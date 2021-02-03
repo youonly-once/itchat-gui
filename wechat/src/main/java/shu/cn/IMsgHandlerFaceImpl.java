@@ -120,7 +120,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         if (text.contains("[Bomb]")) {
             String userName = core.getUserSelf().getString("UserName");
             if (!msg.getFromUserName().equals(userName)
-            && MessageTools.bombMsgMao.get(msg.getFromUserName())>0) {
+            && (
+                    MessageTools.bombMsgMao.get(msg.getFromUserName()) == null ||
+                            MessageTools.bombMsgMao.get(msg.getFromUserName())<0)) {
 
                 results.add(MessageTools.Result.builder()
                         .msg("？，炸我")
@@ -132,6 +134,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                                 .msg("[Bomb]")
                                 .replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
                                 .sleep((long) (Math.random() * (100 - 0) + 100))
+                                .type("[Bomb]")
                                 .build());
                     }
                     MessageTools.bombMsgMao.put(msg.getFromUserName(),10);
@@ -142,6 +145,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                             .msg("[Bomb]")
                             .replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
                             .sleep((long) (Math.random() * (1000 - 100) + 100))
+                            .type("[Bomb]")
                             .build());
                 }
                 results.add(MessageTools.Result.builder()
@@ -154,6 +158,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                             .msg("[Bomb]")
                             .replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
                             .sleep((long) (Math.random() * (1000 * 10 - 100) + 100))
+                            .type("[Bomb]")
                             .build());
                 }
                 results.add(MessageTools.Result.builder()
@@ -166,6 +171,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                             .msg("[Bomb]")
                             .replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
                             .sleep((long) (Math.random() * (1000 * 10 - 100) + 100))
+                            .type("[Bomb]")
                             .build());
                 }
                 MessageTools.bombMsgMao.put(msg.getFromUserName(),1010);
