@@ -9,16 +9,16 @@ package shu.cn.weichat.utils.enums;
  *
  */
 public enum MsgTypeEnum {
-	TEXT("Text", "文本消息"),
-	PIC("Pic", "图片消息"),
-	VOICE("Voice", "语音消息"),
-	VIEDO("Viedo", "小视频消息"),
-	NAMECARD("NameCard", "名片消息"),
-	UNDO("Undo", "撤回消息"),
-	ADDFRIEND("AddFriend", "添加好友消息"),
-	EMOTION("Emotion", "表情消息"),
-	APP("Emotion", "分享链接信息"),
-	MEDIA("app", "文件消息"),
+	TEXT("TEXT", "文本消息"),
+	PIC("PIC", "图片消息"),
+	VOICE("VOICE", "语音消息"),
+	VIDEO("VIDEO", "小视频消息"),
+	NAMECARD("NAMECARD", "名片消息"),
+	UNDO("UNDO", "撤回消息"),
+	ADDFRIEND("ADDFRIEND", "添加好友消息"),
+	EMOTION("EMOTION", "表情消息"),
+	APP("APP", "分享链接信息"),
+	MEDIA("MEDIA", "文件消息"),
 	SYSTEM("SYSTEM", "系统消息");//添加成功后会发该消息
 	private String type;
 	private String code;

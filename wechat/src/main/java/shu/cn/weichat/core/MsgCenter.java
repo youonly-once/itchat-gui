@@ -97,7 +97,7 @@ public class MsgCenter {
             } else if (m.getInteger("MsgType") == MsgCodeEnum.MSGTYPE_VIDEO.getCode()
                     || m.getInteger("MsgType") == MsgCodeEnum.MSGTYPE_MICROVIDEO.getCode()) {// viedo
                 //log.info(m.getString("NewMsgId") + "-视频消息:" + m);
-                m.put("Type", MsgTypeEnum.VIEDO.getType());
+                m.put("Type", MsgTypeEnum.VIDEO.getType());
             } else if (m.getInteger("MsgType") == MsgCodeEnum.MSGTYPE_APP.getCode()) { // sharing
                 //log.info(m.getString("NewMsgId") + "-分享链接消息:" + m); // 分享链接
                 m.put("Type", MsgTypeEnum.APP.getType());
@@ -162,7 +162,7 @@ public class MsgCenter {
                         } else if (msg.getType().equals(MsgTypeEnum.VOICE.getType())) {
                             String result = msgHandler.voiceMsgHandle(msg);
                             MessageTools.sendMsgById(result, msg.getFromUserName());
-                        } else if (msg.getType().equals(MsgTypeEnum.VIEDO.getType())) {
+                        } else if (msg.getType().equals(MsgTypeEnum.VIDEO.getType())) {
                             String result = msgHandler.videoMsgHandle(msg);
                             MessageTools.sendMsgById(result, msg.getFromUserName());
                         } else if (msg.getType().equals(MsgTypeEnum.NAMECARD.getType())) {

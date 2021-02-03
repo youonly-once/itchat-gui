@@ -36,7 +36,7 @@ public class UpdateContactThread implements Runnable {
 			//log.info("3. 更新本次登陆好友相关消息");
 			WechatTools.setUserInfo(); // 登陆成功后缓存本次登陆好友相关消息（NickName, UserName）
 
-			SleepUtils.sleep(10 * 1000); // 休眠10秒
+			SleepUtils.sleep(60 * 1000); // 休眠10秒
 		}
 	}
 

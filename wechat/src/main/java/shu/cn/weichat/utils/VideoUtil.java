@@ -27,7 +27,7 @@ public class VideoUtil {
      * 传视频File对象，返回压缩后File对象信息
      * @param source
      */
-    public static File compressionVideo(File source, String picName) {
+    public static File compressionVideo(File source, String picName,int bitRate) {
         if(source == null){
             return null;
         }
@@ -52,9 +52,10 @@ public class VideoUtil {
                 long time = System.currentTimeMillis();
                 //TODO 视频属性设置
                 int maxBitRate = 128000;
-                maxBitRate=12800;
+                maxBitRate=128000;
                 int maxSamplingRate = 44100;
-                int bitRate = 800000;
+                //int bitRate = 800000;
+
                 int maxFrameRate = 20;
                 int maxWidth = 1280;
 
@@ -190,9 +191,7 @@ public class VideoUtil {
     }
 
     public static void main(String[] ars ){
-        compressionVideo(new File(
-                "C:\\Users\\user\\Videos\\Captures\\2.mp4")
-                ,"/temp/1.mp4");
+
     }
 
 }

@@ -168,10 +168,18 @@ public class MessageTools {
 			log.info("file is not exist");
 			return null;
 		}
+		//1M以上视频发不出去
 		long fileSize = f.length();
-		if (fileSize> 1024 * 1024){
-			f = VideoUtil.compressionVideo(f,"/compression/"+f.getName()+".mp4");
+		File tempF =f;
+		if (f.getName().toLowerCase().endsWith(".mp4")){
+			int bitRate = 800000;
+			while (fileSize> 1024 * 1024){
+				tempF = VideoUtil.compressionVideo(f,"/compression/"+f.getName()+".mp4",bitRate);
+				fileSize = tempF.length();
+				bitRate = (int)(bitRate/1.1);
+			}
 		}
+		f = tempF;
 		fileSize = f.length();
 		String url = String.format(URLEnum.WEB_WX_UPLOAD_MEDIA.getUrl(), core.getLoginInfoMap().get("fileUrl"));
 		String mimeType = new MimetypesFileTypeMap().getContentType(f);

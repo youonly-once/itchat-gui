@@ -48,7 +48,7 @@ public class DownloadTools {
 			url = String.format(URLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String) core.getLoginInfoMap().get("url"));
 		} else if (type.equals(MsgTypeEnum.VOICE.getType())) {
 			url = String.format(URLEnum.WEB_WX_GET_VOICE.getUrl(), (String) core.getLoginInfoMap().get("url"));
-		} else if (type.equals(MsgTypeEnum.VIEDO.getType())) {
+		} else if (type.equals(MsgTypeEnum.VIDEO.getType())) {
 			headerMap.put("Range", "bytes=0-");
 			url = String.format(URLEnum.WEB_WX_GET_VIEDO.getUrl(), (String) core.getLoginInfoMap().get("url"));
 		} else if (type.equals(MsgTypeEnum.MEDIA.getType())) {

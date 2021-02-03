@@ -233,7 +233,7 @@ public class WechatTools {
 				? contactByUserName.getString("NickName")
 				: contactByUserName.getString("RemarkName")
 		);
-		return remarkName == null ? "" : remarkName;
+		return remarkName == null ? userName : remarkName;
 	}
 
 	/**
@@ -244,6 +244,9 @@ public class WechatTools {
 	 */
 	public static String getGroupRemarkNameByUserName(String userName) {
 		JSONObject jsonObject1 = core.getGroupMap().get(userName);
+		if (jsonObject1 == null){
+			return "";
+		}
 		return jsonObject1.getString("NickName");
 
 	}
@@ -255,6 +258,7 @@ public class WechatTools {
 	 * @return 成员
 	 */
 	public static JSONObject getGroupUserOfGroup(String groupName, String userName) {
+		core.getGroupMap().get(groupName);
 		Map<String, JSONArray> groupMemeberMap = core.getGroupMemberMap();
 		JSONArray members = groupMemeberMap.get(groupName);
 		if (members == null) {
@@ -301,10 +305,14 @@ public class WechatTools {
 				? groupUserOfGroup.getString("DisplayName")
 				: null;
 		if (StringUtils.isEmpty(displayName)){
-			return groupUserOfGroup != null
+			String nickName = groupUserOfGroup != null
 					? groupUserOfGroup.getString("NickName")
 					: null;
+			if (StringUtils.isEmpty(nickName)){
+				return userName;
+			}
 		}
+
 		return displayName;
 	}
 
