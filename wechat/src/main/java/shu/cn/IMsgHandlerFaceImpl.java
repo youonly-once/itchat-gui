@@ -47,6 +47,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
 
     private final Set<String> groupIdList = new HashSet<>();
 
+    //不处理撤回消息的群名列表
+    private final Set<String> nonHandleUndoMsgGroupId = new HashSet<>();
+
     public IMsgHandlerFaceImpl() {
 
 
@@ -221,6 +224,11 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             results.add(resultBuilder.build());
             return results;
         }
+        //群防撤回功能开关
+        if (msg.getGroupMsg() && text.toUpperCase().equals("UNDO")){
+            nonHandleUndoMsgGroupId.add(msg.getFromUserName());
+            return null;
+        }
         text = isReply(msg);
         if (text.isEmpty()) {
             return results;
@@ -255,28 +263,13 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
      * @see X.cn.zhouyafeng.itchat4j.face.IMsgHandlerFace#picMsgHandle(com.alibaba.fastjson.JSONObject)
      */
     @Override
-    public String picMsgHandle(BaseMsg msg) {
+    public List<MessageTools.Result> picMsgHandle(BaseMsg msg) {
         String path = downloadFile(msg, ".jpg", MsgTypeEnum.PIC); // 调用此方法来保存图片
         log.info(LogUtil.printFromMeg(msg, path));
         if (StringUtil.isNotBlank(path)) {
             storeMsg(msg.getMsgId(), MsgTypeEnum.PIC.getType() + ":"+msg.getFromUserName()+"-" + path);
         }
-        if (isReply(msg).isEmpty()) {
-            return "";
-        }
-
-/*        try {// 识别图片文字
-            String string = OCRHelper.recognizeText(picPath, fileName, "chi_sim");
-            log.info("图片识别：" + string);
-            if (string.isEmpty()) {
-                return "这个图片什么含义";
-            }
-            return  HttpUtil.robotMsgTuling(string);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "";
-        }*/
-        return "";
+        return null;
     }
 
     /*
@@ -284,34 +277,15 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
      * @see X.cn.zhouyafeng.itchat4j.face.IMsgHandlerFace#voiceMsgHandle(com.alibaba.fastjson.JSONObject)
      */
     @Override
-    public String voiceMsgHandle(BaseMsg msg) {
-
+    public List<MessageTools.Result> voiceMsgHandle(BaseMsg msg) {
         // 调用此方法来保存语音
         String path = downloadFile(msg, ".mp3", MsgTypeEnum.VOICE);
         log.info(LogUtil.printFromMeg(msg, path));
+        //存储消息
         if (StringUtil.isNotBlank(path)) {
             storeMsg(msg.getMsgId(), MsgTypeEnum.VOICE.getType() + ":"+msg.getFromUserName()+"-" + path);
         }
-        if (isReply(msg).isEmpty()) {
-            return "";
-        }
-        String str = "";
-        /*try {
-            str = voice2Text(fileName, voicePath + fileName);
-        } catch (WXException | IOException e1) {
-            // TODO Auto-generated catch block
-            return "不方便听语音。";
-        }
-        if (str.isEmpty()) {
-            return "不方便听语音.";
-        }
-        try {
-            str = HttpUtil.robotMsgTuling(str);
-        } catch (JSONException | NullPointerException | IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }*/
-        return str;
+        return null;
     }
 
     private String downloadFile(BaseMsg msg, String ext, MsgTypeEnum type) {
@@ -349,16 +323,13 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     }
 
     @Override
-    public String videoMsgHandle(BaseMsg msg) {
+    public List<MessageTools.Result> videoMsgHandle(BaseMsg msg) {
         String path = downloadFile(msg, ".mp4", MsgTypeEnum.VIDEO);
         log.info(LogUtil.printFromMeg(msg, path));
         if (StringUtil.isNotBlank(path)) {
             storeMsg(msg.getMsgId(), MsgTypeEnum.VIDEO.getType() + ":"+msg.getFromUserName()+"-" + path);
         }
-        if (isReply(msg).equals("")) {
-            return "";
-        }
-        return "";
+      return null;
     }
 
     @Override
@@ -389,6 +360,19 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         if (value == null) {
             return null;
         }
+        //======家人群不发送撤回消息====
+        if (msg.getFromUserName().startsWith("@@")){
+            String to = WechatTools.getGroupRemarkNameByUserName(msg.getFromUserName());
+            if ("<span class=\"emoji emoji2764\"></span>汪家人<span class=\"emoji emoji2764\"></span>".equals(to)) {
+                log.error("家人群，不发送撤回消息");
+                return null;
+            }
+            //不处理群消息
+            if (nonHandleUndoMsgGroupId.contains(msg.getFromUserName())){
+                return null;
+            }
+        }
+
         //==============是否为自己的消息
         String oldMsgFromUserName = value.substring(value.indexOf(":") + 1, value.indexOf("-"));
         JSONObject userSelf = core.getUserSelf();
@@ -457,30 +441,21 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     }
 
     @Override
-    public String addFriendMsgHandle(BaseMsg msg) {
+    public List<MessageTools.Result> addFriendMsgHandle(BaseMsg msg) {
         log.info(LogUtil.printFromMeg(msg));
         String text = isReply(msg);
-        if (text.equals("")) {
-            return "";
-        }
-        return "好友确认消息：" + msg.getContent();
+        return null;
     }
 
     @Override
-    public String systemMsgHandle(BaseMsg msg) {
+    public List<MessageTools.Result> systemMsgHandle(BaseMsg msg) {
         log.info(LogUtil.printFromMeg(msg));
         String text = isReply(msg);
-        if (text.equals("")) {
-            return "";
-        }
-        if (text.startsWith("你已添加了")) {
-            return "hello";
-        }
-        return "";
+        return null;
     }
 
     @Override
-    public String emotionMsgHandle(BaseMsg msg) {
+    public List<MessageTools.Result> emotionMsgHandle(BaseMsg msg) {
         log.info(LogUtil.printFromMeg(msg));
         return null;
     }
@@ -492,24 +467,24 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     }
 
     @Override
-    public String verifyAddFriendMsgHandle(BaseMsg msg) {
+    public List<MessageTools.Result> verifyAddFriendMsgHandle(BaseMsg msg) {
         log.info(LogUtil.printFromMeg(msg));
         return null;
     }
 
     @Override
-    public String mediaMsgHandle(BaseMsg msg) {
+    public List<MessageTools.Result> mediaMsgHandle(BaseMsg msg) {
         log.info(LogUtil.printFromMeg(msg));
         return null;
     }
 
     @Override
-    public String nameCardMsgHandle(BaseMsg msg) {
+    public List<MessageTools.Result> nameCardMsgHandle(BaseMsg msg) {
         log.info(LogUtil.printFromMeg(msg));
-        if (isReply(msg).equals("")) {
-            return "";
+        if (isReply(msg).isEmpty()) {
+            return null;
         }
-        return "";
+        return null;
     }
 
     /**

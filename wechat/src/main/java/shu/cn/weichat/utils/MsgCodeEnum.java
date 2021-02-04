@@ -28,6 +28,7 @@ public enum MsgCodeEnum {
 	// public static final int MSGTYPE_SHARECARD = 42;
 	// public static final int MSGTYPE_SYS = 10000;
 	// public static final int MSGTYPE_RECALLED = 10002;
+	UNKNOWN(0, "未知消息类型"),
 	MSGTYPE_TEXT(1, "文本消息类型"),
 	MSGTYPE_IMAGE(3, "图片消息"),
 	MSGTYPE_VOICE(34, "语音消息"),
@@ -56,7 +57,14 @@ public enum MsgCodeEnum {
 		this.code = code;
 		this.type = type;
 	}
-
+	public static MsgCodeEnum getByCode(int code){
+		for (MsgCodeEnum value : MsgCodeEnum.values()) {
+			if (value.code == code){
+				return value;
+			}
+		}
+		return UNKNOWN;
+	}
 	public int getCode() {
 		return code;
 	}

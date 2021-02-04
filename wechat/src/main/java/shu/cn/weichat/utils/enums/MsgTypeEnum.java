@@ -1,5 +1,7 @@
 package shu.cn.weichat.utils.enums;
 
+import shu.cn.weichat.utils.MsgCodeEnum;
+
 /**
  * 消息类型枚举类
  *
@@ -9,6 +11,7 @@ package shu.cn.weichat.utils.enums;
  *
  */
 public enum MsgTypeEnum {
+	UNKNOWN("UNKNOWN", "文本消息"),
 	TEXT("TEXT", "文本消息"),
 	PIC("PIC", "图片消息"),
 	VOICE("VOICE", "语音消息"),
@@ -19,6 +22,7 @@ public enum MsgTypeEnum {
 	EMOTION("EMOTION", "表情消息"),
 	APP("APP", "分享链接信息"),
 	MEDIA("MEDIA", "文件消息"),
+	MAP("MAP", "地图消息"),
 	SYSTEM("SYSTEM", "系统消息");//添加成功后会发该消息
 	private String type;
 	private String code;
@@ -26,6 +30,14 @@ public enum MsgTypeEnum {
 	MsgTypeEnum(String type, String code) {
 		this.type = type;
 		this.code = code;
+	}
+	public static  MsgTypeEnum getByCode(String type){
+		for (MsgTypeEnum value : MsgTypeEnum.values()) {
+			if (value.type == type){
+				return value;
+			}
+		}
+		return UNKNOWN;
 	}
 
 	public String getType() {

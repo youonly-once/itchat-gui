@@ -31,7 +31,7 @@ public interface IMsgHandlerFace {
 	 * @param msg
 	 * @return
 	 */
-	public String picMsgHandle(BaseMsg msg);
+	public List<MessageTools.Result> picMsgHandle(BaseMsg msg);
 
 	/**
 	 * 处理声音消息
@@ -41,7 +41,7 @@ public interface IMsgHandlerFace {
 	 * @param msg
 	 * @return
 	 */
-	public String voiceMsgHandle(BaseMsg msg);
+	public List<MessageTools.Result> voiceMsgHandle(BaseMsg msg);
 
 	/**
 	 * 处理小视频消息
@@ -51,7 +51,7 @@ public interface IMsgHandlerFace {
 	 * @param msg
 	 * @return
 	 */
-	public String videoMsgHandle(BaseMsg msg);
+	public List<MessageTools.Result> videoMsgHandle(BaseMsg msg);
 
 	/**
 	 * 处理名片消息
@@ -61,7 +61,7 @@ public interface IMsgHandlerFace {
 	 * @param msg
 	 * @return
 	 */
-	public String nameCardMsgHandle(BaseMsg msg);
+	public List<MessageTools.Result> nameCardMsgHandle(BaseMsg msg);
 	/**
 	 * 处理撤回消息
 	 *
@@ -80,7 +80,7 @@ public interface IMsgHandlerFace {
 	 * @param msg
 	 * @return
 	 */
-	public String addFriendMsgHandle(BaseMsg msg);
+	public List<MessageTools.Result> addFriendMsgHandle(BaseMsg msg);
 
 	/**
 	 * 处理好友确认消息
@@ -90,14 +90,14 @@ public interface IMsgHandlerFace {
 	 * @param msg
 	 * @return
 	 */
-	public String systemMsgHandle(BaseMsg msg);
+	public List<MessageTools.Result> systemMsgHandle(BaseMsg msg);
 
 	/**
 	 * 表情处理消息
 	 * @param msg
 	 * @return
 	 */
-	public String emotionMsgHandle(BaseMsg msg);
+	public List<MessageTools.Result> emotionMsgHandle(BaseMsg msg);
 	/**
 	 * 分享链接信息
 	 * @param msg
@@ -112,7 +112,7 @@ public interface IMsgHandlerFace {
 	 * @param msg
 	 * @return
 	 */
-	public String verifyAddFriendMsgHandle(BaseMsg msg);
+	public List<MessageTools.Result> verifyAddFriendMsgHandle(BaseMsg msg);
 
 	/**
 	 * 处理收到的文件消息
@@ -121,6 +121,6 @@ public interface IMsgHandlerFace {
 	 * @param msg
 	 * @return
 	 */
-	public String mediaMsgHandle(BaseMsg msg);
+	public List<MessageTools.Result> mediaMsgHandle(BaseMsg msg);
 
 }
