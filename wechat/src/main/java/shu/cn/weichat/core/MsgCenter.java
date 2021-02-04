@@ -44,7 +44,7 @@ public class MsgCenter {
     public static void produceMsg(JSONArray msgList) {
 
         for (Object o : msgList) {
-            JSONObject m = (JSONObject)o;
+            JSONObject m = (JSONObject) o;
             m.put("groupMsg", false);// 是否是群消息
             String fromUserName = m.getString("FromUserName");
             String toUserName = m.getString("ToUserName");
@@ -74,7 +74,7 @@ public class MsgCenter {
                         if (matcher.find()) {
                             data = matcher.group(1);
                         }
-                        msg.put("Type",  MsgTypeEnum.MAP.getType());
+                        msg.put("Type", MsgTypeEnum.MAP.getType());
                         msg.put("Text", data);
                     } else {
                         msg.put("Type", MsgTypeEnum.TEXT.getType());
@@ -162,83 +162,84 @@ public class MsgCenter {
      * @date 2017年5月14日 上午10:52:34
      */
     public static void handleMsg(IMsgHandlerFace msgHandler) {
-                while (true) {
-                    BaseMsg msg = null;
-                    try {
-                        //拿元素 会阻塞
-                        msg = core.getMsgList().take();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    if (msg == null) {
-                        continue;
-                    }
-                    if (StringUtils.isEmpty(msg.getContent())) {
-                        continue;
-                    }
-                    //群消息content格式化
-                    groupMsgFormater(msg);
-                    //需要发送的消息
-                    List<MessageTools.Result> results = null;
-                    switch (MsgTypeEnum.getByCode(msg.getType())) {
-                        case TEXT:
-                            results = msgHandler.textMsgHandle(msg);
-                            break;
-                        case PIC:
-                            results = msgHandler.picMsgHandle(msg);
-                            break;
-                        case VOICE:
-                            results = msgHandler.voiceMsgHandle(msg);
-                            break;
-                        case VIDEO:
-                            results = msgHandler.videoMsgHandle(msg);
-                            break;
-                        case NAMECARD:
-                            results = msgHandler.nameCardMsgHandle(msg);
-                            break;
-                        case UNDO:
-                           results = msgHandler.undoMsgHandle(msg);
-                            break;
-                        case ADDFRIEND:
-                            results = msgHandler.addFriendMsgHandle(msg);
-                            break;
-                        case EMOTION:
-                            results = msgHandler.emotionMsgHandle(msg);
-                            break;
-                        case APP:
-                            results = msgHandler.appMsgHandle(msg);
-                            break;
-                        case MEDIA:
-                            break;
-                        case MAP:
-                           results = msgHandler.appMsgHandle(msg);
-                            break;
-                        case SYSTEM:
-                            results = msgHandler.systemMsgHandle(msg);
-                            break;
-                        case UNKNOWN:
-                        default:
-                            log.info(LogUtil.printFromMeg(msg));
-                            log.warn("未知消息：{}", msg);
-                            break;
-                    }
-                    //发送消息
-                    MessageTools.sendMsgById(results, msg.getFromUserName());
-                }
+        while (true) {
+            BaseMsg msg = null;
+            try {
+                //拿元素 会阻塞
+                msg = core.getMsgList().take();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (msg == null) {
+                continue;
+            }
+            if (StringUtils.isEmpty(msg.getContent())) {
+                continue;
+            }
+            //群消息content格式化
+            groupMsgFormater(msg);
+            //需要发送的消息
+            List<MessageTools.Result> results = null;
+            switch (MsgTypeEnum.getByCode(msg.getType())) {
+                case TEXT:
+                    results = msgHandler.textMsgHandle(msg);
+                    break;
+                case PIC:
+                    results = msgHandler.picMsgHandle(msg);
+                    break;
+                case VOICE:
+                    results = msgHandler.voiceMsgHandle(msg);
+                    break;
+                case VIDEO:
+                    results = msgHandler.videoMsgHandle(msg);
+                    break;
+                case NAMECARD:
+                    results = msgHandler.nameCardMsgHandle(msg);
+                    break;
+                case UNDO:
+                    results = msgHandler.undoMsgHandle(msg);
+                    break;
+                case ADDFRIEND:
+                    results = msgHandler.addFriendMsgHandle(msg);
+                    break;
+                case EMOTION:
+                    results = msgHandler.emotionMsgHandle(msg);
+                    break;
+                case APP:
+                    results = msgHandler.appMsgHandle(msg);
+                    break;
+                case MEDIA:
+                    break;
+                case MAP:
+                    results = msgHandler.appMsgHandle(msg);
+                    break;
+                case SYSTEM:
+                    results = msgHandler.systemMsgHandle(msg);
+                    break;
+                case UNKNOWN:
+                default:
+                    log.info(LogUtil.printFromMeg(msg));
+                    log.warn("未知消息：{}", msg);
+                    break;
+            }
+            //发送消息
+            MessageTools.sendMsgById(results, msg.getFromUserName());
+        }
 
 
     }
-    private static void groupMsgFormater(BaseMsg msg){
+
+    private static void groupMsgFormater(BaseMsg msg) {
         //群消息
-        if (msg.getGroupMsg()){
+        if (msg.getGroupMsg()) {
             //获取自己在群里的备注
             String groupMyUserNickNameOfGroup = WechatTools.getGroupUserDisplayNameOfGroup(msg.getFromUserName(), core.getUserName());
             if (groupMyUserNickNameOfGroup != null
-            && msg.getContent().contains("@"+groupMyUserNickNameOfGroup+" ")){
+                    && msg.getContent().contains("@" + groupMyUserNickNameOfGroup + " ")) {
                 //@自己
                 //获取他的群备注
                 String groupOtherUserNickNameOfGroup = WechatTools.getGroupUserDisplayNameOfGroup(msg.getFromUserName(), msg.getMemberName());
-                if (groupOtherUserNickNameOfGroup != null){
+                if (groupOtherUserNickNameOfGroup != null) {
                     msg.setMentionMeUserNickName(groupOtherUserNickNameOfGroup);
                     String replace = msg.getContent().replace("@" + groupMyUserNickNameOfGroup, "");
                     msg.setContent(replace);
