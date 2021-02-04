@@ -84,7 +84,7 @@ public class MessageTools {
 		}
 		for (Result result : results) {
 			if ("[Bomb]".equals(result.type)){
-				bombMsgMao.put(id, bombMsgMao.get(id).intValue() - 1);
+				bombMsgMao.put(id, bombMsgMao.get(id) - 1);
 			}
 			if (result.sleep!=null){
 				SleepUtils.sleep(result.sleep);
@@ -100,7 +100,7 @@ public class MessageTools {
 				default:
 					sendFileMsgByUserId(id,result.msg);
 			}
-			log.info(bombMsgMao.get(id) +" : "+LogUtil.printToMeg(id,result.msg));
+			log.info((bombMsgMao.get(id) == null?"":bombMsgMao.get(id)) +" : "+LogUtil.printToMeg(id,result.msg));
 		}
 
 	}
@@ -170,16 +170,14 @@ public class MessageTools {
 		}
 		//1M以上视频发不出去
 		long fileSize = f.length();
-		File tempF =f;
 		if (f.getName().toLowerCase().endsWith(".mp4")){
 			int bitRate = 800000;
 			while (fileSize> 1024 * 1024){
-				tempF = VideoUtil.compressionVideo(f,"/compression/"+f.getName()+".mp4",bitRate);
-				fileSize = tempF.length();
-				bitRate = (int)(bitRate/1.1);
+				f = VideoUtil.compressionVideo(f,"/compression/"+f.getName()+".mp4",bitRate);
+				fileSize = f.length();
+				bitRate = (int)(bitRate/2);
 			}
 		}
-		f = tempF;
 		fileSize = f.length();
 		String url = String.format(URLEnum.WEB_WX_UPLOAD_MEDIA.getUrl(), core.getLoginInfoMap().get("fileUrl"));
 		String mimeType = new MimetypesFileTypeMap().getContentType(f);
