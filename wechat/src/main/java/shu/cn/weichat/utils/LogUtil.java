@@ -21,7 +21,7 @@ public class LogUtil {
      * @param path 消息为文件时的文件路径
      * @return 日志内容
      */
-    public static String  printFromMeg(BaseMsg msg,String path){
+    public static String  printFromMeg(BaseMsg msg,String path,String title){
         String myUserName = core.getUserName();
         String myNickName = core.getNickName();
         //自己发的消息
@@ -52,7 +52,7 @@ public class LogUtil {
 
             }
         }
-        return String.format("【%s ->>>>>>> %s: %s】 ===%s",fromUser,toUser
+        return String.format(title+"【%s ->>>>>>> %s: %s】 ===%s",fromUser,toUser
                         , StringUtils.isEmpty(path)?msg.getContent():path
                 ,msg.toString());
     }
@@ -62,8 +62,8 @@ public class LogUtil {
      * @param msg 消息内容
      * @return 日志内容
      */
-    public static String  printFromMeg(BaseMsg msg){
-        return printFromMeg(msg,"");
+    public static String  printFromMeg(BaseMsg msg,String title){
+        return printFromMeg(msg,"",title);
     }
 
     /**

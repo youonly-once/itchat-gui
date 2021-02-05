@@ -63,8 +63,7 @@ public class MsgCenter {
             }
             MsgCodeEnum msgType = MsgCodeEnum.getByCode(m.getInteger("MsgType"));
             switch (msgType) {
-                case UNKNOWN:
-                    break;
+
                 case MSGTYPE_TEXT:
                     JSONObject msg = new JSONObject();
                     if (m.getString("Url").length() != 0) {
@@ -93,9 +92,6 @@ public class MsgCenter {
                     //log.info(m.getString("NewMsgId") + "-语音消息:" + m);
                     break;
                 case MSGTYPE_VIDEO:
-                    //log.info(m.getString("NewMsgId") + "-视频消息:" + m);
-                    m.put("Type", MsgTypeEnum.VIDEO.getType());
-                    break;
                 case MSGTYPE_MICROVIDEO:
                     //log.info(m.getString("NewMsgId") + "-视频消息:" + m);
                     m.put("Type", MsgTypeEnum.VIDEO.getType());
@@ -140,14 +136,16 @@ public class MsgCenter {
                     //log.info(m.getString("NewMsgId") + "-撤回消息:" + m);
                     m.put("Type", MsgTypeEnum.UNDO.getType());
                     break;
+                case UNKNOWN:
                 default:
                     log.warn(m.getString("NewMsgId") + "-未知消息:" + m);
                     break;
             }
             try {
                 //添加元素 会阻塞
-                core.getMsgList().put(JSON.toJavaObject(m,
-                        BaseMsg.class));
+                BaseMsg baseMsg = JSON.toJavaObject(m,
+                        BaseMsg.class);
+                core.getMsgList().put(baseMsg);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -174,7 +172,7 @@ public class MsgCenter {
                 continue;
             }
             if (StringUtils.isEmpty(msg.getContent())) {
-                continue;
+              //  continue;
             }
             //群消息content格式化
             groupMsgFormater(msg);
@@ -211,19 +209,20 @@ public class MsgCenter {
                 case MEDIA:
                     break;
                 case MAP:
-                    results = msgHandler.appMsgHandle(msg);
+                    results = msgHandler.mapMsgHandle(msg);
                     break;
                 case SYSTEM:
                     results = msgHandler.systemMsgHandle(msg);
                     break;
                 case UNKNOWN:
+                    log.warn(LogUtil.printFromMeg(msg,MsgTypeEnum.UNKNOWN.getCode()));
+                    break;
                 default:
-                    log.info(LogUtil.printFromMeg(msg));
-                    log.warn("未知消息：{}", msg);
+                    log.warn(LogUtil.printFromMeg(msg,MsgTypeEnum.UNKNOWN.getCode()));
                     break;
             }
             //发送消息
-            MessageTools.sendMsgById(results, msg.getFromUserName());
+            MessageTools.sendMsgByUserId(results, msg.getFromUserName());
         }
 
 

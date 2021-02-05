@@ -27,6 +27,7 @@ import shu.cn.weichat.utils.LogUtil;
 import shu.cn.weichat.utils.SleepUtils;
 import shu.cn.weichat.utils.XmlUtil;
 import shu.cn.weichat.utils.enums.MsgTypeEnum;
+import shu.cn.weichat.utils.enums.MsgTypeOfAppEnum;
 import shu.cn.weichat.utils.enums.ReplyMsgTypeEnum;
 import shu.cn.weichat.utils.tools.DownloadTools;
 import utils.DateUtil;
@@ -38,7 +39,7 @@ import weixin.utils.WXUntil;
 @Log4j2
 public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     private final Properties pps = new Properties();
-    private final String msgFileName = "msg.property";
+    private String msgFileName = "msg.property";
     private int count = 1;
     private boolean autoReply = false;
 
@@ -56,6 +57,17 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         String qrPath = savePath + File.separator + "login";
         Wechat wechat = new Wechat(IMsgHandlerFaceImpl.this, qrPath);
         wechat.start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(1000 * 60 * 60 );
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                msgFileName = DateUtil.getCurrDate() + "msg.property";
+            }
+        }, "DelMsgThread").start();
 
     }
 
@@ -112,18 +124,73 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         return "";
     }
 
+    private void delMsg(String msgId) {
+        OutputStreamWriter outputStreamWriter = null;
+        try {
+            outputStreamWriter = new OutputStreamWriter(new FileOutputStream(msgFileName, true), StandardCharsets.UTF_8);
+            pps.remove(msgId);
+            pps.store(outputStreamWriter, DateUtil.getCurrDateAndTimeMil());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (outputStreamWriter != null) {
+                try {
+                    outputStreamWriter.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+
+    }
+
+
     @Override
     public List<MessageTools.Result> textMsgHandle(BaseMsg msg) {
-        log.info(LogUtil.printFromMeg(msg, ""));
-        List<MessageTools.Result> results = new ArrayList<>();
+        log.info(LogUtil.printFromMeg(msg, "", MsgTypeEnum.TEXT.getCode()));
         String text = msg.getText();
         //存储消息
-        storeMsg(msg.getMsgId(), MsgTypeEnum.TEXT.getType() + ":"+msg.getFromUserName()+"-" +  text);
+        storeMsg(msg.getMsgId(), MsgTypeEnum.TEXT.getType() + ":" + msg.getFromUserName() + "-" + text);
+        List<MessageTools.Result> results = new ArrayList<>();
+
+        //=========================手动发送消息=====================
+        String[] split = text.split("：");
+        if (split.length >= 2) {
+        try {
+            long sleep = 100;
+                try{
+                    sleep = Long.parseLong(split[2]);
+                }catch (ArrayIndexOutOfBoundsException e){
+
+                }
+                String s = split[1];
+                int i = Integer.parseInt(s);
+                results.add(MessageTools.Result.builder()
+                        .msg("开始发送：" + i + "个" + split[0])
+                        .toUserName(msg.getToUserName())
+                        .replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
+                        .build());
+                for (int j = 0; j < i; j++) {
+                    results.add(MessageTools.Result.builder()
+                            .msg(split[0])
+                            .replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
+                            .sleep(sleep)
+                            .toUserName(msg.getToUserName())
+                            .build());
+                }
+                return results;
+
+            }catch(NumberFormatException e){
+            }
+        }
+        //=============================================================
+
         //============炸弹消息===================
         if (text.contains("[Bomb]")) {
             String userName = core.getUserSelf().getString("UserName");
             if (!msg.getFromUserName().equals(userName)
-                    ) {
+            ) {
 
                 results.add(MessageTools.Result.builder()
                         .msg("？，炸我")
@@ -160,20 +227,20 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                         results.add(MessageTools.Result.builder()
                                 .msg("[Bomb]")
                                 .replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
-                                .sleep((long) (Math.random() * (1000  - 100) + 100))
+                                .sleep((long) (Math.random() * (1000 - 100) + 100))
                                 .type("[Bomb]")
                                 .build());
                     }
                     results.add(MessageTools.Result.builder()
                             .msg("慢慢来...")
                             .replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
-                            .sleep((long) (Math.random() * (1000  - 100) + 100))
+                            .sleep((long) (Math.random() * (1000 - 100) + 100))
                             .build());
                     for (int i = 0; i < 500; i++) {
                         results.add(MessageTools.Result.builder()
                                 .msg("[Bomb]")
                                 .replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
-                                .sleep((long) (Math.random() * (1000  - 100) + 100))
+                                .sleep((long) (Math.random() * (1000 - 100) + 100))
                                 .type("[Bomb]")
                                 .build());
                     }
@@ -225,8 +292,8 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             return results;
         }
         //群防撤回功能开关
-        if (msg.getGroupMsg() && text.toUpperCase().equals("UNDO")){
-            nonHandleUndoMsgGroupId.add(msg.getFromUserName());
+        if (msg.getGroupMsg() && text.toUpperCase().equals("UNDO")) {
+            nonHandleUndoMsgGroupId.add(msg.getToUserName());
             return null;
         }
         text = isReply(msg);
@@ -264,10 +331,10 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
      */
     @Override
     public List<MessageTools.Result> picMsgHandle(BaseMsg msg) {
-        String path = downloadFile(msg, ".jpg", MsgTypeEnum.PIC); // 调用此方法来保存图片
-        log.info(LogUtil.printFromMeg(msg, path));
+        String path = downloadFile(msg, ".gif", MsgTypeEnum.PIC); // 调用此方法来保存图片
+        log.info(LogUtil.printFromMeg(msg, path, MsgTypeEnum.PIC.getCode()));
         if (StringUtil.isNotBlank(path)) {
-            storeMsg(msg.getMsgId(), MsgTypeEnum.PIC.getType() + ":"+msg.getFromUserName()+"-" + path);
+            storeMsg(msg.getMsgId(), MsgTypeEnum.PIC.getType() + ":" + msg.getFromUserName() + "-" + path);
         }
         return null;
     }
@@ -280,21 +347,17 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     public List<MessageTools.Result> voiceMsgHandle(BaseMsg msg) {
         // 调用此方法来保存语音
         String path = downloadFile(msg, ".mp3", MsgTypeEnum.VOICE);
-        log.info(LogUtil.printFromMeg(msg, path));
+        log.info(LogUtil.printFromMeg(msg, path, MsgTypeEnum.VOICE.getCode()));
         //存储消息
         if (StringUtil.isNotBlank(path)) {
-            storeMsg(msg.getMsgId(), MsgTypeEnum.VOICE.getType() + ":"+msg.getFromUserName()+"-" + path);
+            storeMsg(msg.getMsgId(), MsgTypeEnum.VOICE.getType() + ":" + msg.getFromUserName() + "-" + path);
         }
         return null;
     }
 
-    private String downloadFile(BaseMsg msg, String ext, MsgTypeEnum type) {
+    private String downloadFile(BaseMsg msg, String ext, MsgTypeEnum msgTypeEnum) {
         //发消息的用户或群名称
         String username = core.getRemarkNameByUserName(msg.getFromUserName());
-/*        //视频存储在中文路径然后用ffpeg压缩卡住
-        if (ext.equals(".mp4")){
-            username = msg.getFromUserName();
-        }*/
         //群成员名称
         String groupUsername;
         if (msg.getMemberName() != null) {
@@ -308,13 +371,10 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         fileName = delete(fileName);
         username = delete(username);
         // 保存语音的路径
-        String path = savePath + File.separator + type + File.separator + username + File.separator;
-/*        //去掉@，FFmpeg会卡住
-        path = path.replace("@", "");
-        fileName = fileName.replace("@", "");*/
+        String path = savePath + File.separator + msgTypeEnum + File.separator + username + File.separator;
         boolean logDir = createLogDir(path);
         if (logDir) {
-            DownloadTools.getDownloadFn(msg, type.getType(), path + fileName);
+            DownloadTools.getDownloadFn(msg, msgTypeEnum, path + fileName);
         } else {
             return null;
         }
@@ -325,11 +385,11 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     @Override
     public List<MessageTools.Result> videoMsgHandle(BaseMsg msg) {
         String path = downloadFile(msg, ".mp4", MsgTypeEnum.VIDEO);
-        log.info(LogUtil.printFromMeg(msg, path));
+        log.info(LogUtil.printFromMeg(msg, path, MsgTypeEnum.VIDEO.getCode()));
         if (StringUtil.isNotBlank(path)) {
-            storeMsg(msg.getMsgId(), MsgTypeEnum.VIDEO.getType() + ":"+msg.getFromUserName()+"-" + path);
+            storeMsg(msg.getMsgId(), MsgTypeEnum.VIDEO.getType() + ":" + msg.getFromUserName() + "-" + path);
         }
-      return null;
+        return null;
     }
 
     @Override
@@ -351,7 +411,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         String content = msg.getContent();
         content = content.replace("&lt;", "<").replace("&gt;", ">");
         content = "<root>" + content + "</root>";
-        Map<String, String> map = XmlUtil.toMap(content);
+        Map<String, Object> map = XmlUtil.toMap(content);
         Object msgid = map.get("msgid");
         if (msgid == null) {
             return null;
@@ -361,14 +421,14 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             return null;
         }
         //======家人群不发送撤回消息====
-        if (msg.getFromUserName().startsWith("@@")){
+        if (msg.getFromUserName().startsWith("@@")) {
             String to = WechatTools.getGroupRemarkNameByUserName(msg.getFromUserName());
             if ("<span class=\"emoji emoji2764\"></span>汪家人<span class=\"emoji emoji2764\"></span>".equals(to)) {
                 log.error("家人群，不发送撤回消息");
                 return null;
             }
             //不处理群消息
-            if (nonHandleUndoMsgGroupId.contains(msg.getFromUserName())){
+            if (nonHandleUndoMsgGroupId.contains(msg.getFromUserName())) {
                 return null;
             }
         }
@@ -378,7 +438,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         JSONObject userSelf = core.getUserSelf();
         //自己的撤回消息不发送
         if (userSelf.getString("UserName").equals(oldMsgFromUserName)) {
-           // return null;
+            // return null;
         }
         //===============
         ArrayList<MessageTools.Result> results = new ArrayList<>();
@@ -386,104 +446,186 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         //撤回消息用户的昵称
         String fromNickName = "";
         if (msg.getGroupMsg()) {
-            fromNickName = WechatTools.getGroupUserDisplayNameOfGroup(msg.getFromUserName(), msg.getMemberName()==null?oldMsgFromUserName:msg.getMemberName());
+            fromNickName = WechatTools.getGroupUserDisplayNameOfGroup(msg.getFromUserName(), msg.getMemberName() == null ? oldMsgFromUserName : msg.getMemberName());
         } else {
             fromNickName = WechatTools.getContactRemarkNameByUserName(msg.getFromUserName());
         }
 
         String msgType = value.substring(0, value.indexOf(":"));
+        String realMsgContent = value.substring(value.indexOf("-") + 1);
         switch (MsgTypeEnum.valueOf(msgType)) {
             case TEXT:
                 result = MessageTools.Result.builder()
-                        .msg("【" + fromNickName + "】撤回的文本消息：" + value.substring(value.indexOf("-")+1))
+                        .msg("【" + fromNickName + "】撤回的消息：" + realMsgContent)
                         .replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
                         .build();
                 results.add(result);
                 break;
             case PIC:
                 result = MessageTools.Result.builder()
-                        .msg("【" + fromNickName + "】撤回的图片消息：")
+                        .msg("【" + fromNickName + "】撤回的图片：")
                         .replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
                         .build();
                 results.add(result);
                 result = MessageTools.Result.builder()
-                        .msg(value.substring(value.indexOf("-")+1))
+                        .msg(realMsgContent)
+                        .replyMsgTypeEnum(ReplyMsgTypeEnum.PIC)
+                        .build();
+                results.add(result);
+                break;
+            case EMOTION:
+                result = MessageTools.Result.builder()
+                        .msg("【" + fromNickName + "】撤回的表情：")
+                        .replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
+                        .build();
+                results.add(result);
+                result = MessageTools.Result.builder()
+                        .msg(realMsgContent)
                         .replyMsgTypeEnum(ReplyMsgTypeEnum.PIC)
                         .build();
                 results.add(result);
                 break;
             case VOICE:
                 result = MessageTools.Result.builder()
-                        .msg("【" + fromNickName + "】撤回的语音消息：")
+                        .msg("【" + fromNickName + "】撤回的语音：")
                         .replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
                         .build();
                 results.add(result);
                 result = MessageTools.Result.builder()
-                        .msg( value.substring(value.indexOf("-")+1))
+                        .msg(realMsgContent)
                         .replyMsgTypeEnum(ReplyMsgTypeEnum.VOICE)
                         .build();
                 results.add(result);
                 break;
             case VIDEO:
                 result = MessageTools.Result.builder()
-                        .msg("【" + fromNickName + "】撤回的视频消息：")
+                        .msg("【" + fromNickName + "】撤回的视频：")
                         .replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
                         .build();
                 results.add(result);
                 result = MessageTools.Result.builder()
-                        .msg( value.substring(value.indexOf("-")+1))
+                        .msg(realMsgContent)
                         .replyMsgTypeEnum(ReplyMsgTypeEnum.VIDEO)
                         .build();
                 results.add(result);
                 break;
+            case MAP:
+                result = MessageTools.Result.builder()
+                        .msg("【" + fromNickName + "】撤回的定位：" + realMsgContent)
+                        .replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
+                        .build();
+                results.add(result);
+                break;
+            case NAMECARD:
+                result = MessageTools.Result.builder()
+                        .msg("【" + fromNickName + "】撤回的联系人名片：" + realMsgContent)
+                        .replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
+                        .build();
+                results.add(result);
+                break;
+            case FAVOURITEOFAPP:
+                result = MessageTools.Result.builder()
+                        .msg("【" + fromNickName + "】撤回的收藏消息：" + realMsgContent)
+                        .replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
+                        .build();
+                results.add(result);
+                break;
+            case APP:
+                //目前是分享的链接
+
+                //目前是文件消息
+                result = MessageTools.Result.builder()
+                        .msg("【" + fromNickName + "】撤回的APP消息：")
+                        .replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
+                        .build();
+                results.add(result);
+                result = MessageTools.Result.builder()
+                        .msg(realMsgContent)
+                        .replyMsgTypeEnum(ReplyMsgTypeEnum.APP)
+                        .build();
+                results.add(result);
+                break;
+
         }
         return results;
     }
 
     @Override
     public List<MessageTools.Result> addFriendMsgHandle(BaseMsg msg) {
-        log.info(LogUtil.printFromMeg(msg));
+        log.info(LogUtil.printFromMeg(msg, MsgTypeEnum.ADDFRIEND.getCode()));
         String text = isReply(msg);
         return null;
     }
 
     @Override
     public List<MessageTools.Result> systemMsgHandle(BaseMsg msg) {
-        log.info(LogUtil.printFromMeg(msg));
+        log.info(LogUtil.printFromMeg(msg, MsgTypeEnum.SYSTEM.getCode()));
         String text = isReply(msg);
         return null;
     }
 
     @Override
     public List<MessageTools.Result> emotionMsgHandle(BaseMsg msg) {
-        log.info(LogUtil.printFromMeg(msg));
+        String path = downloadFile(msg, ".gif", MsgTypeEnum.EMOTION); // 调用此方法来保存图片
+        log.info(LogUtil.printFromMeg(msg, path, MsgTypeEnum.EMOTION.getCode()));
+        if (StringUtil.isNotBlank(path)) {
+            storeMsg(msg.getMsgId(), MsgTypeEnum.EMOTION.getType() + ":" + msg.getFromUserName() + "-" + path);
+        }
         return null;
     }
 
     @Override
     public List<MessageTools.Result> appMsgHandle(BaseMsg msg) {
-        log.info(LogUtil.printFromMeg(msg));
+        log.info(LogUtil.printFromMeg(msg, MsgTypeEnum.APP.getCode()));
+        MsgTypeOfAppEnum byCode = MsgTypeOfAppEnum.getByCode(msg.getAppMsgType());
+        switch (byCode) {
+            case UNKNOWN:
+                break;
+            case FAVOURITE:
+                storeMsg(msg.getMsgId(), MsgTypeEnum.FAVOURITEOFAPP.getType() + ":" + msg.getFromUserName() + "-" + msg.getUrl());
+                break;
+            case FILE:
+                //文件消息
+                String path = downloadFile(msg, msg.getFileName().substring(msg.getFileName().lastIndexOf(".")), MsgTypeEnum.APP);
+                //存储消息
+                if (StringUtil.isNotBlank(path)) {
+                    storeMsg(msg.getMsgId(), MsgTypeEnum.APP.getType() + ":" + msg.getFromUserName() + "-" + path);
+                }
+                break;
+        }
         return null;
     }
 
     @Override
     public List<MessageTools.Result> verifyAddFriendMsgHandle(BaseMsg msg) {
-        log.info(LogUtil.printFromMeg(msg));
+        log.info(LogUtil.printFromMeg(msg, "VerifyAddFriendMsg"));
+        return null;
+    }
+
+    @Override
+    public List<MessageTools.Result> mapMsgHandle(BaseMsg msg) {
+        // String path = downloadFile(msg, ".gif", MsgTypeEnum.MAP); // 调用此方法来保存图片
+        log.info(LogUtil.printFromMeg(msg, MsgTypeEnum.MAP.getCode()));
+        storeMsg(msg.getMsgId(), MsgTypeEnum.MAP.getType() + ":" + msg.getFromUserName() + "-" + msg.getMemberName()+","+msg.getUrl());
         return null;
     }
 
     @Override
     public List<MessageTools.Result> mediaMsgHandle(BaseMsg msg) {
-        log.info(LogUtil.printFromMeg(msg));
+        log.info(LogUtil.printFromMeg(msg, MsgTypeEnum.MEDIA.getCode()));
         return null;
     }
 
     @Override
     public List<MessageTools.Result> nameCardMsgHandle(BaseMsg msg) {
-        log.info(LogUtil.printFromMeg(msg));
-        if (isReply(msg).isEmpty()) {
-            return null;
-        }
+        log.info(LogUtil.printFromMeg(msg, MsgTypeEnum.NAMECARD.getCode()));
+        String content = msg.getContent();
+        content = content.replace("&lt;", "<").replace("&gt;", ">").replace("<br/>", "");
+        //   content = "<root>" + content + "</root>";
+        Map<String, Object> map = XmlUtil.toMap(content);
+        Map<String, String> msgMap = (Map<String, String>) map.get("msg_V");
+        storeMsg(msg.getMsgId(), MsgTypeEnum.NAMECARD.getType() + ":" + msg.getFromUserName() + "-"
+                + msgMap.get("username") + "," + msgMap.get("nickname"));
         return null;
     }
 

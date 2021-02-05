@@ -18,16 +18,19 @@ import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.nlpcn.commons.lang.util.StringUtil;
 import org.w3c.dom.Document;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import shu.cn.weichat.api.MessageTools;
 import shu.cn.weichat.core.Core;
 import shu.cn.weichat.core.MsgCenter;
 import shu.cn.weichat.service.ILoginService;
 import shu.cn.weichat.utils.*;
+import shu.cn.weichat.utils.enums.ReplyMsgTypeEnum;
 import shu.cn.weichat.utils.enums.ResultEnum;
 import cn.zhouyafeng.itchat4j.utils.enums.RetCodeEnum;
 import shu.cn.weichat.utils.enums.StorageLoginInfoEnum;
@@ -699,24 +702,40 @@ public class LoginServiceImpl implements ILoginService {
 		}
 		return "";
 	}
-	private void put(Map<String,JSONObject> map,String key,JSONObject value,String tip){
-		JSONObject jsonObject = map.get(key);
-		String name =value.getString("RemarkName");
-		if ( name == null) {
-			name = value.getString("NickName");
+	private void put(Map<String,JSONObject> map,String key,JSONObject newV,String tip){
+		JSONObject oldV = map.get(key);
+		String name =newV.getString("RemarkName");
+		if (StringUtil.isBlank(name)) {
+			name = newV.getString("NickName");
 		}
-		if (jsonObject != null){
+		ArrayList<MessageTools.Result> results = new ArrayList<>();
+		if (oldV != null){
 			//存在key
-			Map<String, Map<String, String>> differenceMap = JSONObjectUtil.getDifferenceMap(jsonObject, value);
+			Map<String, Map<String, String>> differenceMap = JSONObjectUtil.getDifferenceMap(oldV, newV);
 			if (differenceMap.size()>0){
 				//Old与New存在差异
 				log.info("{}（{}）属性更新：{}",tip,name,differenceMap);
-				map.put(key,value);
+				//发送消息
+				results.add(MessageTools.Result.builder().msg(tip+"（"+name+"）属性更新："+differenceMap)
+				.replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
+				.build());
+				map.put(key,newV);
 			}
 		}else{
-			log.info("新增{}（{}）：{}",tip,name,value);
-			map.put(key,value);
+			log.info("新增{}（{}）：{}",tip,name,newV);
+			//发送消息
+			/*results.add(MessageTools.Result.builder().msg("新增"+tip+"（"+name+"）："+newV)
+					.replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
+					.build());*/
+			map.put(key,newV);
 		}
+		String userName = newV.getString("UserName");
+		if (userName.startsWith("@@")){
+			MessageTools.sendMsgByUserId(results,"filehelper");
+		}else{
+			MessageTools.sendMsgByUserId(results,userName);
+		}
+
 	}
 /*	private void put(Map<String,JSONArray> map,String key,JSONArray value,String tip){
 		JSONArray jsonArray = map.get(key);

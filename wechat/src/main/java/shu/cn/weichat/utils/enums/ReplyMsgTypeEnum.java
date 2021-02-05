@@ -10,6 +10,7 @@ public enum ReplyMsgTypeEnum {
     TEXT(1, "文本消息"),
     PIC(3, "图片消息"),
     VOICE(4, ""),
+    APP(6, ""),
     VIDEO(5, "图片消息");
     private Integer code;
     private String msg;

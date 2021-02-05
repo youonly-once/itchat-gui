@@ -27,17 +27,7 @@ import java.util.*;
 public class WechatTools {
 	private static Core core = Core.getInstance();
 
-	/**
-	 * 根据用户名发送文本消息
-	 * 
-	 * @author SXS
-	 * @date 2017年5月4日 下午10:43:14
-	 * @param msg
-	 * @param toUserName
-	 */
-	public static void sendMsgByUserName(String msg, String toUserName) {
-		MessageTools.sendMsgById(msg, toUserName);
-	}
+
 
 	/**
 	 * <p>

@@ -104,6 +104,12 @@ public interface IMsgHandlerFace {
 	 * @return
 	 */
 	public List<MessageTools.Result> appMsgHandle(BaseMsg msg);
+	/**
+	 * map消息
+	 * @param msg
+	 * @return
+	 */
+	public List<MessageTools.Result> mapMsgHandle(BaseMsg msg);
 
 	/**
 	 * 处理确认添加好友消息

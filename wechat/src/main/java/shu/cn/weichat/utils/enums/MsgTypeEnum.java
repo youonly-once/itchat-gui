@@ -20,7 +20,8 @@ public enum MsgTypeEnum {
 	UNDO("UNDO", "撤回消息"),
 	ADDFRIEND("ADDFRIEND", "添加好友消息"),
 	EMOTION("EMOTION", "表情消息"),
-	APP("APP", "分享链接信息"),
+	APP("APP", "APP消息"),
+	FAVOURITEOFAPP("FAVOURITEOFAPP", "APP收藏消息消息"),
 	MEDIA("MEDIA", "文件消息"),
 	MAP("MAP", "地图消息"),
 	SYSTEM("SYSTEM", "系统消息");//添加成功后会发该消息

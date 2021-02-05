@@ -36,27 +36,34 @@ public class DownloadTools {
 	 * @author SXS
 	 * @date 2017年4月21日 下午11:00:25
 	 * @param msg
-	 * @param type
+	 * @param msgTypeEnum
 	 * @param path
 	 * @return
 	 */
-	public static Object getDownloadFn(BaseMsg msg, String type, String path) {
+	public static Object getDownloadFn(BaseMsg msg, MsgTypeEnum msgTypeEnum, String path) {
 		Map<String, String> headerMap = new HashMap<String, String>();
 		List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
 		String url = "";
-		if (type.equals(MsgTypeEnum.PIC.getType())) {
-			url = String.format(URLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String) core.getLoginInfoMap().get("url"));
-		} else if (type.equals(MsgTypeEnum.VOICE.getType())) {
-			url = String.format(URLEnum.WEB_WX_GET_VOICE.getUrl(), (String) core.getLoginInfoMap().get("url"));
-		} else if (type.equals(MsgTypeEnum.VIDEO.getType())) {
-			headerMap.put("Range", "bytes=0-");
-			url = String.format(URLEnum.WEB_WX_GET_VIEDO.getUrl(), (String) core.getLoginInfoMap().get("url"));
-		} else if (type.equals(MsgTypeEnum.MEDIA.getType())) {
-			headerMap.put("Range", "bytes=0-");
-			url = String.format(URLEnum.WEB_WX_GET_MEDIA.getUrl(), (String) core.getLoginInfoMap().get("fileUrl"));
-			params.add(new BasicNameValuePair("sender", msg.getFromUserName()));
-			params.add(new BasicNameValuePair("mediaid", msg.getMediaId()));
-			params.add(new BasicNameValuePair("filename", msg.getFileName()));
+		switch (msgTypeEnum) {
+			case PIC:
+			case EMOTION:
+				url = String.format(URLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String) core.getLoginInfoMap().get("url"));
+				break;
+			case VOICE:
+				url = String.format(URLEnum.WEB_WX_GET_VOICE.getUrl(), (String) core.getLoginInfoMap().get("url"));
+				break;
+			case VIDEO:
+				headerMap.put("Range", "bytes=0-");
+				url = String.format(URLEnum.WEB_WX_GET_VIEDO.getUrl(), (String) core.getLoginInfoMap().get("url"));
+				break;
+			case APP:
+			case MEDIA:
+				headerMap.put("Range", "bytes=0-");
+				url = String.format(URLEnum.WEB_WX_GET_MEDIA.getUrl(), (String) core.getLoginInfoMap().get("fileUrl"));
+				params.add(new BasicNameValuePair("sender", msg.getFromUserName()));
+				params.add(new BasicNameValuePair("mediaid", msg.getMediaId()));
+				params.add(new BasicNameValuePair("filename", msg.getFileName()));
+				break;
 		}
 		params.add(new BasicNameValuePair("msgid", msg.getNewMsgId()));
 		params.add(new BasicNameValuePair("skey", (String) core.getLoginInfoMap().get("skey")));
@@ -67,8 +74,6 @@ public class DownloadTools {
 			out.write(bytes);
 			out.flush();
 			out.close();
-			// Tools.printQr(path);
-
 		} catch (Exception e) {
 			log.info(e.getMessage());
 			return false;

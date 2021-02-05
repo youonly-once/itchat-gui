@@ -5,6 +5,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.Builder;
 import lombok.extern.log4j.Log4j2;
+import net.coobird.thumbnailator.Thumbnailator;
+import net.coobird.thumbnailator.Thumbnails;
+import net.coobird.thumbnailator.name.Rename;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
@@ -12,6 +15,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.util.EntityUtils;
+import org.nlpcn.commons.lang.util.StringUtil;
 import shu.cn.weichat.beans.BaseMsg;
 import shu.cn.weichat.beans.RecommendInfo;
 import shu.cn.weichat.core.Core;
@@ -23,6 +27,7 @@ import shu.cn.weichat.utils.enums.VerifyFriendEnum;
 
 import javax.activation.MimetypesFileTypeMap;
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -42,50 +47,27 @@ public class MessageTools {
 	public final static Map<String,Integer> bombMsgMao =new Hashtable<>();
 	private final static MyHttpClient myHttpClient = core.getMyHttpClient();
 
-	/**
-	 * 根据UserName发送文本消息
-	 * 
-	 * @author SXS
-	 * @date 2017年5月4日 下午11:17:38
-	 * @param text
-	 * @param toUserName
-	 */
-	private static void sendMsg(String text, String toUserName) {
-		if (text.isEmpty()) {
-			return;
-		}
-		log.info(LogUtil.printToMeg(toUserName,text));
-		webWxSendMsg(1, text, toUserName);
-	}
 
-	/**
-	 * 根据ID发送文本消息
-	 * 
-	 * @author SXS
-	 * @date 2017年5月6日 上午11:45:51
-	 * @param text
-	 * @param id
-	 */
-	public static void sendMsgById(String text, String id) {
-		if (text == null) {
-			return;
-		}
-		sendMsg(text, id);
-	}
 
 	/**
 	 * 根据指定类型发送消息
 	 * @param results
 	 * @param id id
 	 */
-	public static void sendMsgById(List<Result> results, String id){
+	public static void sendMsgByUserId(List<Result> results, String id){
 		if(results == null ||results.isEmpty()){
 			return;
 		}
 		for (Result result : results) {
-			if ("[Bomb]".equals(result.type)){
+			//result若指定接收人
+			if (StringUtils.isNotEmpty(result.toUserName)){
+				id = result.toUserName;
+			}
+
+			if ("[Bomb]".equals(result.type) && bombMsgMao.containsKey(id)){
 				bombMsgMao.put(id, bombMsgMao.get(id) - 1);
 			}
+			//发送延迟
 			if (result.sleep!=null){
 				SleepUtils.sleep(result.sleep);
 
@@ -95,7 +77,7 @@ public class MessageTools {
 					sendPicMsgByUserId(id,result.msg);
 					break;
 				case TEXT://文本消息
-					sendMsgById(result.msg,id);
+					sendTextMsgByUserId(result.msg,id);
 					break;
 				default:
 					sendFileMsgByUserId(id,result.msg);
@@ -104,39 +86,19 @@ public class MessageTools {
 		}
 
 	}
+
 	/**
-	 * 根据NickName发送文本消息
-	 * 
+	 * 根据UserName发送文本消息
+	 *
 	 * @author SXS
 	 * @date 2017年5月4日 下午11:17:38
-	 * @param text
-	 * @param nickName
-	 */
-	public static boolean sendMsgByNickName(String text, String nickName) {
-		if (nickName != null) {
-			String toUserName = WechatTools.getUserNameByNickName(nickName);
-			if (toUserName != null) {
-				webWxSendMsg(1, text, toUserName);
-				return true;
-			}
-		}
-		return false;
-
-	}
-
-	/**
-	 * 消息发送
-	 * 
-	 * @author SXS
-	 * @date 2017年4月23日 下午2:32:02
-	 * @param msgType
 	 * @param content
 	 * @param toUserName
 	 */
-	public static void webWxSendMsg(int msgType, String content, String toUserName) {
+	public static void sendTextMsgByUserId( String content, String toUserName) {
 		String url = String.format(URLEnum.WEB_WX_SEND_MSG.getUrl(), core.getLoginInfoMap().get("url"));
 		Map<String, Object> msgMap = new HashMap<String, Object>();
-		msgMap.put("Type", msgType);
+		msgMap.put("Type", 1);
 		msgMap.put("Content", content);
 		msgMap.put("FromUserName", core.getUserName());
 		msgMap.put("ToUserName", toUserName == null ? core.getUserName() : toUserName);
@@ -173,12 +135,11 @@ public class MessageTools {
 		if (f.getName().toLowerCase().endsWith(".mp4")){
 			int bitRate = 800000;
 			while (fileSize> 1024 * 1024){
-				f = VideoUtil.compressionVideo(f,"/compression/"+f.getName()+".mp4",bitRate);
+				f = MediaUtil.compressionVideo(f,"/compression/"+f.getName()+".mp4",bitRate);
 				fileSize = f.length();
 				bitRate = (int)(bitRate/2);
 			}
 		}
-		fileSize = f.length();
 		String url = String.format(URLEnum.WEB_WX_UPLOAD_MEDIA.getUrl(), core.getLoginInfoMap().get("fileUrl"));
 		String mimeType = new MimetypesFileTypeMap().getContentType(f);
 		String mediaType = "";
@@ -187,6 +148,10 @@ public class MessageTools {
 		} else {
 			mediaType = mimeType.split("/")[0].equals("image") ? "pic" : "doc";
 		}
+		 if ("pic".equals(mediaType) && fileSize>1024 * 1024 ){
+			f = MediaUtil.compressImage(f,1024 * 1024 );
+		 }
+		fileSize = f.length();
 		String lastModifieDate = new SimpleDateFormat("yyyy MM dd HH:mm:ss").format(new Date());
 
 		String passTicket = (String) core.getLoginInfoMap().get("pass_ticket");
@@ -233,21 +198,7 @@ public class MessageTools {
 		return null;
 	}
 
-	/**
-	 * 根据NickName发送图片消息
-	 * 
-	 * @author SXS
-	 * @date 2017年5月7日 下午10:32:45
-	 * @param nickName
-	 * @return
-	 */
-	public static boolean sendPicMsgByNickName(String nickName, String filePath) {
-		String toUserName = WechatTools.getUserNameByNickName(nickName);
-		if (toUserName != null) {
-			return sendPicMsgByUserId(toUserName, filePath);
-		}
-		return false;
-	}
+
 
 	/**
 	 * 根据用户id发送图片消息
@@ -338,27 +289,38 @@ public class MessageTools {
 		}
 		return webWxSendAppMsg(userId, data);
 	}
-
 	/**
-	 * 根据用户昵称发送文件消息
-	 * 
+	 * 根据用户id发送文件
+	 *
 	 * @author SXS
-	 * @date 2017年5月10日 下午10:59:27
-	 * @param nickName
-	 * @param filePath
+	 * @date 2017年5月7日 下午11:57:36
+	 * @param userId
 	 * @return
 	 */
-	public static boolean sendFileMsgByNickName(String nickName, String filePath) {
-		String toUserName = WechatTools.getUserNameByNickName(nickName);
-		if (toUserName != null) {
-			return sendFileMsgByUserId(toUserName, filePath);
-		}
-		return false;
+	public static boolean sendAppMsgByUserId(String userId) {
+		Map<String, String> data = new HashMap<String, String>();
+		data.put("appid", Config.API_WXAPPID);
+		data.put("title", "测试");
+		data.put("totallen", "");
+		data.put("attachid", "");
+		data.put("type", "5"); // APPMSGTYPE_ATTACH
+		//data.put("fileext", ""); // 文件后缀
+		data.put("url","www.baidu.com");
+/*		JSONObject responseObj = webWxUploadMedia(filePath);
+		if (responseObj != null) {
+			data.put("totallen", responseObj.getString("StartPos"));
+			data.put("attachid", responseObj.getString("MediaId"));
+		} else {
+			log.error("sednFileMsgByUserId 错误: ", data);
+		}*/
+		return webWxSendAppMsg(userId, data);
 	}
+
+
 
 	/**
 	 * 内部调用
-	 * 
+	 * 暂时不能使用
 	 * @author SXS
 	 * @date 2017年5月10日 上午12:21:28
 	 * @param userId
@@ -370,10 +332,8 @@ public class MessageTools {
 				core.getLoginInfoMap().get("pass_ticket"));
 		String clientMsgId = String.valueOf(new Date().getTime())
 				+ String.valueOf(new Random().nextLong()).substring(1, 5);
-		String content = "<appmsg appid='wxeb7ec651dd0aefa9' sdkver=''><title>" + data.get("title")
-				+ "</title><des></des><action></action><type>6</type><content></content><url></url><lowurl></lowurl>"
-				+ "<appattach><totallen>" + data.get("totallen") + "</totallen><attachid>" + data.get("attachid")
-				+ "</attachid><fileext>" + data.get("fileext") + "</fileext></appattach><extinfo></extinfo></appmsg>";
+		String content = "";
+		content = "<appmsg appid=\"\" sdkver=\"0\"><br/><title>异性的这 3 个要求，你越拒绝，他越爱你</title><br/><des>真正相爱的人，总能相互磨合，共度一生。</des><br/><action /><br/><type>5</type><br/><showtype>0</showtype><br/><soundtype>0</soundtype><br/><mediatagname /><br/><messageext /><br/><messageaction /><br/><content /><br/><contentattr>0</contentattr><br/><url>http://mp.weixin.qq.com/s?__biz=MjM5MTAxNjY4MA==&amp;amp;mid=2652209745&amp;amp;idx=1&amp;amp;sn=6ed0c5d4b024126dccdcc794f487dbbb&amp;amp;chksm=bd5ad1d68a2d58c0eeb2fc69898f288acd6a60a1c8d977e9acf392637e49a7a745c934cbbfd8&amp;amp;mpshare=1&amp;amp;scene=24&amp;amp;srcid=0119o3tdryeh9NISzMnmiYSF&amp;amp;sharer_sharetime=1611040957165&amp;amp;sharer_shareid=942001db66d68de0a228cdc24bb72cd2#rd</url><br/><lowurl /><br/><dataurl /><br/><lowdataurl /><br/><songalbumurl /><br/><songlyric /><br/><appattach><br/><totallen>0</totallen><br/><attachid /><br/><emoticonmd5 /><br/><fileext /><br/><cdnthumbaeskey /><br/><aeskey /><br/></appattach><br/><extinfo /><br/><sourceusername></sourceusername><br/><sourcedisplayname>简易心理学</sourcedisplayname><br/><thumburl>https://mmbiz.qlogo.cn/mmbiz_jpg/Lgzb4UR9mOmNbta52DLH0dYmt4rm57RHZBY0uHd5xIcJLYGOm4ttyxcV1D8tE7KiafR6icRJyxVMr7H2oa4aQ0LQ/300?wx_fmt=jpeg&amp;amp;wxfrom=4</thumburl><br/><md5 /><br/><statextstr /><br/><directshare>0</directshare><br/><mmreadershare><br/><itemshowtype>0</itemshowtype><br/><nativepage>0</nativepage><br/><pubtime>0</pubtime><br/><duration>0</duration><br/><width>0</width><br/><height>0</height><br/><vid /><br/><funcflag>0</funcflag><br/><ispaysubscribe>0</ispaysubscribe><br/></mmreadershare><br/></appmsg>";
 		Map<String, Object> msgMap = new HashMap<String, Object>();
 		msgMap.put("Type", data.get("type"));
 		msgMap.put("Content", content);
@@ -477,5 +437,7 @@ public class MessageTools {
 		private final Long sleep;
 		//类型
 		private final String type;
+		//消息接收者
+		private final String toUserName;
 	}
 }
