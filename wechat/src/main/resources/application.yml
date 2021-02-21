@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    username: root
+    password: 123456
+    url: jdbc:mysql://127.0.0.1:3306/wechat?serverTimezone=Asia/Shanghai&characterEncoding=utf8&allowMultiQueries=true
+mybatis:
+  mapper-locations: classpath*:mapper/**/**Mapper.xml

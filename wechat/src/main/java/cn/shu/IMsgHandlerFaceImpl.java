@@ -4,32 +4,31 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import bean.tuling.enums.ResultType;
 import bean.tuling.response.Results;
 import bean.tuling.response.TuLingResponseBean;
-import cn.shu.weichat.Wechat;
-import cn.shu.weichat.api.MessageTools;
-import cn.shu.weichat.api.WechatTools;
-import cn.shu.weichat.beans.BaseMsg;
-import cn.shu.weichat.core.Core;
-import cn.shu.weichat.face.IMsgHandlerFace;
-import cn.shu.weichat.utils.LogUtil;
-import cn.shu.weichat.utils.SleepUtils;
-import cn.shu.weichat.utils.XmlUtil;
-import cn.shu.weichat.utils.enums.MsgTypeEnum;
-import cn.shu.weichat.utils.enums.MsgTypeOfAppEnum;
-import cn.shu.weichat.utils.enums.ReplyMsgTypeEnum;
-import cn.shu.weichat.utils.tools.DownloadTools;
+import cn.shu.wechat.Wechat;
+import cn.shu.wechat.api.MessageTools;
+import cn.shu.wechat.api.WechatTools;
+import cn.shu.wechat.beans.BaseMsg;
+import cn.shu.wechat.core.Core;
+import cn.shu.wechat.face.IMsgHandlerFace;
+import cn.shu.wechat.utils.LogUtil;
+import cn.shu.wechat.utils.SleepUtils;
+import cn.shu.wechat.utils.XmlUtil;
+import cn.shu.wechat.utils.enums.MsgTypeEnum;
+import cn.shu.wechat.utils.enums.MsgTypeOfAppEnum;
+import cn.shu.wechat.utils.enums.ReplyMsgTypeEnum;
+import cn.shu.wechat.utils.tools.DownloadTools;
 import com.alibaba.fastjson.JSONObject;
 
 import lombok.extern.log4j.Log4j2;
 import net.sf.json.JSONException;
-import org.apache.commons.lang.StringUtils;
 import org.nlpcn.commons.lang.util.StringUtil;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import utils.DateUtil;
 import utils.HttpUtil;
 import utils.TuLingUtil;
@@ -37,12 +36,13 @@ import weixin.exception.WXException;
 import weixin.utils.WXUntil;
 
 @Log4j2
+@Component
 public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     private final Properties pps = new Properties();
-    private String msgFileName = "msg.property";
+    private String msgFileName = DateUtil.getCurrDate() + "msg.property";
     private int count = 1;
     private boolean autoReply = false;
-
+    @Autowired private Wechat wechat;
     private static final Core core = Core.getInstance();
     public String savePath = "D://weixin";
 
@@ -50,24 +50,27 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
 
     //不处理撤回消息的群名列表
     private final Set<String> nonHandleUndoMsgGroupId = new HashSet<>();
-
-    public IMsgHandlerFaceImpl() {
-
-
-        String qrPath = savePath + File.separator + "login";
-        Wechat wechat = new Wechat(IMsgHandlerFaceImpl.this, qrPath);
-        wechat.start();
+    public void init(){
         new Thread(new Runnable() {
             @Override
             public void run() {
+                msgFileName = DateUtil.getCurrDate() + "msg.property";
                 try {
                     Thread.sleep(1000 * 60 * 60 );
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                msgFileName = DateUtil.getCurrDate() + "msg.property";
+
             }
         }, "DelMsgThread").start();
+
+        String qrPath = savePath + File.separator + "login";
+        wechat.init(qrPath);
+        wechat.start();
+
+    }
+    public IMsgHandlerFaceImpl() {
+
 
     }
 
@@ -242,7 +245,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         //============炸弹消息= 结束==================
         //============接龙消息========================
         //#接龙<br/>周三 健身房<br/><br/>1. 潘洁
-        String userName = core.getUserSelf().getString("UserName");
+     /*   String userName = core.getUserSelf().getString("UserName");
         if (!msg.getFromUserName().equals(userName)) {
             String regex = "#接龙<br/>.*<br/><br/>.*(\\d+)\\.(.+)$";
             Pattern compile = Pattern.compile(regex);
@@ -263,9 +266,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                     }
                 }
             }
-        }
+        }*/
         //============接龙消息====结束====================
-
+       // log.info("红包检测中...\n");
         text = isReply(msg);
         if (text.isEmpty()) {
             return results;
@@ -392,7 +395,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         JSONObject userSelf = core.getUserSelf();
         //自己的撤回消息不发送
         if (userSelf.getString("UserName").equals(oldMsgFromUserName)) {
-            // return null;
+             return null;
         }
         //===============
         ArrayList<MessageTools.Result> results = new ArrayList<>();
@@ -484,6 +487,13 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                         .build();
                 results.add(result);
                 break;
+            case PROGRAMOFAPP:
+                result = MessageTools.Result.builder()
+                        .msg("【" + fromNickName + "】撤回的小程序：" + realMsgContent)
+                        .replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
+                        .build();
+                results.add(result);
+                break;
             case APP:
                 //目前是分享的链接
 
@@ -508,12 +518,14 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     public List<MessageTools.Result> addFriendMsgHandle(BaseMsg msg) {
         log.info(LogUtil.printFromMeg(msg, MsgTypeEnum.ADDFRIEND.getCode()));
         String text = isReply(msg);
+        //自动同意
+        MessageTools.addFriend(msg,true);
         return null;
     }
 
     @Override
     public List<MessageTools.Result> systemMsgHandle(BaseMsg msg) {
-        log.info(LogUtil.printFromMeg(msg, MsgTypeEnum.SYSTEM.getCode()));
+//       log.info(LogUtil.printFromMeg(msg, MsgTypeEnum.SYSTEM.getCode()));
         String text = isReply(msg);
         return null;
     }
@@ -545,6 +557,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 if (StringUtil.isNotBlank(path)) {
                     storeMsg(msg.getMsgId(), MsgTypeEnum.APP.getType() + ":" + msg.getFromUserName() + "-" + path);
                 }
+                break;
+            case PROGRAM:
+                    storeMsg(msg.getMsgId(), MsgTypeEnum.PROGRAMOFAPP.getType() + ":" + msg.getFromUserName() + "-" + msg.getFileName()+","+msg.getUrl());
                 break;
         }
         return null;
