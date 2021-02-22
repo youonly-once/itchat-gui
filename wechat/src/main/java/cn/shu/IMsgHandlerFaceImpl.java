@@ -35,6 +35,7 @@ import utils.TuLingUtil;
 import weixin.exception.WXException;
 import weixin.utils.WXUntil;
 
+
 @Log4j2
 @Component
 public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
@@ -44,7 +45,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     private boolean autoReply = false;
     @Autowired private Wechat wechat;
     private static final Core core = Core.getInstance();
-    public String savePath = "D://weixin";
+    public static String savePath = "D://weixin";
 
     private final Set<String> groupIdList = new HashSet<>();
 
@@ -325,8 +326,8 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         String fileName = groupUsername + "-"
                 + new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date()) + "-" + msg.getNewMsgId()
                 + ext;
-        fileName = delete(fileName);
-        username = delete(username);
+        fileName = DownloadTools.replace(fileName);
+        username =  DownloadTools.replace(username);
         // 保存语音的路径
         String path = savePath + File.separator + msgTypeEnum + File.separator + username + File.separator;
         boolean logDir = createLogDir(path);
@@ -723,21 +724,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             return msgId;
         }
         */
-    /*
-     * 不可建立文件夹的字符
-     */
-    private String delete(String string) {
-        string = string.replace("/", "");
-        string = string.replace("\\", "");
-        string = string.replace("*", "");
-        string = string.replace(":", "");
-        string = string.replace("\"", "");
-        string = string.replace("?", "");
-        string = string.replace("<", "");
-        string = string.replace(">", "");
-        return string;
 
-    }
 
     private String voice2Text(String mediaId, String voicePath) throws WXException, IOException {
         String text = "";

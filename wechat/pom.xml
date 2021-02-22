@@ -98,7 +98,7 @@
 
         <dependency>
             <groupId>cn.shu</groupId>
-            <artifactId>WXUtils</artifactId>
+            <artifactId>wxuntils</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>

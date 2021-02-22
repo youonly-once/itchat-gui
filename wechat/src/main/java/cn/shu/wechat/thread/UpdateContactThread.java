@@ -3,13 +3,20 @@ package cn.shu.wechat.thread;
 import cn.shu.wechat.api.WechatTools;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.service.ILoginService;
+import cn.shu.wechat.utils.MyHttpClient;
 import cn.shu.wechat.utils.SleepUtils;
+import cn.shu.wechat.utils.enums.URLEnum;
 import lombok.extern.log4j.Log4j2;
 import cn.shu.wechat.service.impl.LoginServiceImpl;
+import org.apache.http.HttpEntity;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 
 /**
  * 检查微信在线状态
@@ -42,7 +49,8 @@ public class UpdateContactThread implements Runnable {
 			//log.info("3. 更新本次登陆好友相关消息");
 			WechatTools.setUserInfo(); // 登陆成功后缓存本次登陆好友相关消息（NickName, UserName）
 
-			SleepUtils.sleep(30 * 1000); // 休眠10秒
+
+			SleepUtils.sleep(30 * 1000); // 休眠30秒
 		}
 	}
 

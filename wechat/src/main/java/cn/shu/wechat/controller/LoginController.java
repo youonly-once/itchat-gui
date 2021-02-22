@@ -8,9 +8,13 @@ import cn.shu.wechat.thread.CheckLoginStatusThread;
 import cn.shu.wechat.thread.UpdateContactThread;
 import cn.shu.wechat.utils.SleepUtils;
 import cn.shu.wechat.utils.tools.CommonTools;
+import cn.shu.wechat.utils.tools.DownloadTools;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 /**
  * 登陆控制器
@@ -88,7 +92,32 @@ public class LoginController {
 		log.info("12.开启微信状态检测线程");
 		new Thread(new CheckLoginStatusThread(),"CheckLoginStatusThread").start();
 
-		log.info("13.开启好友列表更新线程");
+
+		log.info("13. 下载联系人头像");
+		for (Map.Entry<String, JSONObject> stringJSONObjectEntry : core.getGroupMap().entrySet()) {
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					JSONObject value = stringJSONObjectEntry.getValue();
+					String headImgUrl = DownloadTools.downloadHeadImg(value.getString("HeadImgUrl"), value.getString("UserName"));
+					core.getContactHeadImgPath().put(value.getString("UserName"),headImgUrl);
+				}
+			}).start();
+
+		}
+		for (Map.Entry<String, JSONObject> stringJSONObjectEntry : core.getContactMap().entrySet()) {
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					JSONObject value = stringJSONObjectEntry.getValue();
+					String headImgUrl = DownloadTools.downloadHeadImg(value.getString("HeadImgUrl"), value.getString("UserName"));
+					core.getContactHeadImgPath().put(value.getString("UserName"),headImgUrl);
+				}
+			}).start();
+		}
+
+
+		log.info("14.开启好友列表更新线程");
 		new Thread(updateContactThread,"UpdateContactThread").start();
 	}
 }

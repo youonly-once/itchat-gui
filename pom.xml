@@ -28,7 +28,7 @@
     </build>
     <modules>
         <module>utils</module>
-        <module>WXUtils</module>
+        <module>wxuntils</module>
         <module>wechat</module>
     </modules>
     <dependencyManagement>

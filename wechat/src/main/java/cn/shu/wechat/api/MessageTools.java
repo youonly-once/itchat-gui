@@ -58,16 +58,12 @@ public class MessageTools {
 			if (StringUtils.isNotEmpty(result.toUserName)){
 				id = result.toUserName;
 			}
-
-			if ("[Bomb]".equals(result.type) && bombMsgMao.containsKey(id)){
-				bombMsgMao.put(id, bombMsgMao.get(id) - 1);
-			}
 			//发送延迟
-			if (result.sleep!=null){
+			if (result.sleep != null && result.sleep > 0){
 				SleepUtils.sleep(result.sleep);
 
 			}
-			log.info((bombMsgMao.get(id) == null?"":bombMsgMao.get(id)) +" : "+ LogUtil.printToMeg(id,result.msg));
+ 			log.info((bombMsgMao.get(id) == null?"":bombMsgMao.get(id)) +" : "+ LogUtil.printToMeg(id,result.msg));
 			switch (result.replyMsgTypeEnum){
 				case PIC://图片消息
 					sendPicMsgByUserId(id,result.msg);
@@ -144,7 +140,7 @@ public class MessageTools {
 		} else {
 			mediaType = mimeType.split("/")[0].equals("image") ? "pic" : "doc";
 		}
-		 if ("pic".equals(mediaType) && fileSize>1024 * 1024 ){
+		 if ("pic".equals(mediaType) && fileSize > 1024 * 1024 ){
 			f = MediaUtil.compressImage(f,1024 * 1024 );
 		 }
 		fileSize = f.length();
@@ -433,8 +429,6 @@ public class MessageTools {
 		private final String msg;
 		//延迟发送
 		private final Long sleep;
-		//类型
-		private final String type;
 		//消息接收者
 		private final String toUserName;
 	}

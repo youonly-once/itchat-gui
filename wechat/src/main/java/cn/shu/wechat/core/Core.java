@@ -68,6 +68,8 @@ public class Core {
 	private Map<String, JSONObject> userInfoMap = new HashMap<>();
 	//登录信息
 	Map<String, Object> loginInfoMap = new HashMap<String, Object>();
+	//好友头像路径
+	Map<String, String> contactHeadImgPath = new HashMap<String, String>();
 	// CloseableHttpClient httpClient = HttpClients.createDefault();
 	MyHttpClient myHttpClient = MyHttpClient.getInstance();
 	String uuid = null;

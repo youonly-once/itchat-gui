@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.regex.Matcher;
 
+import cn.shu.IMsgHandlerFaceImpl;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.beans.AttrHistory;
 import cn.shu.wechat.core.Core;
@@ -26,6 +27,7 @@ import cn.shu.wechat.utils.enums.parameters.LoginParaEnum;
 import cn.shu.wechat.utils.enums.parameters.StatusNotifyParaEnum;
 import cn.shu.wechat.utils.enums.parameters.UUIDParaEnum;
 import cn.shu.wechat.utils.tools.CommonTools;
+import cn.shu.wechat.utils.tools.DownloadTools;
 import lombok.extern.log4j.Log4j2;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
@@ -409,6 +411,7 @@ public class LoginServiceImpl implements ILoginService {
 					// 普通联系人
 					put(core.getContactMap(),userName,o,"普通联系人");
 				}
+
 			}
 			return;
 		} catch (Exception e) {
@@ -734,7 +737,8 @@ public class LoginServiceImpl implements ILoginService {
 				.replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
 				.build());
 				map.put(key,newV);
-				store(differenceMap,oldV);
+				//存储数据库
+				store(differenceMap,oldV,results);
 			}
 		}else{
 			log.info("新增{}（{}）：{}",tip,name,newV);
@@ -758,21 +762,63 @@ public class LoginServiceImpl implements ILoginService {
 	 * @param differenceMap
 	 * @param oldV
 	 */
-	private void store(Map<String, Map<String, String>> differenceMap,JSONObject oldV){
+	private void store(Map<String, Map<String, String>> differenceMap,JSONObject oldV,ArrayList<MessageTools.Result> results){
 		ArrayList<AttrHistory> attrHistories = new ArrayList<>();
 		for (Entry<String, Map<String, String>> stringMapEntry : differenceMap.entrySet()) {
 			for (Entry<String, String> stringStringEntry : stringMapEntry.getValue().entrySet()) {
-				AttrHistory build = AttrHistory.builder()
-						.attr(stringMapEntry.getKey())
-						.oldval(stringStringEntry.getKey())
-						.newval(stringStringEntry.getValue())
-						.id(0)
-						.nickname(oldV.getString("NickName"))
-						.remarkname(oldV.getString("RemarkName"))
-						.username(oldV.getString("UserName"))
-						.createtime(new Date())
-						.build();
-				attrHistories.add(build);
+				if (stringMapEntry.getKey().equals("HeadImgUrl")
+						|| stringMapEntry.getKey().equals("头像更换")){
+/*					String oldHeadPath = DownloadTools.downloadHeadImg(stringStringEntry.getKey()
+							, IMsgHandlerFaceImpl.savePath+File.separator+oldV.getString("UserName")+File.separator);*/
+					String oldHeadPath = core.getContactHeadImgPath().get(oldV.getString("UserName"));
+					String newHeadPath = DownloadTools.downloadHeadImg(stringStringEntry.getValue()
+							, oldV.getString("UserName"));
+					core.getContactHeadImgPath().put(oldV.getString("UserName"),newHeadPath);
+					//更换前
+		/*			results.add(MessageTools.Result.builder()
+							.msg("头像更换前：")
+							.replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
+							//.toUserName("filehelper")
+							.build());*/
+					results.add(MessageTools.Result.builder()
+					.replyMsgTypeEnum(ReplyMsgTypeEnum.PIC)
+							//.toUserName("filehelper")
+					.msg(oldHeadPath).build());
+					//更换后
+/*					results.add(MessageTools.Result.builder()
+							.msg("头像更换后：")
+							.replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
+							//.toUserName("filehelper")
+							.build());*/
+					results.add(MessageTools.Result.builder()
+							.replyMsgTypeEnum(ReplyMsgTypeEnum.PIC)
+							//.toUserName("filehelper")
+							.msg(newHeadPath).build());
+					AttrHistory build = AttrHistory.builder()
+							.attr(stringMapEntry.getKey())
+							.oldval(oldHeadPath)
+							.newval(newHeadPath)
+							.id(0)
+							.nickname(oldV.getString("NickName"))
+							.remarkname(oldV.getString("RemarkName"))
+							.username(oldV.getString("UserName"))
+							.createtime(new Date())
+							.build();
+					attrHistories.add(build);
+				}else{
+					AttrHistory build = AttrHistory.builder()
+							.attr(stringMapEntry.getKey())
+							.oldval(stringStringEntry.getKey())
+							.newval(stringStringEntry.getValue())
+							.id(0)
+							.nickname(oldV.getString("NickName"))
+							.remarkname(oldV.getString("RemarkName"))
+							.username(oldV.getString("UserName"))
+							.createtime(new Date())
+							.build();
+					attrHistories.add(build);
+				}
+
 			}
 		}
 		attrHistoryMapper.batchInsert(attrHistories);
