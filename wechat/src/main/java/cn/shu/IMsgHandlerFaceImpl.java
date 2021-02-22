@@ -35,22 +35,30 @@ import utils.TuLingUtil;
 import weixin.exception.WXException;
 import weixin.utils.WXUntil;
 
+import javax.annotation.Resource;
+
 
 @Log4j2
 @Component
 public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     private final Properties pps = new Properties();
+
     private String msgFileName = DateUtil.getCurrDate() + "msg.property";
+
     private int count = 1;
+
     private boolean autoReply = false;
-    @Autowired private Wechat wechat;
-    private static final Core core = Core.getInstance();
+
+    @Resource
+    private Wechat wechat;
+
     public static String savePath = "D://weixin";
 
     private final Set<String> groupIdList = new HashSet<>();
 
     //不处理撤回消息的群名列表
     private final Set<String> nonHandleUndoMsgGroupId = new HashSet<>();
+
     public void init(){
         new Thread(new Runnable() {
             @Override
@@ -66,6 +74,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         }, "DelMsgThread").start();
 
         String qrPath = savePath + File.separator + "login";
+
         wechat.init(qrPath);
         wechat.start();
 
@@ -192,7 +201,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
 
         //============炸弹消息===================
         if (text.contains("[Bomb]")) {
-            String userName = core.getUserSelf().getString("UserName");
+            String userName = Core.getUserSelf().getString("UserName");
             if (!msg.getFromUserName().equals(userName) ) {
                     for (int i = 0; i < 1; i++) {
                         results.add(MessageTools.Result.builder()
@@ -226,7 +235,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         }
         //#######我自己在群里发的消息  控制命令#######
         else if (msg.getGroupMsg()
-                && msg.getFromUserName().equals(core.getUserSelf().getString("UserName"))) {
+                && msg.getFromUserName().equals(Core.getUserSelf().getString("UserName"))) {
             if ("OG".equals(msg.getContent().toUpperCase())) {//开启群回复
                 groupIdList.add((msg.getToUserName()));
                 results.add(MessageTools.Result.builder().replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
@@ -246,7 +255,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         //============炸弹消息= 结束==================
         //============接龙消息========================
         //#接龙<br/>周三 健身房<br/><br/>1. 潘洁
-     /*   String userName = core.getUserSelf().getString("UserName");
+     /*   String userName = Core.getUserSelf().getString("UserName");
         if (!msg.getFromUserName().equals(userName)) {
             String regex = "#接龙<br/>.*<br/><br/>.*(\\d+)\\.(.+)$";
             Pattern compile = Pattern.compile(regex);
@@ -315,11 +324,11 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
 
     private String downloadFile(AddMsgList msg, String ext, MsgTypeEnum msgTypeEnum) {
         //发消息的用户或群名称
-        String username = core.getRemarkNameByUserName(msg.getFromUserName());
+        String username = WechatTools.getRemarkNameByUserName(msg.getFromUserName());
         //群成员名称
         String groupUsername;
         if (msg.getMemberName() != null) {
-            groupUsername = core.getRemarkNameByUserName(msg.getMemberName()) + "-";
+            groupUsername = WechatTools.getRemarkNameByUserName(msg.getMemberName()) + "-";
         } else {
             groupUsername = "";
         }
@@ -393,7 +402,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
 
         //==============是否为自己的消息
         String oldMsgFromUserName = value.substring(value.indexOf(":") + 1, value.indexOf("-"));
-        JSONObject userSelf = core.getUserSelf();
+        JSONObject userSelf = Core.getUserSelf();
         //自己的撤回消息不发送
         if (userSelf.getString("UserName").equals(oldMsgFromUserName)) {
              return null;
@@ -652,7 +661,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         if (content == null) {
             return "";
         }
-        JSONObject userSelf = core.getUserSelf();
+        JSONObject userSelf = Core.getUserSelf();
         //#############群消息############
         if (groupMsg) {
             if (groupIdList.contains(fromUserName)) {

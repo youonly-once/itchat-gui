@@ -22,6 +22,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.springframework.stereotype.Component;
 
 /**
  * HTTP访问类，对Apache HttpClient进行简单封装，适配器模式
@@ -34,17 +35,16 @@ import org.apache.http.util.EntityUtils;
 @Log4j2
 public class MyHttpClient {
 
-	private static CloseableHttpClient httpClient = HttpClients.createDefault();
+	private static CloseableHttpClient MyHttpClient = HttpClients.createDefault();
 
-	private static MyHttpClient instance = null;
 
 	private static CookieStore cookieStore;
 
 	static {
 		cookieStore = new BasicCookieStore();
 
-		// 将CookieStore设置到httpClient中
-		httpClient = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
+		// 将CookieStore设置到MyHttpClient中
+		MyHttpClient = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
 	}
 
 	public static String getCookie(String name) {
@@ -69,7 +69,7 @@ public class MyHttpClient {
 	 * @date 2017年5月7日 下午8:37:17
 	 * @return
 	 */
-	public static MyHttpClient getInstance() {
+/*	public static MyHttpClient getInstance() {
 		if (instance == null) {
 			synchronized (MyHttpClient.class) {
 				if (instance == null) {
@@ -78,7 +78,7 @@ public class MyHttpClient {
 			}
 		}
 		return instance;
-	}
+	}*/
 
 	/**
 	 * 处理GET请求
@@ -89,7 +89,7 @@ public class MyHttpClient {
 	 * @param params
 	 * @return
 	 */
-	public HttpEntity doGet(String url, List<BasicNameValuePair> params, boolean redirect,
+	public static HttpEntity doGet(String url, List<BasicNameValuePair> params, boolean redirect,
 							Map<String, String> headerMap) {
 		HttpEntity entity = null;
 		HttpGet httpGet;
@@ -111,7 +111,7 @@ public class MyHttpClient {
 					httpGet.setHeader(entry.getKey(), entry.getValue());
 				}
 			}
-			CloseableHttpResponse response = httpClient.execute(httpGet);
+			CloseableHttpResponse response = MyHttpClient.execute(httpGet);
 			entity = response.getEntity();
 		} catch (IOException e) {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     			log.error(e.getMessage());
@@ -130,7 +130,7 @@ public class MyHttpClient {
 	 * @param paramsStr
 	 * @return
 	 */
-	public HttpEntity doPost(String url, String paramsStr) {
+	public static HttpEntity doPost(String url, String paramsStr) {
 		HttpEntity entity = null;
 		HttpPost httpPost ;
 		try {
@@ -139,7 +139,7 @@ public class MyHttpClient {
 			httpPost.setEntity(params);
 			httpPost.setHeader("Content-type", "application/json; charset=utf-8");
 			httpPost.setHeader("User-Agent", Config.USER_AGENT);
-			CloseableHttpResponse response = httpClient.execute(httpPost);
+			CloseableHttpResponse response = MyHttpClient.execute(httpPost);
 			entity = response.getEntity();
 		} catch (IOException e) {
 			log.error(e.getMessage());
@@ -157,13 +157,13 @@ public class MyHttpClient {
 	 * @param reqEntity
 	 * @return
 	 */
-	public HttpEntity doPostFile(String url, HttpEntity reqEntity) {
+	public static HttpEntity doPostFile(String url, HttpEntity reqEntity) {
 		HttpEntity entity = null;
 		HttpPost httpPost = new HttpPost(url);
 		httpPost.setHeader("User-Agent", Config.USER_AGENT);
 		httpPost.setEntity(reqEntity);
 		try {
-			CloseableHttpResponse response = httpClient.execute(httpPost);
+			CloseableHttpResponse response = MyHttpClient.execute(httpPost);
 			entity = response.getEntity();
 
 		} catch (Exception e) {
@@ -173,7 +173,7 @@ public class MyHttpClient {
 	}
 
 	public static CloseableHttpClient getHttpClient() {
-		return httpClient;
+		return MyHttpClient;
 	}
 
 

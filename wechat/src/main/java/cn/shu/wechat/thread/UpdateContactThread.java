@@ -34,12 +34,16 @@ import java.io.OutputStream;
 @Log4j2
 @Component
 public class UpdateContactThread implements Runnable {
-	private Core core = Core.getInstance();
-	@Autowired
+
+	/**
+	 * 登录服务
+	 */
+	@Resource
 	private ILoginService loginService;
 	@Override
 	public void run() {
-		while (core.isAlive()) {
+		while (Core.isAlive()) {
+			SleepUtils.sleep(30 * 1000); // 休眠30秒
 			//log.info("1. 更新联系人信息");
 			loginService.webWxGetContact();
 
@@ -49,8 +53,6 @@ public class UpdateContactThread implements Runnable {
 			//log.info("3. 更新本次登陆好友相关消息");
 			WechatTools.setUserInfo(); // 登陆成功后缓存本次登陆好友相关消息（NickName, UserName）
 
-
-			SleepUtils.sleep(30 * 1000); // 休眠30秒
 		}
 	}
 

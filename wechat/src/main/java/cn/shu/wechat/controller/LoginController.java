@@ -14,6 +14,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.Map;
 
 /**
@@ -27,12 +28,21 @@ import java.util.Map;
 @Log4j2
 @Component
 public class LoginController {
-	@Autowired private ILoginService loginService;
-	private static Core core = Core.getInstance();
-	@Autowired private UpdateContactThread updateContactThread;
+	/**
+	 * 登陆服务实现类
+	 */
+	@Resource
+	private ILoginService loginService;
+
+	/**
+	 * 更新联系人的线程处理器
+	 */
+	@Resource
+	private UpdateContactThread updateContactThread;
+
 	public void login(String qrPath) {
-		loginService = new LoginServiceImpl();
-		if (core.isAlive()) { // 已登陆
+
+		if (Core.isAlive()) { // 已登陆
 			log.info("itchat4j已登陆");
 			return;
 		}
@@ -49,15 +59,15 @@ public class LoginController {
 				log.info("2. 获取登陆二维码图片");
 				if (loginService.getQR(qrPath)) {
 					break;
-				} else if (count == 10) {
+				} else if (count == 9) {
 					log.error("2.2. 获取登陆二维码图片失败，系统退出");
 					System.exit(0);
 				}
 			}
 			log.info("3. 请扫描二维码图片，并在手机上确认");
-			if (!core.isAlive()) {
+			if (!Core.isAlive()) {
 				loginService.login();
-				core.setAlive(true);
+				Core.setAlive(true);
 				log.info(("登陆成功"));
 				break;
 			}
@@ -75,7 +85,7 @@ public class LoginController {
 
 		log.info("7. 清除。。。。");
 		CommonTools.clearScreen();
-		log.info(String.format("欢迎回来， %s", core.getNickName()));
+		log.info(String.format("欢迎回来， %s", Core.getNickName()));
 
 		log.info("8. 开始接收消息");
 		loginService.startReceiving();
@@ -94,27 +104,27 @@ public class LoginController {
 
 
 		log.info("13. 下载联系人头像");
-		/*for (Map.Entry<String, JSONObject> stringJSONObjectEntry : core.getGroupMap().entrySet()) {
+		for (Map.Entry<String, JSONObject> stringJSONObjectEntry : Core.getGroupMap().entrySet()) {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
 					JSONObject value = stringJSONObjectEntry.getValue();
 					String headImgUrl = DownloadTools.downloadHeadImg(value.getString("HeadImgUrl"), value.getString("UserName"));
-					core.getContactHeadImgPath().put(value.getString("UserName"),headImgUrl);
+					Core.getContactHeadImgPath().put(value.getString("UserName"),headImgUrl);
 				}
 			}).start();
 
 		}
-		for (Map.Entry<String, JSONObject> stringJSONObjectEntry : core.getContactMap().entrySet()) {
+		for (Map.Entry<String, JSONObject> stringJSONObjectEntry : Core.getContactMap().entrySet()) {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
 					JSONObject value = stringJSONObjectEntry.getValue();
 					String headImgUrl = DownloadTools.downloadHeadImg(value.getString("HeadImgUrl"), value.getString("UserName"));
-					core.getContactHeadImgPath().put(value.getString("UserName"),headImgUrl);
+					Core.getContactHeadImgPath().put(value.getString("UserName"),headImgUrl);
 				}
 			}).start();
-		}*/
+		}
 
 
 		log.info("14.开启好友列表更新线程");

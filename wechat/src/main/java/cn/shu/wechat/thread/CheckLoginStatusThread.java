@@ -5,6 +5,9 @@ import cn.shu.wechat.service.ILoginService;
 import cn.shu.wechat.utils.SleepUtils;
 import lombok.extern.log4j.Log4j2;
 import cn.shu.wechat.service.impl.LoginServiceImpl;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 /**
  * 检查微信在线状态
@@ -20,14 +23,15 @@ import cn.shu.wechat.service.impl.LoginServiceImpl;
  *
  */
 @Log4j2
+@Component
 public class CheckLoginStatusThread implements Runnable {
-	private Core core = Core.getInstance();
+
 	@Override
 	public void run() {
-		while (core.isAlive()) {
+		while (Core.isAlive()) {
 			long t1 = System.currentTimeMillis(); // 秒为单位
-			if (t1 - core.getLastNormalRetcodeTime() > 60 * 1000) { // 超过60秒，判为离线
-				//core.setAlive(false);
+			if (t1 - Core.getLastNormalRetcodeTime() > 60 * 1000) { // 超过60秒，判为离线
+				//Core.setAlive(false);
 				//TODO 心跳检测不准确
 				log.info("微信已离线");
 			}

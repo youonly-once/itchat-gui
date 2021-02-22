@@ -22,6 +22,7 @@ import cn.shu.wechat.utils.enums.StorageLoginInfoEnum;
 import cn.shu.wechat.utils.enums.URLEnum;
 
 import javax.activation.MimetypesFileTypeMap;
+import javax.annotation.Resource;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -37,11 +38,15 @@ import java.util.*;
 @Log4j2
 public class MessageTools {
 
-	private final static Core core = Core.getInstance();
 	//炸弹消息队列
 	public final static Map<String,Integer> bombMsgMao =new Hashtable<>();
-	private final static MyHttpClient myHttpClient = core.getMyHttpClient();
 
+	private static MyHttpClient myHttpClient;
+
+	@Resource
+	public static void setMyHttpClient(MyHttpClient myHttpClient) {
+		MessageTools.myHttpClient = myHttpClient;
+	}
 
 
 	/**
@@ -87,15 +92,15 @@ public class MessageTools {
 	 * @param toUserName
 	 */
 	public static void sendTextMsgByUserId( String content, String toUserName) {
-		String url = String.format(URLEnum.WEB_WX_SEND_MSG.getUrl(), core.getLoginInfoMap().get("url"));
+		String url = String.format(URLEnum.WEB_WX_SEND_MSG.getUrl(), Core.getLoginInfoMap().get("url"));
 		Map<String, Object> msgMap = new HashMap<String, Object>();
 		msgMap.put("Type", 1);
 		msgMap.put("Content", content);
-		msgMap.put("FromUserName", core.getUserName());
-		msgMap.put("ToUserName", toUserName == null ? core.getUserName() : toUserName);
+		msgMap.put("FromUserName", Core.getUserName());
+		msgMap.put("ToUserName", toUserName == null ? Core.getUserName() : toUserName);
 		msgMap.put("LocalID", new Date().getTime() * 10);
 		msgMap.put("ClientMsgId", new Date().getTime() * 10);
-		Map<String, Object> paramMap = core.getParamMap();
+		Map<String, Object> paramMap = Core.getParamMap();
 		paramMap.put("Msg", msgMap);
 		paramMap.put("Scene", 0);
 		try {
@@ -132,7 +137,7 @@ public class MessageTools {
 				bitRate = (int)(bitRate/2);
 			}
 		}
-		String url = String.format(URLEnum.WEB_WX_UPLOAD_MEDIA.getUrl(), core.getLoginInfoMap().get("fileUrl"));
+		String url = String.format(URLEnum.WEB_WX_UPLOAD_MEDIA.getUrl(), Core.getLoginInfoMap().get("fileUrl"));
 		String mimeType = new MimetypesFileTypeMap().getContentType(f);
 		String mediaType = "";
 		if (mimeType == null) {
@@ -146,7 +151,7 @@ public class MessageTools {
 		fileSize = f.length();
 		String lastModifieDate = new SimpleDateFormat("yyyy MM dd HH:mm:ss").format(new Date());
 
-		String passTicket = (String) core.getLoginInfoMap().get("pass_ticket");
+		String passTicket = (String) Core.getLoginInfoMap().get("pass_ticket");
 		String clientMediaId = String.valueOf(new Date().getTime())
 				+ String.valueOf(new Random().nextLong()).substring(0, 4);
 		String webwxDataTicket = MyHttpClient.getCookie("webwx_data_ticket");
@@ -155,7 +160,7 @@ public class MessageTools {
 			return null;
 		}
 
-		Map<String, Object> paramMap = core.getParamMap();
+		Map<String, Object> paramMap = Core.getParamMap();
 
 		paramMap.put("ClientMediaId", clientMediaId);
 		paramMap.put("TotalLen", fileSize);
@@ -219,19 +224,19 @@ public class MessageTools {
 	 * @return
 	 */
 	private static boolean webWxSendMsgImg(String userId, String mediaId) {
-		String url = String.format("%s/webwxsendmsgimg?fun=async&f=json&pass_ticket=%s", core.getLoginInfoMap().get("url"),
-				core.getLoginInfoMap().get("pass_ticket"));
+		String url = String.format("%s/webwxsendmsgimg?fun=async&f=json&pass_ticket=%s", Core.getLoginInfoMap().get("url"),
+				Core.getLoginInfoMap().get("pass_ticket"));
 		Map<String, Object> msgMap = new HashMap<String, Object>();
 		msgMap.put("Type", 3);
 		msgMap.put("MediaId", mediaId);
-		msgMap.put("FromUserName", core.getUserSelf().getString("UserName"));
+		msgMap.put("FromUserName", Core.getUserSelf().getString("UserName"));
 		msgMap.put("ToUserName", userId);
 		String clientMsgId = String.valueOf(new Date().getTime())
 				+ String.valueOf(new Random().nextLong()).substring(1, 5);
 		msgMap.put("LocalID", clientMsgId);
 		msgMap.put("ClientMsgId", clientMsgId);
-		Map<String, Object> paramMap = core.getParamMap();
-		paramMap.put("BaseRequest", core.getParamMap().get("BaseRequest"));
+		Map<String, Object> paramMap = Core.getParamMap();
+		paramMap.put("BaseRequest", Core.getParamMap().get("BaseRequest"));
 		paramMap.put("Msg", msgMap);
 		String paramStr = JSON.toJSONString(paramMap);
 		HttpEntity entity = myHttpClient.doPost(url, paramStr);
@@ -320,8 +325,8 @@ public class MessageTools {
 	 * @return
 	 */
 	private static boolean webWxSendAppMsg(String userId, Map<String, String> data) {
-		String url = String.format("%s/webwxsendappmsg?fun=async&f=json&pass_ticket=%s", core.getLoginInfoMap().get("url"),
-				core.getLoginInfoMap().get("pass_ticket"));
+		String url = String.format("%s/webwxsendappmsg?fun=async&f=json&pass_ticket=%s", Core.getLoginInfoMap().get("url"),
+				Core.getLoginInfoMap().get("pass_ticket"));
 		String clientMsgId = String.valueOf(new Date().getTime())
 				+ String.valueOf(new Random().nextLong()).substring(1, 5);
 		String content = "<appmsg appid='wxeb7ec651dd0aefa9' sdkver=''><title>" + data.get("title")
@@ -331,7 +336,7 @@ public class MessageTools {
 		Map<String, Object> msgMap = new HashMap<String, Object>();
 		msgMap.put("Type", data.get("type"));
 		msgMap.put("Content", content);
-		msgMap.put("FromUserName", core.getUserSelf().getString("UserName"));
+		msgMap.put("FromUserName", Core.getUserSelf().getString("UserName"));
 		msgMap.put("ToUserName", userId);
 		msgMap.put("LocalID", clientMsgId);
 		msgMap.put("ClientMsgId", clientMsgId);
@@ -340,11 +345,11 @@ public class MessageTools {
 		 * 
 		 * @SuppressWarnings("unchecked") Map<String, Map<String, String>>
 		 * baseRequestMap = (Map<String, Map<String, String>>)
-		 * core.getLoginInfo() .get("baseRequest"); paramMap.put("BaseRequest",
+		 * Core.getLoginInfo() .get("baseRequest"); paramMap.put("BaseRequest",
 		 * baseRequestMap.get("BaseRequest"));
 		 */
 
-		Map<String, Object> paramMap = core.getParamMap();
+		Map<String, Object> paramMap = Core.getParamMap();
 		paramMap.put("Msg", msgMap);
 		paramMap.put("Scene", 0);
 		String paramStr = JSON.toJSONString(paramMap);
@@ -378,10 +383,10 @@ public class MessageTools {
 		String ticket = recommendInfo.getTicket();
 		// 更新好友列表
 		// TODO 此处需要更新好友列表
-		// core.getContactList().add(msg.getJSONObject("RecommendInfo"));
+		// Core.getContactList().add(msg.getJSONObject("RecommendInfo"));
 
-		String url = String.format(URLEnum.WEB_WX_VERIFYUSER.getUrl(), core.getLoginInfoMap().get("url"),
-				String.valueOf(System.currentTimeMillis() / 3158L), core.getLoginInfoMap().get("pass_ticket"));
+		String url = String.format(URLEnum.WEB_WX_VERIFYUSER.getUrl(), Core.getLoginInfoMap().get("url"),
+				String.valueOf(System.currentTimeMillis() / 3158L), Core.getLoginInfoMap().get("pass_ticket"));
 
 		List<Map<String, Object>> verifyUserList = new ArrayList<Map<String, Object>>();
 		Map<String, Object> verifyUser = new HashMap<String, Object>();
@@ -393,14 +398,14 @@ public class MessageTools {
 		sceneList.add(33);
 
 		JSONObject body = new JSONObject();
-		body.put("BaseRequest", core.getParamMap().get("BaseRequest"));
+		body.put("BaseRequest", Core.getParamMap().get("BaseRequest"));
 		body.put("Opcode", status);
 		body.put("VerifyUserListSize", 1);
 		body.put("VerifyUserList", verifyUserList);
 		body.put("VerifyContent", "");
 		body.put("SceneListCount", 1);
 		body.put("SceneList", sceneList);
-		body.put("skey", core.getLoginInfoMap().get(StorageLoginInfoEnum.skey.getKey()));
+		body.put("skey", Core.getLoginInfoMap().get(StorageLoginInfoEnum.skey.getKey()));
 
 		String result = null;
 		try {

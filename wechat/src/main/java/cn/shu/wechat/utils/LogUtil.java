@@ -2,9 +2,13 @@ package cn.shu.wechat.utils;
 
 import cn.shu.wechat.beans.sync.AddMsgList;
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.utils.tools.DownloadTools;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.StringUtils;
 import cn.shu.wechat.api.WechatTools;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 /**
  * @作者 舒新胜
@@ -13,7 +17,6 @@ import cn.shu.wechat.api.WechatTools;
  */
 @Log4j2
 public class LogUtil {
-    private static Core core = Core.getInstance();
 
     /**
      * 打印发给自己的消息
@@ -22,8 +25,8 @@ public class LogUtil {
      * @return 日志内容
      */
     public static String  printFromMeg(AddMsgList msg, String path, String title){
-        String myUserName = core.getUserName();
-        String myNickName = core.getNickName();
+        String myUserName = Core.getUserName();
+        String myNickName = Core.getNickName();
         //自己发的消息
         String fromUser ="";
         String toUser ="";
@@ -73,8 +76,8 @@ public class LogUtil {
      * @return 日志内容
      */
     public static String  printFromMeg(String fromUserName,String content){
-        String myNickName = core.getUserSelf().getString("NickName");
-        core.getUserSelf().getString("UserName");
+        String myNickName = Core.getUserSelf().getString("NickName");
+        Core.getUserSelf().getString("UserName");
         String fromRemarkName = WechatTools.getRemarkNameByUserName(fromUserName);
         return String.format("【%s ->>>>>>> %s: %s】",fromRemarkName,myNickName , content) ;
     }
@@ -91,6 +94,6 @@ public class LogUtil {
             toUserName = WechatTools.getRemarkNameByUserName(toUserName);
         }
 
-        return String.format("【%s ->>>>>>> %s】: %s",core.getNickName(),toUserName , content) ;
+        return String.format("【%s ->>>>>>> %s】: %s",Core.getNickName(),toUserName , content) ;
     }
 }

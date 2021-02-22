@@ -1,6 +1,8 @@
 package cn.shu.wechat.api;
 
+
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.utils.MyHttpClient;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.StringUtils;
 import cn.shu.wechat.utils.enums.StorageLoginInfoEnum;
@@ -25,9 +27,6 @@ import java.util.*;
  */
 @Log4j2
 public class WechatTools {
-	private static Core core = Core.getInstance();
-
-
 
 	/**
 	 * <p>
@@ -45,7 +44,7 @@ public class WechatTools {
 	 * @return
 	 */
 	public static String getUserNameByNickName(String nickName) {
-		for (Map.Entry<String, JSONObject> stringJSONObjectEntry : core.getContactMap().entrySet()) {
+		for (Map.Entry<String, JSONObject> stringJSONObjectEntry : Core.getContactMap().entrySet()) {
 			if (stringJSONObjectEntry.getValue().getString("NickName").equals(nickName)) {
 				return stringJSONObjectEntry.getValue().getString("UserName");
 			}
@@ -62,7 +61,7 @@ public class WechatTools {
 	 */
 	public static List<String> getContactNickNameList() {
 		List<String> contactNickNameList = new ArrayList<String>();
-		for (Map.Entry<String, JSONObject> stringJSONObjectEntry : core.getContactMap().entrySet()) {
+		for (Map.Entry<String, JSONObject> stringJSONObjectEntry : Core.getContactMap().entrySet()) {
 			contactNickNameList.add(stringJSONObjectEntry.getValue().getString("NickName"));
 		}
 
@@ -76,7 +75,7 @@ public class WechatTools {
 	 * @return
 	 */
 	public static Map<String,JSONObject> getContactList() {
-		return core.getContactMap();
+		return Core.getContactMap();
 	}
 
 	/**
@@ -87,7 +86,7 @@ public class WechatTools {
 	 * @return
 	 */
 	public static Map<String,JSONObject> getGroupList() {
-		return core.getGroupMap();
+		return Core.getGroupMap();
 	}
 
 	/**
@@ -97,7 +96,7 @@ public class WechatTools {
 	 * @return
 	 */
 	public static Set<String> getGroupIdList() {
-		return core.getGroupIdSet();
+		return Core.getGroupIdSet();
 	}
 
 	/**
@@ -107,7 +106,7 @@ public class WechatTools {
 	 * @return
 	 */
 	public static Set<String> getGroupNickNameList() {
-		return core.getGroupNickNameSet();
+		return Core.getGroupNickNameSet();
 	}
 
 	/**
@@ -118,7 +117,7 @@ public class WechatTools {
 	 * @return
 	 */
 	public static JSONArray getMemberListByGroupId(String groupId) {
-		return core.getGroupMemberMap().get(groupId);
+		return Core.getGroupMemberMap().get(groupId);
 	}
 
 	/**
@@ -133,14 +132,14 @@ public class WechatTools {
 
 	private static boolean webWxLogout() {
 		String url = String.format(URLEnum.WEB_WX_LOGOUT.getUrl(),
-				core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()));
+				Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()));
 		List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
 		params.add(new BasicNameValuePair("redirect", "1"));
 		params.add(new BasicNameValuePair("type", "1"));
 		params.add(
-				new BasicNameValuePair("skey", (String) core.getLoginInfoMap().get(StorageLoginInfoEnum.skey.getKey())));
+				new BasicNameValuePair("skey", (String) Core.getLoginInfoMap().get(StorageLoginInfoEnum.skey.getKey())));
 		try {
-			HttpEntity entity = core.getMyHttpClient().doGet(url, params, false, null);
+			HttpEntity entity = MyHttpClient.doGet(url, params, false, null);
 			String text = EntityUtils.toString(entity, Consts.UTF_8); // 无消息
 			return true;
 		} catch (Exception e) {
@@ -150,9 +149,9 @@ public class WechatTools {
 	}
 
 	public static void setUserInfo() {
-		for (Map.Entry<String, JSONObject> stringJSONObjectEntry : core.getContactMap().entrySet()) {
-			core.getUserInfoMap().put(stringJSONObjectEntry.getValue().getString("NickName"), stringJSONObjectEntry.getValue());
-			core.getUserInfoMap().put(stringJSONObjectEntry.getValue().getString("UserName"), stringJSONObjectEntry.getValue());
+		for (Map.Entry<String, JSONObject> stringJSONObjectEntry : Core.getContactMap().entrySet()) {
+			Core.getUserInfoMap().put(stringJSONObjectEntry.getValue().getString("NickName"), stringJSONObjectEntry.getValue());
+			Core.getUserInfoMap().put(stringJSONObjectEntry.getValue().getString("UserName"), stringJSONObjectEntry.getValue());
 		}
 
 	}
@@ -166,21 +165,21 @@ public class WechatTools {
 	 * @param remName
 	 */
 	public static void remarkNameByNickName(String nickName, String remName) {
-		String url = String.format(URLEnum.WEB_WX_REMARKNAME.getUrl(), core.getLoginInfoMap().get("url"),
-				core.getLoginInfoMap().get(StorageLoginInfoEnum.pass_ticket.getKey()));
+		String url = String.format(URLEnum.WEB_WX_REMARKNAME.getUrl(), Core.getLoginInfoMap().get("url"),
+				Core.getLoginInfoMap().get(StorageLoginInfoEnum.pass_ticket.getKey()));
 		Map<String, Object> msgMap = new HashMap<String, Object>();
 		Map<String, Object> msgMap_BaseRequest = new HashMap<String, Object>();
 		msgMap.put("CmdId", 2);
 		msgMap.put("RemarkName", remName);
-		msgMap.put("UserName", core.getUserInfoMap().get(nickName).get("UserName"));
-		msgMap_BaseRequest.put("Uin", core.getLoginInfoMap().get(StorageLoginInfoEnum.wxuin.getKey()));
-		msgMap_BaseRequest.put("Sid", core.getLoginInfoMap().get(StorageLoginInfoEnum.wxsid.getKey()));
-		msgMap_BaseRequest.put("Skey", core.getLoginInfoMap().get(StorageLoginInfoEnum.skey.getKey()));
-		msgMap_BaseRequest.put("DeviceID", core.getLoginInfoMap().get(StorageLoginInfoEnum.deviceid.getKey()));
+		msgMap.put("UserName", Core.getUserInfoMap().get(nickName).get("UserName"));
+		msgMap_BaseRequest.put("Uin", Core.getLoginInfoMap().get(StorageLoginInfoEnum.wxuin.getKey()));
+		msgMap_BaseRequest.put("Sid", Core.getLoginInfoMap().get(StorageLoginInfoEnum.wxsid.getKey()));
+		msgMap_BaseRequest.put("Skey", Core.getLoginInfoMap().get(StorageLoginInfoEnum.skey.getKey()));
+		msgMap_BaseRequest.put("DeviceID", Core.getLoginInfoMap().get(StorageLoginInfoEnum.deviceid.getKey()));
 		msgMap.put("BaseRequest", msgMap_BaseRequest);
 		try {
 			String paramStr = JSON.toJSONString(msgMap);
-			HttpEntity entity = core.getMyHttpClient().doPost(url, paramStr);
+			HttpEntity entity =  MyHttpClient.doPost(url, paramStr);
 			// String result = EntityUtils.toString(entity, Consts.UTF_8);
 			log.info("修改备注" + remName);
 		} catch (Exception e) {
@@ -195,7 +194,7 @@ public class WechatTools {
 	 * @return
 	 */
 	public static boolean getWechatStatus() {
-		return core.isAlive();
+		return Core.isAlive();
 	}
 
 	/**
@@ -205,7 +204,7 @@ public class WechatTools {
 	 * @return 用户信息
 	 */
 	public static JSONObject getUserByUserName(String userName) {
-		Map<String, JSONObject> contactMap = core.getContactMap();
+		Map<String, JSONObject> contactMap = Core.getContactMap();
 		return contactMap.get(userName);
 	}
 
@@ -233,7 +232,7 @@ public class WechatTools {
 	 * @return 群备注
 	 */
 	public static String getRemarkNameByGroupUserName(String userName) {
-		JSONObject jsonObject1 = core.getGroupMap().get(userName);
+		JSONObject jsonObject1 = Core.getGroupMap().get(userName);
 		if (jsonObject1 == null){
 			return "";
 		}
@@ -248,8 +247,8 @@ public class WechatTools {
 	 * @return 成员
 	 */
 	public static JSONObject getMemberOfGroup(String groupName, String userName) {
-		core.getGroupMap().get(groupName);
-		Map<String, JSONArray> groupMemeberMap = core.getGroupMemberMap();
+		Core.getGroupMap().get(groupName);
+		Map<String, JSONArray> groupMemeberMap = Core.getGroupMemberMap();
 		JSONArray members = groupMemeberMap.get(groupName);
 		if (members == null) {
 			return null;

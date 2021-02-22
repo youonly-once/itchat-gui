@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
 import cn.shu.wechat.beans.sync.AddMsgList;
 import cn.shu.wechat.utils.enums.parameters.BaseParaEnum;
+import org.springframework.stereotype.Component;
 
 
 /**
@@ -23,7 +24,7 @@ import cn.shu.wechat.utils.enums.parameters.BaseParaEnum;
 @Data
 public class Core {
 
-	private static Core instance;
+/*	private static Core instance;
 
 	private Core() {
 
@@ -36,55 +37,55 @@ public class Core {
 			}
 		}
 		return instance;
-	}
+	}*/
 
-	boolean alive = false;
-	private int memberCount = 0;
+	static private boolean alive = false;
+	static private int memberCount = 0;
 
-	private String indexUrl;
+	static private String indexUrl;
 
-	private String userName;
-	private String nickName;
+	static private String userName;
+	static private String nickName;
 	//消息队列（阻塞、线程安全）
-	private LinkedBlockingQueue<AddMsgList> msgList = new LinkedBlockingQueue<>();
+	static private LinkedBlockingQueue<AddMsgList> msgList = new LinkedBlockingQueue<>();
 	// 登陆账号自身信息
-	private JSONObject userSelf;
+	static private JSONObject userSelf;
 	// 好友+群聊+公众号+特殊账号
-	private Map<String,JSONObject> memberMap = new HashMap<>();
+	static private Map<String,JSONObject> memberMap = new HashMap<>();
 	// 好友
-	private Map<String,JSONObject> contactMap = new HashMap<>();
+	static private Map<String,JSONObject> contactMap = new HashMap<>();
 	// 群
-	private Map<String,JSONObject> groupMap = new HashMap<>();
+	static private Map<String,JSONObject> groupMap = new HashMap<>();
 	// 群聊成员字典
-	private Map<String, JSONArray> groupMemberMap = new HashMap<String, JSONArray>();
+	static private Map<String, JSONArray> groupMemberMap = new HashMap<String, JSONArray>();
 	// 公众号／服务号
-	private Map<String,JSONObject> publicUsersMap = new HashMap<>();
+	static private Map<String,JSONObject> publicUsersMap = new HashMap<>();
 	// 特殊账号
-	private Map<String,JSONObject> specialUsersMap = new HashMap<>();
+	static private Map<String,JSONObject> specialUsersMap = new HashMap<>();
 	// 群ID列表
-	private Set<String> groupIdSet = new HashSet<>();
+	static private Set<String> groupIdSet = new HashSet<>();
 	// 群NickName列表
-	private Set<String> groupNickNameSet = new HashSet<String>();
+	static private Set<String> groupNickNameSet = new HashSet<String>();
 	//用户信息
-	private Map<String, JSONObject> userInfoMap = new HashMap<>();
+	static private Map<String, JSONObject> userInfoMap = new HashMap<>();
 	//登录信息
-	Map<String, Object> loginInfoMap = new HashMap<String, Object>();
+	static  Map<String, Object> loginInfoMap = new HashMap<String, Object>();
 	//好友头像路径
-	Map<String, String> contactHeadImgPath = new HashMap<String, String>();
-	// CloseableHttpClient httpClient = HttpClients.createDefault();
-	MyHttpClient myHttpClient = MyHttpClient.getInstance();
-	String uuid = null;
+	static private Map<String, String> contactHeadImgPath = new HashMap<String, String>();
+	// CloseableHttpClient MyHttpClient = HttpClients.createDefault();
 
-	boolean useHotReload = false;
-	String hotReloadDir = "itchat.pkl";
-	int receivingRetryCount = 5;
+	static private String uuid = null;
 
-	private long lastNormalRetcodeTime; // 最后一次收到正常retcode的时间，秒为单位
+	static private boolean useHotReload = false;
+	static private String hotReloadDir = "itchat.pkl";
+	static private int receivingRetryCount = 5;
 
+	static private long lastNormalRetcodeTime; // 最后一次收到正常retcode的时间，秒为单位
 	/**
 	 * 请求参数
 	 */
-	public Map<String, Object> getParamMap() {
+	public static Map<String, Object> getParamMap() {
+
 		return new HashMap<String, Object>(1) {
 			/**
 			 *
@@ -94,29 +95,194 @@ public class Core {
 			{
 				Map<String, String> map = new HashMap<String, String>();
 				for (BaseParaEnum baseRequest : BaseParaEnum.values()) {
-					map.put(baseRequest.para(), getLoginInfoMap().get(baseRequest.value()).toString());
+					map.put(baseRequest.para(), Core.getLoginInfoMap().get(baseRequest.value()).toString());
 				}
 				put("BaseRequest", map);
 			}
 		};
 	}
-	public String  getRemarkNameByUserName(String username) {
-		Map<String,JSONObject> object;
-		if(username.startsWith("@@")){
-			object= groupMap;
-		}else {
-			object= contactMap;
-		}
-		JSONObject  jsonObject = object.get(username);
-		if (jsonObject ==null)return username;
-		if (username.equals(jsonObject.getString("UserName")) ) {
-			if(!jsonObject.getString("RemarkName").equals("")){
-				return jsonObject.getString("RemarkName");
-			}
-			return jsonObject.getString("NickName") ;
-		}
 
-		return username;
+	public static boolean isAlive() {
+		return alive;
 	}
 
+	public static void setAlive(boolean alive) {
+		Core.alive = alive;
+	}
+
+	public static int getMemberCount() {
+		return memberCount;
+	}
+
+	public static void setMemberCount(int memberCount) {
+		Core.memberCount = memberCount;
+	}
+
+	public static String getIndexUrl() {
+		return indexUrl;
+	}
+
+	public static void setIndexUrl(String indexUrl) {
+		Core.indexUrl = indexUrl;
+	}
+
+	public static String getUserName() {
+		return userName;
+	}
+
+	public static void setUserName(String userName) {
+		Core.userName = userName;
+	}
+
+	public static String getNickName() {
+		return nickName;
+	}
+
+	public static void setNickName(String nickName) {
+		Core.nickName = nickName;
+	}
+
+	public static LinkedBlockingQueue<AddMsgList> getMsgList() {
+		return msgList;
+	}
+
+	public static void setMsgList(LinkedBlockingQueue<AddMsgList> msgList) {
+		Core.msgList = msgList;
+	}
+
+	public static JSONObject getUserSelf() {
+		return userSelf;
+	}
+
+	public static void setUserSelf(JSONObject userSelf) {
+		Core.userSelf = userSelf;
+	}
+
+	public static Map<String, JSONObject> getMemberMap() {
+		return memberMap;
+	}
+
+	public static void setMemberMap(Map<String, JSONObject> memberMap) {
+		Core.memberMap = memberMap;
+	}
+
+	public static Map<String, JSONObject> getContactMap() {
+		return contactMap;
+	}
+
+	public static void setContactMap(Map<String, JSONObject> contactMap) {
+		Core.contactMap = contactMap;
+	}
+
+	public static Map<String, JSONObject> getGroupMap() {
+		return groupMap;
+	}
+
+	public static void setGroupMap(Map<String, JSONObject> groupMap) {
+		Core.groupMap = groupMap;
+	}
+
+	public static Map<String, JSONArray> getGroupMemberMap() {
+		return groupMemberMap;
+	}
+
+	public static void setGroupMemberMap(Map<String, JSONArray> groupMemberMap) {
+		Core.groupMemberMap = groupMemberMap;
+	}
+
+	public static Map<String, JSONObject> getPublicUsersMap() {
+		return publicUsersMap;
+	}
+
+	public static void setPublicUsersMap(Map<String, JSONObject> publicUsersMap) {
+		Core.publicUsersMap = publicUsersMap;
+	}
+
+	public static Map<String, JSONObject> getSpecialUsersMap() {
+		return specialUsersMap;
+	}
+
+	public static void setSpecialUsersMap(Map<String, JSONObject> specialUsersMap) {
+		Core.specialUsersMap = specialUsersMap;
+	}
+
+	public static Set<String> getGroupIdSet() {
+		return groupIdSet;
+	}
+
+	public static void setGroupIdSet(Set<String> groupIdSet) {
+		Core.groupIdSet = groupIdSet;
+	}
+
+	public static Set<String> getGroupNickNameSet() {
+		return groupNickNameSet;
+	}
+
+	public static void setGroupNickNameSet(Set<String> groupNickNameSet) {
+		Core.groupNickNameSet = groupNickNameSet;
+	}
+
+	public static Map<String, JSONObject> getUserInfoMap() {
+		return userInfoMap;
+	}
+
+	public static void setUserInfoMap(Map<String, JSONObject> userInfoMap) {
+		Core.userInfoMap = userInfoMap;
+	}
+
+	public static Map<String, Object> getLoginInfoMap() {
+		return loginInfoMap;
+	}
+
+	public static void setLoginInfoMap(Map<String, Object> loginInfoMap) {
+		Core.loginInfoMap = loginInfoMap;
+	}
+
+	public static Map<String, String> getContactHeadImgPath() {
+		return contactHeadImgPath;
+	}
+
+	public static void setContactHeadImgPath(Map<String, String> contactHeadImgPath) {
+		Core.contactHeadImgPath = contactHeadImgPath;
+	}
+
+	public static String getUuid() {
+		return uuid;
+	}
+
+	public static void setUuid(String uuid) {
+		Core.uuid = uuid;
+	}
+
+	public static boolean isUseHotReload() {
+		return useHotReload;
+	}
+
+	public static void setUseHotReload(boolean useHotReload) {
+		Core.useHotReload = useHotReload;
+	}
+
+	public static String getHotReloadDir() {
+		return hotReloadDir;
+	}
+
+	public static void setHotReloadDir(String hotReloadDir) {
+		Core.hotReloadDir = hotReloadDir;
+	}
+
+	public static int getReceivingRetryCount() {
+		return receivingRetryCount;
+	}
+
+	public static void setReceivingRetryCount(int receivingRetryCount) {
+		Core.receivingRetryCount = receivingRetryCount;
+	}
+
+	public static long getLastNormalRetcodeTime() {
+		return lastNormalRetcodeTime;
+	}
+
+	public static void setLastNormalRetcodeTime(long lastNormalRetcodeTime) {
+		Core.lastNormalRetcodeTime = lastNormalRetcodeTime;
+	}
 }

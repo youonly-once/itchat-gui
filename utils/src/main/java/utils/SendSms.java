@@ -25,7 +25,7 @@ import org.dom4j.io.XMLWriter;
 @Log4j2
 public class SendSms {
 
-	private static CloseableHttpClient httpClient = HttpClients.createMinimal();
+	private static CloseableHttpClient MyHttpClient = HttpClients.createMinimal();
 	private static List<String> msgContentList = new ArrayList<String>();
 	private static String userName = "cqgt";
 	private static String userpass = "Haier2019";
@@ -72,7 +72,7 @@ public class SendSms {
 			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params, "UTF-8");
 			HttpPost postMethod = new HttpPost(sendUrl);
 			postMethod.setEntity(entity); // 将参数填入POST Entity中
-			HttpResponse response = httpClient.execute(postMethod); // 执行POST方法
+			HttpResponse response = MyHttpClient.execute(postMethod); // 执行POST方法
 			int statuscode = response.getStatusLine().getStatusCode();
 			String restr = EntityUtils.toString(response.getEntity(), "UTF-8").trim();
 			log.info("短信发送结果："+restr);
@@ -114,7 +114,7 @@ public class SendSms {
 			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params, "UTF-8");
 			HttpPost postMethod = new HttpPost(sendUrl);
 			postMethod.setEntity(entity); // 将参数填入POST Entity中
-			HttpResponse response = httpClient.execute(postMethod); // 执行POST方法
+			HttpResponse response = MyHttpClient.execute(postMethod); // 执行POST方法
 			int statuscode = response.getStatusLine().getStatusCode();
 			String restr = EntityUtils.toString(response.getEntity(), "UTF-8").trim();
 			log.info("短信发送结果："+restr);
@@ -173,7 +173,7 @@ public class SendSms {
 			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params, "UTF-8");
 			HttpPost postMethod = new HttpPost(sendUrl);
 			postMethod.setEntity(entity); // 将参数填入POST Entity中
-			HttpResponse response = httpClient.execute(postMethod); // 执行POST方法
+			HttpResponse response = MyHttpClient.execute(postMethod); // 执行POST方法
 			int statuscode = response.getStatusLine().getStatusCode();
 			String restr = EntityUtils.toString(response.getEntity(), "UTF-8").trim();
 			AtomicInteger succCnt = new AtomicInteger(0);

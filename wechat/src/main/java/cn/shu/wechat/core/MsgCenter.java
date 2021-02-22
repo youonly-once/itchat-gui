@@ -45,14 +45,14 @@ import javax.annotation.Resource;
 @Log4j2
 public class MsgCenter {
 
-    private static Core core = Core.getInstance();
 
-    private static AttrHistoryMapper attrHistoryMapper;
+
+    /*   private static AttrHistoryMapper attrHistoryMapper;
 
     @Resource
     public static void setAttrHistoryMapper(AttrHistoryMapper attrHistoryMapper) {
         MsgCenter.attrHistoryMapper = attrHistoryMapper;
-    }
+    }*/
 
     /**
      * 接收消息，放入队列
@@ -162,7 +162,7 @@ public class MsgCenter {
             try {
                 //添加元素 会阻塞
 
-                core.getMsgList().put(m);
+                Core.getMsgList().put(m);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -181,7 +181,7 @@ public class MsgCenter {
             AddMsgList msg = null;
             try {
                 //拿元素 会阻塞
-                msg = core.getMsgList().take();
+                msg = Core.getMsgList().take();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -252,11 +252,20 @@ public class MsgCenter {
     public static void produceModContactMsg(List<ModContactList> msgLists) {
         for (ModContactList msg : msgLists) {
             JSONObject newV = JSON.parseObject(JSON.toJSONString(msg));
-            JSONObject oldV = core.getContactMap().get(msg.getUserName());
+            JSONObject oldV = null;
+            if (msg.getUserName().startsWith("@@")){
+                oldV = Core.getGroupMap().get(msg.getUserName());
+            }else{
+                oldV = Core.getContactMap().get(msg.getUserName());
+            }
+            oldV= JSON.parseObject(JSON.toJSONString(JSON.toJavaObject(oldV,ModContactList.class)));
+            if (oldV == null){
+                return;
+            }
             ArrayList<MessageTools.Result> results = new ArrayList<>();
-            String name =oldV.getString("RemarkName");
+            String name =oldV.getString("remarkName");
             if (StringUtil.isBlank(name)) {
-                name = oldV.getString("NickName");
+                name = oldV.getString("nickName");
             }
             //存在key
             Map<String, Map<String, String>> differenceMap = JSONObjectUtil.getDifferenceMap(oldV, newV);
@@ -268,9 +277,11 @@ public class MsgCenter {
                 results.add(MessageTools.Result.builder().msg(tip+"（"+name+"）属性更新："+mapToString(differenceMap))
                         .replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
                         .build());
-                core.getContactMap().put(msg.getUserName(),newV);
+                Core.getContactMap().put(msg.getUserName(),newV);
                 //存储数据库
-              //  store(differenceMap,oldV,results);
+                store(differenceMap,oldV,results);
+
+                MessageTools.sendMsgByUserId(results, msg.getUserName());
             }
         }
 
@@ -286,30 +297,20 @@ public class MsgCenter {
         ArrayList<AttrHistory> attrHistories = new ArrayList<>();
         for (Map.Entry<String, Map<String, String>> stringMapEntry : differenceMap.entrySet()) {
             for (Map.Entry<String, String> stringStringEntry : stringMapEntry.getValue().entrySet()) {
-                if (stringMapEntry.getKey().equals("HeadImgUrl")
+                if (stringMapEntry.getKey().equals("headImgUrl")
                         || stringMapEntry.getKey().equals("头像更换")){
 /*					String oldHeadPath = DownloadTools.downloadHeadImg(stringStringEntry.getKey()
 							, IMsgHandlerFaceImpl.savePath+File.separator+oldV.getString("UserName")+File.separator);*/
-                    String oldHeadPath = core.getContactHeadImgPath().get(oldV.getString("UserName"));
+                    String oldHeadPath = Core.getContactHeadImgPath().get(oldV.getString("userName"));
                     String newHeadPath = DownloadTools.downloadHeadImg(stringStringEntry.getValue()
-                            , oldV.getString("UserName"));
-                    core.getContactHeadImgPath().put(oldV.getString("UserName"),newHeadPath);
+                            , oldV.getString("userName"));
+                    Core.getContactHeadImgPath().put(oldV.getString("userName"),newHeadPath);
                     //更换前
-		/*			results.add(MessageTools.Result.builder()
-							.msg("头像更换前：")
-							.replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
-							//.toUserName("filehelper")
-							.build());*/
                     results.add(MessageTools.Result.builder()
                             .replyMsgTypeEnum(ReplyMsgTypeEnum.PIC)
                             //.toUserName("filehelper")
                             .msg(oldHeadPath).build());
                     //更换后
-/*					results.add(MessageTools.Result.builder()
-							.msg("头像更换后：")
-							.replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
-							//.toUserName("filehelper")
-							.build());*/
                     results.add(MessageTools.Result.builder()
                             .replyMsgTypeEnum(ReplyMsgTypeEnum.PIC)
                             //.toUserName("filehelper")
@@ -319,9 +320,9 @@ public class MsgCenter {
                             .oldval(oldHeadPath)
                             .newval(newHeadPath)
                             .id(0)
-                            .nickname(oldV.getString("NickName"))
-                            .remarkname(oldV.getString("RemarkName"))
-                            .username(oldV.getString("UserName"))
+                            .nickname(oldV.getString("nickName"))
+                            .remarkname(oldV.getString("remarkName"))
+                            .username(oldV.getString("userName"))
                             .createtime(new Date())
                             .build();
                     attrHistories.add(build);
@@ -331,9 +332,9 @@ public class MsgCenter {
                             .oldval(stringStringEntry.getKey())
                             .newval(stringStringEntry.getValue())
                             .id(0)
-                            .nickname(oldV.getString("NickName"))
-                            .remarkname(oldV.getString("RemarkName"))
-                            .username(oldV.getString("UserName"))
+                            .nickname(oldV.getString("nickName"))
+                            .remarkname(oldV.getString("remarkName"))
+                            .username(oldV.getString("userName"))
                             .createtime(new Date())
                             .build();
                     attrHistories.add(build);
@@ -341,7 +342,7 @@ public class MsgCenter {
 
             }
         }
-        attrHistoryMapper.batchInsert(attrHistories);
+        //attrHistoryMapper.batchInsert(attrHistories);
     }
     /**
      * map转string
@@ -379,7 +380,7 @@ public class MsgCenter {
         //群消息
         if (msg.getGroupMsg()) {
             //获取自己在群里的备注
-            String groupMyUserNickNameOfGroup = WechatTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), core.getUserName());
+            String groupMyUserNickNameOfGroup = WechatTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), Core.getUserName());
             if (groupMyUserNickNameOfGroup != null
                     && msg.getContent().contains("@" + groupMyUserNickNameOfGroup + " ")) {
                 //@自己

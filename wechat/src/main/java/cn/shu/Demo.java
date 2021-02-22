@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 /**
  * @author ShuXinSheng
@@ -17,17 +18,17 @@ import javax.annotation.PostConstruct;
 @MapperScan("cn.shu.wechat.mapper")
 public class Demo {
 
-	@Autowired private IMsgHandlerFaceImpl iMsgHandlerFace;
+	@Resource
+	private IMsgHandlerFaceImpl iMsgHandlerFace;
 
 	@PostConstruct
 	public void init(){
 		iMsgHandlerFace.init();
 	}
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		ApplicationContext applicationContext = SpringApplication.run(Demo.class,args);
-	/*	new IMsgHandlerFaceImpl();*/
 
+
+	public static void main(String[] args) {
+		ApplicationContext applicationContext = SpringApplication.run(Demo.class,args);
 	}
 
 

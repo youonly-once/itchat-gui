@@ -1,10 +1,11 @@
 package cn.shu.wechat.utils.tools;
 
 import cn.shu.IMsgHandlerFaceImpl;
+import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.api.WechatTools;
+import cn.shu.wechat.core.Core;
 import lombok.extern.log4j.Log4j2;
 import cn.shu.wechat.beans.sync.AddMsgList;
-import cn.shu.wechat.core.Core;
 import cn.shu.wechat.utils.MyHttpClient;
 import cn.shu.wechat.utils.enums.MsgTypeEnum;
 import cn.shu.wechat.utils.enums.URLEnum;
@@ -13,6 +14,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
+import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -28,8 +30,6 @@ import java.util.*;
  */
 @Log4j2
 public class DownloadTools {
-	private static Core core = Core.getInstance();
-	private static MyHttpClient myHttpClient = core.getMyHttpClient();
 
 	/**
 	 * 处理下载任务
@@ -48,27 +48,27 @@ public class DownloadTools {
 		switch (msgTypeEnum) {
 			case PIC:
 			case EMOTION:
-				url = String.format(URLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String) core.getLoginInfoMap().get("url"));
+				url = String.format(URLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String) Core.getLoginInfoMap().get("url"));
 				break;
 			case VOICE:
-				url = String.format(URLEnum.WEB_WX_GET_VOICE.getUrl(), (String) core.getLoginInfoMap().get("url"));
+				url = String.format(URLEnum.WEB_WX_GET_VOICE.getUrl(), (String) Core.getLoginInfoMap().get("url"));
 				break;
 			case VIDEO:
 				headerMap.put("Range", "bytes=0-");
-				url = String.format(URLEnum.WEB_WX_GET_VIEDO.getUrl(), (String) core.getLoginInfoMap().get("url"));
+				url = String.format(URLEnum.WEB_WX_GET_VIEDO.getUrl(), (String) Core.getLoginInfoMap().get("url"));
 				break;
 			case APP:
 			case MEDIA:
 				headerMap.put("Range", "bytes=0-");
-				url = String.format(URLEnum.WEB_WX_GET_MEDIA.getUrl(), (String) core.getLoginInfoMap().get("fileUrl"));
+				url = String.format(URLEnum.WEB_WX_GET_MEDIA.getUrl(), (String) Core.getLoginInfoMap().get("fileUrl"));
 				params.add(new BasicNameValuePair("sender", msg.getFromUserName()));
 				params.add(new BasicNameValuePair("mediaid", msg.getMediaId()));
 				params.add(new BasicNameValuePair("filename", msg.getFileName()));
 				break;
 		}
 		params.add(new BasicNameValuePair("msgid",String.valueOf( msg.getNewMsgId())));
-		params.add(new BasicNameValuePair("skey", (String) core.getLoginInfoMap().get("skey")));
-		HttpEntity entity = myHttpClient.doGet(url, params, true, headerMap);
+		params.add(new BasicNameValuePair("skey", (String) Core.getLoginInfoMap().get("skey")));
+		HttpEntity entity = MyHttpClient.doGet(url, params, true, headerMap);
 		try {
 			OutputStream out = new FileOutputStream(path);
 			byte[] bytes = EntityUtils.toByteArray(entity);
@@ -110,9 +110,8 @@ public class DownloadTools {
 			if (!file.exists()){
 				file.createNewFile();
 			}
-			MyHttpClient myHttpClient = core.getMyHttpClient();
 			String url= "https://wx2.qq.com/"+relativeUrl+"&type=big";
-			HttpEntity entity = myHttpClient.doGet(url,null,false,null);
+			HttpEntity entity = MyHttpClient.doGet(url,null,false,null);
 			OutputStream out = new FileOutputStream(file);
 			byte[] bytes = EntityUtils.toByteArray(entity);
 			out.write(bytes);
