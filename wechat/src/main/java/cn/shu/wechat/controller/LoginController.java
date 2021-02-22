@@ -94,7 +94,7 @@ public class LoginController {
 
 
 		log.info("13. 下载联系人头像");
-		for (Map.Entry<String, JSONObject> stringJSONObjectEntry : core.getGroupMap().entrySet()) {
+		/*for (Map.Entry<String, JSONObject> stringJSONObjectEntry : core.getGroupMap().entrySet()) {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
@@ -114,7 +114,7 @@ public class LoginController {
 					core.getContactHeadImgPath().put(value.getString("UserName"),headImgUrl);
 				}
 			}).start();
-		}
+		}*/
 
 
 		log.info("14.开启好友列表更新线程");

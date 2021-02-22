@@ -1,11 +1,22 @@
 package cn.shu.wechat.core;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 
+import cn.shu.wechat.beans.AttrHistory;
+import cn.shu.wechat.beans.sync.AddMsgList;
+import cn.shu.wechat.beans.sync.DelContactList;
+import cn.shu.wechat.beans.sync.ModContactList;
 import cn.shu.wechat.face.IMsgHandlerFace;
+import cn.shu.wechat.mapper.AttrHistoryMapper;
+import cn.shu.wechat.utils.JSONObjectUtil;
 import cn.shu.wechat.utils.MsgCodeEnum;
+import cn.shu.wechat.utils.enums.ReplyMsgTypeEnum;
 import cn.shu.wechat.utils.tools.CommonTools;
+import cn.shu.wechat.utils.tools.DownloadTools;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.StringUtils;
@@ -15,10 +26,14 @@ import com.alibaba.fastjson.JSONObject;
 
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.api.WechatTools;
-import cn.shu.wechat.beans.BaseMsg;
+
 
 import cn.shu.wechat.utils.LogUtil;
 import cn.shu.wechat.utils.enums.MsgTypeEnum;
+import org.nlpcn.commons.lang.util.StringUtil;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 /**
  * 消息处理中心
@@ -32,77 +47,79 @@ public class MsgCenter {
 
     private static Core core = Core.getInstance();
 
+    private static AttrHistoryMapper attrHistoryMapper;
+
+    @Resource
+    public static void setAttrHistoryMapper(AttrHistoryMapper attrHistoryMapper) {
+        MsgCenter.attrHistoryMapper = attrHistoryMapper;
+    }
 
     /**
      * 接收消息，放入队列
      *
-     * @param msgList
+     * @param msgLists
      * @return
      * @author ShuXinSheng
      * @date 2017年4月23日 下午2:30:48
      */
-    public static void produceMsg(JSONArray msgList) {
+    public static void produceNewMsg(List<AddMsgList> msgLists) {
 
-        for (Object o : msgList) {
-            JSONObject m = (JSONObject) o;
-            m.put("groupMsg", false);// 是否是群消息
-            String fromUserName = m.getString("FromUserName");
-            String toUserName = m.getString("ToUserName");
-            String content = m.getString("Content");
+        for (AddMsgList m : msgLists) {
+            m.setGroupMsg( false);// 是否是群消息
+            String fromUserName = m.getFromUserName();
+            String toUserName = m.getToUserName();
+            String content = m.getContent();
             if (fromUserName.contains("@@") || toUserName.contains("@@")) { // 群聊消息
                 // 群消息与普通消息不同的是在其消息体（Content）中会包含发送者id及":<br/>"消息，这里需要处理一下，去掉多余信息，只保留消息内容
                 int index = content.indexOf(":<br/>");
                 if (index != -1) {
-                    m.put("Content", content.substring(index + ":<br/>".length()));
+                    m.setContent( content.substring(index + ":<br/>".length()));
                     //发送消息的人
-                    m.put("MemberName", content.substring(0, index));
+                    m.setMemberName(content.substring(0, index));
                 }
-                m.put("groupMsg", true);
+                m.setGroupMsg( Boolean.TRUE);
             } else {
-                CommonTools.msgFormatter(m, "Content");
+                CommonTools.msgFormatter(JSON.parseObject(JSON.toJSONString(m)), "content");
             }
-            MsgCodeEnum msgType = MsgCodeEnum.getByCode(m.getInteger("MsgType"));
+            MsgCodeEnum msgType = MsgCodeEnum.getByCode(m.getMsgType());
             switch (msgType) {
 
                 case MSGTYPE_TEXT:
-                    JSONObject msg = new JSONObject();
-                    if (m.getString("Url").length() != 0) {
+                    if (m.getUrl().length() != 0) {
                         String regEx = "(.+?\\(.+?\\))";
-                        Matcher matcher = CommonTools.getMatcher(regEx, m.getString("Content"));
+                        Matcher matcher = CommonTools.getMatcher(regEx, m.getContent());
                         String data = "Map";
                         if (matcher.find()) {
                             data = matcher.group(1);
                         }
-                        msg.put("Type", MsgTypeEnum.MAP.getType());
-                        msg.put("Text", data);
+                        m.setType(  MsgTypeEnum.MAP);
+                        m.setText( data);
                     } else {
-                        msg.put("Type", MsgTypeEnum.TEXT.getType());
-                        msg.put("Text", m.getString("Content"));
+                        m.setType( MsgTypeEnum.TEXT);
+                        m.setText(m.getContent());
                     }
-                    m.put("Type", msg.getString("Type"));
-                    m.put("Text", msg.getString("Text"));
                     //log.info(m.getString("NewMsgId") + "-文本消息:" + m);
                     break;
                 case MSGTYPE_IMAGE:
-                    m.put("Type", MsgTypeEnum.PIC.getType());
+                    m.setType( MsgTypeEnum.PIC);
                     //log.info(m.getString("NewMsgId") + "-图片消息:" + m);
                     break;
                 case MSGTYPE_VOICE:
-                    m.put("Type", MsgTypeEnum.VOICE.getType());
+                    m.setType( MsgTypeEnum.VOICE);
                     //log.info(m.getString("NewMsgId") + "-语音消息:" + m);
                     break;
                 case MSGTYPE_VIDEO:
                 case MSGTYPE_MICROVIDEO:
                     //log.info(m.getString("NewMsgId") + "-视频消息:" + m);
-                    m.put("Type", MsgTypeEnum.VIDEO.getType());
+                    m.setType(MsgTypeEnum.VIDEO);
                     break;
                 case MSGTYPE_EMOTICON:
                     //log.info(m.getString("NewMsgId") + "-表情消息:" + m);
-                    m.put("Type", MsgTypeEnum.EMOTION.getType());
+                    m.setType(MsgTypeEnum.EMOTION);
                     break;
                 case MSGTYPE_APP:
                     //log.info(m.getString("NewMsgId") + "-分享链接消息:" + m); // 分享链接
-                    m.put("Type", MsgTypeEnum.APP.getType());
+                    m.setType( MsgTypeEnum.APP);
                     break;
                 case MSGTYPE_VOIPMSG:
                     break;
@@ -115,7 +132,7 @@ public class MsgCenter {
                 case MSGTYPE_STATUSNOTIFY:
                     //log.info(m.getString("NewMsgId") + "-微信初始化消息:" + m); // init
                     // 微信初始化消息
-                    m.put("Type", MsgTypeEnum.SYSTEM.getType());
+                    m.setType(MsgTypeEnum.SYSTEM);
                     break;
                 case MSGTYPE_SYSNOTICE:
                     break;
@@ -123,30 +140,29 @@ public class MsgCenter {
                     break;
                 case MSGTYPE_VERIFYMSG:
                     //log.info(m.getString("NewMsgId") + "-好友确认消息:" + m); // 好友确认消息
-                    m.put("Type", MsgTypeEnum.ADDFRIEND.getType());
+                    m.setType( MsgTypeEnum.ADDFRIEND);
                     break;
                 case MSGTYPE_SHARECARD:
-                    m.put("Type", MsgTypeEnum.NAMECARD.getType());
+                    m.setType( MsgTypeEnum.NAMECARD);
                     //log.info(m.getString("NewMsgId") + "-名片分享消息:" + m);
                     break;
                 case MSGTYPE_SYS:
                     //log.info(m.getString("NewMsgId") + "-系统消息:" + m);
-                    m.put("Type", MsgTypeEnum.SYSTEM.getType());
+                    m.setType( MsgTypeEnum.SYSTEM);
                     break;
                 case MSGTYPE_RECALLED:
                     //log.info(m.getString("NewMsgId") + "-撤回消息:" + m);
-                    m.put("Type", MsgTypeEnum.UNDO.getType());
+                    m.setType( MsgTypeEnum.UNDO);
                     break;
                 case UNKNOWN:
                 default:
-                    log.warn(m.getString("NewMsgId") + "-未知消息:" + m);
+                    log.warn(m.getNewMsgId() + "-未知消息:" + m);
                     break;
             }
             try {
                 //添加元素 会阻塞
-                BaseMsg baseMsg = JSON.toJavaObject(m,
-                        BaseMsg.class);
-                core.getMsgList().put(baseMsg);
+
+                core.getMsgList().put(m);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -162,7 +178,7 @@ public class MsgCenter {
      */
     public static void handleMsg(IMsgHandlerFace msgHandler) {
         while (true) {
-            BaseMsg msg = null;
+            AddMsgList msg = null;
             try {
                 //拿元素 会阻塞
                 msg = core.getMsgList().take();
@@ -179,7 +195,7 @@ public class MsgCenter {
             groupMsgFormater(msg);
             //需要发送的消息
             List<MessageTools.Result> results = null;
-            switch (MsgTypeEnum.getByCode(msg.getType())) {
+            switch (msg.getType()) {
                 case TEXT:
                     results = msgHandler.textMsgHandle(msg);
                     break;
@@ -229,7 +245,137 @@ public class MsgCenter {
 
     }
 
-    private static void groupMsgFormater(BaseMsg msg) {
+    /**
+     * 联系人修改消息
+     * @param msgLists
+     */
+    public static void produceModContactMsg(List<ModContactList> msgLists) {
+        for (ModContactList msg : msgLists) {
+            JSONObject newV = JSON.parseObject(JSON.toJSONString(msg));
+            JSONObject oldV = core.getContactMap().get(msg.getUserName());
+            ArrayList<MessageTools.Result> results = new ArrayList<>();
+            String name =oldV.getString("RemarkName");
+            if (StringUtil.isBlank(name)) {
+                name = oldV.getString("NickName");
+            }
+            //存在key
+            Map<String, Map<String, String>> differenceMap = JSONObjectUtil.getDifferenceMap(oldV, newV);
+            if (differenceMap.size()>0){
+                //Old与New存在差异
+                String tip ="联系人";
+                log.info("{}（{}）属性更新：{}",tip,name,differenceMap);
+                //发送消息
+                results.add(MessageTools.Result.builder().msg(tip+"（"+name+"）属性更新："+mapToString(differenceMap))
+                        .replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
+                        .build());
+                core.getContactMap().put(msg.getUserName(),newV);
+                //存储数据库
+              //  store(differenceMap,oldV,results);
+            }
+        }
+
+
+
+    }
+    /**
+     * 保存修改记录到数据库
+     * @param differenceMap
+     * @param oldV
+     */
+    private static void store(Map<String, Map<String, String>> differenceMap,JSONObject oldV,ArrayList<MessageTools.Result> results){
+        ArrayList<AttrHistory> attrHistories = new ArrayList<>();
+        for (Map.Entry<String, Map<String, String>> stringMapEntry : differenceMap.entrySet()) {
+            for (Map.Entry<String, String> stringStringEntry : stringMapEntry.getValue().entrySet()) {
+                if (stringMapEntry.getKey().equals("HeadImgUrl")
+                        || stringMapEntry.getKey().equals("头像更换")){
+/*					String oldHeadPath = DownloadTools.downloadHeadImg(stringStringEntry.getKey()
+							, IMsgHandlerFaceImpl.savePath+File.separator+oldV.getString("UserName")+File.separator);*/
+                    String oldHeadPath = core.getContactHeadImgPath().get(oldV.getString("UserName"));
+                    String newHeadPath = DownloadTools.downloadHeadImg(stringStringEntry.getValue()
+                            , oldV.getString("UserName"));
+                    core.getContactHeadImgPath().put(oldV.getString("UserName"),newHeadPath);
+                    //更换前
+		/*			results.add(MessageTools.Result.builder()
+							.msg("头像更换前：")
+							.replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
+							//.toUserName("filehelper")
+							.build());*/
+                    results.add(MessageTools.Result.builder()
+                            .replyMsgTypeEnum(ReplyMsgTypeEnum.PIC)
+                            //.toUserName("filehelper")
+                            .msg(oldHeadPath).build());
+                    //更换后
+/*					results.add(MessageTools.Result.builder()
+							.msg("头像更换后：")
+							.replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
+							//.toUserName("filehelper")
+							.build());*/
+                    results.add(MessageTools.Result.builder()
+                            .replyMsgTypeEnum(ReplyMsgTypeEnum.PIC)
+                            //.toUserName("filehelper")
+                            .msg(newHeadPath).build());
+                    AttrHistory build = AttrHistory.builder()
+                            .attr(stringMapEntry.getKey())
+                            .oldval(oldHeadPath)
+                            .newval(newHeadPath)
+                            .id(0)
+                            .nickname(oldV.getString("NickName"))
+                            .remarkname(oldV.getString("RemarkName"))
+                            .username(oldV.getString("UserName"))
+                            .createtime(new Date())
+                            .build();
+                    attrHistories.add(build);
+                }else{
+                    AttrHistory build = AttrHistory.builder()
+                            .attr(stringMapEntry.getKey())
+                            .oldval(stringStringEntry.getKey())
+                            .newval(stringStringEntry.getValue())
+                            .id(0)
+                            .nickname(oldV.getString("NickName"))
+                            .remarkname(oldV.getString("RemarkName"))
+                            .username(oldV.getString("UserName"))
+                            .createtime(new Date())
+                            .build();
+                    attrHistories.add(build);
+                }
+
+            }
+        }
+        attrHistoryMapper.batchInsert(attrHistories);
+    }
+    /**
+     * map转string
+     * @param differenceMap
+     * @return
+     */
+    private static String mapToString(Map<String, Map<String, String>> differenceMap){
+        String str = "";
+        for (Map.Entry<String, Map<String, String>> stringMapEntry : differenceMap.entrySet()) {
+            Map<String, String> value = stringMapEntry.getValue();
+            for (Map.Entry<String, String> stringStringEntry : value.entrySet()) {
+                str = str+"\n【"+stringMapEntry.getKey()+"】(\""+stringStringEntry.getKey()+"\" -> \""+stringStringEntry.getValue()+"\")";
+            }
+        }
+        return str;
+    }
+
+    /**
+     * 联系人删除消息
+     * @param msgLists
+     */
+    public static void produceDelContactMsg(List<DelContactList> msgLists) {
+
+    }
+
+    /**
+     * 聊天室修改消息
+     * @param msgLists
+     */
+    public static void produceModChatRoomMemberMsg(List<ModContactList> msgLists) {
+
+    }
+
+    private static void groupMsgFormater(AddMsgList msg) {
         //群消息
         if (msg.getGroupMsg()) {
             //获取自己在群里的备注

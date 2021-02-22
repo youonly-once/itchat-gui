@@ -16,8 +16,8 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.util.EntityUtils;
-import cn.shu.wechat.beans.BaseMsg;
-import cn.shu.wechat.beans.RecommendInfo;
+import cn.shu.wechat.beans.sync.AddMsgList;
+import cn.shu.wechat.beans.sync.RecommendInfo;
 import cn.shu.wechat.utils.enums.StorageLoginInfoEnum;
 import cn.shu.wechat.utils.enums.URLEnum;
 
@@ -368,7 +368,7 @@ public class MessageTools {
 	 * @param accept
 	 *            true 接受 false 拒绝
 	 */
-	public static void addFriend(BaseMsg msg, boolean accept) {
+	public static void addFriend(AddMsgList msg, boolean accept) {
 		if (!accept) { // 不添加
 			return;
 		}

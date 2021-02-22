@@ -1,7 +1,8 @@
 package cn.shu.wechat.face;
 
 import cn.shu.wechat.api.MessageTools;
-import cn.shu.wechat.beans.BaseMsg;
+
+import cn.shu.wechat.beans.sync.AddMsgList;
 
 import java.util.List;
 
@@ -21,7 +22,7 @@ public interface IMsgHandlerFace {
 	 * @param msg
 	 * @return
 	 */
-	public List<MessageTools.Result> textMsgHandle(BaseMsg msg);
+	public List<MessageTools.Result> textMsgHandle(AddMsgList msg);
 
 	/**
 	 * 处理图片消息
@@ -31,7 +32,7 @@ public interface IMsgHandlerFace {
 	 * @param msg
 	 * @return
 	 */
-	public List<MessageTools.Result> picMsgHandle(BaseMsg msg);
+	public List<MessageTools.Result> picMsgHandle(AddMsgList msg);
 
 	/**
 	 * 处理声音消息
@@ -41,7 +42,7 @@ public interface IMsgHandlerFace {
 	 * @param msg
 	 * @return
 	 */
-	public List<MessageTools.Result> voiceMsgHandle(BaseMsg msg);
+	public List<MessageTools.Result> voiceMsgHandle(AddMsgList msg);
 
 	/**
 	 * 处理小视频消息
@@ -51,7 +52,7 @@ public interface IMsgHandlerFace {
 	 * @param msg
 	 * @return
 	 */
-	public List<MessageTools.Result> videoMsgHandle(BaseMsg msg);
+	public List<MessageTools.Result> videoMsgHandle(AddMsgList msg);
 
 	/**
 	 * 处理名片消息
@@ -61,7 +62,7 @@ public interface IMsgHandlerFace {
 	 * @param msg
 	 * @return
 	 */
-	public List<MessageTools.Result> nameCardMsgHandle(BaseMsg msg);
+	public List<MessageTools.Result> nameCardMsgHandle(AddMsgList msg);
 	/**
 	 * 处理撤回消息
 	 *
@@ -70,7 +71,7 @@ public interface IMsgHandlerFace {
 	 * @param msg
 	 * @return
 	 */
-	public List<MessageTools.Result> undoMsgHandle(BaseMsg msg) ;
+	public List<MessageTools.Result> undoMsgHandle(AddMsgList msg) ;
 
 	/**
 	 * 处理好友确认消息
@@ -80,7 +81,7 @@ public interface IMsgHandlerFace {
 	 * @param msg
 	 * @return
 	 */
-	public List<MessageTools.Result> addFriendMsgHandle(BaseMsg msg);
+	public List<MessageTools.Result> addFriendMsgHandle(AddMsgList msg);
 
 	/**
 	 * 处理好友确认消息
@@ -90,26 +91,26 @@ public interface IMsgHandlerFace {
 	 * @param msg
 	 * @return
 	 */
-	public List<MessageTools.Result> systemMsgHandle(BaseMsg msg);
+	public List<MessageTools.Result> systemMsgHandle(AddMsgList msg);
 
 	/**
 	 * 表情处理消息
 	 * @param msg
 	 * @return
 	 */
-	public List<MessageTools.Result> emotionMsgHandle(BaseMsg msg);
+	public List<MessageTools.Result> emotionMsgHandle(AddMsgList msg);
 	/**
 	 * 分享链接信息
 	 * @param msg
 	 * @return
 	 */
-	public List<MessageTools.Result> appMsgHandle(BaseMsg msg);
+	public List<MessageTools.Result> appMsgHandle(AddMsgList msg);
 	/**
 	 * map消息
 	 * @param msg
 	 * @return
 	 */
-	public List<MessageTools.Result> mapMsgHandle(BaseMsg msg);
+	public List<MessageTools.Result> mapMsgHandle(AddMsgList msg);
 
 	/**
 	 * 处理确认添加好友消息
@@ -118,7 +119,7 @@ public interface IMsgHandlerFace {
 	 * @param msg
 	 * @return
 	 */
-	public List<MessageTools.Result> verifyAddFriendMsgHandle(BaseMsg msg);
+	public List<MessageTools.Result> verifyAddFriendMsgHandle(AddMsgList msg);
 
 	/**
 	 * 处理收到的文件消息
@@ -127,6 +128,6 @@ public interface IMsgHandlerFace {
 	 * @param msg
 	 * @return
 	 */
-	public List<MessageTools.Result> mediaMsgHandle(BaseMsg msg);
+	public List<MessageTools.Result> mediaMsgHandle(AddMsgList msg);
 
 }

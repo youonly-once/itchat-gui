@@ -3,7 +3,7 @@ package cn.shu.wechat.utils.tools;
 import cn.shu.IMsgHandlerFaceImpl;
 import cn.shu.wechat.api.WechatTools;
 import lombok.extern.log4j.Log4j2;
-import cn.shu.wechat.beans.BaseMsg;
+import cn.shu.wechat.beans.sync.AddMsgList;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.utils.MyHttpClient;
 import cn.shu.wechat.utils.enums.MsgTypeEnum;
@@ -41,7 +41,7 @@ public class DownloadTools {
 	 * @param path
 	 * @return
 	 */
-	public static Object getDownloadFn(BaseMsg msg, MsgTypeEnum msgTypeEnum, String path) {
+	public static Object getDownloadFn(AddMsgList msg, MsgTypeEnum msgTypeEnum, String path) {
 		Map<String, String> headerMap = new HashMap<String, String>();
 		List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
 		String url = "";
@@ -66,7 +66,7 @@ public class DownloadTools {
 				params.add(new BasicNameValuePair("filename", msg.getFileName()));
 				break;
 		}
-		params.add(new BasicNameValuePair("msgid", msg.getNewMsgId()));
+		params.add(new BasicNameValuePair("msgid",String.valueOf( msg.getNewMsgId())));
 		params.add(new BasicNameValuePair("skey", (String) core.getLoginInfoMap().get("skey")));
 		HttpEntity entity = myHttpClient.doGet(url, params, true, headerMap);
 		try {
@@ -111,7 +111,7 @@ public class DownloadTools {
 				file.createNewFile();
 			}
 			MyHttpClient myHttpClient = core.getMyHttpClient();
-			String url= "https://wx2.qq.com/"+relativeUrl;
+			String url= "https://wx2.qq.com/"+relativeUrl+"&type=big";
 			HttpEntity entity = myHttpClient.doGet(url,null,false,null);
 			OutputStream out = new FileOutputStream(file);
 			byte[] bytes = EntityUtils.toByteArray(entity);

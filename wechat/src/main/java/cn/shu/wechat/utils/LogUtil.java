@@ -1,10 +1,10 @@
 package cn.shu.wechat.utils;
 
+import cn.shu.wechat.beans.sync.AddMsgList;
 import cn.shu.wechat.core.Core;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.StringUtils;
 import cn.shu.wechat.api.WechatTools;
-import cn.shu.wechat.beans.BaseMsg;
 
 /**
  * @作者 舒新胜
@@ -21,7 +21,7 @@ public class LogUtil {
      * @param path 消息为文件时的文件路径
      * @return 日志内容
      */
-    public static String  printFromMeg(BaseMsg msg,String path,String title){
+    public static String  printFromMeg(AddMsgList msg, String path, String title){
         String myUserName = core.getUserName();
         String myNickName = core.getNickName();
         //自己发的消息
@@ -62,7 +62,7 @@ public class LogUtil {
      * @param msg 消息内容
      * @return 日志内容
      */
-    public static String  printFromMeg(BaseMsg msg,String title){
+    public static String  printFromMeg(AddMsgList msg,String title){
         return printFromMeg(msg,"",title);
     }
 

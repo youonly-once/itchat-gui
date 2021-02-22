@@ -11,7 +11,7 @@ import bean.tuling.response.TuLingResponseBean;
 import cn.shu.wechat.Wechat;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.api.WechatTools;
-import cn.shu.wechat.beans.BaseMsg;
+import cn.shu.wechat.beans.sync.AddMsgList;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.face.IMsgHandlerFace;
 import cn.shu.wechat.utils.LogUtil;
@@ -151,7 +151,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
 
 
     @Override
-    public List<MessageTools.Result> textMsgHandle(BaseMsg msg) {
+    public List<MessageTools.Result> textMsgHandle(AddMsgList msg) {
         log.info(LogUtil.printFromMeg(msg, "", MsgTypeEnum.TEXT.getCode()));
         String text = msg.getText();
         //存储消息
@@ -288,7 +288,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
      * @see X.cn.zhouyafeng.itchat4j.face.IMsgHandlerFace#picMsgHandle(com.alibaba.fastjson.JSONObject)
      */
     @Override
-    public List<MessageTools.Result> picMsgHandle(BaseMsg msg) {
+    public List<MessageTools.Result> picMsgHandle(AddMsgList msg) {
         String path = downloadFile(msg, ".gif", MsgTypeEnum.PIC); // 调用此方法来保存图片
         log.info(LogUtil.printFromMeg(msg, path, MsgTypeEnum.PIC.getCode()));
         if (StringUtil.isNotBlank(path)) {
@@ -302,7 +302,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
      * @see X.cn.zhouyafeng.itchat4j.face.IMsgHandlerFace#voiceMsgHandle(com.alibaba.fastjson.JSONObject)
      */
     @Override
-    public List<MessageTools.Result> voiceMsgHandle(BaseMsg msg) {
+    public List<MessageTools.Result> voiceMsgHandle(AddMsgList msg) {
         // 调用此方法来保存语音
         String path = downloadFile(msg, ".mp3", MsgTypeEnum.VOICE);
         log.info(LogUtil.printFromMeg(msg, path, MsgTypeEnum.VOICE.getCode()));
@@ -313,7 +313,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         return null;
     }
 
-    private String downloadFile(BaseMsg msg, String ext, MsgTypeEnum msgTypeEnum) {
+    private String downloadFile(AddMsgList msg, String ext, MsgTypeEnum msgTypeEnum) {
         //发消息的用户或群名称
         String username = core.getRemarkNameByUserName(msg.getFromUserName());
         //群成员名称
@@ -341,7 +341,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     }
 
     @Override
-    public List<MessageTools.Result> videoMsgHandle(BaseMsg msg) {
+    public List<MessageTools.Result> videoMsgHandle(AddMsgList msg) {
         String path = downloadFile(msg, ".mp4", MsgTypeEnum.VIDEO);
         log.info(LogUtil.printFromMeg(msg, path, MsgTypeEnum.VIDEO.getCode()));
         if (StringUtil.isNotBlank(path)) {
@@ -351,7 +351,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     }
 
     @Override
-    public List<MessageTools.Result> undoMsgHandle(BaseMsg msg) {
+    public List<MessageTools.Result> undoMsgHandle(AddMsgList msg) {
 		/* 撤回消息格式
 		#1108768584572118898为被撤回消息ID
 		<sysmsg type="revokemsg">
@@ -516,7 +516,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     }
 
     @Override
-    public List<MessageTools.Result> addFriendMsgHandle(BaseMsg msg) {
+    public List<MessageTools.Result> addFriendMsgHandle(AddMsgList msg) {
         log.info(LogUtil.printFromMeg(msg, MsgTypeEnum.ADDFRIEND.getCode()));
         String text = isReply(msg);
         //自动同意
@@ -525,14 +525,14 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     }
 
     @Override
-    public List<MessageTools.Result> systemMsgHandle(BaseMsg msg) {
+    public List<MessageTools.Result> systemMsgHandle(AddMsgList msg) {
 //       log.info(LogUtil.printFromMeg(msg, MsgTypeEnum.SYSTEM.getCode()));
         String text = isReply(msg);
         return null;
     }
 
     @Override
-    public List<MessageTools.Result> emotionMsgHandle(BaseMsg msg) {
+    public List<MessageTools.Result> emotionMsgHandle(AddMsgList msg) {
         String path = downloadFile(msg, ".gif", MsgTypeEnum.EMOTION); // 调用此方法来保存图片
         log.info(LogUtil.printFromMeg(msg, path, MsgTypeEnum.EMOTION.getCode()));
         if (StringUtil.isNotBlank(path)) {
@@ -542,7 +542,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     }
 
     @Override
-    public List<MessageTools.Result> appMsgHandle(BaseMsg msg) {
+    public List<MessageTools.Result> appMsgHandle(AddMsgList msg) {
         log.info(LogUtil.printFromMeg(msg, MsgTypeEnum.APP.getCode()));
         MsgTypeOfAppEnum byCode = MsgTypeOfAppEnum.getByCode(msg.getAppMsgType());
         switch (byCode) {
@@ -567,13 +567,13 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     }
 
     @Override
-    public List<MessageTools.Result> verifyAddFriendMsgHandle(BaseMsg msg) {
+    public List<MessageTools.Result> verifyAddFriendMsgHandle(AddMsgList msg) {
         log.info(LogUtil.printFromMeg(msg, "VerifyAddFriendMsg"));
         return null;
     }
 
     @Override
-    public List<MessageTools.Result> mapMsgHandle(BaseMsg msg) {
+    public List<MessageTools.Result> mapMsgHandle(AddMsgList msg) {
         // String path = downloadFile(msg, ".gif", MsgTypeEnum.MAP); // 调用此方法来保存图片
         log.info(LogUtil.printFromMeg(msg, MsgTypeEnum.MAP.getCode()));
         storeMsg(msg.getMsgId(), MsgTypeEnum.MAP.getType() + ":" + msg.getFromUserName() + "-" + msg.getMemberName()+","+msg.getUrl());
@@ -581,13 +581,13 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     }
 
     @Override
-    public List<MessageTools.Result> mediaMsgHandle(BaseMsg msg) {
+    public List<MessageTools.Result> mediaMsgHandle(AddMsgList msg) {
         log.info(LogUtil.printFromMeg(msg, MsgTypeEnum.MEDIA.getCode()));
         return null;
     }
 
     @Override
-    public List<MessageTools.Result> nameCardMsgHandle(BaseMsg msg) {
+    public List<MessageTools.Result> nameCardMsgHandle(AddMsgList msg) {
         log.info(LogUtil.printFromMeg(msg, MsgTypeEnum.NAMECARD.getCode()));
         String content = msg.getContent();
         content = content.replace("&lt;", "<").replace("&gt;", ">").replace("<br/>", "");
@@ -605,7 +605,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
      * @param tl
      * @return
      */
-    private List<MessageTools.Result> handleTuLingMsg(TuLingResponseBean tl, BaseMsg msg) {
+    private List<MessageTools.Result> handleTuLingMsg(TuLingResponseBean tl, AddMsgList msg) {
         ArrayList<MessageTools.Result> msgResults = new ArrayList<>();
         List<Results> results = tl.getResults();
         for (Results result : results) {
@@ -637,7 +637,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         return msgResults;
     }
 
-    private String  isReply(BaseMsg m) {
+    private String  isReply(AddMsgList m) {
         if (!autoReply) {
             //log.info("已关闭自动回复。");
             return "";
@@ -647,7 +647,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         String fromUserName = m.getFromUserName();
         String toUserName = m.getToUserName();
         String content = m.getText();
-        String msgId = m.getNewMsgId();
+        String msgId = String.valueOf(m.getNewMsgId());
         Boolean groupMsg = m.getGroupMsg();
         if (content == null) {
             return "";
