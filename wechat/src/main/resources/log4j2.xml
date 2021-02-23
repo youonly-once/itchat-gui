@@ -60,12 +60,31 @@
         <!--过滤掉spring和mybatis的一些无用的DEBUG信息-->
         <logger name="org.springframework" level="INFO"/>
         <logger name="org.mybatis" level="INFO"/>
-        <root level="all">其他logger输出所有的日志信息
+        <root level="all"><!--其他logger输出所有的日志信息-->
             <appender-ref ref="Console"/>
             <appender-ref ref="RollingFileInfo"/>
             <appender-ref ref="RollingFileWarn"/>
             <appender-ref ref="RollingFileError"/>
         </root>
+
+        <logger name="log4jdbc.log4j2" level="INFO" additivity="false">
+            <MarkerFilter marker="LOG4JDBC_EXCEPTION" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <appender-ref ref="Console"/>
+        </logger>
+        <!--<logger name="log4jdbc.log4j2" level="${MY_LEVEL}" additivity="false">-->
+        <!--  <MarkerFilter marker="LOG4JDBC_OTHER" onMatch="DENY" onMismatch="NEUTRAL"/>-->
+        <!--  <appender-ref ref="log4j2_sql_file"/>-->
+        <!--  <appender-ref ref="Console"/>-->
+        <!--</logger>-->
+        <!--<logger name="log4jdbc.log4j2" level="${MY_LEVEL}" additivity="false">-->
+        <!--  <MarkerFilter marker="LOG4JDBC_JDBC" onMatch="DENY" onMismatch="NEUTRAL"/>-->
+        <!--  <appender-ref ref="log4j2_sql_file"/>-->
+        <!--  <appender-ref ref="Console"/>-->
+        <!--</logger>-->
+        <logger name="log4jdbc.log4j2" level="INFO" additivity="false">
+            <MarkerFilter marker="LOG4JDBC_NON_STATEMENT" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <appender-ref ref="Console"/>
+        </logger>
     </loggers>
 
 </configuration>
