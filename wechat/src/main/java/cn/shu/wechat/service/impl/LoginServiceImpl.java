@@ -828,7 +828,12 @@ public class LoginServiceImpl implements ILoginService {
 		for (Entry<String, Map<String, String>> stringMapEntry : differenceMap.entrySet()) {
 			Map<String, String> value = stringMapEntry.getValue();
 			for (Entry<String, String> stringStringEntry : value.entrySet()) {
-				str = str+"\n【"+stringMapEntry.getKey()+"】(\""+stringStringEntry.getKey()+"\" -> \""+stringStringEntry.getValue()+"\")";
+				if (stringMapEntry.getKey().equals("头像更换")
+				||stringMapEntry.getKey().equals("HeadImgUrl")){
+					str = str+"\n【"+stringMapEntry.getKey()+"】更换前后如下";
+				}else{
+					str = str+"\n【"+stringMapEntry.getKey()+"】(\""+stringStringEntry.getKey()+"\" -> \""+stringStringEntry.getValue()+"\")";
+				}
 			}
 		}
 		return str;

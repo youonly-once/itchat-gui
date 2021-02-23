@@ -110,7 +110,7 @@ public class DownloadTools {
 			if (!file.exists()){
 				file.createNewFile();
 			}
-			String url= "https://wx2.qq.com/"+relativeUrl+"&type=big";
+			String url= String.format(URLEnum.WEB_WX_GET_HEAD_IMAGE.getUrl(),relativeUrl);
 			HttpEntity entity = MyHttpClient.doGet(url,null,false,null);
 			OutputStream out = new FileOutputStream(file);
 			byte[] bytes = EntityUtils.toByteArray(entity);
@@ -124,7 +124,7 @@ public class DownloadTools {
 		return file.getAbsolutePath();
 	}
 
-	/*
+	/**
 	 * 不可建立文件夹的字符
 	 */
 	public static String replace(String string) {

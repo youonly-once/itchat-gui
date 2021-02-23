@@ -38,17 +38,6 @@ import java.util.*;
 @Log4j2
 public class MessageTools {
 
-	//炸弹消息队列
-	public final static Map<String,Integer> bombMsgMao =new Hashtable<>();
-
-	private static MyHttpClient myHttpClient;
-
-	@Resource
-	public static void setMyHttpClient(MyHttpClient myHttpClient) {
-		MessageTools.myHttpClient = myHttpClient;
-	}
-
-
 	/**
 	 * 根据指定类型发送消息
 	 * @param results
@@ -68,7 +57,7 @@ public class MessageTools {
 				SleepUtils.sleep(result.sleep);
 
 			}
- 			log.info((bombMsgMao.get(id) == null?"":bombMsgMao.get(id)) +" : "+ LogUtil.printToMeg(id,result.msg));
+ 			log.info(" : "+ LogUtil.printToMeg(id,result.msg));
 			switch (result.replyMsgTypeEnum){
 				case PIC://图片消息
 					sendPicMsgByUserId(id,result.msg);
@@ -76,7 +65,7 @@ public class MessageTools {
 				case TEXT://文本消息
 					sendTextMsgByUserId(result.msg,id);
 					break;
-				default:
+				default://其他消息发送文件
 					sendFileMsgByUserId(id,result.msg);
 			}
 		}
@@ -94,7 +83,7 @@ public class MessageTools {
 	public static void sendTextMsgByUserId( String content, String toUserName) {
 		String url = String.format(URLEnum.WEB_WX_SEND_MSG.getUrl(), Core.getLoginInfoMap().get("url"));
 		Map<String, Object> msgMap = new HashMap<String, Object>();
-		msgMap.put("Type", 1);
+		msgMap.put("Type", ReplyMsgTypeEnum.TEXT.getCode());
 		msgMap.put("Content", content);
 		msgMap.put("FromUserName", Core.getUserName());
 		msgMap.put("ToUserName", toUserName == null ? Core.getUserName() : toUserName);
@@ -105,7 +94,7 @@ public class MessageTools {
 		paramMap.put("Scene", 0);
 		try {
 			String paramStr = JSON.toJSONString(paramMap);
-			HttpEntity entity = myHttpClient.doPost(url, paramStr);
+			HttpEntity entity = MyHttpClient.doPost(url, paramStr);
 			String s = EntityUtils.toString(entity, Consts.UTF_8);
 		//	System.out.println(s);
 		} catch (Exception e) {
@@ -182,7 +171,7 @@ public class MessageTools {
 		builder.addTextBody("pass_ticket", passTicket, ContentType.TEXT_PLAIN);
 		builder.addBinaryBody("filename", f, ContentType.create(mimeType), filePath);
 		HttpEntity reqEntity = builder.build();
-		HttpEntity entity = myHttpClient.doPostFile(url, reqEntity);
+		HttpEntity entity = MyHttpClient.doPostFile(url, reqEntity);
 		if (entity != null) {
 			try {
 				String result = EntityUtils.toString(entity, Consts.UTF_8);
@@ -210,54 +199,40 @@ public class MessageTools {
 		JSONObject responseObj = webWxUploadMedia(filePath);
 		if (responseObj != null) {
 			String mediaId = responseObj.getString("MediaId");
-			if (mediaId != null) {
-				return webWxSendMsgImg(userId, mediaId);
+			if (StringUtils.isEmpty(mediaId)) {
+				return false;
 			}
-		}
-		return false;
-	}
-	/**
-	 * 发送图片消息，内部调用
-	 * 
-	 * @author SXS
-	 * @date 2017年5月7日 下午10:38:55
-	 * @return
-	 */
-	private static boolean webWxSendMsgImg(String userId, String mediaId) {
-		String url = String.format("%s/webwxsendmsgimg?fun=async&f=json&pass_ticket=%s", Core.getLoginInfoMap().get("url"),
-				Core.getLoginInfoMap().get("pass_ticket"));
-		Map<String, Object> msgMap = new HashMap<String, Object>();
-		msgMap.put("Type", 3);
-		msgMap.put("MediaId", mediaId);
-		msgMap.put("FromUserName", Core.getUserSelf().getString("UserName"));
-		msgMap.put("ToUserName", userId);
-		String clientMsgId = String.valueOf(new Date().getTime())
-				+ String.valueOf(new Random().nextLong()).substring(1, 5);
-		msgMap.put("LocalID", clientMsgId);
-		msgMap.put("ClientMsgId", clientMsgId);
-		Map<String, Object> paramMap = Core.getParamMap();
-		paramMap.put("BaseRequest", Core.getParamMap().get("BaseRequest"));
-		paramMap.put("Msg", msgMap);
-		String paramStr = JSON.toJSONString(paramMap);
-		HttpEntity entity = myHttpClient.doPost(url, paramStr);
-		if (entity != null) {
-			try {
-				String result = EntityUtils.toString(entity, Consts.UTF_8);
-				return JSON.parseObject(result).getJSONObject("BaseResponse").getInteger("Ret") == 0;
-			} catch (Exception e) {
-				log.error("webWxSendMsgImg 错误： ", e);
+			String url = String.format("%s/webwxsendmsgimg?fun=async&f=json&pass_ticket=%s", Core.getLoginInfoMap().get("url"),
+					Core.getLoginInfoMap().get("pass_ticket"));
+			Map<String, Object> msgMap = new HashMap<String, Object>();
+			msgMap.put("Type", ReplyMsgTypeEnum.PIC.getCode());
+			msgMap.put("MediaId", mediaId);
+			msgMap.put("FromUserName", Core.getUserSelf().getString("UserName"));
+			msgMap.put("ToUserName", userId);
+			String clientMsgId = String.valueOf(new Date().getTime())
+					+ String.valueOf(new Random().nextLong()).substring(1, 5);
+			msgMap.put("LocalID", clientMsgId);
+			msgMap.put("ClientMsgId", clientMsgId);
+			Map<String, Object> paramMap = Core.getParamMap();
+			paramMap.put("BaseRequest", Core.getParamMap().get("BaseRequest"));
+			paramMap.put("Msg", msgMap);
+			String paramStr = JSON.toJSONString(paramMap);
+			HttpEntity entity = MyHttpClient.doPost(url, paramStr);
+			if (entity != null) {
+				try {
+					String result = EntityUtils.toString(entity, Consts.UTF_8);
+					return JSON.parseObject(result).getJSONObject("BaseResponse").getInteger("Ret") == 0;
+				} catch (Exception e) {
+					log.error("webWxSendMsgImg 错误： ", e);
+				}
 			}
-		}
-		return false;
+			return false;
 
+		}
+		return false;
 	}
-	/**
-	 * 发送图片消息，内部调用
-	 *
-	 * @author SXS
-	 * @date 2017年5月7日 下午10:38:55
-	 * @return
-	 */
+
+
 
 	/**
 	 * 根据用户id发送文件
@@ -275,7 +250,7 @@ public class MessageTools {
 		data.put("title", title);
 		data.put("totallen", "");
 		data.put("attachid", "");
-		data.put("type", "6"); // APPMSGTYPE_ATTACH
+		data.put("type", ReplyMsgTypeEnum.APP.getCode()+""); // APPMSGTYPE_ATTACH
 		data.put("fileext", title.split("\\.")[1]); // 文件后缀
 		JSONObject responseObj = webWxUploadMedia(filePath);
 		if (responseObj != null) {
@@ -286,38 +261,9 @@ public class MessageTools {
 		}
 		return webWxSendAppMsg(userId, data);
 	}
-	/**
-	 * 根据用户id发送文件
-	 *
-	 * @author SXS
-	 * @date 2017年5月7日 下午11:57:36
-	 * @param userId
-	 * @return
-	 */
-	public static boolean sendAppMsgByUserId(String userId) {
-		Map<String, String> data = new HashMap<String, String>();
-		data.put("appid", Config.API_WXAPPID);
-		data.put("title", "测试");
-		data.put("totallen", "");
-		data.put("attachid", "");
-		data.put("type", "5"); // APPMSGTYPE_ATTACH
-		//data.put("fileext", ""); // 文件后缀
-		data.put("url","www.baidu.com");
-/*		JSONObject responseObj = webWxUploadMedia(filePath);
-		if (responseObj != null) {
-			data.put("totallen", responseObj.getString("StartPos"));
-			data.put("attachid", responseObj.getString("MediaId"));
-		} else {
-			log.error("sednFileMsgByUserId 错误: ", data);
-		}*/
-		return webWxSendAppMsg(userId, data);
-	}
-
-
 
 	/**
 	 * 内部调用
-	 * 暂时不能使用
 	 * @author SXS
 	 * @date 2017年5月10日 上午12:21:28
 	 * @param userId
@@ -353,7 +299,7 @@ public class MessageTools {
 		paramMap.put("Msg", msgMap);
 		paramMap.put("Scene", 0);
 		String paramStr = JSON.toJSONString(paramMap);
-		HttpEntity entity = myHttpClient.doPost(url, paramStr);
+		HttpEntity entity = MyHttpClient.doPost(url, paramStr);
 		if (entity != null) {
 			try {
 				String result = EntityUtils.toString(entity, Consts.UTF_8);
@@ -410,7 +356,7 @@ public class MessageTools {
 		String result = null;
 		try {
 			String paramStr = JSON.toJSONString(body);
-			HttpEntity entity = myHttpClient.doPost(url, paramStr);
+			HttpEntity entity = MyHttpClient.doPost(url, paramStr);
 			result = EntityUtils.toString(entity, Consts.UTF_8);
 		} catch (Exception e) {
 			log.error("webWxSendMsg", e);
@@ -430,7 +376,7 @@ public class MessageTools {
 	public static class Result{
 		//消息类型
 		private final ReplyMsgTypeEnum replyMsgTypeEnum;
-		//文本消息或图片、文件路径
+		//文本消息或图片、文件消息的文件路径路径
 		private final String msg;
 		//延迟发送
 		private final Long sleep;

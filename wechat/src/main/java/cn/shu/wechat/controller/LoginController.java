@@ -38,6 +38,12 @@ public class LoginController {
 	 * 更新联系人的线程处理器
 	 */
 	@Resource
+	private CheckLoginStatusThread checkLoginStatusThread;
+
+	/**
+	 * 检测登录状态的线程
+	 */
+	@Resource
 	private UpdateContactThread updateContactThread;
 
 	public void login(String qrPath) {
@@ -100,7 +106,7 @@ public class LoginController {
 		WechatTools.setUserInfo(); // 登陆成功后缓存本次登陆好友相关消息（NickName, UserName）
 
 		log.info("12.开启微信状态检测线程");
-		new Thread(new CheckLoginStatusThread(),"CheckLoginStatusThread").start();
+		new Thread(checkLoginStatusThread,"CheckLoginStatusThread").start();
 
 
 		log.info("13. 下载联系人头像");
