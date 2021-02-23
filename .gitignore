@@ -8,3 +8,6 @@
 /log/
 /logs/
 /.idea/
+/wxuntils/target/
+*msg.property
+*.iml
