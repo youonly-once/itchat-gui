@@ -30,6 +30,7 @@ import cn.shu.wechat.utils.enums.parameters.UUIDParaEnum;
 import cn.shu.wechat.utils.tools.CommonTools;
 import cn.shu.wechat.utils.tools.DownloadTools;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.message.BasicNameValuePair;
@@ -50,6 +51,8 @@ import cn.shu.wechat.utils.enums.URLEnum;
 import utils.DateUtil;
 
 import javax.annotation.Resource;
+
+import static cn.shu.wechat.utils.Config.DEFAULT_QR;
 
 /**
  * 登陆服务实现类
@@ -136,7 +139,7 @@ public class LoginServiceImpl implements ILoginService {
 
 	@Override
 	public boolean getQR(String qrPath) {
-		qrPath = qrPath + File.separator + "QR.jpg";
+		qrPath = qrPath + File.separator +Config. DEFAULT_QR;
 		String qrUrl = URLEnum.QRCODE_URL.getUrl() + Core.getUuid();
 		HttpEntity entity = MyHttpClient.doGet(qrUrl, null, true, null);
 		try {
@@ -382,38 +385,36 @@ public class LoginServiceImpl implements ILoginService {
 				member.addAll(fullFriendsJsonList.getJSONArray(StorageLoginInfoEnum.MemberList.getKey()));
 			}
 			Core.setMemberCount(member.size());
-			for (Iterator<?> iterator = member.iterator(); iterator.hasNext();) {
-				JSONObject o = (JSONObject) iterator.next();
+			for (Object value : member) {
+				JSONObject o = (JSONObject) value;
 				String userName = o.getString("UserName");
 				if ((o.getInteger("VerifyFlag") & 8) != 0) {
 					// 公众号/服务号
-					put(Core.getPublicUsersMap(),userName,o,"公众号/服务号");
+					put(Core.getPublicUsersMap(), userName, o, "公众号/服务号");
 				} else if (Config.API_SPECIAL_USER.contains(userName)) {
 					// 特殊账号
-					put(Core.getSpecialUsersMap(),userName,o,"特殊账号");
-				} else if (userName.indexOf("@@") != -1) {
+					put(Core.getSpecialUsersMap(), userName, o, "特殊账号");
+				} else if (userName.startsWith("@@")) {
 
 					// 群聊
 					if (!Core.getGroupIdSet().contains(userName)) {
-						log.info("新增群聊：{}",userName);
+						log.info("新增群聊：{}", userName);
 						Core.getGroupNickNameSet().add(userName);
 						Core.getGroupIdSet().add(userName);
-						Core.getGroupMap().put(userName,o);
+						Core.getGroupMap().put(userName, o);
 					}
 				} else if (userName.equals(Core.getUserSelf().getString("UserName"))) {
 					// 自己
 					Core.getContactMap().remove(userName);
 				} else {
 					// 普通联系人
-					put(Core.getContactMap(),userName,o,"普通联系人");
+					put(Core.getContactMap(), userName, o, "普通联系人");
 				}
 
 			}
-			return;
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
-		return;
 	}
 
 	@Override
@@ -437,7 +438,7 @@ public class LoginServiceImpl implements ILoginService {
 			JSONObject obj = JSON.parseObject(text);
 			JSONArray contactList = obj.getJSONArray("ContactList");
 			for (int i = 0; i < contactList.size(); i++) { // 群好友
-				if (contactList.getJSONObject(i).getString("UserName").indexOf("@@") > -1) {
+				if (contactList.getJSONObject(i).getString("UserName").startsWith("@@")) {
 					// 群
 					// 更新群昵称列表
 					Core.getGroupNickNameSet().add(contactList.getJSONObject(i).getString("NickName"));
@@ -726,21 +727,27 @@ public class LoginServiceImpl implements ILoginService {
 	 */
 	private void put(Map<String,JSONObject> map,String key,JSONObject newV,String tip){
 		JSONObject oldV = map.get(key);
-		String name =newV.getString("RemarkName");
-		if (StringUtil.isBlank(name)) {
-			name = newV.getString("NickName");
+		String name =newV.getString("NickName");
+		if (StringUtils.isEmpty(name)) {
+			name = newV.getString("UserName");
+		}
+		if (newV.getString("UserName").startsWith("@@")){
+			map.put(key,newV);
+			return;
 		}
 		ArrayList<MessageTools.Result> results = new ArrayList<>();
 		if (oldV != null){
 			//存在key 更新
 			Map<String, Map<String, String>> differenceMap = JSONObjectUtil.getDifferenceMap(oldV, newV);
 			if (differenceMap.size()>0){
-				//Old与New存在差异
-				log.info("{}（{}）属性更新：{}",tip,name,differenceMap);
+
+				String s = mapToString(differenceMap);
 				//发送消息
-				 results.add(MessageTools.Result.builder().msg(tip+"（"+name+"）属性更新："+mapToString(differenceMap))
+				 results.add(MessageTools.Result.builder().msg(tip+"（"+name+"）属性更新："+s)
 				.replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT)
 				.build());
+				//Old与New存在差异
+				log.info("{}（{}）属性更新：{}",tip,name,s);
 				//用新值替换旧值
 				map.put(key,newV);
 				//存储数据库

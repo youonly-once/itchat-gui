@@ -7,8 +7,8 @@ package cn.shu.wechat.utils.enums;
 public enum URLEnum {
 
 
-    cAPI_qrcode("https://login.weixin.qq.com/l/", "API_qrcode"),
-    BASE_URL("https://login.weixin.qq.com","基本的URL"),
+    cAPI_qrcode("https://wx2.qq.com/l/", "API_qrcode"),
+    BASE_URL("https://wx2.qq.com/","基本的URL"),
     UUID_URL(BASE_URL.url+"/jslogin","UUIDLURL"),
     QRCODE_URL(BASE_URL.url+"/qrcode/","初始化URL"),
     STATUS_NOTIFY_URL(BASE_URL.url+"/webwxstatusnotify?lang=zh_CN&pass_ticket=%s","微信状态通知"),
@@ -28,7 +28,8 @@ public enum URLEnum {
     WEB_WX_REMARKNAME("%s/webwxoplog?lang=zh_CN&pass_ticket=%s", "修改好友备注"),
     WEB_WX_VERIFYUSER("%s/webwxverifyuser?r=%s&lang=zh_CN&pass_ticket=%s", "被动添加好友"),
     WEB_WX_GET_MEDIA("%s/webwxgetmedia", "下载文件"),
-    WEB_WX_GET_HEAD_IMAGE("https://wx2.qq.com/%s&type=big", "下载头像")
+    WEB_WX_GET_HEAD_IMAGE("https://wx2.qq.com/%s&type=big", "下载头像"),
+    WEB_WX_REVOKE_MSG("%scgi-bin/mmwebwx-bin/webwxrevokemsg?lang=zh_CN&pass_ticket=%s", "撤回消息")
 
 
 

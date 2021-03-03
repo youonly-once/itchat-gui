@@ -16,6 +16,10 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 登陆控制器
@@ -110,28 +114,39 @@ public class LoginController {
 
 
 		log.info("13. 下载联系人头像");
+		ExecutorService executorService = Executors.newCachedThreadPool();
 		for (Map.Entry<String, JSONObject> stringJSONObjectEntry : Core.getGroupMap().entrySet()) {
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					JSONObject value = stringJSONObjectEntry.getValue();
-					String headImgUrl = DownloadTools.downloadHeadImg(value.getString("HeadImgUrl"), value.getString("UserName"));
-					Core.getContactHeadImgPath().put(value.getString("UserName"),headImgUrl);
-				}
-			}).start();
+			Runnable runnable = () -> {
+				JSONObject value = stringJSONObjectEntry.getValue();
+				String headImgUrl = DownloadTools.downloadHeadImg(value.getString("HeadImgUrl"), value.getString("UserName"));
+				Core.getContactHeadImgPath().put(value.getString("UserName"), headImgUrl);
+				//System.out.println("头像已下载：" + headImgUrl);
+			};
+			executorService.execute(runnable);
 
 		}
 		for (Map.Entry<String, JSONObject> stringJSONObjectEntry : Core.getContactMap().entrySet()) {
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					JSONObject value = stringJSONObjectEntry.getValue();
-					String headImgUrl = DownloadTools.downloadHeadImg(value.getString("HeadImgUrl"), value.getString("UserName"));
-					Core.getContactHeadImgPath().put(value.getString("UserName"),headImgUrl);
-				}
-			}).start();
-		}
+			Runnable runnable = () -> {
+				JSONObject value = stringJSONObjectEntry.getValue();
+				String headImgUrl = DownloadTools.downloadHeadImg(value.getString("HeadImgUrl"), value.getString("UserName"));
+				Core.getContactHeadImgPath().put(value.getString("UserName"), headImgUrl);
+				//System.out.println("头像已下载：" + headImgUrl);
+			};
+			executorService.submit(runnable);
 
+		}
+		executorService.shutdown();
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					boolean b = executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				log.info("头像下载完成");
+			}
+		}).start();
 
 		log.info("14.开启好友列表更新线程");
 		new Thread(updateContactThread,"UpdateContactThread").start();

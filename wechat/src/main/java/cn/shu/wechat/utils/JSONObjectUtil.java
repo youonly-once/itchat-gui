@@ -6,6 +6,8 @@ import org.nlpcn.commons.lang.util.StringUtil;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @作者 舒新胜
@@ -24,7 +26,24 @@ public class JSONObjectUtil {
         for (Map.Entry<String, Object> entry : oldO.entrySet()) {
             String newV = newO.getString(entry.getKey());
             String oldV = StringUtil.toString(entry.getValue());
-            if (!oldV.equals(newV)) {
+            //是否相同
+            boolean equals = oldV.equals(newV);
+            if ("HeadImgUrl".equals(entry.getKey())) {
+                Pattern pattern = Pattern.compile(".+\\?seq=(\\d+).+");
+                Matcher matcherNew = pattern.matcher(newV);
+                Matcher matcherOld = pattern.matcher(oldV);
+                if (matcherNew.find() && matcherOld.find()) {
+                    //头像相同
+                    String groupNew = matcherNew.group(1);
+                    String groupOld = matcherOld.group(1);
+                    if (groupNew.equals(groupOld)){
+                        equals = true;
+                    }else{
+                        equals = false;
+                    }
+                }
+            }
+            if (!equals) {
                 if (entry.getKey().equals("MemberList")){
                     JSONArray jsonArrayNew= (JSONArray) newO.get(entry.getKey());
                     JSONArray jsonArrayOld = (JSONArray) entry.getValue();
@@ -38,12 +57,12 @@ public class JSONObjectUtil {
                                 difference.put(StringUtil.toString(entry.getKey()+"(DisplayName)"),temp);
                             }
                         }
-                    }
+                    } //判断头像是否更改
                 }else{
 
                     HashMap<String, String> temp = new HashMap<>();
                     temp.put(StringUtil.toString(oldV), newV);
-                   difference.put(UserInfo.getName(StringUtil.toString(entry.getKey())),temp);
+                    difference.put(UserInfo.getName(StringUtil.toString(entry.getKey())),temp);
                 }
 
             }

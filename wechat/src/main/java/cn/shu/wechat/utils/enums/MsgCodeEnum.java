@@ -1,4 +1,4 @@
-package cn.shu.wechat.utils;
+package cn.shu.wechat.utils.enums;
 
 /**
  * 消息类型

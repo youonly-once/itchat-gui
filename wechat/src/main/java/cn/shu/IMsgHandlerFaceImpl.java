@@ -4,6 +4,9 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 import bean.tuling.enums.ResultType;
 import bean.tuling.response.Results;
@@ -14,6 +17,7 @@ import cn.shu.wechat.api.WechatTools;
 import cn.shu.wechat.beans.sync.AddMsgList;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.face.IMsgHandlerFace;
+import cn.shu.wechat.utils.Config;
 import cn.shu.wechat.utils.LogUtil;
 import cn.shu.wechat.utils.SleepUtils;
 import cn.shu.wechat.utils.XmlUtil;
@@ -36,6 +40,8 @@ import weixin.exception.WXException;
 import weixin.utils.WXUntil;
 
 import javax.annotation.Resource;
+
+import static cn.shu.wechat.utils.Config.QR_PATH;
 
 
 @Log4j2
@@ -71,16 +77,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 }
 
             }
-        }, "DelMsgThread").start();
-
-        String qrPath = savePath + File.separator + "login";
-
-        wechat.init(qrPath);
+        }, "").start();
+        wechat.init(Config.QR_PATH);
         wechat.start();
-
-    }
-    public IMsgHandlerFaceImpl() {
-
 
     }
 
@@ -323,30 +322,45 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     }
 
     private String downloadFile(AddMsgList msg, String ext, MsgTypeEnum msgTypeEnum) {
-        //发消息的用户或群名称
-        String username = WechatTools.getRemarkNameByUserName(msg.getFromUserName());
-        //群成员名称
-        String groupUsername;
-        if (msg.getMemberName() != null) {
-            groupUsername = WechatTools.getRemarkNameByUserName(msg.getMemberName()) + "-";
-        } else {
-            groupUsername = "";
-        }
-        String fileName = groupUsername + "-"
-                + new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date()) + "-" + msg.getNewMsgId()
-                + ext;
-        fileName = DownloadTools.replace(fileName);
-        username =  DownloadTools.replace(username);
-        // 保存语音的路径
-        String path = savePath + File.separator + msgTypeEnum + File.separator + username + File.separator;
-        boolean logDir = createLogDir(path);
-        if (logDir) {
-            DownloadTools.getDownloadFn(msg, msgTypeEnum, path + fileName);
-        } else {
-            return null;
-        }
 
-        return path + fileName;
+        Callable<String> callable = new Callable<String>() {
+
+            @Override
+            public String call() throws Exception {
+                //发消息的用户或群名称
+                String username = WechatTools.getRemarkNameByUserName(msg.getFromUserName());
+                //群成员名称
+                String groupUsername;
+                if (msg.getMemberName() != null) {
+                    groupUsername = WechatTools.getRemarkNameByUserName(msg.getMemberName()) + "-";
+                } else {
+                    groupUsername = "";
+                }
+                String fileName = groupUsername + "-"
+                        + new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date()) + "-" + msg.getNewMsgId()
+                        + ext;
+                fileName = DownloadTools.replace(fileName);
+                username =  DownloadTools.replace(username);
+                // 保存语音的路径
+                String path = savePath + File.separator + msgTypeEnum + File.separator + username + File.separator;
+                boolean logDir = createLogDir(path);
+                if (logDir) {
+                    DownloadTools.getDownloadFn(msg, msgTypeEnum, path + fileName);
+                } else {
+                    return null;
+                }
+
+                return path + fileName;
+            }
+        };
+
+        FutureTask<String> futureTask = new FutureTask<String>(callable);
+        new Thread(futureTask, "download_media").start();
+        try {
+            return futureTask.get();
+        } catch (InterruptedException | ExecutionException e) {
+           return null;
+        }
     }
 
     @Override
@@ -629,6 +643,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 case NEWS:
                 case TEXT:
                     msgBuilder.replyMsgTypeEnum(ReplyMsgTypeEnum.TEXT);
+                    msgBuilder.msg(msgStr+"【自动回复】");
                     break;
                 case IMAGE:
                     msgBuilder.replyMsgTypeEnum(ReplyMsgTypeEnum.PIC);
