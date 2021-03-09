@@ -1,22 +1,23 @@
 package cn.shu.wechat.controller;
 
+import cn.shu.wechat.utils.ChartUtil;
 import cn.shu.wechat.api.WechatTools;
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.face.IMsgHandlerFace;
 import cn.shu.wechat.service.ILoginService;
-import cn.shu.wechat.service.impl.LoginServiceImpl;
 import cn.shu.wechat.thread.CheckLoginStatusThread;
 import cn.shu.wechat.thread.UpdateContactThread;
+import cn.shu.wechat.utils.Config;
 import cn.shu.wechat.utils.SleepUtils;
-import cn.shu.wechat.utils.tools.CommonTools;
-import cn.shu.wechat.utils.tools.DownloadTools;
+import cn.shu.wechat.utils.CommonTools;
+import cn.shu.wechat.api.DownloadTools;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -50,6 +51,17 @@ public class LoginController {
 	@Resource
 	private UpdateContactThread updateContactThread;
 
+	@Resource
+	private ChartUtil chart;
+	/**
+	 * 消息处理类
+	 */
+	@Resource
+	private IMsgHandlerFace msgHandler;
+
+	private ExecutorService executorService = Executors.newCachedThreadPool();
+
+
 	public void login(String qrPath) {
 
 		if (Core.isAlive()) { // 已登陆
@@ -57,6 +69,7 @@ public class LoginController {
 			return;
 		}
 		while (true) {
+			Process process = null;
 			for (int count = 0; count < 10; count++) {
 				log.info("获取UUID");
 				while (loginService.getUuid() == null) {
@@ -67,7 +80,13 @@ public class LoginController {
 					}
 				}
 				log.info("2. 获取登陆二维码图片");
+				qrPath = qrPath + File.separator + Config. DEFAULT_QR;
 				if (loginService.getQR(qrPath)) {
+					try {
+						process = CommonTools.printQr(qrPath);// 打开登陆二维码图片
+					} catch (Exception e) {
+						log.info(e.getMessage());
+					}
 					break;
 				} else if (count == 9) {
 					log.error("2.2. 获取登陆二维码图片失败，系统退出");
@@ -77,6 +96,8 @@ public class LoginController {
 			log.info("3. 请扫描二维码图片，并在手机上确认");
 			if (!Core.isAlive()) {
 				loginService.login();
+				//登录成功，关闭打开的二维码图片
+				CommonTools.closeQr(process);
 				Core.setAlive(true);
 				log.info(("登陆成功"));
 				break;
@@ -106,6 +127,23 @@ public class LoginController {
 		log.info("10. 获取群好友及群好友列表");
 		loginService.WebWxBatchGetContact();
 
+		Runnable chartRunnable = new Runnable() {
+
+			@Override
+			public void run() {
+
+					while (true){try{
+						chart.create();
+						//SleepUtils.sleep(1000 * 10 );
+						SleepUtils.sleep(1000 * 60 * 60 * 8);
+					}catch (Exception e){e.printStackTrace();}
+					}
+
+
+			}
+		};
+		new Thread(chartRunnable).start();
+
 		log.info("11. 缓存本次登陆好友相关消息");
 		WechatTools.setUserInfo(); // 登陆成功后缓存本次登陆好友相关消息（NickName, UserName）
 
@@ -114,7 +152,7 @@ public class LoginController {
 
 
 		log.info("13. 下载联系人头像");
-		ExecutorService executorService = Executors.newCachedThreadPool();
+
 		for (Map.Entry<String, JSONObject> stringJSONObjectEntry : Core.getGroupMap().entrySet()) {
 			Runnable runnable = () -> {
 				JSONObject value = stringJSONObjectEntry.getValue();
@@ -144,11 +182,12 @@ public class LoginController {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
+				log.info("14.开启好友列表更新线程");
+				new Thread(updateContactThread,"UpdateContactThread").start();
 				log.info("头像下载完成");
 			}
 		}).start();
 
-		log.info("14.开启好友列表更新线程");
-		new Thread(updateContactThread,"UpdateContactThread").start();
+
 	}
 }

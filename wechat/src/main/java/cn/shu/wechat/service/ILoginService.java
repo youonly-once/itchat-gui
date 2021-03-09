@@ -1,5 +1,9 @@
 package cn.shu.wechat.service;
 
+import cn.shu.wechat.face.IMsgHandlerFace;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 /**
  * 登陆服务接口
  * 
@@ -62,7 +66,7 @@ public interface ILoginService {
 	 * @author SXS
 	 * @date 2017年5月13日 上午12:14:37
 	 */
-	void startReceiving();
+	void startReceiving( );
 
 	/**
 	 * 获取微信联系人
@@ -73,10 +77,18 @@ public interface ILoginService {
 	void webWxGetContact();
 
 	/**
-	 * 批量获取联系人信息
+	 * 批量获取群成员信息
 	 * 
 	 * @date 2017年6月22日 下午11:24:35
 	 */
 	void WebWxBatchGetContact();
+
+	/**
+	 * 批量获取群成员详细信息
+	 * 和上个方法的区别在于这个方法可以获取群成员的性别、省市等信息
+	 * 一次只能获取50个，群成员是好友的可以不用获取
+	 * @date 2017年6月22日 下午11:24:35
+	 */
+	JSONArray WebWxBatchGetContactDetail(JSONObject groupObject) ;
 
 }

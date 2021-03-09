@@ -22,6 +22,8 @@ public class TuLingUtil {
      * 调用图灵机器人
      */
     public static TuLingResponseBean robotMsgTuling(String msg) throws IOException, NullPointerException, JSONException {
+
+
         TuLingRequestBean tuLingRequestBean = TuLingRequestBean.builder()
                 .perception(
                         Perception.builder()

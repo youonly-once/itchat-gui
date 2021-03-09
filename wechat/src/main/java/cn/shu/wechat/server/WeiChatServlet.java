@@ -20,7 +20,7 @@ import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
-import cn.shu.IMsgHandlerFaceImpl;
+import cn.shu.wechat.face.IMsgHandlerFaceImpl;
 import utils.DateUtil;
 import weixin.exception.WXException;
 import weixin.utils.WXUntil;

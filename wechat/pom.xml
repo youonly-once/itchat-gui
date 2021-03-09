@@ -30,11 +30,7 @@
             <artifactId>httpmime</artifactId>
             <version>4.5.2</version>
         </dependency>
-        <dependency>
-            <groupId>org.ansj</groupId>
-            <artifactId>ansj_seg</artifactId>
-            <version>5.1.6</version>
-        </dependency>
+
         <dependency>
             <groupId>com.google.zxing</groupId>
             <artifactId>core</artifactId>
@@ -109,10 +105,10 @@
             <version>3.8.0</version>
         </dependency>
         <!-- springmvc -->
-<!--        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>-->
+        <!--        <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-web</artifactId>
+                </dependency>-->
         <!--log color-->
         <dependency>
             <groupId>org.fusesource.jansi</groupId>
@@ -167,10 +163,10 @@
                 </exclusion>
             </exclusions>
         </dependency>
-  <!--      <dependency>
-            <groupId>org.mybatis</groupId>
-            <artifactId>mybatis</artifactId>
-        </dependency>-->
+        <!--      <dependency>
+                  <groupId>org.mybatis</groupId>
+                  <artifactId>mybatis</artifactId>
+              </dependency>-->
         <!--mysql-->
         <dependency>
             <groupId>mysql</groupId>
@@ -185,6 +181,31 @@
             <groupId>me.xuxiaoxiao</groupId>
             <artifactId>xtools-common</artifactId>
             <version>1.4.0</version>
+        </dependency>
+        <!--Jfree 图表-->
+        <!-- https://mvnrepository.com/artifact/org.jfree/jfreechart -->
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>com.springsource.org.jfree</artifactId>
+            <version>1.0.12</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>com.springsource.javax.servlet</artifactId>
+            <version>2.4.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- ansj分词插件依赖 -->
+        <dependency>
+            <groupId>org.ansj</groupId>
+            <artifactId>ansj_seg</artifactId>
+            <version>5.1.6</version>
         </dependency>
     </dependencies>
 

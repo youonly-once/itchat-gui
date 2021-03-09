@@ -7,8 +7,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import lombok.extern.log4j.Log4j2;
-import org.apache.http.Consts;
-import org.apache.http.HttpEntity;
+import org.apache.http.*;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -22,7 +21,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.springframework.stereotype.Component;
 
 /**
  * HTTP访问类，对Apache HttpClient进行简单封装，适配器模式
@@ -35,16 +33,15 @@ import org.springframework.stereotype.Component;
 @Log4j2
 public class MyHttpClient {
 
-	private static CloseableHttpClient MyHttpClient = HttpClients.createDefault();
+	private static final CloseableHttpClient myHttpClient;
 
 
-	private static CookieStore cookieStore;
+	public static final CookieStore cookieStore;
 
 	static {
 		cookieStore = new BasicCookieStore();
-
 		// 将CookieStore设置到MyHttpClient中
-		MyHttpClient = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
+		myHttpClient = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
 	}
 
 	public static String getCookie(String name) {
@@ -111,7 +108,7 @@ public class MyHttpClient {
 					httpGet.setHeader(entry.getKey(), entry.getValue());
 				}
 			}
-			CloseableHttpResponse response = MyHttpClient.execute(httpGet);
+			CloseableHttpResponse response = myHttpClient.execute(httpGet);
 			entity = response.getEntity();
 		} catch (IOException e) {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     			log.error(e.getMessage());
@@ -139,8 +136,9 @@ public class MyHttpClient {
 			httpPost.setEntity(params);
 			httpPost.setHeader("Content-type", "application/json; charset=utf-8");
 			httpPost.setHeader("User-Agent", Config.USER_AGENT);
-			CloseableHttpResponse response = MyHttpClient.execute(httpPost);
+			CloseableHttpResponse response = myHttpClient.execute(httpPost);
 			entity = response.getEntity();
+
 		} catch (IOException e) {
 			log.error(e.getMessage());
 		}
@@ -163,7 +161,7 @@ public class MyHttpClient {
 		httpPost.setHeader("User-Agent", Config.USER_AGENT);
 		httpPost.setEntity(reqEntity);
 		try {
-			CloseableHttpResponse response = MyHttpClient.execute(httpPost);
+			CloseableHttpResponse response = myHttpClient.execute(httpPost);
 			entity = response.getEntity();
 
 		} catch (Exception e) {
@@ -171,10 +169,5 @@ public class MyHttpClient {
 		}
 		return entity;
 	}
-
-	public static CloseableHttpClient getHttpClient() {
-		return MyHttpClient;
-	}
-
 
 }

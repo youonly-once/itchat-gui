@@ -111,8 +111,8 @@ public class MediaUtil {
 //                attr.setPreset(PresetUtil.VERYFAST);
 //                attr.setCrf(27);
 //                // 设置线程数
-               attr.setEncodingThreads(Runtime.getRuntime().availableProcessors()/2);
-
+                int i1 = Runtime.getRuntime().availableProcessors();
+                attr.setEncodingThreads(i1/2);
                 Encoder encoder = new Encoder();
                 encoder.encode(new MultimediaObject(source), target, attr);
                 System.out.println("压缩总耗时：" + (System.currentTimeMillis() - time)/1000);

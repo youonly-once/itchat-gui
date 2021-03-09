@@ -2,7 +2,7 @@ package cn.shu.wechat.face;
 
 import cn.shu.wechat.api.MessageTools;
 
-import cn.shu.wechat.beans.sync.AddMsgList;
+import cn.shu.wechat.beans.msg.sync.AddMsgList;
 
 import java.util.List;
 
@@ -121,13 +121,5 @@ public interface IMsgHandlerFace {
 	 */
 	public List<MessageTools.Result> verifyAddFriendMsgHandle(AddMsgList msg);
 
-	/**
-	 * 处理收到的文件消息
-	 *
-	 * @date 2017年7月21日 下午11:59:14
-	 * @param msg
-	 * @return
-	 */
-	public List<MessageTools.Result> mediaMsgHandle(AddMsgList msg);
 
 }

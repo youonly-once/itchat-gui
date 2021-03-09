@@ -1,7 +1,9 @@
 package cn.shu.wechat.mapper;
 
-import cn.shu.wechat.beans.AttrHistory;
+import cn.shu.wechat.beans.pojo.AttrHistory;
 import java.util.List;
+import java.util.Map;
+
 import org.apache.ibatis.annotations.Param;
 
 /**
@@ -29,4 +31,8 @@ public interface AttrHistoryMapper {
     int updateBatch(List<AttrHistory> list);
 
     int batchInsert(@Param("list") List<AttrHistory> list);
+
+    List<Map<String, Object>> selectUpdateInfoCount(int top);
+
+    List<Map<String, Object>> selectUpdateAttrCount(int top);
 }

@@ -1,16 +1,11 @@
 package cn.shu.wechat.core;
 
 import java.util.*;
-import java.util.concurrent.LinkedBlockingQueue;
 
-import cn.shu.wechat.beans.sync.AddMsgList;
-import cn.shu.wechat.utils.MyHttpClient;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
-import cn.shu.wechat.beans.sync.AddMsgList;
-import cn.shu.wechat.utils.enums.parameters.BaseParaEnum;
-import org.springframework.stereotype.Component;
+import cn.shu.wechat.enums.parameters.BaseParaEnum;
 
 
 /**
@@ -46,8 +41,6 @@ public class Core {
 
 	static private String userName;
 	static private String nickName;
-	//消息队列（阻塞、线程安全）
-	static private LinkedBlockingQueue<AddMsgList> msgList = new LinkedBlockingQueue<>();
 	// 登陆账号自身信息
 	static private JSONObject userSelf;
 	// 好友+群聊+公众号+特殊账号
@@ -142,13 +135,6 @@ public class Core {
 		Core.nickName = nickName;
 	}
 
-	public static LinkedBlockingQueue<AddMsgList> getMsgList() {
-		return msgList;
-	}
-
-	public static void setMsgList(LinkedBlockingQueue<AddMsgList> msgList) {
-		Core.msgList = msgList;
-	}
 
 	public static JSONObject getUserSelf() {
 		return userSelf;

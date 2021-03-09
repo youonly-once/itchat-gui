@@ -1,7 +1,9 @@
 package cn.shu;
 
+import cn.shu.wechat.Wechat;
+import cn.shu.wechat.face.IMsgHandlerFaceImpl;
+import cn.shu.wechat.utils.Config;
 import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
@@ -19,11 +21,11 @@ import javax.annotation.Resource;
 public class Demo {
 
 	@Resource
-	private IMsgHandlerFaceImpl iMsgHandlerFace;
+	private Wechat wechat;
 
 	@PostConstruct
 	public void init(){
-		iMsgHandlerFace.init();
+		wechat.init(Config.QR_PATH);
 	}
 
 

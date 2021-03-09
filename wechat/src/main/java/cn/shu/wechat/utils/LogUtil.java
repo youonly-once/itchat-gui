@@ -1,14 +1,10 @@
 package cn.shu.wechat.utils;
 
-import cn.shu.wechat.beans.sync.AddMsgList;
+import cn.shu.wechat.beans.msg.sync.AddMsgList;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.utils.tools.DownloadTools;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.StringUtils;
 import cn.shu.wechat.api.WechatTools;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
 
 /**
  * @作者 舒新胜
@@ -37,21 +33,21 @@ public class LogUtil {
                 fromUser = myNickName;
             }else{
                 fromUser = myNickName;
-                if (msg.getGroupMsg()){
-                    toUser = WechatTools.getRemarkNameByGroupUserName(msg.getToUserName())+"(Group)";
+                if (msg.isGroupMsg()){
+                    toUser = WechatTools.getGroupDisplayNameByUserName(msg.getToUserName())+"(Group)";
                 }else{
-                    toUser =  WechatTools.getRemarkNameByUserName(msg.getToUserName());
+                    toUser =  WechatTools.getDisplayNameByUserName(msg.getToUserName());
                 }
             }
 
         }else{
             toUser = myNickName;
-            if (msg.getGroupMsg()){
+            if (msg.isGroupMsg()){
                 //群成员昵称
                 String groupUserNickNameOfGroup = WechatTools.getMemberNickNameOfGroup(msg.getFromUserName(), msg.getMemberName());
-                fromUser = WechatTools.getRemarkNameByGroupUserName(msg.getFromUserName())+"("+groupUserNickNameOfGroup+")";
+                fromUser = WechatTools.getGroupDisplayNameByUserName(msg.getFromUserName())+"("+groupUserNickNameOfGroup+")";
             }else{
-                fromUser = WechatTools.getRemarkNameByUserName(msg.getFromUserName());
+                fromUser = WechatTools.getDisplayNameByUserName(msg.getFromUserName());
 
             }
         }
@@ -71,6 +67,15 @@ public class LogUtil {
 
     /**
      * 打印发给自己的消息
+     * @param msg 消息内容
+     * @return 日志内容
+     */
+    public static String  printFromMeg(AddMsgList msg,int title){
+        return printFromMeg(msg,"",title+"");
+    }
+
+    /**
+     * 打印发给自己的消息
      * @param fromUserName 发送者
      * @param content 发送内容
      * @return 日志内容
@@ -78,7 +83,7 @@ public class LogUtil {
     public static String  printFromMeg(String fromUserName,String content){
         String myNickName = Core.getUserSelf().getString("NickName");
         Core.getUserSelf().getString("UserName");
-        String fromRemarkName = WechatTools.getRemarkNameByUserName(fromUserName);
+        String fromRemarkName = WechatTools.getDisplayNameByUserName(fromUserName);
         return String.format("【%s ->>>>>>> %s: %s】",fromRemarkName,myNickName , content) ;
     }
     /**
@@ -89,9 +94,9 @@ public class LogUtil {
      */
     public static String  printToMeg(String toUserName,String content){
         if (toUserName.startsWith("@@")){
-            toUserName = WechatTools.getRemarkNameByGroupUserName(toUserName)+"(Group)";
+            toUserName = WechatTools.getGroupDisplayNameByUserName(toUserName)+"(Group)";
         }else{
-            toUserName = WechatTools.getRemarkNameByUserName(toUserName);
+            toUserName = WechatTools.getDisplayNameByUserName(toUserName);
         }
 
         return String.format("【%s ->>>>>>> %s】: %s",Core.getNickName(),toUserName , content) ;
