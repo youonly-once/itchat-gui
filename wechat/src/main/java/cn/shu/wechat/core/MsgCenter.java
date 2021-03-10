@@ -135,6 +135,7 @@ public class MsgCenter {
             case MSGTYPE_SYS:
             case MSGTYPE_STATUSNOTIFY:
                 //当打开聊天窗口时会像该联系人发送该类型的消息
+                //StatusNotifyCode = 1发送图片、视频消息完成  2进入聊天框  0发送文字完成
                 results = msgHandler.systemMsgHandle(msg);
                 break;
             case MSGTYPE_SYSNOTICE:

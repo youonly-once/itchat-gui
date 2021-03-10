@@ -1,9 +1,14 @@
 package cn.shu.wechat.utils;
 
 import cn.shu.wechat.api.MessageTools;
+import cn.shu.wechat.api.WechatTools;
+import cn.shu.wechat.beans.pojo.Message;
+import cn.shu.wechat.beans.pojo.MessageExample;
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.enums.WXSendMsgCodeEnum;
+import cn.shu.wechat.mapper.MessageMapper;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -67,6 +72,9 @@ public class ChartUtil {
 
     @Resource
     private AttrHistoryMapper attrHistoryMapper;
+
+    @Resource
+    private MessageMapper messageMapper;
 
     public static void main(String[] args) {
         // 创建主题样式
@@ -306,6 +314,175 @@ public class ChartUtil {
     }
 
     /**
+     * 群用户活跃度(消息发送次数)
+     * @param userName
+     * @return
+     */
+    public String makeWXMemberOfGroupActivity(String userName) {
+
+        MessageExample messageExample = new MessageExample();
+        MessageExample.Criteria criteria = messageExample.or();
+        MessageExample.Criteria criteria1 = messageExample.or();
+        MessageExample.Criteria criteria2 = messageExample.or();
+
+        criteria.andFromUsernameEqualTo(userName);
+        criteria1.andFromNicknameEqualTo(WechatTools.getNickNameByUserName(userName));
+        criteria2.andFromRemarknameEqualTo(WechatTools.getRemarkNameByUserName(userName));
+        messageExample.or().andToNicknameEqualTo(WechatTools.getNickNameByUserName(userName));
+        messageExample.or().andToUsernameEqualTo(userName);
+        messageExample.or().andToRemarknameEqualTo(WechatTools.getRemarkNameByUserName(userName));
+        List<Message> messages = messageMapper.selectByExample(messageExample);
+
+        Map<String, AtomicInteger> msgCount = new HashMap<>();
+        for (Message message : messages) {
+            String fromMemberOfGroupDisplayname = message.getFromMemberOfGroupDisplayname();
+            if (StringUtils.isEmpty(fromMemberOfGroupDisplayname)){
+                fromMemberOfGroupDisplayname = message.getFromNickname();
+            }
+            if (message.getMsgType()>=1 && message.getMsgType()<=48){
+                msgCount.computeIfAbsent(fromMemberOfGroupDisplayname, v -> new AtomicInteger()).getAndIncrement();
+            }
+        }
+
+
+        msgCount = sortMapByValue(msgCount);
+        int maxSize = 10;
+        int size = Math.min(maxSize, msgCount.size());
+        double[][] data = new double[1][size];
+        String[] columnKeys = new String[size];
+        String[] rowKeys = {"发送数量"};
+        double[] values = new double[size];
+
+        int i = 0;
+        for (Map.Entry<String, AtomicInteger> type : msgCount.entrySet()) {
+            if (i==size){
+                break;
+            }
+            columnKeys[i] = type.getKey();
+            values[i] = type.getValue().get();
+            i++;
+        }
+        data[0] = values;
+        if (values.length>0){
+            CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
+            String barImg1 = createBarChart(dataset, "用户昵称", "发送消息数量", "群成员活跃度", "makeWXGroupMessageTop1.png");
+            return barImg1;
+        }
+        return null;
+    }
+
+    /**
+     * 聊天信息统计
+     * @param userName
+     * @return
+     */
+    public List<String> makeWXUserMessageTop(String userName) {
+
+        MessageExample messageExample = new MessageExample();
+        MessageExample.Criteria criteria = messageExample.or();
+        MessageExample.Criteria criteria1 = messageExample.or();
+        MessageExample.Criteria criteria2 = messageExample.or();
+
+        criteria.andFromUsernameEqualTo(userName);
+        criteria1.andFromNicknameEqualTo(WechatTools.getNickNameByUserName(userName));
+        criteria2.andFromRemarknameEqualTo(WechatTools.getRemarkNameByUserName(userName));
+        messageExample.or().andToNicknameEqualTo(WechatTools.getNickNameByUserName(userName));
+        messageExample.or().andToUsernameEqualTo(userName);
+        messageExample.or().andToRemarknameEqualTo(WechatTools.getRemarkNameByUserName(userName));
+        List<Message> messages = messageMapper.selectByExample(messageExample);
+
+        Map<String, AtomicInteger> msgType = new HashMap<>();
+        Map<String, AtomicInteger> msgTerm = new HashMap<>();
+        for (Message message : messages) {
+            String msg = message.getContent();
+            String type = message.getMsgDesc();
+            msgType.computeIfAbsent(type, v -> new AtomicInteger()).getAndIncrement();
+                if (message.getMsgType() == WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode()
+                        && StringUtils.isNotBlank(msg)) {
+                    Result result = ToAnalysis.parse(msg);
+                    for (Term term : result.getTerms()) {
+                        System.out.println(term);
+                        String natureStr = term.getNatureStr().substring(0, 1);
+                        if (StringUtils.isBlank(term.getName())) {
+                            continue;
+                        }
+                        switch (natureStr) {
+                            //case "e":
+                            case "n":
+                                case "v":
+                                case "t":
+
+                                 case "a":
+                                 case "b":
+                                case "d":
+                                case "o":
+                               // case "r":
+                                msgTerm.computeIfAbsent(term.toString(), v -> new AtomicInteger()).getAndIncrement();
+                                break;
+                            default:
+
+                        }
+
+                    }
+            }
+        }
+
+
+        ArrayList<String> imgs = new ArrayList<>();
+        msgType = sortMapByValue(msgType);
+        msgTerm = sortMapByValue(msgTerm);
+
+        int maxSize = 10;
+        int size = Math.min(maxSize, msgType.size());
+        double[][] data = new double[1][size];
+        String[] columnKeys = new String[size];
+        String[] rowKeys = {"发送数量"};
+        double[] values = new double[size];
+
+        int i = 0;
+        for (Map.Entry<String, AtomicInteger> type : msgType.entrySet()) {
+            if (i==size){
+                break;
+            }
+            columnKeys[i] = type.getKey();
+            values[i] = type.getValue().get();
+            i++;
+        }
+        data[0] = values;
+        if (values.length>0){
+            CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
+            String barImg1 = createBarChart(dataset, "消息类型", "发送数量", "消息类型排行", "makeWXGroupMessageTop1.png");
+            imgs.add(barImg1);
+        }
+
+        size = Math.min(maxSize, msgTerm.size());
+        double[][] data1 = new double[1][size];
+        String[] columnKeys1 = new String[size];
+        String[] rowKeys1 = {"更新次数"};
+        double[] values1 = new double[size];
+
+        int i1 = 0;
+        for (Map.Entry<String, AtomicInteger> term : msgTerm.entrySet()) {
+            if (i1 == size) {
+                break;
+            }
+            columnKeys1[i1] = term.getKey();
+            values1[i1] = term.getValue().get();
+           /* if (term.getValue().get() >= 1500) {
+                continue;
+            }*/
+            i1++;
+        }
+        data1[0] = values1;
+        if (size> 0){
+            CategoryDataset dataset1 = getBarData(data1, rowKeys1, columnKeys1);
+            String barImg2 = createBarChart(dataset1, "词语", "发送数量", "消息常用关键词排行", "makeWXGroupMessageTop2.png");
+            imgs.add(barImg2);
+        }
+
+        return imgs;
+    }
+    /**
      * 获取消息top20
      */
     public void makeWXContactMessageTop() {
@@ -380,7 +557,7 @@ public class ChartUtil {
         }
         data[0] = values;
         CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
-        createBarChart(dataset, "消息类型", "发送数量", "微信消息类型排行/月", "makeWXContactMessageTopType.png");
+        createBarChart(dataset, "消息类型", "发送数量", "消息类型排行", "makeWXContactMessageTop2.png");
 
 
         double[][] data1 = new double[1][maxSize];
@@ -402,7 +579,7 @@ public class ChartUtil {
         }
         data1[0] = values1;
         CategoryDataset dataset1 = getBarData(data1, rowKeys1, columnKeys1);
-        createBarChart(dataset1, "词语", "发送数量", "微信消息常用词语 排行/月", "makeWXContactMessageTop.png");
+        createBarChart(dataset1, "词语", "发送数量", "消息常用词语", "makeWXContactMessageTop2.png");
 
 
     }
@@ -630,7 +807,7 @@ public class ChartUtil {
             isChartPathExist(CHART_PATH);
             String chartName = CHART_PATH + charName;
             fos_jpg = new FileOutputStream(chartName);
-            ChartUtils.writeChartAsPNG(fos_jpg, chart, 1024, 768, true, 10);
+            ChartUtils.writeChartAsPNG(fos_jpg, chart, 500, 400, true, 10);
             return chartName;
         } catch (Exception e) {
             e.printStackTrace();
@@ -1075,8 +1252,11 @@ public class ChartUtil {
      * @return
      */
     public Map<String, AtomicInteger> sortMapByValue(Map<String, AtomicInteger> oriMap) {
-        if (oriMap == null || oriMap.isEmpty()) {
+        if (oriMap == null ) {
             return null;
+        }
+        if (oriMap.isEmpty()){
+            return oriMap;
         }
         Map<String, AtomicInteger> sortedMap = new LinkedHashMap<String, AtomicInteger>();
         List<Map.Entry<String, AtomicInteger>> entryList = new ArrayList<Map.Entry<String, AtomicInteger>>(

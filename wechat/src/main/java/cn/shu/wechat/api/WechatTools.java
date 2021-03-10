@@ -216,7 +216,7 @@ public class WechatTools {
 	 */
 	public static String getUserDisplayNameByUserName(String userName) {
 		String remarkNameByPersonUserName = getUserRemarkNameByUserName(userName);
-		if (remarkNameByPersonUserName != null){
+		if (StringUtils.isNotEmpty(remarkNameByPersonUserName)){
 			return remarkNameByPersonUserName;
 		}
 		String nickNameByPersonUserName = getUserNickNameByUserName(userName);
@@ -325,7 +325,7 @@ public class WechatTools {
 	public static JSONObject getMemberOfGroup(String groupName, String userName) {
 		Map<String, JSONArray> groupMemeberMap = Core.getGroupMemberMap();
 		JSONArray members = groupMemeberMap.get(groupName);
-		if (members == null) {
+		if (members == null || userName ==null) {
 			return null;
 		}
 		try {

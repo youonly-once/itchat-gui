@@ -17,12 +17,9 @@ import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.utils.*;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
 import cn.shu.wechat.enums.WXSendMsgCodeEnum;
-import cn.shu.wechat.api.DownloadTools;
-import com.alibaba.fastjson.JSONObject;
 
 import lombok.extern.log4j.Log4j2;
 import net.sf.json.JSONException;
-import org.nlpcn.commons.lang.util.StringUtil;
 
 import org.springframework.stereotype.Component;
 import utils.TuLingUtil;
@@ -125,8 +122,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         if (msg.getFromUserName().equals(Core.getUserName())){
             toUserName = msg.getToUserName();
         }
-        String remarkNameByGroupUserName = WechatTools.getGroupDisplayNameByUserName(toUserName);
+        String remarkNameByGroupUserName = WechatTools.getDisplayNameByUserName(toUserName);
         switch (text){
+            case "help":
             case "/h":
                 if (msg.isGroupMsg()){
                     //群消息
@@ -136,8 +134,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                         +"3、【ggr】\n\t群成员性别比例图\n"
                         +"4、【gpr】\n\t群成员省市分布图\n"
                        // +"opundo/cpundo：群成员活跃度\n"
-                        +"5、【gmt10】\n\t群消息关键词TOP10\n"
-                        +"6、【op/cp】\n\t开启/关闭全局个人用户消息自动回复\n"
+                        +"5、【op/cp】\n\t开启/关闭全局个人用户消息自动回复\n"
+                            +"6、【gma10】\n\t群成员活跃度TOP10\n"
+                            +"7、【mf10】\n\t聊天消息关键词TOP10\n"
                     )
                     .toUserName(toUserName)
                     .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
@@ -149,7 +148,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                             .msg("1、【oauto/cauto】\n\t开启/关闭当前联系人自动回复\n"
                                  +"2、【opundo/cpundo】\n\t开启/关闭当前联系人消息防撤回\n"
                                     +"3、【op/cp】\n\t开启/关闭全局个人用户消息自动回复\n"
-                                    +"4、【pmt10】\n\t消息关键词TOP10\n")
+                                +"4、【mf10】\n\t聊天消息关键词TOP10\n")
                             .toUserName(toUserName)
                             .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                             .build());
@@ -222,6 +221,28 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             case "gmt10":
                 break;
             case "pmt10":
+                break;
+            case "gma10":
+                //群成员活跃度排名
+                if (msg.isGroupMsg()){
+                    String s1 = chartUtil.makeWXMemberOfGroupActivity(toUserName);
+                    results.add(MessageTools.Result.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
+                            .msg(s1)
+                            .toUserName(toUserName).build());
+                    log.info("计算【"+ remarkNameByGroupUserName +"】成员活跃度");
+                }
+                break;
+            case "mf10":
+                //聊天词语频率排名
+                    List<String> imgs= chartUtil.makeWXUserMessageTop(toUserName);
+                    for (String s : imgs) {
+                        //群消息
+                        results.add(MessageTools.Result.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
+                                .msg(s)
+                                .toUserName(toUserName).build());
+                    }
+
+                    log.info("计算【"+ remarkNameByGroupUserName +"】聊天类型及关键词");
                 break;
 
         }
@@ -427,7 +448,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 results.add(result);
                 break;
             case MSGTYPE_APP:
-                switch (WXReceiveMsgCodeOfAppEnum.getByCode(msg.getAppMsgType())) {
+                switch (WXReceiveMsgCodeOfAppEnum.getByCode(oldMessage.getAppMsgType())) {
                     case UNKNOWN:
                         break;
                     case FAVOURITE:
