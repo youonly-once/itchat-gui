@@ -6,6 +6,8 @@ package cn.shu.wechat.utils;
  * @创建时间 3/10/2021 11:46 AM
  */
 
+import lombok.extern.log4j.Log4j2;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -23,6 +25,7 @@ import java.util.*;
 /**
  * @author  xuxile
  */
+@Log4j2
 public class FileSplitAndMergeUtil {
 
     public static void main(String[] args) throws Exception {
@@ -183,9 +186,9 @@ public class FileSplitAndMergeUtil {
                 }
                 out.close();
             }
-            System.out.println("文件分片成功！");
+            log.error("待发送文件分片完成：{}",filePath);
         } catch (Exception e) {
-            System.out.println("文件分片失败！");
+            log.error("待发送文件分片失败：{},{}",filePath,e.getMessage());
             e.printStackTrace();
         } finally {
             try {

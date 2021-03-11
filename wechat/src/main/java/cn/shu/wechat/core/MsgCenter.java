@@ -1,5 +1,7 @@
 package cn.shu.wechat.core;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 
@@ -24,12 +26,14 @@ import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.api.WechatTools;
 
 
+import org.apache.commons.lang.StringUtils;
 import org.nlpcn.commons.lang.util.StringUtil;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
 import static cn.shu.wechat.enums.WXReceiveMsgCodeEnum.MSGTYPE_TEXT;
+import static javax.swing.UIManager.put;
 
 /**
  * 消息处理中心
@@ -60,15 +64,29 @@ public class MsgCenter {
      * @date 2017年4月23日 下午2:30:48
      */
     public void handleNewMsg(AddMsgList msg) {
+        /**
+         * 文本消息：content为文本内容
+         * 图片视频文件消息：content为资源ID，@开头，发送消息时指定Content字段可直接发送，不需mediaid
+         *                  如果消息是自己发的，content为xml
+         */
         //消息格式化
-         CommonTools.msgFormatter(msg);
+        CommonTools.msgFormatter(msg);
         WXReceiveMsgCodeEnum msgType = WXReceiveMsgCodeEnum.getByCode(msg.getMsgType());
         if (msgType == MSGTYPE_TEXT && msg.getUrl().length() != 0) {
             //地图消息
             msg.setMsgType(WXReceiveMsgCodeEnum.MSGTYPE_MAP.getCode());
         }
         //下载资源文件
-        String path =  DownloadTools.downloadFile(msg, msgType);
+        String path = DownloadTools.getDownloadFilePath(msg);
+        //false表示当前文件未下载完成，此时其它地方不能使用
+        Hashtable<String, Boolean> fileDownloadStatus = DownloadTools.fileDownloadStatus;
+        if (path != null){
+            fileDownloadStatus. put(path,false);
+            DownloadTools.downloadFile(msg,  path);
+            msg.setFilePath(path);
+        }
+        //存储消息
+        storeMsgToDB(msg);
         //打印日志
         log.info(LogUtil.printFromMeg(msg, msgType.getDesc()));
         //需要发送的消息
@@ -161,9 +179,10 @@ public class MsgCenter {
                 log.warn(LogUtil.printFromMeg(msg, msgType.getCode()));
                 break;
         }
+
         //发送消息
         MessageTools.sendMsgByUserId(results, msg.getFromUserName());
-        storeMsgToDB(msg);
+
     }
 
 
@@ -179,6 +198,7 @@ public class MsgCenter {
         Message build = Message
                 .builder()
                 .content(msg.getContent())
+                .filePath(msg.getFilePath())
                 .createTime(new Date())
                 .fromNickname(isFromSelf ? Core.getNickName() : WechatTools.getNickNameByUserName(msg.getFromUserName()))
                 .fromRemarkname(isFromSelf ? Core.getNickName() : WechatTools.getRemarkNameByUserName(msg.getFromUserName()))
@@ -234,7 +254,7 @@ public class MsgCenter {
                 String tip = "联系人";
                 log.info("{}（{}）属性更新：{}", tip, name, differenceMap);
                 //发送消息
-                results.add(MessageTools.Result.builder().msg(tip + "（" + name + "）属性更新：" + mapToString(differenceMap))
+                results.add(MessageTools.Result.builder().content(tip + "（" + name + "）属性更新：" + mapToString(differenceMap))
                         .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                         .build());
                 Core.getContactMap().put(msg.getUserName(), newV);
@@ -270,12 +290,12 @@ public class MsgCenter {
                     results.add(MessageTools.Result.builder()
                             .replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
                             //.toUserName("filehelper")
-                            .msg(oldHeadPath).build());
+                            .content(oldHeadPath).build());
                     //更换后
                     results.add(MessageTools.Result.builder()
                             .replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
                             //.toUserName("filehelper")
-                            .msg(newHeadPath).build());
+                            .content(newHeadPath).build());
                     AttrHistory build = AttrHistory.builder()
                             .attr(stringMapEntry.getKey())
                             .oldval(oldHeadPath)

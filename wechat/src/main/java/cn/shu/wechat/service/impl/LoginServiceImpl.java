@@ -54,7 +54,11 @@ import javax.annotation.Resource;
 @Component
 public class LoginServiceImpl implements ILoginService {
 
-    private final ExecutorService executorService = Executors.newCachedThreadPool();
+    /**
+     * 消息处理线程池
+     */
+    private final ExecutorService messageExecutorService = Executors.newCachedThreadPool();
+
     @Resource
     private AttrHistoryMapper attrHistoryMapper;
 
@@ -297,7 +301,7 @@ public class LoginServiceImpl implements ILoginService {
 
                                                     }
                                                 };
-                                                executorService.submit(runnable);
+                                                messageExecutorService.submit(runnable);
                                             }
                                             //联系人修改消息
                                             //MsgCenter.produceModContactMsg(webWxSyncMsg.getModContactList());
@@ -350,7 +354,8 @@ public class LoginServiceImpl implements ILoginService {
                 }
             }
         };
-        new Thread(runnable, "ReceiveThread ").start();
+        messageExecutorService.submit(runnable);
+
 
     }
 
@@ -803,7 +808,7 @@ public class LoginServiceImpl implements ILoginService {
 
                 String s = mapToString(differenceMap);
                 //发送消息
-                results.add(MessageTools.Result.builder().msg(tip + "（" + name + "）属性更新：" + s)
+                results.add(MessageTools.Result.builder().content(tip + "（" + name + "）属性更新：" + s)
                         .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                         .build());
                 //Old与New存在差异
@@ -847,11 +852,11 @@ public class LoginServiceImpl implements ILoginService {
                     //更换前
                     results.add(MessageTools.Result.builder()
                             .replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
-                            .msg(oldHeadPath).build());
+                            .filePath(oldHeadPath).build());
                     //更换后
                     results.add(MessageTools.Result.builder()
                             .replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
-                            .msg(newHeadPath).build());
+                            .filePath(newHeadPath).build());
                     AttrHistory build = AttrHistory.builder()
                             .attr(stringMapEntry.getKey())
                             .oldval(oldHeadPath)

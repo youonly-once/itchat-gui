@@ -6,8 +6,8 @@ import java.util.List;
 
 /**
   *@作者     舒新胜
-  *@项目     weixin
-  *@创建时间  3/9/2021 1:01 PM
+  *@项目     AutoWeChat
+  *@创建时间  3/10/2021 10:36 PM
 */
 public class MessageExample {
     protected String orderByClause;
@@ -570,6 +570,76 @@ public class MessageExample {
             return (Criteria) this;
         }
 
+        public Criteria andFilePathIsNull() {
+            addCriterion("file_path is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andFilePathIsNotNull() {
+            addCriterion("file_path is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andFilePathEqualTo(String value) {
+            addCriterion("file_path =", value, "filePath");
+            return (Criteria) this;
+        }
+
+        public Criteria andFilePathNotEqualTo(String value) {
+            addCriterion("file_path <>", value, "filePath");
+            return (Criteria) this;
+        }
+
+        public Criteria andFilePathGreaterThan(String value) {
+            addCriterion("file_path >", value, "filePath");
+            return (Criteria) this;
+        }
+
+        public Criteria andFilePathGreaterThanOrEqualTo(String value) {
+            addCriterion("file_path >=", value, "filePath");
+            return (Criteria) this;
+        }
+
+        public Criteria andFilePathLessThan(String value) {
+            addCriterion("file_path <", value, "filePath");
+            return (Criteria) this;
+        }
+
+        public Criteria andFilePathLessThanOrEqualTo(String value) {
+            addCriterion("file_path <=", value, "filePath");
+            return (Criteria) this;
+        }
+
+        public Criteria andFilePathLike(String value) {
+            addCriterion("file_path like", value, "filePath");
+            return (Criteria) this;
+        }
+
+        public Criteria andFilePathNotLike(String value) {
+            addCriterion("file_path not like", value, "filePath");
+            return (Criteria) this;
+        }
+
+        public Criteria andFilePathIn(List<String> values) {
+            addCriterion("file_path in", values, "filePath");
+            return (Criteria) this;
+        }
+
+        public Criteria andFilePathNotIn(List<String> values) {
+            addCriterion("file_path not in", values, "filePath");
+            return (Criteria) this;
+        }
+
+        public Criteria andFilePathBetween(String value1, String value2) {
+            addCriterion("file_path between", value1, value2, "filePath");
+            return (Criteria) this;
+        }
+
+        public Criteria andFilePathNotBetween(String value1, String value2) {
+            addCriterion("file_path not between", value1, value2, "filePath");
+            return (Criteria) this;
+        }
+
         public Criteria andMsgJsonIsNull() {
             addCriterion("msg_json is null");
             return (Criteria) this;
@@ -710,76 +780,6 @@ public class MessageExample {
             return (Criteria) this;
         }
 
-        public Criteria andToUsernameIsNull() {
-            addCriterion("to_username is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andToUsernameIsNotNull() {
-            addCriterion("to_username is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andToUsernameEqualTo(String value) {
-            addCriterion("to_username =", value, "toUsername");
-            return (Criteria) this;
-        }
-
-        public Criteria andToUsernameNotEqualTo(String value) {
-            addCriterion("to_username <>", value, "toUsername");
-            return (Criteria) this;
-        }
-
-        public Criteria andToUsernameGreaterThan(String value) {
-            addCriterion("to_username >", value, "toUsername");
-            return (Criteria) this;
-        }
-
-        public Criteria andToUsernameGreaterThanOrEqualTo(String value) {
-            addCriterion("to_username >=", value, "toUsername");
-            return (Criteria) this;
-        }
-
-        public Criteria andToUsernameLessThan(String value) {
-            addCriterion("to_username <", value, "toUsername");
-            return (Criteria) this;
-        }
-
-        public Criteria andToUsernameLessThanOrEqualTo(String value) {
-            addCriterion("to_username <=", value, "toUsername");
-            return (Criteria) this;
-        }
-
-        public Criteria andToUsernameLike(String value) {
-            addCriterion("to_username like", value, "toUsername");
-            return (Criteria) this;
-        }
-
-        public Criteria andToUsernameNotLike(String value) {
-            addCriterion("to_username not like", value, "toUsername");
-            return (Criteria) this;
-        }
-
-        public Criteria andToUsernameIn(List<String> values) {
-            addCriterion("to_username in", values, "toUsername");
-            return (Criteria) this;
-        }
-
-        public Criteria andToUsernameNotIn(List<String> values) {
-            addCriterion("to_username not in", values, "toUsername");
-            return (Criteria) this;
-        }
-
-        public Criteria andToUsernameBetween(String value1, String value2) {
-            addCriterion("to_username between", value1, value2, "toUsername");
-            return (Criteria) this;
-        }
-
-        public Criteria andToUsernameNotBetween(String value1, String value2) {
-            addCriterion("to_username not between", value1, value2, "toUsername");
-            return (Criteria) this;
-        }
-
         public Criteria andFromRemarknameIsNull() {
             addCriterion("from_remarkname is null");
             return (Criteria) this;
@@ -847,76 +847,6 @@ public class MessageExample {
 
         public Criteria andFromRemarknameNotBetween(String value1, String value2) {
             addCriterion("from_remarkname not between", value1, value2, "fromRemarkname");
-            return (Criteria) this;
-        }
-
-        public Criteria andToRemarknameIsNull() {
-            addCriterion("to_remarkname is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andToRemarknameIsNotNull() {
-            addCriterion("to_remarkname is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andToRemarknameEqualTo(String value) {
-            addCriterion("to_remarkname =", value, "toRemarkname");
-            return (Criteria) this;
-        }
-
-        public Criteria andToRemarknameNotEqualTo(String value) {
-            addCriterion("to_remarkname <>", value, "toRemarkname");
-            return (Criteria) this;
-        }
-
-        public Criteria andToRemarknameGreaterThan(String value) {
-            addCriterion("to_remarkname >", value, "toRemarkname");
-            return (Criteria) this;
-        }
-
-        public Criteria andToRemarknameGreaterThanOrEqualTo(String value) {
-            addCriterion("to_remarkname >=", value, "toRemarkname");
-            return (Criteria) this;
-        }
-
-        public Criteria andToRemarknameLessThan(String value) {
-            addCriterion("to_remarkname <", value, "toRemarkname");
-            return (Criteria) this;
-        }
-
-        public Criteria andToRemarknameLessThanOrEqualTo(String value) {
-            addCriterion("to_remarkname <=", value, "toRemarkname");
-            return (Criteria) this;
-        }
-
-        public Criteria andToRemarknameLike(String value) {
-            addCriterion("to_remarkname like", value, "toRemarkname");
-            return (Criteria) this;
-        }
-
-        public Criteria andToRemarknameNotLike(String value) {
-            addCriterion("to_remarkname not like", value, "toRemarkname");
-            return (Criteria) this;
-        }
-
-        public Criteria andToRemarknameIn(List<String> values) {
-            addCriterion("to_remarkname in", values, "toRemarkname");
-            return (Criteria) this;
-        }
-
-        public Criteria andToRemarknameNotIn(List<String> values) {
-            addCriterion("to_remarkname not in", values, "toRemarkname");
-            return (Criteria) this;
-        }
-
-        public Criteria andToRemarknameBetween(String value1, String value2) {
-            addCriterion("to_remarkname between", value1, value2, "toRemarkname");
-            return (Criteria) this;
-        }
-
-        public Criteria andToRemarknameNotBetween(String value1, String value2) {
-            addCriterion("to_remarkname not between", value1, value2, "toRemarkname");
             return (Criteria) this;
         }
 
@@ -990,73 +920,73 @@ public class MessageExample {
             return (Criteria) this;
         }
 
-        public Criteria andToNicknameIsNull() {
-            addCriterion("to_nickname is null");
+        public Criteria andFromMemberOfGroupUsernameIsNull() {
+            addCriterion("from_member_of_group_username is null");
             return (Criteria) this;
         }
 
-        public Criteria andToNicknameIsNotNull() {
-            addCriterion("to_nickname is not null");
+        public Criteria andFromMemberOfGroupUsernameIsNotNull() {
+            addCriterion("from_member_of_group_username is not null");
             return (Criteria) this;
         }
 
-        public Criteria andToNicknameEqualTo(String value) {
-            addCriterion("to_nickname =", value, "toNickname");
+        public Criteria andFromMemberOfGroupUsernameEqualTo(String value) {
+            addCriterion("from_member_of_group_username =", value, "fromMemberOfGroupUsername");
             return (Criteria) this;
         }
 
-        public Criteria andToNicknameNotEqualTo(String value) {
-            addCriterion("to_nickname <>", value, "toNickname");
+        public Criteria andFromMemberOfGroupUsernameNotEqualTo(String value) {
+            addCriterion("from_member_of_group_username <>", value, "fromMemberOfGroupUsername");
             return (Criteria) this;
         }
 
-        public Criteria andToNicknameGreaterThan(String value) {
-            addCriterion("to_nickname >", value, "toNickname");
+        public Criteria andFromMemberOfGroupUsernameGreaterThan(String value) {
+            addCriterion("from_member_of_group_username >", value, "fromMemberOfGroupUsername");
             return (Criteria) this;
         }
 
-        public Criteria andToNicknameGreaterThanOrEqualTo(String value) {
-            addCriterion("to_nickname >=", value, "toNickname");
+        public Criteria andFromMemberOfGroupUsernameGreaterThanOrEqualTo(String value) {
+            addCriterion("from_member_of_group_username >=", value, "fromMemberOfGroupUsername");
             return (Criteria) this;
         }
 
-        public Criteria andToNicknameLessThan(String value) {
-            addCriterion("to_nickname <", value, "toNickname");
+        public Criteria andFromMemberOfGroupUsernameLessThan(String value) {
+            addCriterion("from_member_of_group_username <", value, "fromMemberOfGroupUsername");
             return (Criteria) this;
         }
 
-        public Criteria andToNicknameLessThanOrEqualTo(String value) {
-            addCriterion("to_nickname <=", value, "toNickname");
+        public Criteria andFromMemberOfGroupUsernameLessThanOrEqualTo(String value) {
+            addCriterion("from_member_of_group_username <=", value, "fromMemberOfGroupUsername");
             return (Criteria) this;
         }
 
-        public Criteria andToNicknameLike(String value) {
-            addCriterion("to_nickname like", value, "toNickname");
+        public Criteria andFromMemberOfGroupUsernameLike(String value) {
+            addCriterion("from_member_of_group_username like", value, "fromMemberOfGroupUsername");
             return (Criteria) this;
         }
 
-        public Criteria andToNicknameNotLike(String value) {
-            addCriterion("to_nickname not like", value, "toNickname");
+        public Criteria andFromMemberOfGroupUsernameNotLike(String value) {
+            addCriterion("from_member_of_group_username not like", value, "fromMemberOfGroupUsername");
             return (Criteria) this;
         }
 
-        public Criteria andToNicknameIn(List<String> values) {
-            addCriterion("to_nickname in", values, "toNickname");
+        public Criteria andFromMemberOfGroupUsernameIn(List<String> values) {
+            addCriterion("from_member_of_group_username in", values, "fromMemberOfGroupUsername");
             return (Criteria) this;
         }
 
-        public Criteria andToNicknameNotIn(List<String> values) {
-            addCriterion("to_nickname not in", values, "toNickname");
+        public Criteria andFromMemberOfGroupUsernameNotIn(List<String> values) {
+            addCriterion("from_member_of_group_username not in", values, "fromMemberOfGroupUsername");
             return (Criteria) this;
         }
 
-        public Criteria andToNicknameBetween(String value1, String value2) {
-            addCriterion("to_nickname between", value1, value2, "toNickname");
+        public Criteria andFromMemberOfGroupUsernameBetween(String value1, String value2) {
+            addCriterion("from_member_of_group_username between", value1, value2, "fromMemberOfGroupUsername");
             return (Criteria) this;
         }
 
-        public Criteria andToNicknameNotBetween(String value1, String value2) {
-            addCriterion("to_nickname not between", value1, value2, "toNickname");
+        public Criteria andFromMemberOfGroupUsernameNotBetween(String value1, String value2) {
+            addCriterion("from_member_of_group_username not between", value1, value2, "fromMemberOfGroupUsername");
             return (Criteria) this;
         }
 
@@ -1200,73 +1130,213 @@ public class MessageExample {
             return (Criteria) this;
         }
 
-        public Criteria andFromMemberOfGroupUsernameIsNull() {
-            addCriterion("from_member_of_group_username is null");
+        public Criteria andToUsernameIsNull() {
+            addCriterion("to_username is null");
             return (Criteria) this;
         }
 
-        public Criteria andFromMemberOfGroupUsernameIsNotNull() {
-            addCriterion("from_member_of_group_username is not null");
+        public Criteria andToUsernameIsNotNull() {
+            addCriterion("to_username is not null");
             return (Criteria) this;
         }
 
-        public Criteria andFromMemberOfGroupUsernameEqualTo(String value) {
-            addCriterion("from_member_of_group_username =", value, "fromMemberOfGroupUsername");
+        public Criteria andToUsernameEqualTo(String value) {
+            addCriterion("to_username =", value, "toUsername");
             return (Criteria) this;
         }
 
-        public Criteria andFromMemberOfGroupUsernameNotEqualTo(String value) {
-            addCriterion("from_member_of_group_username <>", value, "fromMemberOfGroupUsername");
+        public Criteria andToUsernameNotEqualTo(String value) {
+            addCriterion("to_username <>", value, "toUsername");
             return (Criteria) this;
         }
 
-        public Criteria andFromMemberOfGroupUsernameGreaterThan(String value) {
-            addCriterion("from_member_of_group_username >", value, "fromMemberOfGroupUsername");
+        public Criteria andToUsernameGreaterThan(String value) {
+            addCriterion("to_username >", value, "toUsername");
             return (Criteria) this;
         }
 
-        public Criteria andFromMemberOfGroupUsernameGreaterThanOrEqualTo(String value) {
-            addCriterion("from_member_of_group_username >=", value, "fromMemberOfGroupUsername");
+        public Criteria andToUsernameGreaterThanOrEqualTo(String value) {
+            addCriterion("to_username >=", value, "toUsername");
             return (Criteria) this;
         }
 
-        public Criteria andFromMemberOfGroupUsernameLessThan(String value) {
-            addCriterion("from_member_of_group_username <", value, "fromMemberOfGroupUsername");
+        public Criteria andToUsernameLessThan(String value) {
+            addCriterion("to_username <", value, "toUsername");
             return (Criteria) this;
         }
 
-        public Criteria andFromMemberOfGroupUsernameLessThanOrEqualTo(String value) {
-            addCriterion("from_member_of_group_username <=", value, "fromMemberOfGroupUsername");
+        public Criteria andToUsernameLessThanOrEqualTo(String value) {
+            addCriterion("to_username <=", value, "toUsername");
             return (Criteria) this;
         }
 
-        public Criteria andFromMemberOfGroupUsernameLike(String value) {
-            addCriterion("from_member_of_group_username like", value, "fromMemberOfGroupUsername");
+        public Criteria andToUsernameLike(String value) {
+            addCriterion("to_username like", value, "toUsername");
             return (Criteria) this;
         }
 
-        public Criteria andFromMemberOfGroupUsernameNotLike(String value) {
-            addCriterion("from_member_of_group_username not like", value, "fromMemberOfGroupUsername");
+        public Criteria andToUsernameNotLike(String value) {
+            addCriterion("to_username not like", value, "toUsername");
             return (Criteria) this;
         }
 
-        public Criteria andFromMemberOfGroupUsernameIn(List<String> values) {
-            addCriterion("from_member_of_group_username in", values, "fromMemberOfGroupUsername");
+        public Criteria andToUsernameIn(List<String> values) {
+            addCriterion("to_username in", values, "toUsername");
             return (Criteria) this;
         }
 
-        public Criteria andFromMemberOfGroupUsernameNotIn(List<String> values) {
-            addCriterion("from_member_of_group_username not in", values, "fromMemberOfGroupUsername");
+        public Criteria andToUsernameNotIn(List<String> values) {
+            addCriterion("to_username not in", values, "toUsername");
             return (Criteria) this;
         }
 
-        public Criteria andFromMemberOfGroupUsernameBetween(String value1, String value2) {
-            addCriterion("from_member_of_group_username between", value1, value2, "fromMemberOfGroupUsername");
+        public Criteria andToUsernameBetween(String value1, String value2) {
+            addCriterion("to_username between", value1, value2, "toUsername");
             return (Criteria) this;
         }
 
-        public Criteria andFromMemberOfGroupUsernameNotBetween(String value1, String value2) {
-            addCriterion("from_member_of_group_username not between", value1, value2, "fromMemberOfGroupUsername");
+        public Criteria andToUsernameNotBetween(String value1, String value2) {
+            addCriterion("to_username not between", value1, value2, "toUsername");
+            return (Criteria) this;
+        }
+
+        public Criteria andToRemarknameIsNull() {
+            addCriterion("to_remarkname is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andToRemarknameIsNotNull() {
+            addCriterion("to_remarkname is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andToRemarknameEqualTo(String value) {
+            addCriterion("to_remarkname =", value, "toRemarkname");
+            return (Criteria) this;
+        }
+
+        public Criteria andToRemarknameNotEqualTo(String value) {
+            addCriterion("to_remarkname <>", value, "toRemarkname");
+            return (Criteria) this;
+        }
+
+        public Criteria andToRemarknameGreaterThan(String value) {
+            addCriterion("to_remarkname >", value, "toRemarkname");
+            return (Criteria) this;
+        }
+
+        public Criteria andToRemarknameGreaterThanOrEqualTo(String value) {
+            addCriterion("to_remarkname >=", value, "toRemarkname");
+            return (Criteria) this;
+        }
+
+        public Criteria andToRemarknameLessThan(String value) {
+            addCriterion("to_remarkname <", value, "toRemarkname");
+            return (Criteria) this;
+        }
+
+        public Criteria andToRemarknameLessThanOrEqualTo(String value) {
+            addCriterion("to_remarkname <=", value, "toRemarkname");
+            return (Criteria) this;
+        }
+
+        public Criteria andToRemarknameLike(String value) {
+            addCriterion("to_remarkname like", value, "toRemarkname");
+            return (Criteria) this;
+        }
+
+        public Criteria andToRemarknameNotLike(String value) {
+            addCriterion("to_remarkname not like", value, "toRemarkname");
+            return (Criteria) this;
+        }
+
+        public Criteria andToRemarknameIn(List<String> values) {
+            addCriterion("to_remarkname in", values, "toRemarkname");
+            return (Criteria) this;
+        }
+
+        public Criteria andToRemarknameNotIn(List<String> values) {
+            addCriterion("to_remarkname not in", values, "toRemarkname");
+            return (Criteria) this;
+        }
+
+        public Criteria andToRemarknameBetween(String value1, String value2) {
+            addCriterion("to_remarkname between", value1, value2, "toRemarkname");
+            return (Criteria) this;
+        }
+
+        public Criteria andToRemarknameNotBetween(String value1, String value2) {
+            addCriterion("to_remarkname not between", value1, value2, "toRemarkname");
+            return (Criteria) this;
+        }
+
+        public Criteria andToNicknameIsNull() {
+            addCriterion("to_nickname is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andToNicknameIsNotNull() {
+            addCriterion("to_nickname is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andToNicknameEqualTo(String value) {
+            addCriterion("to_nickname =", value, "toNickname");
+            return (Criteria) this;
+        }
+
+        public Criteria andToNicknameNotEqualTo(String value) {
+            addCriterion("to_nickname <>", value, "toNickname");
+            return (Criteria) this;
+        }
+
+        public Criteria andToNicknameGreaterThan(String value) {
+            addCriterion("to_nickname >", value, "toNickname");
+            return (Criteria) this;
+        }
+
+        public Criteria andToNicknameGreaterThanOrEqualTo(String value) {
+            addCriterion("to_nickname >=", value, "toNickname");
+            return (Criteria) this;
+        }
+
+        public Criteria andToNicknameLessThan(String value) {
+            addCriterion("to_nickname <", value, "toNickname");
+            return (Criteria) this;
+        }
+
+        public Criteria andToNicknameLessThanOrEqualTo(String value) {
+            addCriterion("to_nickname <=", value, "toNickname");
+            return (Criteria) this;
+        }
+
+        public Criteria andToNicknameLike(String value) {
+            addCriterion("to_nickname like", value, "toNickname");
+            return (Criteria) this;
+        }
+
+        public Criteria andToNicknameNotLike(String value) {
+            addCriterion("to_nickname not like", value, "toNickname");
+            return (Criteria) this;
+        }
+
+        public Criteria andToNicknameIn(List<String> values) {
+            addCriterion("to_nickname in", values, "toNickname");
+            return (Criteria) this;
+        }
+
+        public Criteria andToNicknameNotIn(List<String> values) {
+            addCriterion("to_nickname not in", values, "toNickname");
+            return (Criteria) this;
+        }
+
+        public Criteria andToNicknameBetween(String value1, String value2) {
+            addCriterion("to_nickname between", value1, value2, "toNickname");
+            return (Criteria) this;
+        }
+
+        public Criteria andToNicknameNotBetween(String value1, String value2) {
+            addCriterion("to_nickname not between", value1, value2, "toNickname");
             return (Criteria) this;
         }
 

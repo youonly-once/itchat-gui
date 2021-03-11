@@ -56,5 +56,6 @@ public class AddMsgList {
     private String text;
     private WXReceiveMsgCodeEnum Type;
     private String memberName;
+    private String filePath;
 
 }

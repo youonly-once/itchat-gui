@@ -1,4 +1,4 @@
-package cn.shu.wechat.beans.msg;
+package cn.shu.wechat.beans.msg.send;
 
 import lombok.Data;
 
@@ -8,7 +8,7 @@ import lombok.Data;
  * @创建时间 3/3/2021 3:44 PM
  */
 @Data
-public class SendMsgResponse {
+public class WebWXSendMsgResponse {
 
 
     private BaseResponse BaseResponse;
@@ -16,8 +16,7 @@ public class SendMsgResponse {
     private String LocalID;
 
     @Data
-    static
-    class BaseResponse {
+    public static class BaseResponse {
 
         private int Ret;
         private String ErrMsg;

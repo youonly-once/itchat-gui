@@ -29,7 +29,7 @@ public enum URLEnum {
     WEB_WX_VERIFYUSER("%s/webwxverifyuser?r=%s&lang=zh_CN&pass_ticket=%s", "被动添加好友"),
     WEB_WX_GET_MEDIA("%s/webwxgetmedia", "下载文件"),
     WEB_WX_GET_HEAD_IMAGE("https://wx2.qq.com/%s&type=big", "下载头像"),
-    WEB_WX_REVOKE_MSG("%scgi-bin/mmwebwx-bin/webwxrevokemsg?lang=zh_CN&pass_ticket=%s", "撤回消息"),
+    WEB_WX_REVOKE_MSG("%s/cgi-bin/mmwebwx-bin/webwxrevokemsg", "撤回消息"),
     WEB_WX_SEND_PIC_MSG("%s/webwxsendmsgimg?fun=async&f=json&pass_ticket=%s","图片消息"),
     WEB_WX_SEND_VIDEO_MSG("%s/webwxsendvideomsg?fun=async&f=json&pass_ticket=%s","图片消息")
 

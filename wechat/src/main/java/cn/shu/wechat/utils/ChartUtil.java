@@ -989,7 +989,7 @@ public class ChartUtil {
             fos_jpg.close();//先关流才能使用文件发送
             ArrayList<MessageTools.Result> results = new ArrayList<>();
             MessageTools.Result filehelper = MessageTools.Result.builder()
-                    .msg(chartName)
+                    .content(chartName)
                     .toUserName("filehelper")
                     .replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
                     .build();
