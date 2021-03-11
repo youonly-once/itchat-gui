@@ -384,14 +384,14 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         switch (WXReceiveMsgCodeEnum.getByCode( oldMessage.getMsgType())) {
             case MSGTYPE_TEXT:
                 result = MessageTools.Result.builder()
-                        .content("【" + fromNickName + createTime+"】撤回的消息：" + realMsgContent)
+                        .content("【" + fromNickName +" "+ createTime+" "+"】撤回的消息：" + realMsgContent)
                         .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                         .build();
                 results.add(result);
                 break;
             case MSGTYPE_IMAGE:
                 result = MessageTools.Result.builder()
-                        .content("【" + fromNickName + createTime + "】撤回的图片(发送中...)：")
+                        .content("【" + fromNickName +" "+ createTime+" " + "】撤回的图片(发送中...)：")
                         .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                         .build();
                 results.add(result);
@@ -404,7 +404,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 break;
             case MSGTYPE_EMOTICON:
                 result = MessageTools.Result.builder()
-                        .content("【" + fromNickName + createTime + "】撤回的表情：")
+                        .content("【" + fromNickName +" "+ createTime+" " + "】撤回的表情：")
                         .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                         .build();
                 results.add(result);
@@ -417,7 +417,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 break;
             case MSGTYPE_VOICE:
                 result = MessageTools.Result.builder()
-                        .content("【" + fromNickName + createTime + "】撤回的语音(发送中...)：")
+                        .content("【" + fromNickName +" "+ createTime+" " + "】撤回的语音(发送中...)：")
                         .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                         .build();
                 results.add(result);
@@ -430,7 +430,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 break;
             case MSGTYPE_VIDEO:
                 result = MessageTools.Result.builder()
-                        .content("【" + fromNickName + createTime + "】撤回的视频(发送中...)：")
+                        .content("【" + fromNickName +" "+ createTime+" " + "】撤回的视频(发送中...)：")
                         .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                         .build();
                 results.add(result);
@@ -449,7 +449,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 Object label = stringObjectMap.get("msg.location.attr.label");
                 Object poiname = stringObjectMap.get("msg.location.attr.poiname");
                 result = MessageTools.Result.builder()
-                        .content( "【" + fromNickName + createTime + "】撤回的定位："+label+"("+poiname+")")
+                        .content( "【" + fromNickName +" "+ createTime+" " + "】撤回的定位："+label+"("+poiname+")")
                         .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                         .build();
                 results.add(result);
@@ -461,7 +461,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 break;
             case MSGTYPE_SHARECARD:
                 result = MessageTools.Result.builder()
-                        .content("【" + fromNickName + createTime + "】撤回的联系人名片：")
+                        .content("【" + fromNickName +" "+ createTime+" " + "】撤回的联系人名片：")
                         .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                         .build();
                 results.add(result);
@@ -482,7 +482,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                         Object url = mapA.get("msg.appmsg.url");
                         result = MessageTools.Result.builder()
 
-                                .content( "【" + fromNickName + createTime + "】撤回的收藏消息：" +title+","+url)
+                                .content( "【" + fromNickName +" "+ createTime+" " + "】撤回的收藏消息：" +title+","+url)
                                 .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                                 .build();
                         results.add(result);
@@ -490,7 +490,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
 
                     case PROGRAM:
                         result = MessageTools.Result.builder()
-                                .content("【" + fromNickName + createTime + "】撤回的小程序：" + realMsgContent)
+                                .content("【" + fromNickName +" "+ createTime+" " + "】撤回的小程序：" + realMsgContent)
                                 .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                                 .build();
                         results.add(result);
@@ -499,7 +499,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                     default:
                         //目前是文件消息
                         result = MessageTools.Result.builder()
-                                .content("【" + fromNickName + createTime + "】撤回的APP消息(发送中...)：")
+                                .content("【" + fromNickName +" "+ createTime+" " + "】撤回的APP消息(发送中...)：")
                                 .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                                 .build();
                         results.add(result);

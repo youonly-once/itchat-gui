@@ -52,7 +52,7 @@ public class LogUtil {
             }
         }
         return String.format(title+"【%s ->>>>>>> %s: %s】 ===%s",fromUser,toUser
-                        , StringUtils.isEmpty(path)?msg.getContent():path
+                        , StringUtils.isEmpty(path)?(StringUtils.isEmpty(msg.getFilePath())?msg.getContent():msg.getFilePath()):path
                 ,msg.toString());
     }
 
@@ -99,6 +99,6 @@ public class LogUtil {
             toUserName = WechatTools.getDisplayNameByUserName(toUserName);
         }
 
-        return String.format("【%s ->>>>>>> %s】: %s",Core.getNickName(),toUserName , content) ;
+        return String.format( msgType+ "【%s ->>>>>>> %s】: %s",Core.getNickName(),toUserName , content) ;
     }
 }

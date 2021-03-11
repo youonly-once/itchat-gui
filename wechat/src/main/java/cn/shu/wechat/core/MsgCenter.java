@@ -103,20 +103,16 @@ public class MsgCenter {
                 break;
             case MSGTYPE_IMAGE:
                 //存储消息
-                msg.setContent(path);
                 results = msgHandler.picMsgHandle(msg);
                 break;
             case MSGTYPE_VOICE:
                 results = msgHandler.voiceMsgHandle(msg);
-                msg.setContent(path);
                 break;
             case MSGTYPE_VIDEO:
             case MSGTYPE_MICROVIDEO:
                 results = msgHandler.videoMsgHandle(msg);
-                msg.setContent(path);
                 break;
             case MSGTYPE_EMOTICON:
-                msg.setContent(path);
                 results = msgHandler.emotionMsgHandle(msg);
                 break;
             case MSGTYPE_APP:
@@ -124,13 +120,10 @@ public class MsgCenter {
                     case UNKNOWN:
                         break;
                     case FAVOURITE:
-                        msg.setContent( msg.getUrl());
                         break;
                     case FILE:
-                        msg.setContent( path);
                         break;
                     case PROGRAM:
-                        msg.setContent(msg.getFileName()+","+msg.getUrl());
                         break;
                 }
                 results = msgHandler.appMsgHandle(msg);
