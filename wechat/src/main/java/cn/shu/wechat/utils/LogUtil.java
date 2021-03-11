@@ -92,7 +92,7 @@ public class LogUtil {
      * @param content 发送内容
      * @return 日志内容
      */
-    public static String  printToMeg(String toUserName,String content){
+    public static String  printToMeg(String msgType,String toUserName,String content){
         if (toUserName.startsWith("@@")){
             toUserName = WechatTools.getGroupDisplayNameByUserName(toUserName)+"(Group)";
         }else{

@@ -239,4 +239,14 @@ public class DateUtil {// 返回查询时间
 		return diffMillisecond;
 	}
 
+	public static String format(Date date,String format){
+		SimpleDateFormat simpleDateFormat=new SimpleDateFormat(format);
+		return simpleDateFormat.format(date);
+	}
+
+	public static String format(Date date){
+		String format="HH:mm:ss";
+		return format(date,format);
+	}
+
 }

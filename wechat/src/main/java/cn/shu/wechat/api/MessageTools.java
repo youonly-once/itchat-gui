@@ -89,7 +89,7 @@ public class MessageTools {
             }
             WebWXSendMsgResponse sendMsgResponse = null;
             try {
-                String content = formatXml(result.content);
+                String content = XmlStreamUtil.formatXml(result.content);
                 switch (result.replyMsgTypeEnum) {
                     case PIC://图片消息
                         //至少间隔1秒发送
@@ -112,10 +112,9 @@ public class MessageTools {
                         break;
 
                     default://其他消息发送文件
-                        content = formatXml(result.content);
                         sendMsgResponse = sendAppMsgByUserId(toUserName, result.filePath,content);
                 }
-                log.info(" : " + LogUtil.printToMeg(toUserName, content));
+                log.info(LogUtil.printToMeg(result.replyMsgTypeEnum.getMsg(),toUserName,StringUtils.isEmpty(result.filePath)?content: result.filePath));
                 if (sendMsgResponse == null ) {
                     log.error("发送消息失败：{}", result);
                 }else if (sendMsgResponse.getBaseResponse().getRet() != 0){
@@ -129,11 +128,7 @@ public class MessageTools {
         }
 
     }
-    private static  String formatXml(String content){
-        return content.replace("&lt;", "<")
-                .replace("&gt;", ">")
-                .replace("<br/>", "").replace("\t","");
-    }
+
 
     /**
      * 保存发送的消息到数据库
@@ -410,8 +405,7 @@ public class MessageTools {
         try {
             if (StringUtils.isNotEmpty(content)) {
                 Map<String, Object> stringObjectMap = XmlStreamUtil.toMap(content);
-                Map<String, Object> emoji_v = (Map<String, Object>) stringObjectMap.get("emoji_V");
-                md5 = emoji_v.get("md5").toString();
+                md5 = stringObjectMap.get("msg.emoji.attr.md5").toString();
             }
         }catch (Exception e){
 
@@ -426,7 +420,6 @@ public class MessageTools {
            textMsg.EmojiFlag = 2;
        }else{
            textMsg.EMoticonMd5 = md5;
-           textMsg.EmojiFlag = null;
        }
         textMsg.ToUserName = userId;
         msgRequest.Scene = 2;
@@ -514,6 +507,7 @@ public class MessageTools {
             String title = new File(filePath).getName();
             String appid = Config.API_WXAPPID;
             String fileext =  title.split("\\.")[1];
+            if (fileext == null)fileext ="";
             WebWXUploadMediaResponse webWXUploadMediaResponse = webWxUploadMedia(filePath, Core.getUserName(), userId);
             long totallen = webWXUploadMediaResponse.getStartPos();
             String attachid =  webWXUploadMediaResponse.getMediaId();
@@ -524,11 +518,16 @@ public class MessageTools {
                     "<fileext>" + fileext + "</fileext>" +
                     "</appattach><extinfo></extinfo></appmsg>";
         }else{
-            String substring = content.substring(content.indexOf("<appattach>"), content.indexOf("</fileext>"));
-            String title = content.substring(content.indexOf("<title>"),content.indexOf("</title>"));
-           content =  "<appmsg appid='wxeb7ec651dd0aefa9' sdkver=''>" +
-                   title+"</title><des></des><action></action><type>6</type><content></content><url></url><lowurl></lowurl>"
-                    +substring+ "</fileext>" +
+            Map<String, Object> stringObjectMap = XmlStreamUtil.toMap(content);
+            Object attachid_ = stringObjectMap.get("msg.appmsg.appattach.attachid");
+            Object totallen = stringObjectMap.get("msg.appmsg.appattach.totallen");
+            Object fileext = stringObjectMap.get("msg.appmsg.appattach.fileext");
+            Object title = stringObjectMap.get("msg.appmsg.title");
+            content = "<appmsg appid='wxeb7ec651dd0aefa9' sdkver=''>" +
+                    "<title>" + title + "</title><des></des><action></action><type>6</type><content></content><url></url><lowurl></lowurl>"
+                    + "<appattach><totallen>" + totallen + "</totallen>" +
+                    "<attachid>" + attachid_ + "</attachid>" +
+                    "<fileext>" + fileext + "</fileext>" +
                     "</appattach><extinfo></extinfo></appmsg>";
 
         }

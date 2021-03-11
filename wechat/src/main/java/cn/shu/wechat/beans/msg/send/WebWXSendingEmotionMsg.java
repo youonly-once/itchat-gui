@@ -11,7 +11,7 @@ import cn.shu.wechat.enums.WXSendMsgCodeEnum;
  */
 
 public class WebWXSendingEmotionMsg extends WebWXSendingMsg {
-    public Integer EmojiFlag = 2;
+    public Integer EmojiFlag = null;
     public String EMoticonMd5;
     public WebWXSendingEmotionMsg() {
         super( WXSendMsgCodeEnum.EMOTION.getCode());

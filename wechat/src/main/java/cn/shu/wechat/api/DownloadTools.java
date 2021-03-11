@@ -283,7 +283,13 @@ public class DownloadTools {
                     case PROGRAM:
                         break;
                     case FILE:
-                        ext = msg.getFileName().substring(msg.getFileName().lastIndexOf("."));
+                        int i = msg.getFileName().lastIndexOf(".");
+                        if (i== -1){
+                            ext = "";
+                        }else{
+                            ext = msg.getFileName().substring(i);
+                        }
+
                         break;
                 }
                 break;

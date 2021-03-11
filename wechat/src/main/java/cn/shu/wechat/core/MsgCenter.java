@@ -75,6 +75,7 @@ public class MsgCenter {
         if (msgType == MSGTYPE_TEXT && msg.getUrl().length() != 0) {
             //地图消息
             msg.setMsgType(WXReceiveMsgCodeEnum.MSGTYPE_MAP.getCode());
+            msgType = WXReceiveMsgCodeEnum.MSGTYPE_MAP;
         }
         //下载资源文件
         String path = DownloadTools.getDownloadFilePath(msg);
@@ -88,19 +89,11 @@ public class MsgCenter {
         //存储消息
         storeMsgToDB(msg);
         //打印日志
-        log.info(LogUtil.printFromMeg(msg, msgType.getDesc()));
+        log.info(LogUtil.printFromMeg(msg,msgType.getDesc()));
         //需要发送的消息
         List<MessageTools.Result> results = null;
         switch (msgType) {
             case MSGTYPE_MAP:
-                //地图消息
-                String regEx = "(.+?\\(.+?\\))";
-                Matcher matcher = CommonTools.getMatcher(regEx, msg.getContent());
-                String data = "Map";
-                if (matcher.find()) {
-                    data = matcher.group(1);
-                }
-                msg.setText(data);
                 results = msgHandler.mapMsgHandle(msg);
                 break;
             case MSGTYPE_TEXT:
@@ -164,11 +157,6 @@ public class MsgCenter {
                 results = msgHandler.addFriendMsgHandle(msg);
                 break;
             case MSGTYPE_SHARECARD:
-                String content = msg.getContent();
-                content = content.replace("&lt;", "<").replace("&gt;", ">").replace("<br/>", "");
-                Map<String, Object> map = XmlStreamUtil.toMap(content);
-                Map<String, String> msgMap = (Map<String, String>) map.get("msg_V");
-                msg.setContent(msgMap.get("username") + "," + msgMap.get("nickname"));
                 results = msgHandler.nameCardMsgHandle(msg);
                 break;
             case MSGTYPE_RECALLED:
