@@ -160,7 +160,7 @@ public class LoginController {
 				Core.getContactHeadImgPath().put(value.getString("UserName"), headImgUrl);
 				//System.out.println("头像已下载：" + headImgUrl);
 			};
-			executorService.execute(runnable);
+			//executorService.execute(runnable);
 
 		}
 		for (Map.Entry<String, JSONObject> stringJSONObjectEntry : Core.getContactMap().entrySet()) {
@@ -170,7 +170,7 @@ public class LoginController {
 				Core.getContactHeadImgPath().put(value.getString("UserName"), headImgUrl);
 				//System.out.println("头像已下载：" + headImgUrl);
 			};
-			executorService.submit(runnable);
+			//executorService.submit(runnable);
 
 		}
 		executorService.shutdown();

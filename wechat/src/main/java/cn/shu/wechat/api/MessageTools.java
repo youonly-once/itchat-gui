@@ -89,27 +89,33 @@ public class MessageTools {
             }
             WebWXSendMsgResponse sendMsgResponse = null;
             try {
+                String content = formatXml(result.content);
                 switch (result.replyMsgTypeEnum) {
                     case PIC://图片消息
                         //至少间隔1秒发送
                         long l = new Date().getTime() - lastSendImgDate.getTime();
                         lastSendImgDate = new Date();
                         if (l > 0 && l < 1000) SleepUtils.sleep(1000 - l);
-                        sendMsgResponse = sendPicMsgByUserId(toUserName, result.filePath,result.content);
+                        sendMsgResponse = sendPicMsgByUserId(toUserName, result.filePath,content);
                         break;
                     case TEXT://文本消息
-                        sendMsgResponse = sendTextMsgByUserId(result.content, toUserName);
+                        sendMsgResponse = sendTextMsgByUserId(content, toUserName);
                         break;
                     case VIDEO:
-                        sendMsgResponse = sendVideoMsgByUserId(toUserName, result.filePath,result.content);
+                        sendMsgResponse = sendVideoMsgByUserId(toUserName, result.filePath,content);
+                        break;
+                    case EMOTION:
+                        sendMsgResponse = sendEmotionMsgByUserId(toUserName, result.filePath,content);
                         break;
                     case CARD:
-                        sendMsgResponse = sendCardMsgByUserId(toUserName,result.content);
+                        sendMsgResponse = sendCardMsgByUserId(toUserName,content);
                         break;
+
                     default://其他消息发送文件
-                        sendMsgResponse = sendAppMsgByUserId(toUserName, result.filePath,result.content);
+                        content = formatXml(result.content);
+                        sendMsgResponse = sendAppMsgByUserId(toUserName, result.filePath,content);
                 }
-                log.info(" : " + LogUtil.printToMeg(toUserName, result.content));
+                log.info(" : " + LogUtil.printToMeg(toUserName, content));
                 if (sendMsgResponse == null ) {
                     log.error("发送消息失败：{}", result);
                 }else if (sendMsgResponse.getBaseResponse().getRet() != 0){
@@ -122,6 +128,11 @@ public class MessageTools {
 
         }
 
+    }
+    private static  String formatXml(String content){
+        return content.replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace("<br/>", "").replace("\t","");
     }
 
     /**
@@ -188,9 +199,6 @@ public class MessageTools {
         String url = String.format(URLEnum.WEB_WX_SEND_MSG.getUrl(), Core.getLoginInfoMap().get("url"));
         WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
         WebWXSendingMsg textMsg = new WebWXSendingTextMsg();
-        content =  content.replace("&lt;", "<")
-                .replace("&gt;", ">")
-                .replace("<br/>","");
         textMsg.Content =content;
         textMsg.ToUserName = toUserName;
         msgRequest.Msg = textMsg;
@@ -209,14 +217,12 @@ public class MessageTools {
         String url = String.format(URLEnum.WEB_WX_SEND_MSG.getUrl(), Core.getLoginInfoMap().get("url"));
         WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
         WebWXSendingCardMsg textMsg = new WebWXSendingCardMsg();
-        content =  content.replace("&lt;", "<")
-                .replace("&gt;", ">")
-                .replace("<br/>","");
         textMsg.Content =content;
         textMsg.ToUserName = toUserName;
         msgRequest.Msg = textMsg;
         return sendMsg(msgRequest,url);
     }
+
 
     /**
      * @param filePath     文件路径
@@ -237,9 +243,13 @@ public class MessageTools {
                 break;
             }
         }
+        long fileSize = file.length();
+        if (fileSize<=0){
+            throw new WebWXException("文件大小为："+fileSize+"," + filePath);
+        }
         DownloadTools.fileDownloadStatus.remove(filePath);
         String fileType = WeChatToolXXX.fileType(file);
-        long fileSize = file.length();
+
         //大于20M不能发送吗？需要压缩
         if (fileSize > 1024 * 1024 * 20) {
             switch (fileType) {
@@ -382,6 +392,50 @@ public class MessageTools {
     }
 
     /**
+     * 根据用户id发送表情消息
+     *
+     * @param userId
+     * @param filePath
+     * @return
+     * @author SXS
+     * @date 2017年5月7日 下午10:34:24
+     */
+    public static WebWXSendMsgResponse sendEmotionMsgByUserId(String userId, String filePath,String content) throws WebWXException, IOException {
+
+        String url = String.format(URLEnum.WEB_WX_SEND_EMOTION_MSG.getUrl(), Core.getLoginInfoMap().get("url"));
+
+        WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
+        WebWXSendingEmotionMsg textMsg = new WebWXSendingEmotionMsg();
+        String md5 = null;
+        try {
+            if (StringUtils.isNotEmpty(content)) {
+                Map<String, Object> stringObjectMap = XmlStreamUtil.toMap(content);
+                Map<String, Object> emoji_v = (Map<String, Object>) stringObjectMap.get("emoji_V");
+                md5 = emoji_v.get("md5").toString();
+            }
+        }catch (Exception e){
+
+        }
+        /**
+         * content里面有表情md5可直接发送
+         * 没有则通过filepath上传使用mediaid发送
+         */
+       if (md5 == null){
+           WebWXUploadMediaResponse resp = webWxUploadMedia(filePath, Core.getUserName(), userId);
+           textMsg.MediaId = resp.getMediaId();
+           textMsg.EmojiFlag = 2;
+       }else{
+           textMsg.EMoticonMd5 = md5;
+           textMsg.EmojiFlag = null;
+       }
+        textMsg.ToUserName = userId;
+        msgRequest.Scene = 2;
+        msgRequest.Msg = textMsg;
+        return sendMsg(msgRequest,url);
+
+    }
+
+    /**
      * 根据用户id发送撤回消息
      *
      * @param userId
@@ -427,10 +481,6 @@ public class MessageTools {
             WebWXUploadMediaResponse resp = webWxUploadMedia(filePath, Core.getUserName(), userId);
             mediaId = resp.getMediaId();
             content = "";
-        }else{
-            content =  content.replace("&lt;", "<")
-                    .replace("&gt;", ">")
-                    .replace("<br/>","");
         }
         String url = String.format(URLEnum.WEB_WX_SEND_VIDEO_MSG.getUrl(), Core.getLoginInfoMap().get("url"),
                 Core.getLoginInfoMap().get("pass_ticket"));
@@ -474,9 +524,6 @@ public class MessageTools {
                     "<fileext>" + fileext + "</fileext>" +
                     "</appattach><extinfo></extinfo></appmsg>";
         }else{
-            content =  content.replace("&lt;", "<")
-                    .replace("&gt;", ">")
-                    .replace("<br/>","").replace("\t","");
             String substring = content.substring(content.indexOf("<appattach>"), content.indexOf("</fileext>"));
             String title = content.substring(content.indexOf("<title>"),content.indexOf("</title>"));
            content =  "<appmsg appid='wxeb7ec651dd0aefa9' sdkver=''>" +

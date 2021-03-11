@@ -19,7 +19,6 @@ public class DataBaseOpeator {
 
 
 	private DataBaseOpeator() {
-		// TODO Auto-generated constructor stub
 	}
 
 	public static DataBaseOpeator getInstance() {
@@ -197,7 +196,7 @@ public class DataBaseOpeator {
 				simpleDateFormat.parse(dateBegin);
 				dateEnd = DateUtil.getdDayAdd1(simpleDateFormat.parse(dateEnd));
 			} catch (IndexOutOfBoundsException | ParseException e) {
-				// TODO: handle exception
+
 
 				return "日期格式不正确\n"+WXServletConfig.TIP_STR[5];
 			}

@@ -277,7 +277,6 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 results = handleTuLingMsg(TuLingUtil.robotMsgTuling(text), msg);
             }
         } catch (JSONException | NullPointerException | IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return results;
@@ -410,7 +409,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 result = MessageTools.Result.builder()
                         .filePath(filePath)
                         .content(realMsgContent)
-                        .replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
+                        .replyMsgTypeEnum(WXSendMsgCodeEnum.EMOTION)
                         .build();
                 results.add(result);
                 break;

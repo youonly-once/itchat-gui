@@ -18,7 +18,7 @@ public class WebWXSendingMsg {
 
     public int Type = 0;
 
-    public long LocalID=  Long.parseLong(new Date().getTime()+ String.valueOf(new Random().nextLong()).substring(1, 5));
+    public long LocalID=  ClientMsgId;
 
     public String Content = "";
 
@@ -26,7 +26,8 @@ public class WebWXSendingMsg {
 
     public String ToUserName = "";
 
-    public String MediaId = "";
+    public String MediaId = null;
+
 
 
     public WebWXSendingMsg() {
