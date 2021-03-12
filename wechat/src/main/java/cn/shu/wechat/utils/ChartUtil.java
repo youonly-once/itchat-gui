@@ -1,7 +1,7 @@
 package cn.shu.wechat.utils;
 
 import cn.shu.wechat.api.MessageTools;
-import cn.shu.wechat.api.WechatTools;
+import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.beans.pojo.MessageExample;
 import cn.shu.wechat.core.Core;
@@ -326,11 +326,11 @@ public class ChartUtil {
         MessageExample.Criteria criteria2 = messageExample.or();
 
         criteria.andFromUsernameEqualTo(userName);
-        criteria1.andFromNicknameEqualTo(WechatTools.getNickNameByUserName(userName));
-        criteria2.andFromRemarknameEqualTo(WechatTools.getRemarkNameByUserName(userName));
-        messageExample.or().andToNicknameEqualTo(WechatTools.getNickNameByUserName(userName));
+        criteria1.andFromNicknameEqualTo(ContactsTools.getNickNameByUserName(userName));
+        criteria2.andFromRemarknameEqualTo(ContactsTools.getRemarkNameByUserName(userName));
+        messageExample.or().andToNicknameEqualTo(ContactsTools.getNickNameByUserName(userName));
         messageExample.or().andToUsernameEqualTo(userName);
-        messageExample.or().andToRemarknameEqualTo(WechatTools.getRemarkNameByUserName(userName));
+        messageExample.or().andToRemarknameEqualTo(ContactsTools.getRemarkNameByUserName(userName));
         List<Message> messages = messageMapper.selectByExample(messageExample);
 
         Map<String, AtomicInteger> msgCount = new HashMap<>();
@@ -384,11 +384,11 @@ public class ChartUtil {
         MessageExample.Criteria criteria2 = messageExample.or();
 
         criteria.andFromUsernameEqualTo(userName);
-        criteria1.andFromNicknameEqualTo(WechatTools.getNickNameByUserName(userName));
-        criteria2.andFromRemarknameEqualTo(WechatTools.getRemarkNameByUserName(userName));
-        messageExample.or().andToNicknameEqualTo(WechatTools.getNickNameByUserName(userName));
+        criteria1.andFromNicknameEqualTo(ContactsTools.getNickNameByUserName(userName));
+        criteria2.andFromRemarknameEqualTo(ContactsTools.getRemarkNameByUserName(userName));
+        messageExample.or().andToNicknameEqualTo(ContactsTools.getNickNameByUserName(userName));
         messageExample.or().andToUsernameEqualTo(userName);
-        messageExample.or().andToRemarknameEqualTo(WechatTools.getRemarkNameByUserName(userName));
+        messageExample.or().andToRemarknameEqualTo(ContactsTools.getRemarkNameByUserName(userName));
         List<Message> messages = messageMapper.selectByExample(messageExample);
 
         Map<String, AtomicInteger> msgType = new HashMap<>();
@@ -1280,36 +1280,37 @@ public class ChartUtil {
         Arrays.sort(args, cmp);
     }
 
-}
+    static class MapValueComparator implements Comparator<Map.Entry<String, AtomicInteger>> {
 
-class MapValueComparator implements Comparator<Map.Entry<String, AtomicInteger>> {
-
-    @Override
-    public int compare(Map.Entry<String, AtomicInteger> me1, Map.Entry<String, AtomicInteger> me2) {
-        if (me1.getValue().get() == me2.getValue().get()) {
-            return 0;
+        @Override
+        public int compare(Map.Entry<String, AtomicInteger> me1, Map.Entry<String, AtomicInteger> me2) {
+            if (me1.getValue().get() == me2.getValue().get()) {
+                return 0;
+            }
+            return me1.getValue().get() > me2.getValue().get() ? -1 : 1;
         }
-        return me1.getValue().get() > me2.getValue().get() ? -1 : 1;
     }
-}
 
 
-// Comparator是一个接口
+    // Comparator是一个接口
 //Comparator是一个比较器
 //Comparator中的compare可以将传入进行比对，按照返回的参数大于(1)等于(0)小于(-1)进行排序
 //默认情况下返回1的在后，返回-1的在前
 //如果我们需要逆序，只要把返回值-1和1的换位置即可。
-class MyComparator implements Comparator<Double> {
-    public int compare(Double o1, Double o2) {
-        // 如果o1小于o2，我们就返回正值，如果n1大于n2我们就返回负值，
-        if (o1 < o2) {
-            return 1;
-        } else if (o1 > o2) {
-            return -1;
-        } else {
-            return 0;
+    class MyComparator implements Comparator<Double> {
+        @Override
+        public int compare(Double o1, Double o2) {
+            // 如果o1小于o2，我们就返回正值，如果n1大于n2我们就返回负值，
+            if (o1 < o2) {
+                return 1;
+            } else if (o1 > o2) {
+                return -1;
+            } else {
+                return 0;
+            }
         }
     }
 }
+
 
 

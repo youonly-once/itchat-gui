@@ -1,10 +1,9 @@
 package cn.shu.wechat.utils;
 
-import cn.shu.wechat.api.WechatTools;
+import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.msg.sync.AddMsgList;
 import cn.shu.wechat.core.Core;
 import lombok.extern.log4j.Log4j2;
-import cn.shu.wechat.utils.Config;
 import cn.shu.wechat.enums.OsNameEnum;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -289,12 +288,12 @@ public class CommonTools {
 		}
 		msg.setGroupMsg(Boolean.TRUE);
 		//获取自己在群里的备注
-		String groupMyUserNickNameOfGroup = WechatTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), Core.getUserName());
+		String groupMyUserNickNameOfGroup = ContactsTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), Core.getUserName());
 		if (groupMyUserNickNameOfGroup != null
 				&& content.contains("@" + groupMyUserNickNameOfGroup + " ")) {
 			//@自己
 			//获取他的群备注
-			String groupOtherUserNickNameOfGroup = WechatTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), msg.getMemberName());
+			String groupOtherUserNickNameOfGroup = ContactsTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), msg.getMemberName());
 			if (groupOtherUserNickNameOfGroup != null) {
 				msg.setMentionMeUserNickName(groupOtherUserNickNameOfGroup);
 				String replace = content.replace("@" + groupMyUserNickNameOfGroup, "");

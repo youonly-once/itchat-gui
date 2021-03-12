@@ -4,7 +4,7 @@ import cn.shu.wechat.beans.msg.sync.AddMsgList;
 import cn.shu.wechat.core.Core;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.StringUtils;
-import cn.shu.wechat.api.WechatTools;
+import cn.shu.wechat.api.ContactsTools;
 
 /**
  * @作者 舒新胜
@@ -34,9 +34,9 @@ public class LogUtil {
             }else{
                 fromUser = myNickName;
                 if (msg.isGroupMsg()){
-                    toUser = WechatTools.getGroupDisplayNameByUserName(msg.getToUserName())+"(Group)";
+                    toUser = ContactsTools.getGroupDisplayNameByUserName(msg.getToUserName())+"(Group)";
                 }else{
-                    toUser =  WechatTools.getDisplayNameByUserName(msg.getToUserName());
+                    toUser =  ContactsTools.getDisplayNameByUserName(msg.getToUserName());
                 }
             }
 
@@ -44,10 +44,10 @@ public class LogUtil {
             toUser = myNickName;
             if (msg.isGroupMsg()){
                 //群成员昵称
-                String groupUserNickNameOfGroup = WechatTools.getMemberNickNameOfGroup(msg.getFromUserName(), msg.getMemberName());
-                fromUser = WechatTools.getGroupDisplayNameByUserName(msg.getFromUserName())+"("+groupUserNickNameOfGroup+")";
+                String groupUserNickNameOfGroup = ContactsTools.getMemberNickNameOfGroup(msg.getFromUserName(), msg.getMemberName());
+                fromUser = ContactsTools.getGroupDisplayNameByUserName(msg.getFromUserName())+"("+groupUserNickNameOfGroup+")";
             }else{
-                fromUser = WechatTools.getDisplayNameByUserName(msg.getFromUserName());
+                fromUser = ContactsTools.getDisplayNameByUserName(msg.getFromUserName());
 
             }
         }
@@ -83,7 +83,7 @@ public class LogUtil {
     public static String  printFromMeg(String fromUserName,String content){
         String myNickName = Core.getUserSelf().getString("NickName");
         Core.getUserSelf().getString("UserName");
-        String fromRemarkName = WechatTools.getDisplayNameByUserName(fromUserName);
+        String fromRemarkName = ContactsTools.getDisplayNameByUserName(fromUserName);
         return String.format("【%s ->>>>>>> %s: %s】",fromRemarkName,myNickName , content) ;
     }
     /**
@@ -94,9 +94,9 @@ public class LogUtil {
      */
     public static String  printToMeg(String msgType,String toUserName,String content){
         if (toUserName.startsWith("@@")){
-            toUserName = WechatTools.getGroupDisplayNameByUserName(toUserName)+"(Group)";
+            toUserName = ContactsTools.getGroupDisplayNameByUserName(toUserName)+"(Group)";
         }else{
-            toUserName = WechatTools.getDisplayNameByUserName(toUserName);
+            toUserName = ContactsTools.getDisplayNameByUserName(toUserName);
         }
 
         return String.format( msgType+ "【%s ->>>>>>> %s】: %s",Core.getNickName(),toUserName , content) ;

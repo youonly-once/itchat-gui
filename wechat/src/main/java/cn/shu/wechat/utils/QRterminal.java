@@ -14,6 +14,10 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
+/**
+ * 二维码工具类
+ * 生成可打印到控制台的二维码
+ */
 public class QRterminal {
 
     public static String getQr(String text) {

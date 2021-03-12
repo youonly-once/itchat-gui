@@ -7,7 +7,7 @@ import bean.tuling.enums.ResultType;
 import bean.tuling.response.Results;
 import bean.tuling.response.TuLingResponseBean;
 import cn.shu.wechat.api.MessageTools;
-import cn.shu.wechat.api.WechatTools;
+import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.msg.sync.AddMsgList;
 import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.beans.pojo.MessageExample;
@@ -124,7 +124,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         if (msg.getFromUserName().equals(Core.getUserName())){
             toUserName = msg.getToUserName();
         }
-        String remarkNameByGroupUserName = WechatTools.getDisplayNameByUserName(toUserName);
+        String remarkNameByGroupUserName = ContactsTools.getDisplayNameByUserName(toUserName);
         switch (text){
             case "help":
             case "/h":
@@ -349,7 +349,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         Message oldMessage = messages.get(0);
         //======家人群不发送撤回消息====
         if (msg.getFromUserName().startsWith("@@")) {
-            String to = WechatTools.getGroupDisplayNameByUserName(msg.getFromUserName());
+            String to = ContactsTools.getGroupDisplayNameByUserName(msg.getFromUserName());
             if ("<span class=\"emoji emoji2764\"></span>汪家人<span class=\"emoji emoji2764\"></span>".equals(to)
             || "弹性大数据KZK2101".equals(to)) {
                 log.error("重要群群，不发送撤回消息");
@@ -373,9 +373,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         //撤回消息的用户的昵称
         String fromNickName = "";
         if (msg.isGroupMsg()) {
-            fromNickName = WechatTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), msg.getMemberName() );
+            fromNickName = ContactsTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), msg.getMemberName() );
         } else {
-            fromNickName = WechatTools.getUserNickNameByUserName(msg.getFromUserName());
+            fromNickName = ContactsTools.getUserNickNameByUserName(msg.getFromUserName());
         }
 
         String realMsgContent = oldMessage.getContent();

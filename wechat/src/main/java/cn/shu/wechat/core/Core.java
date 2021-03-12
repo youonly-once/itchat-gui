@@ -67,6 +67,9 @@ public class Core {
 	static private Map<String, String> contactHeadImgPath = new HashMap<String, String>();
 	// CloseableHttpClient MyHttpClient = HttpClients.createDefault();
 
+	/**
+	 * 扫描登录前需获取的UUID
+	 */
 	static private String uuid = null;
 
 	static private boolean useHotReload = false;

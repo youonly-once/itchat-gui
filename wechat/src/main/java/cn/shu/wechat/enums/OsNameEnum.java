@@ -9,5 +9,9 @@ package cn.shu.wechat.enums;
  *
  */
 public enum OsNameEnum {
+
+	/**
+	 *
+	 */
 	WINDOWS, LINUX, DARWIN, MAC, OTHER
 }

@@ -1,15 +1,13 @@
 package cn.shu.wechat.controller;
 
-import cn.shu.wechat.utils.ChartUtil;
-import cn.shu.wechat.api.WechatTools;
+import cn.shu.wechat.api.WeChatTool;
+import cn.shu.wechat.utils.*;
+import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.face.IMsgHandlerFace;
 import cn.shu.wechat.service.ILoginService;
-import cn.shu.wechat.thread.CheckLoginStatusThread;
-import cn.shu.wechat.thread.UpdateContactThread;
-import cn.shu.wechat.utils.Config;
-import cn.shu.wechat.utils.SleepUtils;
-import cn.shu.wechat.utils.CommonTools;
+import cn.shu.wechat.runnable.CheckLoginStatusRunnable;
+import cn.shu.wechat.runnable.UpdateContactRunnable;
 import cn.shu.wechat.api.DownloadTools;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.log4j.Log4j2;
@@ -25,6 +23,15 @@ import java.util.concurrent.TimeUnit;
 /**
  * 登陆控制器
  *
+ *
+ * 1、获取UUID
+ * 2、下载二维码图片
+ * 3、扫描登录
+ * 4、初始化
+ * 5、状态通知
+ * 6、获取联系人
+ * 7、监听消息
+ * 8、下载头像
  * @author SXS
  * @date 创建时间：2017年5月13日 下午12:56:07
  * @version 1.1
@@ -43,49 +50,45 @@ public class LoginController {
 	 * 更新联系人的线程处理器
 	 */
 	@Resource
-	private CheckLoginStatusThread checkLoginStatusThread;
+	private CheckLoginStatusRunnable checkLoginStatusRunnable;
 
 	/**
 	 * 检测登录状态的线程
 	 */
 	@Resource
-	private UpdateContactThread updateContactThread;
+	private UpdateContactRunnable updateContactRunnable;
 
-	@Resource
-	private ChartUtil chart;
 	/**
-	 * 消息处理类
+	 * 图表工具类
 	 */
 	@Resource
-	private IMsgHandlerFace msgHandler;
-
-	private ExecutorService executorService = Executors.newCachedThreadPool();
-
+	private ChartUtil chart;
 
 	public void login(String qrPath) {
 
-		if (Core.isAlive()) { // 已登陆
-			log.info("itchat4j已登陆");
-			return;
-		}
 		while (true) {
 			Process process = null;
 			for (int count = 0; count < 10; count++) {
 				log.info("获取UUID");
-				while (loginService.getUuid() == null) {
+				while (true) {
 					log.info("1. 获取微信UUID");
-					while (loginService.getUuid() == null) {
-						log.warn("1.1. 获取微信UUID失败，两秒后重新获取");
-						SleepUtils.sleep(2000);
+					String uuid = loginService.getUuid();
+					if (uuid != null) {
+						break;
 					}
+					log.warn("1.1. 获取微信UUID失败，两秒后重新获取");
+					SleepUtils.sleep(2000);
 				}
+
 				log.info("2. 获取登陆二维码图片");
 				qrPath = qrPath + File.separator + Config. DEFAULT_QR;
 				if (loginService.getQR(qrPath)) {
 					try {
-						process = CommonTools.printQr(qrPath);// 打开登陆二维码图片
+						// 使用图片查看器打开登陆二维码图片
+						process = CommonTools.printQr(qrPath);
 					} catch (Exception e) {
 						log.info(e.getMessage());
+						log.info("请手动打开二维码图片进行扫码登录："+qrPath);
 					}
 					break;
 				} else if (count == 9) {
@@ -96,10 +99,10 @@ public class LoginController {
 			log.info("3. 请扫描二维码图片，并在手机上确认");
 			if (!Core.isAlive()) {
 				loginService.login();
-				//登录成功，关闭打开的二维码图片
+				//TODO 登录成功，关闭打开的二维码图片，暂时没有成功
 				CommonTools.closeQr(process);
 				Core.setAlive(true);
-				log.info(("登陆成功"));
+				log.info(("4、登陆成功"));
 				break;
 			}
 			log.info("4. 登陆超时，请重新扫描二维码图片");
@@ -118,75 +121,71 @@ public class LoginController {
 		CommonTools.clearScreen();
 		log.info(String.format("欢迎回来， %s", Core.getNickName()));
 
-		log.info("8. 开始接收消息");
-		loginService.startReceiving();
-
-		log.info("9. 获取联系人信息");
+		log.info("8. 获取联系人信息");
 		loginService.webWxGetContact();
 
-		log.info("10. 获取群好友及群好友列表");
+		log.info("9. 获取群好友及群好友列表");
 		loginService.WebWxBatchGetContact();
 
-		Runnable chartRunnable = new Runnable() {
-
-			@Override
-			public void run() {
-
-					while (true){try{
-						chart.create();
-						//SleepUtils.sleep(1000 * 10 );
-						SleepUtils.sleep(1000 * 60 * 60 * 8);
-					}catch (Exception e){e.printStackTrace();}
-					}
+		log.info("10. 开始接收消息");
+		loginService.startReceiving();
 
 
-			}
+
+		Runnable chartRunnable = () -> {
+
+				while (true){try{
+					chart.create();
+					//SleepUtils.sleep(1000 * 10 );
+					SleepUtils.sleep(1000 * 60 * 60 * 8);
+				}catch (Exception e){e.printStackTrace();}
+				}
+
 		};
-		new Thread(chartRunnable).start();
+		ExecutorsUtil.getGlobalExecutorService().submit(chartRunnable);
 
 		log.info("11. 缓存本次登陆好友相关消息");
-		WechatTools.setUserInfo(); // 登陆成功后缓存本次登陆好友相关消息（NickName, UserName）
+		// 登陆成功后缓存本次登陆好友相关消息（NickName, UserName）
+		WeChatTool.setUserInfo();
 
 		log.info("12.开启微信状态检测线程");
-		new Thread(checkLoginStatusThread,"CheckLoginStatusThread").start();
+		ExecutorsUtil.getGlobalExecutorService().submit(checkLoginStatusRunnable);
 
 
 		log.info("13. 下载联系人头像");
 
-		for (Map.Entry<String, JSONObject> stringJSONObjectEntry : Core.getGroupMap().entrySet()) {
+		for (Map.Entry<String, JSONObject> entry : Core.getGroupMap().entrySet()) {
 			Runnable runnable = () -> {
-				JSONObject value = stringJSONObjectEntry.getValue();
+				JSONObject value = entry.getValue();
 				String headImgUrl = DownloadTools.downloadHeadImg(value.getString("HeadImgUrl"), value.getString("UserName"));
 				Core.getContactHeadImgPath().put(value.getString("UserName"), headImgUrl);
 				//System.out.println("头像已下载：" + headImgUrl);
 			};
-			executorService.execute(runnable);
+			ExecutorsUtil.getHeadImageDownloadExecutorService().execute(runnable);
 
 		}
-		for (Map.Entry<String, JSONObject> stringJSONObjectEntry : Core.getContactMap().entrySet()) {
+		for (Map.Entry<String, JSONObject> entry : Core.getContactMap().entrySet()) {
 			Runnable runnable = () -> {
-				JSONObject value = stringJSONObjectEntry.getValue();
+				JSONObject value = entry.getValue();
 				String headImgUrl = DownloadTools.downloadHeadImg(value.getString("HeadImgUrl"), value.getString("UserName"));
 				Core.getContactHeadImgPath().put(value.getString("UserName"), headImgUrl);
 				//System.out.println("头像已下载：" + headImgUrl);
 			};
-			executorService.submit(runnable);
+			ExecutorsUtil.getHeadImageDownloadExecutorService().submit(runnable);
 
 		}
-		executorService.shutdown();
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					boolean b = executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				log.info("14.开启好友列表更新线程");
-				new Thread(updateContactThread,"UpdateContactThread").start();
-				log.info("头像下载完成");
+		ExecutorsUtil.getHeadImageDownloadExecutorService().shutdown();
+		ExecutorsUtil.getGlobalExecutorService().submit(() -> {
+			try {
+				//等待头像下载完成
+				boolean b = ExecutorsUtil.getHeadImageDownloadExecutorService().awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
-		}).start();
+			log.info("14.开启好友列表更新线程");
+			new Thread(updateContactRunnable,"UpdateContactThread").start();
+			log.info("头像下载完成");
+		});
 
 
 	}

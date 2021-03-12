@@ -14,34 +14,36 @@ import com.alibaba.fastjson.JSONObject;
  */
 public interface ILoginService {
 
-	/**
-	 * 登陆
-	 * 
-	 * @author SXS
-	 * @date 2017年5月13日 上午12:14:07
-	 * @return
-	 */
-	boolean login();
+
 
 	/**
 	 * 获取UUID
 	 * 
 	 * @author SXS
 	 * @date 2017年5月13日 上午12:21:40
-	 * @param qrPath
 	 * @return
 	 */
 	String getUuid();
 
 	/**
-	 * 获取二维码图片
+	 * 下周登录二维码图片
 	 * 
 	 * @author SXS
 	 * @date 2017年5月13日 上午12:13:51
-	 * @param qrPath
-	 * @return
+	 * @param qrPath 二维码图片保存路径
+	 * @return {@code true} 获取成功 {@code false} 获取失败
 	 */
 	boolean getQR(String qrPath);
+
+
+	/**
+	 * 登陆
+	 *
+	 * @author SXS
+	 * @date 2017年5月13日 上午12:14:07
+	 * @return {@code true} 获取成功 {@code false} 获取失败
+	 */
+	boolean login();
 
 	/**
 	 * web初始化

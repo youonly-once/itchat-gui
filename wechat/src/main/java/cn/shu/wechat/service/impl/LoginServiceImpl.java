@@ -1,25 +1,19 @@
 package cn.shu.wechat.service.impl;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 
 import cn.shu.wechat.api.MessageTools;
-import cn.shu.wechat.api.WechatTools;
 import cn.shu.wechat.beans.pojo.AttrHistory;
 import cn.shu.wechat.beans.msg.sync.AddMsgList;
 import cn.shu.wechat.beans.msg.sync.WebWxSyncMsg;
-import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.core.MsgCenter;
 import cn.shu.wechat.enums.*;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
-import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.service.ILoginService;
 import cn.shu.wechat.utils.*;
 import cn.shu.wechat.enums.parameters.BaseParaEnum;
@@ -54,10 +48,6 @@ import javax.annotation.Resource;
 @Component
 public class LoginServiceImpl implements ILoginService {
 
-    /**
-     * 消息处理线程池
-     */
-    private final ExecutorService messageExecutorService = Executors.newCachedThreadPool();
 
     @Resource
     private AttrHistoryMapper attrHistoryMapper;
@@ -138,15 +128,17 @@ public class LoginServiceImpl implements ILoginService {
         String qrUrl = URLEnum.QRCODE_URL.getUrl() + Core.getUuid();
         HttpEntity entity = MyHttpClient.doGet(qrUrl, null, true, null);
         try {
+            //下载二维码图片
             OutputStream out = new FileOutputStream(qrPath);
             byte[] bytes = EntityUtils.toByteArray(entity);
             out.write(bytes);
             out.flush();
             out.close();
-
+            //二维码地址
             String qrUrl2 = URLEnum.cAPI_qrcode.getUrl() + Core.getUuid();
+            //控制台打印二维码
             String qrString = QRterminal.getQr(qrUrl2);
-            //System.out.println("\n"+qrString);
+            System.out.println("\n"+qrString);
         } catch (Exception e) {
             log.error(e.getMessage());
             return false;
@@ -190,17 +182,18 @@ public class LoginServiceImpl implements ILoginService {
             String synckey = sb.toString();
 
             // 1_661706053|2_661706420|3_661706415|1000_1494151022
-            Core.getLoginInfoMap().put(StorageLoginInfoEnum.synckey.getKey(), synckey.substring(0, synckey.length() - 1));// 1_656161336|2_656161626|3_656161313|11_656159955|13_656120033|201_1492273724|1000_1492265953|1001_1492250432|1004_1491805192
+            // 1_656161336|2_656161626|3_656161313|11_656159955|13_656120033|201_1492273724|1000_1492265953|1001_1492250432|1004_1491805192
+            Core.getLoginInfoMap().put(StorageLoginInfoEnum.synckey.getKey(), synckey.substring(0, synckey.length() - 1));
             Core.setUserName(user.getString("UserName"));
             Core.setNickName(user.getString("NickName"));
             Core.setUserSelf(obj.getJSONObject("User"));
 
             String chatSet = obj.getString("ChatSet");
             String[] chatSetArray = chatSet.split(",");
-            for (int i = 0; i < chatSetArray.length; i++) {
-                if (chatSetArray[i].indexOf("@@") != -1) {
+            for (String s : chatSetArray) {
+                if (s.startsWith("@@")) {
                     // 更新GroupIdList
-                    Core.getGroupIdSet().add(chatSetArray[i]); //
+                    Core.getGroupIdSet().add(s);
                 }
             }
             // JSONArray contactListArray = obj.getJSONArray("ContactList");
@@ -259,7 +252,7 @@ public class LoginServiceImpl implements ILoginService {
                         String selector = resultMap.get("selector");
                         if (retcode.equals(SyncCheckRetCodeEnum.UNKOWN.getCode())) {
                             //好像搜狗输入法按语音键盘松手会触发
-                            //log.info(RetCodeEnum.UNKOWN.getType());
+                            log.info(SyncCheckRetCodeEnum.UNKOWN.getType());
                             continue;
                         } else if (retcode.equals(SyncCheckRetCodeEnum.LOGIN_OUT.getCode())) {
                             // 退出
@@ -279,7 +272,6 @@ public class LoginServiceImpl implements ILoginService {
                             //消息同步
                             JSONObject msgObj = webWxSync();
                             switch (SyncCheckSelectorEnum.getByCode(selector)) {
-
                                 case NORMAL:
                                     break;
                                 case NEW_MSG:
@@ -289,19 +281,15 @@ public class LoginServiceImpl implements ILoginService {
                                             WebWxSyncMsg webWxSyncMsg = JSON.parseObject(JSON.toJSONString(msgObj), WebWxSyncMsg.class);
                                             List<AddMsgList> addMsgLists = webWxSyncMsg.getAddMsgList();
                                             for (AddMsgList msg : addMsgLists) {
-                                                Runnable runnable = new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        try {
-                                                            msgCenter.handleNewMsg(msg);
-                                                        } catch (Exception e) {
-                                                            e.printStackTrace();
-                                                            log.error(e.getMessage());
-                                                        }
-
+                                                ExecutorsUtil.getGlobalExecutorService().submit(() -> {
+                                                    try {
+                                                        msgCenter.handleNewMsg(msg);
+                                                    } catch (Exception e) {
+                                                        e.printStackTrace();
+                                                        log.error(e.getMessage());
                                                     }
-                                                };
-                                                messageExecutorService.submit(runnable);
+
+                                                });
                                             }
                                             //联系人修改消息
                                             //MsgCenter.produceModContactMsg(webWxSyncMsg.getModContactList());
@@ -314,10 +302,8 @@ public class LoginServiceImpl implements ILoginService {
                                 case ADD_OR_DEL_CONTACT:
                                     if (msgObj != null) {
                                         try {
-                                            JSONArray msgList = new JSONArray();
-                                            msgList = msgObj.getJSONArray("AddMsgList");
+                                            JSONArray msgList = msgObj.getJSONArray("AddMsgList");
                                             JSONArray modContactList = msgObj.getJSONArray("ModContactList"); // 存在删除或者新增的好友信息
-                                            //MsgCenter.produceMsg(msgList);
                                             for (int j = 0; j < msgList.size(); j++) {
                                                 JSONObject userInfo = modContactList.getJSONObject(j);
                                                 // 存在主动加好友之后的同步联系人到本地
@@ -338,6 +324,8 @@ public class LoginServiceImpl implements ILoginService {
                                 case A:
                                     System.out.println("哈哈");
                                     break;
+                                default:
+                                    break;
 
                             }
                         }
@@ -354,7 +342,7 @@ public class LoginServiceImpl implements ILoginService {
                 }
             }
         };
-        messageExecutorService.submit(runnable);
+        ExecutorsUtil.getGlobalExecutorService().submit(runnable);
 
 
     }
@@ -377,7 +365,7 @@ public class LoginServiceImpl implements ILoginService {
             List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
             if (fullFriendsJsonList.get("Seq") != null) {
                 seq = fullFriendsJsonList.getLong("Seq");
-                currentTime = new Date().getTime();
+                currentTime = System.currentTimeMillis();
             }
             Core.setMemberCount(fullFriendsJsonList.getInteger(StorageLoginInfoEnum.MemberCount.getKey()));
             JSONArray member = fullFriendsJsonList.getJSONArray(StorageLoginInfoEnum.MemberList.getKey());
@@ -396,7 +384,7 @@ public class LoginServiceImpl implements ILoginService {
 
                 if (fullFriendsJsonList.get("Seq") != null) {
                     seq = fullFriendsJsonList.getLong("Seq");
-                    currentTime = new Date().getTime();
+                    currentTime = System.currentTimeMillis();
                 }
 
                 // 累加好友列表
@@ -456,7 +444,8 @@ public class LoginServiceImpl implements ILoginService {
             JSONObject obj = JSON.parseObject(text);
             //群列表
             JSONArray contactList = obj.getJSONArray("ContactList");
-            for (int i = 0; i < contactList.size(); i++) { // 群好友
+            for (int i = 0; i < contactList.size(); i++) {
+                // 群好友
                 JSONObject groupObject = contactList.getJSONObject(i);
                 String userName = groupObject.getString("UserName");
                 String nickName = groupObject.getString("NickName");
@@ -480,7 +469,7 @@ public class LoginServiceImpl implements ILoginService {
     @Override
     public JSONArray WebWxBatchGetContactDetail(JSONObject groupObject) {
         String url = String.format(URLEnum.WEB_WX_BATCH_GET_CONTACT.getUrl(),
-                Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()), new Date().getTime(),
+                Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()), System.currentTimeMillis(),
                 Core.getLoginInfoMap().get(StorageLoginInfoEnum.pass_ticket.getKey()));
         Map<String, Object> paramMap = Core.getParamMap();
 
@@ -557,7 +546,8 @@ public class LoginServiceImpl implements ILoginService {
         Matcher matcher = CommonTools.getMatcher(regEx, loginContent);
         if (matcher.find()) {
             String originalUrl = matcher.group(1);
-            String url = originalUrl.substring(0, originalUrl.lastIndexOf('/')); // https://wx2.qq.com/cgi-bin/mmwebwx-bin
+            // https://wx2.qq.com/cgi-bin/mmwebwx-bin
+            String url = originalUrl.substring(0, originalUrl.lastIndexOf('/'));
             Core.getLoginInfoMap().put("url", url);
             Map<String, List<String>> possibleUrlMap = this.getPossibleUrlMap();
             Iterator<Entry<String, List<String>>> iterator = possibleUrlMap.entrySet().iterator();
@@ -696,7 +686,7 @@ public class LoginServiceImpl implements ILoginService {
         Map<String, Object> paramMap = Core.getParamMap();
         paramMap.put(StorageLoginInfoEnum.SyncKey.getKey(),
                 Core.getLoginInfoMap().get(StorageLoginInfoEnum.SyncKey.getKey()));
-        paramMap.put("rr", -new Date().getTime() / 1000);
+        paramMap.put("rr", -System.currentTimeMillis() / 1000);
         String paramStr = JSON.toJSONString(paramMap);
         try {
             HttpEntity entity = MyHttpClient.doPost(url, paramStr);
@@ -741,9 +731,9 @@ public class LoginServiceImpl implements ILoginService {
             params.add(new BasicNameValuePair(baseRequest.para().toLowerCase(),
                     Core.getLoginInfoMap().get(baseRequest.value()).toString()));
         }
-        params.add(new BasicNameValuePair("r", String.valueOf(new Date().getTime())));
+        params.add(new BasicNameValuePair("r", String.valueOf(System.currentTimeMillis() )));
         params.add(new BasicNameValuePair("synckey", (String) Core.getLoginInfoMap().get("synckey")));
-        params.add(new BasicNameValuePair("_", String.valueOf(new Date().getTime())));
+        params.add(new BasicNameValuePair("_", String.valueOf(System.currentTimeMillis() )));
         SleepUtils.sleep(7);
         try {
             HttpEntity entity = MyHttpClient.doGet(url, params, true, null);

@@ -1,9 +1,11 @@
 package cn.shu.wechat.enums.parameters;
 
 /**
- * UUID
+ * 获取UUID需要的参数
  * <p>
- * Created by xiaoxiaomo on 2017/5/7.
+ *
+ * @author xiaoxiaomo
+ * @date 2017/5/7
  */
 public enum UUIDParaEnum {
 

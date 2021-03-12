@@ -1,7 +1,6 @@
 package cn.shu;
 
 import cn.shu.wechat.Wechat;
-import cn.shu.wechat.face.IMsgHandlerFaceImpl;
 import cn.shu.wechat.utils.Config;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
@@ -18,7 +17,7 @@ import javax.annotation.Resource;
  */
 @SpringBootApplication
 @MapperScan("cn.shu.wechat.mapper")
-public class Demo {
+public class WeChatStater {
 
 	@Resource
 	private Wechat wechat;
@@ -30,7 +29,7 @@ public class Demo {
 
 
 	public static void main(String[] args) {
-		ApplicationContext applicationContext = SpringApplication.run(Demo.class,args);
+		ApplicationContext applicationContext = SpringApplication.run(WeChatStater.class,args);
 	}
 
 
