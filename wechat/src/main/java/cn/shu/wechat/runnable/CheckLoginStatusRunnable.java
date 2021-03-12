@@ -1,13 +1,9 @@
-package cn.shu.wechat.thread;
+package cn.shu.wechat.runnable;
 
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.service.ILoginService;
 import cn.shu.wechat.utils.SleepUtils;
 import lombok.extern.log4j.Log4j2;
-import cn.shu.wechat.service.impl.LoginServiceImpl;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
 
 /**
  * 检查微信在线状态
@@ -24,7 +20,7 @@ import javax.annotation.Resource;
  */
 @Log4j2
 @Component
-public class CheckLoginStatusThread implements Runnable {
+public class CheckLoginStatusRunnable implements Runnable {
 
 	@Override
 	public void run() {

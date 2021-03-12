@@ -1,25 +1,19 @@
 package cn.shu.wechat.service.impl;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 
 import cn.shu.wechat.api.MessageTools;
-import cn.shu.wechat.api.WechatTools;
 import cn.shu.wechat.beans.pojo.AttrHistory;
 import cn.shu.wechat.beans.msg.sync.AddMsgList;
 import cn.shu.wechat.beans.msg.sync.WebWxSyncMsg;
-import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.core.MsgCenter;
 import cn.shu.wechat.enums.*;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
-import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.service.ILoginService;
 import cn.shu.wechat.utils.*;
 import cn.shu.wechat.enums.parameters.BaseParaEnum;
@@ -54,10 +48,6 @@ import javax.annotation.Resource;
 @Component
 public class LoginServiceImpl implements ILoginService {
 
-    /**
-     * 消息处理线程池
-     */
-    private final ExecutorService messageExecutorService = Executors.newCachedThreadPool();
 
     @Resource
     private AttrHistoryMapper attrHistoryMapper;
@@ -301,7 +291,7 @@ public class LoginServiceImpl implements ILoginService {
 
                                                     }
                                                 };
-                                                messageExecutorService.submit(runnable);
+                                                ExecutorsUtil.getGlobalExecutorService().submit(runnable);
                                             }
                                             //联系人修改消息
                                             //MsgCenter.produceModContactMsg(webWxSyncMsg.getModContactList());
@@ -314,10 +304,8 @@ public class LoginServiceImpl implements ILoginService {
                                 case ADD_OR_DEL_CONTACT:
                                     if (msgObj != null) {
                                         try {
-                                            JSONArray msgList = new JSONArray();
-                                            msgList = msgObj.getJSONArray("AddMsgList");
+                                            JSONArray msgList = msgObj.getJSONArray("AddMsgList");
                                             JSONArray modContactList = msgObj.getJSONArray("ModContactList"); // 存在删除或者新增的好友信息
-                                            //MsgCenter.produceMsg(msgList);
                                             for (int j = 0; j < msgList.size(); j++) {
                                                 JSONObject userInfo = modContactList.getJSONObject(j);
                                                 // 存在主动加好友之后的同步联系人到本地
@@ -338,6 +326,8 @@ public class LoginServiceImpl implements ILoginService {
                                 case A:
                                     System.out.println("哈哈");
                                     break;
+                                default:
+                                    break;
 
                             }
                         }
@@ -354,7 +344,7 @@ public class LoginServiceImpl implements ILoginService {
                 }
             }
         };
-        messageExecutorService.submit(runnable);
+        ExecutorsUtil.getGlobalExecutorService().submit(runnable);
 
 
     }

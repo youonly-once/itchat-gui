@@ -2,9 +2,9 @@ package cn.shu.wechat.enums;
 
 /**
  * 检测是否扫描登录接口 返回状态码
+ * @author SXS
  */
 public enum CheckLoginResultEnum {
-
     SUCCESS("200", "成功"),
     WAIT_CONFIRM("201", "请在手机上点击确认"),
     WAIT_SCAN("400", "请扫描二维码");
@@ -21,13 +21,5 @@ public enum CheckLoginResultEnum {
         return code;
     }
 
-//    public static MsgInfoEnum getCode(String code) {
-//        switch (code) {
-//            case "Text":
-//                return MsgInfoEnum.TEXT;
-//            default:
-//                return MsgInfoEnum.VIDEO;
-//        }
-//    }
 
 }

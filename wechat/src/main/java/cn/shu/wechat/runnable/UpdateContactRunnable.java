@@ -1,7 +1,8 @@
-package cn.shu.wechat.thread;
+package cn.shu.wechat.runnable;
 
+import cn.shu.wechat.api.WeChatTool;
 import cn.shu.wechat.utils.ChartUtil;
-import cn.shu.wechat.api.WechatTools;
+import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.service.ILoginService;
 import cn.shu.wechat.utils.SleepUtils;
@@ -25,7 +26,7 @@ import javax.annotation.Resource;
  */
 @Log4j2
 @Component
-public class UpdateContactThread implements Runnable {
+public class UpdateContactRunnable implements Runnable {
 
 	/**
 	 * 登录服务
@@ -33,21 +34,14 @@ public class UpdateContactThread implements Runnable {
 	@Resource
 	private ILoginService loginService;
 
-	@Resource
-	private ChartUtil chart;
 
 	@Override
 	public void run() {
 		while (Core.isAlive()) {
-			SleepUtils.sleep(30 * 1000); // 休眠30秒
-			//log.info("1. 更新联系人信息");
+			SleepUtils.sleep(30 * 1000);
 			loginService.webWxGetContact();
 
-			//log.info("2. 更新群好友及群好友列表");
 			loginService.WebWxBatchGetContact();
-
-			//log.info("3. 更新本次登陆好友相关消息");
-			WechatTools.setUserInfo(); // 登陆成功后缓存本次登陆好友相关消息（NickName, UserName）
 
 		}
 	}

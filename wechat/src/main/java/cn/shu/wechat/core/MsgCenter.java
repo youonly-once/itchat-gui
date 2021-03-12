@@ -1,9 +1,6 @@
 package cn.shu.wechat.core;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.regex.Matcher;
 
 import cn.shu.wechat.beans.pojo.AttrHistory;
 import cn.shu.wechat.beans.pojo.Message;
@@ -23,17 +20,15 @@ import lombok.extern.log4j.Log4j2;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.shu.wechat.api.MessageTools;
-import cn.shu.wechat.api.WechatTools;
+import cn.shu.wechat.api.ContactsTools;
 
 
-import org.apache.commons.lang.StringUtils;
 import org.nlpcn.commons.lang.util.StringUtil;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
 import static cn.shu.wechat.enums.WXReceiveMsgCodeEnum.MSGTYPE_TEXT;
-import static javax.swing.UIManager.put;
 
 /**
  * 消息处理中心
@@ -80,7 +75,7 @@ public class MsgCenter {
         //下载资源文件
         String path = DownloadTools.getDownloadFilePath(msg);
         //false表示当前文件未下载完成，此时其它地方不能使用
-        Hashtable<String, Boolean> fileDownloadStatus = DownloadTools.fileDownloadStatus;
+        Hashtable<String, Boolean> fileDownloadStatus = DownloadTools.FILE_DOWNLOAD_STATUS;
         if (path != null){
             fileDownloadStatus. put(path,false);
             DownloadTools.downloadFile(msg,  path);
@@ -188,12 +183,12 @@ public class MsgCenter {
                 .content(msg.getContent())
                 .filePath(msg.getFilePath())
                 .createTime(new Date())
-                .fromNickname(isFromSelf ? Core.getNickName() : WechatTools.getNickNameByUserName(msg.getFromUserName()))
-                .fromRemarkname(isFromSelf ? Core.getNickName() : WechatTools.getRemarkNameByUserName(msg.getFromUserName()))
+                .fromNickname(isFromSelf ? Core.getNickName() : ContactsTools.getNickNameByUserName(msg.getFromUserName()))
+                .fromRemarkname(isFromSelf ? Core.getNickName() : ContactsTools.getRemarkNameByUserName(msg.getFromUserName()))
                 .fromUsername(msg.getFromUserName())
                 .id(UUID.randomUUID().toString().replace("-", ""))
-                .toNickname(isToSelf ? Core.getNickName() : WechatTools.getNickNameByUserName(msg.getToUserName()))
-                .toRemarkname(isToSelf ? Core.getNickName() : WechatTools.getRemarkNameByUserName(msg.getToUserName()))
+                .toNickname(isToSelf ? Core.getNickName() : ContactsTools.getNickNameByUserName(msg.getToUserName()))
+                .toRemarkname(isToSelf ? Core.getNickName() : ContactsTools.getRemarkNameByUserName(msg.getToUserName()))
                 .toUsername(msg.getToUserName())
                 .msgId(msg.getMsgId())
                 .msgType(msg.getMsgType())
@@ -201,8 +196,8 @@ public class MsgCenter {
                 .appMsgType(msg.getAppMsgType())
                 .msgJson(JSON.toJSONString(msg))
                 .msgDesc(WXReceiveMsgCodeEnum.getByCode(msg.getMsgType()).getDesc())
-                .fromMemberOfGroupDisplayname(msg.isGroupMsg() ? WechatTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), msg.getMemberName()) : null)
-                .fromMemberOfGroupNickname(msg.isGroupMsg() ? WechatTools.getMemberNickNameOfGroup(msg.getFromUserName(), msg.getMemberName()) : null)
+                .fromMemberOfGroupDisplayname(msg.isGroupMsg() ? ContactsTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), msg.getMemberName()) : null)
+                .fromMemberOfGroupNickname(msg.isGroupMsg() ? ContactsTools.getMemberNickNameOfGroup(msg.getFromUserName(), msg.getMemberName()) : null)
                 .fromMemberOfGroupUsername(msg.isGroupMsg() ? msg.getMemberName() : null)
                 .build();
 

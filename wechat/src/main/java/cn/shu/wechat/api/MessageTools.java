@@ -8,7 +8,6 @@ import cn.shu.wechat.enums.*;
 import cn.shu.wechat.exception.WebWXException;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.utils.*;
-import cn.shu.wechat.utils.xxx.WeChatToolXXX;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.Builder;
@@ -43,7 +42,7 @@ import java.util.*;
 @Component
 public class MessageTools {
     /**
-     * 本次登录上传文件的数量
+     * 本次登录以来上传文件的数量
      */
     private static int fileCount = 0;
     /**
@@ -61,11 +60,10 @@ public class MessageTools {
         MessageTools.messageMapper = messageMapper;
     }
 
-
     /**
      * 根据指定类型发送消息
      *
-     * @param results    消息
+     * @param results    消息列表
      * @param toUserName 接收方username
      */
     public static void sendMsgByUserId(List<Result> results, String toUserName) {
@@ -91,14 +89,16 @@ public class MessageTools {
             try {
                 String content = XmlStreamUtil.formatXml(result.content);
                 switch (result.replyMsgTypeEnum) {
-                    case PIC://图片消息
-                        //至少间隔1秒发送
-                        long l = new Date().getTime() - lastSendImgDate.getTime();
+                    case PIC:
+                        //至少间隔0.5秒发送
+                        long l = System.currentTimeMillis() - lastSendImgDate.getTime();
                         lastSendImgDate = new Date();
-                        if (l > 0 && l < 1000) SleepUtils.sleep(1000 - l);
+                        if (l > 0 && l < 500) {
+                            SleepUtils.sleep(500 - l);
+                        }
                         sendMsgResponse = sendPicMsgByUserId(toUserName, result.filePath,content);
                         break;
-                    case TEXT://文本消息
+                    case TEXT:
                         sendMsgResponse = sendTextMsgByUserId(content, toUserName);
                         break;
                     case VIDEO:
@@ -132,7 +132,7 @@ public class MessageTools {
 
     /**
      * 保存发送的消息到数据库
-     *
+     * @param toUserName         消息接收者
      * @param results         发送的消息
      * @param sendMsgResponse 发送成功响应信息
      */
@@ -157,6 +157,8 @@ public class MessageTools {
                 case VIDEO:
                     type = WXReceiveMsgCodeEnum.MSGTYPE_VIDEO;
                     break;
+                default:
+                    break;
             }
             Message build = Message
                     .builder()
@@ -166,8 +168,8 @@ public class MessageTools {
                     .fromRemarkname(Core.getNickName())
                     .fromUsername(Core.getUserName())
                     .id(UUID.randomUUID().toString().replace("-", ""))
-                    .toNickname(isToSelf ? Core.getNickName() : WechatTools.getNickNameByUserName(toUserName))
-                    .toRemarkname(isToSelf ? Core.getNickName() : WechatTools.getRemarkNameByUserName(toUserName))
+                    .toNickname(isToSelf ? Core.getNickName() : ContactsTools.getNickNameByUserName(toUserName))
+                    .toRemarkname(isToSelf ? Core.getNickName() : ContactsTools.getRemarkNameByUserName(toUserName))
                     .toUsername(toUserName)
                     .msgId(sendMsgResponse == null ? null : sendMsgResponse.getLocalID())
                     .msgType(type.getCode())
@@ -185,8 +187,9 @@ public class MessageTools {
     /**
      * 根据UserName发送文本消息
      *
-     * @param content
-     * @param toUserName
+     * @param toUserName 消息接收者UserName
+     * @param content 消息内容，content可能包含资源文件的id等信息，可直接使用
+     * @return {@link WebWXSendMsgResponse}
      * @author SXS
      * @date 2017年5月4日 下午11:17:38
      */
@@ -203,8 +206,9 @@ public class MessageTools {
     /**
      * 根据UserName发送名片消息
      *
-     * @param content
-     * @param toUserName
+     * @param toUserName 消息接收者UserName
+     * @param content 消息内容，content可能包含资源文件的id等信息，可直接使用
+     * @return {@link WebWXSendMsgResponse}
      * @author SXS
      * @date 2017年5月4日 下午11:17:38
      */
@@ -222,14 +226,18 @@ public class MessageTools {
     /**
      * @param filePath     文件路径
      * @param fromUserName 该消息发送者
-     * @param toUserName
-     * @return
+     * @param toUserName 消息接收者
+     * @return {@link WebWXSendMsgResponse}
      */
     private static WebWXUploadMediaResponse webWxUploadMedia(String filePath, String fromUserName, String toUserName) throws WebWXException, IOException {
+        //微信上传最大文件大小
+        long maxFileSize = 1024 * 1024 * 20;
+        //一次上传的文件最大1M
+        long singleFileMaxSize = 1048576L;
         File file = new File(filePath);
         //等待另一线程的下载该资源完成
         while (true){
-            Hashtable<String, Boolean> fileDownloadStatus = DownloadTools.fileDownloadStatus;
+            Hashtable<String, Boolean> fileDownloadStatus = DownloadTools.FILE_DOWNLOAD_STATUS;
             Boolean aBoolean = fileDownloadStatus.get(filePath);
             if (aBoolean == null){
                 aBoolean = true;
@@ -242,29 +250,34 @@ public class MessageTools {
         if (fileSize<=0){
             throw new WebWXException("文件大小为："+fileSize+"," + filePath);
         }
-        DownloadTools.fileDownloadStatus.remove(filePath);
-        String fileType = WeChatToolXXX.fileType(file);
+        DownloadTools.FILE_DOWNLOAD_STATUS.remove(filePath);
+        String fileType = WeChatTool.getFileType(file);
 
-        //大于20M不能发送吗？需要压缩
-        if (fileSize > 1024 * 1024 * 20) {
+        //大于20M不能发送需要压缩
+        if (fileSize > maxFileSize) {
+
             switch (fileType) {
-                case "video":  //视频超过1M，则压缩到1M
+                case "video":
+                    //视频超过1M，则压缩到1M
                     int bitRate = 800000;
                     String name = file.getName();
-                    while (fileSize > 1024 * 1024) {
+                    while (fileSize > maxFileSize) {
                         file = MediaUtil.compressionVideo(file, "/compression/" + name + ".mp4", bitRate);
                         fileSize = file.length();
-                        bitRate = (int) (bitRate / 2);
+                        bitRate =  (bitRate / 2);
                     }
                     break;
-                case "pic":  //图片超过1M，则压缩到1M
-                    file = MediaUtil.compressImage(file, 1024 * 1024);
+                case "pic":
+                    //图片超过1M，则压缩到1M
+                    file = MediaUtil.compressImage(file, maxFileSize);
                     break;
-                default://其它文件压缩成zip
+                default:
+                    //其它文件压缩成zip
+                    break;
 
             }
         }
-        if (file.length() > 1024 * 1024 * 20) {
+        if (file.length() > maxFileSize) {
             throw new WebWXException("不能上传大于20M的文件：" + filePath);
         }
         int fileId = fileCount++;
@@ -280,7 +293,7 @@ public class MessageTools {
         if (StringUtils.isEmpty(passTicket)) {
             passTicket = "undefined";
         }
-        String clientMediaId = new Date().getTime() + String.valueOf(new Random().nextLong()).substring(0, 4);
+        String clientMediaId = System.currentTimeMillis() + String.valueOf(new Random().nextLong()).substring(0, 4);
         String webWXDataTicket = MyHttpClient.getCookie("webwx_data_ticket");
         Map<String, Object> paramMap = Core.getParamMap();
         paramMap.put("UploadType", 2);
@@ -295,7 +308,7 @@ public class MessageTools {
         paramMap.put("FileMd5", XTools.md5(file));
         String result = null;
         String url = String.format(URLEnum.WEB_WX_UPLOAD_MEDIA.getUrl(), Core.getLoginInfoMap().get("fileUrl"));
-        if (file.length() <= 1048576L) {
+        if (file.length() <= singleFileMaxSize) {
             //小于1M发送方式
             MultipartEntityBuilder builder = MultipartEntityBuilder.create();
             builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
@@ -360,9 +373,10 @@ public class MessageTools {
     /**
      * 根据用户id发送图片消息
      *
-     * @param userId
-     * @param filePath
-     * @return
+     * @param userId 消息接收者UserName
+     * @param filePath 待上传文件路径 content为空时使用上传
+     * @param content 消息内容，content可能包含资源文件的id等信息，可直接使用
+     * @return {@link WebWXSendMsgResponse}
      * @author SXS
      * @date 2017年5月7日 下午10:34:24
      */
@@ -389,9 +403,12 @@ public class MessageTools {
     /**
      * 根据用户id发送表情消息
      *
-     * @param userId
-     * @param filePath
-     * @return
+     *     content里面有表情md5可直接发送
+     *     没有则通过filepath上传使用mediaid发送
+     * @param userId 消息接收者UserName
+     * @param filePath 待上传文件路径 content为空时使用上传
+     * @param content 消息内容，content可能包含资源文件的id等信息，可直接使用
+     * @return {@link WebWXSendMsgResponse}
      * @author SXS
      * @date 2017年5月7日 下午10:34:24
      */
@@ -408,12 +425,9 @@ public class MessageTools {
                 md5 = stringObjectMap.get("msg.emoji.attr.md5").toString();
             }
         }catch (Exception e){
-
+        log.error(e.getMessage());
         }
-        /**
-         * content里面有表情md5可直接发送
-         * 没有则通过filepath上传使用mediaid发送
-         */
+
        if (md5 == null){
            WebWXUploadMediaResponse resp = webWxUploadMedia(filePath, Core.getUserName(), userId);
            textMsg.MediaId = resp.getMediaId();
@@ -431,9 +445,10 @@ public class MessageTools {
     /**
      * 根据用户id发送撤回消息
      *
-     * @param userId
-     * @param
-     * @return
+     * @param userId 消息接收者
+     * @param clientMsgId  发送消息返回的 LocalID {@link WebWXSendMsgResponse}
+     * @param svrMsgId 发送消息返回的 MsgId {@link WebWXSendMsgResponse}
+     * @return {@code true} 发送成功 {@code false} 发送失败
      * @author SXS
      * @date 201714年5月7日 下午10:34:24
      */
@@ -462,9 +477,10 @@ public class MessageTools {
     /**
      * 根据用户id发送视频消息
      *
-     * @param userId
-     * @param filePath
-     * @return
+     * @param userId 消息接收者UserName
+     * @param filePath 待上传文件路径 content为空时使用上传
+     * @param content 消息内容，content可能包含资源文件的id等信息，可直接使用
+     * @return {@link WebWXSendMsgResponse}
      * @author SXS
      * @date 201714年5月7日 下午10:34:24
      */
@@ -491,23 +507,25 @@ public class MessageTools {
 
 
     /**
-     * 内部调用
+     * 发送APP消息
      *
-     * @param userId
-     * @param filePath
-     * @return
+     * @param userId 消息接收者UserName
+     * @param filePath 待上传文件路径 content为空时使用上传
+     * @param content 消息内容，content可能包含资源文件的id等信息，可直接使用
+     * @return {@link WebWXSendMsgResponse}
      * @author SXS
      * @date 2017年5月10日 上午12:21:28
      */
     private static WebWXSendMsgResponse sendAppMsgByUserId(String userId, String filePath,String content) throws IOException, WebWXException {
-        String url = String.format("%s/webwxsendappmsg?fun=async&f=json&pass_ticket=%s", Core.getLoginInfoMap().get("url"),
+        String url = String.format(URLEnum.WEB_WX_SEND_APP_MSG.getUrl(), Core.getLoginInfoMap().get("url"),
                 Core.getLoginInfoMap().get("pass_ticket"));
 
         if (StringUtils.isEmpty(content)) {
             String title = new File(filePath).getName();
-            String appid = Config.API_WXAPPID;
             String fileext =  title.split("\\.")[1];
-            if (fileext == null)fileext ="";
+            if (fileext == null) {
+                fileext ="";
+            }
             WebWXUploadMediaResponse webWXUploadMediaResponse = webWxUploadMedia(filePath, Core.getUserName(), userId);
             long totallen = webWXUploadMediaResponse.getStartPos();
             String attachid =  webWXUploadMediaResponse.getMediaId();
@@ -542,15 +560,17 @@ public class MessageTools {
     /**
      * 被动添加好友
      *
-     * @param msg
-     * @param accept true 接受 false 拒绝
+     * @param msg 消息实体
+     * @param accept {@code true} 接受 {@code false} 拒绝
      * @date 2017年6月29日 下午10:08:43
      */
     public static void addFriend(AddMsgList msg, boolean accept) {
-        if (!accept) { // 不添加
+        if (!accept) {
+            // 不添加
             return;
         }
-        int status = VerifyFriendEnum.ACCEPT.getCode(); // 接受好友请求
+        // 接受好友请求
+        int status = VerifyFriendEnum.ACCEPT.getCode();
         RecommendInfo recommendInfo = msg.getRecommendInfo();
         String userName = recommendInfo.getUserName();
         String ticket = recommendInfo.getTicket();
@@ -599,10 +619,10 @@ public class MessageTools {
 
     /**
      * 发送消息
-     * @param webWXSendMsgRequest
-     * @param url
-     * @return
-     * @throws IOException
+     * @param webWXSendMsgRequest 请求体
+     * @param url 请求地址
+     * @return {@link WebWXSendMsgResponse}
+     * @throws IOException  IOException
      */
     private static WebWXSendMsgResponse sendMsg(WebWXSendMsgRequest webWXSendMsgRequest,String url) throws IOException {
         String paramStr = JSON.toJSONString(webWXSendMsgRequest);
@@ -626,6 +646,7 @@ public class MessageTools {
         //消息接收者
         private final String toUserName;
     }
+
 
 
 }
