@@ -23,6 +23,15 @@ import java.util.concurrent.TimeUnit;
 /**
  * 登陆控制器
  *
+ *
+ * 1、获取UUID
+ * 2、下载二维码图片
+ * 3、扫描登录
+ * 4、初始化
+ * 5、状态通知
+ * 6、获取联系人
+ * 7、监听消息
+ * 8、下载头像
  * @author SXS
  * @date 创建时间：2017年5月13日 下午12:56:07
  * @version 1.1
@@ -57,30 +66,29 @@ public class LoginController {
 
 	public void login(String qrPath) {
 
-		if (Core.isAlive()) {
-			// 已登陆
-			log.info("itchat4j已登陆");
-			return;
-		}
 		while (true) {
 			Process process = null;
 			for (int count = 0; count < 10; count++) {
 				log.info("获取UUID");
-				while (loginService.getUuid() == null) {
+				while (true) {
 					log.info("1. 获取微信UUID");
-					while (loginService.getUuid() == null) {
-						log.warn("1.1. 获取微信UUID失败，两秒后重新获取");
-						SleepUtils.sleep(2000);
+					String uuid = loginService.getUuid();
+					if (uuid != null) {
+						break;
 					}
+					log.warn("1.1. 获取微信UUID失败，两秒后重新获取");
+					SleepUtils.sleep(2000);
 				}
+
 				log.info("2. 获取登陆二维码图片");
 				qrPath = qrPath + File.separator + Config. DEFAULT_QR;
 				if (loginService.getQR(qrPath)) {
 					try {
-						// 打开登陆二维码图片
+						// 使用图片查看器打开登陆二维码图片
 						process = CommonTools.printQr(qrPath);
 					} catch (Exception e) {
 						log.info(e.getMessage());
+						log.info("请手动打开二维码图片进行扫码登录："+qrPath);
 					}
 					break;
 				} else if (count == 9) {
@@ -91,10 +99,10 @@ public class LoginController {
 			log.info("3. 请扫描二维码图片，并在手机上确认");
 			if (!Core.isAlive()) {
 				loginService.login();
-				//登录成功，关闭打开的二维码图片
+				//TODO 登录成功，关闭打开的二维码图片，暂时没有成功
 				CommonTools.closeQr(process);
 				Core.setAlive(true);
-				log.info(("登陆成功"));
+				log.info(("4、登陆成功"));
 				break;
 			}
 			log.info("4. 登陆超时，请重新扫描二维码图片");
@@ -113,14 +121,16 @@ public class LoginController {
 		CommonTools.clearScreen();
 		log.info(String.format("欢迎回来， %s", Core.getNickName()));
 
-		log.info("8. 开始接收消息");
-		loginService.startReceiving();
-
-		log.info("9. 获取联系人信息");
+		log.info("8. 获取联系人信息");
 		loginService.webWxGetContact();
 
-		log.info("10. 获取群好友及群好友列表");
+		log.info("9. 获取群好友及群好友列表");
 		loginService.WebWxBatchGetContact();
+
+		log.info("10. 开始接收消息");
+		loginService.startReceiving();
+
+
 
 		Runnable chartRunnable = () -> {
 
