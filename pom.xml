@@ -24,8 +24,11 @@
                     <target>8</target>
                 </configuration>
             </plugin>
+
+
         </plugins>
     </build>
+
     <modules>
         <module>utils</module>
         <module>wxuntils</module>

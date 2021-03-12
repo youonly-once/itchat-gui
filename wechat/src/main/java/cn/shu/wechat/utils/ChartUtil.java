@@ -213,7 +213,9 @@ public class ChartUtil {
         String[] rowKeys = {"苹果", "梨子", "葡萄"};
         String[] columnKeys = {"北京", "上海", "广州", "成都", "深圳"};
         CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
+/*
         createBarChart(dataset, "x坐标", "y坐标", "柱状图", "barGroup.png");
+*/
     }
 
     /**
@@ -225,7 +227,9 @@ public class ChartUtil {
         String[] rowKeys = {"苹果"};
         String[] columnKeys = {"北京", "上海", "广州", "成都", "深圳"};
         CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
+/*
         createBarChart(dataset, "x坐标", "y坐标", "柱状图", "bar.png");
+*/
     }
 
     /**
@@ -365,7 +369,7 @@ public class ChartUtil {
         data[0] = values;
         if (values.length>0){
             CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
-            String barImg1 = createBarChart(dataset, "用户昵称", "发送消息数量", "群成员活跃度", "makeWXGroupMessageTop1.png");
+            String barImg1 = createBarChart(dataset, "用户昵称", "发送消息数量", "群成员活跃度", "makeWXGroupMessageTop1.png",1024,768);
             return barImg1;
         }
         return null;
@@ -451,7 +455,7 @@ public class ChartUtil {
         data[0] = values;
         if (values.length>0){
             CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
-            String barImg1 = createBarChart(dataset, "消息类型", "发送数量", "消息类型排行", "makeWXGroupMessageTop1.png");
+            String barImg1 = createBarChart(dataset, "消息类型", "发送数量", "消息类型排行", "makeWXGroupMessageTop1.png",500,400);
             imgs.add(barImg1);
         }
 
@@ -476,7 +480,7 @@ public class ChartUtil {
         data1[0] = values1;
         if (size> 0){
             CategoryDataset dataset1 = getBarData(data1, rowKeys1, columnKeys1);
-            String barImg2 = createBarChart(dataset1, "词语", "发送数量", "消息常用关键词排行", "makeWXGroupMessageTop2.png");
+            String barImg2 = createBarChart(dataset1, "词语", "发送数量", "消息常用关键词排行", "makeWXGroupMessageTop2.png",500,400);
             imgs.add(barImg2);
         }
 
@@ -557,7 +561,7 @@ public class ChartUtil {
         }
         data[0] = values;
         CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
-        createBarChart(dataset, "消息类型", "发送数量", "消息类型排行", "makeWXContactMessageTop2.png");
+        createBarChart(dataset, "消息类型", "发送数量", "消息类型排行", "makeWXContactMessageTop2.png",500,400);
 
 
         double[][] data1 = new double[1][maxSize];
@@ -579,7 +583,7 @@ public class ChartUtil {
         }
         data1[0] = values1;
         CategoryDataset dataset1 = getBarData(data1, rowKeys1, columnKeys1);
-        createBarChart(dataset1, "词语", "发送数量", "消息常用词语", "makeWXContactMessageTop2.png");
+        createBarChart(dataset1, "词语", "发送数量", "消息常用词语", "makeWXContactMessageTop2.png",500,400);
 
 
     }
@@ -601,7 +605,7 @@ public class ChartUtil {
         }
         data[0] = values;
         CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
-        createBarChart(dataset, "好友昵称", "更新数量", "微信好友个人信息更新次数/月", "makeWXContactUpdateAttrBarChart.png");
+        createBarChart(dataset, "好友昵称", "更新数量", "微信好友个人信息更新次数/月", "makeWXContactUpdateAttrBarChart.png",1024,768);
 
 
         List<Map<String, Object>> stringAtomicIntegerMapAttr = attrHistoryMapper.selectUpdateAttrCount(10);
@@ -612,7 +616,8 @@ public class ChartUtil {
         }
         data[0] = values;
         dataset = getBarData(data, rowKeys, columnKeys);
-        createBarChart(dataset, "好友昵称", "更新数量", "微信好友个人信息更新次数TYPE/月", "makeWXContactUpdateAttrBarChartTYPE.png");
+        createBarChart(dataset, "好友昵称", "更新数量", "微信好友个人信息更新次数TYPE/月", "makeWXContactUpdateAttrBarChartTYPE.png"
+        ,1024,768);
 
 
     }
@@ -664,7 +669,7 @@ public class ChartUtil {
      * @return
      */
     public String createBarChart(CategoryDataset dataset, String xName,
-                                 String yName, String chartTitle, String charName) {
+                                 String yName, String chartTitle, String charName, int width, int height) {
         JFreeChart chart = ChartFactory.createBarChart(chartTitle, // 图表标题
                 xName, // 目录轴的显示标签
                 yName, // 数值轴的显示标签
@@ -807,7 +812,7 @@ public class ChartUtil {
             isChartPathExist(CHART_PATH);
             String chartName = CHART_PATH + charName;
             fos_jpg = new FileOutputStream(chartName);
-            ChartUtils.writeChartAsPNG(fos_jpg, chart, 500, 400, true, 10);
+            ChartUtils.writeChartAsPNG(fos_jpg, chart, width, height, true, 10);
             return chartName;
         } catch (Exception e) {
             e.printStackTrace();

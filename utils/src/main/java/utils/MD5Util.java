@@ -69,11 +69,4 @@ public class MD5Util {
         return DigestUtils.md5Hex(target);
     }
 
-    public static void main(String[] args) {
-        long beginTime = System.currentTimeMillis();
-        File file = new File("D:/1/pdi-ce-7.0.0.0-24.zip");
-        String md5 = getMD5(file);
-        long endTime = System.currentTimeMillis();
-        System.out.println("MD5:" + md5 + "\n 耗时:" + ((endTime - beginTime) / 1000) + "s");
-    }
 }

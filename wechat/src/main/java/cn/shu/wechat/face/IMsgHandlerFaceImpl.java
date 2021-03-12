@@ -204,7 +204,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                     String imgPath = chartUtil.makeGroupMemberAttrPieChart(toUserName, remarkNameByGroupUserName,"Sex",500,400);
                     //群消息
                     results.add(MessageTools.Result.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
-                            .content(imgPath)
+                            .filePath(imgPath)
                             .toUserName(toUserName).build());
                     log.info("计算群【"+ remarkNameByGroupUserName +"】成员性别分布图");
                 }
@@ -215,7 +215,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                     String imgPath = chartUtil.makeGroupMemberAttrPieChart(toUserName, remarkNameByGroupUserName,"Province",500,400);
                     //群消息
                     results.add(MessageTools.Result.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
-                            .content(imgPath)
+                            .filePath(imgPath)
                             .toUserName(toUserName).build());
                     log.info("计算群【"+ remarkNameByGroupUserName +"】成员省份分布图");
                 }

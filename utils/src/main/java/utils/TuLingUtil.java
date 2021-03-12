@@ -87,7 +87,4 @@ public class TuLingUtil {
 
     }
 
-    public static void main(String[] args) throws IOException {
-        System.out.println(TuLingUtil.robotMsgTuling("你好"));
-    }
 }
