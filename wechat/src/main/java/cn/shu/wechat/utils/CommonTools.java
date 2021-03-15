@@ -205,18 +205,37 @@ public class CommonTools {
 		return r;
 	}
 
+
+	public static void emojiFormatter(JSONObject d, String k) {
+
+
+	}
 	/**
 	 * 处理emoji表情
-	 * 
+	 *
 	 * @author SXS
 	 * @date 2017年4月23日 下午2:39:04
-	 * @param d
-	 * @param k
+
 	 */
-	public static void emojiFormatter(JSONObject d, String k) {
-		Matcher matcher = getMatcher("<span class=\"emoji emoji(.{1,10})\"></span>", d.getString(k));
+	public static void msgFormatter(AddMsgList msg) {
+		if (msg.getFromUserName().contains("@@") || msg.getToUserName().contains("@@")) { // 群聊消息
+			groupMsgFormatter(msg);
+		} else {
+			emojiFormatter(msg);
+		}
+
+	}
+	/**
+	 * 消息格式化
+	 * 
+	 * @author SXS
+	 * @date 2017年4月23日 下午4:19:08
+	 */
+	public static void emojiFormatter(AddMsgList msg) {
+		msg.setContent(msg.getContent().replace("<br/>", "\n"));
+		Matcher matcher = getMatcher("<span class=\"emoji emoji(.{1,10})\"></span>",msg.getContent());
 		StringBuilder sb = new StringBuilder();
-		String content = d.getString(k);
+		String content = msg.getContent();
 		int lastStart = 0;
 		while (matcher.find()) {
 			String str = matcher.group(1);
@@ -225,9 +244,8 @@ public class CommonTools {
 			} else if (str.length() == 10) {
 
 			} else {
-				str = "&#x" + str + ";";
 				String tmp = content.substring(lastStart, matcher.start());
-				sb.append(tmp + str);
+				sb.append(tmp).append("&#x").append(str).append(";");
 				lastStart = matcher.end();
 			}
 		}
@@ -235,39 +253,10 @@ public class CommonTools {
 			sb.append(content.substring(lastStart));
 		}
 		if (sb.length() != 0) {
-			d.put(k, EmojiParser.parseToUnicode(sb.toString()));
+			msg.setContent(EmojiParser.parseToUnicode(sb.toString()));
 		} else {
-			d.put(k, content);
+			EmojiParser.parseToUnicode(content);
 		}
-
-	}
-	/**
-	 * 消息格式化
-	 *
-	 * @author SXS
-	 * @date 2017年4月23日 下午4:19:08
-	 * @param
-	 * @param
-	 */
-	public static void msgFormatter(AddMsgList msg) {
-		if (msg.getFromUserName().contains("@@") || msg.getToUserName().contains("@@")) { // 群聊消息
-			groupMsgFormatter(msg);
-		} else {
-			msgFormatter(JSON.parseObject(JSON.toJSONString(msg)), "content");
-		}
-
-	}
-	/**
-	 * 消息格式化
-	 * 
-	 * @author SXS
-	 * @date 2017年4月23日 下午4:19:08
-	 * @param d
-	 * @param k
-	 */
-	public static void msgFormatter(JSONObject d, String k) {
-		d.put(k, d.getString(k).replace("<br/>", "\n"));
-		emojiFormatter(d, k);
 		// TODO 与emoji表情有部分兼容问题，目前暂未处理解码处理 d.put(k,
 		// StringEscapeUtils.unescapeHtml4(d.getString(k)));
 
@@ -278,7 +267,8 @@ public class CommonTools {
 	 * @param msg
 	 */
 	public static void groupMsgFormatter(AddMsgList msg) {
-		// 群消息与普通消息不同的是在其消息体（Content）中会包含发送者id及":<br/>"消息，这里需要处理一下，去掉多余信息，只保留消息内容
+		// 群消息与普通消息不同的是在其消息体（Content）中会包含发送者id及":<br/>"消息，
+		// 这里需要处理一下，去掉多余信息，只保留消息内容
 		String content = msg.getContent();
 		int index = content.indexOf(":<br/>");
 		if (index != -1) {

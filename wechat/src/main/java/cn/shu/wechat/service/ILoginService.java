@@ -50,7 +50,7 @@ public interface ILoginService {
 	 * 
 	 * @author SXS
 	 * @date 2017年5月13日 上午12:14:13
-	 * @return
+	 * @return {@code true} 成功 {@code false} 失败
 	 */
 	boolean webWxInit();
 
@@ -90,6 +90,8 @@ public interface ILoginService {
 	 * 和上个方法的区别在于这个方法可以获取群成员的性别、省市等信息
 	 * 一次只能获取50个，群成员是好友的可以不用获取
 	 * @date 2017年6月22日 下午11:24:35
+	 * @param groupObject 群对象
+	 * @return 群成员数组
 	 */
 	JSONArray WebWxBatchGetContactDetail(JSONObject groupObject) ;
 

@@ -10,7 +10,7 @@ public class SleepUtils {
 
     /**
      * 毫秒为单位
-     * @param time
+     * @param time 休眠时间
      */
     public static void sleep( long time ){
         try {

@@ -53,7 +53,7 @@ public class LogUtil {
         }
         return String.format(title+"【%s ->>>>>>> %s: %s】 ===%s",fromUser,toUser
                         , StringUtils.isEmpty(path)?(StringUtils.isEmpty(msg.getFilePath())?msg.getContent():msg.getFilePath()):path
-                ,msg.toString());
+                ,""/*msg.toString()*/);
     }
 
     /**

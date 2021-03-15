@@ -23,6 +23,7 @@ import lombok.extern.log4j.Log4j2;
 import net.sf.json.JSONException;
 
 import org.springframework.stereotype.Component;
+import sun.misc.MessageUtils;
 import utils.DateUtil;
 import utils.TuLingUtil;
 
@@ -247,9 +248,36 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
 
                     log.info("计算【"+ remarkNameByGroupUserName +"】聊天类型及关键词");
                 break;
+            case "不要问了":
+            case "不要问我":
+                if (msg.getFromUserName().equals(Core.getUserName())){
+                    results.add(MessageTools.Result.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.VOICE)
+                            .filePath("D:/weixin/MSGTYPE_VOICE/dont_ask.mp3")
+                            .toUserName(toUserName).build());
+                }
+                break;
+
 
         }
-        if (text.startsWith("attr_rate") &&msg.isGroupMsg()){
+        //延迟撤回消息，text:1  延迟一秒
+        if (msg.getFromUserName().equals(Core.getUserName())){
+            try {
+                String replace = msg.getText();
+                int i = replace.indexOf("&amp;");
+                if (i !=-1 ){
+                    long sleep = Long.parseLong(replace.substring(i + 5));
+                    final long relay =   sleep == 0?2*60*1000:sleep*1000;
+                    ExecutorsUtil.getGlobalExecutorService().submit(() -> {
+                        SleepUtils.sleep(relay);
+                        MessageTools.sendRevokeMsgByUserId(msg.getToUserName(), msg.getMsgId(), msg.getNewMsgId() + "");
+                    });
+                }
+            }catch (Exception e){
+
+            }
+
+        }
+        if (text.startsWith("attr_rate") && msg.isGroupMsg()){
             String substring = msg.getText().substring(msg.getText().indexOf(":") + 1);
                 String imgPath = chartUtil.makeGroupMemberAttrPieChart(toUserName, remarkNameByGroupUserName,substring,500,400);
                 //群消息

@@ -43,12 +43,12 @@ public class MediaUtil {
             AudioInfo audioInfo = object.getInfo().getAudio();
             // 根据视频大小来判断是否需要进行压缩,
             int maxSize = 1;
-           double mb = Math.ceil(source.length()/ 1048576);
+           double mb = Math.ceil(source.length()/ 1048576.0);
             int second = (int)object.getInfo().getDuration()/1000;
             BigDecimal bd = new BigDecimal(String.format("%.4f", mb/second));
             System.out.println("开始压缩视频了--> 视频每秒平均 "+ bd +" MB ");
             // 视频 > 100MB, 或者每秒 > 0.5 MB 才做压缩， 不需要的话可以把判断去掉
-            boolean temp = source.length() > maxSize*1024*1024 || bd.compareTo(new BigDecimal(0.5)) > 0;
+            boolean temp = source.length() > maxSize*1024*1024 || bd.compareTo(new BigDecimal("0.5")) > 0;
             if(temp){
                 long time = System.currentTimeMillis();
                 //TODO 视频属性设置

@@ -194,7 +194,7 @@ public class MessageTools {
      * @date 2017年5月4日 下午11:17:38
      */
     public static WebWXSendMsgResponse sendTextMsgByUserId(String content, String toUserName) throws IOException {
-        String url = String.format(URLEnum.WEB_WX_SEND_MSG.getUrl(), Core.getLoginInfoMap().get("url"));
+        String url = String.format(URLEnum.WEB_WX_SEND_MSG.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()));
         WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
         WebWXSendingMsg textMsg = new WebWXSendingTextMsg();
         textMsg.Content =content;
@@ -213,7 +213,7 @@ public class MessageTools {
      * @date 2017年5月4日 下午11:17:38
      */
     public static WebWXSendMsgResponse sendCardMsgByUserId(String toUserName,String content ) throws IOException {
-        String url = String.format(URLEnum.WEB_WX_SEND_MSG.getUrl(), Core.getLoginInfoMap().get("url"));
+        String url = String.format(URLEnum.WEB_WX_SEND_MSG.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()));
         WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
         WebWXSendingCardMsg textMsg = new WebWXSendingCardMsg();
         textMsg.Content =content;
@@ -307,7 +307,7 @@ public class MessageTools {
         paramMap.put("ToUserName", toUserName);
         paramMap.put("FileMd5", XTools.md5(file));
         String result = null;
-        String url = String.format(URLEnum.WEB_WX_UPLOAD_MEDIA.getUrl(), Core.getLoginInfoMap().get("fileUrl"));
+        String url = String.format(URLEnum.WEB_WX_UPLOAD_MEDIA.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.fileUrl.getKey()));
         if (file.length() <= singleFileMaxSize) {
             //小于1M发送方式
             MultipartEntityBuilder builder = MultipartEntityBuilder.create();
@@ -387,7 +387,7 @@ public class MessageTools {
             mediaId = resp.getMediaId();
             content = "";
         }
-        String url = String.format(URLEnum.WEB_WX_SEND_PIC_MSG.getUrl(), Core.getLoginInfoMap().get("url"),
+        String url = String.format(URLEnum.WEB_WX_SEND_PIC_MSG.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()),
                 Core.getLoginInfoMap().get("pass_ticket"));
 
         WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
@@ -414,7 +414,7 @@ public class MessageTools {
      */
     public static WebWXSendMsgResponse sendEmotionMsgByUserId(String userId, String filePath,String content) throws WebWXException, IOException {
 
-        String url = String.format(URLEnum.WEB_WX_SEND_EMOTION_MSG.getUrl(), Core.getLoginInfoMap().get("url"));
+        String url = String.format(URLEnum.WEB_WX_SEND_EMOTION_MSG.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()));
 
         WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
         WebWXSendingEmotionMsg textMsg = new WebWXSendingEmotionMsg();
@@ -491,8 +491,8 @@ public class MessageTools {
             mediaId = resp.getMediaId();
             content = "";
         }
-        String url = String.format(URLEnum.WEB_WX_SEND_VIDEO_MSG.getUrl(), Core.getLoginInfoMap().get("url"),
-                Core.getLoginInfoMap().get("pass_ticket"));
+        String url = String.format(URLEnum.WEB_WX_SEND_VIDEO_MSG.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()),
+                Core.getLoginInfoMap().get(StorageLoginInfoEnum.pass_ticket.getKey()));
         WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
         WebWXSendingVideoMsg textMsg = new WebWXSendingVideoMsg();
         textMsg.MediaId = mediaId;
@@ -517,7 +517,7 @@ public class MessageTools {
      * @date 2017年5月10日 上午12:21:28
      */
     private static WebWXSendMsgResponse sendAppMsgByUserId(String userId, String filePath,String content) throws IOException, WebWXException {
-        String url = String.format(URLEnum.WEB_WX_SEND_APP_MSG.getUrl(), Core.getLoginInfoMap().get("url"),
+        String url = String.format(URLEnum.WEB_WX_SEND_APP_MSG.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()),
                 Core.getLoginInfoMap().get("pass_ticket"));
 
         if (StringUtils.isEmpty(content)) {
@@ -578,8 +578,8 @@ public class MessageTools {
         // TODO 此处需要更新好友列表
         // Core.getContactList().add(msg.getJSONObject("RecommendInfo"));
 
-        String url = String.format(URLEnum.WEB_WX_VERIFYUSER.getUrl(), Core.getLoginInfoMap().get("url"),
-                String.valueOf(System.currentTimeMillis() / 3158L), Core.getLoginInfoMap().get("pass_ticket"));
+        String url = String.format(URLEnum.WEB_WX_VERIFYUSER.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()),
+                String.valueOf(System.currentTimeMillis() / 3158L), Core.getLoginInfoMap().get(StorageLoginInfoEnum.pass_ticket.getKey()));
 
         List<Map<String, Object>> verifyUserList = new ArrayList<Map<String, Object>>();
         Map<String, Object> verifyUser = new HashMap<String, Object>();

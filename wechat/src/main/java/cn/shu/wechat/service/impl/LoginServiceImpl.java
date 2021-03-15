@@ -138,7 +138,7 @@ public class LoginServiceImpl implements ILoginService {
             String qrUrl2 = URLEnum.cAPI_qrcode.getUrl() + Core.getUuid();
             //控制台打印二维码
             String qrString = QRterminal.getQr(qrUrl2);
-            System.out.println("\n"+qrString);
+            //System.out.println("\n" + qrString);
         } catch (Exception e) {
             log.error(e.getMessage());
             return false;
@@ -150,11 +150,11 @@ public class LoginServiceImpl implements ILoginService {
     @Override
     public boolean webWxInit() {
         Core.setAlive(true);
-        Core.setLastNormalRetcodeTime(System.currentTimeMillis());
+        Core.setLastNormalRetCodeTime(System.currentTimeMillis());
         // 组装请求URL和参数
         String url = String.format(URLEnum.INIT_URL.getUrl(),
                 Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()),
-                String.valueOf(System.currentTimeMillis() / 3158L),
+                System.currentTimeMillis() / 3158L,
                 Core.getLoginInfoMap().get(StorageLoginInfoEnum.pass_ticket.getKey()));
 
         Map<String, Object> paramMap = Core.getParamMap();
@@ -188,24 +188,17 @@ public class LoginServiceImpl implements ILoginService {
             Core.setNickName(user.getString("NickName"));
             Core.setUserSelf(obj.getJSONObject("User"));
 
+            //初始化列表的联系人
+            //最近聊天的联系人
             String chatSet = obj.getString("ChatSet");
             String[] chatSetArray = chatSet.split(",");
-            for (String s : chatSetArray) {
+     /*       for (String s : chatSetArray) {
                 if (s.startsWith("@@")) {
                     // 更新GroupIdList
                     Core.getGroupIdSet().add(s);
                 }
-            }
-            // JSONArray contactListArray = obj.getJSONArray("ContactList");
-            // for (int i = 0; i < contactListArray.size(); i++) {
-            // JSONObject o = contactListArray.getJSONObject(i);
-            // if (o.getString("UserName").indexOf("@@") != -1) {
-            // Core.getGroupIdList().add(o.getString("UserName")); //
-            // // 更新GroupIdList
-            // Core.getGroupList().add(o); // 更新GroupList
-            // Core.getGroupNickNameList().add(o.getString("NickName"));
-            // }
-            // }
+            }*/
+
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -247,7 +240,6 @@ public class LoginServiceImpl implements ILoginService {
                     try {
                         //检测是否有新消息
                         Map<String, String> resultMap = syncCheck();
-//						log.info(JSONObject.toJSONString(resultMap));
                         String retcode = resultMap.get("retcode");
                         String selector = resultMap.get("selector");
                         if (retcode.equals(SyncCheckRetCodeEnum.UNKOWN.getCode())) {
@@ -268,7 +260,7 @@ public class LoginServiceImpl implements ILoginService {
                             break;
                         } else if (retcode.equals(SyncCheckRetCodeEnum.SUCCESS.getCode())) {
                             // 最后收到正常报文时间
-                            Core.setLastNormalRetcodeTime(System.currentTimeMillis());
+                            Core.setLastNormalRetCodeTime(System.currentTimeMillis());
                             //消息同步
                             JSONObject msgObj = webWxSync();
                             switch (SyncCheckSelectorEnum.getByCode(selector)) {
@@ -330,10 +322,11 @@ public class LoginServiceImpl implements ILoginService {
                             }
                         }
                     } catch (Exception e) {
-                        log.info(e.getMessage());
+                        e.printStackTrace();
+                        log.error("消息同步错误：{}", e.getMessage());
                         retryCount += 1;
                         if (Core.getReceivingRetryCount() < retryCount) {
-                            Core.setAlive(false);
+                            //Core.setAlive(false);
                         } else {
                             SleepUtils.sleep(1000);
                         }
@@ -367,7 +360,6 @@ public class LoginServiceImpl implements ILoginService {
                 seq = fullFriendsJsonList.getLong("Seq");
                 currentTime = System.currentTimeMillis();
             }
-            Core.setMemberCount(fullFriendsJsonList.getInteger(StorageLoginInfoEnum.MemberCount.getKey()));
             JSONArray member = fullFriendsJsonList.getJSONArray(StorageLoginInfoEnum.MemberList.getKey());
             // 循环获取seq直到为0，即获取全部好友列表 ==0：好友获取完毕 >0：好友未获取完毕，此时seq为已获取的字节数
             while (seq > 0) {
@@ -390,31 +382,30 @@ public class LoginServiceImpl implements ILoginService {
                 // 累加好友列表
                 member.addAll(fullFriendsJsonList.getJSONArray(StorageLoginInfoEnum.MemberList.getKey()));
             }
-            Core.setMemberCount(member.size());
+
             for (Object value : member) {
                 JSONObject o = (JSONObject) value;
                 String userName = o.getString("UserName");
                 if ((o.getInteger("VerifyFlag") & 8) != 0) {
                     // 公众号/服务号
-                    put(Core.getPublicUsersMap(), userName, o, "公众号/服务号");
+                    Core.getPublicUsersMap().put(userName, o);
                 } else if (Config.API_SPECIAL_USER.contains(userName)) {
                     // 特殊账号
-                    put(Core.getSpecialUsersMap(), userName, o, "特殊账号");
+                    Core.getSpecialUsersMap().put(userName, o);
                 } else if (userName.startsWith("@@")) {
-
                     // 群聊
                     if (!Core.getGroupIdSet().contains(userName)) {
                         log.info("新增群聊：{}", userName);
-                        Core.getGroupNickNameSet().add(userName);
                         Core.getGroupIdSet().add(userName);
-                        Core.getGroupMap().put(userName, o);
                     }
-                } else if (userName.equals(Core.getUserSelf().getString("UserName"))) {
+                } else if (userName.equals(Core.getUserName())) {
                     // 自己
                     Core.getContactMap().remove(userName);
                 } else {
+                        //比较上次差异
+                    compareOld(Core.getContactMap(), userName, o, "普通联系人");
                     // 普通联系人
-                    put(Core.getContactMap(), userName, o, "普通联系人");
+                    Core.getContactMap().put(userName, o);
                 }
 
             }
@@ -448,16 +439,11 @@ public class LoginServiceImpl implements ILoginService {
                 // 群好友
                 JSONObject groupObject = contactList.getJSONObject(i);
                 String userName = groupObject.getString("UserName");
-                String nickName = groupObject.getString("NickName");
                 if (userName.startsWith("@@")) {
                     //以上接口返回的成员属性不全，以下的接口获取群成员详细属性
                     JSONArray memberArray = WebWxBatchGetContactDetail(groupObject);
                     Core.getGroupMemberMap().put(userName, memberArray);
-                    // 更新群信息（所有）列表
-                    put(Core.getGroupMap(), userName, groupObject, "群聊");
-                    // 更新群昵称列表
-                    Core.getGroupNickNameSet().add(nickName);
-
+                    Core.getGroupMap().put(userName, groupObject);
                 }
             }
         } catch (Exception e) {
@@ -560,7 +546,6 @@ public class LoginServiceImpl implements ILoginService {
                 fileUrl = "https://" + entry.getValue().get(0) + "/cgi-bin/mmwebwx-bin";
                 syncUrl = "https://" + entry.getValue().get(1) + "/cgi-bin/mmwebwx-bin";
                 if (Core.getLoginInfoMap().get("url").toString().contains(indexUrl)) {
-                    Core.setIndexUrl(indexUrl);
                     Core.getLoginInfoMap().put("fileUrl", fileUrl);
                     Core.getLoginInfoMap().put("syncUrl", syncUrl);
                     break;
@@ -731,9 +716,9 @@ public class LoginServiceImpl implements ILoginService {
             params.add(new BasicNameValuePair(baseRequest.para().toLowerCase(),
                     Core.getLoginInfoMap().get(baseRequest.value()).toString()));
         }
-        params.add(new BasicNameValuePair("r", String.valueOf(System.currentTimeMillis() )));
+        params.add(new BasicNameValuePair("r", String.valueOf(System.currentTimeMillis())));
         params.add(new BasicNameValuePair("synckey", (String) Core.getLoginInfoMap().get("synckey")));
-        params.add(new BasicNameValuePair("_", String.valueOf(System.currentTimeMillis() )));
+        params.add(new BasicNameValuePair("_", String.valueOf(System.currentTimeMillis())));
         SleepUtils.sleep(7);
         try {
             HttpEntity entity = MyHttpClient.doGet(url, params, true, null);
@@ -774,50 +759,37 @@ public class LoginServiceImpl implements ILoginService {
 
     /**
      * 联系人相关map的put操作
+     * put前统计哪些信息变了
      *
      * @param map  保存联系人信息的map
      * @param key  联系人key
      * @param newV 新值
      * @param tip  提示信息
      */
-    private void put(Map<String, JSONObject> map, String key, JSONObject newV, String tip) {
+    private void compareOld(Map<String, JSONObject> map, String key, JSONObject newV, String tip) {
         JSONObject oldV = map.get(key);
+
         String name = newV.getString("NickName");
         if (StringUtils.isEmpty(name)) {
             name = newV.getString("UserName");
         }
-        if (newV.getString("UserName").startsWith("@@")) {
-            map.put(key, newV);
+        if (oldV == null) {
+            log.info("新增{}（{}）：{}", tip, name, newV);
             return;
         }
-        ArrayList<MessageTools.Result> results = new ArrayList<>();
-        if (oldV != null) {
-            //存在key 更新
-            Map<String, Map<String, String>> differenceMap = JSONObjectUtil.getDifferenceMap(oldV, newV);
-            if (differenceMap.size() > 0) {
-
-                String s = mapToString(differenceMap);
-                //发送消息
-                results.add(MessageTools.Result.builder().content(tip + "（" + name + "）属性更新：" + s)
-                        .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
-                        .build());
-                //Old与New存在差异
-                log.info("{}（{}）属性更新：{}", tip, name, s);
-                //用新值替换旧值
-                map.put(key, newV);
-                //存储数据库
-                store(differenceMap, oldV, results);
-            }
-        } else {
-            //新增
-            log.info("新增{}（{}）：{}", tip, name, newV);
-            map.put(key, newV);
-        }
-        String userName = newV.getString("UserName");
-        if (userName.startsWith("@@")) {
-            MessageTools.sendMsgByUserId(results, "filehelper");
-        } else {
-            MessageTools.sendMsgByUserId(results, userName);
+        Map<String, Map<String, String>> differenceMap = JSONObjectUtil.getDifferenceMap(oldV, newV);
+        if (differenceMap.size() > 0) {
+            //待发消息列表
+            ArrayList<MessageTools.Result> results = new ArrayList<>();
+            String s = mapToString(differenceMap);
+            //发送消息
+            results.add(MessageTools.Result.builder().content(tip + "（" + name + "）属性更新：" + s)
+                    .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
+                    .build());
+            //Old与New存在差异
+            log.info("{}（{}）属性更新：{}", tip, name, s);
+            //差异存到数据库
+            store(differenceMap, oldV, results);
         }
 
     }

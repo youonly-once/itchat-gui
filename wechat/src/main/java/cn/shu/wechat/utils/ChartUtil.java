@@ -316,7 +316,64 @@ public class ChartUtil {
 
 
     }
+    /**
+     * 聊天双方用户活跃度(消息发送次数)
+     * @param userName
+     * @return
+     */
+    public String makeWXUserActivity(String userName) {
 
+        MessageExample messageExample = new MessageExample();
+        MessageExample.Criteria criteria = messageExample.or();
+        MessageExample.Criteria criteria1 = messageExample.or();
+        MessageExample.Criteria criteria2 = messageExample.or();
+        //我发给对方的
+        criteria.andFromUsernameEqualTo(Core.getUserName());
+        criteria1.andFromNicknameEqualTo(Core.getNickName());
+        criteria2.andFromRemarknameEqualTo(Core.getNickName());
+        messageExample.or().andToNicknameEqualTo(ContactsTools.getNickNameByUserName(userName));
+        messageExample.or().andToUsernameEqualTo(userName);
+        messageExample.or().andToRemarknameEqualTo(ContactsTools.getRemarkNameByUserName(userName));
+
+        List<Message> messages = messageMapper.selectByExample(messageExample);
+
+        Map<String, AtomicInteger> msgCount = new HashMap<>();
+        for (Message message : messages) {
+            String fromMemberOfGroupDisplayname = message.getFromMemberOfGroupDisplayname();
+            if (StringUtils.isEmpty(fromMemberOfGroupDisplayname)){
+                fromMemberOfGroupDisplayname = message.getFromNickname();
+            }
+            if (message.getMsgType()>=1 && message.getMsgType()<=48){
+                msgCount.computeIfAbsent(fromMemberOfGroupDisplayname, v -> new AtomicInteger()).getAndIncrement();
+            }
+        }
+
+
+        msgCount = sortMapByValue(msgCount);
+        int maxSize = 10;
+        int size = Math.min(maxSize, msgCount.size());
+        double[][] data = new double[1][size];
+        String[] columnKeys = new String[size];
+        String[] rowKeys = {"发送数量"};
+        double[] values = new double[size];
+
+        int i = 0;
+        for (Map.Entry<String, AtomicInteger> type : msgCount.entrySet()) {
+            if (i==size){
+                break;
+            }
+            columnKeys[i] = type.getKey();
+            values[i] = type.getValue().get();
+            i++;
+        }
+        data[0] = values;
+        if (values.length>0){
+            CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
+            String barImg1 = createBarChart(dataset, "用户昵称", "发送消息数量", "群成员活跃度", "makeWXGroupMessageTop1.png",1024,768);
+            return barImg1;
+        }
+        return null;
+    }
     /**
      * 群用户活跃度(消息发送次数)
      * @param userName
@@ -405,7 +462,7 @@ public class ChartUtil {
                         && StringUtils.isNotBlank(msg)) {
                     Result result = ToAnalysis.parse(msg);
                     for (Term term : result.getTerms()) {
-                        System.out.println(term);
+                        //System.out.println(term);
                         String natureStr = term.getNatureStr().substring(0, 1);
                         if (StringUtils.isBlank(term.getName())) {
                             continue;

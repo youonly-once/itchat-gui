@@ -10,8 +10,9 @@ package cn.shu.wechat.enums;
  */
 public enum WXReceiveMsgCodeOfAppEnum {
 	UNKNOWN(0, "未知消息"),
-	FAVOURITE(5, "收藏消息"),
+	FAVOURITE(5, "链接消息"),
 	PROGRAM(33, "小程序消息"),
+	MUSIC(3, "分享的音乐"),
 	FILE(6, "文件消息");
 	private int type;
 	private String code;
