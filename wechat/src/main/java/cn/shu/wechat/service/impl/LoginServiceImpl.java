@@ -790,6 +790,8 @@ public class LoginServiceImpl implements ILoginService {
             log.info("{}（{}）属性更新：{}", tip, name, s);
             //差异存到数据库
             store(differenceMap, oldV, results);
+            String userName = newV.getString("UserName");
+            MessageTools.sendMsgByUserId(results,userName);
         }
 
     }
