@@ -181,7 +181,11 @@ public class MessageTools {
             messages.add(build);
 
         }
-        int insert = messageMapper.batchInsert(messages);
+        try {
+            int insert = messageMapper.batchInsert(messages);
+        }catch (Exception e){
+
+        }
     }
 
     /**

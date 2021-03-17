@@ -81,7 +81,7 @@ public class LoginController {
                 }
 
                 log.info("2. 获取登陆二维码图片");
-                qrPath = qrPath + File.separator + Config.DEFAULT_QR;
+
                 if (loginService.getQR(qrPath)) {
                     try {
                         // 使用图片查看器打开登陆二维码图片

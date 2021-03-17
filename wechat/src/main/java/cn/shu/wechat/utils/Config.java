@@ -22,9 +22,8 @@ public class Config {
 	public static final String API_WXAPPID = "API_WXAPPID";
 
 	public static final String PIC_DIR = "D://weixin";
-	public static final String QR_PATH = Config.PIC_DIR + File.separator + "login";
 	public static final String DEFAULT_QR = "QR.jpg";
-
+	public static final String QR_PATH = PIC_DIR + File.separator + "login"+File.separator+DEFAULT_QR;
 	public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.183 Safari/537.36";
 	public static final ArrayList<String> API_SPECIAL_USER = new ArrayList<String>(Arrays.asList("filehelper", "weibo",
 			"qqmail", "fmessage", "tmessage", "qmessage", "qqsync", "floatbottle", "lbsapp", "shakeapp", "medianote",
