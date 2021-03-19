@@ -38,8 +38,7 @@ public class UpdateContactRunnable implements Runnable {
 
 	@Override
 	public void run() {
-		while (Core.isAlive()) {
-			SleepUtils.sleep(30 * 1000);
+		if (Core.isAlive()) {
 			loginService.webWxGetContact();
 
 			loginService.WebWxBatchGetContact();

@@ -2,9 +2,7 @@ package cn.shu.wechat.controller;
 
 import cn.shu.wechat.api.WeChatTool;
 import cn.shu.wechat.utils.*;
-import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.face.IMsgHandlerFace;
 import cn.shu.wechat.service.ILoginService;
 import cn.shu.wechat.runnable.CheckLoginStatusRunnable;
 import cn.shu.wechat.runnable.UpdateContactRunnable;
@@ -14,9 +12,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.io.File;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -130,62 +126,34 @@ public class LoginController {
         log.info("10. 开始接收消息");
         loginService.startReceiving();
 
-
-        Runnable chartRunnable = () -> {
-
-            while (true) {
-                try {
-                    chart.create();
-                    //SleepUtils.sleep(1000 * 10 );
-                    SleepUtils.sleep(1000 * 60 * 60 * 8);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-        };
-        ExecutorsUtil.getGlobalExecutorService().submit(chartRunnable);
+        ExecutorServiceUtil.getScheduledExecutorService()
+                .scheduleWithFixedDelay(() -> chart.create(), 0, 1000 * 60 * 60 * 8,TimeUnit.SECONDS);
 
         log.info("11. 缓存本次登陆好友相关消息");
         // 登陆成功后缓存本次登陆好友相关消息（NickName, UserName）
         WeChatTool.setUserInfo();
 
         log.info("12.开启微信状态检测线程");
-        ExecutorsUtil.getGlobalExecutorService().submit(checkLoginStatusRunnable);
-
+        ExecutorServiceUtil.getScheduledExecutorService()
+                .scheduleWithFixedDelay(checkLoginStatusRunnable, 60*10 * 1000, 60*10 * 1000,TimeUnit.SECONDS);
 
         log.info("13. 下载联系人头像");
 
-        for (Map.Entry<String, JSONObject> entry : Core.getGroupMap().entrySet()) {
-            Runnable runnable = () -> {
-                JSONObject value = entry.getValue();
-                String headImgUrl = DownloadTools.downloadHeadImg(value.getString("HeadImgUrl"), value.getString("UserName"));
-                Core.getContactHeadImgPath().put(value.getString("UserName"), headImgUrl);
-                //System.out.println("头像已下载：" + headImgUrl);
-            };
-            ExecutorsUtil.getHeadImageDownloadExecutorService().execute(runnable);
+        for (Map.Entry<String, JSONObject> entry : Core.getMemberMap().entrySet()) {
+            ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(()->Core.getContactHeadImgPath().put(entry.getValue().getString("UserName"), DownloadTools.downloadHeadImg(entry.getValue().getString("HeadImgUrl"), entry.getValue().getString("UserName"))));
 
         }
-        for (Map.Entry<String, JSONObject> entry : Core.getContactMap().entrySet()) {
-            Runnable runnable = () -> {
-                JSONObject value = entry.getValue();
-                String headImgUrl = DownloadTools.downloadHeadImg(value.getString("HeadImgUrl"), value.getString("UserName"));
-                Core.getContactHeadImgPath().put(value.getString("UserName"), headImgUrl);
-                //System.out.println("头像已下载：" + headImgUrl);
-            };
-            ExecutorsUtil.getHeadImageDownloadExecutorService().submit(runnable);
-
-        }
-        ExecutorsUtil.getHeadImageDownloadExecutorService().shutdown();
-        ExecutorsUtil.getGlobalExecutorService().submit(() -> {
+        ExecutorServiceUtil.getHeadImageDownloadExecutorService().shutdown();
+        ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
             try {
                 //等待头像下载完成
-                boolean b = ExecutorsUtil.getHeadImageDownloadExecutorService().awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+                boolean b = ExecutorServiceUtil.getHeadImageDownloadExecutorService().awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             log.info("14.开启好友列表更新线程");
-            new Thread(updateContactRunnable, "UpdateContactThread").start();
+            ExecutorServiceUtil.getScheduledExecutorService()
+                    .scheduleWithFixedDelay(updateContactRunnable,15,15,TimeUnit.SECONDS);
             log.info("头像下载完成");
         });
 

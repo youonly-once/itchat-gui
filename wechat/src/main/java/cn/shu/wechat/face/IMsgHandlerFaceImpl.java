@@ -255,6 +255,8 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                             .toUserName(toUserName).build());
                 }
                 break;
+            default:
+                break;
 
 
         }
@@ -266,7 +268,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 if (i !=-1 ){
                     long sleep = Long.parseLong(replace.substring(i + 5));
                     final long relay =   sleep == 0?2*60*1000:sleep*1000;
-                    ExecutorsUtil.getGlobalExecutorService().submit(() -> {
+                    ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
                         SleepUtils.sleep(relay);
                         MessageTools.sendRevokeMsgByUserId(msg.getToUserName(), msg.getMsgId(), msg.getNewMsgId() + "");
                     });
