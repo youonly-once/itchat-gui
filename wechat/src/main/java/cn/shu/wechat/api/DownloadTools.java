@@ -6,7 +6,7 @@ import cn.shu.wechat.enums.URLEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
 import cn.shu.wechat.utils.Config;
-import cn.shu.wechat.utils.ExecutorsUtil;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.MyHttpClient;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.StringUtils;
@@ -261,7 +261,7 @@ public class DownloadTools {
                 DownloadTools.getDownloadFn(msg, path);
             }
         };
-        ExecutorsUtil.getGlobalExecutorService().submit(runnable);
+        ExecutorServiceUtil.getGlobalExecutorService().execute(runnable);
 
     }
 

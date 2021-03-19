@@ -24,14 +24,15 @@ public class CheckLoginStatusRunnable implements Runnable {
 
 	@Override
 	public void run() {
-		while (Core.isAlive()) {
-			long t1 = System.currentTimeMillis(); // 秒为单位
-			if (t1 - Core.getLastNormalRetCodeTime() > 60 * 1000) { // 超过60秒，判为离线
+		if (Core.isAlive()) {
+			// 秒为单位
+			long t1 = System.currentTimeMillis();
+			if (t1 - Core.getLastNormalRetCodeTime() > 60 * 1000) {
+				// 超过60秒，判为离线
 				//Core.setAlive(false);
 				// 心跳检测不准确
 				log.info("微信已离线");
 			}
-			SleepUtils.sleep(60*10 * 1000); // 休眠10秒
 		}
 	}
 

@@ -273,7 +273,7 @@ public class LoginServiceImpl implements ILoginService {
                                             WebWxSyncMsg webWxSyncMsg = JSON.parseObject(JSON.toJSONString(msgObj), WebWxSyncMsg.class);
                                             List<AddMsgList> addMsgLists = webWxSyncMsg.getAddMsgList();
                                             for (AddMsgList msg : addMsgLists) {
-                                                ExecutorsUtil.getGlobalExecutorService().submit(() -> {
+                                                ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
                                                     try {
                                                         msgCenter.handleNewMsg(msg);
                                                     } catch (Exception e) {
@@ -335,7 +335,7 @@ public class LoginServiceImpl implements ILoginService {
                 }
             }
         };
-        ExecutorsUtil.getGlobalExecutorService().submit(runnable);
+        ExecutorServiceUtil.getGlobalExecutorService().execute(runnable);
 
 
     }
