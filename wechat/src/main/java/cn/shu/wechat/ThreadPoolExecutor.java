@@ -182,6 +182,10 @@ import java.util.concurrent.locks.ReentrantLock;
  * avoid rejection of new submitted tasks. This in turn admits the
  * possibility of unbounded thread growth when commands continue to
  * arrive on average faster than they can be processed.
+ * TODO 直接交付。一个好的默认的工作队列的选择是直接交付任务给线程而不是保留任务的的{@link SynchronousQueue}队列。
+ * TODO 这里，一个尝试放入队列的任务将会失败如果没有立即可用的线程去执行它，所以一个新的线程将被创建。
+ * TODO 该策略在处理可能具有内部依赖项的请求集时避免锁定，直接交付通常请求无限的{@code maximumPoolSizes}去避免拒绝新提交的任务。
+ * TODO 反过来承认当命令以平均速度高于他们能处理的速度持续到达时，线程存在无限增长的可能性。
  *
  * <li><em> Unbounded queues.</em> Using an unbounded queue (for
  * example a {@link LinkedBlockingQueue} without a predefined
@@ -195,6 +199,10 @@ import java.util.concurrent.locks.ReentrantLock;
  * transient bursts of requests, it admits the possibility of
  * unbounded work queue growth when commands continue to arrive on
  * average faster than they can be processed.
+ * TODO 无限队列。当所有的核心线程正在忙时，如果使用一个无边界的队列（例如一个没有预定于容量的队列：{@link LinkedBlockingQueue}）将会导致新任务在队列中等待。
+ * TODO 因此，不会创建超过corePoolSize数量的线程（此时maximumPoolSize的值无效）。
+ * TODO 当每个任务完全独立于其它任务时这也许是恰当的，所以任务不会影响其他任务的执行;例如，在一个网页服务器。
+ * TODO 这种类型的排队在一个平滑的瞬间爆发的请求方面是有用的，当命令以平均速度高于他们能处理的速度持续到达时，它允许线程存在无限增长的可能性。
  *
  * <li><em>Bounded queues.</em> A bounded queue (for example, an
  * {@link ArrayBlockingQueue}) helps prevent resource exhaustion when
@@ -208,7 +216,10 @@ import java.util.concurrent.locks.ReentrantLock;
  * generally requires larger pool sizes, which keeps CPUs busier but
  * may encounter unacceptable scheduling overhead, which also
  * decreases throughput.
- *
+ * TODO 有限队列：当我们使用一个无穷的maximumPoolSizes事，一个有限队列（例如，{@link ArrayBlockingQueue}）帮助预防资源耗尽，但是可能更难调整和控制。
+ * TODO 队列大小和线程池最大大小可以互相交换：使用大队列和小池子可以最大限度减少CPU的使用，操作系统资源，和上下文切换的开销，但是也能人工导致低吞吐量。
+ * TODO 如果一个任务频繁的阻塞（例如他们是I/O），一个系统可能有能力去安排时间给比你允许的更多的线程。
+ * TODO 使用小队列通常请求大池子，保持CPU更忙，但是也会造成无法接受的调度开销，也会降低吞吐量。
  * </ol>
  *
  * </dd>
@@ -223,7 +234,9 @@ import java.util.concurrent.locks.ReentrantLock;
  * RejectedExecutionHandler#rejectedExecution(Runnable, ThreadPoolExecutor)}
  * method of its {@link RejectedExecutionHandler}.  Four predefined handler
  * policies are provided:
- *
+ *  TODO 当执行器已经被关闭，或者当执行器使用有限的最大线程容量和工作队列数量，或者线程池是饱和时，通过方法{@link #execute(Runnable)}提交的新任务将被拒绝。
+ *  TODO 另一方面，{@code execute}方法调用{@link RejectedExecutionHandler#rejectedExecution(Runnable, ThreadPoolExecutor)}方法。
+ *  TODO 提供四个预定义的handler策略。
  * <ol>
  *
  * <li>In the default {@link ThreadPoolExecutor.AbortPolicy}, the handler
@@ -1219,7 +1232,8 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * @throws NullPointerException if {@code workQueue}
      *         or {@code threadFactory} is null
      */
-    public ThreadPoolExecutor(int corePoolSize,
+    public
+    ThreadPoolExecutor(int corePoolSize,
                               int maximumPoolSize,
                               long keepAliveTime,
                               TimeUnit unit,

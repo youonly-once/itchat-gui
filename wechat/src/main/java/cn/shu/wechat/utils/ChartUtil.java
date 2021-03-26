@@ -553,7 +553,7 @@ public class ChartUtil {
             return;
         }
         Properties properties = new Properties();
-        Map<String, AtomicInteger> msgType = new HashMap<>();
+        Map<String, AtomicInteger> msgType = new TreeMap<>();
         Map<String, AtomicInteger> msgTerm = new HashMap<>();
         for (File file : files) {
             if (file.isFile() && file.getName().endsWith(".property")) {
@@ -1307,12 +1307,12 @@ public class ChartUtil {
     }
 
 
-    /**
+/*    *//**
      * 使用 Map按value进行排序
      *
      * @param
      * @return
-     */
+     *//*
     public Map<String, AtomicInteger> sortMapByValue(Map<String, AtomicInteger> oriMap) {
         if (oriMap == null ) {
             return null;
@@ -1371,7 +1371,7 @@ public class ChartUtil {
                 return 0;
             }
         }
-    }
+    }*/
 }
 
 
