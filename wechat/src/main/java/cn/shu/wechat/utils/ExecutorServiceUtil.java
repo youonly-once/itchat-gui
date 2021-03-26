@@ -29,7 +29,7 @@ public class ExecutorServiceUtil {
      * 全局线程池
      */
     private final static ExecutorService globalExecutorService = new ThreadPoolExecutor(
-            100
+            20
             , Integer.MAX_VALUE
             , 60L
             , TimeUnit.SECONDS
