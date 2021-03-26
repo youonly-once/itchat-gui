@@ -140,7 +140,9 @@ public class LoginController {
         log.info("13. 下载联系人头像");
 
         for (Map.Entry<String, JSONObject> entry : Core.getMemberMap().entrySet()) {
-            ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(()->Core.getContactHeadImgPath().put(entry.getValue().getString("UserName"), DownloadTools.downloadHeadImg(entry.getValue().getString("HeadImgUrl"), entry.getValue().getString("UserName"))));
+            ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(
+                    ()->{Core.getContactHeadImgPath().put(entry.getValue().getString("UserName"), DownloadTools.downloadHeadImg(entry.getValue().getString("HeadImgUrl"), entry.getValue().getString("UserName")));
+                    log.info("下载头像：({}):{}",entry.getValue().getString("NickName"),entry.getValue().getString("HeadImgUrl"));});
 
         }
         ExecutorServiceUtil.getHeadImageDownloadExecutorService().shutdown();

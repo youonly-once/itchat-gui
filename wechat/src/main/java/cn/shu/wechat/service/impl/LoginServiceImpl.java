@@ -386,6 +386,7 @@ public class LoginServiceImpl implements ILoginService {
             for (Object value : member) {
                 JSONObject o = (JSONObject) value;
                 String userName = o.getString("UserName");
+                Core.getMemberMap().put(userName,o);
                 if ((o.getInteger("VerifyFlag") & 8) != 0) {
                     // 公众号/服务号
                     Core.getPublicUsersMap().put(userName, o);
@@ -439,6 +440,7 @@ public class LoginServiceImpl implements ILoginService {
                 // 群好友
                 JSONObject groupObject = contactList.getJSONObject(i);
                 String userName = groupObject.getString("UserName");
+                Core.getMemberMap().put(userName,groupObject);
                 if (userName.startsWith("@@")) {
                     //以上接口返回的成员属性不全，以下的接口获取群成员详细属性
                     JSONArray memberArray = WebWxBatchGetContactDetail(groupObject);
@@ -787,7 +789,7 @@ public class LoginServiceImpl implements ILoginService {
                     .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                     .build());
             //Old与New存在差异
-            log.info("{}（{}）属性更新：{}", tip, name, s);
+//            log.info("{}（{}）属性更新：{}", tip, name, s);
             //差异存到数据库
             store(differenceMap, oldV, results);
             String userName = newV.getString("UserName");
