@@ -100,7 +100,7 @@ public class DownloadTools {
                 break;
         }
 
-
+        boolean downloadStatus = false;
         OutputStream out = null;
         try {
             File file = new File(path);
@@ -110,30 +110,28 @@ public class DownloadTools {
                     boolean mkdirs = parentFile.mkdirs();
                     if (!mkdirs) {
                         log.error("创建目录失败：{}", parentFile.getAbsolutePath());
-                        return false;
                     }
                 }
                 boolean newFile = file.createNewFile();
                 if (!newFile) {
                     log.error("创建文件失败：{}", path);
-                    return false;
                 }
 
             }
             if (entity == null) {
                 log.error("下载失败：response entity is null.");
-                return false;
             }
             out = new FileOutputStream(file);
             byte[] bytes = EntityUtils.toByteArray(entity);
             out.write(bytes);
             out.flush();
             log.info("资源下载完成：{}", path);
+            downloadStatus = true;
         } catch (Exception e) {
             log.info(e.getMessage());
             return false;
         } finally {
-
+            DownloadTools.FILE_DOWNLOAD_STATUS.put(path, downloadStatus);
             if (out != null) {
                 try {
                     out.close();
@@ -143,7 +141,6 @@ public class DownloadTools {
             }
 
         }
-        DownloadTools.FILE_DOWNLOAD_STATUS.put(path, true);
         return false;
     }
 

@@ -246,7 +246,10 @@ public class MessageTools {
             if (aBoolean == null){
                 aBoolean = true;
             }
-            if (file.exists() && file.canRead()&& aBoolean){
+            if (!aBoolean){
+                throw new WebWXException("资源文件下载失败不能上传："+ filePath);
+            }
+            if (file.exists() && file.canRead()){
                 break;
             }
         }
