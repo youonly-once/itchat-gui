@@ -326,7 +326,7 @@ public class LoginServiceImpl implements ILoginService {
                         log.error("消息同步错误：{}", e.getMessage());
                         retryCount += 1;
                         if (Core.getReceivingRetryCount() < retryCount) {
-                            //Core.setAlive(false);
+                          //  Core.setAlive(false);
                         } else {
                             SleepUtils.sleep(1000);
                         }
@@ -775,6 +775,7 @@ public class LoginServiceImpl implements ILoginService {
         if (StringUtils.isEmpty(name)) {
             name = newV.getString("UserName");
         }
+        name = CommonTools.emojiFormatter(name);
         if (oldV == null) {
             log.info("新增{}（{}）：{}", tip, name, newV);
             return;

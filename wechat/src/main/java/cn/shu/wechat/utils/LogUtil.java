@@ -34,7 +34,7 @@ public class LogUtil {
             }else{
                 fromUser = myNickName;
                 if (msg.isGroupMsg()){
-                    toUser = ContactsTools.getGroupDisplayNameByUserName(msg.getToUserName())+"(Group)";
+                    toUser = ContactsTools.getDisplayNameByUserName(msg.getToUserName())+"(Group)";
                 }else{
                     toUser =  ContactsTools.getDisplayNameByUserName(msg.getToUserName());
                 }
@@ -45,7 +45,7 @@ public class LogUtil {
             if (msg.isGroupMsg()){
                 //群成员昵称
                 String groupUserNickNameOfGroup = ContactsTools.getMemberNickNameOfGroup(msg.getFromUserName(), msg.getMemberName());
-                fromUser = ContactsTools.getGroupDisplayNameByUserName(msg.getFromUserName())+"("+groupUserNickNameOfGroup+")";
+                fromUser = ContactsTools.getDisplayNameByUserName(msg.getFromUserName())+"("+groupUserNickNameOfGroup+")";
             }else{
                 fromUser = ContactsTools.getDisplayNameByUserName(msg.getFromUserName());
 
@@ -94,7 +94,7 @@ public class LogUtil {
      */
     public static String  printToMeg(String msgType,String toUserName,String content){
         if (toUserName.startsWith("@@")){
-            toUserName = ContactsTools.getGroupDisplayNameByUserName(toUserName)+"(Group)";
+            toUserName = ContactsTools.getDisplayNameByUserName(toUserName)+"(Group)";
         }else{
             toUserName = ContactsTools.getDisplayNameByUserName(toUserName);
         }
