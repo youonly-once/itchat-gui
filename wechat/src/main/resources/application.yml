@@ -16,3 +16,13 @@ log4jdbc:
       threshold: 10000
   spylogdelegator:
     name: net.sf.log4jdbc.log.log4j2.Log4j2SpyLogDelegator
+server:
+  port: 9999
+management:
+  server:
+    port: 9991
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: ["*"]
