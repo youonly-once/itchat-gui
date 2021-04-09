@@ -14,6 +14,14 @@
     <artifactId>weixin</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
+
+
+    <modules>
+        <module>utils</module>
+        <module>wxuntils</module>
+        <module>wechat</module>
+    </modules>
+    <!--打包配置-->
     <build>
         <plugins>
             <plugin>
@@ -25,15 +33,9 @@
                 </configuration>
             </plugin>
 
-
         </plugins>
     </build>
-
-    <modules>
-        <module>utils</module>
-        <module>wxuntils</module>
-        <module>wechat</module>
-    </modules>
+<!--声明依赖-->
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -102,4 +104,12 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    <profiles>
+        <profile>
+            <id>1-dev</id>
+        </profile>
+        <profile>
+            <id>2-test</id>
+        </profile>
+    </profiles>
 </project>
