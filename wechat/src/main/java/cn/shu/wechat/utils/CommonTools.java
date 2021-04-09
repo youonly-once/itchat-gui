@@ -9,6 +9,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.vdurmont.emoji.EmojiParser;
+import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -205,11 +206,6 @@ public class CommonTools {
 		return r;
 	}
 
-
-	public static void emojiFormatter(JSONObject d, String k) {
-
-
-	}
 	/**
 	 * 处理emoji表情
 	 *
@@ -232,10 +228,23 @@ public class CommonTools {
 	 * @date 2017年4月23日 下午4:19:08
 	 */
 	public static void emojiFormatter(AddMsgList msg) {
-		msg.setContent(msg.getContent().replace("<br/>", "\n"));
-		Matcher matcher = getMatcher("<span class=\"emoji emoji(.{1,10})\"></span>",msg.getContent());
+		msg.setContent(emojiFormatter(msg.getContent()));
+
+	}
+
+	/**
+	 * 消息格式化
+	 *
+	 * @author SXS
+	 * @date 2017年4月23日 下午4:19:08
+	 */
+	public static String emojiFormatter(String msg) {
+		if (StringUtils.isEmpty(msg)) {
+			return msg;
+		}
+		msg = msg.replace("<br/>", "\n");
+		Matcher matcher = getMatcher("<span class=\"emoji emoji(.{1,10})\"></span>",msg);
 		StringBuilder sb = new StringBuilder();
-		String content = msg.getContent();
 		int lastStart = 0;
 		while (matcher.find()) {
 			String str = matcher.group(1);
@@ -244,19 +253,20 @@ public class CommonTools {
 			} else if (str.length() == 10) {
 
 			} else {
-				String tmp = content.substring(lastStart, matcher.start());
+				String tmp = msg.substring(lastStart, matcher.start());
 				sb.append(tmp).append("&#x").append(str).append(";");
 				lastStart = matcher.end();
 			}
 		}
-		if (lastStart < content.length()) {
-			sb.append(content.substring(lastStart));
+		if (lastStart < msg.length()) {
+			sb.append(msg.substring(lastStart));
 		}
 		if (sb.length() != 0) {
-			msg.setContent(EmojiParser.parseToUnicode(sb.toString()));
+			msg = EmojiParser.parseToUnicode(sb.toString());
 		} else {
-			EmojiParser.parseToUnicode(content);
+			msg = EmojiParser.parseToUnicode(msg);
 		}
+		return msg;
 		// TODO 与emoji表情有部分兼容问题，目前暂未处理解码处理 d.put(k,
 		// StringEscapeUtils.unescapeHtml4(d.getString(k)));
 

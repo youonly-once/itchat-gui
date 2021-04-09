@@ -33,13 +33,14 @@
  * http://creativecommons.org/publicdomain/zero/1.0/
  */
 
-package java.util.concurrent;
+package cn.shu.wechat;
 
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.AbstractQueuedSynchronizer;
 import java.util.concurrent.locks.Condition;
@@ -230,8 +231,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * <em>rejected</em> when the Executor has been shut down, and also when
  * the Executor uses finite bounds for both maximum threads and work queue
  * capacity, and is saturated.  In either case, the {@code execute} method
- * invokes the {@link
- * RejectedExecutionHandler#rejectedExecution(Runnable, ThreadPoolExecutor)}
+ * invokes the
  * method of its {@link RejectedExecutionHandler}.  Four predefined handler
  * policies are provided:
  *  TODO 当执行器已经被关闭，或者当执行器使用有限的最大线程容量和工作队列数量，或者线程池是饱和时，通过方法{@link #execute(Runnable)}提交的新任务将被拒绝。
@@ -847,9 +847,9 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * Invokes the rejected execution handler for the given command.
      * Package-protected for use by ScheduledThreadPoolExecutor.
      */
-    final void reject(Runnable command) {
+  /*  final void reject(Runnable command) {
         handler.rejectedExecution(command, this);
-    }
+    }*/
 
     /**
      * Performs any further cleanup following run state transition on
@@ -1373,13 +1373,15 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         }
         if (isRunning(c) && workQueue.offer(command)) {
             int recheck = ctl.get();
-            if (! isRunning(recheck) && remove(command))
-                reject(command);
+            if (! isRunning(recheck) && remove(command)){
+               /* reject(command);*/}
             else if (workerCountOf(recheck) == 0)
                 addWorker(null, false);
         }
-        else if (!addWorker(command, false))
-            reject(command);
+        else if (!addWorker(command, false)){
+
+        }
+          /*  reject(command);*/
     }
 
     /**
@@ -1495,7 +1497,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * that shut down this executor, but in this version, finalize
      * does nothing.
      */
-    @Deprecated(since="9")
+
     protected void finalize() {}
 
     /**
@@ -2054,6 +2056,11 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
                 r.run();
             }
         }
+
+        @Override
+        public void rejectedExecution(Runnable r, java.util.concurrent.ThreadPoolExecutor executor) {
+
+        }
     }
 
     /**
@@ -2081,6 +2088,11 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
                     " rejected from " +
                     e.toString());
         }
+
+        @Override
+        public void rejectedExecution(Runnable r, java.util.concurrent.ThreadPoolExecutor executor) {
+
+        }
     }
 
     /**
@@ -2100,6 +2112,11 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
          * @param e the executor attempting to execute this task
          */
         public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+        }
+
+        @Override
+        public void rejectedExecution(Runnable r, java.util.concurrent.ThreadPoolExecutor executor) {
+
         }
     }
 
@@ -2128,6 +2145,11 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
                 e.getQueue().poll();
                 e.execute(r);
             }
+        }
+
+        @Override
+        public void rejectedExecution(Runnable r, java.util.concurrent.ThreadPoolExecutor executor) {
+
         }
     }
 }

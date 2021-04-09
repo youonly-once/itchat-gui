@@ -612,6 +612,7 @@ public class MessageTools {
             String paramStr = JSON.toJSONString(body);
             HttpEntity entity = MyHttpClient.doPost(url, paramStr);
             result = EntityUtils.toString(entity, Consts.UTF_8);
+            log.info("自动添加好友："+result);
         } catch (Exception e) {
             log.error("webWxSendMsg", e);
         }

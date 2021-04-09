@@ -1307,12 +1307,12 @@ public class ChartUtil {
     }
 
 
-/*    *//**
+  /*  *
      * 使用 Map按value进行排序
      *
      * @param
      * @return
-     *//*
+     */
     public Map<String, AtomicInteger> sortMapByValue(Map<String, AtomicInteger> oriMap) {
         if (oriMap == null ) {
             return null;
@@ -1371,7 +1371,7 @@ public class ChartUtil {
                 return 0;
             }
         }
-    }*/
+    }
 }
 
 

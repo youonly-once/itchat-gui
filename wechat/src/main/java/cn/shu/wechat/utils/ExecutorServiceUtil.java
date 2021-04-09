@@ -23,7 +23,7 @@ public class ExecutorServiceUtil {
             , 0
             , TimeUnit.SECONDS
             , new SynchronousQueue<>()
-            , new TaskThreadFactory("headImgDownloadPool - Thread -", false, Thread.NORM_PRIORITY));
+            , new TaskThreadFactory("HeadImgDownloadPool-Thread-", false, Thread.NORM_PRIORITY));
 
     /**
      * 全局线程池
@@ -34,7 +34,7 @@ public class ExecutorServiceUtil {
             , 60L
             , TimeUnit.SECONDS
             , new SynchronousQueue<>()
-            , new TaskThreadFactory("globalPool - Thread -", false, 6)
+            , new TaskThreadFactory("GlobalPool-Thread-", false, 6)
     );
 
 
@@ -47,7 +47,7 @@ public class ExecutorServiceUtil {
      */
     private final static ScheduledExecutorService scheduledExecutorService
             = Executors.newScheduledThreadPool(3,
-                    new TaskThreadFactory("scheduledExecutorServiceThread", false, Thread.NORM_PRIORITY));
+                    new TaskThreadFactory("ScheduledExecutorServiceThread-", false, Thread.NORM_PRIORITY));
 
 
     public static ExecutorService getGlobalExecutorService() {
