@@ -59,12 +59,10 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     private final Set<String> nonPreventUndoMsgUserName = new HashSet<>();
 
 
-
-
     /**
      * 消息控制命令
-     * @param msg
-     * @return
+     * @param msg 消息
+     * @return 回复消息
      */
     private List<MessageTools.Result> controlCommandHandler(AddMsgList msg){
         String text = msg.getText().toLowerCase();
@@ -313,9 +311,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         return results;
     }
 
-    /*
+    /**
      * 图片消息(non-Javadoc)
-     * @see X.cn.zhouyafeng.itchat4j.face.IMsgHandlerFace#picMsgHandle(com.alibaba.fastjson.JSONObject)
+     * @see
      */
     @Override
     public List<MessageTools.Result> picMsgHandle(AddMsgList msg) {
@@ -324,9 +322,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         return null;
     }
 
-    /*
+    /**
      * 语音消息(non-Javadoc)
-     * @see X.cn.zhouyafeng.itchat4j.face.IMsgHandlerFace#voiceMsgHandle(com.alibaba.fastjson.JSONObject)
+     * @see
      */
     @Override
     public List<MessageTools.Result> voiceMsgHandle(AddMsgList msg) {
@@ -380,7 +378,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         if (msg.getFromUserName().startsWith("@@")) {
             String to = ContactsTools.getGroupDisplayNameByUserName(msg.getFromUserName());
             if ("<span class=\"emoji emoji2764\"></span>汪家人<span class=\"emoji emoji2764\"></span>".equals(to)
-            || "弹性大数据KZK2101".equals(to)) {
+            || "弹性大数据KZK2101".equals(to)
+            || "销秘科技".equals(to)
+            || "艾视医疗集团总群".equals(to)) {
                 log.error("重要群群，不发送撤回消息");
                 return null;
             }

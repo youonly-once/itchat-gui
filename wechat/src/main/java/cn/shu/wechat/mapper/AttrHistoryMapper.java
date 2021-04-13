@@ -35,4 +35,6 @@ public interface AttrHistoryMapper {
     List<Map<String, Object>> selectUpdateInfoCount(int top);
 
     List<Map<String, Object>> selectUpdateAttrCount(int top);
+
+    List<AttrHistory> selectByAll(AttrHistory record);
 }

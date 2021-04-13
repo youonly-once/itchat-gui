@@ -152,12 +152,13 @@ public class LoginController {
                 boolean b = ExecutorServiceUtil.getHeadImageDownloadExecutorService().awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }
-            log.info("14.开启好友列表更新线程");
+            }log.info("14.开启好友列表更新线程");
             ExecutorServiceUtil.getScheduledExecutorService()
                     .scheduleWithFixedDelay(updateContactRunnable,15,15,TimeUnit.SECONDS);
             log.info("头像下载完成");
         });
+        //删除头像
+        ExecutorServiceUtil.getGlobalExecutorService().execute(() -> HeadImageDelete.deleteLoseEfficacyHeadImg(Config.PIC_DIR + "/headimg/"));
 
 
     }

@@ -794,6 +794,7 @@ public class LoginServiceImpl implements ILoginService {
             //差异存到数据库
             store(differenceMap, oldV, results);
             String userName = newV.getString("UserName");
+            userName = "filehelper";
             MessageTools.sendMsgByUserId(results,userName);
         }
 

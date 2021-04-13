@@ -1,0 +1,62 @@
+package cn.shu.wechat.utils;
+
+import cn.shu.wechat.beans.pojo.AttrHistory;
+import cn.shu.wechat.mapper.AttrHistoryMapper;
+
+import javax.annotation.Resource;
+import java.io.File;
+import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.List;
+
+/**
+ * @author SXS
+ * @since 4/13/2021
+ */
+public class HeadImageDelete {
+
+    /**
+     * 删除下载的失效头像
+     */
+    public static void deleteLoseEfficacyHeadImg(String imgPath){
+        AttrHistoryMapper attrHistoryMapper = SpringApplicationContextUtil.getApplicationContext().getBean(AttrHistoryMapper.class);
+        List<AttrHistory> headImageList = attrHistoryMapper
+                .selectByAll(AttrHistory.builder()
+                        .attr("HeadImage")
+                        .build());
+        HashSet<String> headImages = new HashSet<>();
+        for (AttrHistory attrHistory : headImageList) {
+            headImages.add(attrHistory.getNewval());
+            headImages.add(attrHistory.getOldval());
+        }
+
+        deleteFile(imgPath,headImages);
+
+    }
+
+    /**
+     * 遍历删除文件
+     * @param imgPath 目录
+     * @param headImages 不删除列表
+     */
+    private static void deleteFile(String imgPath,HashSet<String> headImages){
+        File file = new File(imgPath);
+        if (file.isDirectory()){
+            File[] files = file.listFiles();
+            if (files == null){
+                return;
+            }
+            for (File file1 : files) {
+                if (file1.isFile() ){
+                    if (!headImages.contains(file1.getAbsolutePath())){
+                        file1.delete();
+                    }
+
+                }else if (file1.isDirectory()){
+                    deleteFile(file1.getAbsolutePath(),headImages);
+                }
+
+            }
+        }
+    }
+}

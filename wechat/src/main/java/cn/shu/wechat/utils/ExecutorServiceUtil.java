@@ -1,6 +1,7 @@
 package cn.shu.wechat.utils;
 
 import org.apache.tomcat.util.threads.TaskThreadFactory;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.*;
 
@@ -21,7 +22,7 @@ public class ExecutorServiceUtil {
             0
             , Integer.MAX_VALUE
             , 0
-            , TimeUnit.SECONDS
+            , TimeUnit.MICROSECONDS
             , new SynchronousQueue<>()
             , new TaskThreadFactory("HeadImgDownloadPool-Thread-", false, Thread.NORM_PRIORITY));
 
@@ -41,7 +42,6 @@ public class ExecutorServiceUtil {
     public static ScheduledExecutorService getScheduledExecutorService() {
         return scheduledExecutorService;
     }
-
     /**
      * 更新联系人定时任务
      */
