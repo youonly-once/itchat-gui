@@ -23,17 +23,10 @@ import javax.annotation.Resource;
 @EnableAsync
 public class WeChatStater {
 
-	@Resource
-	private Wechat wechat;
-
-	@PostConstruct
-	public void init(){
-		wechat.init(Config.QR_PATH);
-	}
-
-
 	public static void main(String[] args) {
 		ApplicationContext applicationContext = SpringApplication.run(WeChatStater.class,args);
+		Wechat wechat = applicationContext.getBean(Wechat.class);
+		wechat.init(Config.QR_PATH);
 	}
 
 

@@ -23,7 +23,7 @@ public class TimedTask {
     @Bean
     public AsyncTaskExecutor asyncTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setThreadNamePrefix("ScheduledExecutorServiceThread-");
+        executor.setThreadNamePrefix("ThreadPoolTaskExecutor-");
         executor.setMaxPoolSize(2);
         executor.setCorePoolSize(2);
         executor.setQueueCapacity(0);

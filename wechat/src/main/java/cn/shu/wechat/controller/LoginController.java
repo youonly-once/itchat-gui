@@ -4,8 +4,6 @@ import cn.shu.wechat.api.WeChatTool;
 import cn.shu.wechat.utils.*;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.service.ILoginService;
-import cn.shu.wechat.runnable.CheckLoginStatusRunnable;
-import cn.shu.wechat.runnable.UpdateContactRunnable;
 import cn.shu.wechat.api.DownloadTools;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.log4j.Log4j2;
@@ -42,17 +40,6 @@ public class LoginController {
     @Resource
     private ILoginService loginService;
 
-    /**
-     * 更新联系人的线程处理器
-     */
-    @Resource
-    private CheckLoginStatusRunnable checkLoginStatusRunnable;
-
-    /**
-     * 检测登录状态的线程
-     */
-    @Resource
-    private UpdateContactRunnable updateContactRunnable;
 
     /**
      * 图表工具类
@@ -133,12 +120,9 @@ public class LoginController {
         // 登陆成功后缓存本次登陆好友相关消息（NickName, UserName）
         WeChatTool.setUserInfo();
 
-        log.info("12.开启微信状态检测线程");
-        ExecutorServiceUtil.getScheduledExecutorService()
-                .scheduleWithFixedDelay(checkLoginStatusRunnable, 60*10 * 1000, 60*10 * 1000,TimeUnit.SECONDS);
-
         log.info("13. 下载联系人头像");
-
+        //删除无效头像
+        HeadImageDelete.deleteLoseEfficacyHeadImg(Config.PIC_DIR + "/headimg/");
         for (Map.Entry<String, JSONObject> entry : Core.getMemberMap().entrySet()) {
             ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(
                     ()->{Core.getContactHeadImgPath().put(entry.getValue().getString("UserName"), DownloadTools.downloadHeadImg(entry.getValue().getString("HeadImgUrl"), entry.getValue().getString("UserName")));
@@ -152,13 +136,9 @@ public class LoginController {
                 boolean b = ExecutorServiceUtil.getHeadImageDownloadExecutorService().awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }log.info("14.开启好友列表更新线程");
-            ExecutorServiceUtil.getScheduledExecutorService()
-                    .scheduleWithFixedDelay(updateContactRunnable,15,15,TimeUnit.SECONDS);
+            }
             log.info("头像下载完成");
         });
-        //删除头像
-        ExecutorServiceUtil.getGlobalExecutorService().execute(() -> HeadImageDelete.deleteLoseEfficacyHeadImg(Config.PIC_DIR + "/headimg/"));
 
 
     }

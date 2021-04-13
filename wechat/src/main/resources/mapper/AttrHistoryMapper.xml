@@ -337,7 +337,6 @@
         SELECT
         <include refid="Base_Column_List"/>
         FROM attr_history
-        where
         <where>
             <if test="attr != null">
                 and attr = #{attr,jdbcType=VARCHAR}

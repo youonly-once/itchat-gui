@@ -1,11 +1,14 @@
 package cn.shu.wechat.utils;
 
 import cn.shu.wechat.beans.pojo.AttrHistory;
+import cn.shu.wechat.core.Core;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
+import lombok.extern.log4j.Log4j2;
 
 import javax.annotation.Resource;
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
@@ -13,6 +16,7 @@ import java.util.List;
  * @author SXS
  * @since 4/13/2021
  */
+@Log4j2
 public class HeadImageDelete {
 
     /**
@@ -22,15 +26,15 @@ public class HeadImageDelete {
         AttrHistoryMapper attrHistoryMapper = SpringApplicationContextUtil.getApplicationContext().getBean(AttrHistoryMapper.class);
         List<AttrHistory> headImageList = attrHistoryMapper
                 .selectByAll(AttrHistory.builder()
-                        .attr("HeadImage")
+                        .attr("头像更换")
                         .build());
         HashSet<String> headImages = new HashSet<>();
         for (AttrHistory attrHistory : headImageList) {
             headImages.add(attrHistory.getNewval());
             headImages.add(attrHistory.getOldval());
         }
-
         deleteFile(imgPath,headImages);
+        log.info("头像删除成功");
 
     }
 
