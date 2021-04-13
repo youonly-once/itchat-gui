@@ -4,6 +4,11 @@ spring:
     username: root
     password: 123456
     url: jdbc:mysql://127.0.0.1:3306/wechat?serverTimezone=Asia/Shanghai&characterEncoding=utf8&allowMultiQueries=true
+  boot:
+    #admin客户端注册到admin 服务
+    admin:
+      client:
+        url: http://localhost:8999
 mybatis:
   mapper-locations: classpath*:mapper/**/**Mapper.xml
 
@@ -18,9 +23,8 @@ log4jdbc:
     name: net.sf.log4jdbc.log.log4j2.Log4j2SpyLogDelegator
 server:
   port: 9999
+
 management:
-  server:
-    port: 9991
   endpoints:
     web:
       base-path: /
