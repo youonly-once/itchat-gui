@@ -7,12 +7,14 @@ import cn.shu.wechat.service.ILoginService;
 import cn.shu.wechat.api.DownloadTools;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.io.File;
 import java.util.Map;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -33,7 +35,7 @@ import java.util.concurrent.TimeUnit;
  * @date 创建时间：2017年5月13日 下午12:56:07
  */
 @Log4j2
-@Component
+@Controller
 public class LoginController {
     /**
      * 登陆服务实现类
@@ -48,7 +50,7 @@ public class LoginController {
     @Resource
     private ChartUtil chart;
 
-    public void login() {
+    public void login(boolean dHImg) {
         // 防止SSL错误
         System.setProperty("jsse.enableSNIExtension", "false");
         String qrPath = Config.QR_PATH;
@@ -86,7 +88,12 @@ public class LoginController {
             }
             log.info("3. 请扫描二维码图片，并在手机上确认");
             if (!Core.isAlive()) {
-                loginService.login();
+                try {
+                    loginService.login();
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                    return;
+                }
                 //TODO 登录成功，关闭打开的二维码图片，暂时没有成功
                 CommonTools.closeQr(process);
                 Core.setAlive(true);
@@ -124,16 +131,20 @@ public class LoginController {
         log.info("11. 缓存本次登陆好友相关消息");
         // 登陆成功后缓存本次登陆好友相关消息（NickName, UserName）
         WeChatTool.setUserInfo();
-
-        log.info("13. 下载联系人头像");
         //删除无效头像
         HeadImageDelete.deleteLoseEfficacyHeadImg(Config.PIC_DIR + "/headimg/");
-        for (Map.Entry<String, JSONObject> entry : Core.getMemberMap().entrySet()) {
-            ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(
-                    ()->{Core.getContactHeadImgPath().put(entry.getValue().getString("UserName"), DownloadTools.downloadHeadImg(entry.getValue().getString("HeadImgUrl"), entry.getValue().getString("UserName")));
-                    log.info("下载头像：({}):{}",entry.getValue().getString("NickName"),entry.getValue().getString("HeadImgUrl"));});
+        if (dHImg){
+            log.info("13. 下载联系人头像");
+            for (Map.Entry<String, JSONObject> entry : Core.getMemberMap().entrySet()) {
+                ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(
+                        ()->{Core.getContactHeadImgPath().put(entry.getValue().getString("UserName"), DownloadTools.downloadHeadImg(entry.getValue().getString("HeadImgUrl"), entry.getValue().getString("UserName")));
+                            log.info("下载头像：({}):{}",entry.getValue().getString("NickName"),entry.getValue().getString("HeadImgUrl"));});
 
+            }
         }
+
+
+
         ExecutorServiceUtil.getHeadImageDownloadExecutorService().shutdown();
         ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
             try {
@@ -146,5 +157,21 @@ public class LoginController {
         });
 
 
+    }
+
+    /**
+     *
+     * @param dHImg 是否下载头像
+     * @return 提示信息
+     */
+    @RequestMapping("/reLogin")
+    @ResponseBody
+    public String reLogin(boolean dHImg){
+        //取消上次登录
+        Core.setCancelPreLogin(true);
+        ExecutorServiceUtil.getGlobalExecutorService().execute(
+                () -> login(dHImg)
+        );
+        return "请扫描二维码登录！";
     }
 }

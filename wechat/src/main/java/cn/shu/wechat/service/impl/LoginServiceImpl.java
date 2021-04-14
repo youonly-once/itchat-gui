@@ -57,7 +57,7 @@ public class LoginServiceImpl implements ILoginService {
 
 
     @Override
-    public boolean login() {
+    public boolean login() throws Exception{
 
         boolean isLogin = false;
         // 组装参数和URL
@@ -68,6 +68,9 @@ public class LoginServiceImpl implements ILoginService {
 
         // long time = 4000;
         while (!isLogin) {
+            if (Core.isCancelPreLogin()){
+                throw new Exception("取消登录！");
+            }
             // SleepUtils.sleep(time += 1000);
             long millis = System.currentTimeMillis();
             params.add(new BasicNameValuePair(LoginParaEnum.R.para(), String.valueOf(millis / 1579L)));

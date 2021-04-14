@@ -4,7 +4,6 @@ import java.util.*;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import lombok.Data;
 import cn.shu.wechat.enums.parameters.BaseParaEnum;
 
 
@@ -23,7 +22,18 @@ public class Core {
      */
     static private boolean alive = false;
 
+    public static boolean isCancelPreLogin() {
+        return cancelPreLogin;
+    }
 
+    public static void setCancelPreLogin(boolean cancelPreLogin) {
+        Core.cancelPreLogin = cancelPreLogin;
+    }
+
+    /**
+     * 取消登录
+     */
+    static private boolean cancelPreLogin =false;
     /**
      * 本次登录用户唯一标识
      */

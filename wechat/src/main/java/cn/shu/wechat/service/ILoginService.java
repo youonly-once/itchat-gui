@@ -43,7 +43,7 @@ public interface ILoginService {
 	 * @date 2017年5月13日 上午12:14:07
 	 * @return {@code true} 获取成功 {@code false} 获取失败
 	 */
-	boolean login();
+	boolean login()  throws Exception;
 
 	/**
 	 * web初始化
