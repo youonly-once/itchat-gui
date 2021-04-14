@@ -30,9 +30,9 @@ public class ExecutorServiceUtil {
      * 全局线程池
      */
     private final static ExecutorService globalExecutorService = new ThreadPoolExecutor(
-            20
+            0
             , Integer.MAX_VALUE
-            , 60L
+            , 0L
             , TimeUnit.SECONDS
             , new SynchronousQueue<>()
             , new TaskThreadFactory("GlobalPool-Thread-", false, 6)

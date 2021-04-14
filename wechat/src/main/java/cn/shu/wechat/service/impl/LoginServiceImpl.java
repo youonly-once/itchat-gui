@@ -771,9 +771,12 @@ public class LoginServiceImpl implements ILoginService {
     private void compareOld(Map<String, JSONObject> map, String key, JSONObject newV, String tip) {
         JSONObject oldV = map.get(key);
 
-        String name = newV.getString("NickName");
+        String name = newV.getString("RemarkName");
         if (StringUtils.isEmpty(name)) {
-            name = newV.getString("UserName");
+            name = newV.getString("NickName");
+            if (StringUtils.isEmpty(name)) {
+                name = newV.getString("UserName");
+            }
         }
         name = CommonTools.emojiFormatter(name);
         if (oldV == null) {
