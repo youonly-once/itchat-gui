@@ -10,6 +10,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -47,8 +48,12 @@ public class LoginController {
     @Resource
     private ChartUtil chart;
 
-    public void login(String qrPath) {
-
+    public void login() {
+        // 防止SSL错误
+        System.setProperty("jsse.enableSNIExtension", "false");
+        String qrPath = Config.QR_PATH;
+        boolean mkdirs = new File(qrPath).getParentFile().mkdirs();
+        // 登陆
         while (true) {
             Process process = null;
             for (int count = 0; count < 10; count++) {
