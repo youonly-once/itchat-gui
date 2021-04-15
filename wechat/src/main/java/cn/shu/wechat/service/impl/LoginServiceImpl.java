@@ -404,7 +404,7 @@ public class LoginServiceImpl implements ILoginService {
                     }
                 } else if (userName.equals(Core.getUserName())) {
                     // 自己
-                    Core.getContactMap().remove(userName);
+                    //Core.getContactMap().remove(userName);
                 } else {
                         //比较上次差异
                     compareOld(Core.getContactMap(), userName, o, "普通联系人");

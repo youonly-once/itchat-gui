@@ -331,9 +331,9 @@ public class ChartUtil {
         criteria.andFromUsernameEqualTo(Core.getUserName());
         criteria1.andFromNicknameEqualTo(Core.getNickName());
         criteria2.andFromRemarknameEqualTo(Core.getNickName());
-        messageExample.or().andToNicknameEqualTo(ContactsTools.getNickNameByUserName(userName));
+        messageExample.or().andToNicknameEqualTo(ContactsTools.getContactNickNameByUserName(userName));
         messageExample.or().andToUsernameEqualTo(userName);
-        messageExample.or().andToRemarknameEqualTo(ContactsTools.getRemarkNameByUserName(userName));
+        messageExample.or().andToRemarknameEqualTo(ContactsTools.getContactRemarkNameByUserName(userName));
 
         List<Message> messages = messageMapper.selectByExample(messageExample);
 
@@ -387,11 +387,11 @@ public class ChartUtil {
         MessageExample.Criteria criteria2 = messageExample.or();
 
         criteria.andFromUsernameEqualTo(userName);
-        criteria1.andFromNicknameEqualTo(ContactsTools.getNickNameByUserName(userName));
-        criteria2.andFromRemarknameEqualTo(ContactsTools.getRemarkNameByUserName(userName));
-        messageExample.or().andToNicknameEqualTo(ContactsTools.getNickNameByUserName(userName));
+        criteria1.andFromNicknameEqualTo(ContactsTools.getContactNickNameByUserName(userName));
+        criteria2.andFromRemarknameEqualTo(ContactsTools.getContactRemarkNameByUserName(userName));
+        messageExample.or().andToNicknameEqualTo(ContactsTools.getContactNickNameByUserName(userName));
         messageExample.or().andToUsernameEqualTo(userName);
-        messageExample.or().andToRemarknameEqualTo(ContactsTools.getRemarkNameByUserName(userName));
+        messageExample.or().andToRemarknameEqualTo(ContactsTools.getContactRemarkNameByUserName(userName));
         List<Message> messages = messageMapper.selectByExample(messageExample);
 
         Map<String, AtomicInteger> msgCount = new HashMap<>();
@@ -445,11 +445,11 @@ public class ChartUtil {
         MessageExample.Criteria criteria2 = messageExample.or();
 
         criteria.andFromUsernameEqualTo(userName);
-        criteria1.andFromNicknameEqualTo(ContactsTools.getNickNameByUserName(userName));
-        criteria2.andFromRemarknameEqualTo(ContactsTools.getRemarkNameByUserName(userName));
-        messageExample.or().andToNicknameEqualTo(ContactsTools.getNickNameByUserName(userName));
+        criteria1.andFromNicknameEqualTo(ContactsTools.getContactNickNameByUserName(userName));
+        criteria2.andFromRemarknameEqualTo(ContactsTools.getContactRemarkNameByUserName(userName));
+        messageExample.or().andToNicknameEqualTo(ContactsTools.getContactNickNameByUserName(userName));
         messageExample.or().andToUsernameEqualTo(userName);
-        messageExample.or().andToRemarknameEqualTo(ContactsTools.getRemarkNameByUserName(userName));
+        messageExample.or().andToRemarknameEqualTo(ContactsTools.getContactRemarkNameByUserName(userName));
         List<Message> messages = messageMapper.selectByExample(messageExample);
 
         Map<String, AtomicInteger> msgType = new HashMap<>();

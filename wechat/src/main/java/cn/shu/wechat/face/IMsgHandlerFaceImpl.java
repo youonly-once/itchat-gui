@@ -122,7 +122,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         if (msg.getFromUserName().equals(Core.getUserName())){
             toUserName = msg.getToUserName();
         }
-        String remarkNameByGroupUserName = ContactsTools.getDisplayNameByUserName(toUserName);
+        String remarkNameByGroupUserName = ContactsTools.getContactDisplayNameByUserName(toUserName);
         switch (text){
             case "help":
             case "/h":
@@ -376,8 +376,8 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         Message oldMessage = messages.get(0);
         //======家人群不发送撤回消息====
         if (msg.getFromUserName().startsWith("@@")) {
-            String to = ContactsTools.getGroupDisplayNameByUserName(msg.getFromUserName());
-            if ("<span class=\"emoji emoji2764\"></span>汪家人<span class=\"emoji emoji2764\"></span>".equals(to)
+            String to = ContactsTools.getContactDisplayNameByUserName(msg.getFromUserName());
+            if ("❤汪家人❤".equals(to)
             || "弹性大数据KZK2101".equals(to)
             || "销秘科技".equals(to)
             || "艾视医疗集团总群".equals(to)) {
@@ -404,7 +404,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         if (msg.isGroupMsg()) {
             fromNickName = ContactsTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), msg.getMemberName() );
         } else {
-            fromNickName = ContactsTools.getUserNickNameByUserName(msg.getFromUserName());
+            fromNickName = ContactsTools.getContactNickNameByUserName(msg.getFromUserName());
         }
 
         String realMsgContent = oldMessage.getContent();

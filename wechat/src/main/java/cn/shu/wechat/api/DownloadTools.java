@@ -172,9 +172,9 @@ public class DownloadTools {
 
 
         //创建本地文件
-        String remarkNameByUserName = ContactsTools.getDisplayNameByUserName(userName);
+        String remarkNameByUserName = ContactsTools.getContactDisplayNameByUserName(userName);
         if (userName.startsWith("@@")) {
-            remarkNameByUserName = ContactsTools.getGroupDisplayNameByUserName(userName);
+            remarkNameByUserName = ContactsTools.getContactDisplayNameByUserName(userName);
         }
         if (StringUtils.isEmpty(remarkNameByUserName)) {
             remarkNameByUserName = userName;
@@ -314,11 +314,11 @@ public class DownloadTools {
             return null;
         }
         //发消息的用户或群名称
-        String username = ContactsTools.getDisplayNameByUserName(msg.getFromUserName());
+        String username = ContactsTools.getContactDisplayNameByUserName(msg.getFromUserName());
         //群成员名称
         String groupUsername = "";
         if (msg.isGroupMsg() && msg.getMemberName() != null) {
-            groupUsername = ContactsTools.getDisplayNameByUserName(msg.getMemberName());
+            groupUsername = ContactsTools.getContactDisplayNameByUserName(msg.getMemberName());
         }
         username = replace(username);
 

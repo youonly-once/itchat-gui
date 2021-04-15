@@ -2,6 +2,7 @@ package cn.shu.wechat.timedtask;
 
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.service.ILoginService;
+import cn.shu.wechat.utils.ChartUtil;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -37,6 +38,12 @@ public class TimedTask {
     private ILoginService loginService;
 
     /**
+     * 图表工具类
+     */
+    @Resource
+    private ChartUtil chart;
+
+    /**
      * 15秒获取一次联系人信息
      */
     @Scheduled(cron = "*/15 * * * * ?")
@@ -46,7 +53,7 @@ public class TimedTask {
             loginService.webWxGetContact();
 
             loginService.WebWxBatchGetContact();
-
+           // log.info("更新联系人完成！");
         }
     }
 
@@ -66,5 +73,14 @@ public class TimedTask {
                 log.info("微信已离线");
             }
         }
+    }
+
+    /**
+     * 生成图标
+     */
+    @Scheduled(cron = "0 0 12 * * ?")
+    @Async
+    public void createChart(){
+        chart.create();
     }
 }

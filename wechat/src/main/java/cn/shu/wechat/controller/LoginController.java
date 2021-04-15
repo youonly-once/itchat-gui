@@ -44,11 +44,7 @@ public class LoginController {
     private ILoginService loginService;
 
 
-    /**
-     * 图表工具类
-     */
-    @Resource
-    private ChartUtil chart;
+
 
     public void login(boolean dHImg) {
         // 防止SSL错误
@@ -125,8 +121,7 @@ public class LoginController {
         log.info("10. 开始接收消息");
         loginService.startReceiving();
 
-        ExecutorServiceUtil.getScheduledExecutorService()
-                .scheduleWithFixedDelay(() -> chart.create(), 0, 1000 * 60 * 60 * 8,TimeUnit.SECONDS);
+
 
         log.info("11. 缓存本次登陆好友相关消息");
         // 登陆成功后缓存本次登陆好友相关消息（NickName, UserName）

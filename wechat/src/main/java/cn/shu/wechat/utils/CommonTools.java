@@ -214,7 +214,8 @@ public class CommonTools {
 
 	 */
 	public static void msgFormatter(AddMsgList msg) {
-		if (msg.getFromUserName().contains("@@") || msg.getToUserName().contains("@@")) { // 群聊消息
+		// 群聊消息
+		if (msg.getFromUserName().contains("@@") || msg.getToUserName().contains("@@")) {
 			groupMsgFormatter(msg);
 		} else {
 			emojiFormatter(msg);

@@ -1,9 +1,11 @@
 package cn.shu.wechat.utils;
 
 import org.apache.tomcat.util.threads.TaskThreadFactory;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 线程池工具类
@@ -37,17 +39,6 @@ public class ExecutorServiceUtil {
             , new SynchronousQueue<>()
             , new TaskThreadFactory("GlobalPool-Thread-", false, 6)
     );
-
-
-    public static ScheduledExecutorService getScheduledExecutorService() {
-        return scheduledExecutorService;
-    }
-    /**
-     * 更新联系人定时任务
-     */
-    private final static ScheduledExecutorService scheduledExecutorService
-            = Executors.newScheduledThreadPool(3,
-                    new TaskThreadFactory("ScheduledExecutorServiceThread-", false, Thread.NORM_PRIORITY));
 
 
     public static ExecutorService getGlobalExecutorService() {
