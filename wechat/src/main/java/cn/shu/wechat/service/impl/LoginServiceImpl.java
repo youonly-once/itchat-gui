@@ -316,8 +316,9 @@ public class LoginServiceImpl implements ILoginService {
                                     webWxSync();
                                     break;
                                 case MOD_CONTACT:
+                                    log.info("联系人修改！");
                                 case A:
-                                    System.out.println("哈哈");
+                                    log.info("未知消息！");
                                     break;
                                 default:
                                     break;
