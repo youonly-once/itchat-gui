@@ -9,6 +9,8 @@ spring:
     admin:
       client:
         url: http://localhost:8999
+        period: 1000
+        read-timeout: 5000
 mybatis:
   mapper-locations: classpath*:mapper/**/**Mapper.xml
 
