@@ -81,8 +81,11 @@
         <!--  <appender-ref ref="log4j2_sql_file"/>-->
         <!--  <appender-ref ref="Console"/>-->
         <!--</logger>-->
-        <logger name="log4jdbc.log4j2" level="INFO" additivity="false">
+        <logger name="log4jdbc.log4j2" level="DEBUG" additivity="false">
             <MarkerFilter marker="LOG4JDBC_NON_STATEMENT" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <appender-ref ref="Console"/>
+        </logger>
+        <logger name="cn.shu.wechat.mapper" level="DEBUG" additivity="false">
             <appender-ref ref="Console"/>
         </logger>
     </loggers>

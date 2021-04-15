@@ -22,7 +22,7 @@ public class WeChatStater {
 	public static void main(String[] args) {
 		ApplicationContext applicationContext = SpringApplication.run(WeChatStater.class,args);
 		LoginController loginController = applicationContext.getBean(LoginController.class);
-		loginController.login(true);
+		loginController.login(false);
 	}
 
 

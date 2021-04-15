@@ -400,7 +400,7 @@ public class LoginServiceImpl implements ILoginService {
                 } else if (userName.startsWith("@@")) {
                     // 群聊
                     if (!Core.getGroupIdSet().contains(userName)) {
-                        log.info("新增群聊：{}", userName);
+                        log.info("新增群聊：{}", o.getString("NickName"));
                         Core.getGroupIdSet().add(userName);
                     }
                 } else if (userName.equals(Core.getUserName())) {

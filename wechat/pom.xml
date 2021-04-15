@@ -56,7 +56,12 @@
             <artifactId>xuggle-xuggler</artifactId>
             <version>5.4.0</version>
         </dependency>
-
+        <!--监听数据库操作-->
+        <dependency>
+            <groupId>org.bgee.log4jdbc-log4j2</groupId>
+            <artifactId>log4jdbc-log4j2-jdbc4.1</artifactId>
+            <version>1.16</version>
+        </dependency>
 
         <!--log4j2依赖包-->
         <dependency>

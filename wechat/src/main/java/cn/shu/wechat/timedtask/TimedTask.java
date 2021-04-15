@@ -25,8 +25,8 @@ public class TimedTask {
     public AsyncTaskExecutor asyncTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setThreadNamePrefix("ThreadPoolTaskExecutor-");
-        executor.setMaxPoolSize(2);
-        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(3);
+        executor.setCorePoolSize(3);
         executor.setQueueCapacity(0);
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         return executor;
