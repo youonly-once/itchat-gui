@@ -1,9 +1,9 @@
 spring:
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
     username: root
     password: 123456
-    url: jdbc:mysql://127.0.0.1:3306/wechat?serverTimezone=Asia/Shanghai&characterEncoding=utf8&allowMultiQueries=true
+    url: jdbc:log4jdbc:mysql://127.0.0.1:3306/wechat?serverTimezone=Asia/Shanghai&characterEncoding=utf8&allowMultiQueries=true
   boot:
     #admin客户端注册到admin 服务
     admin:
@@ -14,15 +14,6 @@ spring:
 mybatis:
   mapper-locations: classpath*:mapper/**/**Mapper.xml
 
-#log4jdbc configuration
-log4jdbc:
-  sqltiming:
-    warn:
-      threshold: 10000
-    error:
-      threshold: 10000
-  spylogdelegator:
-    name: net.sf.log4jdbc.log.log4j2.Log4j2SpyLogDelegator
 server:
   port: 9999
 

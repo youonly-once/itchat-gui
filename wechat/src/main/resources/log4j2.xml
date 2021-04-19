@@ -26,7 +26,7 @@
                      filePattern="logs/$${date:yyyy-MM}/info-%d{yyyy-MM-dd}-%i.log">
             <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
             <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
-            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss:SSS}] %highlight{[%p]} - %t - %style{%l}{bright,yellow} - %m%n"/>
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss:SSS}] [%p] - %t - %l - %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy/>
                 <SizeBasedTriggeringPolicy size="100 MB"/>
@@ -36,7 +36,7 @@
         <RollingFile name="RollingFileWarn" fileName="logs/warn/warn.log"
                      filePattern="logs/$${date:yyyy-MM}/warn-%d{yyyy-MM-dd}-%i.log">
             <ThresholdFilter level="warn" onMatch="ACCEPT" onMismatch="DENY"/>
-            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss:SSS}] %highlight{[%p]} - %t - %style{%l}{bright,yellow} - %m%n"/>
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss:SSS}] [%p] - %t - %l - %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy/>
                 <SizeBasedTriggeringPolicy size="100 MB"/>
@@ -48,7 +48,7 @@
         <RollingFile name="RollingFileError" fileName="logs/error/error.log"
                      filePattern="logs/$${date:yyyy-MM}/error-%d{yyyy-MM-dd}-%i.log">
             <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
-            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss:SSS}] %highlight{[%p]} - %t - %style{%l}{bright,yellow} - %m%n"/>
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss:SSS}] [%p] - %t - %l - %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy/>
                 <SizeBasedTriggeringPolicy size="100 MB"/>
@@ -66,26 +66,28 @@
             <appender-ref ref="RollingFileWarn"/>
             <appender-ref ref="RollingFileError"/>
         </root>
-
-        <logger name="log4jdbc.log4j2" level="INFO" additivity="false">
-            <MarkerFilter marker="LOG4JDBC_EXCEPTION" onMatch="DENY" onMismatch="NEUTRAL"/>
+        <logger name="log4jdbc.log4j2" level="info" additivity="false">
+            <MarkerFilter marker="LOG4JDBC_INSERT" onMatch="ACCEPT" onMismatch="DENY"/>
             <appender-ref ref="Console"/>
         </logger>
-        <!--<logger name="log4jdbc.log4j2" level="${MY_LEVEL}" additivity="false">-->
-        <!--  <MarkerFilter marker="LOG4JDBC_OTHER" onMatch="DENY" onMismatch="NEUTRAL"/>-->
-        <!--  <appender-ref ref="log4j2_sql_file"/>-->
-        <!--  <appender-ref ref="Console"/>-->
-        <!--</logger>-->
-        <!--<logger name="log4jdbc.log4j2" level="${MY_LEVEL}" additivity="false">-->
-        <!--  <MarkerFilter marker="LOG4JDBC_JDBC" onMatch="DENY" onMismatch="NEUTRAL"/>-->
-        <!--  <appender-ref ref="log4j2_sql_file"/>-->
-        <!--  <appender-ref ref="Console"/>-->
-        <!--</logger>-->
-        <logger name="log4jdbc.log4j2" level="DEBUG" additivity="false">
+        <logger name="log4jdbc.log4j2" level="info" additivity="false">
             <MarkerFilter marker="LOG4JDBC_NON_STATEMENT" onMatch="DENY" onMismatch="NEUTRAL"/>
             <appender-ref ref="Console"/>
         </logger>
-        <logger name="cn.shu.wechat.mapper" level="DEBUG" additivity="false">
+        <logger name="log4jdbc.log4j2" level="info" additivity="false">
+            <MarkerFilter marker="LOG4JDBC_AUDIT" onMatch="ACCEPT" onMismatch="DENY"/>
+            <appender-ref ref="Console"/>
+        </logger>
+        <logger name="log4jdbc.log4j2" level="info" additivity="false">
+            <MarkerFilter marker="LOG4JDBC_RESULTSET" onMatch="ACCEPT" onMismatch="DENY"/>
+            <appender-ref ref="Console"/>
+        </logger>
+        <logger name="log4jdbc.log4j2" level="info" additivity="false">
+            <MarkerFilter marker="LOG4JDBC_CONNECTION" onMatch="ACCEPT" onMismatch="DENY"/>
+            <appender-ref ref="Console"/>
+        </logger>
+        <logger name="log4jdbc.log4j2" level="info" additivity="false">
+            <MarkerFilter marker="LOG4JDBC_RESULTSETTABLE" onMatch="ACCEPT" onMismatch="DENY"/>
             <appender-ref ref="Console"/>
         </logger>
     </loggers>
