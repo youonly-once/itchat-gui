@@ -60,17 +60,23 @@
         <!--过滤掉spring和mybatis的一些无用的DEBUG信息-->
         <logger name="org.springframework" level="INFO"/>
         <logger name="org.mybatis" level="INFO"/>
+        <logger name="cn.shu.wechat.mapper" level="TRACE"/>
         <root level="all"><!--其他logger输出所有的日志信息-->
             <appender-ref ref="Console"/>
             <appender-ref ref="RollingFileInfo"/>
             <appender-ref ref="RollingFileWarn"/>
             <appender-ref ref="RollingFileError"/>
         </root>
-        <logger name="log4jdbc.log4j2" level="info" additivity="false">
-            <MarkerFilter marker="LOG4JDBC_INSERT" onMatch="ACCEPT" onMismatch="DENY"/>
+        <logger name="log4jdbc.log4j2" level="INFO" additivity="false">
+            <MarkerFilter marker="LOG4JDBC_EXCEPTION" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <appender-ref ref="RollingFileError"/>
             <appender-ref ref="Console"/>
         </logger>
-        <logger name="log4jdbc.log4j2" level="info" additivity="false">
+<!--        <logger name="log4jdbc.log4j2" level="all" additivity="false">
+            <MarkerFilter marker="LOG4JDBC_SQL" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
+            <appender-ref ref="Console"/>
+        </logger>-->
+   <!--     <logger name="log4jdbc.log4j2" level="info" additivity="false">
             <MarkerFilter marker="LOG4JDBC_NON_STATEMENT" onMatch="DENY" onMismatch="NEUTRAL"/>
             <appender-ref ref="Console"/>
         </logger>
@@ -85,11 +91,26 @@
         <logger name="log4jdbc.log4j2" level="info" additivity="false">
             <MarkerFilter marker="LOG4JDBC_CONNECTION" onMatch="ACCEPT" onMismatch="DENY"/>
             <appender-ref ref="Console"/>
-        </logger>
-        <logger name="log4jdbc.log4j2" level="info" additivity="false">
-            <MarkerFilter marker="LOG4JDBC_RESULTSETTABLE" onMatch="ACCEPT" onMismatch="DENY"/>
+        </logger>-->
+<!--        <logger name="log4jdbc.log4j2" level="INFO" additivity="false">
+            <MarkerFilter marker="LOG4JDBC_RESULTSETTABLE" onMatch="DENY" onMismatch="NEUTRAL"/>
             <appender-ref ref="Console"/>
-        </logger>
+        </logger>-->
+        <!--打印查询语句-->
+       <logger name="log4jdbc.log4j2" level="INFO" additivity="false">
+        <MarkerFilter marker="LOG4JDBC_SELECT" onMatch="ACCEPT" onMismatch="DENY"/>
+        <appender-ref ref="Console"/>
+        <appender-ref ref="RollingFileInfo"/>
+    </logger>
+<!--        <logger name="log4jdbc.log4j2" level="info" additivity="false">
+            <MarkerFilter marker="LOG4JDBC_RESULTSET" onMatch="ACCEPT" onMismatch="DENY"/>
+            <appender-ref ref="Console"/>
+        </logger>-->
+<!--        <logger name="log4jdbc.log4j2" level="INFO" additivity="false">
+            <MarkerFilter marker="LOG4JDBC_NON_STATEMENT" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <appender-ref ref="Console"/>
+            <appender-ref ref="RollingFileInfo"/>
+        </logger>-->
     </loggers>
 
 </configuration>
