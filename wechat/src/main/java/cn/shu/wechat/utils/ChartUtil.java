@@ -76,6 +76,8 @@ public class ChartUtil {
     @Resource
     private MessageMapper messageMapper;
 
+
+
     public static void main(String[] args) {
         // 创建主题样式
         StandardChartTheme standardChartTheme = new StandardChartTheme("CN");
@@ -743,6 +745,7 @@ public class ChartUtil {
          */
         chart.getRenderingHints().put(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
         chart.setTextAntiAlias(false);
+        chart.getTitle().setFont(new Font("宋体",Font.PLAIN,14));
         chart.setBackgroundPaint(Color.white);
         // create plot
         CategoryPlot plot = chart.getCategoryPlot();
@@ -820,7 +823,7 @@ public class ChartUtil {
         //设置图例位置
         LegendTitle legend = chart.getLegend();
         legend.setPosition(RectangleEdge.RIGHT);
-
+        legend.setItemFont(new Font("宋体",Font.PLAIN,14));
         class CustomRender extends BarRenderer {
             private Paint[] colors;
             // 初始化柱子颜色
