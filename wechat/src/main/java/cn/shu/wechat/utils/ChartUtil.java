@@ -140,7 +140,7 @@ public class ChartUtil {
      */
     public String makeGroupMemberAttrPieChart(String groupName, String groupRemarkName, String attrName, int width, int height) {
         log.info("makeGroupMemberAttrPieChart：" + attrName);
-        JSONArray memberArray = Core.getGroupMemberMap().get(groupName);
+        JSONArray memberArray = Core.getMemberMap().get(groupName).getJSONArray("MemberList");
         if (memberArray == null || memberArray.size() <= 0) {
             return null;
         }
@@ -154,7 +154,7 @@ public class ChartUtil {
         stringStringHashMap.put("1", "男");
         stringStringHashMap.put("2", "女");
         stringHashMapHashMap.put("Sex", stringStringHashMap);
-        stringStringHashMap = new HashMap<String, String>();
+        stringStringHashMap = new HashMap<>();
         stringStringHashMap.put("", "未设置");
         stringHashMapHashMap.put("Province", stringStringHashMap);
         for (String key : keys) {
@@ -445,13 +445,18 @@ public class ChartUtil {
         MessageExample.Criteria criteria = messageExample.or();
         MessageExample.Criteria criteria1 = messageExample.or();
         MessageExample.Criteria criteria2 = messageExample.or();
-
+        String contactRemarkNameByUserName = ContactsTools.getContactRemarkNameByUserName(userName);
         criteria.andFromUsernameEqualTo(userName);
         criteria1.andFromNicknameEqualTo(ContactsTools.getContactNickNameByUserName(userName));
-        criteria2.andFromRemarknameEqualTo(ContactsTools.getContactRemarkNameByUserName(userName));
+        if (StringUtils.isNotEmpty(contactRemarkNameByUserName)){
+            criteria2.andFromRemarknameEqualTo(contactRemarkNameByUserName);
+        }
         messageExample.or().andToNicknameEqualTo(ContactsTools.getContactNickNameByUserName(userName));
         messageExample.or().andToUsernameEqualTo(userName);
-        messageExample.or().andToRemarknameEqualTo(ContactsTools.getContactRemarkNameByUserName(userName));
+        if (StringUtils.isNotEmpty(contactRemarkNameByUserName)){
+            messageExample.or().andToRemarknameEqualTo(contactRemarkNameByUserName);
+        }
+
         List<Message> messages = messageMapper.selectByExample(messageExample);
 
         Map<String, AtomicInteger> msgType = new HashMap<>();
@@ -1033,7 +1038,8 @@ public class ChartUtil {
         plot.setForegroundAlpha(1);
         // 指定显示的饼图上圆形(false)还椭圆形(true)
         plot.setCircular(false, true);
-
+        LegendTitle legend = chart.getLegend();
+        legend.setItemFont(new Font("宋体",Font.PLAIN,12));
         // 设置第一个 饼块section 的开始位置，默认是12点钟方向
         plot.setStartAngle(90);
         plot.setBackgroundPaint(new Color(39, 43, 88));

@@ -209,13 +209,13 @@ public final class WeChatTool {
     /**
      * 保存用户信息到核心类
      */
-    public static void setUserInfo() {
+/*    public static void setUserInfo() {
         for (Map.Entry<String, JSONObject> jsonObjectEntry : Core.getContactMap().entrySet()) {
             Core.getUserInfoMap().put(jsonObjectEntry.getValue().getString("NickName"), jsonObjectEntry.getValue());
             Core.getUserInfoMap().put(jsonObjectEntry.getValue().getString("UserName"), jsonObjectEntry.getValue());
         }
 
-    }
+    }*/
     /**
      *
      * 根据用户昵称设置备注名称
@@ -224,7 +224,7 @@ public final class WeChatTool {
      * @param nickName 联系人昵称
      * @param remName 联系人备注
      */
-    public static void remarkNameByNickName(String nickName, String remName) {
+  /*  public static void remarkNameByNickName(String nickName, String remName) {
         String url = String.format(URLEnum.WEB_WX_REMARKNAME.getUrl(), Core.getLoginInfoMap().get("url"),
                 Core.getLoginInfoMap().get(StorageLoginInfoEnum.pass_ticket.getKey()));
         Map<String, Object> msgMap = new HashMap<String, Object>();
@@ -245,7 +245,7 @@ public final class WeChatTool {
         } catch (Exception e) {
             log.error("remarkNameByUserName", e);
         }
-    }
+    }*/
 
     /**
      * 获取微信在线状态

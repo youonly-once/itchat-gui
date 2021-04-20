@@ -316,9 +316,9 @@ public class LoginServiceImpl implements ILoginService {
                                     webWxSync();
                                     break;
                                 case MOD_CONTACT:
-                                    log.info("联系人修改！");
+                                    log.info("联系人修改：{}",msgObj);
                                 case A:
-                                    log.info("未知消息！");
+                                    log.info("未知消息：{}",msgObj);
                                     break;
                                 default:
                                     break;
@@ -390,17 +390,24 @@ public class LoginServiceImpl implements ILoginService {
             for (Object value : member) {
                 JSONObject o = (JSONObject) value;
                 String userName = o.getString("UserName");
+                String nickName = o.getString("NickName");
                 Core.getMemberMap().put(userName,o);
                 if ((o.getInteger("VerifyFlag") & 8) != 0) {
                     // 公众号/服务号
+                    if (!Core.getPublicUsersMap().containsKey(userName)){
+                        log.info("新增公众号/服务号：{}", nickName);
+                    }
                     Core.getPublicUsersMap().put(userName, o);
                 } else if (Config.API_SPECIAL_USER.contains(userName)) {
                     // 特殊账号
+                    if (!Core.getSpecialUsersMap().containsKey(userName)){
+                        log.info("新增特殊账号：{}", nickName);
+                    }
                     Core.getSpecialUsersMap().put(userName, o);
                 } else if (userName.startsWith("@@")) {
                     // 群聊
                     if (!Core.getGroupIdSet().contains(userName)) {
-                        log.info("新增群聊：{}", o.getString("NickName"));
+                        log.info("新增群聊：{}", nickName);
                         Core.getGroupIdSet().add(userName);
                     }
                 } else if (userName.equals(Core.getUserName())) {
@@ -448,7 +455,8 @@ public class LoginServiceImpl implements ILoginService {
                 if (userName.startsWith("@@")) {
                     //以上接口返回的成员属性不全，以下的接口获取群成员详细属性
                     JSONArray memberArray = WebWxBatchGetContactDetail(groupObject);
-                    Core.getGroupMemberMap().put(userName, memberArray);
+                   // Core.getGroupMemberMap().put(userName, memberArray);
+                    groupObject.put("MemberList",memberArray);
                     Core.getGroupMap().put(userName, groupObject);
                 }
             }

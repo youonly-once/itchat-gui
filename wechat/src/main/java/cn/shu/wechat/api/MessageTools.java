@@ -120,10 +120,11 @@ public class MessageTools {
                 }else if (sendMsgResponse.getBaseResponse().getRet() != 0){
                     log.error("发送消息失败：{},{}",sendMsgResponse.getBaseResponse().getErrMsg(), result);
                 }
-                storeMsgToDB(results, sendMsgResponse, toUserName);
+
             } catch (Exception e) {
                 log.error("发送消息失败：{}", e.getMessage());
             }
+            storeMsgToDB(results, sendMsgResponse, toUserName);
 
         }
 

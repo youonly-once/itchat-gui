@@ -1,6 +1,8 @@
 package cn.shu.wechat.core;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -52,54 +54,58 @@ public class Core {
     /**
      * 好友+群聊+公众号+特殊账号
      */
-    static private Map<String, JSONObject> memberMap = new HashMap<>();
+    static private Map<String, JSONObject> memberMap = new ConcurrentHashMap<>();
 
 
     /**
      * 好友
      */
-    static private Map<String, JSONObject> contactMap = new HashMap<>();
+    static private Map<String, JSONObject> contactMap = new ConcurrentHashMap<>();
 
     /**
      * 群
      */
-    static private Map<String, JSONObject> groupMap = new HashMap<>();
+    static private Map<String, JSONObject> groupMap = new ConcurrentHashMap<>();
 
     /**
      * 群聊成员字典
      */
+/*
     static private Map<String, JSONArray> groupMemberMap = new HashMap<String, JSONArray>();
+*/
 
     /**
      * 公众号／服务号
      */
-    static private Map<String, JSONObject> publicUsersMap = new HashMap<>();
+    static private Map<String, JSONObject> publicUsersMap = new ConcurrentHashMap<>();
 
     /**
      * 特殊账号
      */
-    static private Map<String, JSONObject> specialUsersMap = new HashMap<>();
+    static private Map<String, JSONObject> specialUsersMap = new ConcurrentHashMap<>();
 
     /**
      * 群ID列表
      */
-    static private Set<String> groupIdSet = new HashSet<>();
+    static private Set<String> groupIdSet = new CopyOnWriteArraySet<>();
 
     /**
      * 用户信息
      */
+/*
     static private Map<String, JSONObject> userInfoMap = new HashMap<>();
+*/
 
     /**
      * 登录信息
      */
-    static private Map<String, Object> loginInfoMap = new HashMap<String, Object>();
+    static private Map<String, Object> loginInfoMap = new ConcurrentHashMap<String, Object>();
 
     /**
      * 所有好友最新头像路径
-     * 多线程下载 用安全Hahstable
+     * 多线程下载 用安全ConcurrentHashMap
      */
-    static private Map<String, String> contactHeadImgPath = new HashMap<>();
+    static private Map<String, String> contactHeadImgPath = new ConcurrentHashMap<>();
 
     /**
      * 扫描登录前需获取的UUID
@@ -122,7 +128,7 @@ public class Core {
      */
     public static Map<String, Object> getParamMap() {
 
-        return new HashMap<String, Object>(1) {
+        return new ConcurrentHashMap<String, Object>(1) {
             /**
              *
              */
@@ -195,13 +201,13 @@ public class Core {
         Core.groupMap = groupMap;
     }
 
-    public static Map<String, JSONArray> getGroupMemberMap() {
+ /*   public static Map<String, JSONArray> getGroupMemberMap() {
         return groupMemberMap;
     }
 
     public static void setGroupMemberMap(Map<String, JSONArray> groupMemberMap) {
         Core.groupMemberMap = groupMemberMap;
-    }
+    }*/
 
     public static Map<String, JSONObject> getPublicUsersMap() {
         return publicUsersMap;
@@ -229,13 +235,13 @@ public class Core {
 
 
 
-    public static Map<String, JSONObject> getUserInfoMap() {
+/*    public static Map<String, JSONObject> getUserInfoMap() {
         return userInfoMap;
-    }
+    }*/
 
-    public static void setUserInfoMap(Map<String, JSONObject> userInfoMap) {
+/*    public static void setUserInfoMap(Map<String, JSONObject> userInfoMap) {
         Core.userInfoMap = userInfoMap;
-    }
+    }*/
 
     public static Map<String, Object> getLoginInfoMap() {
         return loginInfoMap;

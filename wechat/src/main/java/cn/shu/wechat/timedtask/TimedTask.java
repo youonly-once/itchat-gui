@@ -47,7 +47,7 @@ public class TimedTask {
      * 15秒获取一次联系人信息
      */
     @Scheduled(cron = "*/15 * * * * ?")
-    @Async
+    /*@Async*/
     public void updateContactTask(){
         if (Core.isAlive()) {
             loginService.webWxGetContact();
@@ -61,7 +61,7 @@ public class TimedTask {
      * 10分钟检测一次登录状态
      */
     @Scheduled(cron = "0 */10 * * * ?")
-    @Async
+    /*@Async*/
     public void checkLoginStatusTask(){
         if (Core.isAlive()) {
             // 秒为单位

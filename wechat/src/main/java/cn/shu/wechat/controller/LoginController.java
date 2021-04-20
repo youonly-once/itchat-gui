@@ -124,8 +124,8 @@ public class LoginController {
 
 
         log.info("11. 缓存本次登陆好友相关消息");
-        // 登陆成功后缓存本次登陆好友相关消息（NickName, UserName）
-        WeChatTool.setUserInfo();
+ /*       // 登陆成功后缓存本次登陆好友相关消息（NickName, UserName）
+        WeChatTool.setUserInfo();*/
         //删除无效头像
         HeadImageDelete.deleteLoseEfficacyHeadImg(Config.PIC_DIR + "/headimg/");
         if (dHImg){

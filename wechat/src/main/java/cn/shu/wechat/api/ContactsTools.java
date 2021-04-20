@@ -95,13 +95,17 @@ public class ContactsTools {
 	 * @return 成员
 	 */
 	private static JSONObject getMemberOfGroup(String groupName, String userName) {
-		Map<String, JSONArray> groupMemeberMap = Core.getGroupMemberMap();
-		JSONArray members = groupMemeberMap.get(groupName);
-		if (members == null || userName ==null) {
+		Map<String, JSONObject> groupMemeberMap = Core.getGroupMap();
+		JSONObject group = groupMemeberMap.get(groupName);
+		if (group == null || userName ==null) {
+			return null;
+		}
+		JSONArray memberList = group.getJSONArray("MemberList");
+		if (memberList == null || memberList.size() <= 0){
 			return null;
 		}
 		try {
-			for (Object member : members) {
+			for (Object member : memberList) {
 				JSONObject memberJson = (JSONObject) member;
 				if (userName.equals(memberJson.getString("UserName"))) {
 					return memberJson;
