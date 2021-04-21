@@ -43,7 +43,7 @@ public class LoginController {
     @Resource
     private ILoginService loginService;
 
-
+    private static int count = 0;
     public void login(boolean dHImg) {
         // 防止SSL错误
         System.setProperty("jsse.enableSNIExtension", "false");
@@ -169,7 +169,9 @@ public class LoginController {
 
 
     @RequestMapping("/test")
-    public void test() {
-        log.info("me");
+    @ResponseBody
+    public String test() {
+        log.info(++count);
+        return "ok";
     }
 }

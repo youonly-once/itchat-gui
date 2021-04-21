@@ -1,6 +1,8 @@
 package cn.shu.zuul;
 
 import com.netflix.loadbalancer.IRule;
+import com.netflix.loadbalancer.RandomRule;
+import com.netflix.loadbalancer.RoundRobinRule;
 import com.netflix.loadbalancer.WeightedResponseTimeRule;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -20,8 +22,8 @@ public class ZuulApplication {
         SpringApplication.run(ZuulApplication.class, args);
     }
 
-  /*  @Bean
+    @Bean
     public IRule myLoadBalanceRule(){
-        return new WeightedResponseTimeRule();
-    }*/
+        return new RoundRobinRule();
+    }
 }

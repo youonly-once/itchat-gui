@@ -39,6 +39,7 @@
         <java.version>1.8</java.version>
         <spring-cloud.version>Hoxton.SR10</spring-cloud.version>
     </properties>
+    <packaging>pom</packaging>
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -114,5 +115,12 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
+    <profiles>
+        <profile>
+            <id>1-dev</id>
+        </profile>
+        <profile>
+            <id>2-test</id>
+        </profile>
+    </profiles>
 </project>
