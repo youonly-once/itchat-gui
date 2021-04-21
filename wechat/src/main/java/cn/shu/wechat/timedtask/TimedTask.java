@@ -45,9 +45,9 @@ public class TimedTask {
     private ChartUtil chart;
 
     /**
-     * 15秒获取一次联系人信息
+     * 30秒获取一次联系人信息 76j00
      */
-    @Scheduled(cron = "*/15 * * * * ?")
+    @Scheduled(cron = "*/30 * * * * ?")
     /*@Async*/
     public void updateContactTask() {
         if (Core.isAlive()) {

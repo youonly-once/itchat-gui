@@ -49,6 +49,10 @@ public class MsgCenter {
     @Resource
     private MessageMapper messageMapper;
 
+    /**
+     * 保存消息
+     */
+    public static ThreadLocal<AddMsgList> threadLocalOfMsg = new ThreadLocal<AddMsgList>();
 
     /**
      * 接收消息，放入队列
@@ -59,6 +63,7 @@ public class MsgCenter {
      * @date 2017年4月23日 下午2:30:48
      */
     public void handleNewMsg(AddMsgList msg) {
+        threadLocalOfMsg.set(msg);
         /**
          * 文本消息：content为文本内容
          * 图片视频文件消息：content为资源ID，@开头，发送消息时指定Content字段可直接发送，不需mediaid
@@ -158,7 +163,7 @@ public class MsgCenter {
 
         //发送消息
         MessageTools.sendMsgByUserId(results, msg.getFromUserName());
-
+        threadLocalOfMsg.remove();
     }
 
 

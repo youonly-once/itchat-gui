@@ -5,7 +5,7 @@ spring:
     password: 123456
     url: jdbc:log4jdbc:mysql://127.0.0.1:3306/wechat?serverTimezone=Asia/Shanghai&characterEncoding=utf8&allowMultiQueries=true
   boot:
-    #actuator客户端注册到actuator server
+    #admin客户端注册到admin 服务
     admin:
       client:
         url: http://localhost:8999

@@ -63,6 +63,18 @@ public class MessageTools {
     /**
      * 根据指定类型发送消息
      *
+     * @param result    消息列表
+     * @param toUserName 接收方username
+     */
+    public static void sendMsgByUserId(Result result, String toUserName) {
+        ArrayList<Result> results = new ArrayList<>();
+        results.add(result);
+        sendMsgByUserId(results,toUserName);
+    }
+
+    /**
+     * 根据指定类型发送消息
+     *
      * @param results    消息列表
      * @param toUserName 接收方username
      */

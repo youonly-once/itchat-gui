@@ -277,13 +277,7 @@ public class LoginServiceImpl implements ILoginService {
                                             List<AddMsgList> addMsgLists = webWxSyncMsg.getAddMsgList();
                                             for (AddMsgList msg : addMsgLists) {
                                                 ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
-                                                    try {
                                                         msgCenter.handleNewMsg(msg);
-                                                    } catch (Exception e) {
-                                                        e.printStackTrace();
-                                                        log.error(e.getMessage());
-                                                    }
-
                                                 });
                                             }
                                             //联系人修改消息
