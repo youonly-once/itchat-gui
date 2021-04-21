@@ -8,7 +8,7 @@ spring:
     #admin客户端注册到admin 服务
     admin:
       client:
-        url: http://localhost:8999
+        url: http://localhost:9999
         period: 1000
         read-timeout: 5000
   application:
@@ -17,7 +17,10 @@ mybatis:
   mapper-locations: classpath*:mapper/**/**Mapper.xml
 
 server:
-  port: 9999
+  port: 8001
+  jetty:
+    threads:
+      max: 10000
 #actuator 组件配置
 management:
   endpoints:

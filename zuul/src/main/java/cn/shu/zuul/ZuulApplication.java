@@ -24,6 +24,6 @@ public class ZuulApplication {
 
     @Bean
     public IRule myLoadBalanceRule(){
-        return new RoundRobinRule();
+        return new WeightedResponseTimeRule();
     }
 }

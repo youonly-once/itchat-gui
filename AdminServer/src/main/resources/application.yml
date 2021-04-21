@@ -2,7 +2,7 @@ spring:
   application:
     name: AdminServer
 server:
-  port: 8999
+  port: 9999
 eureka:
   client:
     service-url:

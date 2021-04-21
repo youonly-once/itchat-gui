@@ -3,6 +3,13 @@ server:
 spring:
   application:
     name: zuul
+  boot:
+    #admin客户端注册到admin 服务
+    admin:
+      client:
+        url: http://localhost:9999
+        period: 1000
+        read-timeout: 5000
 eureka:
   client:
     service-url:
@@ -10,9 +17,40 @@ eureka:
 
 zuul:
   routes:
-    wechat: #�Զ�������
-      path: /autowechat/**   #�ⲿ����·��ƥ��
-      service-id: autowechat #ƥ��autowechat����
-wechat:
-  ribbon:
-    NFLoadBalancerRuleClassName: com:netflix:loadbalancer:RandomRule
+    wechat: #自定义名称
+      path: /autowechat/**   #外部访问路径匹配
+      service-id: autowechat #匹配autowechat服务
+#actuator 组件配置
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        #暴露所有信息
+        include: ["*"]
+  endpoint:
+    shutdown:
+      #允许使用actuator关闭服务
+      enabled: true
+hystrix:
+  threadpool:
+    default:
+      coreSize: 100
+      maxQueueSize: 1500
+      queueSizeRejectionThreshold: 1000
+  command:
+    default:
+      execution:
+        isolation:
+          strategy: SEMAPHORE
+          thread:
+            timeoutInMilliseconds:  120000
+          semaphore:
+            maxConcurrentRequests: 20000
+          circuitBreaker:
+            sleepWindowInMilliseconds: 5000
+  metrics:
+    enabled: true
+ribbon:
+  ConnectTimeout: 30000
+  ReadTimeout: 30000

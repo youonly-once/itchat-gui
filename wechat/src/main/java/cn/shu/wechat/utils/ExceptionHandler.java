@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
  * @项目 AutoWeChat
  * @创建时间 4/19/2021 9:34 PM
  */
-@ControllerAdvice(basePackages = "cn.shu.wechat")
+//@ControllerAdvice(basePackages = "cn.shu.wechat")
 public class ExceptionHandler {
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(Exception.class)
+   // @org.springframework.web.bind.annotation.ExceptionHandler(Exception.class)
     public void handler(Exception e) {
         System.out.println(Thread.currentThread().getName());
         AddMsgList msg = MsgCenter.threadLocalOfMsg.get();

@@ -170,8 +170,9 @@ public class LoginController {
 
     @RequestMapping("/test")
     @ResponseBody
-    public String test() {
+    public String test() throws InterruptedException {
         log.info(++count);
+        Thread.sleep((long)(Math.random() * 5000));
         return "ok";
     }
 }

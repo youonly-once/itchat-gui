@@ -22,7 +22,7 @@ spring:
     #admin客户端注册到admin 服务
     admin:
       client:
-        url: http://localhost:8999
+        url: http://localhost:9999
 management:
   endpoints:
     web:
