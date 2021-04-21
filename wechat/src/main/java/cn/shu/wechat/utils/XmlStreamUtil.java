@@ -77,7 +77,7 @@ public class XmlStreamUtil {
             List<Attribute> attributes = rootElt.attributes();
             HashMap<String, String> attrMap = new HashMap<>();
             for (Attribute attribute : attributes) {
-				map.put(rootElt.getName() + ".attr."+attribute.getName(), attribute.getValue());
+                map.put(rootElt.getName() + ".attr." + attribute.getName(), attribute.getValue());
             }
             getXmlMap(map, rootElt.elements(), rootElt.getName());
         } catch (Exception e) {
@@ -94,19 +94,19 @@ public class XmlStreamUtil {
             map.put(layer, e.getText());// 遍历list对象，并将结果保存到集合中
             //节点属性
             for (Attribute attribute : attributes) {
-                map.put(layer + ".attr."+ attribute.getName(), attribute.getValue());
+                map.put(layer + ".attr." + attribute.getName(), attribute.getValue());
             }
             getXmlMap(map, elements, layer);
         }
 
     }
 
-    public static  String formatXml(String content){
-        if (content == null){
+    public static String formatXml(String content) {
+        if (content == null) {
             return "";
         }
         return content.replace("&lt;", "<")
                 .replace("&gt;", ">")
-                .replace("<br/>", "").replace("\t","");
+                .replace("<br/>", "").replace("\t", "");
     }
 }

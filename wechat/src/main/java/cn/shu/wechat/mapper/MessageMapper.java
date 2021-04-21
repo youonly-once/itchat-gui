@@ -2,7 +2,9 @@ package cn.shu.wechat.mapper;
 
 import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.beans.pojo.MessageExample;
+
 import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 
 /**

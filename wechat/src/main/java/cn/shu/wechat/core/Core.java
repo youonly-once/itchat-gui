@@ -35,7 +35,7 @@ public class Core {
     /**
      * 取消登录
      */
-    static private boolean cancelPreLogin =false;
+    static private boolean cancelPreLogin = false;
     /**
      * 本次登录用户唯一标识
      */
@@ -114,7 +114,6 @@ public class Core {
 
     /**
      * 消息同步失败重试次数
-     *
      */
     static private int receivingRetryCount = 5;
 

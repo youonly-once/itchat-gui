@@ -5,6 +5,7 @@ package cn.shu.wechat.utils;
  * @项目 weixin
  * @创建时间 2/1/2021 7:58 PM
  */
+
 import java.util.Hashtable;
 
 import com.google.zxing.BarcodeFormat;

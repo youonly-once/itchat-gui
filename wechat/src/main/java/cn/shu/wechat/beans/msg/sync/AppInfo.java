@@ -1,6 +1,6 @@
 /**
-  * Copyright 2021 bejson.com 
-  */
+ * Copyright 2021 bejson.com
+ */
 package cn.shu.wechat.beans.msg.sync;
 
 /**
@@ -13,18 +13,21 @@ public class AppInfo {
 
     private String AppID;
     private int Type;
+
     public void setAppID(String AppID) {
-         this.AppID = AppID;
-     }
-     public String getAppID() {
-         return AppID;
-     }
+        this.AppID = AppID;
+    }
+
+    public String getAppID() {
+        return AppID;
+    }
 
     public void setType(int Type) {
-         this.Type = Type;
-     }
-     public int getType() {
-         return Type;
-     }
+        this.Type = Type;
+    }
+
+    public int getType() {
+        return Type;
+    }
 
 }

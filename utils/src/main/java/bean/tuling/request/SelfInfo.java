@@ -1,6 +1,6 @@
 /**
-  * Copyright 2021 bejson.com 
-  */
+ * Copyright 2021 bejson.com
+ */
 package bean.tuling.request;
 
 import lombok.Builder;
@@ -15,11 +15,13 @@ import lombok.Builder;
 public class SelfInfo {
 
     private Location location;
+
     public void setLocation(Location location) {
-         this.location = location;
-     }
-     public Location getLocation() {
-         return location;
-     }
+        this.location = location;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
 
 }

@@ -1,7 +1,6 @@
 package cn.shu.wechat.enums.parameters;
 
 /**
- *
  * 基本请求参数
  * 1. webWxInit      初始化
  * 2. wxStatusNotify 微信状态通知

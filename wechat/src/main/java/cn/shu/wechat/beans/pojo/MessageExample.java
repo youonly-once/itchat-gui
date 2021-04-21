@@ -5,10 +5,10 @@ import java.util.Date;
 import java.util.List;
 
 /**
-  *@作者     舒新胜
-  *@项目     AutoWeChat
-  *@创建时间  3/10/2021 10:36 PM
-*/
+ * @作者 舒新胜
+ * @项目 AutoWeChat
+ * @创建时间 3/10/2021 10:36 PM
+ */
 public class MessageExample {
     protected String orderByClause;
 

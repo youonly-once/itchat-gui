@@ -31,6 +31,7 @@ public class TimedTask {
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         return executor;
     }
+
     /**
      * 登录服务
      */
@@ -48,12 +49,12 @@ public class TimedTask {
      */
     @Scheduled(cron = "*/15 * * * * ?")
     /*@Async*/
-    public void updateContactTask(){
+    public void updateContactTask() {
         if (Core.isAlive()) {
             loginService.webWxGetContact();
 
             loginService.WebWxBatchGetContact();
-           // log.info("更新联系人完成！");
+            // log.info("更新联系人完成！");
         }
     }
 
@@ -62,7 +63,7 @@ public class TimedTask {
      */
     @Scheduled(cron = "0 */10 * * * ?")
     /*@Async*/
-    public void checkLoginStatusTask(){
+    public void checkLoginStatusTask() {
         if (Core.isAlive()) {
             // 秒为单位
             long t1 = System.currentTimeMillis();
@@ -80,7 +81,7 @@ public class TimedTask {
      */
     @Scheduled(cron = "0 0 12 * * ?")
     @Async
-    public void createChart(){
+    public void createChart() {
         chart.create();
     }
 }

@@ -1,6 +1,6 @@
 /**
-  * Copyright 2021 bejson.com 
-  */
+ * Copyright 2021 bejson.com
+ */
 package bean.tuling.response;
 
 /**
@@ -12,11 +12,13 @@ package bean.tuling.response;
 public class Values {
 
     private String text;
+
     public void setText(String text) {
-         this.text = text;
-     }
-     public String getText() {
-         return text;
-     }
+        this.text = text;
+    }
+
+    public String getText() {
+        return text;
+    }
 
 }

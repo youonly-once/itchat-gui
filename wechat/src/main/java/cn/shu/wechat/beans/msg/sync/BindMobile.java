@@ -1,6 +1,6 @@
 /**
-  * Copyright 2021 bejson.com 
-  */
+ * Copyright 2021 bejson.com
+ */
 package cn.shu.wechat.beans.msg.sync;
 
 /**
@@ -12,11 +12,13 @@ package cn.shu.wechat.beans.msg.sync;
 public class BindMobile {
 
     private String Buff;
+
     public void setBuff(String Buff) {
-         this.Buff = Buff;
-     }
-     public String getBuff() {
-         return Buff;
-     }
+        this.Buff = Buff;
+    }
+
+    public String getBuff() {
+        return Buff;
+    }
 
 }

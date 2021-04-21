@@ -3,6 +3,7 @@ package cn.shu.wechat.enums;
 
 /**
  * 检测是否扫描登录接口 返回状态码
+ *
  * @author SXS
  */
 

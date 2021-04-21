@@ -1,6 +1,6 @@
 /**
-  * Copyright 2021 bejson.com 
-  */
+ * Copyright 2021 bejson.com
+ */
 package bean.tuling.response;
 
 /**
@@ -12,11 +12,13 @@ package bean.tuling.response;
 public class Parameters {
 
     private String nearby_place;
+
     public void setNearby_place(String nearby_place) {
-         this.nearby_place = nearby_place;
-     }
-     public String getNearby_place() {
-         return nearby_place;
-     }
+        this.nearby_place = nearby_place;
+    }
+
+    public String getNearby_place() {
+        return nearby_place;
+    }
 
 }

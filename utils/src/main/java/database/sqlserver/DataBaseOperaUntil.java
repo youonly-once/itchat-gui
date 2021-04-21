@@ -58,7 +58,7 @@ public class DataBaseOperaUntil {
      * 数据库查询操作
      */
     public static List<Map<String, String>> databaseQueryProcedure(String procedure,
-                                                                   ConnectDataBaseInter connectSqlserPool,HashMap<Integer, String> parammeters) {
+                                                                   ConnectDataBaseInter connectSqlserPool, HashMap<Integer, String> parammeters) {
         // 若报错没有返回结果集，需要再存储过程begin后添加:SET NOCOUNT ON
         Connection con = null;
         CallableStatement statement = null;
@@ -71,7 +71,7 @@ public class DataBaseOperaUntil {
                 log.info("error：statement is null");
                 return null;
             }
-            if (parammeters!=null) {
+            if (parammeters != null) {
                 for (Entry<Integer, String> entry : parammeters.entrySet()) {
                     statement.setString(entry.getKey(), entry.getValue());//设置存储过程参数
                 }
@@ -93,7 +93,7 @@ public class DataBaseOperaUntil {
     /*
      * 数据库更新操作
      */
-    public static boolean databaseUpdate(String sql, ConnectDataBaseInter  connectDataBaseInter) {
+    public static boolean databaseUpdate(String sql, ConnectDataBaseInter connectDataBaseInter) {
         // 若报错没有返回结果集，需要再存储过程begin后添加:SET NOCOUNT ON
         Connection con = null;
         Statement statement = null;
@@ -111,8 +111,8 @@ public class DataBaseOperaUntil {
                 log.info("error：result < 1");
 
                 return false;
-            }else{
-                log.info("更新成功："+result);
+            } else {
+                log.info("更新成功：" + result);
             }
             return true;
 
@@ -126,7 +126,8 @@ public class DataBaseOperaUntil {
             connectDataBaseInter.close(con);
         }
     }
-    private static void close(Statement statement,ResultSet result){
+
+    private static void close(Statement statement, ResultSet result) {
         try {
             if (statement != null) {
                 statement.close();
@@ -140,6 +141,7 @@ public class DataBaseOperaUntil {
         }
 
     }
+
     private static List<Map<String, String>> ResultSet2Map(ResultSet resultSet) throws SQLException {
 
         Map<String, String> map;
@@ -156,47 +158,48 @@ public class DataBaseOperaUntil {
         }
         return list;
     }
+
     /*
      * 保存用户信息
      */
-    public static boolean saveUserInfo(Map<String, Object> userInfo){
+    public static boolean saveUserInfo(Map<String, Object> userInfo) {
 
-        String sql="select openid as c from weixin_users where openid='"+userInfo.get("openid")+"'";
-        List<Map<String, String>> maps=DataBaseOperaUntil.databaseQuery(sql, ConnectSqlserPool127.getInstance());
+        String sql = "select openid as c from weixin_users where openid='" + userInfo.get("openid") + "'";
+        List<Map<String, String>> maps = DataBaseOperaUntil.databaseQuery(sql, ConnectSqlserPool127.getInstance());
 
-        if (maps==null) {
+        if (maps == null) {
             log.info("保存用户信息失败：" + userInfo);
             return false;
         }
         //数据库无记录，插入
         if (maps.isEmpty()) {
             log.info("新增用户信息：" + userInfo);
-            sql="insert into weixin_users (openid,realname,nickname,sex ,province,city ,country,headimgurl,"+userInfo.get("EventKey")+") "
+            sql = "insert into weixin_users (openid,realname,nickname,sex ,province,city ,country,headimgurl," + userInfo.get("EventKey") + ") "
                     + "values('"
-                    +userInfo.get("openid")+"','"
-                    +userInfo.get("realname")+"','"
-                    +userInfo.get("nickname")+"','"
-                    +userInfo.get("sex")+"','"
-                    +userInfo.get("province")+"','"
-                    +userInfo.get("city")+"','"
-                    +userInfo.get("country")+"','"
-                    +userInfo.get("headimgurl")+"',1)";
+                    + userInfo.get("openid") + "','"
+                    + userInfo.get("realname") + "','"
+                    + userInfo.get("nickname") + "','"
+                    + userInfo.get("sex") + "','"
+                    + userInfo.get("province") + "','"
+                    + userInfo.get("city") + "','"
+                    + userInfo.get("country") + "','"
+                    + userInfo.get("headimgurl") + "',1)";
 
             return DataBaseOperaUntil.databaseUpdate(sql, ConnectSqlserPool127.getInstance());
-        }else{//更新用户信息
+        } else {//更新用户信息
             log.info("更新用户信息：" + userInfo);
-            sql="update weixin_users set "
-                    +"realname='"+userInfo.get("realname")+"',"
-                    +"nickname='"+userInfo.get("nickname")+"',"
-                    +"sex='"+userInfo.get("sex")+"',"
-                    +"province='"+userInfo.get("province")+"',"
-                    +"city='"+userInfo.get("city")+"',"
-                    +"country='"+userInfo.get("country")+"',"
-                    +"headimgurl='"+userInfo.get("headimgurl")+"',"
-                    +"updatedate='"+DateUtil.getCurrDateAndTimeMil()+"',"
-                    +"updatecount=updatecount+1,"
-                    +userInfo.get("EventKey")+"="+userInfo.get("EventKey")+"+1"
-                    +" where openid='"+userInfo.get("openid")+"'";
+            sql = "update weixin_users set "
+                    + "realname='" + userInfo.get("realname") + "',"
+                    + "nickname='" + userInfo.get("nickname") + "',"
+                    + "sex='" + userInfo.get("sex") + "',"
+                    + "province='" + userInfo.get("province") + "',"
+                    + "city='" + userInfo.get("city") + "',"
+                    + "country='" + userInfo.get("country") + "',"
+                    + "headimgurl='" + userInfo.get("headimgurl") + "',"
+                    + "updatedate='" + DateUtil.getCurrDateAndTimeMil() + "',"
+                    + "updatecount=updatecount+1,"
+                    + userInfo.get("EventKey") + "=" + userInfo.get("EventKey") + "+1"
+                    + " where openid='" + userInfo.get("openid") + "'";
             return DataBaseOperaUntil.databaseUpdate(sql, ConnectSqlserPool127.getInstance());
         }
     }

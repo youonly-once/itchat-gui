@@ -1,6 +1,6 @@
 /**
-  * Copyright 2021 bejson.com 
-  */
+ * Copyright 2021 bejson.com
+ */
 package cn.shu.wechat.beans.msg.sync;
 
 /**
@@ -13,18 +13,21 @@ public class BaseResponse {
 
     private int Ret;
     private String ErrMsg;
+
     public void setRet(int Ret) {
-         this.Ret = Ret;
-     }
-     public int getRet() {
-         return Ret;
-     }
+        this.Ret = Ret;
+    }
+
+    public int getRet() {
+        return Ret;
+    }
 
     public void setErrMsg(String ErrMsg) {
-         this.ErrMsg = ErrMsg;
-     }
-     public String getErrMsg() {
-         return ErrMsg;
-     }
+        this.ErrMsg = ErrMsg;
+    }
+
+    public String getErrMsg() {
+        return ErrMsg;
+    }
 
 }

@@ -8,7 +8,7 @@ import java.awt.image.BufferedImage;
 
 /**
  * 用于二维码的解析，由Google提供。
- *
+ * <p>
  * Created by Eric on 2017/2/15.
  */
 public final class BufferedImageLuminanceSource extends LuminanceSource {

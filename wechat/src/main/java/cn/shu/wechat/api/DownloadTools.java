@@ -43,7 +43,6 @@ public class DownloadTools {
     public final static Hashtable<String, Boolean> FILE_DOWNLOAD_STATUS = new Hashtable<>();
 
 
-
     /**
      * 处理下载任务
      *
@@ -334,7 +333,7 @@ public class DownloadTools {
     /**
      * @param dir 目录
      * @return {@code true} 创建成功
-     *         {@code false} 创建失败
+     * {@code false} 创建失败
      */
     public static boolean createLogDir(String dir) {
         File logFile = new File(dir);

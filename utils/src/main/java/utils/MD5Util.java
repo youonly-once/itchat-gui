@@ -5,6 +5,7 @@ package utils;
  * @项目 weixin
  * @创建时间 3/3/2021 10:57 AM
  */
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -14,12 +15,13 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 
 /**
- *MD5计算工具
+ * MD5计算工具
  */
 public class MD5Util {
 
     /**
      * 获取一个文件的md5值(可处理大文件)
+     *
      * @return md5 value
      */
     public static String getMD5(File file) {
@@ -38,7 +40,7 @@ public class MD5Util {
             return null;
         } finally {
             try {
-                if (fileInputStream != null){
+                if (fileInputStream != null) {
                     fileInputStream.close();
                 }
             } catch (IOException e) {
@@ -46,8 +48,10 @@ public class MD5Util {
             }
         }
     }
+
     /**
      * 获取一个文件的md5值(可处理大文件)
+     *
      * @return md5 value
      */
     public static String getMD5(byte[] buffer) {
@@ -60,8 +64,10 @@ public class MD5Util {
             return null;
         }
     }
+
     /**
      * 求一个字符串的md5值
+     *
      * @param target 字符串
      * @return md5 value
      */

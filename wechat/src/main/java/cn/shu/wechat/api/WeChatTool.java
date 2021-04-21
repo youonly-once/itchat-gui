@@ -4,6 +4,7 @@
 //
 
 package cn.shu.wechat.api;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,6 +27,7 @@ import org.apache.http.util.EntityUtils;
 
 /**
  * 微信工具类
+ *
  * @author SXS
  */
 @Log4j2
@@ -34,13 +36,14 @@ public final class WeChatTool {
 
     /**
      * 获取文件类型，该文件类型是网页版微信上传文件时定义的类型
+     *
      * @param file 文件对象
      * @return 文件类型
      */
     public static String getFileType(File file) {
         String var1 = getFileSuffix(file);
         byte var2 = -1;
-        switch(var1.hashCode()) {
+        switch (var1.hashCode()) {
             case 97669:
                 if (var1.equals("bmp")) {
                     var2 = 0;
@@ -70,7 +73,7 @@ public final class WeChatTool {
                 break;
         }
 
-        switch(var2) {
+        switch (var2) {
             case 0:
             case 1:
             case 2:
@@ -85,6 +88,7 @@ public final class WeChatTool {
 
     /**
      * 获取文件后缀 gif、jpg...
+     *
      * @param file 文件对象
      * @return 文件后缀
      */
@@ -99,7 +103,7 @@ public final class WeChatTool {
                 is.read(b, 0, b.length);
                 String fileCode = bytesToHex(b);
                 byte var6 = -1;
-                switch(fileCode.hashCode()) {
+                switch (fileCode.hashCode()) {
                     case -1277558572:
                         if (fileCode.equals("ffd8ff")) {
                             var6 = 0;
@@ -119,7 +123,7 @@ public final class WeChatTool {
                         break;
                 }
 
-                switch(var6) {
+                switch (var6) {
                     case 0:
                         var7 = "jpg";
                         return var7;
@@ -169,13 +173,14 @@ public final class WeChatTool {
 
     /**
      * 字节转16进制
+     *
      * @param bytes 字节数组
      * @return 16进制
      */
     private static String bytesToHex(byte[] bytes) {
         char[] chars = new char[bytes.length * 2];
 
-        for(int i = 0; i < bytes.length; ++i) {
+        for (int i = 0; i < bytes.length; ++i) {
             byte b = bytes[i];
             chars[i << 1] = HEX[b >>> 4 & 15];
             chars[(i << 1) + 1] = HEX[b & 15];
@@ -250,8 +255,8 @@ public final class WeChatTool {
     /**
      * 获取微信在线状态
      *
-     * @date 2017年6月16日 上午12:47:46
      * @return {@code true} 在线  {@code false} 离线
+     * @date 2017年6月16日 上午12:47:46
      */
     public static boolean getWechatStatus() {
         return Core.isAlive();

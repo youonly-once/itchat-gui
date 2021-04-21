@@ -1,7 +1,8 @@
 /**
-  * Copyright 2021 bejson.com 
-  */
+ * Copyright 2021 bejson.com
+ */
 package cn.shu.wechat.beans.msg.sync;
+
 import java.util.List;
 
 /**
@@ -33,151 +34,173 @@ public class ModContactList {
     private String City;
     private int SnsFlag;
     private String KeyWord;
+
     public void setUserName(String UserName) {
-         this.UserName = UserName;
-     }
-     public String getUserName() {
-         return UserName;
-     }
+        this.UserName = UserName;
+    }
+
+    public String getUserName() {
+        return UserName;
+    }
 
     public void setNickName(String NickName) {
-         this.NickName = NickName;
-     }
-     public String getNickName() {
-         return NickName;
-     }
+        this.NickName = NickName;
+    }
+
+    public String getNickName() {
+        return NickName;
+    }
 
     public void setSex(int Sex) {
-         this.Sex = Sex;
-     }
-     public int getSex() {
-         return Sex;
-     }
+        this.Sex = Sex;
+    }
+
+    public int getSex() {
+        return Sex;
+    }
 
     public void setHeadImgUpdateFlag(int HeadImgUpdateFlag) {
-         this.HeadImgUpdateFlag = HeadImgUpdateFlag;
-     }
-     public int getHeadImgUpdateFlag() {
-         return HeadImgUpdateFlag;
-     }
+        this.HeadImgUpdateFlag = HeadImgUpdateFlag;
+    }
+
+    public int getHeadImgUpdateFlag() {
+        return HeadImgUpdateFlag;
+    }
 
     public void setContactType(int ContactType) {
-         this.ContactType = ContactType;
-     }
-     public int getContactType() {
-         return ContactType;
-     }
+        this.ContactType = ContactType;
+    }
+
+    public int getContactType() {
+        return ContactType;
+    }
 
     public void setAlias(String Alias) {
-         this.Alias = Alias;
-     }
-     public String getAlias() {
-         return Alias;
-     }
+        this.Alias = Alias;
+    }
+
+    public String getAlias() {
+        return Alias;
+    }
 
     public void setChatRoomOwner(String ChatRoomOwner) {
-         this.ChatRoomOwner = ChatRoomOwner;
-     }
-     public String getChatRoomOwner() {
-         return ChatRoomOwner;
-     }
+        this.ChatRoomOwner = ChatRoomOwner;
+    }
+
+    public String getChatRoomOwner() {
+        return ChatRoomOwner;
+    }
 
     public void setHeadImgUrl(String HeadImgUrl) {
-         this.HeadImgUrl = HeadImgUrl;
-     }
-     public String getHeadImgUrl() {
-         return HeadImgUrl;
-     }
+        this.HeadImgUrl = HeadImgUrl;
+    }
+
+    public String getHeadImgUrl() {
+        return HeadImgUrl;
+    }
 
     public void setContactFlag(int ContactFlag) {
-         this.ContactFlag = ContactFlag;
-     }
-     public int getContactFlag() {
-         return ContactFlag;
-     }
+        this.ContactFlag = ContactFlag;
+    }
+
+    public int getContactFlag() {
+        return ContactFlag;
+    }
 
     public void setMemberCount(int MemberCount) {
-         this.MemberCount = MemberCount;
-     }
-     public int getMemberCount() {
-         return MemberCount;
-     }
+        this.MemberCount = MemberCount;
+    }
+
+    public int getMemberCount() {
+        return MemberCount;
+    }
 
     public void setMemberList(List<MemberList> MemberList) {
-         this.MemberList = MemberList;
-     }
-     public List<MemberList> getMemberList() {
-         return MemberList;
-     }
+        this.MemberList = MemberList;
+    }
+
+    public List<MemberList> getMemberList() {
+        return MemberList;
+    }
 
     public void setHideInputBarFlag(int HideInputBarFlag) {
-         this.HideInputBarFlag = HideInputBarFlag;
-     }
-     public int getHideInputBarFlag() {
-         return HideInputBarFlag;
-     }
+        this.HideInputBarFlag = HideInputBarFlag;
+    }
+
+    public int getHideInputBarFlag() {
+        return HideInputBarFlag;
+    }
 
     public void setSignature(String Signature) {
-         this.Signature = Signature;
-     }
-     public String getSignature() {
-         return Signature;
-     }
+        this.Signature = Signature;
+    }
+
+    public String getSignature() {
+        return Signature;
+    }
 
     public void setVerifyFlag(int VerifyFlag) {
-         this.VerifyFlag = VerifyFlag;
-     }
-     public int getVerifyFlag() {
-         return VerifyFlag;
-     }
+        this.VerifyFlag = VerifyFlag;
+    }
+
+    public int getVerifyFlag() {
+        return VerifyFlag;
+    }
 
     public void setRemarkName(String RemarkName) {
-         this.RemarkName = RemarkName;
-     }
-     public String getRemarkName() {
-         return RemarkName;
-     }
+        this.RemarkName = RemarkName;
+    }
+
+    public String getRemarkName() {
+        return RemarkName;
+    }
 
     public void setStatues(int Statues) {
-         this.Statues = Statues;
-     }
-     public int getStatues() {
-         return Statues;
-     }
+        this.Statues = Statues;
+    }
+
+    public int getStatues() {
+        return Statues;
+    }
 
     public void setAttrStatus(int AttrStatus) {
-         this.AttrStatus = AttrStatus;
-     }
-     public int getAttrStatus() {
-         return AttrStatus;
-     }
+        this.AttrStatus = AttrStatus;
+    }
+
+    public int getAttrStatus() {
+        return AttrStatus;
+    }
 
     public void setProvince(String Province) {
-         this.Province = Province;
-     }
-     public String getProvince() {
-         return Province;
-     }
+        this.Province = Province;
+    }
+
+    public String getProvince() {
+        return Province;
+    }
 
     public void setCity(String City) {
-         this.City = City;
-     }
-     public String getCity() {
-         return City;
-     }
+        this.City = City;
+    }
+
+    public String getCity() {
+        return City;
+    }
 
     public void setSnsFlag(int SnsFlag) {
-         this.SnsFlag = SnsFlag;
-     }
-     public int getSnsFlag() {
-         return SnsFlag;
-     }
+        this.SnsFlag = SnsFlag;
+    }
+
+    public int getSnsFlag() {
+        return SnsFlag;
+    }
 
     public void setKeyWord(String KeyWord) {
-         this.KeyWord = KeyWord;
-     }
-     public String getKeyWord() {
-         return KeyWord;
-     }
+        this.KeyWord = KeyWord;
+    }
+
+    public String getKeyWord() {
+        return KeyWord;
+    }
 
 }

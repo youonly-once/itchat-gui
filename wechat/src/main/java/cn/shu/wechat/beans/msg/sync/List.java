@@ -1,6 +1,6 @@
 /**
-  * Copyright 2021 bejson.com 
-  */
+ * Copyright 2021 bejson.com
+ */
 package cn.shu.wechat.beans.msg.sync;
 
 /**
@@ -13,18 +13,21 @@ public class List {
 
     private int Key;
     private long Val;
+
     public void setKey(int Key) {
-         this.Key = Key;
-     }
-     public int getKey() {
-         return Key;
-     }
+        this.Key = Key;
+    }
+
+    public int getKey() {
+        return Key;
+    }
 
     public void setVal(long Val) {
-         this.Val = Val;
-     }
-     public long getVal() {
-         return Val;
-     }
+        this.Val = Val;
+    }
+
+    public long getVal() {
+        return Val;
+    }
 
 }

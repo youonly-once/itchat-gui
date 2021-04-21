@@ -1,6 +1,6 @@
 /**
-  * Copyright 2021 bejson.com 
-  */
+ * Copyright 2021 bejson.com
+ */
 package bean.tuling.response;
 
 /**
@@ -14,25 +14,29 @@ public class Intent {
     private String actionName;
     private int code;
     private String intentName;
+
     public void setActionName(String actionName) {
-         this.actionName = actionName;
-     }
-     public String getActionName() {
-         return actionName;
-     }
+        this.actionName = actionName;
+    }
+
+    public String getActionName() {
+        return actionName;
+    }
 
     public void setCode(int code) {
-         this.code = code;
-     }
-     public int getCode() {
-         return code;
-     }
+        this.code = code;
+    }
+
+    public int getCode() {
+        return code;
+    }
 
     public void setIntentName(String intentName) {
-         this.intentName = intentName;
-     }
-     public String getIntentName() {
-         return intentName;
-     }
+        this.intentName = intentName;
+    }
+
+    public String getIntentName() {
+        return intentName;
+    }
 
 }

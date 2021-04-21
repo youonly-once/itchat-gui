@@ -1,25 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <!-- 父级项目 -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.3.0.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>cn.shu</groupId>
-    <artifactId>weixin</artifactId>
-    <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
-
-
     <modules>
         <module>utils</module>
         <module>wxuntils</module>
         <module>wechat</module>
+        <module>zuul</module>
+        <module>AdminServer</module>
+        <module>EurekaServer</module>
     </modules>
     <!--打包配置-->
     <build>
@@ -35,7 +30,15 @@
 
         </plugins>
     </build>
-<!--声明依赖-->
+    <groupId>cn.shu</groupId>
+    <artifactId>weixin</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <name>weixin</name>
+    <description>Demo project for Spring Boot</description>
+    <properties>
+        <java.version>1.8</java.version>
+        <spring-cloud.version>Hoxton.SR10</spring-cloud.version>
+    </properties>
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -102,14 +105,14 @@
                 <artifactId>mysql-connector-java</artifactId>
                 <version>8.0.20</version>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
-    <profiles>
-        <profile>
-            <id>1-dev</id>
-        </profile>
-        <profile>
-            <id>2-test</id>
-        </profile>
-    </profiles>
+
 </project>

@@ -1,6 +1,6 @@
 /**
-  * Copyright 2021 bejson.com 
-  */
+ * Copyright 2021 bejson.com
+ */
 package bean.tuling.response;
 
 /**
@@ -13,18 +13,21 @@ public class Emotion {
 
     private RobotEmotion robotEmotion;
     private UserEmotion userEmotion;
+
     public void setRobotEmotion(RobotEmotion robotEmotion) {
-         this.robotEmotion = robotEmotion;
-     }
-     public RobotEmotion getRobotEmotion() {
-         return robotEmotion;
-     }
+        this.robotEmotion = robotEmotion;
+    }
+
+    public RobotEmotion getRobotEmotion() {
+        return robotEmotion;
+    }
 
     public void setUserEmotion(UserEmotion userEmotion) {
-         this.userEmotion = userEmotion;
-     }
-     public UserEmotion getUserEmotion() {
-         return userEmotion;
-     }
+        this.userEmotion = userEmotion;
+    }
+
+    public UserEmotion getUserEmotion() {
+        return userEmotion;
+    }
 
 }

@@ -17,12 +17,13 @@ import java.util.regex.Pattern;
 public class JSONObjectUtil {
     /**
      * 返回二个JSONObject的差异
+     *
      * @param oldO 旧
      * @param newO 新
      * @return difference
      */
-    public static Map<String,Map<String,String>> getDifferenceMap(JSONObject oldO,JSONObject newO){
-        Map<String,Map<String,String>>  difference= new HashMap<>();
+    public static Map<String, Map<String, String>> getDifferenceMap(JSONObject oldO, JSONObject newO) {
+        Map<String, Map<String, String>> difference = new HashMap<>();
         for (Map.Entry<String, Object> entry : oldO.entrySet()) {
             String newV = newO.getString(entry.getKey());
             String oldV = StringUtil.toString(entry.getValue());
@@ -36,48 +37,50 @@ public class JSONObjectUtil {
                     //头像相同
                     String groupNew = matcherNew.group(1);
                     String groupOld = matcherOld.group(1);
-                    if (groupNew.equals(groupOld)){
+                    if (groupNew.equals(groupOld)) {
                         equals = true;
-                    }else{
+                    } else {
                         equals = false;
                     }
                 }
             }
             if (!equals) {
-                if (entry.getKey().equals("MemberList")){
-                    JSONArray jsonArrayNew= (JSONArray) newO.get(entry.getKey());
+                if (entry.getKey().equals("MemberList")) {
+                    JSONArray jsonArrayNew = (JSONArray) newO.get(entry.getKey());
                     JSONArray jsonArrayOld = (JSONArray) entry.getValue();
                     for (Object o : jsonArrayNew) {
                         JSONObject jsonObject = (JSONObject) o;
                         for (Object o1 : jsonArrayOld) {
                             JSONObject jsonObject1 = (JSONObject) o1;
-                            if (jsonObject.getString("UserName").equals(jsonObject1.getString("UserName"))){
+                            if (jsonObject.getString("UserName").equals(jsonObject1.getString("UserName"))) {
                                 HashMap<String, String> temp = new HashMap<>();
                                 temp.put(jsonObject1.getString("DisplayName"), jsonObject.getString("DisplayName"));
-                                difference.put(StringUtil.toString(entry.getKey()+"(DisplayName)"),temp);
+                                difference.put(StringUtil.toString(entry.getKey() + "(DisplayName)"), temp);
                             }
                         }
                     } //判断头像是否更改
-                }else{
+                } else {
 
                     HashMap<String, String> temp = new HashMap<>();
                     temp.put(StringUtil.toString(oldV), newV);
-                    difference.put(UserInfo.getName(StringUtil.toString(entry.getKey())),temp);
+                    difference.put(UserInfo.getName(StringUtil.toString(entry.getKey())), temp);
                 }
 
             }
         }
         return difference;
     }
-    enum UserInfo{
+
+    enum UserInfo {
         NickName("昵称更换"),
         HeadImgUrl("头像更换"),
         Sex("性别更换"),
         Signature("签名更换"),
         RemarkName("备注更换");
         String name;
+
         UserInfo(String s) {
-            this .name =s;
+            this.name = s;
         }
 
         public static String getName(String e) {

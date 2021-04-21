@@ -14,11 +14,11 @@ import java.util.Random;
  */
 
 public class WebWXSendingMsg {
-    public long ClientMsgId = Long.parseLong(new Date().getTime()+ String.valueOf(new Random().nextLong()).substring(1, 5));
+    public long ClientMsgId = Long.parseLong(new Date().getTime() + String.valueOf(new Random().nextLong()).substring(1, 5));
 
     public int Type = 0;
 
-    public long LocalID=  ClientMsgId;
+    public long LocalID = ClientMsgId;
 
     public String Content = "";
 
@@ -29,10 +29,10 @@ public class WebWXSendingMsg {
     public String MediaId = null;
 
 
-
     public WebWXSendingMsg() {
 
     }
+
     public WebWXSendingMsg(int type) {
         Type = type;
     }

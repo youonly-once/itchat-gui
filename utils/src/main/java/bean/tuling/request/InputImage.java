@@ -1,6 +1,6 @@
 /**
-  * Copyright 2021 bejson.com 
-  */
+ * Copyright 2021 bejson.com
+ */
 package bean.tuling.request;
 
 import lombok.Builder;
@@ -15,11 +15,13 @@ import lombok.Builder;
 public class InputImage {
 
     private String url;
+
     public void setUrl(String url) {
-         this.url = url;
-     }
-     public String getUrl() {
-         return url;
-     }
+        this.url = url;
+    }
+
+    public String getUrl() {
+        return url;
+    }
 
 }

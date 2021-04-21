@@ -17,32 +17,37 @@ public class WechatTemplate {
     private String template_id;
     private String touser;
     private String url;
+
     public void setData(Map<String, TemplateData> data) {
-         this.data = data;
-     }
-     public Map<String, TemplateData> getData() {
-         return data;
-     }
+        this.data = data;
+    }
+
+    public Map<String, TemplateData> getData() {
+        return data;
+    }
 
     public void setTemplate_id(String template_id) {
-         this.template_id = template_id;
-     }
-     public String getTemplate_id() {
-         return template_id;
-     }
+        this.template_id = template_id;
+    }
+
+    public String getTemplate_id() {
+        return template_id;
+    }
 
     public void setTouser(String touser) {
-         this.touser = touser;
-     }
-     public String getTouser() {
-         return touser;
-     }
+        this.touser = touser;
+    }
+
+    public String getTouser() {
+        return touser;
+    }
 
     public void setUrl(String url) {
-         this.url = url;
-     }
-     public String getUrl() {
-         return url;
-     }
+        this.url = url;
+    }
+
+    public String getUrl() {
+        return url;
+    }
 
 }

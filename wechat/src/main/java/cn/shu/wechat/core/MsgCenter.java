@@ -76,15 +76,15 @@ public class MsgCenter {
         String path = DownloadTools.getDownloadFilePath(msg);
         //false表示当前文件未下载完成，此时其它地方不能使用
         Hashtable<String, Boolean> fileDownloadStatus = DownloadTools.FILE_DOWNLOAD_STATUS;
-        if (path != null){
-            fileDownloadStatus. put(path,false);
-            DownloadTools.downloadFile(msg,  path);
+        if (path != null) {
+            fileDownloadStatus.put(path, false);
+            DownloadTools.downloadFile(msg, path);
             msg.setFilePath(path);
         }
         //存储消息
         storeMsgToDB(msg);
         //打印日志
-        log.info(LogUtil.printFromMeg(msg,msgType.getDesc()));
+        log.info(LogUtil.printFromMeg(msg, msgType.getDesc()));
         //需要发送的消息
         List<MessageTools.Result> results = null;
         switch (msgType) {
@@ -168,36 +168,36 @@ public class MsgCenter {
      * @param msg
      */
     private void storeMsgToDB(AddMsgList msg) {
-    try {
-        boolean isFromSelf = msg.getFromUserName().endsWith(Core.getUserName());
-        boolean isToSelf = msg.getToUserName().endsWith(Core.getUserName());
-        Message build = Message
-                .builder()
-                .content(msg.getContent())
-                .filePath(msg.getFilePath())
-                .createTime(new Date())
-                .fromNickname(isFromSelf ? Core.getNickName() : ContactsTools.getContactNickNameByUserName(msg.getFromUserName()))
-                .fromRemarkname(isFromSelf ? Core.getNickName() : ContactsTools.getContactRemarkNameByUserName(msg.getFromUserName()))
-                .fromUsername(msg.getFromUserName())
-                .id(UUID.randomUUID().toString().replace("-", ""))
-                .toNickname(isToSelf ? Core.getNickName() : ContactsTools.getContactNickNameByUserName(msg.getToUserName()))
-                .toRemarkname(isToSelf ? Core.getNickName() : ContactsTools.getContactRemarkNameByUserName(msg.getToUserName()))
-                .toUsername(msg.getToUserName())
-                .msgId(msg.getMsgId())
-                .msgType(msg.getMsgType())
-                .isSend(isFromSelf)
-                .appMsgType(msg.getAppMsgType())
-                .msgJson(JSON.toJSONString(msg))
-                .msgDesc(WXReceiveMsgCodeEnum.getByCode(msg.getMsgType()).getDesc())
-                .fromMemberOfGroupDisplayname(msg.isGroupMsg() ? ContactsTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), msg.getMemberName()) : null)
-                .fromMemberOfGroupNickname(msg.isGroupMsg() ? ContactsTools.getMemberNickNameOfGroup(msg.getFromUserName(), msg.getMemberName()) : null)
-                .fromMemberOfGroupUsername(msg.isGroupMsg() ? msg.getMemberName() : null)
-                .build();
+        try {
+            boolean isFromSelf = msg.getFromUserName().endsWith(Core.getUserName());
+            boolean isToSelf = msg.getToUserName().endsWith(Core.getUserName());
+            Message build = Message
+                    .builder()
+                    .content(msg.getContent())
+                    .filePath(msg.getFilePath())
+                    .createTime(new Date())
+                    .fromNickname(isFromSelf ? Core.getNickName() : ContactsTools.getContactNickNameByUserName(msg.getFromUserName()))
+                    .fromRemarkname(isFromSelf ? Core.getNickName() : ContactsTools.getContactRemarkNameByUserName(msg.getFromUserName()))
+                    .fromUsername(msg.getFromUserName())
+                    .id(UUID.randomUUID().toString().replace("-", ""))
+                    .toNickname(isToSelf ? Core.getNickName() : ContactsTools.getContactNickNameByUserName(msg.getToUserName()))
+                    .toRemarkname(isToSelf ? Core.getNickName() : ContactsTools.getContactRemarkNameByUserName(msg.getToUserName()))
+                    .toUsername(msg.getToUserName())
+                    .msgId(msg.getMsgId())
+                    .msgType(msg.getMsgType())
+                    .isSend(isFromSelf)
+                    .appMsgType(msg.getAppMsgType())
+                    .msgJson(JSON.toJSONString(msg))
+                    .msgDesc(WXReceiveMsgCodeEnum.getByCode(msg.getMsgType()).getDesc())
+                    .fromMemberOfGroupDisplayname(msg.isGroupMsg() ? ContactsTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), msg.getMemberName()) : null)
+                    .fromMemberOfGroupNickname(msg.isGroupMsg() ? ContactsTools.getMemberNickNameOfGroup(msg.getFromUserName(), msg.getMemberName()) : null)
+                    .fromMemberOfGroupUsername(msg.isGroupMsg() ? msg.getMemberName() : null)
+                    .build();
 
-        int insert = messageMapper.insert(build);
-    }catch (Exception e){
-        e.printStackTrace();
-    }
+            int insert = messageMapper.insert(build);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -336,8 +336,6 @@ public class MsgCenter {
     public static void produceModChatRoomMemberMsg(List<ModContactList> msgLists) {
 
     }
-
-
 
 
 }

@@ -9,8 +9,8 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public class WXTokenExpireException extends Exception {
-	public WXTokenExpireException() {
-		// TODO Auto-generated constructor stub
-		super("access_token过期");
-	}
+    public WXTokenExpireException() {
+        // TODO Auto-generated constructor stub
+        super("access_token过期");
+    }
 }

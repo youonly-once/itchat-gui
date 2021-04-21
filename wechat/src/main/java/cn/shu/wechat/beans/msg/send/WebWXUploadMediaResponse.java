@@ -12,16 +12,17 @@ public class WebWXUploadMediaResponse {
     /**
      * Copyright 2021 json.cn
      */
-        private BaseResponse BaseResponse;
-        private String MediaId;
-        private int StartPos;
-        private int CDNThumbImgHeight;
-        private int CDNThumbImgWidth;
-        private String EncryFileName;
-        @Data
-        private static class BaseResponse {
-            private int Ret;
-            private String ErrMsg;
+    private BaseResponse BaseResponse;
+    private String MediaId;
+    private int StartPos;
+    private int CDNThumbImgHeight;
+    private int CDNThumbImgWidth;
+    private String EncryFileName;
 
-        }
+    @Data
+    private static class BaseResponse {
+        private int Ret;
+        private String ErrMsg;
+
+    }
 }

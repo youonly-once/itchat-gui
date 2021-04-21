@@ -1,6 +1,6 @@
 /**
-  * Copyright 2021 bejson.com 
-  */
+ * Copyright 2021 bejson.com
+ */
 package cn.shu.wechat.beans.msg.sync;
 
 /**
@@ -24,95 +24,109 @@ public class Profile {
     private int HeadImgUpdateFlag;
     private String HeadImgUrl;
     private String Signature;
+
     public void setBitFlag(int BitFlag) {
-         this.BitFlag = BitFlag;
-     }
-     public int getBitFlag() {
-         return BitFlag;
-     }
+        this.BitFlag = BitFlag;
+    }
+
+    public int getBitFlag() {
+        return BitFlag;
+    }
 
     public void setUserName(UserName UserName) {
-         this.UserName = UserName;
-     }
-     public UserName getUserName() {
-         return UserName;
-     }
+        this.UserName = UserName;
+    }
+
+    public UserName getUserName() {
+        return UserName;
+    }
 
     public void setNickName(NickName NickName) {
-         this.NickName = NickName;
-     }
-     public NickName getNickName() {
-         return NickName;
-     }
+        this.NickName = NickName;
+    }
+
+    public NickName getNickName() {
+        return NickName;
+    }
 
     public void setBindUin(int BindUin) {
-         this.BindUin = BindUin;
-     }
-     public int getBindUin() {
-         return BindUin;
-     }
+        this.BindUin = BindUin;
+    }
+
+    public int getBindUin() {
+        return BindUin;
+    }
 
     public void setBindEmail(BindEmail BindEmail) {
-         this.BindEmail = BindEmail;
-     }
-     public BindEmail getBindEmail() {
-         return BindEmail;
-     }
+        this.BindEmail = BindEmail;
+    }
+
+    public BindEmail getBindEmail() {
+        return BindEmail;
+    }
 
     public void setBindMobile(BindMobile BindMobile) {
-         this.BindMobile = BindMobile;
-     }
-     public BindMobile getBindMobile() {
-         return BindMobile;
-     }
+        this.BindMobile = BindMobile;
+    }
+
+    public BindMobile getBindMobile() {
+        return BindMobile;
+    }
 
     public void setStatus(int Status) {
-         this.Status = Status;
-     }
-     public int getStatus() {
-         return Status;
-     }
+        this.Status = Status;
+    }
+
+    public int getStatus() {
+        return Status;
+    }
 
     public void setSex(int Sex) {
-         this.Sex = Sex;
-     }
-     public int getSex() {
-         return Sex;
-     }
+        this.Sex = Sex;
+    }
+
+    public int getSex() {
+        return Sex;
+    }
 
     public void setPersonalCard(int PersonalCard) {
-         this.PersonalCard = PersonalCard;
-     }
-     public int getPersonalCard() {
-         return PersonalCard;
-     }
+        this.PersonalCard = PersonalCard;
+    }
+
+    public int getPersonalCard() {
+        return PersonalCard;
+    }
 
     public void setAlias(String Alias) {
-         this.Alias = Alias;
-     }
-     public String getAlias() {
-         return Alias;
-     }
+        this.Alias = Alias;
+    }
+
+    public String getAlias() {
+        return Alias;
+    }
 
     public void setHeadImgUpdateFlag(int HeadImgUpdateFlag) {
-         this.HeadImgUpdateFlag = HeadImgUpdateFlag;
-     }
-     public int getHeadImgUpdateFlag() {
-         return HeadImgUpdateFlag;
-     }
+        this.HeadImgUpdateFlag = HeadImgUpdateFlag;
+    }
+
+    public int getHeadImgUpdateFlag() {
+        return HeadImgUpdateFlag;
+    }
 
     public void setHeadImgUrl(String HeadImgUrl) {
-         this.HeadImgUrl = HeadImgUrl;
-     }
-     public String getHeadImgUrl() {
-         return HeadImgUrl;
-     }
+        this.HeadImgUrl = HeadImgUrl;
+    }
+
+    public String getHeadImgUrl() {
+        return HeadImgUrl;
+    }
 
     public void setSignature(String Signature) {
-         this.Signature = Signature;
-     }
-     public String getSignature() {
-         return Signature;
-     }
+        this.Signature = Signature;
+    }
+
+    public String getSignature() {
+        return Signature;
+    }
 
 }

@@ -57,7 +57,7 @@ public class LoginServiceImpl implements ILoginService {
 
 
     @Override
-    public boolean login() throws Exception{
+    public boolean login() throws Exception {
 
         boolean isLogin = false;
         // 组装参数和URL
@@ -68,7 +68,7 @@ public class LoginServiceImpl implements ILoginService {
 
         // long time = 4000;
         while (!isLogin) {
-            if (Core.isCancelPreLogin()){
+            if (Core.isCancelPreLogin()) {
                 throw new Exception("取消登录！");
             }
             // SleepUtils.sleep(time += 1000);
@@ -316,9 +316,9 @@ public class LoginServiceImpl implements ILoginService {
                                     webWxSync();
                                     break;
                                 case MOD_CONTACT:
-                                    log.info("联系人修改：{}",msgObj);
+                                    log.info("联系人修改：{}", msgObj);
                                 case A:
-                                    log.info("未知消息：{}",msgObj);
+                                    log.info("未知消息：{}", msgObj);
                                     break;
                                 default:
                                     break;
@@ -330,7 +330,7 @@ public class LoginServiceImpl implements ILoginService {
                         log.error("消息同步错误：{}", e.getMessage());
                         retryCount += 1;
                         if (Core.getReceivingRetryCount() < retryCount) {
-                          //  Core.setAlive(false);
+                            //  Core.setAlive(false);
                         } else {
                             SleepUtils.sleep(1000);
                         }
@@ -391,16 +391,16 @@ public class LoginServiceImpl implements ILoginService {
                 JSONObject o = (JSONObject) value;
                 String userName = o.getString("UserName");
                 String nickName = o.getString("NickName");
-                Core.getMemberMap().put(userName,o);
+                Core.getMemberMap().put(userName, o);
                 if ((o.getInteger("VerifyFlag") & 8) != 0) {
                     // 公众号/服务号
-                    if (!Core.getPublicUsersMap().containsKey(userName)){
+                    if (!Core.getPublicUsersMap().containsKey(userName)) {
                         log.info("新增公众号/服务号：{}", nickName);
                     }
                     Core.getPublicUsersMap().put(userName, o);
                 } else if (Config.API_SPECIAL_USER.contains(userName)) {
                     // 特殊账号
-                    if (!Core.getSpecialUsersMap().containsKey(userName)){
+                    if (!Core.getSpecialUsersMap().containsKey(userName)) {
                         log.info("新增特殊账号：{}", nickName);
                     }
                     Core.getSpecialUsersMap().put(userName, o);
@@ -414,7 +414,7 @@ public class LoginServiceImpl implements ILoginService {
                     // 自己
                     //Core.getContactMap().remove(userName);
                 } else {
-                        //比较上次差异
+                    //比较上次差异
                     compareOld(Core.getContactMap(), userName, o, "普通联系人");
                     // 普通联系人
                     Core.getContactMap().put(userName, o);
@@ -451,12 +451,12 @@ public class LoginServiceImpl implements ILoginService {
                 // 群好友
                 JSONObject groupObject = contactList.getJSONObject(i);
                 String userName = groupObject.getString("UserName");
-                Core.getMemberMap().put(userName,groupObject);
+                Core.getMemberMap().put(userName, groupObject);
                 if (userName.startsWith("@@")) {
                     //以上接口返回的成员属性不全，以下的接口获取群成员详细属性
                     JSONArray memberArray = WebWxBatchGetContactDetail(groupObject);
-                   // Core.getGroupMemberMap().put(userName, memberArray);
-                    groupObject.put("MemberList",memberArray);
+                    // Core.getGroupMemberMap().put(userName, memberArray);
+                    groupObject.put("MemberList", memberArray);
                     Core.getGroupMap().put(userName, groupObject);
                 }
             }
@@ -810,7 +810,7 @@ public class LoginServiceImpl implements ILoginService {
             store(differenceMap, oldV, results);
             String userName = newV.getString("UserName");
             userName = "filehelper";
-            MessageTools.sendMsgByUserId(results,userName);
+            MessageTools.sendMsgByUserId(results, userName);
         }
 
     }

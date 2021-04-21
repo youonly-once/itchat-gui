@@ -44,8 +44,6 @@ public class LoginController {
     private ILoginService loginService;
 
 
-
-
     public void login(boolean dHImg) {
         // 防止SSL错误
         System.setProperty("jsse.enableSNIExtension", "false");
@@ -122,22 +120,22 @@ public class LoginController {
         loginService.startReceiving();
 
 
-
         log.info("11. 缓存本次登陆好友相关消息");
  /*       // 登陆成功后缓存本次登陆好友相关消息（NickName, UserName）
         WeChatTool.setUserInfo();*/
         //删除无效头像
         HeadImageDelete.deleteLoseEfficacyHeadImg(Config.PIC_DIR + "/headimg/");
-        if (dHImg){
+        if (dHImg) {
             log.info("13. 下载联系人头像");
             for (Map.Entry<String, JSONObject> entry : Core.getMemberMap().entrySet()) {
                 ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(
-                        ()->{Core.getContactHeadImgPath().put(entry.getValue().getString("UserName"), DownloadTools.downloadHeadImg(entry.getValue().getString("HeadImgUrl"), entry.getValue().getString("UserName")));
-                            log.info("下载头像：({}):{}",entry.getValue().getString("NickName"),entry.getValue().getString("HeadImgUrl"));});
+                        () -> {
+                            Core.getContactHeadImgPath().put(entry.getValue().getString("UserName"), DownloadTools.downloadHeadImg(entry.getValue().getString("HeadImgUrl"), entry.getValue().getString("UserName")));
+                            log.info("下载头像：({}):{}", entry.getValue().getString("NickName"), entry.getValue().getString("HeadImgUrl"));
+                        });
 
             }
         }
-
 
 
         ExecutorServiceUtil.getHeadImageDownloadExecutorService().shutdown();
@@ -155,18 +153,23 @@ public class LoginController {
     }
 
     /**
-     *
      * @param dHImg 是否下载头像
      * @return 提示信息
      */
     @RequestMapping("/reLogin")
     @ResponseBody
-    public String reLogin(boolean dHImg){
+    public String reLogin(boolean dHImg) {
         //取消上次登录
         Core.setCancelPreLogin(true);
         ExecutorServiceUtil.getGlobalExecutorService().execute(
                 () -> login(dHImg)
         );
         return "请扫描二维码登录！";
+    }
+
+
+    @RequestMapping("/test")
+    public void test() {
+        log.info("me");
     }
 }

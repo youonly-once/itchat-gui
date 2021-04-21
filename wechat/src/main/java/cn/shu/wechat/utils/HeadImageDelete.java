@@ -22,7 +22,7 @@ public class HeadImageDelete {
     /**
      * 删除下载的失效头像
      */
-    public static void deleteLoseEfficacyHeadImg(String imgPath){
+    public static void deleteLoseEfficacyHeadImg(String imgPath) {
         AttrHistoryMapper attrHistoryMapper = SpringApplicationContextUtil.getApplicationContext().getBean(AttrHistoryMapper.class);
         List<AttrHistory> headImageList = attrHistoryMapper
                 .selectByAll(AttrHistory.builder()
@@ -33,31 +33,32 @@ public class HeadImageDelete {
             headImages.add(attrHistory.getNewval());
             headImages.add(attrHistory.getOldval());
         }
-        deleteFile(imgPath,headImages);
+        deleteFile(imgPath, headImages);
         log.info("头像删除成功");
 
     }
 
     /**
      * 遍历删除文件
-     * @param imgPath 目录
+     *
+     * @param imgPath    目录
      * @param headImages 不删除列表
      */
-    private static void deleteFile(String imgPath,HashSet<String> headImages){
+    private static void deleteFile(String imgPath, HashSet<String> headImages) {
         File file = new File(imgPath);
-        if (file.isDirectory()){
+        if (file.isDirectory()) {
             File[] files = file.listFiles();
-            if (files == null){
+            if (files == null) {
                 return;
             }
             for (File file1 : files) {
-                if (file1.isFile() ){
-                    if (!headImages.contains(file1.getAbsolutePath())){
+                if (file1.isFile()) {
+                    if (!headImages.contains(file1.getAbsolutePath())) {
                         file1.delete();
                     }
 
-                }else if (file1.isDirectory()){
-                    deleteFile(file1.getAbsolutePath(),headImages);
+                } else if (file1.isDirectory()) {
+                    deleteFile(file1.getAbsolutePath(), headImages);
                 }
 
             }

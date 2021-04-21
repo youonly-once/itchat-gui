@@ -15,12 +15,12 @@ import lombok.Data;
 
 /**
  * 场景：需要返回的json格式的参数字段是首字母大写，JSON.toJSONString 后都变成了小写
- *
+ * <p>
  * 原因：JSON源码里，除了所有的属性代写后字段返回的才是大写，其余皆是默认自动返回小写；
- *
+ * <p>
  * 解决办法：
- *
- *  1:所有的属性命名首字母大写，不写get方法（不符合命名规范）
+ * <p>
+ * 1:所有的属性命名首字母大写，不写get方法（不符合命名规范）
  */
 public class WebWXSendMsgRequest {
     public BaseRequest BaseRequest = new BaseRequest();

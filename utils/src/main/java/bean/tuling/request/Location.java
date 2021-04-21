@@ -1,6 +1,6 @@
 /**
-  * Copyright 2021 bejson.com 
-  */
+ * Copyright 2021 bejson.com
+ */
 package bean.tuling.request;
 
 import lombok.Builder;
@@ -17,25 +17,29 @@ public class Location {
     private String city;
     private String province;
     private String street;
+
     public void setCity(String city) {
-         this.city = city;
-     }
-     public String getCity() {
-         return city;
-     }
+        this.city = city;
+    }
+
+    public String getCity() {
+        return city;
+    }
 
     public void setProvince(String province) {
-         this.province = province;
-     }
-     public String getProvince() {
-         return province;
-     }
+        this.province = province;
+    }
+
+    public String getProvince() {
+        return province;
+    }
 
     public void setStreet(String street) {
-         this.street = street;
-     }
-     public String getStreet() {
-         return street;
-     }
+        this.street = street;
+    }
+
+    public String getStreet() {
+        return street;
+    }
 
 }

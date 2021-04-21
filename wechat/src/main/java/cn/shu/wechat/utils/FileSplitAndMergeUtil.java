@@ -23,7 +23,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 /**
- * @author  xuxile
+ * @author xuxile
  */
 @Log4j2
 public class FileSplitAndMergeUtil {
@@ -57,7 +57,7 @@ public class FileSplitAndMergeUtil {
                         bos.flush();
                         bos.close();
                     }
-                    String partFilePath =filePath + "." + (writeByte / splitSize + 1) + ".part";
+                    String partFilePath = filePath + "." + (writeByte / splitSize + 1) + ".part";
                     bos = new BufferedOutputStream(new FileOutputStream(partFilePath));
                     partFilePaths.add(partFilePath);
                 }
@@ -86,18 +86,20 @@ public class FileSplitAndMergeUtil {
 
     /**
      * 删除分片文件
+     *
      * @param filePathList
      */
-    public static void deletePartFile(List<String> filePathList){
+    public static void deletePartFile(List<String> filePathList) {
         for (String s : filePathList) {
-           try{
-               new File(s).delete();
-           }catch (Exception e){
+            try {
+                new File(s).delete();
+            } catch (Exception e) {
 
-           }
+            }
 
         }
     }
+
     /**
      * 大文件合成方法1：普通IO方式
      *
@@ -186,9 +188,9 @@ public class FileSplitAndMergeUtil {
                 }
                 out.close();
             }
-            log.error("待发送文件分片完成：{}",filePath);
+            log.error("待发送文件分片完成：{}", filePath);
         } catch (Exception e) {
-            log.error("待发送文件分片失败：{},{}",filePath,e.getMessage());
+            log.error("待发送文件分片失败：{},{}", filePath, e.getMessage());
             e.printStackTrace();
         } finally {
             try {

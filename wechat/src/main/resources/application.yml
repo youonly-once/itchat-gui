@@ -5,21 +5,33 @@ spring:
     password: 123456
     url: jdbc:log4jdbc:mysql://127.0.0.1:3306/wechat?serverTimezone=Asia/Shanghai&characterEncoding=utf8&allowMultiQueries=true
   boot:
-    #admin客户端注册到admin 服务
+    #actuator客户端注册到actuator server
     admin:
       client:
         url: http://localhost:8999
         period: 1000
         read-timeout: 5000
+  application:
+    name: autowechat
 mybatis:
   mapper-locations: classpath*:mapper/**/**Mapper.xml
 
 server:
   port: 9999
-
+#actuator 组件配置
 management:
   endpoints:
     web:
       base-path: /
       exposure:
+        #暴露所有信息
         include: ["*"]
+  endpoint:
+    shutdown:
+      #允许使用actuator关闭服务
+      enabled: true
+###############eureka配置
+eureka:
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:8888/eureka

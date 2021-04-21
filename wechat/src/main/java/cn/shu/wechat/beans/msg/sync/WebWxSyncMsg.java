@@ -1,7 +1,8 @@
 /**
-  * Copyright 2021 bejson.com 
-  */
+ * Copyright 2021 bejson.com
+ */
 package cn.shu.wechat.beans.msg.sync;
+
 import lombok.Data;
 
 import java.util.List;
@@ -23,7 +24,7 @@ public class WebWxSyncMsg {
     private int DelContactCount;
     private List<DelContactList> DelContactList;
     private int ModChatRoomMemberCount;
-   // private List<String> ModChatRoomMemberList;
+    // private List<String> ModChatRoomMemberList;
     private Profile Profile;
     private int ContinueFlag;
     private SyncKey SyncKey;

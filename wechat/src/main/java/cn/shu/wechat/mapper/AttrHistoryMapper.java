@@ -1,6 +1,7 @@
 package cn.shu.wechat.mapper;
 
 import cn.shu.wechat.beans.pojo.AttrHistory;
+
 import java.util.List;
 import java.util.Map;
 

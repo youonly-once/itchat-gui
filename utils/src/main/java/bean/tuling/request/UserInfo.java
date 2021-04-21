@@ -1,6 +1,6 @@
 /**
-  * Copyright 2021 bejson.com 
-  */
+ * Copyright 2021 bejson.com
+ */
 package bean.tuling.request;
 
 import lombok.Builder;
@@ -16,18 +16,21 @@ public class UserInfo {
 
     private String apiKey;
     private String userId;
+
     public void setApiKey(String apiKey) {
-         this.apiKey = apiKey;
-     }
-     public String getApiKey() {
-         return apiKey;
-     }
+        this.apiKey = apiKey;
+    }
+
+    public String getApiKey() {
+        return apiKey;
+    }
 
     public void setUserId(String userId) {
-         this.userId = userId;
-     }
-     public String getUserId() {
-         return userId;
-     }
+        this.userId = userId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
 
 }

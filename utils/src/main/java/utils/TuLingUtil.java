@@ -18,6 +18,7 @@ import java.util.Map;
  */
 public class TuLingUtil {
     private static final String requestUrl = "http://openapi.tuling123.com/openapi/api/v2";
+
     /**
      * 调用图灵机器人
      */

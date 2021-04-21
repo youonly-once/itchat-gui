@@ -25,6 +25,7 @@ public enum WXSendMsgCodeEnum {
     public Integer getCode() {
         return code;
     }
+
     public String getMsg() {
         return msg;
     }

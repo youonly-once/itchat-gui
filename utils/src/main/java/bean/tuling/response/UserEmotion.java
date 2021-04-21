@@ -1,6 +1,6 @@
 /**
-  * Copyright 2021 bejson.com 
-  */
+ * Copyright 2021 bejson.com
+ */
 package bean.tuling.response;
 
 /**
@@ -15,32 +15,37 @@ public class UserEmotion {
     private int d;
     private int emotionId;
     private int p;
+
     public void setA(int a) {
-         this.a = a;
-     }
-     public int getA() {
-         return a;
-     }
+        this.a = a;
+    }
+
+    public int getA() {
+        return a;
+    }
 
     public void setD(int d) {
-         this.d = d;
-     }
-     public int getD() {
-         return d;
-     }
+        this.d = d;
+    }
+
+    public int getD() {
+        return d;
+    }
 
     public void setEmotionId(int emotionId) {
-         this.emotionId = emotionId;
-     }
-     public int getEmotionId() {
-         return emotionId;
-     }
+        this.emotionId = emotionId;
+    }
+
+    public int getEmotionId() {
+        return emotionId;
+    }
 
     public void setP(int p) {
-         this.p = p;
-     }
-     public int getP() {
-         return p;
-     }
+        this.p = p;
+    }
+
+    public int getP() {
+        return p;
+    }
 
 }

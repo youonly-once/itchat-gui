@@ -1,0 +1,31 @@
+server:
+  port: 8888
+eureka:
+  client:
+    #eureka-server也会向自己发起注册申请 先关闭自我注册，并关闭抓取
+    #因为当server启动时，自己本身未启动成功，再自己注册到自己会抛异常
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      defaultZone: http://127.0.0.1:8888/eureka
+  server:
+    #自我保护机制
+    enable-self-preservation: true
+
+    #instance:
+    #主机名
+    #hostname: MyEurekaServer
+spring:
+  application:
+    name: EurekaServer
+  boot:
+    #admin客户端注册到admin 服务
+    admin:
+      client:
+        url: http://localhost:8999
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: ["*"]

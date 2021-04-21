@@ -1,0 +1,18 @@
+server:
+  port: 8763
+spring:
+  application:
+    name: zuul
+eureka:
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:8888/eureka
+
+zuul:
+  routes:
+    wechat: #自定义名称
+      path: /autowechat/**   #外部访问路径匹配
+      service-id: autowechat #匹配autowechat服务
+wechat:
+  ribbon:
+    NFLoadBalancerRuleClassName: com:netflix:loadbalancer:RandomRule

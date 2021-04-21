@@ -6,10 +6,10 @@ import lombok.Builder;
 import lombok.Data;
 
 /**
-  *@作者     舒新胜
-  *@项目     AutoWeChat
-  *@创建时间  3/10/2021 10:36 PM
-*/
+ * @作者 舒新胜
+ * @项目 AutoWeChat
+ * @创建时间 3/10/2021 10:36 PM
+ */
 @Data
 @Builder
 public class Message {
@@ -26,13 +26,13 @@ public class Message {
     private Date createTime;
 
     /**
-    * 消息内容
-    */
+     * 消息内容
+     */
     private String content;
 
     /**
-    * 资源文件保存路径
-    */
+     * 资源文件保存路径
+     */
     private String filePath;
 
     private String msgJson;
@@ -56,7 +56,7 @@ public class Message {
     private String toNickname;
 
     /**
-    * 是否是本人发送的消息1是0不是
-    */
+     * 是否是本人发送的消息1是0不是
+     */
     private Boolean isSend;
 }

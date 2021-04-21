@@ -17,6 +17,7 @@ public class PropertyUtil {
     private static final Properties pps = new Properties();
 
     private static String msgFileName = DateUtil.getCurrDate() + "msg.property";
+
     static {
    /*     new Thread(new Runnable() {
             @Override
@@ -31,6 +32,7 @@ public class PropertyUtil {
             }
         }, "").start();*/
     }
+
     /**
      * 存储发送的消息
      *

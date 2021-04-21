@@ -1,6 +1,6 @@
 /**
-  * Copyright 2021 bejson.com 
-  */
+ * Copyright 2021 bejson.com
+ */
 package bean.tuling.request;
 
 import lombok.Builder;
@@ -15,11 +15,13 @@ import lombok.Builder;
 public class InputText {
 
     private String text;
+
     public void setText(String text) {
-         this.text = text;
-     }
-     public String getText() {
-         return text;
-     }
+        this.text = text;
+    }
+
+    public String getText() {
+        return text;
+    }
 
 }

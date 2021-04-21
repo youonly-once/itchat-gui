@@ -1,7 +1,6 @@
 package cn.shu.wechat.utils;
 
 
-
 import lombok.extern.log4j.Log4j2;
 
 import java.io.BufferedReader;
@@ -24,7 +23,7 @@ public class OCRHelper {
     private static final String EOL = System.getProperty("line.separator");
 
     /**
-     *  Tesseract-OCR的安装路径
+     * Tesseract-OCR的安装路径
      */
     private static String tessPath = "D:/Tesseract-OCR";
     //private String tessPath = new File("tesseract").getAbsolutePath();
@@ -34,18 +33,18 @@ public class OCRHelper {
      * @param imageFormat 传入的图像格式
      * @return 识别后的字符串
      */
-    public static String recognizeText(String imagePath,String filename,String lanuge) throws Exception {
+    public static String recognizeText(String imagePath, String filename, String lanuge) throws Exception {
         /**
          * 设置输出文件的保存的文件目录
          */
-        File outputFile = new File(imagePath, filename+"_output");
+        File outputFile = new File(imagePath, filename + "_output");
 
         StringBuffer strB = new StringBuffer();
         List<String> cmd = new ArrayList<String>();
 
         cmd.add(tessPath + "/tesseract");
 
-        cmd.add(imagePath+filename);
+        cmd.add(imagePath + filename);
         cmd.add(outputFile.getName());
         cmd.add(LANG_OPTION);
 
@@ -104,9 +103,9 @@ public class OCRHelper {
             throw new RuntimeException(msg);
         }
         new File(outputFile.getAbsolutePath() + ".txt").delete();
-        String result=strB.toString().replaceAll("\\s*", "");
+        String result = strB.toString().replaceAll("\\s*", "");
         if (result.isEmpty()) {
-            return recognizeText(imagePath, filename,"end");
+            return recognizeText(imagePath, filename, "end");
         }
         return result;
 

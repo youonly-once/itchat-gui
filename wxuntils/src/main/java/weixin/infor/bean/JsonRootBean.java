@@ -1,7 +1,8 @@
 /**
-  * Copyright 2018 bejson.com 
-  */
+ * Copyright 2018 bejson.com
+ */
 package weixin.infor.bean;
+
 import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
@@ -16,11 +17,13 @@ import java.util.List;
 public class JsonRootBean {
 
     private List<User_list> user_list;
+
     public void setUser_list(List<User_list> user_list) {
-         this.user_list = user_list;
-     }
-     public List<User_list> getUser_list() {
-         return user_list;
-     }
+        this.user_list = user_list;
+    }
+
+    public List<User_list> getUser_list() {
+        return user_list;
+    }
 
 }

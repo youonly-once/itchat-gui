@@ -1,6 +1,6 @@
 /**
-  * Copyright 2021 bejson.com 
-  */
+ * Copyright 2021 bejson.com
+ */
 package bean.tuling.request;
 
 import lombok.Builder;
@@ -17,25 +17,29 @@ public class Perception {
     private InputText inputText;
     private InputImage inputImage;
     private SelfInfo selfInfo;
+
     public void setInputText(InputText inputText) {
-         this.inputText = inputText;
-     }
-     public InputText getInputText() {
-         return inputText;
-     }
+        this.inputText = inputText;
+    }
+
+    public InputText getInputText() {
+        return inputText;
+    }
 
     public void setInputImage(InputImage inputImage) {
-         this.inputImage = inputImage;
-     }
-     public InputImage getInputImage() {
-         return inputImage;
-     }
+        this.inputImage = inputImage;
+    }
+
+    public InputImage getInputImage() {
+        return inputImage;
+    }
 
     public void setSelfInfo(SelfInfo selfInfo) {
-         this.selfInfo = selfInfo;
-     }
-     public SelfInfo getSelfInfo() {
-         return selfInfo;
-     }
+        this.selfInfo = selfInfo;
+    }
+
+    public SelfInfo getSelfInfo() {
+        return selfInfo;
+    }
 
 }

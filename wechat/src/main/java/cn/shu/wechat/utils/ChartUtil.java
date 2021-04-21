@@ -77,7 +77,6 @@ public class ChartUtil {
     private MessageMapper messageMapper;
 
 
-
     public static void main(String[] args) {
         // 创建主题样式
         StandardChartTheme standardChartTheme = new StandardChartTheme("CN");
@@ -108,8 +107,8 @@ public class ChartUtil {
         chart.makeWXContactInfoPieChart();
 
         */
-       // chart.makeWXContactMessageTop();
-        System.out.println((int)Math.ceil(3/50.0));
+        // chart.makeWXContactMessageTop();
+        System.out.println((int) Math.ceil(3 / 50.0));
     }
 
     public void create() {
@@ -185,7 +184,7 @@ public class ChartUtil {
                 testMap.computeIfAbsent(value, v -> new AtomicInteger()).getAndIncrement();
             }
             String imgPath = createValidityComparePimChar(getDataPieSetByUtil(sortMapByValue(testMap)), title,
-                    UUID.randomUUID().toString().replace("-","") + "_" + key + ".png", sexKeys, width, height);
+                    UUID.randomUUID().toString().replace("-", "") + "_" + key + ".png", sexKeys, width, height);
             return imgPath;
 
 
@@ -318,8 +317,10 @@ public class ChartUtil {
 
 
     }
+
     /**
      * 聊天双方用户活跃度(消息发送次数)
+     *
      * @param userName
      * @return
      */
@@ -342,10 +343,10 @@ public class ChartUtil {
         Map<String, AtomicInteger> msgCount = new HashMap<>();
         for (Message message : messages) {
             String fromMemberOfGroupDisplayname = message.getFromMemberOfGroupDisplayname();
-            if (StringUtils.isEmpty(fromMemberOfGroupDisplayname)){
+            if (StringUtils.isEmpty(fromMemberOfGroupDisplayname)) {
                 fromMemberOfGroupDisplayname = message.getFromNickname();
             }
-            if (message.getMsgType()>=1 && message.getMsgType()<=48){
+            if (message.getMsgType() >= 1 && message.getMsgType() <= 48) {
                 msgCount.computeIfAbsent(fromMemberOfGroupDisplayname, v -> new AtomicInteger()).getAndIncrement();
             }
         }
@@ -361,7 +362,7 @@ public class ChartUtil {
 
         int i = 0;
         for (Map.Entry<String, AtomicInteger> type : msgCount.entrySet()) {
-            if (i==size){
+            if (i == size) {
                 break;
             }
             columnKeys[i] = type.getKey();
@@ -369,15 +370,17 @@ public class ChartUtil {
             i++;
         }
         data[0] = values;
-        if (values.length>0){
+        if (values.length > 0) {
             CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
-            String barImg1 = createBarChart(dataset, "用户昵称", "发送消息数量", "群成员活跃度", "makeWXGroupMessageTop1.png",1024,768);
+            String barImg1 = createBarChart(dataset, "用户昵称", "发送消息数量", "群成员活跃度", "makeWXGroupMessageTop1.png", 1024, 768);
             return barImg1;
         }
         return null;
     }
+
     /**
      * 群用户活跃度(消息发送次数)
+     *
      * @param userName
      * @return
      */
@@ -399,10 +402,10 @@ public class ChartUtil {
         Map<String, AtomicInteger> msgCount = new HashMap<>();
         for (Message message : messages) {
             String fromMemberOfGroupDisplayname = message.getFromMemberOfGroupDisplayname();
-            if (StringUtils.isEmpty(fromMemberOfGroupDisplayname)){
+            if (StringUtils.isEmpty(fromMemberOfGroupDisplayname)) {
                 fromMemberOfGroupDisplayname = message.getFromNickname();
             }
-            if (message.getMsgType()>=1 && message.getMsgType()<=48){
+            if (message.getMsgType() >= 1 && message.getMsgType() <= 48) {
                 msgCount.computeIfAbsent(fromMemberOfGroupDisplayname, v -> new AtomicInteger()).getAndIncrement();
             }
         }
@@ -418,7 +421,7 @@ public class ChartUtil {
 
         int i = 0;
         for (Map.Entry<String, AtomicInteger> type : msgCount.entrySet()) {
-            if (i==size){
+            if (i == size) {
                 break;
             }
             columnKeys[i] = type.getKey();
@@ -426,9 +429,9 @@ public class ChartUtil {
             i++;
         }
         data[0] = values;
-        if (values.length>0){
+        if (values.length > 0) {
             CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
-            String barImg1 = createBarChart(dataset, "用户昵称", "发送消息数量", "群成员活跃度", "makeWXGroupMessageTop1.png",1024,768);
+            String barImg1 = createBarChart(dataset, "用户昵称", "发送消息数量", "群成员活跃度", "makeWXGroupMessageTop1.png", 1024, 768);
             return barImg1;
         }
         return null;
@@ -436,6 +439,7 @@ public class ChartUtil {
 
     /**
      * 聊天信息统计
+     *
      * @param userName
      * @return
      */
@@ -448,12 +452,12 @@ public class ChartUtil {
         String contactRemarkNameByUserName = ContactsTools.getContactRemarkNameByUserName(userName);
         criteria.andFromUsernameEqualTo(userName);
         criteria1.andFromNicknameEqualTo(ContactsTools.getContactNickNameByUserName(userName));
-        if (StringUtils.isNotEmpty(contactRemarkNameByUserName)){
+        if (StringUtils.isNotEmpty(contactRemarkNameByUserName)) {
             criteria2.andFromRemarknameEqualTo(contactRemarkNameByUserName);
         }
         messageExample.or().andToNicknameEqualTo(ContactsTools.getContactNickNameByUserName(userName));
         messageExample.or().andToUsernameEqualTo(userName);
-        if (StringUtils.isNotEmpty(contactRemarkNameByUserName)){
+        if (StringUtils.isNotEmpty(contactRemarkNameByUserName)) {
             messageExample.or().andToRemarknameEqualTo(contactRemarkNameByUserName);
         }
 
@@ -465,33 +469,33 @@ public class ChartUtil {
             String msg = message.getContent();
             String type = message.getMsgDesc();
             msgType.computeIfAbsent(type, v -> new AtomicInteger()).getAndIncrement();
-                if (message.getMsgType() == WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode()
-                        && StringUtils.isNotBlank(msg)) {
-                    Result result = ToAnalysis.parse(msg);
-                    for (Term term : result.getTerms()) {
-                        //System.out.println(term);
-                        String natureStr = term.getNatureStr().substring(0, 1);
-                        if (StringUtils.isBlank(term.getName())) {
-                            continue;
-                        }
-                        switch (natureStr) {
-                            //case "e":
-                            case "n":
-                                case "v":
-                                case "t":
+            if (message.getMsgType() == WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode()
+                    && StringUtils.isNotBlank(msg)) {
+                Result result = ToAnalysis.parse(msg);
+                for (Term term : result.getTerms()) {
+                    //System.out.println(term);
+                    String natureStr = term.getNatureStr().substring(0, 1);
+                    if (StringUtils.isBlank(term.getName())) {
+                        continue;
+                    }
+                    switch (natureStr) {
+                        //case "e":
+                        case "n":
+                        case "v":
+                        case "t":
 
-                                 case "a":
-                                 case "b":
-                                case "d":
-                                case "o":
-                               // case "r":
-                                msgTerm.computeIfAbsent(term.toString(), v -> new AtomicInteger()).getAndIncrement();
-                                break;
-                            default:
-
-                        }
+                        case "a":
+                        case "b":
+                        case "d":
+                        case "o":
+                            // case "r":
+                            msgTerm.computeIfAbsent(term.toString(), v -> new AtomicInteger()).getAndIncrement();
+                            break;
+                        default:
 
                     }
+
+                }
             }
         }
 
@@ -509,7 +513,7 @@ public class ChartUtil {
 
         int i = 0;
         for (Map.Entry<String, AtomicInteger> type : msgType.entrySet()) {
-            if (i==size){
+            if (i == size) {
                 break;
             }
             columnKeys[i] = type.getKey();
@@ -517,9 +521,9 @@ public class ChartUtil {
             i++;
         }
         data[0] = values;
-        if (values.length>0){
+        if (values.length > 0) {
             CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
-            String barImg1 = createBarChart(dataset, "消息类型", "发送数量", "消息类型排行", "makeWXGroupMessageTop1.png",500,400);
+            String barImg1 = createBarChart(dataset, "消息类型", "发送数量", "消息类型排行", "makeWXGroupMessageTop1.png", 500, 400);
             imgs.add(barImg1);
         }
 
@@ -542,14 +546,15 @@ public class ChartUtil {
             i1++;
         }
         data1[0] = values1;
-        if (size> 0){
+        if (size > 0) {
             CategoryDataset dataset1 = getBarData(data1, rowKeys1, columnKeys1);
-            String barImg2 = createBarChart(dataset1, "词语", "发送数量", "消息常用关键词排行", "makeWXGroupMessageTop2.png",500,400);
+            String barImg2 = createBarChart(dataset1, "词语", "发送数量", "消息常用关键词排行", "makeWXGroupMessageTop2.png", 500, 400);
             imgs.add(barImg2);
         }
 
         return imgs;
     }
+
     /**
      * 获取消息top20
      */
@@ -625,7 +630,7 @@ public class ChartUtil {
         }
         data[0] = values;
         CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
-        createBarChart(dataset, "消息类型", "发送数量", "消息类型排行", "makeWXContactMessageTop2.png",500,400);
+        createBarChart(dataset, "消息类型", "发送数量", "消息类型排行", "makeWXContactMessageTop2.png", 500, 400);
 
 
         double[][] data1 = new double[1][maxSize];
@@ -647,7 +652,7 @@ public class ChartUtil {
         }
         data1[0] = values1;
         CategoryDataset dataset1 = getBarData(data1, rowKeys1, columnKeys1);
-        createBarChart(dataset1, "词语", "发送数量", "消息常用词语", "makeWXContactMessageTop2.png",500,400);
+        createBarChart(dataset1, "词语", "发送数量", "消息常用词语", "makeWXContactMessageTop2.png", 500, 400);
 
 
     }
@@ -669,7 +674,7 @@ public class ChartUtil {
         }
         data[0] = values;
         CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
-        createBarChart(dataset, "好友昵称", "更新数量", "微信好友个人信息更新次数/月", "makeWXContactUpdateAttrBarChart.png",1024,768);
+        createBarChart(dataset, "好友昵称", "更新数量", "微信好友个人信息更新次数/月", "makeWXContactUpdateAttrBarChart.png", 1024, 768);
 
 
         List<Map<String, Object>> stringAtomicIntegerMapAttr = attrHistoryMapper.selectUpdateAttrCount(10);
@@ -681,7 +686,7 @@ public class ChartUtil {
         data[0] = values;
         dataset = getBarData(data, rowKeys, columnKeys);
         createBarChart(dataset, "好友昵称", "更新数量", "微信好友个人信息更新次数TYPE/月", "makeWXContactUpdateAttrBarChartTYPE.png"
-        ,1024,768);
+                , 1024, 768);
 
 
     }
@@ -750,7 +755,7 @@ public class ChartUtil {
          */
         chart.getRenderingHints().put(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
         chart.setTextAntiAlias(false);
-        chart.getTitle().setFont(new Font("宋体",Font.PLAIN,14));
+        chart.getTitle().setFont(new Font("宋体", Font.PLAIN, 14));
         chart.setBackgroundPaint(Color.white);
         // create plot
         CategoryPlot plot = chart.getCategoryPlot();
@@ -828,7 +833,7 @@ public class ChartUtil {
         //设置图例位置
         LegendTitle legend = chart.getLegend();
         legend.setPosition(RectangleEdge.RIGHT);
-        legend.setItemFont(new Font("宋体",Font.PLAIN,14));
+        legend.setItemFont(new Font("宋体", Font.PLAIN, 14));
         class CustomRender extends BarRenderer {
             private Paint[] colors;
             // 初始化柱子颜色
@@ -1039,7 +1044,7 @@ public class ChartUtil {
         // 指定显示的饼图上圆形(false)还椭圆形(true)
         plot.setCircular(false, true);
         LegendTitle legend = chart.getLegend();
-        legend.setItemFont(new Font("宋体",Font.PLAIN,12));
+        legend.setItemFont(new Font("宋体", Font.PLAIN, 12));
         // 设置第一个 饼块section 的开始位置，默认是12点钟方向
         plot.setStartAngle(90);
         plot.setBackgroundPaint(new Color(39, 43, 88));
@@ -1316,17 +1321,17 @@ public class ChartUtil {
     }
 
 
-  /*  *
+    /*  *
      * 使用 Map按value进行排序
      *
      * @param
      * @return
      */
     public Map<String, AtomicInteger> sortMapByValue(Map<String, AtomicInteger> oriMap) {
-        if (oriMap == null ) {
+        if (oriMap == null) {
             return null;
         }
-        if (oriMap.isEmpty()){
+        if (oriMap.isEmpty()) {
             return oriMap;
         }
         Map<String, AtomicInteger> sortedMap = new LinkedHashMap<String, AtomicInteger>();

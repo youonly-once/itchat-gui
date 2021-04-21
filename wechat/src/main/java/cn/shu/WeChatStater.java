@@ -4,6 +4,7 @@ import cn.shu.wechat.controller.LoginController;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -17,13 +18,14 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @MapperScan("cn.shu.wechat.mapper")
 @EnableScheduling
 @EnableAsync
+@EnableEurekaClient
 public class WeChatStater {
 
-	public static void main(String[] args) {
-		ApplicationContext applicationContext = SpringApplication.run(WeChatStater.class,args);
-		LoginController loginController = applicationContext.getBean(LoginController.class);
-		loginController.login(true);
-	}
+    public static void main(String[] args) {
+        ApplicationContext applicationContext = SpringApplication.run(WeChatStater.class, args);
+        LoginController loginController = applicationContext.getBean(LoginController.class);
+        loginController.login(true);
+    }
 
 
 }
