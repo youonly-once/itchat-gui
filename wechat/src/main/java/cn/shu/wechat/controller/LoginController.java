@@ -16,6 +16,7 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 登陆控制器
@@ -43,7 +44,7 @@ public class LoginController {
     @Resource
     private ILoginService loginService;
 
-    private static int count = 0;
+    private static AtomicInteger count = new AtomicInteger();
     public void login(boolean dHImg) {
         // 防止SSL错误
         System.setProperty("jsse.enableSNIExtension", "false");
@@ -170,8 +171,10 @@ public class LoginController {
 
     @RequestMapping("/test")
     @ResponseBody
-    public String test() {
-        log.info(++count);
+    public String test() throws InterruptedException {
+        log.info("开始了:{}",count.getAndIncrement());
+        Thread.sleep(10000);
+        log.info("ok\n");
         return "ok";
     }
 }

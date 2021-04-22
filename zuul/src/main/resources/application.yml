@@ -3,16 +3,58 @@ server:
 spring:
   application:
     name: zuul
+  boot:
+    #admin客户端注册到admin 服务
+    admin:
+      client:
+        url: http://127.0.0.1:9999
 eureka:
   client:
     service-url:
       defaultZone: http://127.0.0.1:8888/eureka
-
 zuul:
   routes:
-    wechat: #�Զ�������
-      path: /autowechat/**   #�ⲿ����·��ƥ��
-      service-id: autowechat #ƥ��autowechat����
-wechat:
-  ribbon:
-    NFLoadBalancerRuleClassName: com:netflix:loadbalancer:RandomRule
+    wechat: #自定义名称
+      path: /autowechat/**   #外部访问路径匹配
+      service-id: autowechat #匹配autowechat服务
+management:
+  endpoint:
+    shutdown:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: ["*"]
+      base-path: /
+hystrix:
+  threadpool:
+    default:
+      #同一个服务共用一个线程池
+      coreSize: 20000 #并发执行的最大线程数，默认10
+      maxQueueSize: -1
+  command:
+    default:
+      execution:
+        timeout:
+          enable: true
+        isolation:
+          strategy: THREAD
+          thread:
+            timeoutInMilliseconds: 35000
+    autowechat:
+      execution:
+        timeout:
+          enable: true
+        isolation:
+          strategy: THREAD
+          thread:
+            timeoutInMilliseconds: 35000
+ribbon:
+  #zuul使用ribbon调用，读取数据的时间
+  ReadTimeout: 11000
+  #zuul使用ribbon调用，建立连接超时时间
+  ConnectTimeout: 6000
+  #最大并发数
+  MaxTotalConnections: 10000
+  #分配到每个负载均衡节点的并发数？
+  MaxConnectionsPerHost: 5000
