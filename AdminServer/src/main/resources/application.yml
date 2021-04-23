@@ -7,3 +7,9 @@ eureka:
   client:
     service-url:
       defaultZone: http://127.0.0.1:8888/eureka
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: ["*"]

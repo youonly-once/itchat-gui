@@ -14,43 +14,49 @@ eureka:
   client:
     service-url:
       defaultZone: http://127.0.0.1:8888/eureka
-
 zuul:
   routes:
     wechat: #自定义名称
       path: /autowechat/**   #外部访问路径匹配
       service-id: autowechat #匹配autowechat服务
-#actuator 组件配置
 management:
-  endpoints:
-    web:
-      base-path: /
-      exposure:
-        #暴露所有信息
-        include: ["*"]
   endpoint:
     shutdown:
-      #允许使用actuator关闭服务
       enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: ["*"]
+      base-path: /
 hystrix:
   threadpool:
     default:
-      coreSize: 100
-      maxQueueSize: 1500
-      queueSizeRejectionThreshold: 1000
+      #同一个服务共用一个线程池
+      coreSize: 20000 #并发执行的最大线程数，默认10
+      maxQueueSize: -1
   command:
     default:
       execution:
+        timeout:
+          enable: true
         isolation:
-          strategy: SEMAPHORE
+          strategy: THREAD
           thread:
-            timeoutInMilliseconds:  120000
-          semaphore:
-            maxConcurrentRequests: 20000
-          circuitBreaker:
-            sleepWindowInMilliseconds: 5000
-  metrics:
-    enabled: true
+            timeoutInMilliseconds: 35000
+    autowechat:
+      execution:
+        timeout:
+          enable: true
+        isolation:
+          strategy: THREAD
+          thread:
+            timeoutInMilliseconds: 35000
 ribbon:
-  ConnectTimeout: 30000
-  ReadTimeout: 30000
+  #zuul使用ribbon调用，读取数据的时间
+  ReadTimeout: 11000
+  #zuul使用ribbon调用，建立连接超时时间
+  ConnectTimeout: 6000
+  #最大并发数
+  MaxTotalConnections: 10000
+  #分配到每个负载均衡节点的并发数？
+  MaxConnectionsPerHost: 5000
