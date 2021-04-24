@@ -39,6 +39,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <outputDirectory>E:\JAVA\eee\EurekaServer</outputDirectory>
+                </configuration>
             </plugin>
         </plugins>
     </build>

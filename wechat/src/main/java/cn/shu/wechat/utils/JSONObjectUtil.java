@@ -37,15 +37,11 @@ public class JSONObjectUtil {
                     //头像相同
                     String groupNew = matcherNew.group(1);
                     String groupOld = matcherOld.group(1);
-                    if (groupNew.equals(groupOld)) {
-                        equals = true;
-                    } else {
-                        equals = false;
-                    }
+                    equals = groupNew.equals(groupOld);
                 }
             }
             if (!equals) {
-                if (entry.getKey().equals("MemberList")) {
+          /*      if (entry.getKey().equals("MemberList")) {
                     JSONArray jsonArrayNew = (JSONArray) newO.get(entry.getKey());
                     JSONArray jsonArrayOld = (JSONArray) entry.getValue();
                     for (Object o : jsonArrayNew) {
@@ -60,11 +56,11 @@ public class JSONObjectUtil {
                         }
                     } //判断头像是否更改
                 } else {
-
+*/
                     HashMap<String, String> temp = new HashMap<>();
                     temp.put(StringUtil.toString(oldV), newV);
                     difference.put(UserInfo.getName(StringUtil.toString(entry.getKey())), temp);
-                }
+              //  }
 
             }
         }

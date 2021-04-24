@@ -359,7 +359,9 @@ public class LoginServiceImpl implements ILoginService {
                 currentTime = System.currentTimeMillis();
             }
             JSONArray member = fullFriendsJsonList.getJSONArray(StorageLoginInfoEnum.MemberList.getKey());
-            // 循环获取seq直到为0，即获取全部好友列表 ==0：好友获取完毕 >0：好友未获取完毕，此时seq为已获取的字节数
+            // 循环获取seq直到为0，即获取全部好友列表
+            // ==0：好友获取完毕
+            // >0：好友未获取完毕，此时seq为已获取的字节数
             while (seq > 0) {
                 // 设置seq传参
                 params.add(new BasicNameValuePair("r", String.valueOf(currentTime)));

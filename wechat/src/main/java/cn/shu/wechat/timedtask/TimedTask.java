@@ -57,6 +57,7 @@ public class TimedTask {
             // log.info("更新联系人完成！");
         }
     }
+    
 
     /**
      * 10分钟检测一次登录状态

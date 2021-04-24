@@ -235,6 +235,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <outputDirectory>E:\JAVA\eee\WeChat</outputDirectory>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>

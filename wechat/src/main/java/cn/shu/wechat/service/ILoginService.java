@@ -13,6 +13,8 @@ import com.alibaba.fastjson.JSONObject;
  */
 public interface ILoginService {
 
+    public static final  String x = "100";
+
 
     /**
      * 获取UUID
