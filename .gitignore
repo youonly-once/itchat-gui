@@ -31,3 +31,5 @@ build/
 
 ### VS Code ###
 .vscode/
+/blog/target/
+/blog/ext_resources/

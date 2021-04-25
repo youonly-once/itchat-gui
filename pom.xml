@@ -16,24 +16,10 @@
         <module>AdminServer</module>
         <module>EurekaServer</module>
     </modules>
-    <!--打包配置-->
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>8</source>
-                    <target>8</target>
-                </configuration>
-            </plugin>
 
-        </plugins>
-    </build>
     <groupId>cn.shu</groupId>
-    <artifactId>weixin</artifactId>
+    <artifactId>shu-project</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>weixin</name>
     <description>Demo project for Spring Boot</description>
     <properties>
         <java.version>1.8</java.version>
@@ -115,12 +101,34 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <release>8</release>
+                        <source>8</source>
+                        <target>8</target>
+                    </configuration>
+                </plugin>
+            </plugins>
+
+        </pluginManagement>
+    </build>
     <profiles>
         <profile>
             <id>1-dev</id>
+            <properties>
+                <output-basedir>E:\JAVA\eee\dev</output-basedir>
+            </properties>
         </profile>
         <profile>
             <id>2-test</id>
+            <properties>
+                <output-basedir>E:\JAVA\eee\test</output-basedir>
+            </properties>
         </profile>
     </profiles>
 </project>
