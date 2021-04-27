@@ -7,6 +7,8 @@ import cn.shu.wechat.service.ILoginService;
 import cn.shu.wechat.api.DownloadTools;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -37,12 +39,25 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Log4j2
 @Controller
+@RefreshScope
 public class LoginController {
     /**
      * 登陆服务实现类
      */
     @Resource
     private ILoginService loginService;
+
+    /**
+     * 登录重试次数
+     */
+    @Value("${LoginRetryCount:10}")
+    private int loginRetryCount;
+
+    /**
+     * 登录重试次数
+     */
+    @Value("${server.port}")
+    private int port;
 
     private static AtomicInteger count = new AtomicInteger();
     public void login(boolean dHImg) {
@@ -53,7 +68,7 @@ public class LoginController {
         // 登陆
         while (true) {
             Process process = null;
-            for (int count = 0; count < 10; count++) {
+            for (int count = 0; count < loginRetryCount; count++) {
                 log.info("获取UUID");
                 while (true) {
                     log.info("1. 获取微信UUID");
@@ -76,7 +91,7 @@ public class LoginController {
                         log.info("请手动打开二维码图片进行扫码登录：" + qrPath);
                     }
                     break;
-                } else if (count == 9) {
+                } else if (count == loginRetryCount-1) {
                     log.error("2.2. 获取登陆二维码图片失败，系统退出");
                     System.exit(0);
                 }
@@ -152,7 +167,11 @@ public class LoginController {
 
 
     }
-
+    @ResponseBody
+     @RequestMapping("/getPort")
+    public int getPort(){
+        return port;
+    }
     /**
      * @param dHImg 是否下载头像
      * @return 提示信息

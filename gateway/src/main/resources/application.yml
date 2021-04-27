@@ -1,0 +1,47 @@
+server:
+  port: 8763
+spring:
+  application:
+    name: gateway
+  boot:
+    #admin客户端注册到admin 服务
+    admin:
+      client:
+        url: http://localhost:9999
+        period: 1000
+        read-timeout: 5000
+  cloud:
+    gateway:
+      httpclient:
+        pool:
+          maxIdleTime: 10000
+          type: fixed
+          max-connections: 1000
+      routes:
+      - id: auto_wechat
+        #uri: lb://autowechat
+        uri: lb://autowechat
+        predicates:
+        - Path=/wechat/**
+        filters: #转发时去掉wechat
+          - RewritePath=/wechat/?(?<segment>.*), /$\{segment}
+      discovery:
+        locator:
+          enabled: true
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        group: WechatGroup
+management:
+  endpoint:
+    shutdown:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: ["*"]
+      base-path: /
+-Dreactor:
+  netty:
+    pool:
+      leasingStrategy: lifo

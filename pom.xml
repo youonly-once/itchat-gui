@@ -12,9 +12,10 @@
         <module>utils</module>
         <module>wxuntils</module>
         <module>wechat</module>
-        <module>zuul</module>
+        <module>gateway</module>
         <module>AdminServer</module>
         <module>EurekaServer</module>
+        <module>alibab-nacos-config</module>
     </modules>
 
     <groupId>cn.shu</groupId>
@@ -24,6 +25,7 @@
     <properties>
         <java.version>1.8</java.version>
         <spring-cloud.version>Hoxton.SR10</spring-cloud.version>
+        <spring-cloud-alibaba.version>2.2.1.RELEASE</spring-cloud-alibaba.version>
     </properties>
     <packaging>pom</packaging>
     <dependencyManagement>
@@ -92,12 +94,37 @@
                 <artifactId>mysql-connector-java</artifactId>
                 <version>8.0.20</version>
             </dependency>
+            <!--spring cloud-->
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
                 <version>${spring-cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <!--spring cloud alibaba-->
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>${spring-cloud-alibaba.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!--admin-->
+            <dependency>
+                <groupId>de.codecentric</groupId>
+                <artifactId>spring-boot-admin-starter-client</artifactId>
+                <version>2.3.0</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.shu</groupId>
+                <artifactId>utils</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.shu</groupId>
+                <artifactId>wxuntils</artifactId>
+                <version>1.0-SNAPSHOT</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -121,12 +148,14 @@
         <profile>
             <id>1-dev</id>
             <properties>
+                <spring-profiles-active>dev</spring-profiles-active>
                 <output-basedir>E:\JAVA\eee\dev</output-basedir>
             </properties>
         </profile>
         <profile>
             <id>2-test</id>
             <properties>
+                <spring-profiles-active>test</spring-profiles-active>
                 <output-basedir>E:\JAVA\eee\test</output-basedir>
             </properties>
         </profile>

@@ -35,11 +35,18 @@
             <artifactId>json-simple</artifactId>
             <version>1.1</version>
         </dependency>
-        <!--Eureka客户端-->
+        <!--***************nacos配置信息****************-->
+        <!--注册中心客户端-->
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+
     </dependencies>
     <build>
         <plugins>

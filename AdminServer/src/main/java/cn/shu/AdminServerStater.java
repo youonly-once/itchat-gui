@@ -3,7 +3,8 @@ package cn.shu;
 import de.codecentric.boot.admin.server.config.EnableAdminServer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -13,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @EnableAutoConfiguration
 @EnableAdminServer
-@EnableEurekaClient
+@EnableDiscoveryClient
 public class AdminServerStater {
     public static void main(String[] args) {
         SpringApplication.run(AdminServerStater.class, args);
