@@ -137,9 +137,10 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!--      <dependency>
+<!--              <dependency>
                   <groupId>org.mybatis</groupId>
                   <artifactId>mybatis</artifactId>
+                  <version>3.1.1</version>
               </dependency>-->
         <!--mysql-->
         <dependency>
@@ -163,7 +164,7 @@
             <artifactId>jfreechart</artifactId>
             <version>1.5.3</version>
         </dependency>
- <!--       <dependency>
+        <dependency>
             <groupId>org.jfree</groupId>
             <artifactId>com.springsource.org.jfree</artifactId>
             <version>1.0.12</version>
@@ -173,7 +174,7 @@
             <artifactId>com.springsource.javax.servlet</artifactId>
             <version>2.4.0</version>
             <scope>provided</scope>
-        </dependency>-->
+        </dependency>
 
         <!-- ansj分词插件依赖 -->
         <dependency>

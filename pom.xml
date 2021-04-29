@@ -128,12 +128,13 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    <build>
+<!--    <build>
         <pluginManagement>
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.8.1</version>
                     <configuration>
                         <release>8</release>
                         <source>8</source>
@@ -143,20 +144,20 @@
             </plugins>
 
         </pluginManagement>
-    </build>
+    </build>-->
     <profiles>
         <profile>
             <id>1-dev</id>
             <properties>
                 <spring-profiles-active>dev</spring-profiles-active>
-                <output-basedir>E:\JAVA\eee\dev</output-basedir>
+                <output-basedir>E:\JAVA\eee\</output-basedir>
             </properties>
         </profile>
         <profile>
             <id>2-test</id>
             <properties>
                 <spring-profiles-active>test</spring-profiles-active>
-                <output-basedir>E:\JAVA\eee\test</output-basedir>
+                <output-basedir>E:\JAVA\eee\</output-basedir>
             </properties>
         </profile>
     </profiles>
