@@ -27,7 +27,7 @@ public class Config {
     public static final ArrayList<String> API_SPECIAL_USER = new ArrayList<String>(Arrays.asList("filehelper", "weibo",
             "qqmail", "fmessage", "tmessage", "qmessage", "qqsync", "floatbottle", "lbsapp", "shakeapp", "medianote",
             "qqfriend", "readerapp", "blogapp", "facebookapp", "masssendapp", "meishiapp", "feedsapp", "voip",
-            "blogappweixin", "brandsessionholder", "weixin", "weixinreminder", "officialaccounts", "wxitil",
+            "blogappweixin", "brandsessionholder", "cn/shu/weixin", "weixinreminder", "officialaccounts", "wxitil",
             "notification_messages", "wxid_novlwrv3lqwv11", "gh_22b87fa7cb3c", "userexperience_alarm"));
 
     /**
@@ -56,13 +56,13 @@ public class Config {
      */
     public static OsNameEnum getOsNameEnum() {
         String os = System.getProperty("os.name").toUpperCase();
-        if (os.indexOf(OsNameEnum.DARWIN.toString()) >= 0) {
+        if (os.contains(OsNameEnum.DARWIN.toString())) {
             return OsNameEnum.DARWIN;
-        } else if (os.indexOf(OsNameEnum.WINDOWS.toString()) >= 0) {
+        } else if (os.contains(OsNameEnum.WINDOWS.toString())) {
             return OsNameEnum.WINDOWS;
-        } else if (os.indexOf(OsNameEnum.LINUX.toString()) >= 0) {
+        } else if (os.contains(OsNameEnum.LINUX.toString())) {
             return OsNameEnum.LINUX;
-        } else if (os.indexOf(OsNameEnum.MAC.toString()) >= 0) {
+        } else if (os.contains(OsNameEnum.MAC.toString())) {
             return OsNameEnum.MAC;
         }
         return OsNameEnum.OTHER;

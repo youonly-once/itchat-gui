@@ -3,9 +3,9 @@ package cn.shu.wechat.face;
 import java.io.*;
 import java.util.*;
 
-import bean.tuling.enums.ResultType;
-import bean.tuling.response.Results;
-import bean.tuling.response.TuLingResponseBean;
+import cn.shu.bean.tuling.enums.ResultType;
+import cn.shu.bean.tuling.response.Results;
+import cn.shu.bean.tuling.response.TuLingResponseBean;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.msg.sync.AddMsgList;
@@ -23,8 +23,8 @@ import lombok.extern.log4j.Log4j2;
 import net.sf.json.JSONException;
 
 import org.springframework.stereotype.Component;
-import utils.DateUtil;
-import utils.TuLingUtil;
+import cn.shu.utils.DateUtil;
+import cn.shu.utils.TuLingUtil;
 
 import javax.annotation.Resource;
 

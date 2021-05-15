@@ -57,8 +57,7 @@ public class MsgCenter {
     /**
      * 接收消息，放入队列
      *
-     * @param
-     * @return
+     * @param msg 新消息
      * @author ShuXinSheng
      * @date 2017年4月23日 下午2:30:48
      */

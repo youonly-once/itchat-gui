@@ -1,6 +1,6 @@
 package cn.shu.wechat.utils;
 
-import utils.DateUtil;
+import cn.shu.utils.DateUtil;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

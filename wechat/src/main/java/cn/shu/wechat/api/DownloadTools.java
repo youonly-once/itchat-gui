@@ -13,7 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import utils.MD5Util;
+import cn.shu.utils.MD5Util;
 
 import java.io.File;
 import java.io.FileOutputStream;

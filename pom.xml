@@ -10,12 +10,10 @@
     </parent>
     <modules>
         <module>utils</module>
-        <module>wxuntils</module>
         <module>wechat</module>
         <module>gateway</module>
         <module>AdminServer</module>
         <module>EurekaServer</module>
-        <module>alibab-nacos-config</module>
     </modules>
 
     <groupId>cn.shu</groupId>
