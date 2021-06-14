@@ -176,11 +176,13 @@ public class LoginController {
      * @param dHImg 是否下载头像
      * @return 提示信息
      */
-    @RequestMapping("/reLogin")
+    @RequestMapping("/")
     @ResponseBody
     public String reLogin(boolean dHImg) {
+        //
+        Core.setAlive(false);
         //取消上次登录
-        Core.setCancelPreLogin(true);
+        Core.setCancelPreLogin(false);
         ExecutorServiceUtil.getGlobalExecutorService().execute(
                 () -> login(dHImg)
         );

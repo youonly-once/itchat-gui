@@ -88,7 +88,13 @@ public class MsgCenter {
         //存储消息
         storeMsgToDB(msg);
         //打印日志
-        log.info(LogUtil.printFromMeg(msg, msgType.getDesc()));
+        String s = LogUtil.printFromMeg(msg, msgType.getDesc());
+        if(s.startsWith("系统通知")){
+            log.debug(s);
+        }else{
+            log.info(s);
+        }
+
         //需要发送的消息
         List<MessageTools.Result> results = null;
         switch (msgType) {

@@ -40,6 +40,22 @@ public class ExecutorServiceUtil {
             , new TaskThreadFactory("GlobalPool-Thread-", false, 6)
     );
 
+    public static ExecutorService getReceivingExecutorService() {
+        return receivingExecutorService;
+    }
+
+    /**
+     * 接收消息线程池
+     */
+    private final static ExecutorService receivingExecutorService = new ThreadPoolExecutor(
+            1
+            , 5
+            , 0L
+            , TimeUnit.SECONDS
+            , new SynchronousQueue<>()
+            , new TaskThreadFactory("Receiving-Thread-", false, 6)
+    );
+
 
     public static ExecutorService getGlobalExecutorService() {
         return globalExecutorService;

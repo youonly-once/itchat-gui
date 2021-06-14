@@ -30,7 +30,6 @@ public class WeChatStater {
         ApplicationContext applicationContext = SpringApplication.run(WeChatStater.class, args);
         LoginController loginController = applicationContext.getBean(LoginController.class);
         loginController.login(true);
-        new RandomRule();
     }
 
 

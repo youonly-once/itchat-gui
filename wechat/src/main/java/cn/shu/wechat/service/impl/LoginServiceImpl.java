@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 
 import cn.shu.wechat.api.MessageTools;
@@ -23,7 +24,9 @@ import cn.shu.wechat.enums.parameters.UUIDParaEnum;
 import cn.shu.wechat.utils.CommonTools;
 import cn.shu.wechat.api.DownloadTools;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.message.BasicNameValuePair;
@@ -246,8 +249,7 @@ public class LoginServiceImpl implements ILoginService {
                         String retcode = resultMap.get("retcode");
                         String selector = resultMap.get("selector");
                         if (retcode.equals(SyncCheckRetCodeEnum.UNKOWN.getCode())) {
-                            //好像搜狗输入法按语音键盘松手会触发
-                            log.info(SyncCheckRetCodeEnum.UNKOWN.getType());
+                            //log.info(SyncCheckRetCodeEnum.UNKOWN.getType());
                             continue;
                         } else if (retcode.equals(SyncCheckRetCodeEnum.LOGIN_OUT.getCode())) {
                             // 退出
@@ -333,8 +335,15 @@ public class LoginServiceImpl implements ILoginService {
                 }
             }
         };
-        ExecutorServiceUtil.getGlobalExecutorService().execute(runnable);
-
+        ExecutorServiceUtil.getReceivingExecutorService().execute(runnable);
+/*        while (Core.isAlive()) {
+*//*            try {
+                boolean b = ExecutorServiceUtil.getReceivingExecutorService().awaitTermination(30, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }*//*
+            ExecutorServiceUtil.getReceivingExecutorService().execute(runnable);
+        }*/
 
     }
 
@@ -684,8 +693,12 @@ public class LoginServiceImpl implements ILoginService {
         paramMap.put("rr", -System.currentTimeMillis() / 1000);
         String paramStr = JSON.toJSONString(paramMap);
         try {
+            Long start = System.currentTimeMillis();
+           // log.info("同步消息开始webWxSync-params：{}",paramMap.toString());
             HttpEntity entity = MyHttpClient.doPost(url, paramStr);
             String text = EntityUtils.toString(entity, Consts.UTF_8);
+            Long end = System.currentTimeMillis();
+          //  log.info("同步消息结束webWxSync({}s)-----------------------result：{}",    ((double)(end-start))/1000,text.replace("\n",""));
             JSONObject obj = JSON.parseObject(text);
             if (obj.getJSONObject("BaseResponse").getInteger("Ret") != 0) {
                 result = null;
@@ -731,6 +744,8 @@ public class LoginServiceImpl implements ILoginService {
         params.add(new BasicNameValuePair("_", String.valueOf(System.currentTimeMillis())));
         SleepUtils.sleep(7);
         try {
+            Long start = System.currentTimeMillis();
+            //log.info("开始syncCheck-params：{}",params.toString());
             HttpEntity entity = MyHttpClient.doGet(url, params, true, null);
             if (entity == null) {
                 resultMap.put("retcode", "9999");
@@ -738,6 +753,8 @@ public class LoginServiceImpl implements ILoginService {
                 return resultMap;
             }
             String text = EntityUtils.toString(entity);
+            Long end = System.currentTimeMillis();
+            //log.info("结束syncCheck({}s)结束-----------------------result：{}",    ((double)(end-start))/1000,text);
             String regEx = "window.synccheck=\\{retcode:\"(\\d+)\",selector:\"(\\d+)\"\\}";
             Matcher matcher = CommonTools.getMatcher(regEx, text);
             if (!matcher.find() || matcher.group(1).equals("2")) {

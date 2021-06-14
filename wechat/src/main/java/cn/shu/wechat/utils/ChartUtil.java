@@ -481,13 +481,12 @@ public class ChartUtil {
                     switch (natureStr) {
                         //case "e":
                         case "n":
-                        case "v":
+                        //case "v":
                         case "t":
 
-                        case "a":
-                        case "b":
-                        case "d":
-                        case "o":
+                        //case "a":
+                      //  case "b":
+                       // case "d":
                             // case "r":
                             msgTerm.computeIfAbsent(term.toString(), v -> new AtomicInteger()).getAndIncrement();
                             break;

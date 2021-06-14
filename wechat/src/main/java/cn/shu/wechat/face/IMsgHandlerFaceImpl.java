@@ -380,7 +380,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             if ("❤汪家人❤".equals(to)
                     || "弹性大数据KZK2101".equals(to)
                     || "销秘科技".equals(to)
-                    || "艾视医疗集团总群".equals(to)) {
+                    || "艾视医疗集团总群".equals(to)
+            ||to.contains("三丫")
+            ||to.contains("凡骄")) {
                 log.error("重要群群，不发送撤回消息");
                 return null;
             }
