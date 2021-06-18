@@ -8,13 +8,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 
 import cn.shu.wechat.api.MessageTools;
-import cn.shu.wechat.beans.pojo.AttrHistory;
+import cn.shu.wechat.beans.pojo.*;
 import cn.shu.wechat.beans.msg.sync.AddMsgList;
 import cn.shu.wechat.beans.msg.sync.WebWxSyncMsg;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.core.MsgCenter;
 import cn.shu.wechat.enums.*;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
+import cn.shu.wechat.mapper.ContactsMapper;
+import cn.shu.wechat.mapper.MemberGroupRMapper;
+import cn.shu.wechat.mapper.MemberMapper;
 import cn.shu.wechat.service.ILoginService;
 import cn.shu.wechat.utils.*;
 import cn.shu.wechat.enums.parameters.BaseParaEnum;
@@ -58,6 +61,11 @@ public class LoginServiceImpl implements ILoginService {
     @Resource
     private MsgCenter msgCenter;
 
+    @Resource
+    private ContactsMapper contactsMapper;
+
+    @Resource
+    private MemberGroupRMapper memberGroupRMapper;
 
     @Override
     public boolean login() throws Exception {
@@ -391,9 +399,12 @@ public class LoginServiceImpl implements ILoginService {
                 // 累加好友列表
                 member.addAll(fullFriendsJsonList.getJSONArray(StorageLoginInfoEnum.MemberList.getKey()));
             }
-
+            ArrayList<Contacts> contactsList = new ArrayList<>();
             for (Object value : member) {
                 JSONObject o = (JSONObject) value;
+                Contacts contacts = JSON.parseObject(JSON.toJSONString(o), Contacts.class);
+                contacts.setIscontacts(true);
+                contactsList.add(contacts);
                 String userName = o.getString("UserName");
                 String nickName = o.getString("NickName");
                 Core.getMemberMap().put(userName, o);
@@ -426,6 +437,11 @@ public class LoginServiceImpl implements ILoginService {
                 }
 
             }
+            if (!contactsList.isEmpty()){
+                contactsMapper.deleteByExample(new ContactsExample());
+                contactsMapper.batchInsert(contactsList);
+            }
+
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -452,6 +468,8 @@ public class LoginServiceImpl implements ILoginService {
             JSONObject obj = JSON.parseObject(text);
             //群列表
             JSONArray contactList = obj.getJSONArray("ContactList");
+            List<Contacts> members = new ArrayList<>();
+            ArrayList<MemberGroupR> memberGroupRList = new ArrayList<>();
             for (int i = 0; i < contactList.size(); i++) {
                 // 群好友
                 JSONObject groupObject = contactList.getJSONObject(i);
@@ -460,12 +478,34 @@ public class LoginServiceImpl implements ILoginService {
                 if (userName.startsWith("@@")) {
                     //以上接口返回的成员属性不全，以下的接口获取群成员详细属性
                     JSONArray memberArray = WebWxBatchGetContactDetail(groupObject);
-                    // Core.getGroupMemberMap().put(userName, memberArray);
+                   // Core.getGroupMemberMap().put(userName, memberArray);
                     groupObject.put("MemberList", memberArray);
                     Core.getGroupMap().put(userName, groupObject);
+/*                    List<Contacts> members1 = JSON.parseArray(JSON.toJSONString(memberArray), Contacts.class);
+                    members.addAll(members1);
+                    for (Contacts contacts : members) {
+                        MemberGroupR memberGroupR = new MemberGroupR();
+                        memberGroupR.setGroupusername(userName);
+                        memberGroupR.setMemberusername(contacts.getUsername());
+                        memberGroupR.setId(UUID.randomUUID().toString().replace("-",""));
+                        memberGroupRList.add(memberGroupR);
+                        contacts.setIscontacts(false);
+                    }*/
                 }
             }
+/*            if (!members.isEmpty()){
+                for (Contacts member : members) {
+                    contactsMapper.insertOrUpdateSelective(member);
+                }
+
+            }
+            if (!memberGroupRList.isEmpty()){
+                memberGroupRMapper.batchInsert(memberGroupRList);
+            }*/
+
+
         } catch (Exception e) {
+            e.printStackTrace();
             log.error(e.getMessage());
         }
     }
@@ -481,6 +521,7 @@ public class LoginServiceImpl implements ILoginService {
 
         String groupUserName = groupObject.getString("UserName");
         //保存获取的群成员详细信息
+        ArrayList<Contacts> groupContactsList = new ArrayList<>();
         JSONArray memberArray = new JSONArray();
         //保存需要获取详细资料的群成员username
         List<Map<String, String>> list = new ArrayList<Map<String, String>>();
@@ -501,6 +542,7 @@ public class LoginServiceImpl implements ILoginService {
         }
         //每次请求50个
         int ceil = (int) (Math.ceil((list.size() / 50.0)));
+
         for (int i = 0; i < ceil; i++) {
             List<Map<String, String>> subList = null;
             if (i < ceil - 1) {
@@ -514,8 +556,8 @@ public class LoginServiceImpl implements ILoginService {
             try {
                 String text = EntityUtils.toString(entity, Consts.UTF_8);
                 JSONObject obj = JSON.parseObject(text);
-                JSONArray contactList = obj.getJSONArray("ContactList");
-                memberArray.addAll(contactList);
+                JSONArray contactListArray = obj.getJSONArray("ContactList");
+                memberArray.addAll(contactListArray);
             } catch (Exception e) {
                 log.error(e.getMessage());
             }

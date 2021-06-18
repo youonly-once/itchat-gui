@@ -1,7 +1,13 @@
 package cn.shu.wechat.timedtask;
 
+import cn.shu.wechat.beans.pojo.ContactsExample;
+import cn.shu.wechat.beans.pojo.MemberExample;
+import cn.shu.wechat.beans.pojo.MemberGroupRExample;
 import cn.shu.wechat.controller.LoginController;
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.mapper.ContactsMapper;
+import cn.shu.wechat.mapper.MemberGroupRMapper;
+import cn.shu.wechat.mapper.MemberMapper;
 import cn.shu.wechat.service.ILoginService;
 import cn.shu.wechat.utils.ChartUtil;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
@@ -45,6 +51,13 @@ public class TimedTask {
     @Resource
     private LoginController loginController;
 
+    @Resource
+    private ContactsMapper contactsMapper;
+
+    @Resource
+    private MemberGroupRMapper memberGroupRMapper;
+
+
     /**
      * 图表工具类
      */
@@ -58,13 +71,15 @@ public class TimedTask {
     /*@Async*/
     public void updateContactTask() {
         if (Core.isAlive()) {
+
             loginService.webWxGetContact();
 
             loginService.WebWxBatchGetContact();
-            // log.info("更新联系人完成！");
+            //log.info("更新联系人完成！");
         }
     }
     
+
 
     /**
      * 10分钟检测一次登录状态

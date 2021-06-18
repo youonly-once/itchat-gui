@@ -1,8 +1,11 @@
 package cn.shu.wechat.service;
 
+import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.face.IMsgHandlerFace;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+
+import java.util.ArrayList;
 
 /**
  * 登陆服务接口

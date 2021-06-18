@@ -1,6 +1,10 @@
 package cn.shu.wechat.controller;
 
 import cn.shu.wechat.api.WeChatTool;
+import cn.shu.wechat.beans.pojo.ContactsExample;
+import cn.shu.wechat.beans.pojo.MemberGroupRExample;
+import cn.shu.wechat.mapper.ContactsMapper;
+import cn.shu.wechat.mapper.MemberGroupRMapper;
 import cn.shu.wechat.utils.*;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.service.ILoginService;
@@ -52,6 +56,12 @@ public class LoginController {
      */
     @Value("${LoginRetryCount:10}")
     private int loginRetryCount;
+
+    @Resource
+    private ContactsMapper contactsMapper;
+
+    @Resource
+    private MemberGroupRMapper memberGroupRMapper;
 
     /**
      * 登录重试次数
