@@ -11,9 +11,12 @@ import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.msg.sync.AddMsgList;
 import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.beans.pojo.MessageExample;
+import cn.shu.wechat.beans.pojo.Status;
+import cn.shu.wechat.beans.pojo.StatusExample;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.mapper.MessageMapper;
+import cn.shu.wechat.mapper.StatusMapper;
 import cn.shu.wechat.utils.*;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
 import cn.shu.wechat.enums.WXSendMsgCodeEnum;
@@ -26,6 +29,7 @@ import org.springframework.stereotype.Component;
 import cn.shu.utils.DateUtil;
 import cn.shu.utils.TuLingUtil;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 
@@ -35,6 +39,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
 
     @Resource
     private MessageMapper messageMapper;
+
+    @Resource
+    private StatusMapper statusMapper;
     /**
      * autoChatUserNameList 包含 发送者：自动回复
      * 不包含：autoChatWithPersonal = true ：自动回复，false ：不回复
@@ -44,7 +51,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     /**
      * 自动聊天联系人列表，包括个人、群...
      */
-    private final Set<String> autoChatUserNameList = new HashSet<>();
+    private final  Set<String> autoChatUserNameList = new HashSet<>();
 
 
     @Resource
@@ -56,7 +63,19 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
      */
     private final Set<String> nonPreventUndoMsgUserName = new HashSet<>();
 
-
+    @PostConstruct
+    private void initSet(){
+        log.info("11. 获取自动聊天列表及防撤回列表");
+        List<Status> statuses = statusMapper.selectByExample(new StatusExample());
+        for (Status status : statuses) {
+            if (status.getAutoStatus() == 1){
+                autoChatUserNameList.add(status.getName());
+            }
+            if (status.getUndoStatus() == 2){
+                nonPreventUndoMsgUserName.add(status.getName());
+            }
+        }
+    }
     /**
      * 消息控制命令
      *
@@ -168,29 +187,49 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 log.info("已关闭全局个人用户自动回复功能");
                 break;
             case "oauto":
-                autoChatUserNameList.add(toUserName);
+                String to = ContactsTools.getContactDisplayNameByUserName(toUserName);
+                autoChatUserNameList.add(to);
+                Status status = new Status();
+                status.setName(to);
+                status.setAutoStatus((short)1);
+                statusMapper.insertOrUpdateSelective(status);
                 results.add(MessageTools.Result.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                         .content("已开启【" + remarkNameByGroupUserName + "】自动回复功能")
                         .toUserName(toUserName).build());
                 log.info("已开启【" + remarkNameByGroupUserName + "】自动回复功能");
                 break;
             case "cauto":
-                autoChatUserNameList.remove(toUserName);
+                to = ContactsTools.getContactDisplayNameByUserName(toUserName);
+                autoChatUserNameList.remove(to);
+                status = new Status();
+                status.setName(to);
+                status.setAutoStatus((short)2);
+                statusMapper.insertOrUpdateSelective(status);
                 results.add(MessageTools.Result.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                         .content("已关闭【" + remarkNameByGroupUserName + "】自动回复功能")
                         .toUserName(toUserName).build());
                 log.info("已关闭【" + remarkNameByGroupUserName + "】自动回复功能");
                 break;
             case "opundo":
-                nonPreventUndoMsgUserName.remove(toUserName);
+                to = ContactsTools.getContactDisplayNameByUserName(toUserName);
+                nonPreventUndoMsgUserName.remove(to);
+                status = new Status();
+                status.setName(to);
+                status.setUndoStatus((short)1);
+                statusMapper.insertOrUpdateSelective(status);
                 results.add(MessageTools.Result.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                         .content("已开启【" + remarkNameByGroupUserName + "】防撤回功能")
                         .toUserName(toUserName).build());
                 log.info("已开启【" + remarkNameByGroupUserName + "】防撤回功能");
                 break;
             case "cpundo":
+                to = ContactsTools.getContactDisplayNameByUserName(toUserName);
+                status = new Status();
+                status.setName(to);
+                status.setUndoStatus((short)2);
+                statusMapper.insertOrUpdateSelective(status);
                 //群消息
-                nonPreventUndoMsgUserName.add(toUserName);
+                nonPreventUndoMsgUserName.add(to);
                 results.add(MessageTools.Result.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                         .content("已关闭【" + remarkNameByGroupUserName + "】防撤回功能")
                         .toUserName(toUserName).build());
@@ -299,7 +338,8 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         }
         try {
             //是否需要自动回复
-            if (autoChatUserNameList.contains(msg.getFromUserName())) {
+            String to = ContactsTools.getContactDisplayNameByUserName(msg.getFromUserName());
+            if (autoChatUserNameList.contains(to)) {
                 results = handleTuLingMsg(TuLingUtil.robotMsgTuling(text), msg);
             } else if (autoChatWithPersonal && !msg.isGroupMsg()) {
                 results = handleTuLingMsg(TuLingUtil.robotMsgTuling(text), msg);
@@ -355,6 +395,19 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
 		</revokemsg>
 		</sysmsg>
 		*/
+
+        //======家人群不发送撤回消息====
+        if (msg.getFromUserName().startsWith("@@")) {
+            String to = ContactsTools.getContactDisplayNameByUserName(msg.getFromUserName());
+            if ("❤汪家人❤".equals(to)) {
+                log.error("重要群群，不发送撤回消息");
+                return null;
+            }
+            //不处理撤回消息的群
+            if (nonPreventUndoMsgUserName.contains(to)) {
+                return null;
+            }
+        }
         /*============获取被撤回的消息============*/
         String content = XmlStreamUtil.formatXml(msg.getContent());
         content = "<root>" + content + "</root>";
@@ -363,6 +416,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         if (msgid == null) {
             return null;
         }
+
         //查询历史消息
         MessageExample messageExample = new MessageExample();
         MessageExample.Criteria criteria = messageExample.createCriteria();
@@ -374,23 +428,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             return null;
         }
         Message oldMessage = messages.get(0);
-        //======家人群不发送撤回消息====
-        if (msg.getFromUserName().startsWith("@@")) {
-            String to = ContactsTools.getContactDisplayNameByUserName(msg.getFromUserName());
-            if ("❤汪家人❤".equals(to)
-                    || "弹性大数据KZK2101".equals(to)
-                    || "销秘科技".equals(to)
-                    || "艾视医疗集团总群".equals(to)
-            ||to.contains("三丫")
-            ||to.contains("凡骄")) {
-                log.error("重要群群，不发送撤回消息");
-                return null;
-            }
-            //不处理撤回消息的群
-            if (nonPreventUndoMsgUserName.contains(msg.getFromUserName())) {
-                return null;
-            }
-        }
+
 
         //==============是否为自己的消息
         String oldMsgFromUserName = oldMessage.getFromUsername();

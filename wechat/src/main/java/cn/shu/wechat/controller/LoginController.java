@@ -3,8 +3,11 @@ package cn.shu.wechat.controller;
 import cn.shu.wechat.api.WeChatTool;
 import cn.shu.wechat.beans.pojo.ContactsExample;
 import cn.shu.wechat.beans.pojo.MemberGroupRExample;
+import cn.shu.wechat.beans.pojo.Status;
+import cn.shu.wechat.beans.pojo.StatusExample;
 import cn.shu.wechat.mapper.ContactsMapper;
 import cn.shu.wechat.mapper.MemberGroupRMapper;
+import cn.shu.wechat.mapper.StatusMapper;
 import cn.shu.wechat.utils.*;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.service.ILoginService;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -62,6 +66,8 @@ public class LoginController {
 
     @Resource
     private MemberGroupRMapper memberGroupRMapper;
+
+
 
     /**
      * 登录重试次数
@@ -152,7 +158,7 @@ public class LoginController {
         //删除无效头像
         HeadImageDelete.deleteLoseEfficacyHeadImg(Config.PIC_DIR + "/headimg/");
         if (dHImg) {
-            log.info("13. 下载联系人头像");
+            log.info("12. 下载联系人头像");
             for (Map.Entry<String, JSONObject> entry : Core.getMemberMap().entrySet()) {
                 ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(
                         () -> {
