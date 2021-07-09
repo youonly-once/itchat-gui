@@ -3,7 +3,7 @@
 ## 1、防撤回功能
 - 语音
 - 文字
-- 图片
+- 图片 
 - 视频
 - ...
  ![image](https://user-images.githubusercontent.com/67832925/125041844-c9968580-e0cb-11eb-98ac-7cc807ac7604.png)
