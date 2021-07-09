@@ -35,17 +35,6 @@
             <artifactId>json-simple</artifactId>
             <version>1.1</version>
         </dependency>
-        <!--***************nacos配置信息****************-->
-        <!--注册中心客户端-->
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
-        </dependency>
 
     </dependencies>
     <build>

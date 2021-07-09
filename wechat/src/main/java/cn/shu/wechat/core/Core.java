@@ -54,18 +54,18 @@ public class Core {
     /**
      * 好友+群聊+公众号+特殊账号
      */
-    static private Map<String, JSONObject> memberMap = new ConcurrentHashMap<>();
+    static private Map<String, JSONObject> memberMap = new ConcurrentHashMap<>(1024);
 
 
     /**
      * 好友
      */
-    static private Map<String, JSONObject> contactMap = new ConcurrentHashMap<>();
+    static private Map<String, JSONObject> contactMap = new ConcurrentHashMap<>(1024);
 
     /**
      * 群
      */
-    static private Map<String, JSONObject> groupMap = new ConcurrentHashMap<>();
+    static private Map<String, JSONObject> groupMap = new ConcurrentHashMap<>(32);
 
     /**
      * 群聊成员字典
@@ -77,12 +77,12 @@ public class Core {
     /**
      * 公众号／服务号
      */
-    static private Map<String, JSONObject> publicUsersMap = new ConcurrentHashMap<>();
+    static private Map<String, JSONObject> publicUsersMap = new ConcurrentHashMap<>(64);
 
     /**
      * 特殊账号
      */
-    static private Map<String, JSONObject> specialUsersMap = new ConcurrentHashMap<>();
+    static private Map<String, JSONObject> specialUsersMap = new ConcurrentHashMap<>(0);
 
     /**
      * 群ID列表
@@ -99,7 +99,7 @@ public class Core {
     /**
      * 登录信息
      */
-    static private Map<String, Object> loginInfoMap = new ConcurrentHashMap<String, Object>();
+    static private Map<String, Object> loginInfoMap = new ConcurrentHashMap<String, Object>(12);
 
     /**
      * 所有好友最新头像路径

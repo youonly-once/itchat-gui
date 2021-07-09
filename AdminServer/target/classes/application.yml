@@ -1,14 +1,6 @@
 spring:
   application:
     name: AdminServer
-  cloud:
-    nacos:
-      discovery:
-        group: AdminServer-Group
-        server-addr: http://127.0.0.1:8848
-      config:
-        group: AdminServer-Group
-        server-addr: http://127.0.0.1:8848
 server:
   port: 9999
 management:

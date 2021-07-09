@@ -71,11 +71,11 @@ public class TimedTask {
     /*@Async*/
     public void updateContactTask() {
         if (Core.isAlive()) {
-
+            log.info("更新联系人！");
             loginService.webWxGetContact();
 
             loginService.WebWxBatchGetContact();
-            //log.info("更新联系人完成！");
+            log.info("更新联系人完成！");
         }
     }
     

@@ -1,13 +1,7 @@
 package cn.shu.wechat.controller;
 
-import cn.shu.wechat.api.WeChatTool;
-import cn.shu.wechat.beans.pojo.ContactsExample;
-import cn.shu.wechat.beans.pojo.MemberGroupRExample;
-import cn.shu.wechat.beans.pojo.Status;
-import cn.shu.wechat.beans.pojo.StatusExample;
 import cn.shu.wechat.mapper.ContactsMapper;
 import cn.shu.wechat.mapper.MemberGroupRMapper;
-import cn.shu.wechat.mapper.StatusMapper;
 import cn.shu.wechat.utils.*;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.service.ILoginService;
@@ -15,15 +9,12 @@ import cn.shu.wechat.api.DownloadTools;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,7 +38,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Log4j2
 @Controller
-@RefreshScope
 public class LoginController {
     /**
      * 登陆服务实现类
@@ -156,7 +146,7 @@ public class LoginController {
  /*       // 登陆成功后缓存本次登陆好友相关消息（NickName, UserName）
         WeChatTool.setUserInfo();*/
         //删除无效头像
-        HeadImageDelete.deleteLoseEfficacyHeadImg(Config.PIC_DIR + "/headimg/");
+        HeadImageUtil.deleteLoseEfficacyHeadImg(Config.PIC_DIR + "/headimg/");
         if (dHImg) {
             log.info("12. 下载联系人头像");
             for (Map.Entry<String, JSONObject> entry : Core.getMemberMap().entrySet()) {

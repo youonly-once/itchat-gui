@@ -26,7 +26,7 @@ public class JSONObjectUtil {
      * @return difference
      */
     public static Map<String, Map<String, String>> getDifferenceMap(JSONObject oldO, JSONObject newO) {
-        Map<String, Map<String, String>> difference = new HashMap<>();
+        Map<String, Map<String, String>> difference = new HashMap<>(1);
         for (Map.Entry<String, Object> entry : oldO.entrySet()) {
             String newV = newO.getString(entry.getKey());
             String oldV = StringUtil.toString(entry.getValue());
@@ -60,7 +60,7 @@ public class JSONObjectUtil {
                     } //判断头像是否更改
                 } else {
 */
-                    HashMap<String, String> temp = new HashMap<>();
+                    HashMap<String, String> temp = new HashMap<>(1);
                     temp.put(CommonTools.emojiFormatter(StringUtil.toString(oldV)), CommonTools.emojiFormatter(newV));
                     difference.put(UserInfo.getName(StringUtil.toString(entry.getKey())), temp);
               //  }

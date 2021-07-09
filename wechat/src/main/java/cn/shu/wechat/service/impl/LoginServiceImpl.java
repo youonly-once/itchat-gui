@@ -27,7 +27,6 @@ import cn.shu.wechat.enums.parameters.UUIDParaEnum;
 import cn.shu.wechat.utils.CommonTools;
 import cn.shu.wechat.api.DownloadTools;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.apache.http.Consts;
@@ -405,8 +404,8 @@ public class LoginServiceImpl implements ILoginService {
                 Contacts contacts = JSON.parseObject(JSON.toJSONString(o), Contacts.class);
                 contacts.setIscontacts(true);
                 contactsList.add(contacts);
-                String userName = o.getString("UserName");
-                String nickName = o.getString("NickName");
+                String userName = contacts.getUsername();
+                String nickName = contacts.getNickname();
                 Core.getMemberMap().put(userName, o);
                 if ((o.getInteger("VerifyFlag") & 8) != 0) {
                     // 公众号/服务号
@@ -454,9 +453,9 @@ public class LoginServiceImpl implements ILoginService {
                 Core.getLoginInfoMap().get(StorageLoginInfoEnum.pass_ticket.getKey()));
         Map<String, Object> paramMap = Core.getParamMap();
         paramMap.put("Count", Core.getGroupIdSet().size());
-        List<Map<String, String>> list = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> list = new ArrayList<Map<String, String>>(Core.getGroupIdSet().size());
         for (String s : Core.getGroupIdSet()) {
-            HashMap<String, String> map = new HashMap<String, String>();
+            HashMap<String, String> map = new HashMap<String, String>(2);
             map.put("UserName", s);
             map.put("EncryChatRoomId", "");
             list.add(map);
@@ -524,7 +523,7 @@ public class LoginServiceImpl implements ILoginService {
         ArrayList<Contacts> groupContactsList = new ArrayList<>();
         JSONArray memberArray = new JSONArray();
         //保存需要获取详细资料的群成员username
-        List<Map<String, String>> list = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> list = new ArrayList<Map<String, String>>(groupObject.getJSONArray("MemberList").size());
         for (Object o : groupObject.getJSONArray("MemberList")) {
             //遍历群成员
             JSONObject memberO = (JSONObject) o;

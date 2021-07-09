@@ -3,9 +3,9 @@ package cn.shu.wechat.face;
 import java.io.*;
 import java.util.*;
 
-import cn.shu.bean.tuling.enums.ResultType;
-import cn.shu.bean.tuling.response.Results;
-import cn.shu.bean.tuling.response.TuLingResponseBean;
+import cn.shu.wechat.beans.tuling.enums.ResultType;
+import cn.shu.wechat.beans.tuling.response.Results;
+import cn.shu.wechat.beans.tuling.response.TuLingResponseBean;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.msg.sync.AddMsgList;
@@ -23,11 +23,10 @@ import cn.shu.wechat.enums.WXSendMsgCodeEnum;
 
 import com.alibaba.fastjson.JSON;
 import lombok.extern.log4j.Log4j2;
-import net.sf.json.JSONException;
 
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.stereotype.Component;
-import cn.shu.utils.DateUtil;
-import cn.shu.utils.TuLingUtil;
+import cn.shu.wechat.utils.TuLingUtil;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -68,10 +67,10 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         log.info("11. 获取自动聊天列表及防撤回列表");
         List<Status> statuses = statusMapper.selectByExample(new StatusExample());
         for (Status status : statuses) {
-            if (status.getAutoStatus() == 1){
+            if (status.getAutoStatus()!=null && status.getAutoStatus() == 1){
                 autoChatUserNameList.add(status.getName());
             }
-            if (status.getUndoStatus() == 2){
+            if (status.getUndoStatus()!=null && status.getUndoStatus() == 2){
                 nonPreventUndoMsgUserName.add(status.getName());
             }
         }
@@ -344,7 +343,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             } else if (autoChatWithPersonal && !msg.isGroupMsg()) {
                 results = handleTuLingMsg(TuLingUtil.robotMsgTuling(text), msg);
             }
-        } catch (JSONException | NullPointerException | IOException e) {
+        } catch (NullPointerException | IOException e) {
             e.printStackTrace();
         }
         return results;
@@ -449,7 +448,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
 
         String realMsgContent = oldMessage.getContent();
         String filePath = oldMessage.getFilePath();
-        String createTime = DateUtil.format(oldMessage.getCreateTime());
+        String createTime = DateFormatUtils.format(oldMessage.getCreateTime(), DateFormatConstant.HH_MM_SS);
         switch (WXReceiveMsgCodeEnum.getByCode(oldMessage.getMsgType())) {
             case MSGTYPE_TEXT:
                 result = MessageTools.Result.builder()

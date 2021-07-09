@@ -1,6 +1,7 @@
 package cn.shu.wechat.utils;
 
 /**
+ * 文件分割工具类
  * @作者 舒新胜
  * @项目 AutoWeChat
  * @创建时间 3/10/2021 11:46 AM
@@ -22,9 +23,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-/**
- * @author xuxile
- */
 @Log4j2
 public class FileSplitAndMergeUtil {
 
