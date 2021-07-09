@@ -6,7 +6,7 @@
 - 图片
 - 视频
 - ...
-- ![image](https://user-images.githubusercontent.com/67832925/125041844-c9968580-e0cb-11eb-98ac-7cc807ac7604.png)
+ ![image](https://user-images.githubusercontent.com/67832925/125041844-c9968580-e0cb-11eb-98ac-7cc807ac7604.png)
 
 ## 2、自动回复功能
 > 基于图灵机器人完成聊天自动回复
