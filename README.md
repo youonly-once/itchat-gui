@@ -1,7 +1,8 @@
 # 微信工具
 基于网页版微信完成的微信功能扩展
 ## 1、防撤回功能（语音、文字、图片、视频、......）
- >![image](https://user-images.githubusercontent.com/67832925/125043492-90f7ab80-e0cd-11eb-861b-9852e3d9483b.png)
+ >![image](https://user-images.githubusercontent.com/67832925/125043492-90f7ab80-e0cd-11eb-861b-9852e3d9483b.png)![image](https://user-images.githubusercontent.com/67832925/125046970-1597f900-e0d1-11eb-9d57-b51bd689133a.png)
+
 
 ## 2、自动回复功能
  >![image](https://user-images.githubusercontent.com/67832925/125043653-bc7a9600-e0cd-11eb-8ab5-6bc64bc13c15.png)
