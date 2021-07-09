@@ -4,7 +4,7 @@
  >![image](https://user-images.githubusercontent.com/67832925/125043492-90f7ab80-e0cd-11eb-861b-9852e3d9483b.png)
 
 ## 2、自动回复功能
- >![image](https://user-images.githubusercontent.com/67832925/125041639-8d632500-e0cb-11eb-9ce1-d8317566217d.png)
+ >![image](https://user-images.githubusercontent.com/67832925/125043653-bc7a9600-e0cd-11eb-8ab5-6bc64bc13c15.png)
 ## 3、用户属性监测(动态监测好友属性变化，包括但不限于头像、昵称、签名、朋友圈动态、好友打开与你的聊天框时的提示)
  > ![image](https://user-images.githubusercontent.com/67832925/125041412-51c85b00-e0cb-11eb-9251-fc038bab3c2e.png)
 ## 4、群发消息、拉人进群、...
