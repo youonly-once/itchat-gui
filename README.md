@@ -6,7 +6,8 @@
 ## 2、自动回复功能
  >![image](https://user-images.githubusercontent.com/67832925/125043653-bc7a9600-e0cd-11eb-8ab5-6bc64bc13c15.png)
 ## 3、用户属性监测（头像、昵称、签名、朋友圈动态、对方打开与你的聊天框）
- > ![image](https://user-images.githubusercontent.com/67832925/125041412-51c85b00-e0cb-11eb-9251-fc038bab3c2e.png)
+ > ![image](https://user-images.githubusercontent.com/67832925/125041412-51c85b00-e0cb-11eb-9251-fc038bab3c2e.png)![image](https://user-images.githubusercontent.com/67832925/125043822-ed5acb00-e0cd-11eb-905e-ac665a25d5cc.png)
+
 ## 4、群发消息、拉人进群、...
 >![image](https://user-images.githubusercontent.com/67832925/125042196-272ad200-e0cc-11eb-93a7-d112e89a599b.png)
 ## 5、共同好友的聊天记录截获
