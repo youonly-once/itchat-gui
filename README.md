@@ -7,7 +7,7 @@
 ## 2、自动回复功能
  >![image](https://user-images.githubusercontent.com/67832925/125043653-bc7a9600-e0cd-11eb-8ab5-6bc64bc13c15.png)
 ## 3、用户属性监测（头像、昵称、签名、朋友圈动态、对方打开与你的聊天框）
-> 想象一下你的女神改个签名、打开你的聊天框你马上就能知道，那岂不是手到擒来。
+   想象一下你的女神改个签名、打开你的聊天框你马上就能知道，那岂不是手到擒来。
  > ![image](https://user-images.githubusercontent.com/67832925/125041412-51c85b00-e0cb-11eb-9251-fc038bab3c2e.png)![image](https://user-images.githubusercontent.com/67832925/125045236-58f16800-e0cf-11eb-9de8-a8d261464e38.png)
 
 
