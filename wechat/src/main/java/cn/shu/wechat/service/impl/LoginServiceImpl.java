@@ -54,6 +54,13 @@ import javax.annotation.Resource;
 public class LoginServiceImpl implements ILoginService {
 
 
+    public static LoginServiceImpl getLoginService() {
+        return loginService;
+    }
+
+
+
+    private static LoginServiceImpl loginService =new LoginServiceImpl();
     @Resource
     private AttrHistoryMapper attrHistoryMapper;
 
@@ -286,7 +293,7 @@ public class LoginServiceImpl implements ILoginService {
                                             List<AddMsgList> addMsgLists = webWxSyncMsg.getAddMsgList();
                                             for (AddMsgList msg : addMsgLists) {
                                                 ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
-                                                        msgCenter.handleNewMsg(msg);
+                                                        //msgCenter.handleNewMsg(msg);
                                                 });
                                             }
                                             //联系人修改消息
@@ -437,8 +444,8 @@ public class LoginServiceImpl implements ILoginService {
 
             }
             if (!contactsList.isEmpty()){
-                contactsMapper.deleteByExample(new ContactsExample());
-                contactsMapper.batchInsert(contactsList);
+               // contactsMapper.deleteByExample(new ContactsExample());
+                //contactsMapper.batchInsert(contactsList);
             }
 
         } catch (Exception e) {
@@ -922,7 +929,7 @@ public class LoginServiceImpl implements ILoginService {
             }
         }
         try {
-            attrHistoryMapper.batchInsert(attrHistories);
+            //attrHistoryMapper.batchInsert(attrHistories);
         } catch (Exception e) {
 
         }

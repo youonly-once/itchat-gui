@@ -110,7 +110,7 @@ public class MyHttpClient {
             CloseableHttpResponse response = myHttpClient.execute(httpGet);
             entity = response.getEntity();
         } catch (IOException e) {
-            log.error(e.getMessage());
+           // log.error(e.getMessage());
         }
 
         return entity;

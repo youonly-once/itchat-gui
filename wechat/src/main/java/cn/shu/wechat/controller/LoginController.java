@@ -2,6 +2,7 @@ package cn.shu.wechat.controller;
 
 import cn.shu.wechat.mapper.ContactsMapper;
 import cn.shu.wechat.mapper.MemberGroupRMapper;
+import cn.shu.wechat.service.impl.LoginServiceImpl;
 import cn.shu.wechat.utils.*;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.service.ILoginService;
@@ -42,20 +43,14 @@ public class LoginController {
     /**
      * 登陆服务实现类
      */
-    @Resource
-    private ILoginService loginService;
+
+    private ILoginService loginService = LoginServiceImpl.getLoginService();
 
     /**
      * 登录重试次数
      */
-    @Value("${LoginRetryCount:10}")
-    private int loginRetryCount;
+    private int loginRetryCount = 10;
 
-    @Resource
-    private ContactsMapper contactsMapper;
-
-    @Resource
-    private MemberGroupRMapper memberGroupRMapper;
 
 
 
@@ -146,7 +141,7 @@ public class LoginController {
  /*       // 登陆成功后缓存本次登陆好友相关消息（NickName, UserName）
         WeChatTool.setUserInfo();*/
         //删除无效头像
-        HeadImageUtil.deleteLoseEfficacyHeadImg(Config.PIC_DIR + "/headimg/");
+       // HeadImageUtil.deleteLoseEfficacyHeadImg(Config.PIC_DIR + "/headimg/");
         if (dHImg) {
             log.info("12. 下载联系人头像");
             for (Map.Entry<String, JSONObject> entry : Core.getMemberMap().entrySet()) {

@@ -32,7 +32,7 @@ public class ExecutorServiceUtil {
      * 全局线程池
      */
     private final static ExecutorService globalExecutorService = new ThreadPoolExecutor(
-            0
+            1
             , Integer.MAX_VALUE
             , 0L
             , TimeUnit.SECONDS
