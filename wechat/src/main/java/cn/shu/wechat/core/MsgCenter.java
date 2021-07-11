@@ -10,6 +10,7 @@ import cn.shu.wechat.beans.msg.sync.DelContactList;
 import cn.shu.wechat.beans.msg.sync.ModContactList;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
 import cn.shu.wechat.face.IMsgHandlerFace;
+import cn.shu.wechat.face.IMsgHandlerFaceImpl;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.panels.ChatPanel;
@@ -49,7 +50,7 @@ public class MsgCenter {
      * 消息处理类
      */
     @Resource
-    private IMsgHandlerFace msgHandler ;
+    private IMsgHandlerFace msgHandler = IMsgHandlerFaceImpl.getiMsgHandlerFace();
 
     public static MsgCenter getMessageCenter() {
         return messageCenter;
@@ -123,7 +124,7 @@ public class MsgCenter {
             }
         }
         //需要发送的消息
-/*        List<MessageTools.Result> results = null;
+        List<MessageTools.Result> results = null;
         switch (msgType) {
             case MSGTYPE_MAP:
                 results = msgHandler.mapMsgHandle(msg);
@@ -194,7 +195,7 @@ public class MsgCenter {
         }
 
         //发送消息
-        MessageTools.sendMsgByUserId(results, msg.getFromUserName());*/
+        MessageTools.sendMsgByUserId(results, msg.getFromUserName());
         threadLocalOfMsg.remove();
     }
 

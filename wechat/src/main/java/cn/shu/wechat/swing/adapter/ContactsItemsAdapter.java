@@ -96,7 +96,7 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder>
         try {
             icon.setImage(ImageIO.read(new File(item.getHeadImgPath()))
                     .getScaledInstance(30, 30, Image.SCALE_SMOOTH));
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 /*        icon.setImage(AvatarUtil.createOrLoadUserAvatar(item.getName())
