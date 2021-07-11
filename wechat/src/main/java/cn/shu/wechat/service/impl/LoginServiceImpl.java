@@ -65,7 +65,7 @@ public class LoginServiceImpl implements ILoginService {
     private AttrHistoryMapper attrHistoryMapper;
 
     @Resource
-    private MsgCenter msgCenter;
+    private MsgCenter msgCenter = MsgCenter.getMessageCenter();
 
     @Resource
     private ContactsMapper contactsMapper;
@@ -210,6 +210,9 @@ public class LoginServiceImpl implements ILoginService {
 
             //初始化列表的联系人
             //最近聊天的联系人
+            JSONArray contactList = obj.getJSONArray("ContactList");
+            List<Contacts> contactsList = JSON.parseArray(JSON.toJSONString(contactList), Contacts.class);
+            Core.setRecentContacts(contactsList);
             String chatSet = obj.getString("ChatSet");
             String[] chatSetArray = chatSet.split(",");
      /*       for (String s : chatSetArray) {
@@ -293,7 +296,7 @@ public class LoginServiceImpl implements ILoginService {
                                             List<AddMsgList> addMsgLists = webWxSyncMsg.getAddMsgList();
                                             for (AddMsgList msg : addMsgLists) {
                                                 ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
-                                                        //msgCenter.handleNewMsg(msg);
+                                                        msgCenter.handleNewMsg(msg);
                                                 });
                                             }
                                             //联系人修改消息

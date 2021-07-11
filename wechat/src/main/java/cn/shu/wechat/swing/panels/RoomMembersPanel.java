@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.panels;
 
+import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.adapter.RoomMembersAdapter;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.*;
@@ -12,6 +13,9 @@ import cn.shu.wechat.swing.db.service.RoomService;
 import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.frames.AddOrRemoveMemberDialog;
 import cn.shu.wechat.swing.frames.MainFrame;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
@@ -92,7 +96,11 @@ public class RoomMembersPanel extends ParentAvailablePanel
         this.roomId = roomId;
         room = roomService.findById(roomId);
     }
-
+    public void setRoomId(String roomId,Room room)
+    {
+        this.roomId = roomId;
+       this. room = room;
+    }
     public void setVisibleAndUpdateUI(boolean aFlag)
     {
         if (aFlag)
@@ -104,11 +112,12 @@ public class RoomMembersPanel extends ParentAvailablePanel
         setVisible(aFlag);
     }
 
+    @Override
     public void updateUI()
     {
         if (roomId != null)
         {
-            try
+   /*         try
             {
                 room = roomService.findById(roomId);
             }
@@ -116,12 +125,12 @@ public class RoomMembersPanel extends ParentAvailablePanel
             {
                 e.printStackTrace();
                 room = roomService.findById(roomId);
-            }
+            }*/
 
             getRoomMembers();
 
             // 单独聊天，不显示退出按钮
-            if (room.getType().equals("d"))
+            if (!roomId.startsWith("@@"))
             {
                 leaveButton.setVisible(false);
             }
@@ -151,18 +160,17 @@ public class RoomMembersPanel extends ParentAvailablePanel
         members.clear();
 
         // 单独聊天，成员只显示两人
-        if (room.getType().equals("d"))
-        {
+        if (!roomId.startsWith("@@")){
             members.add(currentUser.getUsername());
-            members.add(room.getName());
+            JSONObject user = Core.getMemberMap().get(roomId);
+            members.add(user.getString("NickName"));
         }
-        else
-        {
-            String roomMembers = room.getMember();
-            String[] userArr = new String[]{};
-            if (roomMembers != null)
-            {
-                userArr = roomMembers.split(",");
+        else {
+            //获取成员
+            JSONObject group = Core.getMemberMap().get(roomId);
+            JSONArray memberList = group.getJSONArray("MemberList");
+            if (memberList == null){
+                return;
             }
 
             if (isRoomCreator())
@@ -170,23 +178,23 @@ public class RoomMembersPanel extends ParentAvailablePanel
                 members.remove("添加成员");
                 members.add("添加成员");
 
-                if (userArr.length > 1)
+                if (memberList.size() > 1)
                 {
                     members.remove("删除成员");
                     members.add("删除成员");
                 }
             }
 
-            if (room.getCreatorName() != null)
+    /*        if (room.getCreatorName() != null)
             {
                 members.add(room.getCreatorName());
-            }
+            }*/
 
-            for (int i = 0; i < userArr.length; i++)
-            {
-                if (!members.contains(userArr[i]))
+            for (Object o : memberList) {
+                JSONObject jsonObject = (JSONObject)o;
+                if (!members.contains(jsonObject.getString("NickName")))
                 {
-                    members.add(userArr[i]);
+                    members.add(jsonObject.getString("NickName"));
                 }
             }
         }

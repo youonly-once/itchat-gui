@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.panels;
 
 
+import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
@@ -14,6 +15,7 @@ import cn.shu.wechat.swing.db.service.RoomService;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
 import org.apache.commons.lang.StringUtils;
@@ -110,31 +112,25 @@ public class UserInfoPanel extends ParentAvailablePanel
     {
         JSONObject user = Core.getMemberMap().get(userId);
         /*ContactsUser user  = contactsUserService.find("username", username).get(0);*/
-        String userId = user.get("UserName").toString();
-        Room room = null;//roomService.findRelativeRoomIdByUserId(userId);
-
-        // 房间已存在，直接打开，否则发送请求创建房间
-        if (room != null)
-        {
-            ChatPanel.getContext().enterRoom(room.getRoomId());
-        }else
-        {
-            String remarkName = user.getString("RemarkName");
-            if (StringUtils.isEmpty(remarkName)){
-                remarkName = user.getString("NickName");
-            }
-            createDirectChat(remarkName);
+        Contacts contacts = JSON.parseObject(JSON.toJSONString(user), Contacts.class);
+        if (!Core.getRecentContacts().contains(contacts)){
+            // 房间bu存在，直接打开，否则发送请求创建房间
+            createDirectChat(contacts);
         }
+        ChatPanel.getContext().enterRoom(contacts.getUsername());
     }
 
     /**
      * 创建直接聊天
      *
-     * @param username
+     * @param contacts
      */
-    private void createDirectChat(String username)
+    private void createDirectChat(Contacts contacts)
     {
-        JOptionPane.showMessageDialog(MainFrame.getContext(), "发起聊天", "发起聊天", JOptionPane.INFORMATION_MESSAGE);
+       // JOptionPane.showMessageDialog(MainFrame.getContext(), "发起聊天", "发起聊天", JOptionPane.INFORMATION_MESSAGE);
+        RoomsPanel.getContext().addRoom(contacts,"");
+        Core.getRecentContacts().add(contacts);
+
     }
 
 

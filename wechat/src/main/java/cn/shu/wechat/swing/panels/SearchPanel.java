@@ -1,5 +1,8 @@
 package cn.shu.wechat.swing.panels;
 
+import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.beans.pojo.Contacts;
+import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.adapter.search.SearchResultItemsAdapter;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
@@ -15,6 +18,8 @@ import cn.shu.wechat.swing.db.service.MessageService;
 import cn.shu.wechat.swing.db.service.RoomService;
 import cn.shu.wechat.swing.entity.SearchResultItem;
 import cn.shu.wechat.swing.utils.FontUtil;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
+import com.alibaba.fastjson.JSONObject;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -22,14 +27,15 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by song on 17-5-29.
  */
-public class SearchPanel extends ParentAvailablePanel
-{
+public class SearchPanel extends ParentAvailablePanel {
     private static SearchPanel context;
     private RCSearchTextField searchTextField;
     private RoomService roomService = Launcher.roomService;
@@ -40,8 +46,7 @@ public class SearchPanel extends ParentAvailablePanel
     private FileAttachmentService fileAttachmentService = Launcher.fileAttachmentService;
 
 
-    public SearchPanel(JPanel parent)
-    {
+    public SearchPanel(JPanel parent) {
         super(parent);
         context = this;
 
@@ -51,15 +56,13 @@ public class SearchPanel extends ParentAvailablePanel
     }
 
 
-    private void initComponent()
-    {
+    private void initComponent() {
         searchTextField = new RCSearchTextField();
         searchTextField.setFont(FontUtil.getDefaultFont(14));
         searchTextField.setForeground(Colors.FONT_WHITE);
     }
 
-    private void initView()
-    {
+    private void initView() {
         setBackground(Colors.DARK);
         this.setLayout(new GridBagLayout());
         this.add(searchTextField, new GBC(0, 0)
@@ -69,66 +72,69 @@ public class SearchPanel extends ParentAvailablePanel
         );
     }
 
-    public static SearchPanel getContext()
-    {
+    public static SearchPanel getContext() {
         return context;
     }
 
-    private void setListeners()
-    {
-        searchTextField.getDocument().addDocumentListener(new DocumentListener()
-        {
+    private void setListeners() {
+        searchTextField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
-            public void insertUpdate(DocumentEvent e)
-            {
-                ListPanel listPanel = ListPanel.getContext();
-                SearchResultPanel searchResultPanel = SearchResultPanel.getContext();
+            public void insertUpdate(DocumentEvent e) {
+          /*      ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
+                    @Override
+                    public void run() {*/
+                        ListPanel listPanel = ListPanel.getContext();
+                        SearchResultPanel searchResultPanel = SearchResultPanel.getContext();
 
-                listPanel.showPanel(ListPanel.SEARCH);
+                        listPanel.showPanel(ListPanel.SEARCH);
 
-                List<SearchResultItem> data = searchUserOrRoom(searchTextField.getText());
-                searchResultPanel.setData(data);
-                searchResultPanel.setKeyWord(searchTextField.getText());
-                searchResultPanel.notifyDataSetChanged(false);
-                searchResultPanel.getTipLabel().setVisible(false);
-            }
+                        List<SearchResultItem> data = searchUserOrRoom(searchTextField.getText());
+                        searchResultPanel.setData(data);
+                        searchResultPanel.setKeyWord(searchTextField.getText());
+                        searchResultPanel.notifyDataSetChanged(false);
+                        searchResultPanel.getTipLabel().setVisible(false);
+                    }
+                //});
 
-            @Override
-            public void removeUpdate(DocumentEvent e)
-            {
-                ListPanel listPanel = ListPanel.getContext();
-                if (searchTextField.getText() == null || searchTextField.getText().isEmpty())
-                {
-                    listPanel.showPanel(listPanel.getPreviousTab());
-                    return;
-                }
 
-                SearchResultPanel searchResultPanel = SearchResultPanel.getContext();
-
-                listPanel.showPanel(ListPanel.SEARCH);
-
-                List<SearchResultItem> data = searchUserOrRoom(searchTextField.getText());
-                searchResultPanel.setData(data);
-                searchResultPanel.setKeyWord(searchTextField.getText());
-                searchResultPanel.notifyDataSetChanged(false);
-                searchResultPanel.getTipLabel().setVisible(false);
-
-            }
+            //}
 
             @Override
-            public void changedUpdate(DocumentEvent e)
-            {
+            public void removeUpdate(DocumentEvent e) {
+              /*  ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
+                    @Override
+                    public void run() {*/
+                        ListPanel listPanel = ListPanel.getContext();
+                        if (searchTextField.getText() == null || searchTextField.getText().isEmpty()) {
+                            listPanel.showPanel(listPanel.getPreviousTab());
+                            return;
+                        }
+
+                        SearchResultPanel searchResultPanel = SearchResultPanel.getContext();
+
+                        listPanel.showPanel(ListPanel.SEARCH);
+
+                        List<SearchResultItem> data = searchUserOrRoom(searchTextField.getText());
+                        searchResultPanel.setData(data);
+                        searchResultPanel.setKeyWord(searchTextField.getText());
+                        searchResultPanel.notifyDataSetChanged(false);
+                        searchResultPanel.getTipLabel().setVisible(false);
+                    }
+                //});
+
+
+            //}
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
             }
         });
 
-        searchTextField.addKeyListener(new KeyAdapter()
-        {
+        searchTextField.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyPressed(KeyEvent e)
-            {
+            public void keyPressed(KeyEvent e) {
                 // ESC清除已输入内容
-                if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-                {
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                     searchTextField.setText("");
                 }
 
@@ -136,10 +142,8 @@ public class SearchPanel extends ParentAvailablePanel
             }
 
             @Override
-            public void keyTyped(KeyEvent e)
-            {
-                if (searchTextField.getText().length() > 8)
-                {
+            public void keyTyped(KeyEvent e) {
+                if (searchTextField.getText().length() > 8) {
                     e.consume();
                 }
             }
@@ -150,19 +154,18 @@ public class SearchPanel extends ParentAvailablePanel
     /**
      * 清空搜索文本
      */
-    public void clearSearchText()
-    {
+    public void clearSearchText() {
         searchTextField.setText("");
     }
 
 
     /**
      * 搜索用户或房间
+     *
      * @param key
      * @return
      */
-    private List<SearchResultItem> searchUserOrRoom(String key)
-    {
+    private List<SearchResultItem> searchUserOrRoom(String key) {
         List<SearchResultItem> list = new ArrayList<>();
 
         list.add(new SearchResultItem("searchAndListMessage", "搜索 \"" + key + "\" 相关消息", "searchMessage"));
@@ -174,20 +177,16 @@ public class SearchPanel extends ParentAvailablePanel
         // 搜索房间
         list.addAll(searchChannelAndGroup(key));
 
-        if (!setSearchMessageOrFileListener)
-        {
+        if (!setSearchMessageOrFileListener) {
             // 查找消息、文件
-            SearchResultPanel.getContext().setSearchMessageOrFileListener(new SearchResultItemsAdapter.SearchMessageOrFileListener()
-            {
+            SearchResultPanel.getContext().setSearchMessageOrFileListener(new SearchResultItemsAdapter.SearchMessageOrFileListener() {
                 @Override
-                public void onSearchMessage()
-                {
+                public void onSearchMessage() {
                     searchAndListMessage(searchTextField.getText());
                 }
 
                 @Override
-                public void onSearchFile()
-                {
+                public void onSearchFile() {
                     searchAndListFile(searchTextField.getText());
                 }
             });
@@ -203,34 +202,26 @@ public class SearchPanel extends ParentAvailablePanel
      *
      * @param key
      */
-    private void searchAndListMessage(String key)
-    {
+    private void searchAndListMessage(String key) {
         SearchResultPanel searchResultPanel = SearchResultPanel.getContext();
         List<Message> messages = messageService.search(key);
         List<SearchResultItem> searchResultItems = new ArrayList<>();
 
-        if (messages == null || messages.size() < 1)
-        {
+        if (messages == null || messages.size() < 1) {
             searchResultPanel.getTipLabel().setVisible(true);
-        }
-        else
-        {
+        } else {
             searchResultPanel.getTipLabel().setVisible(false);
 
             SearchResultItem item;
-            for (Message msg : messages)
-            {
+            for (Message msg : messages) {
                 String content = msg.getMessageContent();
                 int startPos = content.toLowerCase().indexOf(key.toLowerCase());
                 int endPos = startPos + 10;
                 //endPos = endPos > content.length() ? content.length() : endPos;
-                if (endPos > content.length())
-                {
+                if (endPos > content.length()) {
                     endPos = content.length();
                     content = content.substring(startPos, endPos);
-                }
-                else
-                {
+                } else {
                     content = content.substring(startPos, endPos) + "...";
                 }
 
@@ -251,22 +242,17 @@ public class SearchPanel extends ParentAvailablePanel
      *
      * @param key
      */
-    private void searchAndListFile(String key)
-    {
+    private void searchAndListFile(String key) {
         SearchResultPanel searchResultPanel = SearchResultPanel.getContext();
         List<FileAttachment> fileAttachments = fileAttachmentService.search(key);
         List<SearchResultItem> searchResultItems = new ArrayList<>();
 
-        if (fileAttachments == null || fileAttachments.size() < 1)
-        {
+        if (fileAttachments == null || fileAttachments.size() < 1) {
             searchResultPanel.getTipLabel().setVisible(true);
-        }
-        else
-        {
+        } else {
             searchResultPanel.getTipLabel().setVisible(false);
             SearchResultItem item;
-            for (FileAttachment file : fileAttachments)
-            {
+            for (FileAttachment file : fileAttachments) {
                 String content = file.getTitle();
                 //content = content.length() > 10 ? content.substring(0, 10) : content;
 
@@ -288,17 +274,20 @@ public class SearchPanel extends ParentAvailablePanel
      * @param key
      * @return
      */
-    private List<SearchResultItem> searchChannelAndGroup(String key)
-    {
-        List<Room> rooms = roomService.searchByName(key);
+    private List<SearchResultItem> searchChannelAndGroup(String key) {
+        // List<Room> rooms = roomService.searchByName(key);
         List<SearchResultItem> retList = new ArrayList<>();
-
+        List<Contacts> recentContacts = Core.getRecentContacts();
         SearchResultItem item;
-        for (Room room : rooms)
-        {
-            item = new SearchResultItem(room.getRoomId(), room.getName(), room.getType());
-            retList.add(item);
+        for (Contacts recentContact : recentContacts) {
+            String contactDisplayNameByUserName = ContactsTools.getContactDisplayNameByUserName(recentContact.getUsername());
+            if (contactDisplayNameByUserName.startsWith(key) || contactDisplayNameByUserName.endsWith(key)) {
+                item = new SearchResultItem(recentContact.getUsername(), contactDisplayNameByUserName, !recentContact.getUsername().startsWith("@@") ? "d" : "c");
+                retList.add(item);
+            }
+
         }
+
         return retList;
     }
 
@@ -308,15 +297,18 @@ public class SearchPanel extends ParentAvailablePanel
      * @param key
      * @return
      */
-    private List<SearchResultItem> searchContacts(String key)
-    {
-        List<ContactsUser> contactsUsers = contactsUserService.searchByUsernameOrName(key, key);
+    private List<SearchResultItem> searchContacts(String key) {
+        // List<ContactsUser> contactsUsers = contactsUserService.searchByUsernameOrName(key, key);
+        Map<String, JSONObject> memberMap = Core.getMemberMap();
         List<SearchResultItem> retList = new ArrayList<>();
         SearchResultItem item;
-        for (ContactsUser user : contactsUsers)
-        {
-            item = new SearchResultItem(user.getUserId(), user.getUsername(), "d");
-            retList.add(item);
+        for (Map.Entry<String, JSONObject> entry : memberMap.entrySet()) {
+            String contactDisplayNameByUserName = ContactsTools.getContactDisplayNameByUserName(entry.getKey());
+            if (contactDisplayNameByUserName.startsWith(key) || contactDisplayNameByUserName.endsWith(key)) {
+                item = new SearchResultItem(entry.getKey(), ContactsTools.getContactDisplayNameByUserName(entry.getKey()), !entry.getKey().startsWith("@@") ? "d" : "c");
+                retList.add(item);
+            }
+
         }
         return retList;
     }

@@ -1,13 +1,19 @@
 package cn.shu.wechat.swing.components;
 
+import cn.shu.wechat.beans.pojo.Contacts;
+import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.db.model.ContactsUser;
 import cn.shu.wechat.swing.db.model.Room;
 //import cn.shu.wechat.swing.forms.ImageViewerFrame;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.panels.ContactsPanel;
+import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -25,10 +31,12 @@ public class UserInfoPopup extends JPopupMenu
     private JLabel usernameLabel;
     private JButton sendButton;
     private String username;
+    private String displayName;
 
-    public UserInfoPopup(String username)
+    public UserInfoPopup(String username,String displayName)
     {
         this.username = username;
+        this.displayName = displayName;
         initComponents();
         initView();
         setListener();
@@ -123,31 +131,27 @@ public class UserInfoPopup extends JPopupMenu
 
     private void openOrCreateDirectChat()
     {
-        ContactsUser user  = contactsUserService.find("username", username).get(0);
-        String userId = user.getUserId();
-        Room room = roomService.findRelativeRoomIdByUserId(userId);
-
-        // 房间已存在，直接打开，否则发送请求创建房间
-        if (room != null)
-        {
-            ChatPanel.getContext().enterRoom(room.getRoomId());
-        }else
-        {
-            createDirectChat(user.getName());
+        JSONObject user = Core.getMemberMap().get(username);
+        /*ContactsUser user  = contactsUserService.find("username", username).get(0);*/
+        Contacts contacts = JSON.parseObject(JSON.toJSONString(user), Contacts.class);
+        if (!Core.getRecentContacts().contains(contacts)){
+            // 房间bu存在，直接打开，否则发送请求创建房间
+            createDirectChat(contacts);
         }
-
-        this.setVisible(false);
-
+        ChatPanel.getContext().enterRoom(contacts.getUsername());
     }
 
     /**
      * 创建直接聊天
      *
-     * @param username
+     * @param contacts
      */
-    private void createDirectChat(String username)
+    private void createDirectChat(Contacts contacts)
     {
-        JOptionPane.showMessageDialog(MainFrame.getContext(), "发起聊天", "发起聊天", JOptionPane.INFORMATION_MESSAGE);
+        // JOptionPane.showMessageDialog(MainFrame.getContext(), "发起聊天", "发起聊天", JOptionPane.INFORMATION_MESSAGE);
+        RoomsPanel.getContext().addRoom(contacts,"");
+        Core.getRecentContacts().add(contacts);
+
     }
 
 }

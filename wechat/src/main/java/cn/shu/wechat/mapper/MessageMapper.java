@@ -44,4 +44,8 @@ public interface MessageMapper {
     int batchInsert(@Param("list") List<Message> list);
 
     int updateBatchSelective(List<Message> list);
+
+    Message selectLastMessage(String roomId);
+
+    List<Message> selectByPage(@Param("start") int start,@Param("end") int end, @Param("roomId") String roomId);
 }

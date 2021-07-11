@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.panels;
 
+import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
@@ -10,11 +11,15 @@ import cn.shu.wechat.swing.frames.SystemConfigDialog;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
+import com.alibaba.fastjson.JSONObject;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by song on 17-5-29.
@@ -48,9 +53,16 @@ public class MyInfoPanel extends ParentAvailablePanel
 
         //GImage.setBorder(new SubtleSquareBorder(true));
        // currentUsername = currentUserService.findAll().get(0).getUsername();
-        currentUsername="TEST";
+        JSONObject userSelf = Core.getUserSelf();
+        currentUsername=userSelf.getString("NickName");
+        String headImage = Core.getContactHeadImgPath().get(userSelf.getString("UserName"));
         avatar = new JLabel();
-        avatar.setIcon(new ImageIcon(AvatarUtil.createOrLoadUserAvatar(currentUsername).getScaledInstance(50,50,Image.SCALE_SMOOTH)));
+
+        try {
+            avatar.setIcon(new ImageIcon(ImageIO.read(new File(headImage)).getScaledInstance(50,50,Image.SCALE_SMOOTH)));
+        } catch (Exception e) {
+            avatar.setIcon(new ImageIcon(AvatarUtil.createOrLoadUserAvatar(currentUsername).getScaledInstance(50,50,Image.SCALE_SMOOTH)));
+        }
 
         avatar.setPreferredSize(new Dimension(50, 50));
         avatar.setCursor(new Cursor(Cursor.HAND_CURSOR));

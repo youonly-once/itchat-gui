@@ -20,7 +20,7 @@ public class DbUtils
 			sqlSession = sqlMapper.openSession(true);
 			reader.close();
 
-			checkTable();
+		//	checkTable();
 
 		} catch (IOException e) {
 			e.printStackTrace();

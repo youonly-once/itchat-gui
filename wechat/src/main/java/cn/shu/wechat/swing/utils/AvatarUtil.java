@@ -2,6 +2,7 @@ package cn.shu.wechat.swing.utils;
 
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
+import cn.shu.wechat.utils.CommonTools;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.FileImageInputStream;
@@ -352,7 +353,7 @@ public class AvatarUtil
             g2d.dispose();
 
             // 缓存到磁盘
-            File file = new File(AVATAR_CACHE_ROOT + "/" + groupName + ".png");
+            File file = new File(AVATAR_CACHE_ROOT + "/" + CommonTools.emojiFormatter(groupName) + ".png");
             ImageIO.write(image, "png", file);
 
             return image;

@@ -1,5 +1,6 @@
 package cn.shu.wechat.beans.pojo;
 
+import com.google.common.base.Objects;
 import lombok.Data;
 
 /**
@@ -75,4 +76,17 @@ public class Contacts {
      * 是否为联系人(false则为群成员)
      */
     private Boolean iscontacts;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Contacts contacts = (Contacts) o;
+        return Objects.equal(username, contacts.username);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(username);
+    }
 }

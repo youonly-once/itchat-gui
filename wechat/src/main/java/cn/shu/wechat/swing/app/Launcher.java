@@ -57,7 +57,7 @@ public class Launcher
         fileAttachmentService = new FileAttachmentService(sqlSession);
     }
 
-    private JFrame currentFrame;
+    private LoginFrame currentFrame;
 
 
     public Launcher()
@@ -84,7 +84,8 @@ public class Launcher
     {
             currentFrame = new LoginFrame();
             currentFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        currentFrame.setVisible(true);
+            currentFrame.setVisible(true);
+            currentFrame.login(true);
     }
 
     private void config()

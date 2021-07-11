@@ -1,5 +1,14 @@
 package cn.shu.wechat.swing.panels;
 
+import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.api.MessageTools;
+import cn.shu.wechat.beans.msg.send.WebWXSendMsgResponse;
+import cn.shu.wechat.beans.msg.send.WebWXUploadMediaResponse;
+import cn.shu.wechat.core.Core;
+import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
+import cn.shu.wechat.enums.WXSendMsgCodeEnum;
+import cn.shu.wechat.exception.WebWXException;
+import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.swing.adapter.message.*;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
@@ -17,11 +26,14 @@ import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
 import cn.shu.wechat.swing.listener.ExpressionListener;
 import cn.shu.wechat.swing.utils.*;
+import cn.shu.wechat.utils.DataBaseUtil;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringEscapeUtils;
 
+import org.apache.ibatis.session.SqlSession;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import cn.shu.wechat.swing.tasks.*;
 
 import javax.imageio.ImageIO;
@@ -38,6 +50,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 /**
  * 右侧聊天面板
@@ -96,6 +110,11 @@ public class ChatPanel extends ParentAvailablePanel
         super(parent);
         context = this;
         //currentUser = currentUserService.findAll().get(0);
+        currentUser =new CurrentUser();
+        JSONObject userSelf = Core.getUserSelf();
+        currentUser.setUserId(userSelf.getString("UserName"));
+        currentUser.setRealName("舒新胜");
+        currentUser.setUsername(userSelf.getString("NickName"));
         messageViewHolderCacheHelper = new MessageViewHolderCacheHelper();
 
         initComponents();
@@ -166,23 +185,32 @@ public class ChatPanel extends ParentAvailablePanel
                 // 当滚动到顶部时，继续拿前面的消息
                 if (roomId != null)
                 {
-                    List<Message> messages = messageService.findOffset(roomId, messageItems.size(), PAGE_LENGTH);
+                    SqlSession session = DataBaseUtil.getSession();
+                    MessageMapper mapper = session.getMapper(MessageMapper.class);
+                    List<cn.shu.wechat.beans.pojo.Message> messageList = mapper.selectByPage(messageItems.size(),messageItems.size()+PAGE_LENGTH,roomId);
+                    session.close();
 
-                    if (messages.size() > 0)
-                    {
-                        for (int i = messages.size() - 1; i >= 0; i--)
+                    //List<Message> messages = messageService.findOffset(roomId, messageItems.size(), PAGE_LENGTH);
+                    //TODO
+                        for (int i = messageList.size() - 1; i >= 0; i--)
                         {
-                            MessageItem item = new MessageItem(messages.get(i), currentUser.getUserId());
+                            cn.shu.wechat.beans.pojo.Message message = messageList.get(i);
+                            Message message1 = new Message();
+                            message1.setMessageContent(message.getContent());
+                            message1.setSystemMessage(message.getMsgType() == WXReceiveMsgCodeEnum.MSGTYPE_STATUSNOTIFY.getCode());
+                            message1.setImageAttachmentId(message.getFilePath());
+                            message1.setRoomId(roomId);
+                            message1.setId(message.getId());
+                            message1.setSenderUsername(message.getFromNickname());
+                            message1.setSenderId(message.getFromUsername());
+                            message1.setNeedToResend(false);
+                            message1.setUpdatedAt(message.getCreateTime().getTime());
+                            message1.setTimestamp(message.getCreateTime().getTime());
+                            MessageItem item = new MessageItem(message1, currentUser.getUserId());
                             messageItems.add(0, item);
                         }
-                    }
-                    // 如果本地没有拿到消息，则从服务器拿消息
-                    else
-                    {
-                        // TODO: 从服务器获取更多消息
-                    }
 
-                    messagePanel.getMessageListView().notifyItemRangeInserted(0, messages.size());
+                    messagePanel.getMessageListView().notifyItemRangeInserted(0, messageList.size());
                 }
             }
         });
@@ -314,7 +342,8 @@ public class ChatPanel extends ParentAvailablePanel
         {
             if (data instanceof String && !data.equals("\n"))
             {
-                sendTextMessage(null, (String) data);
+                ExecutorServiceUtil.getGlobalExecutorService().submit(() -> sendTextMessage(null,  data.toString()));
+
             }
             else if (data instanceof JLabel)
             {
@@ -353,7 +382,7 @@ public class ChatPanel extends ParentAvailablePanel
     /**
      * 解析输入框中的输入数据
      *
-     * @return
+     * @returnj
      */
     private List<Object> parseEditorInput()
     {
@@ -465,14 +494,31 @@ public class ChatPanel extends ParentAvailablePanel
 
         this.roomId = roomId;
         CHAT_ROOM_OPEN_ID = roomId;
-        this.room = roomService.findById(roomId);
+        JSONObject jsonObject = Core.getMemberMap().get(roomId);
+        Room room = new Room();
+        if (roomId.equals("filehelper")){
+            room.setRoomId("filehelper");
+            room.setType("d");
+            room.setName("文件传输助手");
+            room.setMsgSum(0);
+            room.setLastChatAt(System.currentTimeMillis());
+        }else{
+            room.setRoomId(jsonObject.getString("UserName"));
+            room.setType(roomId.startsWith("@@")?"c":"d");
+            room.setName(ContactsTools.getContactDisplayNameByUserName(jsonObject.getString("UserName")));
+            room.setMsgSum(0);
+            room.setLastChatAt(System.currentTimeMillis());
+        }
+
+       // room.setUpdatedAt(System.currentTimeMillis().);
+        this.room = room;//roomService.findById(roomId);
         // 更新消息列表
         this.notifyDataSetChanged();
 
         // 更新房间标题，尤其是成员数
         updateRoomTitle();
 
-        RoomMembersPanel.getContext().setRoomId(roomId);
+        RoomMembersPanel.getContext().setRoomId(roomId,room);
 
         messageEditorPanel.getEditor().setText("");
 
@@ -540,21 +586,31 @@ public class ChatPanel extends ParentAvailablePanel
      */
     private void loadLocalHistory()
     {
-        List<Message> messages = messageService.findByPage(roomId, messageItems.size(), PAGE_LENGTH);
+        //List<Message> messages = messageService.findByPage(roomId, messageItems.size(), PAGE_LENGTH);
+        SqlSession session = DataBaseUtil.getSession();
+        MessageMapper mapper = session.getMapper(MessageMapper.class);
+        List<cn.shu.wechat.beans.pojo.Message> messageList = mapper.selectByPage(messageItems.size(),messageItems.size()+PAGE_LENGTH,roomId);
+        session.close();
 
-        if (messages.size() > 0)
-        {
-            for (Message message : messages)
-            {
-                MessageItem item = new MessageItem(message, currentUser.getUserId());
-                messageItems.add(item);
+        for (cn.shu.wechat.beans.pojo.Message message : messageList) {
+            if (message.getMsgType()>=51){
+                continue;
             }
+            Message message1 = new Message();
+            message1.setMessageContent(message.getContent());
+            message1.setSystemMessage(message.getMsgType() == WXReceiveMsgCodeEnum.MSGTYPE_STATUSNOTIFY.getCode());
+            message1.setImageAttachmentId(message.getFilePath());
+            message1.setRoomId(roomId);
+            message1.setId(message.getId());
+            message1.setSenderUsername(message.getFromNickname());
+            message1.setSenderId(message.getFromUsername());
+            message1.setNeedToResend(false);
+            message1.setUpdatedAt(message.getCreateTime().getTime());
+            message1.setTimestamp(message.getCreateTime().getTime());
+            MessageItem item = new MessageItem(message1, currentUser.getUserId());
+            messageItems.add(item);
         }
-        // 如果本地没有拿到消息，则从服务器拿消息
-        else
-        {
-            //TODO: 从服务器拿消息
-        }
+
 
         messagePanel.getMessageListView().notifyDataSetChanged(false);
 
@@ -568,17 +624,17 @@ public class ChatPanel extends ParentAvailablePanel
      */
     private void updateUnreadCount(int count)
     {
-        room = roomService.findById(roomId);
+     //   room = roomService.findById(roomId);
         if (count < 0)
         {
             System.out.println(count);
         }
-        room.setUnreadCount(count);
-        room.setTotalReadCount(room.getMsgSum());
-        roomService.update(room);
+  /*      room.setUnreadCount(count);
+        room.setTotalReadCount(room.getMsgSum());*/
+       // roomService.update(room);
 
         // 通知UI更新未读消息数
-        RoomsPanel.getContext().updateRoomItem(room.getRoomId());
+        RoomsPanel.getContext().updateRoomItem(roomId,count,null,null);
     }
 
     /**
@@ -626,7 +682,28 @@ public class ChatPanel extends ParentAvailablePanel
      */
     public void addOrUpdateMessageItem()
     {
-        Message message = messageService.findLastMessage(roomId);
+
+        //Message message = messageService.findLastMessage(roomId);
+        SqlSession session = DataBaseUtil.getSession();
+        MessageMapper mapper = session.getMapper(MessageMapper.class);
+        cn.shu.wechat.beans.pojo.Message lastMessage = mapper.selectLastMessage(roomId);
+        if (lastMessage == null){
+            return;
+        }
+        session.close();
+        Message message = new Message();
+        message.setSenderId(lastMessage.getFromUsername());
+        message.setMessageContent(lastMessage.getContent());
+        message.setRoomId(roomId);
+        message.setGroupable(false);
+        message.setTimestamp(System.currentTimeMillis());
+        message.setId(UUID.randomUUID().toString());
+        message.setSenderUsername(lastMessage.getFromNickname());
+        message.setNeedToResend(false);
+        message.setUpdatedAt(System.currentTimeMillis());
+        message.setProgress(1);
+        message.setDeleted(false);
+
         if (message == null || message.isDeleted())
         {
             return;
@@ -676,7 +753,7 @@ public class ChatPanel extends ParentAvailablePanel
     public void sendTextMessage(String messageId, String content)
     {
         Message dbMessage = null;
-        if (messageId == null)
+   /*     if (messageId == null)
         {
             MessageItem item = new MessageItem();
             if (content == null || content.equals(""))
@@ -705,11 +782,11 @@ public class ChatPanel extends ParentAvailablePanel
 
             messageService.insert(dbMessage);
 
-        }
+        }*/
         // 已有消息重发
-        else
-        {
-            Message msg = messageService.findById(messageId);
+       // else
+       // {
+ /*           Message msg = messageService.findById(messageId);
 
             msg.setTimestamp(System.currentTimeMillis());
             msg.setUpdatedAt(0);
@@ -725,10 +802,10 @@ public class ChatPanel extends ParentAvailablePanel
                 messageItems.get(pos).setUpdatedAt(0);
                 messageItems.get(pos).setTimestamp(System.currentTimeMillis());
                 messagePanel.getMessageListView().notifyItemChanged(pos);
-            }
-        }
+            }*/
+      //  }
 
-        content = StringEscapeUtils.escapeJava(content);
+       // content = StringEscapeUtils.escapeJava(content);
 
         // TODO: 发送消息到服务器
         // 发送
@@ -739,20 +816,24 @@ public class ChatPanel extends ParentAvailablePanel
         if (sentSuccess)
         {
             // 如果发送成功，收到服务器响应后更新消息的updatedAt属性，该属性如果小于0，说明消息发送失败
-            dbMessage.setUpdatedAt(System.currentTimeMillis());
-            messageService.insertOrUpdate(dbMessage);
+/*            dbMessage.setUpdatedAt(System.currentTimeMillis());
+            messageService.insertOrUpdate(dbMessage);*/
             // 更新消息列表
+            MessageTools.sendMsgByUserId(
+                    MessageTools.Result.builder().content(content)
+                            .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT).build()
+                    ,roomId);
             addOrUpdateMessageItem();
 
             // 更新房间信息以及房间列表
-            Room room = roomService.findById(dbMessage.getRoomId());
+ /*           Room room = roomService.findById(dbMessage.getRoomId());
             room.setLastMessage(dbMessage.getMessageContent());
             room.setLastChatAt(dbMessage.getTimestamp());
             room.setMsgSum(room.getMsgSum() + 1);
             room.setUnreadCount(0);
             room.setTotalReadCount(room.getMsgSum());
             roomService.update(room);
-            RoomsPanel.getContext().updateRoomsList(dbMessage.getRoomId());
+            RoomsPanel.getContext().updateRoomsList(dbMessage.getRoomId());*/
         }
 
 
@@ -794,10 +875,10 @@ public class ChatPanel extends ParentAvailablePanel
 
     private void showSendingMessage()
     {
-        Room room = roomService.findById(roomId);
+   /*     Room room = roomService.findById(roomId);
         room.setLastMessage("[发送中...]");
-        roomService.update(room);
-        RoomsPanel.getContext().updateRoomItem(roomId);
+        roomService.update(room);*/
+        RoomsPanel.getContext().updateRoomItem(roomId,-1,"[发送中...]",System.currentTimeMillis());
     }
 
     /**
@@ -906,7 +987,13 @@ public class ChatPanel extends ParentAvailablePanel
      */
     public void notifyStartUploadFile(String uploadFilename, String fileId)
     {
-        uploadFile(uploadFilename, fileId);
+        ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
+            @Override
+            public void run() {
+                uploadFile(uploadFilename, fileId);
+            }
+        });
+
         uploadingOrDownloadingFiles.add(fileId);
     }
 
@@ -941,7 +1028,7 @@ public class ChatPanel extends ParentAvailablePanel
             imageAttachment.setTitle(name);
             item.setImageAttachment(new ImageAttachmentItem(imageAttachment));
             dbMessage.setImageAttachmentId(imageAttachment.getId());
-            imageAttachmentService.insertOrUpdate(imageAttachment);
+           // imageAttachmentService.insertOrUpdate(imageAttachment);
 
             item.setMessageType(MessageItem.RIGHT_IMAGE);
         }
@@ -955,7 +1042,7 @@ public class ChatPanel extends ParentAvailablePanel
             fileAttachment.setTitle(name);
             item.setFileAttachment(new FileAttachmentItem(fileAttachment));
             dbMessage.setFileAttachmentId(fileAttachment.getId());
-            fileAttachmentService.insertOrUpdate(fileAttachment);
+          //  fileAttachmentService.insertOrUpdate(fileAttachment);
 
             item.setMessageType(MessageItem.RIGHT_ATTACHMENT);
         }
@@ -968,19 +1055,10 @@ public class ChatPanel extends ParentAvailablePanel
         item.setId(messageId);
         item.setProgress(0);
 
-
-        dbMessage.setId(messageId);
-        dbMessage.setMessageContent(name);
-        dbMessage.setRoomId(roomId);
-        dbMessage.setSenderId(currentUser.getUserId());
-        dbMessage.setSenderUsername(currentUser.getUsername());
-        dbMessage.setTimestamp(item.getTimestamp());
-        dbMessage.setUpdatedAt(item.getTimestamp());
-
         addMessageItemToEnd(item);
 
 
-        messageService.insertOrUpdate(dbMessage);
+       // messageService.insertOrUpdate(dbMessage);
 
         File file = new File(uploadFilename);
         if (!file.exists())
@@ -989,87 +1067,86 @@ public class ChatPanel extends ParentAvailablePanel
         }
         else
         {
-            // 分块上传
-            final List<byte[]> dataParts = cuttingFile(file);
-            final int[] index = {1};
-
-            // TODO：向服务器上传文件
-            final int[] uploadedBlockCount = {1};
 
             UploadTaskCallback callback = new UploadTaskCallback()
             {
                 @Override
-                public void onTaskSuccess()
+                public void onTaskSuccess(int curr,int size,WebWXUploadMediaResponse webWXUploadMediaResponse)
                 {
-                    // 当收到上一个分块的响应后，才能开始上传下一个分块，否则容易造成分块接收顺序错乱
-                    uploadedBlockCount[0]++;
-                    if (uploadedBlockCount[0] <= dataParts.size())
-                    {
-                        sendDataPart(uploadedBlockCount[0], dataParts, this);
-                    }
+                        int progress = (int) ((curr * 1.0f / size) * 100);
+                        // 上传完成
+                        if (progress == 100)
+                        {
+                            uploadingOrDownloadingFiles.remove(fileId);
 
-
-                    int progress = (int) ((index[0] * 1.0f / dataParts.size()) * 100);
-                    index[0]++;
-
-                    // 上传完成
-                    if (progress == 100)
-                    {
-                        uploadingOrDownloadingFiles.remove(fileId);
-
-                        Room room = roomService.findById(roomId);
+                     /*   Room room = roomService.findById(roomId);
                         room.setLastMessage(dbMessage.getMessageContent());
-                        roomService.update(room);
-                        RoomsPanel.getContext().updateRoomItem(roomId);
+                        roomService.update(room);*/
+                            RoomsPanel.getContext().updateRoomItem(roomId,-1,dbMessage.getMessageContent(),System.currentTimeMillis());
 
-                        if (uploadFilename.startsWith(ClipboardUtil.CLIPBOARD_TEMP_DIR))
-                        {
-                            File file = new File(uploadFilename);
-                            file.delete();
-                        }
-                    }
-
-
-                    for (int i = messageItems.size() - 1; i >= 0; i--)
-                    {
-                        if (messageItems.get(i).getId().equals(item.getId()))
-                        {
-                            messageItems.get(i).setProgress(progress);
-                            messageService.updateProgress(messageItems.get(i).getId(), progress);
-
-
-                            BaseMessageViewHolder viewHolder = getViewHolderByPosition(i);
-                            if (viewHolder != null)
+                            if (uploadFilename.startsWith(ClipboardUtil.CLIPBOARD_TEMP_DIR))
                             {
-                                if (isImage)
-                                {
-                                    MessageRightImageViewHolder holder = (MessageRightImageViewHolder) viewHolder;
-                                    if (progress >= 100)
-                                    {
-                                        holder.sendingProgress.setVisible(false);
-                                    }
-                                }
-                                else
-                                {
-                                    MessageRightAttachmentViewHolder holder = (MessageRightAttachmentViewHolder) viewHolder;
-
-                                    // 隐藏"等待上传"，并显示进度条
-                                    holder.sizeLabel.setVisible(false);
-                                    holder.progressBar.setVisible(true);
-                                    holder.progressBar.setValue(progress);
-
-                                    if (progress >= 100)
-                                    {
-                                        holder.progressBar.setVisible(false);
-                                        holder.sizeLabel.setVisible(true);
-                                        holder.sizeLabel.setText(fileCache.fileSizeString(uploadFilename));
-                                    }
-                                }
-
+                                File file = new File(uploadFilename);
+                                file.delete();
                             }
-                            break;
+                            try {
+
+                                WebWXSendMsgResponse webWXSendMsgResponse = MessageTools.sendPicMsgByUserId(roomId, webWXUploadMediaResponse.getMediaId());
+                                ArrayList<MessageTools.Result> objects = new ArrayList<>();
+                                objects.add(MessageTools.Result.builder().filePath(uploadFilename).toUserName(roomId).replyMsgTypeEnum(WXSendMsgCodeEnum.PIC).build());
+                                MessageTools.storeMsgToDB(objects, webWXSendMsgResponse, roomId);
+                            } catch (WebWXException e) {
+                                e.printStackTrace();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
-                    }
+
+
+                        for (int i = messageItems.size() - 1; i >= 0; i--)
+                        {
+                            if (messageItems.get(i).getId().equals(item.getId()))
+                            {
+                                messageItems.get(i).setProgress(progress);
+                                // messageService.updateProgress(messageItems.get(i).getId(), progress);
+
+
+                                BaseMessageViewHolder viewHolder = getViewHolderByPosition(i);
+                                if (viewHolder != null)
+                                {
+                                    if (isImage)
+                                    {
+                                        MessageRightImageViewHolder holder = (MessageRightImageViewHolder) viewHolder;
+                                        if (progress >= 100)
+                                        {
+                                            holder.sendingProgress.setVisible(false);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        MessageRightAttachmentViewHolder holder = (MessageRightAttachmentViewHolder) viewHolder;
+
+                                        // 隐藏"等待上传"，并显示进度条
+                                        holder.sizeLabel.setVisible(false);
+                                        holder.progressBar.setVisible(true);
+                                        holder.progressBar.setValue(progress);
+
+                                        if (progress >= 100)
+                                        {
+                                            holder.progressBar.setVisible(false);
+                                            holder.sizeLabel.setVisible(true);
+                                            holder.sizeLabel.setText(fileCache.fileSizeString(uploadFilename));
+                                        }
+                                    }
+
+                                }
+                                break;
+                            }
+                        }
+
+                   // }
+                //}
+               // );
 
                 }
 
@@ -1078,8 +1155,19 @@ public class ChatPanel extends ParentAvailablePanel
                 {
                 }
             };
-
-            sendDataPart(0, dataParts, callback);
+          //  try {
+                try {
+                    MessageTools.webWxUploadMedia(uploadFilename, Core.getUserName(), roomId, callback);
+                } catch (WebWXException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                // WebWXUploadMediaResponse webWXUploadMediaResponse = ExecutorServiceUtil.getGlobalExecutorService().submit(() -> ).get();
+       /*     } catch ( InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }*/
+            //sendDataPart(0, dataParts, callback);
         }
     }
 
@@ -1103,7 +1191,7 @@ public class ChatPanel extends ParentAvailablePanel
                     e.printStackTrace();
                 }
 
-                callback.onTaskSuccess();
+               // callback.onTaskSuccess();
             }
         }).start();
 

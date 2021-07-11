@@ -3,6 +3,7 @@ package cn.shu.wechat.core;
 import java.util.*;
 
 import cn.shu.wechat.beans.pojo.AttrHistory;
+import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.beans.msg.sync.AddMsgList;
 import cn.shu.wechat.beans.msg.sync.DelContactList;
@@ -10,6 +11,9 @@ import cn.shu.wechat.beans.msg.sync.ModContactList;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
 import cn.shu.wechat.face.IMsgHandlerFace;
 import cn.shu.wechat.mapper.MessageMapper;
+import cn.shu.wechat.swing.frames.MainFrame;
+import cn.shu.wechat.swing.panels.ChatPanel;
+import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.utils.*;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXSendMsgCodeEnum;
@@ -23,6 +27,7 @@ import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.api.ContactsTools;
 
 
+import org.apache.ibatis.session.SqlSession;
 import org.nlpcn.commons.lang.util.StringUtil;
 import org.springframework.stereotype.Component;
 
@@ -44,11 +49,13 @@ public class MsgCenter {
      * 消息处理类
      */
     @Resource
-    private IMsgHandlerFace msgHandler;
+    private IMsgHandlerFace msgHandler ;
 
-    @Resource
-    private MessageMapper messageMapper;
+    public static MsgCenter getMessageCenter() {
+        return messageCenter;
+    }
 
+    private static MsgCenter messageCenter= new MsgCenter();
     /**
      * 保存消息
      */
@@ -95,8 +102,28 @@ public class MsgCenter {
             log.info(s);
         }
 
+        //新增消息列表
+        ;
+        String userName = msg.getFromUserName();
+        if (userName.equals(Core.getUserName())){
+            userName = msg.getToUserName();
+        }
+        if (msgType.getCode()<51) {
+            //只显示常规消息
+            //刷新消息
+            ChatPanel.getContext().addOrUpdateMessageItem();
+            JSONObject jsonObject = Core.getMemberMap().get(userName);
+            String string = JSON.toJSONString(jsonObject);
+            Contacts contacts = JSON.parseObject(string, Contacts.class);
+            if (!Core.getRecentContacts().contains(contacts)) {
+                RoomsPanel.getContext().addRoom(contacts, msg.getContent());
+                Core.getRecentContacts().add(contacts);
+            } else {
+                RoomsPanel.getContext().updateRoomItem(userName, 1, msg.getContent(), System.currentTimeMillis());
+            }
+        }
         //需要发送的消息
-        List<MessageTools.Result> results = null;
+/*        List<MessageTools.Result> results = null;
         switch (msgType) {
             case MSGTYPE_MAP:
                 results = msgHandler.mapMsgHandle(msg);
@@ -167,7 +194,7 @@ public class MsgCenter {
         }
 
         //发送消息
-        MessageTools.sendMsgByUserId(results, msg.getFromUserName());
+        MessageTools.sendMsgByUserId(results, msg.getFromUserName());*/
         threadLocalOfMsg.remove();
     }
 
@@ -203,8 +230,11 @@ public class MsgCenter {
                     .fromMemberOfGroupNickname(msg.isGroupMsg() ? ContactsTools.getMemberNickNameOfGroup(msg.getFromUserName(), msg.getMemberName()) : null)
                     .fromMemberOfGroupUsername(msg.isGroupMsg() ? msg.getMemberName() : null)
                     .build();
-
-            int insert = messageMapper.insert(build);
+            SqlSession session = DataBaseUtil.getSession();
+            MessageMapper mapper = session.getMapper(MessageMapper.class);
+            int insert = mapper.insert(build);
+            session.commit();
+            session.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

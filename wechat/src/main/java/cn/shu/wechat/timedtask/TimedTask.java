@@ -9,6 +9,7 @@ import cn.shu.wechat.mapper.ContactsMapper;
 import cn.shu.wechat.mapper.MemberGroupRMapper;
 import cn.shu.wechat.mapper.MemberMapper;
 import cn.shu.wechat.service.ILoginService;
+import cn.shu.wechat.service.impl.LoginServiceImpl;
 import cn.shu.wechat.utils.ChartUtil;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import lombok.extern.log4j.Log4j2;
@@ -40,11 +41,18 @@ public class TimedTask {
         return executor;
     }
 
+    public static TimedTask getTimedTask() {
+        return timedTask;
+    }
+
+
+
+    private static TimedTask timedTask = new TimedTask();
     /**
      * 登录服务
      */
     @Resource
-    private ILoginService loginService;
+    private final ILoginService loginService = LoginServiceImpl.getLoginService();
     /**
      * 登录服务
      */

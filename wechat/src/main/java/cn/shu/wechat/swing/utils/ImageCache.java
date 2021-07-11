@@ -57,6 +57,16 @@ public class ImageCache
 
         return null;
     }
+    public ImageIcon tryGetThumbCache(File cacheFile )
+    {
+        if (cacheFile.exists())
+        {
+            ImageIcon icon = new ImageIcon(cacheFile.getAbsolutePath());
+            return icon;
+        }
+
+        return null;
+    }
 
 
     /**

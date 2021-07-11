@@ -5,14 +5,14 @@
     <!-- 引用db.properties配置文件 -->
     <properties resource="db.properties"/>
 
-    <typeAliases>
+<!--    <typeAliases>
         <typeAlias type="cn.shu.wechat.swing.db.model.CurrentUser" alias="CurrentUser"/>
         <typeAlias type="cn.shu.wechat.swing.db.model.Room" alias="Room"/>
         <typeAlias type="cn.shu.wechat.swing.db.model.Message" alias="Message"/>
         <typeAlias type="cn.shu.wechat.swing.db.model.FileAttachment" alias="FileAttachment"/>
         <typeAlias type="cn.shu.wechat.swing.db.model.ImageAttachment" alias="ImageAttachment"/>
         <typeAlias type="cn.shu.wechat.swing.db.model.ContactsUser" alias="ContactsUser"/>
-    </typeAliases>
+    </typeAliases>-->
 
     <!-- development : 开发模式 work : 工作模式 -->
     <environments default="development">
@@ -23,22 +23,22 @@
                 <!-- value属性值引用db.properties配置文件中配置的值 -->
                 <property name="driver" value="${jdbc.driverClassName}"/>
                 <property name="url" value="${jdbc.url}"/>
-                <!--<property name="username" value="${jdbc.username}"/>
-                <property name="password" value="${jdbc.password}"/>-->
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
             </dataSource>
         </environment>
     </environments>
 
 
     <mappers>
-        <mapper resource="cn/shu/wechat/swing/db/mapping/TableMapper.xml"/>
+<!--        <mapper resource="mapper/TableMapper.xml"/>
 
-        <mapper resource="cn/shu/wechat/swing/db/mapping/CurrentUserMapper.xml"/>
-        <mapper resource="cn/shu/wechat/swing/db/mapping/RoomMapper.xml"/>
-        <mapper resource="cn/shu/wechat/swing/db/mapping/MessageMapper.xml"/>
-        <mapper resource="cn/shu/wechat/swing/db/mapping/FileAttachmentMapper.xml"/>
-        <mapper resource="cn/shu/wechat/swing/db/mapping/ImageAttachmentMapper.xml"/>
-        <mapper resource="cn/shu/wechat/swing/db/mapping/ContactsUserMapper.xml"/>
+        <mapper resource="mapper/CurrentUserMapper.xml"/>
+        <mapper resource="mapper/RoomMapper.xml"/>-->
+        <mapper resource="mapper/MessageMapper.xml"/>
+<!--        <mapper resource="mapper/FileAttachmentMapper.xml"/>
+        <mapper resource="mapper/ImageAttachmentMapper.xml"/>
+        <mapper resource="mapper/ContactsUserMapper.xml"/>-->
     </mappers>
 
 

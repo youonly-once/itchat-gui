@@ -29,7 +29,7 @@ public class UploadTask
                     {
                         if (listener != null)
                         {
-                            listener.onTaskSuccess();
+                            //listener.onTaskSuccess();
                         }
                     }
                     else

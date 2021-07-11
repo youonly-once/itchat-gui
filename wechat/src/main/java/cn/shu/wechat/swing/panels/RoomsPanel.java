@@ -1,5 +1,8 @@
 package cn.shu.wechat.swing.panels;
 
+import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.beans.pojo.Contacts;
+import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.adapter.RoomItemViewHolder;
 import cn.shu.wechat.swing.adapter.RoomItemsAdapter;
 import cn.shu.wechat.swing.app.Launcher;
@@ -7,11 +10,13 @@ import cn.shu.wechat.swing.components.*;
 import cn.shu.wechat.swing.db.model.Room;
 import cn.shu.wechat.swing.db.service.RoomService;
 import cn.shu.wechat.swing.entity.RoomItem;
+import org.apache.commons.lang.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 左侧聊天列表
@@ -55,32 +60,32 @@ public class RoomsPanel extends ParentAvailablePanel
         roomItemList.clear();
 
         // TODO: 从数据库中加载房间列表
-
+        //从核心类加载房间列表
        // List<Room> rooms = roomService.findAll();
-        List<Room> rooms = new ArrayList<>();
-        Room room1 = new Room();
-        room1.setRoomId("1");
-
-        rooms.add(room1);
-        for (Room room : rooms)
-        {
+        List<Contacts> recentContacts = Core.getRecentContacts();
+        for (Contacts recentContact : recentContacts) {
             RoomItem item = new RoomItem();
-/*            item.setRoomId(room.getRoomId());
-            item.setTimestamp(room.getLastChatAt());
-            item.setTitle(room.getName());
-            item.setType(room.getType());
-            item.setLastMessage(room.getLastMessage());
-            item.setUnreadCount(room.getUnreadCount());*/
-            item.setRoomId("RoomID1");
-            item.setTimestamp(456);
-            item.setTitle("789");
-            item.setType("10");
-            item.setLastMessage("HH");
-            item.setUnreadCount(20);
+            item.setRoomId(recentContact.getUsername());
+            item.setTimestamp(System.currentTimeMillis());
+            item.setTitle(ContactsTools.getContactDisplayNameByUserName(recentContact.getUsername()));
+            item.setType(recentContact.getUsername().startsWith("@@")?"c":"d");
+            item.setLastMessage("");
+            item.setUnreadCount(0);
             roomItemList.add(item);
         }
     }
 
+    public void addRoom(Contacts recentContact,String latestMsg){
+        RoomItem item = new RoomItem();
+        item.setRoomId(recentContact.getUsername());
+        item.setTimestamp(System.currentTimeMillis());
+        item.setTitle(StringUtils.isEmpty(recentContact.getRemarkname())?recentContact.getNickname():recentContact.getRemarkname());
+        item.setType(recentContact.getUsername().startsWith("@@")?"c":"d");
+        item.setLastMessage(latestMsg);
+        item.setUnreadCount(1);
+        roomItemList.add(0,item);
+        roomItemsListView.notifyDataSetChanged(true);
+    }
     /**
      * 重绘整个列表
      */
@@ -126,7 +131,7 @@ public class RoomsPanel extends ParentAvailablePanel
      * 更新指定位置的房间项目
      * @param roomId
      */
-    public void updateRoomItem(String roomId)
+    public void updateRoomItem(String roomId,int unReadCount,String lastMsg,Long time)
     {
         if (roomId == null || roomId.isEmpty())
         {
@@ -139,14 +144,25 @@ public class RoomsPanel extends ParentAvailablePanel
             RoomItem item = roomItemList.get(i);
             if (item.getRoomId().equals(roomId))
             {
-                Room room = roomService.findById(item.getRoomId());
-                if (room != null)
-                {
-                    item.setLastMessage(room.getLastMessage());
-                    item.setTimestamp(room.getLastChatAt());
-                    item.setUnreadCount(room.getUnreadCount());
+                //Room room = roomService.findById(item.getRoomId());
+               // if (room != null)
+               // {
+                    if (lastMsg!=null){
+                        item.setLastMessage(lastMsg);
+                    }
+                    if (time!=null){
+                        item.setTimestamp(time);
+                    }
+
+
+                    if (unReadCount == 0){
+                        item.setUnreadCount(unReadCount);
+                    }else if (unReadCount!=-1){
+                        item.setUnreadCount(item.getUnreadCount()+unReadCount);
+                    }
+
                     roomItemsListView.notifyItemChanged(i);
-                }
+              //  }
                 break;
             }
         }

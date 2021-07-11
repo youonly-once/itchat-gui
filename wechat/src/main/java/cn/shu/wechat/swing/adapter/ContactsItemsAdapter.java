@@ -94,7 +94,7 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder>
             System.out.println(item);
         }
         try {
-            icon.setImage(ImageIO.read(new File("D:\\weixin\\headimg\\@@9e6e2bc6b5c0030502524a00211d3f575e5e7fbef9ddebf401806c7188ebab5f\\69f3d51dba8bd4ce8b613aef2f8a59f8.jpg"))
+            icon.setImage(ImageIO.read(new File(item.getHeadImgPath()))
                     .getScaledInstance(30, 30, Image.SCALE_SMOOTH));
         } catch (IOException e) {
             e.printStackTrace();

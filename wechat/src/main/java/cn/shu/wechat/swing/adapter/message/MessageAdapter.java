@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.adapter.message;
 
+import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.swing.adapter.BaseAdapter;
 import cn.shu.wechat.swing.adapter.ViewHolder;
 import cn.shu.wechat.swing.app.Launcher;
@@ -25,6 +26,7 @@ import cn.shu.wechat.swing.utils.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -531,8 +533,8 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
         map.put("messageId", item.getId());
         imageLabel.setTag(map);
 
-        ImageIcon imageIcon = imageCache.tryGetThumbCache(item.getImageAttachment().getId());
-
+       // ImageIcon imageIcon = imageCache.tryGetThumbCache(item.getImageAttachment().getId());
+        ImageIcon imageIcon = imageCache.tryGetThumbCache(new File(imageUrl));
         if (imageIcon == null)
         {
             imageLabel.setIcon(IconUtil.getIcon(this, "/image/image_loading.gif"));
@@ -615,7 +617,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
         {
             if (needToUpdateResendStatus)
             {
-                messageService.updateNeedToResend(item.getId(), true);
+                //messageService.updateNeedToResend(item.getId(), true);
             }
 
 
@@ -746,7 +748,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
             @Override
             public void mouseClicked(MouseEvent e)
             {
-                UserInfoPopup popup = new UserInfoPopup(username);
+                UserInfoPopup popup = new UserInfoPopup(username, ContactsTools.getContactDisplayNameByUserName(username));
                 popup.show(e.getComponent(), e.getX(), e.getY());
 
                 super.mouseClicked(e);

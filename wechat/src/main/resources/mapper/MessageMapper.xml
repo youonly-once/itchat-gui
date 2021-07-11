@@ -786,4 +786,18 @@
       </if>
     </trim>
   </insert>
+  <select id="selectLastMessage" resultMap="BaseResultMap">
+  select <include refid="Base_Column_List"/>
+  from message
+  where from_username = #{roomId,jdbcType=VARCHAR} or to_username = #{roomId,jdbcType=VARCHAR}
+  order by create_time desc
+  limit 0,1
+</select>
+<select id="selectByPage" resultMap="BaseResultMap">
+  select <include refid="Base_Column_List"/>
+  from message
+  where from_username = #{roomId,jdbcType=VARCHAR} or to_username = #{roomId,jdbcType=VARCHAR}
+  order by create_time asc
+  limit #{start},#{end}
+</select>
 </mapper>

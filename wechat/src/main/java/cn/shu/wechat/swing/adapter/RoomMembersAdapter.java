@@ -1,5 +1,8 @@
 package cn.shu.wechat.swing.adapter;
 
+import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.beans.pojo.Contacts;
+import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.db.model.CurrentUser;
@@ -50,7 +53,8 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder>
             viewHolders.add(viewHolder);
         }
 
-        String name = members.get(position);
+        String userName = members.get(position);
+        String name = ContactsTools.getContactDisplayNameByUserName(userName);
         viewHolder.roomName.setText(name);
 
         if (name.equals("添加成员"))
@@ -127,10 +131,10 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder>
             imageIcon.setImage(AvatarUtil.createOrLoadUserAvatar(name).getScaledInstance(30, 30, Image.SCALE_SMOOTH));
             viewHolder.avatar.setIcon(imageIcon);
 
-            UserInfoPopup userInfoPopup = new UserInfoPopup(name);
+            UserInfoPopup userInfoPopup = new UserInfoPopup(userName,name);
 
 
-            if (!name.equals(currentUser.getUsername()))
+            if (!name.equals(Core.getNickName()))
             {
                 viewHolder.addMouseListener(new AbstractMouseListener()
                 {

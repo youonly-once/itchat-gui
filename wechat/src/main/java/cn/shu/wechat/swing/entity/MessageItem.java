@@ -4,14 +4,17 @@ import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.db.model.FileAttachment;
 import cn.shu.wechat.swing.db.model.ImageAttachment;
 import cn.shu.wechat.swing.db.model.Message;
+import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by song on 20/03/2017.
  */
 
+@Data
 public class MessageItem implements Comparable<MessageItem>
 {
     public static final int SYSTEM_MESSAGE = 0;
@@ -77,7 +80,14 @@ public class MessageItem implements Comparable<MessageItem>
         {
             isImageAttachment = true;
 
-            ImageAttachment ia = Launcher.imageAttachmentService.findById(message.getImageAttachmentId());
+            ImageAttachment ia = new ImageAttachment();
+            ia.setDescription("DESC");
+            ia.setHeight(500);
+            ia.setWidth(400);
+            ia.setTitle("sasd");
+            ia.setImagesize(200);
+            ia.setId(UUID.randomUUID().toString());
+            ia.setImageUrl(message.getImageAttachmentId());
             this.imageAttachment = new ImageAttachmentItem(ia);
         }
 
@@ -142,156 +152,6 @@ public class MessageItem implements Comparable<MessageItem>
     {
         return (int) (this.getTimestamp() - o.getTimestamp());
 
-    }
-
-    public String getId()
-    {
-        return id;
-    }
-
-    public void setId(String id)
-    {
-        this.id = id;
-    }
-
-    public String getRoomId()
-    {
-        return roomId;
-    }
-
-    public void setRoomId(String roomId)
-    {
-        this.roomId = roomId;
-    }
-
-    public String getMessageContent()
-    {
-        return messageContent;
-    }
-
-    public void setMessageContent(String messageContent)
-    {
-        this.messageContent = messageContent;
-    }
-
-    public boolean isGroupable()
-    {
-        return groupable;
-    }
-
-    public void setGroupable(boolean groupable)
-    {
-        this.groupable = groupable;
-    }
-
-    public long getTimestamp()
-    {
-        return timestamp;
-    }
-
-    public void setTimestamp(long timestamp)
-    {
-        this.timestamp = timestamp;
-    }
-
-    public String getSenderUsername()
-    {
-        return senderUsername;
-    }
-
-    public void setSenderUsername(String senderUsername)
-    {
-        this.senderUsername = senderUsername;
-    }
-
-    public String getSenderId()
-    {
-        return senderId;
-    }
-
-    public void setSenderId(String senderId)
-    {
-        this.senderId = senderId;
-    }
-
-    public long getUpdatedAt()
-    {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(long updatedAt)
-    {
-        this.updatedAt = updatedAt;
-    }
-
-    public int getUnreadCount()
-    {
-        return unreadCount;
-    }
-
-    public void setUnreadCount(int unreadCount)
-    {
-        this.unreadCount = unreadCount;
-    }
-
-    public boolean isNeedToResend()
-    {
-        return needToResend;
-    }
-
-    public void setNeedToResend(boolean needToResend)
-    {
-        this.needToResend = needToResend;
-    }
-
-    public int getProgress()
-    {
-        return progress;
-    }
-
-    public void setProgress(int progress)
-    {
-        this.progress = progress;
-    }
-
-    public boolean isDeleted()
-    {
-        return deleted;
-    }
-
-    public void setDeleted(boolean deleted)
-    {
-        this.deleted = deleted;
-    }
-
-    public int getMessageType()
-    {
-        return messageType;
-    }
-
-    public void setMessageType(int messageType)
-    {
-        this.messageType = messageType;
-    }
-
-    public FileAttachmentItem getFileAttachment()
-    {
-        return fileAttachment;
-    }
-
-    public void setFileAttachment(FileAttachmentItem fileAttachment)
-    {
-        this.fileAttachment = fileAttachment;
-    }
-
-    public ImageAttachmentItem getImageAttachment()
-    {
-        return imageAttachment;
-    }
-
-    public void setImageAttachment(ImageAttachmentItem imageAttachment)
-    {
-        this.imageAttachment = imageAttachment;
     }
 }
 

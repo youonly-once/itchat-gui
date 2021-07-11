@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import cn.shu.wechat.beans.pojo.Contacts;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import cn.shu.wechat.enums.parameters.BaseParaEnum;
@@ -106,6 +107,23 @@ public class Core {
      * 多线程下载 用安全ConcurrentHashMap
      */
     static private Map<String, String> contactHeadImgPath = new ConcurrentHashMap<>();
+
+
+
+
+    /**
+     * 所有好友最新头像路径
+     * 多线程下载 用安全ConcurrentHashMap
+     */
+    static private List<Contacts> recentContacts = new ArrayList<>();
+
+    public static List<Contacts> getRecentContacts() {
+        return recentContacts;
+    }
+
+    public static void setRecentContacts(List<Contacts> recentContacts) {
+        Core.recentContacts = recentContacts;
+    }
 
     /**
      * 扫描登录前需获取的UUID

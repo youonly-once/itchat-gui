@@ -7,6 +7,7 @@ import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.*;
 import cn.shu.wechat.exception.WebWXException;
 import cn.shu.wechat.mapper.MessageMapper;
+import cn.shu.wechat.swing.tasks.UploadTaskCallback;
 import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -22,6 +23,8 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.util.EntityUtils;
 import cn.shu.wechat.beans.msg.sync.AddMsgList;
 import cn.shu.wechat.beans.msg.sync.RecommendInfo;
+import org.apache.ibatis.session.SqlSession;
+import org.jfree.data.general.DatasetUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -150,7 +153,7 @@ public class MessageTools {
      * @param results         发送的消息
      * @param sendMsgResponse 发送成功响应信息
      */
-    private static void storeMsgToDB(List<Result> results, WebWXSendMsgResponse sendMsgResponse, String toUserName) {
+    public static void storeMsgToDB(List<Result> results, WebWXSendMsgResponse sendMsgResponse, String toUserName) {
         ArrayList<Message> messages = new ArrayList<>();
         for (Result result : results) {
             boolean isToSelf = toUserName.endsWith(Core.getUserName());
@@ -196,9 +199,13 @@ public class MessageTools {
 
         }
         try {
-            int insert = messageMapper.batchInsert(messages);
+            SqlSession session = DataBaseUtil.getSession();
+            MessageMapper mapper = session.getMapper(MessageMapper.class);
+            int insert = mapper.batchInsert(messages);
+            session.commit();
+            session.close();
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
     }
 
@@ -247,7 +254,7 @@ public class MessageTools {
      * @param toUserName   消息接收者
      * @return {@link WebWXSendMsgResponse}
      */
-    private static WebWXUploadMediaResponse webWxUploadMedia(String filePath, String fromUserName, String toUserName) throws WebWXException, IOException {
+    public static WebWXUploadMediaResponse webWxUploadMedia(String filePath, String fromUserName, String toUserName, UploadTaskCallback callback) throws WebWXException, IOException {
         //微信上传最大文件大小
         long maxFileSize = 1024 * 1024 * 20;
         //一次上传的文件最大1M
@@ -346,6 +353,9 @@ public class MessageTools {
             HttpEntity reqEntity = builder.build();
             HttpEntity resultEntity = MyHttpClient.doPostFile(url, reqEntity);
             result = EntityUtils.toString(resultEntity, Consts.UTF_8);
+            if (callback!=null){
+                callback.onTaskSuccess(1,1,  JSON.parseObject(result, WebWXUploadMediaResponse.class));
+            }
 
         } else {
             //大于1M发送方式
@@ -375,7 +385,9 @@ public class MessageTools {
                     //不关闭下次执行会卡住
                     resultEntity.getContent().close();
                 }
-
+                if (callback!=null){
+                    callback.onTaskSuccess(i+1,partFilePathList.size(),JSON.parseObject(result, WebWXUploadMediaResponse.class));
+                }
             }
             //删除分片文件
             FileSplitAndMergeUtil.deletePartFile(partFilePathList);
@@ -404,7 +416,7 @@ public class MessageTools {
     public static WebWXSendMsgResponse sendPicMsgByUserId(String userId, String filePath, String content) throws WebWXException, IOException {
         String mediaId = "";
         if (StringUtils.isEmpty(content) || !content.startsWith("@")) {
-            WebWXUploadMediaResponse resp = webWxUploadMedia(filePath, Core.getUserName(), userId);
+            WebWXUploadMediaResponse resp = webWxUploadMedia(filePath, Core.getUserName(), userId,null);
             mediaId = resp.getMediaId();
             content = "";
         }
@@ -416,6 +428,29 @@ public class MessageTools {
         textMsg.MediaId = mediaId;
         textMsg.ToUserName = userId;
         textMsg.Content = content;
+        msgRequest.Msg = textMsg;
+        return sendMsg(msgRequest, url);
+
+    }
+    /**
+     * 根据用户id发送图片消息
+     *
+     * @param userId   消息接收者UserName
+     * @param filePath 待上传文件路径 content为空时使用上传
+     * @param content  消息内容，content可能包含资源文件的id等信息，可直接使用
+     * @return {@link WebWXSendMsgResponse}
+     * @author SXS
+     * @date 2017年5月7日 下午10:34:24
+     */
+    public static WebWXSendMsgResponse sendPicMsgByUserId(String userId,  String mediaId) throws WebWXException, IOException {
+        String url = String.format(URLEnum.WEB_WX_SEND_PIC_MSG.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()),
+                Core.getLoginInfoMap().get("pass_ticket"));
+
+        WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
+        WebWXSendingPicMsg textMsg = new WebWXSendingPicMsg();
+        textMsg.MediaId = mediaId;
+        textMsg.ToUserName = userId;
+        textMsg.Content = "";
         msgRequest.Msg = textMsg;
         return sendMsg(msgRequest, url);
 
@@ -451,7 +486,7 @@ public class MessageTools {
         }
 
         if (md5 == null) {
-            WebWXUploadMediaResponse resp = webWxUploadMedia(filePath, Core.getUserName(), userId);
+            WebWXUploadMediaResponse resp = webWxUploadMedia(filePath, Core.getUserName(), userId,null);
             textMsg.MediaId = resp.getMediaId();
             textMsg.EmojiFlag = 2;
         } else {
@@ -509,7 +544,7 @@ public class MessageTools {
     public static WebWXSendMsgResponse sendVideoMsgByUserId(String userId, String filePath, String content) throws WebWXException, IOException {
         String mediaId = "";
         if (StringUtils.isEmpty(content) || !content.startsWith("@")) {
-            WebWXUploadMediaResponse resp = webWxUploadMedia(filePath, Core.getUserName(), userId);
+            WebWXUploadMediaResponse resp = webWxUploadMedia(filePath, Core.getUserName(), userId,null);
             mediaId = resp.getMediaId();
             content = "";
         }
@@ -547,7 +582,7 @@ public class MessageTools {
             if (fileext == null) {
                 fileext = "";
             }
-            WebWXUploadMediaResponse webWXUploadMediaResponse = webWxUploadMedia(filePath, Core.getUserName(), userId);
+            WebWXUploadMediaResponse webWXUploadMediaResponse = webWxUploadMedia(filePath, Core.getUserName(), userId,null);
             long totallen = webWXUploadMediaResponse.getStartPos();
             String attachid = webWXUploadMediaResponse.getMediaId();
             content = "<appmsg appid='wxeb7ec651dd0aefa9' sdkver=''>" +

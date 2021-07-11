@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.adapter;
 
+import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.db.model.CurrentUser;
@@ -11,6 +12,8 @@ import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.TimeUtil;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 import javax.swing.*;
 import java.awt.*;
@@ -168,12 +171,18 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder>
 
     private String[] getRoomMembers(String roomId)
     {
-        Room room = roomService.findById(roomId);
-        String members = room.getMember();
-        String[] memberArr = null;
-
+        //Room room = roomService.findById(roomId);
+        JSONObject o = Core.getMemberMap().get(roomId);
+        JSONArray memberList = o.getJSONArray("MemberList");
+        //String members = room.getMember();
         List<String> roomMembers = new ArrayList<>();
-        if (members != null)
+        String[] memberArr = null;
+        for (Object o1 : memberList) {
+            JSONObject meber = (JSONObject)o1;
+            roomMembers.add(meber.getString("NickName"));
+        }
+
+      /*  if (members != null)
         {
             String[] userArr = members.split(",");
             for (int i = 0; i < userArr.length; i++)
@@ -191,7 +200,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder>
             {
                 roomMembers.add(creator);
             }
-        }
+        }*/
 
         memberArr = roomMembers.toArray(new String[]{});
         return memberArr;

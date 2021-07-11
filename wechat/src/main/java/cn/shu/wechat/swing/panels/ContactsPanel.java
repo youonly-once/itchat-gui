@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.panels;
 
+import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.adapter.ContactsItemsAdapter;
 import cn.shu.wechat.swing.app.Launcher;
@@ -81,13 +82,9 @@ public class ContactsPanel extends ParentAvailablePanel
         List<ContactsUser> contactsUsers = new ArrayList<>();
         Map<String, JSONObject> memberMap = Core.getMemberMap();
         for (Map.Entry<String, JSONObject> stringJSONObjectEntry : memberMap.entrySet()) {
-            JSONObject value = stringJSONObjectEntry.getValue();
-            String remarkName = value.getString("RemarkName");
-            if (StringUtils.isEmpty(remarkName)){
-                remarkName = value.getString("NickName");
-            }
+
             String head = Core.getContactHeadImgPath().get(stringJSONObjectEntry.getKey());
-            ContactsItem item = new ContactsItem(stringJSONObjectEntry.getKey(),remarkName, "d",head);
+            ContactsItem item = new ContactsItem(stringJSONObjectEntry.getKey(), ContactsTools.getContactDisplayNameByUserName(stringJSONObjectEntry.getKey()), "d",head);
             contactsItemList.add(item);
         }
 
@@ -147,8 +144,37 @@ public class ContactsPanel extends ParentAvailablePanel
         // TODO: 服务器获取头像，这里从资源文件夹中获取
         try
         {
-            URL url = getClass().getResource("/avatar/" + username + ".png");
-            BufferedImage image = ImageIO.read(url);
+          //  URL url = getClass().getResource("/avatar/" + username + ".png");
+            BufferedImage image = ImageIO.read(new File(Core.getContactHeadImgPath().get(username)));
+            processAvatarData(image, username);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        if (hotRefresh)
+        {
+            AvatarUtil.refreshUserAvatarCache(username);
+
+            if (username.equals(currentUsername))
+            {
+                MyInfoPanel.getContext().reloadAvatar();
+            }
+        }
+    }
+    /**
+     * 更新指定用户头像
+     * @param username 用户名
+     * @param hotRefresh 是否热更新，hotRefresh = true， 将刷新该用户的头像缓存
+     */
+    public void getUserAvatar(String username, boolean hotRefresh,String headPath)
+    {
+
+        // TODO: 服务器获取头像，这里从资源文件夹中获取
+        try
+        {
+            BufferedImage image = ImageIO.read(new File(headPath));
 
             processAvatarData(image, username);
         }
@@ -167,7 +193,6 @@ public class ContactsPanel extends ParentAvailablePanel
             }
         }
     }
-
     /**
      * 处理头像数据
      * @param image
