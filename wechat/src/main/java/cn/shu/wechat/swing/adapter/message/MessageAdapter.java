@@ -534,6 +534,8 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
         imageLabel.setTag(map);
 
        // ImageIcon imageIcon = imageCache.tryGetThumbCache(item.getImageAttachment().getId());
+        imageUrl = (imageUrl==null?"/image/image_loading.gif":imageUrl);
+
         ImageIcon imageIcon = imageCache.tryGetThumbCache(new File(imageUrl));
         if (imageIcon == null)
         {
@@ -679,7 +681,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
     {
         MessageLeftTextViewHolder holder = (MessageLeftTextViewHolder) viewHolder;
 
-        holder.text.setText(item.getMessageContent());
+        holder.text.setText(item.getMessageContent()==null?"[空消息]":item.getMessageContent());
         holder.text.setTag(item.getId());
 
         holder.sender.setText(item.getSenderUsername());

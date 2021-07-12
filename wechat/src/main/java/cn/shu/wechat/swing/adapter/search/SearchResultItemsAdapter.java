@@ -218,9 +218,10 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
     {
         SearchResultMessageItemViewHolder holder = (SearchResultMessageItemViewHolder) viewHolder;
         Room room = roomService.findById((String) item.getTag());
+
         Message message = messageService.findById(item.getId());
 
-        holder.avatar.setIcon(new ImageIcon(getRoomAvatar(room.getType(), room.getName(), null)));
+        holder.avatar.setIcon(new ImageIcon(getRoomAvatar(((String) item.getTag()).startsWith("@@"),room.getRoomId())));
         holder.brief.setKeyWord(keyWord);
         holder.brief.setText(item.getName());
         holder.roomName.setText(room.getName());
@@ -331,7 +332,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
 
         if (type.equals("c") || type.equals("p") || type.equals("d"))
         {
-            icon.setImage(getRoomAvatar(type, item.getName(), null));
+            icon.setImage(getRoomAvatar(true, item.getTag().toString()));
         }
         else
         {
@@ -387,23 +388,22 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
     /**
      * 根据房间类型获取对应的头像
      *
-     * @param type
-     * @param name
-     * @return
+     * @param isGroup 是否为群
+     * @param roomId 房间id
+     * @return 头像
      */
-    private Image getRoomAvatar(String type, String name, String[] members)
+    private Image getRoomAvatar(boolean isGroup, String roomId)
     {
-        if (type.equals("c") || type.equals("p"))
-        {
-            return AvatarUtil.createOrLoadGroupAvatar(name, members, type).getScaledInstance(35, 35, Image.SCALE_SMOOTH);
+        if (isGroup){
+            //群头像
+            return AvatarUtil.createOrLoadGroupAvatar(roomId).getScaledInstance(35, 35, Image.SCALE_SMOOTH);
         }
         // 私聊头像
-        else if (type.equals("d"))
+        else
         {
-            return AvatarUtil.createOrLoadUserAvatar(name).getScaledInstance(35, 35, Image.SCALE_SMOOTH);
+            return AvatarUtil.createOrLoadUserAvatar(roomId).getScaledInstance(35, 35, Image.SCALE_SMOOTH);
         }
 
-        return null;
     }
 
     /**

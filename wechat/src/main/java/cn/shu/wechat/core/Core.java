@@ -54,7 +54,9 @@ public class Core {
 
     /**
      * 好友+群聊+公众号+特殊账号
+     * 不包括filehelper
      */
+
     static private Map<String, JSONObject> memberMap = new ConcurrentHashMap<>(1024);
 
 
@@ -115,13 +117,13 @@ public class Core {
      * 所有好友最新头像路径
      * 多线程下载 用安全ConcurrentHashMap
      */
-    static private List<Contacts> recentContacts = new ArrayList<>();
+    static private Set<Contacts> recentContacts = new HashSet<>();
 
-    public static List<Contacts> getRecentContacts() {
+    public static Set<Contacts> getRecentContacts() {
         return recentContacts;
     }
 
-    public static void setRecentContacts(List<Contacts> recentContacts) {
+    public static void setRecentContacts(Set<Contacts> recentContacts) {
         Core.recentContacts = recentContacts;
     }
 

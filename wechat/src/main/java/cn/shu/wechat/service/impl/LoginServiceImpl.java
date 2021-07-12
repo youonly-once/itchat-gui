@@ -204,7 +204,7 @@ public class LoginServiceImpl implements ILoginService {
             //最近聊天的联系人
             JSONArray contactList = obj.getJSONArray("ContactList");
             List<Contacts> contactsList = JSON.parseArray(JSON.toJSONString(contactList), Contacts.class);
-            Core.setRecentContacts(contactsList);
+            Core.setRecentContacts(new HashSet<>(contactsList));
             String chatSet = obj.getString("ChatSet");
             String[] chatSetArray = chatSet.split(",");
      /*       for (String s : chatSetArray) {

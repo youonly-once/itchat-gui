@@ -114,9 +114,17 @@ public class MsgCenter {
             //只显示常规消息
             //刷新消息
             ChatPanel.getContext().addOrUpdateMessageItem();
-            JSONObject jsonObject = Core.getMemberMap().get(userName);
-            String string = JSON.toJSONString(jsonObject);
-            Contacts contacts = JSON.parseObject(string, Contacts.class);
+
+            Contacts contacts;
+            if ("filehelper".equals(userName)){
+                contacts = new Contacts();
+                contacts.setUsername(userName);
+            }else{
+                JSONObject jsonObject = Core.getMemberMap().get(userName);
+                String string = JSON.toJSONString(jsonObject);
+                contacts = JSON.parseObject(string, Contacts.class);
+            }
+
             if (!Core.getRecentContacts().contains(contacts)) {
                 RoomsPanel.getContext().addRoom(contacts, msg.getContent());
                 Core.getRecentContacts().add(contacts);
@@ -187,7 +195,7 @@ public class MsgCenter {
                 results = msgHandler.nameCardMsgHandle(msg);
                 break;
             case MSGTYPE_RECALLED:
-               // results = msgHandler.undoMsgHandle(msg);
+                results = msgHandler.undoMsgHandle(msg);
                 break;
             case UNKNOWN:
             default:
@@ -204,7 +212,7 @@ public class MsgCenter {
     /**
      * 保存消息到数据库
      *
-     * @param msg
+     * @param msg 消息
      */
     private void storeMsgToDB(AddMsgList msg) {
         try {

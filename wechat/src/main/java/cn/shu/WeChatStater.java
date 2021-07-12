@@ -42,13 +42,6 @@ public class WeChatStater {
                 return null;
             }
         }.execute();
- /*       SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                Launcher launcher = new Launcher();
-                launcher.launch();
-            }
-        });*/
         SleepUtils.sleep(Long.MAX_VALUE);
     }
 

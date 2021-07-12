@@ -1,8 +1,14 @@
 package cn.shu.wechat.swing.utils;
 
+import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.utils.CommonTools;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.FileImageInputStream;
@@ -17,15 +23,13 @@ import java.util.Map;
 
 
 /**
- * Created by song on 15/03/2017.
+ * 头像创建工具类
  */
-
-public class AvatarUtil
-{
+@Log4j2
+public class AvatarUtil {
     private static final Color[] colorArr;
 
-    static
-    {
+    static {
         colorArr = new Color[]{
                 new Color(244, 67, 54),
                 new Color(233, 30, 99),
@@ -55,81 +59,84 @@ public class AvatarUtil
 
     private static Map<String, Image> avatarCache = new HashMap<>();
 
-    static
-    {
+    static {
         AVATAR_CACHE_ROOT = Launcher.appFilesBasePath + "/cache/avatar";
 
         File file = new File(AVATAR_CACHE_ROOT);
-        if (!file.exists())
-        {
+        if (!file.exists()) {
             file.mkdirs();
             System.out.println("创建头像缓存目录：" + file.getAbsolutePath());
         }
 
         CUSTOM_AVATAR_CACHE_ROOT = AVATAR_CACHE_ROOT + "/custom";
         file = new File(CUSTOM_AVATAR_CACHE_ROOT);
-        if (!file.exists())
-        {
+        if (!file.exists()) {
             file.mkdirs();
             System.out.println("创建用户自定义头像缓存目录：" + file.getAbsolutePath());
         }
     }
 
+    /**
+     * 创建群头像
+     *
+     * @param roomId 房间id
+     * @return 头像
+     */
+    public static Image createOrLoadGroupAvatar(String roomId) {   //获取群成员
 
-    public static Image createOrLoadGroupAvatar(String groupName, String[] members, String type)
-    {
-        Image avatar;
-        avatar = avatarCache.get(groupName);
+        //获取内存中的群头像
+        Image avatar = avatarCache.get(roomId);
 
-        // 如果在内存中的缓存
-        if (avatar == null)
-        {
-            avatar = getCachedImageAvatar(groupName);
+        // 如果在内存中的缓存不存在
+        if (avatar == null) {
+            //获取缓存在磁盘的头像
+            avatar = getCachedImageAvatar(roomId);
 
-            // 如果在硬盘中有缓存的文件
-            if (avatar == null)
-            {
+            // 硬盘中无缓存
+            if (avatar == null) {
+                JSONArray memberList = Core.getMemberMap().get(roomId).getJSONArray("MemberList");
                 // 如果尚未从服务器获取群成员，则获取默认群组头像
-                if (members == null || members.length < 1)
-                {
-                    String sign = type.equals("p") ? "#" : "##";
-                    avatar = getCachedImageAvatar(sign);
+                if (memberList == null || memberList.isEmpty()) {
 
+                    //获取 ##.png头像
+                    String sign = "##";
+                    avatar = getCachedImageAvatar(sign);
                     // 默认群组头像不存在，则生成
-                    if (avatar == null)
-                    {
-                        System.out.println("创建群组默认头像 : " + groupName);
-                        avatar = createAvatar(sign, groupName);
+                    if (avatar == null) {
+                        log.info("创建群组默认头像 : {}", roomId);
+                        avatar = createAvatar(ContactsTools.getContactDisplayNameByUserName(roomId));
                     }
-                }
-                // 有群成员，根据群成员的头像合成群头像
-                else
-                {
-                    System.out.println("创建群组个性头像 : " + groupName);
-                    avatar = createGroupAvatar(groupName, members);
+                } else {
+                    // 有群成员，根据群成员的头像合成群头像
+                    log.info("创建群组个性头像 : {}" , roomId);
+                    avatar = createGroupAvatar(roomId, memberList);
                 }
             }
-
-            avatarCache.put(groupName, avatar);
+            //本次生成的头像缓存到内存
+            avatarCache.put(roomId, avatar);
         }
 
         return avatar;
     }
 
-    public static Image createOrLoadUserAvatar(String username)
-    {
-        Image avatar;
-
-        avatar = avatarCache.get(username);
-        if (avatar == null)
-        {
-            avatar = getCachedImageAvatar(username);
-            if (avatar == null)
-            {
-                avatar = createAvatar(username, username);
+    /**
+     * 创建或读取普通用户头像
+     * @param userName 用户名也是房间id
+     * @return 头像
+     */
+    public static Image createOrLoadUserAvatar(String userName) {
+        String displayName = ContactsTools.getContactDisplayNameByUserName(userName);
+        //获取内存中的头像
+        Image avatar = avatarCache.get(userName);
+        if (avatar == null) {
+            //缓存在磁盘中的文件
+            avatar = getCachedImageAvatar(userName);
+            if (avatar == null) {
+                //创建文件
+                avatar = createAvatar(displayName);
             }
 
-            avatarCache.put(username, avatar);
+            avatarCache.put(userName, avatar);
         }
 
         return avatar;
@@ -137,28 +144,28 @@ public class AvatarUtil
 
     /**
      * 刷新用户头像缓存
+     *
      * @param username
      */
-    public static void refreshUserAvatarCache(String username)
-    {
+    public static void refreshUserAvatarCache(String username) {
         avatarCache.put(username, null);
     }
 
-
-    private static Image createAvatar(String sign, String name)
-    {
+    /**
+     * 创建头像
+     * @param displayName 显示名称
+     * @return 头像
+     */
+    private static Image createAvatar(String displayName) {
         String drawString;
-        if (sign.length() > 1)
-        {
-            drawString = sign.substring(0, 1).toUpperCase() + sign.substring(1, 2).toLowerCase();
-        }
-        else
-        {
-            drawString = sign;
+        //取前几位绘制头像
+        if (displayName.length() > 1) {
+            drawString = displayName.substring(0, 1).toUpperCase() + displayName.substring(1, 2).toLowerCase();
+        } else {
+            drawString = displayName;
         }
 
-        try
-        {
+        try {
             int width = 200;
             int height = 200;
 
@@ -171,7 +178,7 @@ public class AvatarUtil
             // 抗锯齿
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             // 画图
-            g2d.setBackground(getColor(name));
+            g2d.setBackground(getColor(displayName));
             g2d.clearRect(0, 0, width, height);
 
             // 文字
@@ -187,12 +194,11 @@ public class AvatarUtil
             BufferedImage roundImage = ImageUtil.setRadius(image, width, height, 35);
 
             g2d.dispose();
-            File file = new File(AVATAR_CACHE_ROOT + "/" + sign + ".png");
+            File file = new File(AVATAR_CACHE_ROOT + "/" + displayName + ".png");
             ImageIO.write(roundImage, "png", file);
 
             return roundImage;
-        } catch (Exception ex)
-        {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
@@ -200,83 +206,67 @@ public class AvatarUtil
     }
 
 
-    private static Color getColor(String username)
-    {
+    private static Color getColor(String username) {
         int position = username.length() % colorArr.length;
         return colorArr[position];
     }
 
-    public static void saveAvatar(BufferedImage image, String username)
-    {
+    public static void saveAvatar(BufferedImage image, String username) {
         saveAvatar(image, username, CUSTOM_AVATAR);
     }
 
-    private static void saveAvatar(BufferedImage image, String username, int type)
-    {
+    private static void saveAvatar(BufferedImage image, String username, int type) {
         String path = "";
-        if (type == DEFAULT_AVATAR)
-        {
+        if (type == DEFAULT_AVATAR) {
             path = AVATAR_CACHE_ROOT + "/" + username + ".png";
-        }
-        else if (type == CUSTOM_AVATAR)
-        {
+        } else if (type == CUSTOM_AVATAR) {
             path = CUSTOM_AVATAR_CACHE_ROOT + "/" + username + ".png";
-        }
-        else
-        {
+        } else {
             throw new RuntimeException("类型不存在");
         }
 
         File avatarPath = new File(path);
 
-        try
-        {
-            if (image != null)
-            {
+        try {
+            if (image != null) {
                 BufferedImage bufferedImage = ImageUtil.setRadius(image, image.getWidth(), image.getHeight(), 35);
                 ImageIO.write(bufferedImage, "png", avatarPath);
-            }
-            else
-            {
+            } else {
                 throw new RuntimeException("头像保存失败，数据为空");
             }
 
-        } catch (FileNotFoundException e)
-        {
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
-        } catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private static Image getCachedImageAvatar(String username)
-    {
-        if (customAvatarExist(username))
-        {
+    /**
+     * 获取缓存在磁盘的用户头像
+     * @param username 用户名
+     * @return 头像
+     */
+    private static Image getCachedImageAvatar(String username) {
+
+        if (customAvatarExist(username)) {
+            //缓存在磁盘的自定义的用户头像
             String path = CUSTOM_AVATAR_CACHE_ROOT + "/" + username + ".png";
 
             return readImage(path);
-        }
-        else if (defaultAvatarExist(username))
-        {
+        } else if (defaultAvatarExist(username)) {
+            //缓存在磁盘的默认用户头像
             String path = AVATAR_CACHE_ROOT + "/" + username + ".png";
             return readImage(path);
-        }
-        else
-        {
+        } else {
             return null;
         }
     }
 
-    private static BufferedImage readImage(String path)
-    {
-        try
-        {
+    private static BufferedImage readImage(String path) {
+        try {
             return ImageIO.read(new File(path));
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -284,47 +274,48 @@ public class AvatarUtil
     }
 
 
-    public static boolean customAvatarExist(String username)
-    {
+    public static boolean customAvatarExist(String username) {
         String path = CUSTOM_AVATAR_CACHE_ROOT + "/" + username + ".png";
         File file = new File(path);
         return file.exists();
     }
 
-    public static boolean defaultAvatarExist(String username)
-    {
+    public static boolean defaultAvatarExist(String username) {
         String path = AVATAR_CACHE_ROOT + "/" + username + ".png";
         File file = new File(path);
         return file.exists();
     }
 
-    public static void deleteCustomAvatar(String username)
-    {
+    public static void deleteCustomAvatar(String username) {
         String path = CUSTOM_AVATAR_CACHE_ROOT + "/" + username + ".png";
 
         File file = new File(path);
-        if (file.exists())
-        {
+        if (file.exists()) {
             file.delete();
         }
     }
 
-    public static void deleteGroupAvatar(String groupName)
-    {
+    public static void deleteGroupAvatar(String groupName) {
         String path = AVATAR_CACHE_ROOT + "/" + groupName + ".png";
         File file = new File(path);
-        if (file.exists())
-        {
+        if (file.exists()) {
             file.delete();
         }
     }
 
+    /**
+     *
+     */
+    /**
+     * 创建群头像
+     *
+     * @param userName   群id
+     * @param memberList 成员列表
+     * @return 头像
+     */
+    public static Image createGroupAvatar(String userName, JSONArray memberList) {
 
-    public static Image createGroupAvatar(String groupName, String[] users)
-    {
-
-        try
-        {
+        try {
             int width = 200;
             int height = 200;
 
@@ -342,47 +333,43 @@ public class AvatarUtil
             g2d.fill(new RoundRectangle2D.Float(0, 0, width, height, 35, 35));
             g2d.setComposite(AlphaComposite.SrcAtop);
 
-            Rectangle[] rectangles = getSubAvatarPoints(users);
-            int max = users.length > 9 ? 9 : users.length;
-            for (int i = 0; i < max; i++)
-            {
-                Image avatar = AvatarUtil.createOrLoadUserAvatar(users[i]);
+            Rectangle[] rectangles = getSubAvatarPoints(memberList.size());
+            int max = Math.min(memberList.size(), 9);
+            for (int i = 0; i < max; i++) {
+                JSONObject member = memberList.getJSONObject(i);
+                String memUserName = member.getString("UserName");
+                Image avatar = AvatarUtil.createOrLoadUserAvatar(memUserName);
                 g2d.drawImage(avatar, rectangles[i].x, rectangles[i].y, rectangles[i].width, rectangles[i].height, null);
             }
 
             g2d.dispose();
 
             // 缓存到磁盘
-            File file = new File(AVATAR_CACHE_ROOT + "/" + CommonTools.emojiFormatter(groupName) + ".png");
+            File file = new File(AVATAR_CACHE_ROOT + "/" + userName + ".png");
             ImageIO.write(image, "png", file);
 
             return image;
-        } catch (Exception ex)
-        {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
         return null;
     }
 
-    private static Rectangle[] getSubAvatarPoints(String[] users)
-    {
+    private static Rectangle[] getSubAvatarPoints(int memberCount) {
         int gap = 8;
         int parentWidth = 200;
 
-        Rectangle[] rectangles = new Rectangle[users.length];
+        Rectangle[] rectangles = new Rectangle[memberCount];
 
         int x;
         int y;
 
-        if (users.length == 1)
-        {
+        if (memberCount == 1) {
             int childWidth = parentWidth / 2;
             x = (parentWidth - childWidth) / 2;
             rectangles[0] = new Rectangle(x, x, childWidth, childWidth);
-        }
-        else if (users.length == 2)
-        {
+        } else if (memberCount == 2) {
             int childWidth = (parentWidth - gap * 3) / 2;
 
             // 第一个
@@ -395,9 +382,7 @@ public class AvatarUtil
 
             rectangles[0] = r1;
             rectangles[1] = r2;
-        }
-        else if (users.length == 3)
-        {
+        } else if (memberCount == 3) {
             int childWidth = (parentWidth - gap * 3) / 2;
 
 
@@ -419,9 +404,7 @@ public class AvatarUtil
             rectangles[0] = r1;
             rectangles[1] = r2;
             rectangles[2] = r3;
-        }
-        else if (users.length == 4)
-        {
+        } else if (memberCount == 4) {
             int childWidth = (parentWidth - gap * 3) / 2;
 
 
@@ -446,9 +429,7 @@ public class AvatarUtil
             rectangles[1] = r2;
             rectangles[2] = r3;
             rectangles[3] = r4;
-        }
-        else if (users.length == 5)
-        {
+        } else if (memberCount == 5) {
             int childWidth = (parentWidth - gap * 4) / 3;
 
             // 第一个
@@ -477,9 +458,7 @@ public class AvatarUtil
             rectangles[2] = r3;
             rectangles[3] = r4;
             rectangles[4] = r5;
-        }
-        else if (users.length == 6)
-        {
+        } else if (memberCount == 6) {
             int childWidth = (parentWidth - gap * 4) / 3;
 
             // 第一个
@@ -513,9 +492,7 @@ public class AvatarUtil
             rectangles[3] = r4;
             rectangles[4] = r5;
             rectangles[5] = r6;
-        }
-        else if (users.length == 7)
-        {
+        } else if (memberCount == 7) {
             int childWidth = (parentWidth - gap * 4) / 3;
 
             // 第一个
@@ -553,9 +530,7 @@ public class AvatarUtil
             rectangles[4] = r5;
             rectangles[5] = r6;
             rectangles[6] = r7;
-        }
-        else if (users.length == 8)
-        {
+        } else if (memberCount == 8) {
             int childWidth = (parentWidth - gap * 4) / 3;
 
             // 第一个
@@ -599,19 +574,14 @@ public class AvatarUtil
             rectangles[5] = r6;
             rectangles[6] = r7;
             rectangles[7] = r8;
-        }
-
-        else if (users.length >= 9)
-        {
+        } else if (memberCount >= 9) {
             int childWidth = (parentWidth - gap * 4) / 3;
 
             int index = 0;
-            for (int i = 1; i <= 3; i++)
-            {
+            for (int i = 1; i <= 3; i++) {
                 y = gap * i + (i - 1) * childWidth;
 
-                for (int j = 1; j <= 3; j++)
-                {
+                for (int j = 1; j <= 3; j++) {
                     x = gap * j + (j - 1) * childWidth;
                     Rectangle r = new Rectangle(x, y, childWidth, childWidth);
 

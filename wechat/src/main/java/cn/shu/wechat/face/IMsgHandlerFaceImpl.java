@@ -70,7 +70,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     @PostConstruct
     private void initSet(){
         log.info("11. 获取自动聊天列表及防撤回列表");
-      /*  List<Status> statuses = statusMapper.selectByExample(new StatusExample());
+        List<Status> statuses = statusMapper.selectByExample(new StatusExample());
         for (Status status : statuses) {
             if (status.getAutoStatus()!=null && status.getAutoStatus() == 1){
                 autoChatUserNameList.add(status.getName());
@@ -78,7 +78,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             if (status.getUndoStatus()!=null && status.getUndoStatus() == 2){
                 nonPreventUndoMsgUserName.add(status.getName());
             }
-        }*/
+        }
     }
     /**
      * 消息控制命令

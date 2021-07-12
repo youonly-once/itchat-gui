@@ -797,7 +797,8 @@
   select * from (select <include refid="Base_Column_List"/>
   from message
   where from_username = #{roomId,jdbcType=VARCHAR} or to_username = #{roomId,jdbcType=VARCHAR}
-  order by create_time asc
+  and msg_type&lt;51
+  order by create_time desc
   limit #{start},#{end}
   )a order by create_time asc
 </select>

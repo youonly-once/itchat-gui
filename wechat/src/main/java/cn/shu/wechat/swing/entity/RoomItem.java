@@ -1,105 +1,52 @@
 package cn.shu.wechat.swing.entity;
 
-/**
- * 消息列表中显示的房间条目
- * Created by song on 24/03/2017.
- */
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+/**
+ * 消息列表中显示的房间(聊天)条目
+ *
+ * @author song
+ * @date 24/03/2017
+ */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class RoomItem implements Comparable<RoomItem>
 {
+    /**
+     * 房间id 对应微信用户的UserName以@开头或@@
+     */
     private String roomId;
-    private String title;
+
+    /**
+     * 房间名
+     */
+    private String name;
+
+    /**
+     * 最后一条消息
+     */
     private String lastMessage;
+
+    /**
+     * 未读消息数量
+     */
     private int unreadCount;
+
+    /**
+     * 时间戳
+     */
     private long timestamp;
-    private String type;
 
-    public RoomItem()
-    {
-    }
-
-    public RoomItem(String roomId, String title, String lastMessage, int unreadCount, long timestamp, String type)
-    {
-        this.roomId = roomId;
-        this.title = title;
-        this.lastMessage = lastMessage;
-        this.unreadCount = unreadCount;
-        this.timestamp = timestamp;
-        this.type = type;
-    }
-
-    public String getRoomId()
-    {
-        return roomId;
-    }
-
-    public void setRoomId(String roomId)
-    {
-        this.roomId = roomId;
-    }
-
-    public String getTitle()
-    {
-        return title;
-    }
-
-    public void setTitle(String title)
-    {
-        this.title = title;
-    }
-
-    public String getLastMessage()
-    {
-        return lastMessage;
-    }
-
-    public void setLastMessage(String lastMessage)
-    {
-        this.lastMessage = lastMessage;
-    }
-
-    public int getUnreadCount()
-    {
-        return unreadCount;
-    }
-
-    public void setUnreadCount(int unreadCount)
-    {
-        this.unreadCount = unreadCount;
-    }
-
-    public long getTimestamp()
-    {
-        return timestamp;
-    }
-
-    public void setTimestamp(long timestamp)
-    {
-        this.timestamp = timestamp;
-    }
+    /**
+     * 是否为群聊
+     */
+    private boolean isGroup;
 
 
-    @Override
-    public String toString()
-    {
-        return "RoomItem{" +
-                "roomId='" + roomId + '\'' +
-                ", title='" + title + '\'' +
-                ", lastMessage='" + lastMessage + '\'' +
-                ", unreadCount=" + unreadCount +
-                ", timestamp='" + timestamp + '\'' +
-                '}';
-    }
 
-    public String getType()
-    {
-        return type;
-    }
-
-    public void setType(String type)
-    {
-        this.type = type;
-    }
 
     @Override
     public int compareTo(RoomItem o)

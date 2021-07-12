@@ -1,5 +1,7 @@
 package cn.shu.wechat.swing.entity;
 
+import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.db.model.FileAttachment;
 import cn.shu.wechat.swing.db.model.ImageAttachment;
@@ -40,6 +42,7 @@ public class MessageItem implements Comparable<MessageItem>
     private int progress;
     private boolean deleted;
     private int messageType;
+    private WXReceiveMsgCodeEnum wxReceiveMsgCodeEnum;
 
     /*List<FileAttachmentItem> fileAttachments = new ArrayList<>();
     List<ImageAttachmentItem> imageAttachments = new ArrayList<>();*/
@@ -51,45 +54,87 @@ public class MessageItem implements Comparable<MessageItem>
     {
     }
 
-    public MessageItem(Message message, String currentUserId)
+    public MessageItem(cn.shu.wechat.beans.pojo.Message message, String currentUserId,String roomId)
     {
         this();
         this.setId(message.getId());
-        this.setMessageContent(message.getMessageContent());
-        this.setGroupable(message.isGroupable());
-        this.setRoomId(message.getRoomId());
-        this.setSenderId(message.getSenderId());
-        this.setSenderUsername(message.getSenderUsername());
-        this.setTimestamp(message.getTimestamp());
-        this.setUpdatedAt(message.getUpdatedAt());
-        this.setNeedToResend(message.isNeedToResend());
-        this.setProgress(message.getProgress());
-        this.setDeleted(message.isDeleted());
+        this.setMessageContent(message.getContent());
+        this.setGroupable(message.getFromUsername().startsWith("@@"));
+        this.setRoomId(roomId);
+        this.setSenderId(message.getFromUsername());
+        this.setSenderUsername(ContactsTools.getContactDisplayNameByUserName(message.getFromUsername()));
+        this.setTimestamp(message.getCreateTime().getTime());
+        this.setUpdatedAt(message.getCreateTime().getTime());
+        this.setNeedToResend(false);
+        this.setProgress(100);
+        this.setDeleted(false);
+        this.setWxReceiveMsgCodeEnum(WXReceiveMsgCodeEnum.getByCode(message.getMsgType()));
 
         boolean isFileAttachment = false;
         boolean isImageAttachment = false;
 
-        if (message.getFileAttachmentId() != null)
-        {
-            isFileAttachment = true;
 
-            FileAttachment fa = Launcher.fileAttachmentService.findById(message.getFileAttachmentId());
-            this.fileAttachment = new FileAttachmentItem(fa);
-        }
-        if (message.getImageAttachmentId() != null)
-        {
-            isImageAttachment = true;
+        switch (this.getWxReceiveMsgCodeEnum()) {
 
-            ImageAttachment ia = new ImageAttachment();
-            ia.setDescription("DESC");
-            ia.setHeight(500);
-            ia.setWidth(400);
-            ia.setTitle("sasd");
-            ia.setImagesize(200);
-            ia.setId(UUID.randomUUID().toString());
-            ia.setImageUrl(message.getImageAttachmentId());
-            this.imageAttachment = new ImageAttachmentItem(ia);
+            case UNKNOWN:
+                break;
+            case MSGTYPE_TEXT:
+                break;
+
+            case MSGTYPE_VOICE:
+            case MSGTYPE_VIDEO:
+            case MSGTYPE_MICROVIDEO:
+                //文件类消息
+                isFileAttachment = true;
+
+                FileAttachment fa = Launcher.fileAttachmentService.findById(message.getFilePath());
+                this.fileAttachment = new FileAttachmentItem(fa);
+                break;
+            case MSGTYPE_IMAGE:
+            case MSGTYPE_EMOTICON:
+                //图片类消息
+                isImageAttachment = true;
+
+                ImageAttachment ia = new ImageAttachment();
+                ia.setDescription("DESC");
+                ia.setHeight(500);
+                ia.setWidth(400);
+                ia.setTitle("sasd");
+                ia.setImagesize(200);
+                ia.setId(UUID.randomUUID().toString());
+                ia.setImageUrl(message.getFilePath());
+                this.imageAttachment = new ImageAttachmentItem(ia);
+                break;
+            case MSGTYPE_APP:
+                break;
+            case MSGTYPE_VOIPMSG:
+                break;
+            case MSGTYPE_VOIPNOTIFY:
+                break;
+            case MSGTYPE_VOIPINVITE:
+                break;
+            case MSGTYPE_LOCATION:
+                break;
+            case MSGTYPE_VERIFYMSG:
+            case MSGTYPE_STATUSNOTIFY:
+            case MSGTYPE_SYSNOTICE:
+            case MSGTYPE_SYS:
+            case MSGTYPE_RECALLED:
+                //系统类消息
+                this.setMessageType(SYSTEM_MESSAGE);
+                break;
+            case MSGTYPE_POSSIBLEFRIEND_MSG:
+                break;
+            case MSGTYPE_SHARECARD:
+                break;
+            case MSGTYPE_MAP:
+                break;
+            default:
+                break;
         }
+
+
+
 
         /*for (FileAttachment fa : message.getFileAttachments())
         {
@@ -101,14 +146,8 @@ public class MessageItem implements Comparable<MessageItem>
             this.imageAttachments.add(new ImageAttachmentItem(ia));
         }*/
 
-        if (message.isSystemMessage())
-        {
-            this.setMessageType(SYSTEM_MESSAGE);
-        }
-        else
-        {
             // 自己发的消息
-            if (message.getSenderId().equals(currentUserId))
+            if (this.getSenderId().equals(currentUserId))
             {
                 // 文件附件
                 if (isFileAttachment)
@@ -144,7 +183,7 @@ public class MessageItem implements Comparable<MessageItem>
                     this.setMessageType(LEFT_TEXT);
                 }
             }
-        }
+
     }
 
     @Override

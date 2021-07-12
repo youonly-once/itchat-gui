@@ -31,6 +31,7 @@ import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by song on 17-5-29.
@@ -277,7 +278,7 @@ public class SearchPanel extends ParentAvailablePanel {
     private List<SearchResultItem> searchChannelAndGroup(String key) {
         // List<Room> rooms = roomService.searchByName(key);
         List<SearchResultItem> retList = new ArrayList<>();
-        List<Contacts> recentContacts = Core.getRecentContacts();
+        Set<Contacts> recentContacts = Core.getRecentContacts();
         SearchResultItem item;
         for (Contacts recentContact : recentContacts) {
             String contactDisplayNameByUserName = ContactsTools.getContactDisplayNameByUserName(recentContact.getUsername());

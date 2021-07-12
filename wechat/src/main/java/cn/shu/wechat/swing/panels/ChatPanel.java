@@ -28,6 +28,7 @@ import cn.shu.wechat.swing.listener.ExpressionListener;
 import cn.shu.wechat.swing.utils.*;
 import cn.shu.wechat.utils.DataBaseUtil;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
+import cn.shu.wechat.utils.SpringContextHolder;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringEscapeUtils;
 
@@ -89,6 +90,12 @@ public class ChatPanel extends ParentAvailablePanel
 
     // 每次加载的消息条数
     private static final int PAGE_LENGTH = 10;
+
+
+    public String getRoomId() {
+        return roomId;
+    }
+
 
 
     private String roomId;
@@ -194,19 +201,7 @@ public class ChatPanel extends ParentAvailablePanel
                     //TODO
                         for (int i = messageList.size() - 1; i >= 0; i--)
                         {
-                            cn.shu.wechat.beans.pojo.Message message = messageList.get(i);
-                            Message message1 = new Message();
-                            message1.setMessageContent(message.getContent());
-                            message1.setSystemMessage(message.getMsgType() == WXReceiveMsgCodeEnum.MSGTYPE_STATUSNOTIFY.getCode());
-                            message1.setImageAttachmentId(message.getFilePath());
-                            message1.setRoomId(roomId);
-                            message1.setId(message.getId());
-                            message1.setSenderUsername(message.getFromNickname());
-                            message1.setSenderId(message.getFromUsername());
-                            message1.setNeedToResend(false);
-                            message1.setUpdatedAt(message.getCreateTime().getTime());
-                            message1.setTimestamp(message.getCreateTime().getTime());
-                            MessageItem item = new MessageItem(message1, currentUser.getUserId());
+                            MessageItem item = new MessageItem(messageList.get(i), currentUser.getUserId(),roomId);
                             messageItems.add(0, item);
                         }
 
@@ -569,7 +564,8 @@ public class ChatPanel extends ParentAvailablePanel
             {
                 if (!message.isDeleted())
                 {
-                    MessageItem item = new MessageItem(message, currentUser.getUserId());
+                    //TODO
+                    MessageItem item = new MessageItem(new cn.shu.wechat.beans.pojo.Message(), currentUser.getUserId(),roomId);
                     this.messageItems.add(item);
                 }
             }
@@ -593,21 +589,7 @@ public class ChatPanel extends ParentAvailablePanel
         session.close();
 
         for (cn.shu.wechat.beans.pojo.Message message : messageList) {
-            if (message.getMsgType()>=51){
-                continue;
-            }
-            Message message1 = new Message();
-            message1.setMessageContent(message.getContent());
-            message1.setSystemMessage(message.getMsgType() == WXReceiveMsgCodeEnum.MSGTYPE_STATUSNOTIFY.getCode());
-            message1.setImageAttachmentId(message.getFilePath());
-            message1.setRoomId(roomId);
-            message1.setId(message.getId());
-            message1.setSenderUsername(message.getFromNickname());
-            message1.setSenderId(message.getFromUsername());
-            message1.setNeedToResend(false);
-            message1.setUpdatedAt(message.getCreateTime().getTime());
-            message1.setTimestamp(message.getCreateTime().getTime());
-            MessageItem item = new MessageItem(message1, currentUser.getUserId());
+            MessageItem item = new MessageItem(message, currentUser.getUserId(),roomId);
             messageItems.add(item);
         }
 
@@ -684,42 +666,23 @@ public class ChatPanel extends ParentAvailablePanel
     {
 
         //Message message = messageService.findLastMessage(roomId);
-        SqlSession session = DataBaseUtil.getSession();
-        MessageMapper mapper = session.getMapper(MessageMapper.class);
+        MessageMapper mapper = SpringContextHolder.getBean(MessageMapper.class);
         cn.shu.wechat.beans.pojo.Message lastMessage = mapper.selectLastMessage(roomId);
         if (lastMessage == null){
             return;
         }
-        session.close();
-        Message message = new Message();
-        message.setSenderId(lastMessage.getFromUsername());
-        message.setMessageContent(lastMessage.getContent());
-        message.setRoomId(roomId);
-        message.setGroupable(false);
-        message.setTimestamp(System.currentTimeMillis());
-        message.setId(UUID.randomUUID().toString());
-        message.setSenderUsername(lastMessage.getFromNickname());
-        message.setNeedToResend(false);
-        message.setUpdatedAt(System.currentTimeMillis());
-        message.setProgress(1);
-        message.setDeleted(false);
-
-        if (message == null || message.isDeleted())
-        {
-            return;
-        }
 
         // 已有消息更新状态
-        int pos = findMessageItemPositionInViewReverse(message.getId());
+        int pos = findMessageItemPositionInViewReverse(lastMessage.getId());
         if (pos > -1)
         {
-            messageItems.get(pos).setUpdatedAt(message.getTimestamp());
+            messageItems.get(pos).setUpdatedAt(lastMessage.getCreateTime().getTime());
             messagePanel.getMessageListView().notifyItemChanged(pos);
             return;
         }
 
         // 插入新的消息
-        MessageItem messageItem = new MessageItem(message, currentUser.getUserId());
+        MessageItem messageItem = new MessageItem(lastMessage, currentUser.getUserId(),roomId);
         this.messageItems.add(messageItem);
         messagePanel.getMessageListView().notifyItemInserted(messageItems.size() - 1, false);
 

@@ -5,10 +5,8 @@ import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.adapter.RoomItemViewHolder;
 import cn.shu.wechat.swing.adapter.RoomItemsAdapter;
-import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.*;
 import cn.shu.wechat.swing.db.model.Room;
-import cn.shu.wechat.swing.db.service.RoomService;
 import cn.shu.wechat.swing.entity.RoomItem;
 import org.apache.commons.lang.StringUtils;
 
@@ -64,18 +62,16 @@ public class RoomsPanel extends ParentAvailablePanel
     private void initData()
     {
         roomItemList.clear();
-
-        // TODO: 从数据库中加载房间列表
         //从核心类加载房间列表
-        List<Contacts> recentContacts = Core.getRecentContacts();
+        Set<Contacts> recentContacts = Core.getRecentContacts();
         for (Contacts recentContact : recentContacts) {
             RoomItem item = new RoomItem();
             item.setRoomId(recentContact.getUsername());
             item.setTimestamp(System.currentTimeMillis());
-            item.setTitle(ContactsTools.getContactDisplayNameByUserName(recentContact.getUsername()));
-            item.setType(recentContact.getUsername().startsWith("@@")?"c":"d");
+            item.setName(ContactsTools.getContactDisplayNameByUserName(recentContact.getUsername()));
             item.setLastMessage("");
             item.setUnreadCount(0);
+            item.setGroup(recentContact.getUsername().startsWith("@@"));
             roomItemList.add(item);
         }
     }
@@ -89,10 +85,10 @@ public class RoomsPanel extends ParentAvailablePanel
         RoomItem item = new RoomItem();
         item.setRoomId(recentContact.getUsername());
         item.setTimestamp(System.currentTimeMillis());
-        item.setTitle(StringUtils.isEmpty(recentContact.getRemarkname())?recentContact.getNickname():recentContact.getRemarkname());
-        item.setType(recentContact.getUsername().startsWith("@@")?"c":"d");
+        item.setName(ContactsTools.getContactDisplayNameByUserName(recentContact.getUsername()));
+        item.setGroup(recentContact.getUsername().startsWith("@@"));
         item.setLastMessage(latestMsg);
-        item.setUnreadCount(1);
+        item.setUnreadCount(ChatPanel.getContext().getRoomId().equals(recentContact.getUsername())?0:1);
         roomItemList.add(0,item);
         roomItemsListView.notifyDataSetChanged(true);
     }

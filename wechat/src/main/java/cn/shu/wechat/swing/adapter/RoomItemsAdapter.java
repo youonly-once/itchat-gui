@@ -1,12 +1,7 @@
 package cn.shu.wechat.swing.adapter;
 
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
-import cn.shu.wechat.swing.db.model.CurrentUser;
-import cn.shu.wechat.swing.db.model.Room;
-import cn.shu.wechat.swing.db.service.CurrentUserService;
-import cn.shu.wechat.swing.db.service.RoomService;
 import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
@@ -22,122 +17,105 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by song on 17-5-30.
+ * @author song
+ * @date 17-5-30
  */
-public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder>
-{
-    private List<RoomItem> roomItems;
-    private List<RoomItemViewHolder> viewHolders = new ArrayList<>();
-    private RoomItemViewHolder selectedViewHolder; // 当前选中的viewHolder
-    private RoomService roomService = Launcher.roomService;
+public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
+    /**
+     * 房间条目
+     */
+    private final List<RoomItem> roomItems;
+    /**
+     * 所有的viewHolder
+     */
+    private final List<RoomItemViewHolder> viewHolders = new ArrayList<>();
+    /**
+     * 当前选中的viewHolder
+     */
+    private RoomItemViewHolder selectedViewHolder;
 
-    public RoomItemsAdapter(List<RoomItem> roomItems)
-    {
+    public RoomItemsAdapter(List<RoomItem> roomItems) {
         this.roomItems = roomItems;
     }
 
     @Override
-    public int getCount()
-    {
+    public int getCount() {
         return roomItems.size();
     }
 
     @Override
-    public RoomItemViewHolder onCreateViewHolder(int viewType)
-    {
+    public RoomItemViewHolder onCreateViewHolder(int viewType) {
         return new RoomItemViewHolder();
     }
 
     @Override
-    public void onBindViewHolder(RoomItemViewHolder viewHolder, int position)
-    {
-        if (!viewHolders.contains(viewHolder))
-        {
+    public void onBindViewHolder(RoomItemViewHolder viewHolder, int position) {
+        if (!viewHolders.contains(viewHolder)) {
             viewHolders.add(viewHolder);
         }
         //viewHolder.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        RoomItem item = roomItems.get(position);
+        RoomItem roomItem = roomItems.get(position);
 
-        viewHolder.setTag(item.getRoomId());
+        viewHolder.setTag(roomItem.getRoomId());
 
-        viewHolder.roomName.setText(item.getTitle());
+        viewHolder.roomName.setText(roomItem.getName());
 
 
         ImageIcon icon = new ImageIcon();
-        // 群组头像
-        String type = item.getType();
-        if (type.equals("c") || type.equals("p"))
-        {
-            String[] memberArr = getRoomMembers(item.getRoomId());
 
-            icon.setImage(AvatarUtil.createOrLoadGroupAvatar(item.getTitle(), memberArr, type)
-                    .getScaledInstance(40, 40, Image.SCALE_SMOOTH));
-        }
-        // 私聊头像
-        else if (type.equals("d"))
-        {
-            Image image = AvatarUtil.createOrLoadUserAvatar(item.getTitle()).getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+        if (roomItem.isGroup()) {
+            // 群组头像
+            icon.setImage(AvatarUtil.createOrLoadGroupAvatar(roomItem.getRoomId()).getScaledInstance(40, 40, Image.SCALE_SMOOTH));
+        } else {
+            // 私聊头像
+            Image image = AvatarUtil.createOrLoadUserAvatar(roomItem.getRoomId()).getScaledInstance(40, 40, Image.SCALE_SMOOTH);
             icon.setImage(image);
         }
         viewHolder.avatar.setIcon(icon);
 
 
         // 消息
-        viewHolder.brief.setText(item.getLastMessage());
-        if (item.getLastMessage() != null && item.getLastMessage().length() > 15)
-        {
-            viewHolder.brief.setText(item.getLastMessage().substring(0, 15) + "...");
-        }
-        else
-        {
-            viewHolder.brief.setText(item.getLastMessage());
+        viewHolder.brief.setText(roomItem.getLastMessage());
+        if (roomItem.getLastMessage() != null && roomItem.getLastMessage().length() > 15) {
+            viewHolder.brief.setText(roomItem.getLastMessage().substring(0, 15) + "...");
+        } else {
+            viewHolder.brief.setText(roomItem.getLastMessage());
         }
 
         // 时间
-        if (item.getTimestamp() > 0)
-        {
-            viewHolder.time.setText(TimeUtil.diff(item.getTimestamp()));
+        if (roomItem.getTimestamp() > 0) {
+            viewHolder.time.setText(TimeUtil.diff(roomItem.getTimestamp()));
         }
 
         // 未读消息数
-        if (item.getUnreadCount() > 0)
-        {
+        if (roomItem.getUnreadCount() > 0) {
             viewHolder.unreadCount.setVisible(true);
-            viewHolder.unreadCount.setText(item.getUnreadCount() + "");
-        }
-        else
-        {
+            viewHolder.unreadCount.setText(roomItem.getUnreadCount() + "");
+        } else {
             viewHolder.unreadCount.setVisible(false);
         }
 
         // 设置是否激活
-        if (ChatPanel.CHAT_ROOM_OPEN_ID != null && item.getRoomId().equals(ChatPanel.CHAT_ROOM_OPEN_ID))
-        {
+        if (roomItem.getRoomId().equals(ChatPanel.CHAT_ROOM_OPEN_ID)) {
             setBackground(viewHolder, Colors.ITEM_SELECTED);
             selectedViewHolder = viewHolder;
         }
         //viewHolder.unreadCount.setVisible(true);
-        //viewHolder.unreadCount.setText(item.getUnreadCount() + "1");
+        //viewHolder.unreadCount.setText(roomItem.getUnreadCount() + "1");
 
-
-        viewHolder.addMouseListener(new AbstractMouseListener()
-        {
+        //鼠标点击事件 点击变色并进入房间
+        viewHolder.addMouseListener(new AbstractMouseListener() {
             @Override
-            public void mouseReleased(MouseEvent e)
-            {
-                if (e.getButton() == MouseEvent.BUTTON1)
-                {
+            public void mouseReleased(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
 
-                    if (selectedViewHolder != viewHolder)
-                    {
+                    if (selectedViewHolder != viewHolder) {
                         // 进入房间
-                        enterRoom(item.getRoomId());
+                        enterRoom(roomItem.getRoomId());
 
-                        for (RoomItemViewHolder holder : viewHolders)
-                        {
-                            if (holder != viewHolder)
-                            {
+                        for (RoomItemViewHolder holder : viewHolders) {
+                            if (holder != viewHolder) {
                                 setBackground(holder, Colors.DARK);
                             }
                         }
@@ -150,35 +128,35 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder>
 
 
             @Override
-            public void mouseEntered(MouseEvent e)
-            {
-                if (selectedViewHolder != viewHolder)
-                {
+            public void mouseEntered(MouseEvent e) {
+                if (selectedViewHolder != viewHolder) {
                     setBackground(viewHolder, Colors.ITEM_SELECTED_DARK);
                 }
             }
 
             @Override
-            public void mouseExited(MouseEvent e)
-            {
-                if (selectedViewHolder != viewHolder)
-                {
+            public void mouseExited(MouseEvent e) {
+                if (selectedViewHolder != viewHolder) {
                     setBackground(viewHolder, Colors.DARK);
                 }
             }
         });
     }
 
-    private String[] getRoomMembers(String roomId)
-    {
-        //Room room = roomService.findById(roomId);
+    /**
+     * 根据房间id获取群成员
+     *
+     * @param roomId 房间id 目前以用户的UserName做的id
+     * @return 群成员
+     */
+    private String[] getRoomMembers(String roomId) {
         JSONObject o = Core.getMemberMap().get(roomId);
         JSONArray memberList = o.getJSONArray("MemberList");
         //String members = room.getMember();
         List<String> roomMembers = new ArrayList<>();
         String[] memberArr = null;
         for (Object o1 : memberList) {
-            JSONObject meber = (JSONObject)o1;
+            JSONObject meber = (JSONObject) o1;
             roomMembers.add(meber.getString("NickName"));
         }
 
@@ -206,15 +184,17 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder>
         return memberArr;
     }
 
-    private void setBackground(RoomItemViewHolder holder, Color color)
-    {
+    private void setBackground(RoomItemViewHolder holder, Color color) {
         holder.setBackground(color);
         holder.nameBrief.setBackground(color);
         holder.timeUnread.setBackground(color);
     }
 
-    private void enterRoom(String roomId)
-    {
+    /**
+     * 进入房间
+     * @param roomId 房间id
+     */
+    private void enterRoom(String roomId) {
         // 加载房间消息
         ChatPanel.getContext().enterRoom(roomId);
 
