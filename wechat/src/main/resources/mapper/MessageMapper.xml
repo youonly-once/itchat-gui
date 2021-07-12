@@ -794,10 +794,11 @@
   limit 0,1
 </select>
 <select id="selectByPage" resultMap="BaseResultMap">
-  select <include refid="Base_Column_List"/>
+  select * from (select <include refid="Base_Column_List"/>
   from message
   where from_username = #{roomId,jdbcType=VARCHAR} or to_username = #{roomId,jdbcType=VARCHAR}
   order by create_time asc
   limit #{start},#{end}
+  )a order by create_time asc
 </select>
 </mapper>

@@ -9,6 +9,7 @@ import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.CharacterParser;
 import org.apache.commons.lang.StringUtils;
 
+import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -23,6 +24,9 @@ import java.util.List;
  */
 public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder>
 {
+
+    @Resource
+    private RightPanel rightPanel;
     private List<ContactsItem> contactsItems;
     private List<ContactsItemViewHolder> viewHolders = new ArrayList<>();
     Map<Integer, String> positionMap = new HashMap<>();
@@ -110,9 +114,9 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder>
             @Override
             public void mouseClicked(MouseEvent e)
             {
-                RightPanel.getContext().getUserInfoPanel().setUsername(item.getName());
-                RightPanel.getContext().getUserInfoPanel().setUserId(item.getId());
-                RightPanel.getContext().showPanel(RightPanel.USER_INFO);
+                rightPanel.getUserInfoPanel().setUsername(item.getName());
+                rightPanel.getUserInfoPanel().setUserId(item.getId());
+                rightPanel.showPanel(RightPanel.USER_INFO);
 
                 setBackground(viewHolder, Colors.ITEM_SELECTED);
                 selectedViewHolder = viewHolder;

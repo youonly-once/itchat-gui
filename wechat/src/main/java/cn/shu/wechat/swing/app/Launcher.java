@@ -8,6 +8,7 @@ import cn.shu.wechat.swing.tasks.HttpGetTask;
 import cn.shu.wechat.swing.tasks.HttpResponseListener;
 import cn.shu.wechat.swing.utils.DbUtils;
 import cn.shu.wechat.utils.SpringApplicationContextUtil;
+import cn.shu.wechat.utils.SpringContextHolder;
 import org.apache.ibatis.session.SqlSession;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,6 +27,7 @@ import java.nio.channels.FileLock;
  * Created by song on 09/06/2017.
  */
 
+@Component
 public class Launcher
 {
     private static Launcher context;
@@ -82,10 +84,11 @@ public class Launcher
 
     private void openFrame()
     {
-            currentFrame = new LoginFrame();
+        LoginFrame currentFrame = SpringContextHolder.getBean(LoginFrame.class);
+        //currentFrame = new LoginFrame();
             currentFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             currentFrame.setVisible(true);
-            currentFrame.login(true);
+            currentFrame.login(false);
     }
 
     private void config()

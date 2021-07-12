@@ -43,8 +43,8 @@ public class LoginController {
     /**
      * 登陆服务实现类
      */
-
-    private ILoginService loginService = LoginServiceImpl.getLoginService();
+    @Resource
+    private ILoginService loginService ;//= LoginServiceImpl.getLoginService();
 
     /**
      * 登录重试次数

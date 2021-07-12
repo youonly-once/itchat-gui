@@ -41,18 +41,18 @@ public class TimedTask {
         return executor;
     }
 
-    public static TimedTask getTimedTask() {
-        return timedTask;
-    }
+    //public static TimedTask getTimedTask() {
+       // return timedTask;
+    //}
 
 
 
-    private static TimedTask timedTask = new TimedTask();
+    //private static TimedTask timedTask = new TimedTask();
     /**
      * 登录服务
      */
     @Resource
-    private final ILoginService loginService = LoginServiceImpl.getLoginService();
+    private ILoginService loginService ;//= LoginServiceImpl.getLoginService();
     /**
      * 登录服务
      */

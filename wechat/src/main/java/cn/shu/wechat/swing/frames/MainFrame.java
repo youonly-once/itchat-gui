@@ -8,8 +8,11 @@ import cn.shu.wechat.swing.utils.ClipboardUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.OSUtil;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
 import sun.audio.AudioPlayer;
 import sun.audio.AudioStream;
+
+import javax.annotation.Resource;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -25,16 +28,43 @@ public class MainFrame extends JFrame
 
     public int currentWindowWidth = DEFAULT_WIDTH;
     public int currentWindowHeight = DEFAULT_HEIGHT;
-
+    /**
+     * 主窗口左面板
+     */
     private LeftPanel leftPanel;
+
+    /**
+     * 主窗口右面板
+     */
     private RightPanel rightPanel;
 
     private static MainFrame context;
-    private Image normalTrayIcon; // 正常时的任务栏图标
-    private Image emptyTrayIcon; // 闪动时的任务栏图标
+
+    /**
+     * 正常时的任务栏图标
+     */
+    private Image normalTrayIcon;
+
+    /**
+     * 闪动时的任务栏图标
+     */
+    private Image emptyTrayIcon;
+
+    /**
+     * 任务栏图例
+     */
     private TrayIcon trayIcon;
+
+    /**
+     * 任务栏图标是否闪动
+     *
+     */
     private boolean trayFlashing = false;
-    private AudioStream messageSound; //消息到来时候的提示间
+
+    /**
+     * 消息到来的时候提示音
+     */
+    private AudioStream messageSound;
 
 
     public MainFrame()
@@ -50,14 +80,7 @@ public class MainFrame extends JFrame
 
     private void initResource()
     {
-        new Thread(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                initTray();
-            }
-        }).start();
+        ExecutorServiceUtil.getGlobalExecutorService().submit(this::initTray);
 
     }
 

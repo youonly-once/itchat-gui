@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.frames;
 
 import cn.shu.wechat.api.DownloadTools;
+import cn.shu.wechat.api.WeChatTool;
 import cn.shu.wechat.controller.LoginController;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.service.ILoginService;
@@ -12,16 +13,15 @@ import cn.shu.wechat.swing.db.service.CurrentUserService;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.utils.*;
 import cn.shu.wechat.timedtask.TimedTask;
-import cn.shu.wechat.utils.CommonTools;
-import cn.shu.wechat.utils.Config;
-import cn.shu.wechat.utils.ExecutorServiceUtil;
-import cn.shu.wechat.utils.SleepUtils;
+import cn.shu.wechat.utils.*;
 import lombok.extern.log4j.Log4j2;
 import org.apache.ibatis.session.SqlSession;
 import org.json.JSONObject;
 import cn.shu.wechat.swing.tasks.HttpPostTask;
 import cn.shu.wechat.swing.tasks.HttpResponseListener;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -37,13 +37,15 @@ import java.util.concurrent.TimeUnit;
  * Created by song on 08/06/2017.
  */
 @Log4j2
-public class LoginFrame extends JFrame implements WindowListener
+@Component
+public class LoginFrame extends JFrame
 {
     /**
      * 登陆服务实现类
      */
+    @Resource
+    private ILoginService loginService ;
 
-    private ILoginService loginService = LoginServiceImpl.getLoginService();
     /**
      * 登录重试次数
      */
@@ -56,7 +58,6 @@ public class LoginFrame extends JFrame implements WindowListener
     private JPanel editPanel;
     private JPanel codePanel;
     private JLabel statusLabel;
-    private JLabel titleLabel;
 
     private static Point origin = new Point();
 
@@ -202,28 +203,6 @@ public class LoginFrame extends JFrame implements WindowListener
         }
 
 
-        KeyListener keyListener = new KeyListener()
-        {
-            @Override
-            public void keyTyped(KeyEvent e)
-            {
-            }
-
-            @Override
-            public void keyPressed(KeyEvent e)
-            {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER)
-                {
-                    doLogin();
-                }
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e)
-            {
-
-            }
-        };
     }
 
     private void doLogin()
@@ -247,6 +226,12 @@ public class LoginFrame extends JFrame implements WindowListener
 
         statusLabel.setText(message);
     }
+
+    /**
+     * 调用网页版微信登录
+     *
+     * @param dHImg 是否下载头像
+     */
     public void login(boolean dHImg) {
         // 防止SSL错误
         System.setProperty("jsse.enableSNIExtension", "false");
@@ -339,8 +324,8 @@ public class LoginFrame extends JFrame implements WindowListener
 
         statusLabel.setText("11. 缓存本次登陆好友相关消息");
         log.info("11. 缓存本次登陆好友相关消息");
- /*       // 登陆成功后缓存本次登陆好友相关消息（NickName, UserName）
-        WeChatTool.setUserInfo();*/
+        // 登陆成功后缓存本次登陆好友相关消息（NickName, UserName）
+        //WeChatTool.setUserInfo();
         //删除无效头像
         // HeadImageUtil.deleteLoseEfficacyHeadImg(Config.PIC_DIR + "/headimg/");
         if (dHImg) {
@@ -369,55 +354,8 @@ public class LoginFrame extends JFrame implements WindowListener
             log.info("头像下载完成");
             doLogin();
         });
-        Executors.newScheduledThreadPool(1).scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                TimedTask.getTimedTask().updateContactTask();
-            }
-        },0,60,TimeUnit.SECONDS);
-
-        Executors.newScheduledThreadPool(1).scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                TimedTask.getTimedTask().checkLoginStatusTask();
-            }
-        },0,10,TimeUnit.SECONDS);
 
 
     }
 
-    @Override
-    public void windowOpened(WindowEvent e) {
-        System.out.println("open");
-    }
-
-    @Override
-    public void windowClosing(WindowEvent e) {
-
-    }
-
-    @Override
-    public void windowClosed(WindowEvent e) {
-
-    }
-
-    @Override
-    public void windowIconified(WindowEvent e) {
-
-    }
-
-    @Override
-    public void windowDeiconified(WindowEvent e) {
-
-    }
-
-    @Override
-    public void windowActivated(WindowEvent e) {
-        System.out.println("windowActivated");
-    }
-
-    @Override
-    public void windowDeactivated(WindowEvent e) {
-
-    }
 }

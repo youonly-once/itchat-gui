@@ -24,7 +24,6 @@ import org.apache.http.util.EntityUtils;
 import cn.shu.wechat.beans.msg.sync.AddMsgList;
 import cn.shu.wechat.beans.msg.sync.RecommendInfo;
 import org.apache.ibatis.session.SqlSession;
-import org.jfree.data.general.DatasetUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -199,11 +198,7 @@ public class MessageTools {
 
         }
         try {
-            SqlSession session = DataBaseUtil.getSession();
-            MessageMapper mapper = session.getMapper(MessageMapper.class);
-            int insert = mapper.batchInsert(messages);
-            session.commit();
-            session.close();
+            int insert = messageMapper.batchInsert(messages);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -436,8 +431,7 @@ public class MessageTools {
      * 根据用户id发送图片消息
      *
      * @param userId   消息接收者UserName
-     * @param filePath 待上传文件路径 content为空时使用上传
-     * @param content  消息内容，content可能包含资源文件的id等信息，可直接使用
+     * @param mediaId 消息id
      * @return {@link WebWXSendMsgResponse}
      * @author SXS
      * @date 2017年5月7日 下午10:34:24

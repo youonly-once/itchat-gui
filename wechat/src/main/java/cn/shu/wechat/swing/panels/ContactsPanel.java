@@ -145,7 +145,9 @@ public class ContactsPanel extends ParentAvailablePanel
         try
         {
           //  URL url = getClass().getResource("/avatar/" + username + ".png");
-            BufferedImage image = ImageIO.read(new File(Core.getContactHeadImgPath().get(username)));
+            String head = Core.getContactHeadImgPath().get(username);
+            head = "E://default.png";
+            BufferedImage image = ImageIO.read(new File(head));
             processAvatarData(image, username);
         }
         catch (IOException e)

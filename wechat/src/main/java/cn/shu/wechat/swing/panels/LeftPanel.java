@@ -11,9 +11,21 @@ import java.awt.*;
  */
 public class LeftPanel extends JPanel
 {
+    /**
+     * 个人信息面板
+     */
     private MyInfoPanel myInfoPanel;
+
+    /**
+     * 搜索面板
+     */
     private SearchPanel searchPanel;
+
     private TabOperationPanel mainOperationPanel;
+
+    /**
+     * list panel
+     */
     private ListPanel listPanel;
 
     public LeftPanel()

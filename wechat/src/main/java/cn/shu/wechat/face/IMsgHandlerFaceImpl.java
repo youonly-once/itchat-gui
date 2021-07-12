@@ -53,11 +53,11 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
      */
     private final  Set<String> autoChatUserNameList = new HashSet<>();
 
-    public static IMsgHandlerFaceImpl getiMsgHandlerFace() {
+    /*//public static IMsgHandlerFaceImpl getiMsgHandlerFace() {
         return iMsgHandlerFace;
-    }
+    }*/
 
-    private static IMsgHandlerFaceImpl iMsgHandlerFace =new IMsgHandlerFaceImpl();
+  //  private static IMsgHandlerFaceImpl iMsgHandlerFace =new IMsgHandlerFaceImpl();
     @Resource
     private ChartUtil chartUtil;
 
@@ -70,7 +70,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     @PostConstruct
     private void initSet(){
         log.info("11. 获取自动聊天列表及防撤回列表");
-        List<Status> statuses = statusMapper.selectByExample(new StatusExample());
+      /*  List<Status> statuses = statusMapper.selectByExample(new StatusExample());
         for (Status status : statuses) {
             if (status.getAutoStatus()!=null && status.getAutoStatus() == 1){
                 autoChatUserNameList.add(status.getName());
@@ -78,7 +78,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             if (status.getUndoStatus()!=null && status.getUndoStatus() == 2){
                 nonPreventUndoMsgUserName.add(status.getName());
             }
-        }
+        }*/
     }
     /**
      * 消息控制命令
@@ -426,10 +426,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         MessageExample.Criteria criteria = messageExample.createCriteria();
         criteria.andMsgIdEqualTo(msgid.toString());
 
-        SqlSession session = DataBaseUtil.getSession();
-        MessageMapper mapper = session.getMapper(MessageMapper.class);
-        List<Message> messages = mapper.selectByExample(messageExample);
-        session.close();
+        List<Message> messages = messageMapper.selectByExample(messageExample);
         /* String value = PropertyUtil.loadMsg(msgid.toString());*/
         if (messages.isEmpty()) {
             return null;

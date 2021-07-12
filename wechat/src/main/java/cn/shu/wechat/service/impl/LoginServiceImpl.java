@@ -53,19 +53,11 @@ import javax.annotation.Resource;
 @Component
 public class LoginServiceImpl implements ILoginService {
 
-
-    public static LoginServiceImpl getLoginService() {
-        return loginService;
-    }
-
-
-
-    private static LoginServiceImpl loginService =new LoginServiceImpl();
     @Resource
     private AttrHistoryMapper attrHistoryMapper;
 
     @Resource
-    private MsgCenter msgCenter = MsgCenter.getMessageCenter();
+    private MsgCenter msgCenter ;//= MsgCenter.getMessageCenter();
 
     @Resource
     private ContactsMapper contactsMapper;

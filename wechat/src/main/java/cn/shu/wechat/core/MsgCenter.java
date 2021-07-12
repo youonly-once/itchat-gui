@@ -50,13 +50,14 @@ public class MsgCenter {
      * 消息处理类
      */
     @Resource
-    private IMsgHandlerFace msgHandler = IMsgHandlerFaceImpl.getiMsgHandlerFace();
+    private IMsgHandlerFace msgHandler ;//= IMsgHandlerFaceImpl.getiMsgHandlerFace();
 
-    public static MsgCenter getMessageCenter() {
+   /* //public static MsgCenter getMessageCenter() {
         return messageCenter;
-    }
-
-    private static MsgCenter messageCenter= new MsgCenter();
+    }*/
+    @Resource
+    private MessageMapper messageMapper;
+    //private static MsgCenter messageCenter= new MsgCenter();
     /**
      * 保存消息
      */
@@ -186,7 +187,7 @@ public class MsgCenter {
                 results = msgHandler.nameCardMsgHandle(msg);
                 break;
             case MSGTYPE_RECALLED:
-                results = msgHandler.undoMsgHandle(msg);
+               // results = msgHandler.undoMsgHandle(msg);
                 break;
             case UNKNOWN:
             default:
@@ -231,11 +232,7 @@ public class MsgCenter {
                     .fromMemberOfGroupNickname(msg.isGroupMsg() ? ContactsTools.getMemberNickNameOfGroup(msg.getFromUserName(), msg.getMemberName()) : null)
                     .fromMemberOfGroupUsername(msg.isGroupMsg() ? msg.getMemberName() : null)
                     .build();
-            SqlSession session = DataBaseUtil.getSession();
-            MessageMapper mapper = session.getMapper(MessageMapper.class);
-            int insert = mapper.insert(build);
-            session.commit();
-            session.close();
+            int insert = messageMapper.insert(build);
         } catch (Exception e) {
             e.printStackTrace();
         }

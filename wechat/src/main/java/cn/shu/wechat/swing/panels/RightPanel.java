@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.panels;
 
 import cn.shu.wechat.swing.components.Colors;
+import lombok.Data;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -9,6 +10,7 @@ import java.awt.*;
 /**
  * Created by song on 17-5-29.
  */
+@Data
 public class RightPanel extends JPanel
 {
     private static RightPanel context;
@@ -76,30 +78,6 @@ public class RightPanel extends JPanel
     }
 
 
-    public RoomMembersPanel getRoomMembersPanel()
-    {
-        return roomMembersPanel;
-    }
-
-    public JPanel getTipPanel()
-    {
-        return tipPanel;
-    }
-
-    public UserInfoPanel getUserInfoPanel()
-    {
-        return userInfoPanel;
-    }
-
-    public static RightPanel getContext()
-    {
-        return context;
-    }
-
-    public JPanel getContentPanel()
-    {
-        return contentPanel;
-    }
 
 
 }

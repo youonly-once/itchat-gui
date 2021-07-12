@@ -25,10 +25,16 @@ import java.util.Set;
 public class RoomsPanel extends ParentAvailablePanel
 {
     private static RoomsPanel context;
-
+    /**
+     * 聊天列表视图数据
+     */
     private RCListView roomItemsListView;
+
+    /**
+     * 当前聊天列表
+     */
     private List<RoomItem> roomItemList = new ArrayList<>();
-    private RoomService roomService = Launcher.roomService;
+
 
 
     public RoomsPanel(JPanel parent)
@@ -61,7 +67,6 @@ public class RoomsPanel extends ParentAvailablePanel
 
         // TODO: 从数据库中加载房间列表
         //从核心类加载房间列表
-       // List<Room> rooms = roomService.findAll();
         List<Contacts> recentContacts = Core.getRecentContacts();
         for (Contacts recentContact : recentContacts) {
             RoomItem item = new RoomItem();
@@ -75,6 +80,11 @@ public class RoomsPanel extends ParentAvailablePanel
         }
     }
 
+    /**
+     * 添加房间
+     * @param recentContact 联系人
+     * @param latestMsg 最新消息
+     */
     public void addRoom(Contacts recentContact,String latestMsg){
         RoomItem item = new RoomItem();
         item.setRoomId(recentContact.getUsername());
@@ -107,7 +117,7 @@ public class RoomsPanel extends ParentAvailablePanel
         String roomId = (String) ((RoomItemViewHolder) (roomItemsListView.getItem(0))).getTag();
         if (roomId.equals(msgRoomId))
         {
-            Room room = roomService.findById(roomId);
+            Room room = null;//roomService.findById(roomId);
             for (RoomItem roomItem : roomItemList)
             {
                 if (roomItem.getRoomId().equals(roomId))
