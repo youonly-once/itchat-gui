@@ -881,7 +881,8 @@ public class LoginServiceImpl implements ILoginService {
         for (Entry<String, Map<String, String>> stringMapEntry : differenceMap.entrySet()) {
             for (Entry<String, String> stringStringEntry : stringMapEntry.getValue().entrySet()) {
                 if (stringMapEntry.getKey().equals("HeadImgUrl")
-                        || stringMapEntry.getKey().equals("头像更换")) {
+                        || stringMapEntry.getKey().equals("头像更换")
+                        || stringMapEntry.getKey().equals("headimgurl")) {
                     String oldHeadPath = Core.getContactHeadImgPath().get(oldV.getUsername());
                     String newHeadPath = DownloadTools.downloadHeadImg(stringStringEntry.getValue()
                             , oldV.getUsername());
@@ -941,7 +942,8 @@ public class LoginServiceImpl implements ILoginService {
             Map<String, String> value = stringMapEntry.getValue();
             for (Entry<String, String> stringStringEntry : value.entrySet()) {
                 if (stringMapEntry.getKey().equals("头像更换")
-                        || stringMapEntry.getKey().equals("HeadImgUrl")) {
+                        || stringMapEntry.getKey().equals("HeadImgUrl")
+                        || stringMapEntry.getKey().equals("headimgurl")) {
                     str = str + "\n【" + stringMapEntry.getKey() + "】更换前后如下";
                 } else {
                     str = str + "\n【" + stringMapEntry.getKey() + "】(\"" + stringStringEntry.getKey() + "\" -> \"" + stringStringEntry.getValue() + "\")";

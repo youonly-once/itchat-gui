@@ -30,7 +30,7 @@ public class JSONObjectUtil {
             String oldV = StringUtil.toString(entry.getValue());
             //是否相同
             boolean equals = oldV.equals(newV);
-            if ("HeadImgUrl".equals(entry.getKey())) {
+            if ("HeadImgUrl".equals(entry.getKey()) || "headimgurl".equals(entry.getKey())) {
                 Pattern pattern = Pattern.compile(".+\\?seq=(\\d+).+");
                 Matcher matcherNew = pattern.matcher(newV);
                 Matcher matcherOld = pattern.matcher(oldV);
@@ -83,6 +83,7 @@ public class JSONObjectUtil {
     enum UserInfo {
         NickName("昵称更换"),
         HeadImgUrl("头像更换"),
+        headimgurl("头像更换"),
         Sex("性别更换"),
         Signature("签名更换"),
         RemarkName("备注更换");
