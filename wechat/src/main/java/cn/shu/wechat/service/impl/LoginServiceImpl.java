@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 
+import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.beans.pojo.*;
 import cn.shu.wechat.beans.msg.sync.AddMsgList;
@@ -433,7 +434,7 @@ public class LoginServiceImpl implements ILoginService {
                     //Core.getContactMap().remove(userName);
                 } else {
                     //比较上次差异
-                    //compareOld(Core.getContactMap(), userName, o, "普通联系人");
+                    compareOld(Core.getContactMap().get(userName), userName, contacts, "普通联系人");
                     // 普通联系人
                     Core.getContactMap().put(userName, contacts);
                 }
@@ -837,22 +838,14 @@ public class LoginServiceImpl implements ILoginService {
      * 联系人相关map的put操作
      * put前统计哪些信息变了
      *
-     * @param map  保存联系人信息的map
+     * @param oldV  旧值
      * @param key  联系人key
      * @param newV 新值
      * @param tip  提示信息
      */
-    private void compareOld(Map<String, JSONObject> map, String key, JSONObject newV, String tip) {
-        JSONObject oldV = map.get(key);
+    private void compareOld(Contacts oldV, String key, Contacts newV, String tip) {
 
-        String name = newV.getString("RemarkName");
-        if (StringUtils.isEmpty(name)) {
-            name = newV.getString("NickName");
-            if (StringUtils.isEmpty(name)) {
-                name = newV.getString("UserName");
-            }
-        }
-        name = CommonTools.emojiFormatter(name);
+        String name = ContactsTools.getContactDisplayNameByUserName(key);
         if (oldV == null) {
             log.info("新增{}（{}）：{}", tip, name, newV);
             return;
@@ -870,7 +863,7 @@ public class LoginServiceImpl implements ILoginService {
 //            log.info("{}（{}）属性更新：{}", tip, name, s);
             //差异存到数据库
             store(differenceMap, oldV, results);
-            String userName = newV.getString("UserName");
+            String userName = newV.getUsername();
             userName = "filehelper";
             MessageTools.sendMsgByUserId(results, userName);
         }
@@ -883,16 +876,16 @@ public class LoginServiceImpl implements ILoginService {
      * @param differenceMap
      * @param oldV
      */
-    private void store(Map<String, Map<String, String>> differenceMap, JSONObject oldV, ArrayList<MessageTools.Result> results) {
+    private void store(Map<String, Map<String, String>> differenceMap, Contacts oldV, ArrayList<MessageTools.Result> results) {
         ArrayList<AttrHistory> attrHistories = new ArrayList<>();
         for (Entry<String, Map<String, String>> stringMapEntry : differenceMap.entrySet()) {
             for (Entry<String, String> stringStringEntry : stringMapEntry.getValue().entrySet()) {
                 if (stringMapEntry.getKey().equals("HeadImgUrl")
                         || stringMapEntry.getKey().equals("头像更换")) {
-                    String oldHeadPath = Core.getContactHeadImgPath().get(oldV.getString("UserName"));
+                    String oldHeadPath = Core.getContactHeadImgPath().get(oldV.getUsername());
                     String newHeadPath = DownloadTools.downloadHeadImg(stringStringEntry.getValue()
-                            , oldV.getString("UserName"));
-                    Core.getContactHeadImgPath().put(oldV.getString("UserName"), newHeadPath);
+                            , oldV.getUsername());
+                    Core.getContactHeadImgPath().put(oldV.getUsername(), newHeadPath);
                     //更换头像需要发送图片
                     //更换前
                     results.add(MessageTools.Result.builder()
@@ -907,9 +900,9 @@ public class LoginServiceImpl implements ILoginService {
                             .oldval(oldHeadPath)
                             .newval(newHeadPath)
                             .id(0)
-                            .nickname(oldV.getString("NickName"))
-                            .remarkname(oldV.getString("RemarkName"))
-                            .username(oldV.getString("UserName"))
+                            .nickname(oldV.getNickname())
+                            .remarkname(oldV.getNickname())
+                            .username(oldV.getUsername())
                             .createtime(new Date())
                             .build();
                     attrHistories.add(build);
@@ -919,9 +912,9 @@ public class LoginServiceImpl implements ILoginService {
                             .oldval(stringStringEntry.getKey())
                             .newval(stringStringEntry.getValue())
                             .id(0)
-                            .nickname(oldV.getString("NickName"))
-                            .remarkname(oldV.getString("RemarkName"))
-                            .username(oldV.getString("UserName"))
+                            .nickname(oldV.getNickname())
+                            .remarkname(oldV.getRemarkname())
+                            .username(oldV.getUsername())
                             .createtime(new Date())
                             .build();
                     attrHistories.add(build);

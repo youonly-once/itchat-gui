@@ -1,14 +1,12 @@
 package cn.shu.wechat.utils;
 
-import com.alibaba.fastjson.JSONArray;
+import cn.shu.wechat.beans.pojo.Contacts;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.nlpcn.commons.lang.util.StringUtil;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -69,7 +67,19 @@ public class JSONObjectUtil {
         }
         return difference;
     }
+    /**
+     * 返回二个JSONObject的差异
+     *
+     * @param oldO 旧
+     * @param newO 新
+     * @return difference
+     */
+    public static Map<String, Map<String, String>> getDifferenceMap(Contacts oldO, Contacts newO) {
+        JSONObject old = JSONObject.parseObject(JSON.toJSONString(oldO));
+        JSONObject new_ = JSONObject.parseObject(JSON.toJSONString(newO));
+        return getDifferenceMap(old,new_);
 
+    }
     enum UserInfo {
         NickName("昵称更换"),
         HeadImgUrl("头像更换"),
