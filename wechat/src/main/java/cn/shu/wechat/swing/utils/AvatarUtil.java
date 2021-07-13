@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.utils;
 
 import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
@@ -19,6 +20,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -94,10 +96,10 @@ public class AvatarUtil {
 
             // 硬盘中无缓存
             if (avatar == null) {
-                JSONArray memberList = Core.getMemberMap().get(roomId).getJSONArray("MemberList");
+                Map<String, Contacts> memberMap = Core.getMemberMap();
+                Contacts contacts = memberMap.get(roomId);
                 // 如果尚未从服务器获取群成员，则获取默认群组头像
-                if (memberList == null || memberList.isEmpty()) {
-
+                if (contacts == null || contacts.getMemberlist()==null || contacts.getMemberlist().isEmpty()) {
                     //获取 ##.png头像
                     String sign = "##";
                     avatar = getCachedImageAvatar(sign);
@@ -107,6 +109,7 @@ public class AvatarUtil {
                         avatar = createAvatar(ContactsTools.getContactDisplayNameByUserName(roomId));
                     }
                 } else {
+                    List<Contacts> memberList = contacts.getMemberlist();
                     // 有群成员，根据群成员的头像合成群头像
                     log.info("创建群组个性头像 : {}" , roomId);
                     avatar = createGroupAvatar(roomId, memberList);
@@ -313,7 +316,7 @@ public class AvatarUtil {
      * @param memberList 成员列表
      * @return 头像
      */
-    public static Image createGroupAvatar(String userName, JSONArray memberList) {
+    public static Image createGroupAvatar(String userName, List<Contacts> memberList) {
 
         try {
             int width = 200;
@@ -336,8 +339,8 @@ public class AvatarUtil {
             Rectangle[] rectangles = getSubAvatarPoints(memberList.size());
             int max = Math.min(memberList.size(), 9);
             for (int i = 0; i < max; i++) {
-                JSONObject member = memberList.getJSONObject(i);
-                String memUserName = member.getString("UserName");
+                Contacts member = memberList.get(i);
+                String memUserName = member.getUsername();
                 Image avatar = AvatarUtil.createOrLoadUserAvatar(memUserName);
                 g2d.drawImage(avatar, rectangles[i].x, rectangles[i].y, rectangles[i].width, rectangles[i].height, null);
             }

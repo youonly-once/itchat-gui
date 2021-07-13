@@ -15,7 +15,7 @@
     <result column="VerifyFlag" jdbcType="DOUBLE" property="verifyflag" />
     <result column="UniFriend" jdbcType="DOUBLE" property="unifriend" />
     <result column="ContactFlag" jdbcType="DOUBLE" property="contactflag" />
-    <result column="MemberList" jdbcType="VARCHAR" property="memberlist" />
+    <result column="MemberList"  property="memberlist" typeHandler="cn.shu.wechat.typehandler.JSONStringTypeHandler"/>
     <result column="StarFriend" jdbcType="DOUBLE" property="starfriend" />
     <result column="HeadImgUrl" jdbcType="VARCHAR" property="headimgurl" />
     <result column="AppAccountFlag" jdbcType="DOUBLE" property="appaccountflag" />
@@ -155,7 +155,7 @@
     values (#{username,jdbcType=VARCHAR}, #{chatroomid,jdbcType=DOUBLE}, #{sex,jdbcType=DOUBLE}, 
       #{attrstatus,jdbcType=DOUBLE}, #{statues,jdbcType=DOUBLE}, #{pyquanpin,jdbcType=VARCHAR}, 
       #{encrychatroomid,jdbcType=VARCHAR}, #{displayname,jdbcType=VARCHAR}, #{verifyflag,jdbcType=DOUBLE}, 
-      #{unifriend,jdbcType=DOUBLE}, #{contactflag,jdbcType=DOUBLE}, #{memberlist,jdbcType=VARCHAR}, 
+      #{unifriend,jdbcType=DOUBLE}, #{contactflag,jdbcType=DOUBLE}, #{memberlist,jdbcType=VARCHAR},
       #{starfriend,jdbcType=DOUBLE}, #{headimgurl,jdbcType=VARCHAR}, #{appaccountflag,jdbcType=DOUBLE}, 
       #{membercount,jdbcType=DOUBLE}, #{remarkpyinitial,jdbcType=VARCHAR}, #{city,jdbcType=VARCHAR}, 
       #{nickname,jdbcType=VARCHAR}, #{province,jdbcType=VARCHAR}, #{snsflag,jdbcType=DOUBLE}, 

@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.panels;
 
+import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.adapter.RoomMembersAdapter;
 import cn.shu.wechat.swing.app.Launcher;
@@ -162,13 +163,13 @@ public class RoomMembersPanel extends ParentAvailablePanel
         // 单独聊天，成员只显示两人
         if (!roomId.startsWith("@@")){
             members.add(currentUser.getUsername());
-            JSONObject user = Core.getMemberMap().get(roomId);
-            members.add(user.getString("NickName"));
+            Contacts user = Core.getMemberMap().get(roomId);
+            members.add(user.getNickname());
         }
         else {
             //获取成员
-            JSONObject group = Core.getMemberMap().get(roomId);
-            JSONArray memberList = group.getJSONArray("MemberList");
+            Contacts group = Core.getMemberMap().get(roomId);
+            List<Contacts> memberList = group.getMemberlist();
             if (memberList == null){
                 return;
             }

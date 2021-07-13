@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.panels;
 
 import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.adapter.ContactsItemsAdapter;
 import cn.shu.wechat.swing.app.Launcher;
@@ -80,8 +81,8 @@ public class ContactsPanel extends ParentAvailablePanel
 
         //List<ContactsUser> contactsUsers = contactsUserService.findAll();
         List<ContactsUser> contactsUsers = new ArrayList<>();
-        Map<String, JSONObject> memberMap = Core.getMemberMap();
-        for (Map.Entry<String, JSONObject> stringJSONObjectEntry : memberMap.entrySet()) {
+        Map<String, Contacts> memberMap = Core.getMemberMap();
+        for (Map.Entry<String, Contacts> stringJSONObjectEntry : memberMap.entrySet()) {
 
             String head = Core.getContactHeadImgPath().get(stringJSONObjectEntry.getKey());
             ContactsItem item = new ContactsItem(stringJSONObjectEntry.getKey(), ContactsTools.getContactDisplayNameByUserName(stringJSONObjectEntry.getKey()), "d",head);

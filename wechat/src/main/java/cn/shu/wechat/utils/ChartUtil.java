@@ -11,6 +11,7 @@ import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.enums.WXSendMsgCodeEnum;
 import cn.shu.wechat.mapper.ContactsMapper;
 import cn.shu.wechat.mapper.MessageMapper;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.awt.*;
 import java.io.*;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -144,13 +146,13 @@ public class ChartUtil {
      */
     public String makeGroupMemberAttrPieChart(String groupName, String groupRemarkName, String attrName, int width, int height) {
         log.info("makeGroupMemberAttrPieChart：" + attrName);
-        JSONArray memberArray = Core.getMemberMap().get(groupName).getJSONArray("MemberList");
-        if (memberArray == null || memberArray.size() <= 0) {
+        List<Contacts> memberlist = Core.getMemberMap().get(groupName).getMemberlist();
+        if (memberlist == null || memberlist.isEmpty()) {
             return null;
         }
-        JSONObject memberAttrKey = (JSONObject) memberArray.get(0);
         String[] sexKeys = {"男", "女", "无"};
-        Set<String> keys = memberAttrKey.keySet();
+        Class<Contacts> contactsClass = Contacts.class;
+        Field[] declaredFields = contactsClass.getDeclaredFields();
         HashMap<String, HashMap<String, String>> stringHashMapHashMap = new HashMap<>();
         //属性值转汉字
         HashMap<String, String> stringStringHashMap = new HashMap<String, String>();
@@ -161,7 +163,9 @@ public class ChartUtil {
         stringStringHashMap = new HashMap<>();
         stringStringHashMap.put("", "未设置");
         stringHashMapHashMap.put("Province", stringStringHashMap);
-        for (String key : keys) {
+        for (Field field : declaredFields) {
+            field.setAccessible(true);
+            String key = field.getName();
             if (!key.equals(attrName)) {
                 continue;
             }
@@ -176,14 +180,14 @@ public class ChartUtil {
             }
 
             Map<String, AtomicInteger> testMap = new HashMap<>(10);
-            for (Object o : memberArray) {
-                JSONObject memberO = (JSONObject) o;
+            for (Contacts o : memberlist) {
+                JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(o));
                 String value = null;
                 if (stringHashMapHashMap.get(key) != null) {
-                    value = stringHashMapHashMap.get(key).get(memberO.getString(key));
+                    value = stringHashMapHashMap.get(key).get(jsonObject.getString(key));
                 }
                 if (value == null) {
-                    value = memberO.getString(key);
+                    value = jsonObject.getString(key);
                 }
 
                 testMap.computeIfAbsent(value, v -> new AtomicInteger()).getAndIncrement();
@@ -268,14 +272,18 @@ public class ChartUtil {
      */
     public void makeWXContactInfoPieChart() {
         System.out.println("create pie-chart.");
-        Map<String, JSONObject> contactMap = Core.getContactMap();
+        Map<String, Contacts> contactMap = Core.getContactMap();
         String[] sexKeys = {"男", "女", "无"};
-        Set<String> keys = null;
-        for (JSONObject value : contactMap.values()) {
-            keys = value.keySet();
+        Set<String> keys = new HashSet<>();
+        for (Contacts value : contactMap.values()) {
+            Class<Contacts> contactsClass = Contacts.class;
+            for (Field declaredField : contactsClass.getDeclaredFields()) {
+                declaredField.setAccessible(true);
+                keys.add(declaredField.getName());
+            }
             break;
         }
-        if (keys == null) {
+        if (keys.isEmpty()) {
             return;
         }
         HashMap<String, HashMap<String, String>> stringHashMapHashMap = new HashMap<>();
@@ -301,14 +309,14 @@ public class ChartUtil {
                     }
 
                     Map<String, AtomicInteger> testMap = new HashMap<>(10);
-                    for (JSONObject value : contactMap.values()) {
-
+                    for (Contacts value : contactMap.values()) {
+                        JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(value));
                         String s = null;
                         if (stringHashMapHashMap.get(key) != null) {
-                            s = stringHashMapHashMap.get(key).get(value.getString(key));
+                            s = stringHashMapHashMap.get(key).get(jsonObject.getString(key));
                         }
                         if (s == null) {
-                            s = value.getString(key);
+                            s = jsonObject.getString(key);
                         }
 
                         testMap.computeIfAbsent(s, v -> new AtomicInteger()).getAndIncrement();

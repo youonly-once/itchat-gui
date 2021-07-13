@@ -1,5 +1,6 @@
 package cn.shu.wechat.controller;
 
+import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.mapper.ContactsMapper;
 import cn.shu.wechat.mapper.MemberGroupRMapper;
 import cn.shu.wechat.service.impl.LoginServiceImpl;
@@ -144,11 +145,11 @@ public class LoginController {
        // HeadImageUtil.deleteLoseEfficacyHeadImg(Config.PIC_DIR + "/headimg/");
         if (dHImg) {
             log.info("12. 下载联系人头像");
-            for (Map.Entry<String, JSONObject> entry : Core.getMemberMap().entrySet()) {
+            for (Map.Entry<String, Contacts> entry : Core.getMemberMap().entrySet()) {
                 ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(
                         () -> {
-                            Core.getContactHeadImgPath().put(entry.getValue().getString("UserName"), DownloadTools.downloadHeadImg(entry.getValue().getString("HeadImgUrl"), entry.getValue().getString("UserName")));
-                            log.info("下载头像：({}):{}", entry.getValue().getString("NickName"), entry.getValue().getString("HeadImgUrl"));
+                            Core.getContactHeadImgPath().put(entry.getValue().getUsername(), DownloadTools.downloadHeadImg(entry.getValue().getHeadimgurl(), entry.getValue().getUsername()));
+                            log.info("下载头像：({}):{}", entry.getValue().getNickname(), entry.getValue().getHeadimgurl());
                         });
 
             }

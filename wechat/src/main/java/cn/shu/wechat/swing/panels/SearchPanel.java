@@ -300,16 +300,15 @@ public class SearchPanel extends ParentAvailablePanel {
      */
     private List<SearchResultItem> searchContacts(String key) {
         // List<ContactsUser> contactsUsers = contactsUserService.searchByUsernameOrName(key, key);
-        Map<String, JSONObject> memberMap = Core.getMemberMap();
+        Map<String, Contacts> memberMap = Core.getMemberMap();
         List<SearchResultItem> retList = new ArrayList<>();
         SearchResultItem item;
-        for (Map.Entry<String, JSONObject> entry : memberMap.entrySet()) {
-            String contactDisplayNameByUserName = ContactsTools.getContactDisplayNameByUserName(entry.getKey());
+        for (String userName : memberMap.keySet()) {
+            String contactDisplayNameByUserName = ContactsTools.getContactDisplayNameByUserName(userName);
             if (contactDisplayNameByUserName.startsWith(key) || contactDisplayNameByUserName.endsWith(key)) {
-                item = new SearchResultItem(entry.getKey(), ContactsTools.getContactDisplayNameByUserName(entry.getKey()), !entry.getKey().startsWith("@@") ? "d" : "c");
+                item = new SearchResultItem(userName, ContactsTools.getContactDisplayNameByUserName(userName), !userName.startsWith("@@") ? "d" : "c");
                 retList.add(item);
             }
-
         }
         return retList;
     }

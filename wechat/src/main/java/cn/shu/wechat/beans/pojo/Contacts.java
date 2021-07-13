@@ -1,7 +1,12 @@
 package cn.shu.wechat.beans.pojo;
 
 import com.google.common.base.Objects;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 /**
  * @作者 舒新胜
@@ -9,6 +14,9 @@ import lombok.Data;
  * @创建时间 6/14/2021 7:41 PM
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Contacts {
     private String username;
 
@@ -32,7 +40,7 @@ public class Contacts {
 
     private Double contactflag;
 
-    private String memberlist;
+    private List<Contacts> memberlist;
 
     private Double starfriend;
 

@@ -54,21 +54,21 @@ public class Core {
 
     /**
      * 好友+群聊+公众号+特殊账号
-     * 不包括filehelper
+     *
      */
 
-    static private Map<String, JSONObject> memberMap = new ConcurrentHashMap<>(1024);
+    static private Map<String, Contacts> memberMap = new ConcurrentHashMap<>(1024);
 
 
     /**
      * 好友
      */
-    static private Map<String, JSONObject> contactMap = new ConcurrentHashMap<>(1024);
+    static private Map<String, Contacts> contactMap = new ConcurrentHashMap<>(1024);
 
     /**
      * 群
      */
-    static private Map<String, JSONObject> groupMap = new ConcurrentHashMap<>(32);
+    static private Map<String, Contacts> groupMap = new ConcurrentHashMap<>(32);
 
     /**
      * 群聊成员字典
@@ -80,12 +80,12 @@ public class Core {
     /**
      * 公众号／服务号
      */
-    static private Map<String, JSONObject> publicUsersMap = new ConcurrentHashMap<>(64);
+    static private Map<String, Contacts> publicUsersMap = new ConcurrentHashMap<>(64);
 
     /**
      * 特殊账号
      */
-    static private Map<String, JSONObject> specialUsersMap = new ConcurrentHashMap<>(0);
+    static private Map<String, Contacts> specialUsersMap = new ConcurrentHashMap<>(0);
 
     /**
      * 群ID列表
@@ -196,27 +196,27 @@ public class Core {
         Core.userSelf = userSelf;
     }
 
-    public static Map<String, JSONObject> getMemberMap() {
+    public static Map<String, Contacts> getMemberMap() {
         return memberMap;
     }
 
-    public static void setMemberMap(Map<String, JSONObject> memberMap) {
+    public static void setMemberMap(Map<String, Contacts> memberMap) {
         Core.memberMap = memberMap;
     }
 
-    public static Map<String, JSONObject> getContactMap() {
+    public static Map<String, Contacts> getContactMap() {
         return contactMap;
     }
 
-    public static void setContactMap(Map<String, JSONObject> contactMap) {
+    public static void setContactMap(Map<String, Contacts> contactMap) {
         Core.contactMap = contactMap;
     }
 
-    public static Map<String, JSONObject> getGroupMap() {
+    public static Map<String, Contacts> getGroupMap() {
         return groupMap;
     }
 
-    public static void setGroupMap(Map<String, JSONObject> groupMap) {
+    public static void setGroupMap(Map<String, Contacts> groupMap) {
         Core.groupMap = groupMap;
     }
 
@@ -228,19 +228,19 @@ public class Core {
         Core.groupMemberMap = groupMemberMap;
     }*/
 
-    public static Map<String, JSONObject> getPublicUsersMap() {
+    public static Map<String, Contacts> getPublicUsersMap() {
         return publicUsersMap;
     }
 
-    public static void setPublicUsersMap(Map<String, JSONObject> publicUsersMap) {
+    public static void setPublicUsersMap(Map<String, Contacts> publicUsersMap) {
         Core.publicUsersMap = publicUsersMap;
     }
 
-    public static Map<String, JSONObject> getSpecialUsersMap() {
+    public static Map<String, Contacts> getSpecialUsersMap() {
         return specialUsersMap;
     }
 
-    public static void setSpecialUsersMap(Map<String, JSONObject> specialUsersMap) {
+    public static void setSpecialUsersMap(Map<String, Contacts> specialUsersMap) {
         Core.specialUsersMap = specialUsersMap;
     }
 

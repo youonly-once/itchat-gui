@@ -4,6 +4,7 @@ import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.beans.msg.send.WebWXSendMsgResponse;
 import cn.shu.wechat.beans.msg.send.WebWXUploadMediaResponse;
+import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXSendMsgCodeEnum;
@@ -489,21 +490,13 @@ public class ChatPanel extends ParentAvailablePanel
 
         this.roomId = roomId;
         CHAT_ROOM_OPEN_ID = roomId;
-        JSONObject jsonObject = Core.getMemberMap().get(roomId);
+        Contacts contacts = Core.getMemberMap().get(roomId);
         Room room = new Room();
-        if (roomId.equals("filehelper")){
-            room.setRoomId("filehelper");
-            room.setType("d");
-            room.setName("文件传输助手");
-            room.setMsgSum(0);
-            room.setLastChatAt(System.currentTimeMillis());
-        }else{
-            room.setRoomId(jsonObject.getString("UserName"));
+            room.setRoomId(contacts.getUsername());
             room.setType(roomId.startsWith("@@")?"c":"d");
-            room.setName(ContactsTools.getContactDisplayNameByUserName(jsonObject.getString("UserName")));
+            room.setName(ContactsTools.getContactDisplayNameByUserName(contacts.getUsername()));
             room.setMsgSum(0);
             room.setLastChatAt(System.currentTimeMillis());
-        }
 
        // room.setUpdatedAt(System.currentTimeMillis().);
         this.room = room;//roomService.findById(roomId);

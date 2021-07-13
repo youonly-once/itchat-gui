@@ -120,9 +120,7 @@ public class MsgCenter {
                 contacts = new Contacts();
                 contacts.setUsername(userName);
             }else{
-                JSONObject jsonObject = Core.getMemberMap().get(userName);
-                String string = JSON.toJSONString(jsonObject);
-                contacts = JSON.parseObject(string, Contacts.class);
+                contacts = Core.getMemberMap().get(userName);
             }
 
             if (!Core.getRecentContacts().contains(contacts)) {
@@ -256,9 +254,9 @@ public class MsgCenter {
             JSONObject newV = JSON.parseObject(JSON.toJSONString(msg));
             JSONObject oldV = null;
             if (msg.getUserName().startsWith("@@")) {
-                oldV = Core.getGroupMap().get(msg.getUserName());
+                //oldV = Core.getGroupMap().get(msg.getUserName());
             } else {
-                oldV = Core.getContactMap().get(msg.getUserName());
+                //oldV = Core.getContactMap().get(msg.getUserName());
             }
             oldV = JSON.parseObject(JSON.toJSONString(JSON.toJavaObject(oldV, ModContactList.class)));
             if (oldV == null) {
@@ -279,7 +277,7 @@ public class MsgCenter {
                 results.add(MessageTools.Result.builder().content(tip + "（" + name + "）属性更新：" + mapToString(differenceMap))
                         .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                         .build());
-                Core.getContactMap().put(msg.getUserName(), newV);
+               // Core.getContactMap().put(msg.getUserName(), newV);
                 //存储数据库
                 store(differenceMap, oldV, results);
 

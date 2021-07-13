@@ -1,6 +1,8 @@
 package cn.shu.wechat.api;
 
 
+import cn.shu.wechat.beans.msg.sync.MemberList;
+import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.utils.CommonTools;
 import lombok.extern.log4j.Log4j2;
@@ -27,8 +29,8 @@ public class ContactsTools {
      * @param userName 用户UserName
      * @return 用户信息
      */
-    private static JSONObject getContactByUserName(String userName) {
-        Map<String, JSONObject> contactMap = Core.getMemberMap();
+    private static Contacts getContactByUserName(String userName) {
+        Map<String, Contacts> contactMap = Core.getMemberMap();
         return contactMap.get(userName);
     }
 
@@ -63,11 +65,11 @@ public class ContactsTools {
         if (userName.startsWith("@@")) {
             return getContactNickNameByUserName(userName);
         }
-        JSONObject contactByUserName = getContactByUserName(userName);
+        Contacts contactByUserName = getContactByUserName(userName);
         if (contactByUserName == null) {
             return null;
         }
-        return CommonTools.emojiFormatter(contactByUserName.getString("RemarkName"));
+        return CommonTools.emojiFormatter(contactByUserName.getRemarkname());
     }
 
 
@@ -78,11 +80,11 @@ public class ContactsTools {
      * @return 备注
      */
     public static String getContactNickNameByUserName(String userName) {
-        JSONObject contactByUserName = getContactByUserName(userName);
+        Contacts contactByUserName = getContactByUserName(userName);
         if (contactByUserName == null) {
             return null;
         }
-        return CommonTools.emojiFormatter(contactByUserName.getString("NickName"));
+        return CommonTools.emojiFormatter(contactByUserName.getNickname());
     }
 
 
@@ -93,27 +95,28 @@ public class ContactsTools {
      * @param userName  成员UserName
      * @return 成员
      */
-    private static JSONObject getMemberOfGroup(String groupName, String userName) {
-        Map<String, JSONObject> groupMemeberMap = Core.getGroupMap();
-        JSONObject group = groupMemeberMap.get(groupName);
+    private static Contacts getMemberOfGroup(String groupName, String userName) {
+        Map<String, Contacts> groupMemberMap = Core.getGroupMap();
+        Contacts group = groupMemberMap.get(groupName);
         if (group == null || userName == null) {
             return null;
         }
-        JSONArray memberList = group.getJSONArray("MemberList");
+        List<Contacts> memberList = group.getMemberlist();
         if (memberList == null || memberList.size() <= 0) {
             return null;
         }
         try {
-            for (Object member : memberList) {
-                JSONObject memberJson = (JSONObject) member;
-                if (userName.equals(memberJson.getString("UserName"))) {
-                    return memberJson;
-                }
+
+        for (Contacts contacts : memberList) {
+            if (userName.equals(contacts.getUsername())) {
+                return contacts;
             }
+        }
         } catch (Exception e) {
             e.printStackTrace();
             log.warn(e.getMessage());
         }
+
         return null;
     }
 
@@ -125,9 +128,9 @@ public class ContactsTools {
      * @return 成员昵称
      */
     public static String getMemberNickNameOfGroup(String groupName, String userName) {
-        JSONObject groupUserOfGroup = getMemberOfGroup(groupName, userName);
-        return groupUserOfGroup != null
-                ? CommonTools.emojiFormatter(groupUserOfGroup.getString("NickName"))
+        Contacts memberOfGroup = getMemberOfGroup(groupName, userName);
+        return memberOfGroup != null
+                ? CommonTools.emojiFormatter(memberOfGroup.getNickname())
                 : null;
 
 
@@ -141,15 +144,15 @@ public class ContactsTools {
      * @return 群成员显示名称
      */
     public static String getMemberDisplayNameOfGroup(String groupName, String userName) {
-        JSONObject groupUserOfGroup = getMemberOfGroup(groupName, userName);
-        if (groupUserOfGroup == null) {
+        Contacts memberOfGroup = getMemberOfGroup(groupName, userName);
+        if (memberOfGroup == null) {
             return "";
         }
-        String displayName = groupUserOfGroup.getString("DisplayName");
+        String displayName = memberOfGroup.getDisplayname();
         if (!StringUtils.isEmpty(displayName)) {
             return CommonTools.emojiFormatter(displayName);
         }
-        displayName = groupUserOfGroup.getString("NickName");
+        displayName = memberOfGroup.getNickname();
         if (!StringUtils.isEmpty(displayName)) {
             return CommonTools.emojiFormatter(displayName);
         }

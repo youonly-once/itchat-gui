@@ -131,9 +131,8 @@ public class UserInfoPopup extends JPopupMenu
 
     private void openOrCreateDirectChat()
     {
-        JSONObject user = Core.getMemberMap().get(username);
+        Contacts contacts  = Core.getMemberMap().get(username);
         /*ContactsUser user  = contactsUserService.find("username", username).get(0);*/
-        Contacts contacts = JSON.parseObject(JSON.toJSONString(user), Contacts.class);
         if (!Core.getRecentContacts().contains(contacts)){
             // 房间bu存在，直接打开，否则发送请求创建房间
             createDirectChat(contacts);

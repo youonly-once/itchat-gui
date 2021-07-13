@@ -1,17 +1,11 @@
 package cn.shu;
 
-import cn.shu.wechat.controller.LoginController;
-import cn.shu.wechat.swing.app.App;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.utils.SleepUtils;
-import com.alibaba.cloud.nacos.discovery.NacosDiscoveryAutoConfiguration;
 import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 

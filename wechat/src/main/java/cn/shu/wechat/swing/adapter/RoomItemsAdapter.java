@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.adapter;
 
+import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.entity.RoomItem;
@@ -150,8 +151,8 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
      * @return 群成员
      */
     private String[] getRoomMembers(String roomId) {
-        JSONObject o = Core.getMemberMap().get(roomId);
-        JSONArray memberList = o.getJSONArray("MemberList");
+        Contacts contacts = Core.getMemberMap().get(roomId);
+        List<Contacts> memberList = contacts.getMemberlist();
         //String members = room.getMember();
         List<String> roomMembers = new ArrayList<>();
         String[] memberArr = null;

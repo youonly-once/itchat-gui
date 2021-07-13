@@ -305,9 +305,10 @@ public class LoginServiceImpl implements ILoginService {
                                             JSONArray msgList = msgObj.getJSONArray("AddMsgList");
                                             JSONArray modContactList = msgObj.getJSONArray("ModContactList"); // 存在删除或者新增的好友信息
                                             for (int j = 0; j < msgList.size(); j++) {
-                                                JSONObject userInfo = modContactList.getJSONObject(j);
+                                                //TODO
+                                                //JSONObject userInfo = modContactList.getJSONObject(j);
                                                 // 存在主动加好友之后的同步联系人到本地
-                                                Core.getContactMap().put(userInfo.getString("UserName"), userInfo);
+                                                //Core.getContactMap().put(userInfo.getString("UserName"), contacts);
                                             }
                                         } catch (Exception e) {
 
@@ -408,19 +409,19 @@ public class LoginServiceImpl implements ILoginService {
                 contactsList.add(contacts);
                 String userName = contacts.getUsername();
                 String nickName = contacts.getNickname();
-                Core.getMemberMap().put(userName, o);
+                Core.getMemberMap().put(userName, contacts);
                 if ((o.getInteger("VerifyFlag") & 8) != 0) {
                     // 公众号/服务号
                     if (!Core.getPublicUsersMap().containsKey(userName)) {
                         log.info("新增公众号/服务号：{}", nickName);
                     }
-                    Core.getPublicUsersMap().put(userName, o);
+                    Core.getPublicUsersMap().put(userName, contacts);
                 } else if (Config.API_SPECIAL_USER.contains(userName)) {
                     // 特殊账号
                     if (!Core.getSpecialUsersMap().containsKey(userName)) {
                         log.info("新增特殊账号：{}", nickName);
                     }
-                    Core.getSpecialUsersMap().put(userName, o);
+                    Core.getSpecialUsersMap().put(userName, contacts);
                 } else if (userName.startsWith("@@")) {
                     // 群聊
                     if (!Core.getGroupIdSet().contains(userName)) {
@@ -432,12 +433,14 @@ public class LoginServiceImpl implements ILoginService {
                     //Core.getContactMap().remove(userName);
                 } else {
                     //比较上次差异
-                    compareOld(Core.getContactMap(), userName, o, "普通联系人");
+                    //compareOld(Core.getContactMap(), userName, o, "普通联系人");
                     // 普通联系人
-                    Core.getContactMap().put(userName, o);
+                    Core.getContactMap().put(userName, contacts);
                 }
 
             }
+            Core.getMemberMap().put("filehelper",
+                    Contacts.builder().username("filehelper").displayname("文件传输助手").build());
             if (!contactsList.isEmpty()){
                // contactsMapper.deleteByExample(new ContactsExample());
                 //contactsMapper.batchInsert(contactsList);
@@ -474,14 +477,17 @@ public class LoginServiceImpl implements ILoginService {
             for (int i = 0; i < contactList.size(); i++) {
                 // 群好友
                 JSONObject groupObject = contactList.getJSONObject(i);
+                Contacts group = JSON.parseObject(JSON.toJSONString(groupObject), Contacts.class);
                 String userName = groupObject.getString("UserName");
-                Core.getMemberMap().put(userName, groupObject);
+                Core.getMemberMap().put(userName, group);
                 if (userName.startsWith("@@")) {
                     //以上接口返回的成员属性不全，以下的接口获取群成员详细属性
                     JSONArray memberArray = WebWxBatchGetContactDetail(groupObject);
-                   // Core.getGroupMemberMap().put(userName, memberArray);
+                    List<Contacts> memberList = JSON.parseArray(JSON.toJSONString(memberArray), Contacts.class);
+                    // Core.getGroupMemberMap().put(userName, memberArray);
                     groupObject.put("MemberList", memberArray);
-                    Core.getGroupMap().put(userName, groupObject);
+                    group.setMemberlist(memberList);
+                    Core.getGroupMap().put(userName, group);
 /*                    List<Contacts> members1 = JSON.parseArray(JSON.toJSONString(memberArray), Contacts.class);
                     members.addAll(members1);
                     for (Contacts contacts : members) {

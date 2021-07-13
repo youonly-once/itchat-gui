@@ -2,6 +2,7 @@ package cn.shu.wechat.swing.frames;
 
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.api.WeChatTool;
+import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.controller.LoginController;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.service.ILoginService;
@@ -317,25 +318,22 @@ public class LoginFrame extends JFrame
         log.info("9. 获取群好友及群好友列表");
         loginService.WebWxBatchGetContact();
 
-        statusLabel.setText("10. 开始接收消息");
-        log.info("10. 开始接收消息");
-        loginService.startReceiving();
 
 
-        statusLabel.setText("11. 缓存本次登陆好友相关消息");
-        log.info("11. 缓存本次登陆好友相关消息");
+        statusLabel.setText("10. 缓存本次登陆好友相关消息");
+        log.info("10. 缓存本次登陆好友相关消息");
         // 登陆成功后缓存本次登陆好友相关消息（NickName, UserName）
         //WeChatTool.setUserInfo();
         //删除无效头像
         // HeadImageUtil.deleteLoseEfficacyHeadImg(Config.PIC_DIR + "/headimg/");
         if (dHImg) {
-            statusLabel.setText("12. 下载联系人头像");
-            log.info("12. 下载联系人头像");
-            for (Map.Entry<String, com.alibaba.fastjson.JSONObject> entry : Core.getMemberMap().entrySet()) {
+            statusLabel.setText("11. 下载联系人头像");
+            log.info("11. 下载联系人头像");
+            for (Map.Entry<String, Contacts> entry : Core.getMemberMap().entrySet()) {
                 ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(
                         () -> {
-                            Core.getContactHeadImgPath().put(entry.getValue().getString("UserName"), DownloadTools.downloadHeadImg(entry.getValue().getString("HeadImgUrl"), entry.getValue().getString("UserName")));
-                            log.info("下载头像：({}):{}", entry.getValue().getString("NickName"), entry.getValue().getString("HeadImgUrl"));
+                            Core.getContactHeadImgPath().put(entry.getValue().getUsername(), DownloadTools.downloadHeadImg(entry.getValue().getHeadimgurl(), entry.getValue().getUsername()));
+                            log.info("下载头像：({}):{}", entry.getValue().getNickname(), entry.getValue().getHeadimgurl());
                         });
 
             }
@@ -352,6 +350,10 @@ public class LoginFrame extends JFrame
             }
             statusLabel.setText("头像下载完成");
             log.info("头像下载完成");
+
+            statusLabel.setText("12 开始接收消息");
+            log.info("12. 开始接收消息");
+            loginService.startReceiving();
             doLogin();
         });
 

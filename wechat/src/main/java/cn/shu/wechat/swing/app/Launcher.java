@@ -88,7 +88,7 @@ public class Launcher
         //currentFrame = new LoginFrame();
             currentFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             currentFrame.setVisible(true);
-            currentFrame.login(true);
+            currentFrame.login(false);
     }
 
     private void config()
