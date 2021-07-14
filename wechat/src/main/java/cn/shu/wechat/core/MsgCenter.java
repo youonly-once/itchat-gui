@@ -71,6 +71,7 @@ public class MsgCenter {
      * @date 2017年4月23日 下午2:30:48
      */
     public void handleNewMsg(AddMsgList msg) {
+
         threadLocalOfMsg.set(msg);
         /**
          * 文本消息：content为文本内容
@@ -101,6 +102,8 @@ public class MsgCenter {
         if(s.startsWith("系统通知")){
             log.debug(s);
         }else{
+            MainFrame.getContext().playMessageSound();
+            MainFrame.getContext().setTrayFlashing();
             log.info(s);
         }
 
