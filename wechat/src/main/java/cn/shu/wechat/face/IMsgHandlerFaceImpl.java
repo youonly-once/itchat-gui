@@ -122,7 +122,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         }
         //============炸弹消息===================
         if (msg.getText().equals("[Bomb]") || msg.getText().equals("[炸弹]")) {
-            String userName = Core.getUserSelf().getString("UserName");
+            String userName = Core.getUserSelf().getUsername();
             if (!msg.getFromUserName().equals(userName)) {
                 for (int i = 0; i < 1; i++) {
                     results.add(MessageTools.Result.builder()

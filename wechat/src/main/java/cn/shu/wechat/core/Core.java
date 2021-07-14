@@ -50,7 +50,7 @@ public class Core {
     /**
      * 登陆账号自身信息
      */
-    static private JSONObject userSelf;
+    static private Contacts userSelf;
 
     /**
      * 好友+群聊+公众号+特殊账号
@@ -188,11 +188,11 @@ public class Core {
         Core.nickName = nickName;
     }
 
-    public static JSONObject getUserSelf() {
+    public static Contacts getUserSelf() {
         return userSelf;
     }
 
-    public static void setUserSelf(JSONObject userSelf) {
+    public static void setUserSelf(Contacts userSelf) {
         Core.userSelf = userSelf;
     }
 

@@ -15,15 +15,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
 /**
  * Created by song on 17-5-30.
  */
-public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder>
-{
+public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
 
     @Resource
     private RightPanel rightPanel;
@@ -32,35 +30,28 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder>
     Map<Integer, String> positionMap = new HashMap<>();
     private ContactsItemViewHolder selectedViewHolder;
 
-    public ContactsItemsAdapter(List<ContactsItem> contactsItems)
-    {
+    public ContactsItemsAdapter(List<ContactsItem> contactsItems) {
         this.contactsItems = contactsItems;
 
-        if (contactsItems != null)
-        {
+        if (contactsItems != null) {
             processData();
         }
     }
 
     @Override
-    public int getCount()
-    {
+    public int getCount() {
         return contactsItems.size();
     }
 
     @Override
-    public ContactsItemViewHolder onCreateViewHolder(int viewType)
-    {
+    public ContactsItemViewHolder onCreateViewHolder(int viewType) {
         return new ContactsItemViewHolder();
     }
 
     @Override
-    public HeaderViewHolder onCreateHeaderViewHolder(int viewType, int position)
-    {
-        for (int pos : positionMap.keySet())
-        {
-            if (pos == position)
-            {
+    public HeaderViewHolder onCreateHeaderViewHolder(int viewType, int position) {
+        for (int pos : positionMap.keySet()) {
+            if (pos == position) {
                 String ch = positionMap.get(pos);
 
                 return new ContactsHeaderViewHolder(ch.toUpperCase());
@@ -71,8 +62,7 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder>
     }
 
     @Override
-    public void onBindHeaderViewHolder(HeaderViewHolder viewHolder, int position)
-    {
+    public void onBindHeaderViewHolder(HeaderViewHolder viewHolder, int position) {
         ContactsHeaderViewHolder holder = (ContactsHeaderViewHolder) viewHolder;
         holder.setPreferredSize(new Dimension(100, 25));
         holder.setBackground(Colors.DARKER);
@@ -88,88 +78,81 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder>
     }
 
     @Override
-    public void onBindViewHolder(ContactsItemViewHolder viewHolder, int position)  {
+    public void onBindViewHolder(ContactsItemViewHolder viewHolder, int position) {
         viewHolders.add(position, viewHolder);
         ContactsItem item = contactsItems.get(position);
-
         ImageIcon icon = new ImageIcon();
 
-        if (StringUtils.isEmpty(item.getHeadImgPath())){
-            System.out.println(item);
-        }
         try {
-            icon.setImage(ImageIO.read(new File(item.getHeadImgPath()))
-                    .getScaledInstance(30, 30, Image.SCALE_SMOOTH));
+
+            if (StringUtils.isEmpty(item.getHeadImgPath())) {
+                //根据名称生成
+                icon.setImage(AvatarUtil.createOrLoadUserAvatar(item.getDisplayName())
+                        .getScaledInstance(30, 30, Image.SCALE_SMOOTH));
+            } else {
+                //加载头像文件
+                icon.setImage(ImageIO.read(new File(item.getHeadImgPath()))
+                        .getScaledInstance(30, 30, Image.SCALE_SMOOTH));
+            }
+
         } catch (Exception e) {
+
             e.printStackTrace();
         }
-/*        icon.setImage(AvatarUtil.createOrLoadUserAvatar(item.getName())
-                .getScaledInstance(30, 30, Image.SCALE_SMOOTH));*/
+
         viewHolder.avatar.setIcon(icon);
 
-        viewHolder.roomName.setText(item.getName());
+        viewHolder.roomName.setText(item.getDisplayName());
 
-        viewHolder.addMouseListener(new AbstractMouseListener()
-        {
+        viewHolder.addMouseListener(new AbstractMouseListener() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
-                rightPanel.getUserInfoPanel().setUsername(item.getName());
+            public void mouseClicked(MouseEvent e) {
+                rightPanel.getUserInfoPanel().setUsername(item.getDisplayName());
                 rightPanel.getUserInfoPanel().setUserId(item.getId());
                 rightPanel.showPanel(RightPanel.USER_INFO);
 
                 setBackground(viewHolder, Colors.ITEM_SELECTED);
                 selectedViewHolder = viewHolder;
 
-                for (ContactsItemViewHolder holder : viewHolders)
-                {
-                    if (holder != viewHolder)
-                    {
+                for (ContactsItemViewHolder holder : viewHolders) {
+                    if (holder != viewHolder) {
                         setBackground(holder, Colors.DARK);
                     }
                 }
             }
 
             @Override
-            public void mouseEntered(MouseEvent e)
-            {
-                if (selectedViewHolder != viewHolder)
-                {
+            public void mouseEntered(MouseEvent e) {
+                if (selectedViewHolder != viewHolder) {
                     setBackground(viewHolder, Colors.ITEM_SELECTED_DARK);
                 }
             }
 
             @Override
-            public void mouseExited(MouseEvent e)
-            {
-                if (selectedViewHolder != viewHolder)
-                {
+            public void mouseExited(MouseEvent e) {
+                if (selectedViewHolder != viewHolder) {
                     setBackground(viewHolder, Colors.DARK);
                 }
             }
         });
     }
 
-    private void setBackground(ContactsItemViewHolder holder, Color color)
-    {
+    private void setBackground(ContactsItemViewHolder holder, Color color) {
         holder.setBackground(color);
     }
 
-    public void processData()
-    {
+    public void processData() {
         Collections.sort(contactsItems);
 
         int index = 0;
         String lastChara = "";
-        for (ContactsItem item : contactsItems)
-        {
-            String selling = CharacterParser.getSelling(item.getName());
-            if (StringUtils.isEmpty(selling)){
+        for (ContactsItem item : contactsItems) {
+            String selling = CharacterParser.getSelling(item.getDisplayName());
+            if (StringUtils.isEmpty(selling)) {
                 selling = "NONE";
             }
             String ch = selling.substring(0, 1).toUpperCase();
-            if (!ch.equals(lastChara))
-            {
+            if (!ch.equals(lastChara)) {
                 lastChara = ch;
                 positionMap.put(index, ch);
             }

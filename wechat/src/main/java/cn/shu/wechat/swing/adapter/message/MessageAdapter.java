@@ -34,8 +34,7 @@ import java.util.Map;
 /**
  * Created by song on 17-6-2.
  */
-public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
-{
+public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     private List<MessageItem> messageItems;
     private RCListView listView;
     private AttachmentIconHelper attachmentIconHelper = new AttachmentIconHelper();
@@ -50,93 +49,75 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
 
     MessageViewHolderCacheHelper messageViewHolderCacheHelper;
 
-    public MessageAdapter(List<MessageItem> messageItems, RCListView listView, MessageViewHolderCacheHelper messageViewHolderCacheHelper)
-    {
+    public MessageAdapter(List<MessageItem> messageItems, RCListView listView, MessageViewHolderCacheHelper messageViewHolderCacheHelper) {
         this.messageItems = messageItems;
         this.listView = listView;
 
-       // currentUser = currentUserService.findAll().get(0);
+        // currentUser = currentUserService.findAll().get(0);
         imageCache = new ImageCache();
         fileCache = new FileCache();
         this.messageViewHolderCacheHelper = messageViewHolderCacheHelper;
     }
 
     @Override
-    public int getItemViewType(int position)
-    {
+    public int getItemViewType(int position) {
         return messageItems.get(position).getMessageType();
     }
 
     @Override
-    public BaseMessageViewHolder onCreateViewHolder(int viewType)
-    {
-        switch (viewType)
-        {
-            case MessageItem.SYSTEM_MESSAGE:
-            {
+    public BaseMessageViewHolder onCreateViewHolder(int viewType) {
+        switch (viewType) {
+            case MessageItem.SYSTEM_MESSAGE: {
                 MessageSystemMessageViewHolder holder = messageViewHolderCacheHelper.tryGetSystemMessageViewHolder();
-                if (holder == null)
-                {
+                if (holder == null) {
                     holder = new MessageSystemMessageViewHolder();
                 }
 
                 return holder;
             }
-            case MessageItem.RIGHT_TEXT:
-            {
+            case MessageItem.RIGHT_TEXT: {
                 MessageRightTextViewHolder holder = messageViewHolderCacheHelper.tryGetRightTextViewHolder();
-                if (holder == null)
-                {
+                if (holder == null) {
                     holder = new MessageRightTextViewHolder();
                 }
 
                 return holder;
             }
-            case MessageItem.LEFT_TEXT:
-            {
+            case MessageItem.LEFT_TEXT: {
                 MessageLeftTextViewHolder holder = messageViewHolderCacheHelper.tryGetLeftTextViewHolder();
-                if (holder == null)
-                {
+                if (holder == null) {
                     holder = new MessageLeftTextViewHolder();
                 }
 
                 return holder;
             }
-            case MessageItem.RIGHT_IMAGE:
-            {
+            case MessageItem.RIGHT_IMAGE: {
                 MessageRightImageViewHolder holder = messageViewHolderCacheHelper.tryGetRightImageViewHolder();
-                if (holder == null)
-                {
+                if (holder == null) {
                     holder = new MessageRightImageViewHolder();
                 }
 
                 return holder;
             }
-            case MessageItem.LEFT_IMAGE:
-            {
+            case MessageItem.LEFT_IMAGE: {
                 MessageLeftImageViewHolder holder = messageViewHolderCacheHelper.tryGetLeftImageViewHolder();
-                if (holder == null)
-                {
+                if (holder == null) {
                     holder = new MessageLeftImageViewHolder();
                 }
 
                 return holder;
             }
-            case MessageItem.RIGHT_ATTACHMENT:
-            {
+            case MessageItem.RIGHT_ATTACHMENT: {
                 MessageRightAttachmentViewHolder holder = messageViewHolderCacheHelper.tryGetRightAttachmentViewHolder();
-                if (holder == null)
-                {
+                if (holder == null) {
                     holder = new MessageRightAttachmentViewHolder();
                 }
 
                 return holder;
             }
-            case MessageItem.LEFT_ATTACHMENT:
-            {
+            case MessageItem.LEFT_ATTACHMENT: {
                 MessageLeftAttachmentViewHolder holder = messageViewHolderCacheHelper.tryGetLeftAttachmentViewHolder();
-                if (holder == null)
-                {
+                if (holder == null) {
                     holder = new MessageLeftAttachmentViewHolder();
                 }
 
@@ -148,10 +129,8 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
     }
 
     @Override
-    public void onBindViewHolder(BaseMessageViewHolder viewHolder, int position)
-    {
-        if (viewHolder == null)
-        {
+    public void onBindViewHolder(BaseMessageViewHolder viewHolder, int position) {
+        if (viewHolder == null) {
             return;
         }
 
@@ -160,44 +139,29 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
 
         processTimeAndAvatar(item, preItem, viewHolder);
 
-        if (viewHolder instanceof MessageSystemMessageViewHolder)
-        {
+        if (viewHolder instanceof MessageSystemMessageViewHolder) {
             processSystemMessage(viewHolder, item);
-        }
-        else if (viewHolder instanceof MessageRightTextViewHolder)
-        {
+        } else if (viewHolder instanceof MessageRightTextViewHolder) {
             processRightTextMessage(viewHolder, item);
-        }
-        else if (viewHolder instanceof MessageLeftTextViewHolder)
-        {
+        } else if (viewHolder instanceof MessageLeftTextViewHolder) {
             processLeftTextMessage(viewHolder, item);
-        }
-        else if (viewHolder instanceof MessageRightImageViewHolder)
-        {
+        } else if (viewHolder instanceof MessageRightImageViewHolder) {
             processRightImageMessage(viewHolder, item);
-        }
-        else if (viewHolder instanceof MessageLeftImageViewHolder)
-        {
+        } else if (viewHolder instanceof MessageLeftImageViewHolder) {
             processLeftImageMessage(viewHolder, item);
-        }
-        else if (viewHolder instanceof MessageRightAttachmentViewHolder)
-        {
+        } else if (viewHolder instanceof MessageRightAttachmentViewHolder) {
             processRightAttachmentMessage(viewHolder, item);
-        }
-        else if (viewHolder instanceof MessageLeftAttachmentViewHolder)
-        {
+        } else if (viewHolder instanceof MessageLeftAttachmentViewHolder) {
             processLeftAttachmentMessage(viewHolder, item);
         }
     }
 
-    private void processSystemMessage(ViewHolder viewHolder, MessageItem item)
-    {
+    private void processSystemMessage(ViewHolder viewHolder, MessageItem item) {
         MessageSystemMessageViewHolder holder = (MessageSystemMessageViewHolder) viewHolder;
         holder.text.setText(item.getMessageContent());
     }
 
-    private void processLeftAttachmentMessage(ViewHolder viewHolder, MessageItem item)
-    {
+    private void processLeftAttachmentMessage(ViewHolder viewHolder, MessageItem item) {
         MessageLeftAttachmentViewHolder holder = (MessageLeftAttachmentViewHolder) viewHolder;
         holder.attachmentTitle.setText(item.getMessageContent());
 
@@ -222,8 +186,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
         attachPopupMenu(viewHolder, MessageItem.LEFT_ATTACHMENT);
     }
 
-    private void processRightAttachmentMessage(ViewHolder viewHolder, MessageItem item)
-    {
+    private void processRightAttachmentMessage(ViewHolder viewHolder, MessageItem item) {
         MessageRightAttachmentViewHolder holder = (MessageRightAttachmentViewHolder) viewHolder;
         holder.attachmentTitle.setText(item.getMessageContent());
 
@@ -236,54 +199,40 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
         ImageIcon attachmentTypeIcon = attachmentIconHelper.getImageIcon(item.getFileAttachment().getTitle());
         holder.attachmentIcon.setIcon(attachmentTypeIcon);
 
-        if (item.getProgress() != 0 && item.getProgress() != 100)
-        {
+        if (item.getProgress() != 0 && item.getProgress() != 100) {
             Message msg = messageService.findById(item.getId());
-            if (msg != null)
-            {
+            if (msg != null) {
                 item.setProgress(msg.getProgress());
 
                 holder.progressBar.setVisible(true);
                 holder.progressBar.setValue(item.getProgress());
 
-                if (item.getProgress() == 100)
-                {
+                if (item.getProgress() == 100) {
                     holder.progressBar.setVisible(false);
-                }
-                else
-                {
-                    if (!ChatPanel.getContext().uploadingOrDownloadingFiles.contains(item.getFileAttachment().getId()))
-                    {
+                } else {
+                    if (!ChatPanel.getContext().uploadingOrDownloadingFiles.contains(item.getFileAttachment().getId())) {
                         item.setNeedToResend(true);
                     }
                 }
             }
-        }
-        else
-        {
+        } else {
             holder.progressBar.setVisible(false);
         }
 
 
         // 判断是否显示重发按钮
-        if (item.isNeedToResend())
-        {
+        if (item.isNeedToResend()) {
             holder.sizeLabel.setVisible(false);
             holder.progressBar.setVisible(false);
             holder.resend.setVisible(true);
-        }
-        else
-        {
+        } else {
             holder.resend.setVisible(false);
         }
 
-        holder.resend.addMouseListener(new MessageMouseListener()
-        {
+        holder.resend.addMouseListener(new MessageMouseListener() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
-                if (item.getUpdatedAt() > 0)
-                {
+            public void mouseClicked(MouseEvent e) {
+                if (item.getUpdatedAt() > 0) {
                     holder.resend.setVisible(false);
                     System.out.println("这条消息其实已经发送出去了");
                     return;
@@ -297,12 +246,9 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
 
         setAttachmentClickListener(holder, item);
 
-        if (item.getUpdatedAt() > 0)
-        {
+        if (item.getUpdatedAt() > 0) {
             processAttachmentSize(holder, item);
-        }
-        else
-        {
+        } else {
             holder.sizeLabel.setText("等待上传...");
         }
 
@@ -320,15 +266,11 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
      * @param viewHolder
      * @param item
      */
-    private void setAttachmentClickListener(MessageAttachmentViewHolder viewHolder, MessageItem item)
-    {
-        MessageMouseListener listener = new MessageMouseListener()
-        {
+    private void setAttachmentClickListener(MessageAttachmentViewHolder viewHolder, MessageItem item) {
+        MessageMouseListener listener = new MessageMouseListener() {
             @Override
-            public void mouseReleased(MouseEvent e)
-            {
-                if (e.getButton() == MouseEvent.BUTTON1)
-                {
+            public void mouseReleased(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
                     ChatPanel.getContext().downloadOrOpenFile(item.getId());
                 }
             }
@@ -339,23 +281,19 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
         viewHolder.attachmentTitle.addMouseListener(listener);
     }
 
-    private void processAttachmentSize(MessageAttachmentViewHolder viewHolder, MessageItem item)
-    {
+    private void processAttachmentSize(MessageAttachmentViewHolder viewHolder, MessageItem item) {
         FileAttachmentItem attachment = item.getFileAttachment();
         String path;
         // 远程服务器文件
-        if (attachment.getLink().startsWith("/file-upload"))
-        {
+        if (attachment.getLink().startsWith("/file-upload")) {
             path = fileCache.tryGetFileCache(item.getFileAttachment().getId(), item.getFileAttachment().getTitle());
         }
         // 我自己上传的文件
-        else
-        {
+        else {
             path = attachment.getLink();
         }
 
-        if (path != null)
-        {
+        if (path != null) {
             viewHolder.sizeLabel.setVisible(true);
             viewHolder.sizeLabel.setText(fileCache.fileSizeString(path));
         }
@@ -367,8 +305,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
      * @param viewHolder
      * @param item
      */
-    private void processLeftImageMessage(ViewHolder viewHolder, MessageItem item)
-    {
+    private void processLeftImageMessage(ViewHolder viewHolder, MessageItem item) {
         MessageLeftImageViewHolder holder = (MessageLeftImageViewHolder) viewHolder;
         holder.sender.setText(item.getSenderUsername());
 
@@ -387,62 +324,44 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
      * @param viewHolder
      * @param item
      */
-    private void processRightImageMessage(ViewHolder viewHolder, MessageItem item)
-    {
+    private void processRightImageMessage(ViewHolder viewHolder, MessageItem item) {
         MessageRightImageViewHolder holder = (MessageRightImageViewHolder) viewHolder;
 
         processImage(item, holder.image, holder);
 
-        if (item.getProgress() != 0 && item.getProgress() != 100)
-        {
+        if (item.getProgress() != 0 && item.getProgress() != 100) {
             Message msg = messageService.findById(item.getId());
-            if (msg != null)
-            {
+            if (msg != null) {
                 item.setProgress(msg.getProgress());
 
-                if (item.getProgress() == 100)
-                {
+                if (item.getProgress() == 100) {
                     holder.sendingProgress.setVisible(false);
-                }
-                else
-                {
-                    if (!ChatPanel.getContext().uploadingOrDownloadingFiles.contains(item.getImageAttachment().getId()))
-                    {
+                } else {
+                    if (!ChatPanel.getContext().uploadingOrDownloadingFiles.contains(item.getImageAttachment().getId())) {
                         item.setNeedToResend(true);
                     }
                 }
             }
-        }
-        else
-        {
-            if (item.getUpdatedAt() < 1)
-            {
+        } else {
+            if (item.getUpdatedAt() < 1) {
                 holder.sendingProgress.setVisible(true);
-            }
-            else
-            {
+            } else {
                 holder.sendingProgress.setVisible(false);
             }
         }
 
 
         // 判断是否显示重发按钮
-        if (item.isNeedToResend())
-        {
+        if (item.isNeedToResend()) {
             holder.resend.setVisible(true);
-        }
-        else
-        {
+        } else {
             holder.resend.setVisible(false);
         }
 
-        holder.resend.addMouseListener(new MessageMouseListener()
-        {
+        holder.resend.addMouseListener(new MessageMouseListener() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
-                if (item.getUpdatedAt() > 0)
-                {
+            public void mouseClicked(MouseEvent e) {
+                if (item.getUpdatedAt() > 0) {
                     holder.resend.setVisible(false);
                     System.out.println("这条消息其实已经发送出去了");
                     return;
@@ -461,8 +380,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
         listView.setScrollHiddenOnMouseLeave(holder.imageBubble);
     }
 
-    private void processImage(MessageItem item, MessageImageLabel imageLabel, ViewHolder holder)
-    {
+    private void processImage(MessageItem item, MessageImageLabel imageLabel, ViewHolder holder) {
        /* String url;
         if (imageUrl.startsWith("/file-upload"))
         {
@@ -477,44 +395,34 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
         loadImageThumb(holder, item, imageLabel);
 
         // 当点击图片时，使用默认程序打开图片
-        imageLabel.addMouseListener(new MessageMouseListener()
-        {
+        imageLabel.addMouseListener(new MessageMouseListener() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
-                if (e.getButton() == MouseEvent.BUTTON1)
-                {
-                    imageCache.requestOriginalAsynchronously(item.getImageAttachment().getId(), item.getImageAttachment().getImageUrl(), new ImageCache.ImageCacheRequestListener()
-                    {
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    imageCache.requestOriginalAsynchronously(item.getImageAttachment().getId(), item.getImageAttachment().getImageUrl(), new ImageCache.ImageCacheRequestListener() {
                         @Override
-                        public void onSuccess(ImageIcon icon, String path)
-                        {
-                            try
-                            {
+                        public void onSuccess(ImageIcon icon, String path) {
+                            try {
                                 //Desktop.getDesktop().open(new File(path));
                                 //ImageViewerFrame frame = new ImageViewerFrame(path);
-                               // frame.setVisible(true);
+                                // frame.setVisible(true);
 
                                 // 如果图片获取成功，则重新加载缩略图
                                 ImageIcon thumbIcon = (ImageIcon) imageLabel.getIcon();
-                                if (thumbIcon.getDescription().endsWith("image_error.png"))
-                                {
+                                if (thumbIcon.getDescription().endsWith("image_error.png")) {
                                     loadImageThumb(holder, item, imageLabel);
                                 }
-                            }
-                            catch (Exception e1)
-                            {
+                            } catch (Exception e1) {
                                 JOptionPane.showMessageDialog(null, "图像不存在", "图像不存在", JOptionPane.ERROR_MESSAGE);
                                 e1.printStackTrace();
                             }
                         }
 
                         @Override
-                        public void onFailed(String why)
-                        {
+                        public void onFailed(String why) {
                             // 图片不存在，显示错误图片
                             //ImageViewerFrame frame = new ImageViewerFrame(getClass().getResource("/image/image_error.png").getPath());
-                           // frame.setVisible(true);
+                            // frame.setVisible(true);
                         }
                     });
                 }
@@ -523,8 +431,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
         });
     }
 
-    private void loadImageThumb(ViewHolder holder, MessageItem item, MessageImageLabel imageLabel)
-    {
+    private void loadImageThumb(ViewHolder holder, MessageItem item, MessageImageLabel imageLabel) {
         String imageUrl = item.getImageAttachment().getImageUrl();
 
         Map map = new HashMap();
@@ -533,19 +440,16 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
         map.put("messageId", item.getId());
         imageLabel.setTag(map);
 
-       // ImageIcon imageIcon = imageCache.tryGetThumbCache(item.getImageAttachment().getId());
-        imageUrl = (imageUrl==null?"/image/image_loading.gif":imageUrl);
+        // ImageIcon imageIcon = imageCache.tryGetThumbCache(item.getImageAttachment().getId());
+        imageUrl = (imageUrl == null ? "/image/image_loading.gif" : imageUrl);
 
         ImageIcon imageIcon = imageCache.tryGetThumbCache(new File(imageUrl));
-        if (imageIcon == null)
-        {
+        if (imageIcon == null) {
             imageLabel.setIcon(IconUtil.getIcon(this, "/image/image_loading.gif"));
 
-            imageCache.requestThumbAsynchronously(item.getImageAttachment().getId(), imageUrl, new ImageCache.ImageCacheRequestListener()
-            {
+            imageCache.requestThumbAsynchronously(item.getImageAttachment().getId(), imageUrl, new ImageCache.ImageCacheRequestListener() {
                 @Override
-                public void onSuccess(ImageIcon icon, String path)
-                {
+                public void onSuccess(ImageIcon icon, String path) {
                     preferredImageSize(icon);
                     imageLabel.setIcon(icon);
                     holder.revalidate();
@@ -553,16 +457,13 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
                 }
 
                 @Override
-                public void onFailed(String why)
-                {
+                public void onFailed(String why) {
                     imageLabel.setIcon(IconUtil.getIcon(this, "/image/image_error.png", 64, 64));
                     holder.revalidate();
                     holder.repaint();
                 }
             });
-        }
-        else
-        {
+        } else {
             preferredImageSize(imageIcon);
             imageLabel.setIcon(imageIcon);
         }
@@ -574,16 +475,14 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
      * @param imageIcon
      * @return
      */
-    public ImageIcon preferredImageSize(ImageIcon imageIcon)
-    {
+    public ImageIcon preferredImageSize(ImageIcon imageIcon) {
         int width = imageIcon.getIconWidth();
         int height = imageIcon.getIconHeight();
         float scale = width * 1.0F / height;
 
         // 限制图片显示大小
         int maxImageWidth = (int) (MainFrame.getContext().currentWindowWidth * 0.2);
-        if (width > maxImageWidth)
-        {
+        if (width > maxImageWidth) {
             width = maxImageWidth;
             height = (int) (width / scale);
         }
@@ -598,8 +497,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
      * @param viewHolder
      * @param item
      */
-    private void processRightTextMessage(ViewHolder viewHolder, final MessageItem item)
-    {
+    private void processRightTextMessage(ViewHolder viewHolder, final MessageItem item) {
         MessageRightTextViewHolder holder = (MessageRightTextViewHolder) viewHolder;
 
         holder.text.setText(item.getMessageContent());
@@ -615,39 +513,29 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
         // 判断是否显示重发按钮
         boolean needToUpdateResendStatus = !item.isNeedToResend() && item.getUpdatedAt() < 1 && System.currentTimeMillis() - item.getTimestamp() > 10 * 1000;
 
-        if (item.isNeedToResend() || needToUpdateResendStatus)
-        {
-            if (needToUpdateResendStatus)
-            {
+        if (item.isNeedToResend() || needToUpdateResendStatus) {
+            if (needToUpdateResendStatus) {
                 //messageService.updateNeedToResend(item.getId(), true);
             }
 
 
             holder.sendingProgress.setVisible(false);
             holder.resend.setVisible(true);
-        }
-        else
-        {
+        } else {
             holder.resend.setVisible(false);
             // 如果是刚发送的消息，显示正在发送进度条
-            if (item.getUpdatedAt() < 1)
-            {
+            if (item.getUpdatedAt() < 1) {
                 holder.sendingProgress.setVisible(true);
-            }
-            else
-            {
+            } else {
                 holder.sendingProgress.setVisible(false);
             }
         }
 
 
-        holder.resend.addMouseListener(new MessageMouseListener()
-        {
+        holder.resend.addMouseListener(new MessageMouseListener() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
-                if (item.getUpdatedAt() > 0)
-                {
+            public void mouseClicked(MouseEvent e) {
+                if (item.getUpdatedAt() > 0) {
                     holder.resend.setVisible(false);
                     return;
                 }
@@ -677,11 +565,10 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
      * @param viewHolder
      * @param item
      */
-    private void processLeftTextMessage(ViewHolder viewHolder, final MessageItem item)
-    {
+    private void processLeftTextMessage(ViewHolder viewHolder, final MessageItem item) {
         MessageLeftTextViewHolder holder = (MessageLeftTextViewHolder) viewHolder;
 
-        holder.text.setText(item.getMessageContent()==null?"[空消息]":item.getMessageContent());
+        holder.text.setText(item.getMessageContent() == null ? "[空消息]" : item.getMessageContent());
         holder.text.setTag(item.getId());
 
         holder.sender.setText(item.getSenderUsername());
@@ -698,29 +585,21 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
      * @param preItem
      * @param holder
      */
-    private void processTimeAndAvatar(MessageItem item, MessageItem preItem, BaseMessageViewHolder holder)
-    {
+    private void processTimeAndAvatar(MessageItem item, MessageItem preItem, BaseMessageViewHolder holder) {
         // 如果当前消息的时间与上条消息时间相差大于1分钟，则显示当前消息的时间
-        if (preItem != null)
-        {
-            if (TimeUtil.inTheSameMinute(item.getTimestamp(), preItem.getTimestamp()))
-            {
+        if (preItem != null) {
+            if (TimeUtil.inTheSameMinute(item.getTimestamp(), preItem.getTimestamp())) {
                 holder.time.setVisible(false);
-            }
-            else
-            {
+            } else {
                 holder.time.setVisible(true);
                 holder.time.setText(TimeUtil.diff(item.getTimestamp(), true));
             }
-        }
-        else
-        {
+        } else {
             holder.time.setVisible(true);
             holder.time.setText(TimeUtil.diff(item.getTimestamp(), true));
         }
 
-        if (holder.avatar != null)
-        {
+        if (holder.avatar != null) {
             ImageIcon icon = new ImageIcon();
             Image image = AvatarUtil.createOrLoadUserAvatar(item.getSenderUsername()).getScaledInstance(40, 40, Image.SCALE_SMOOTH);
             icon.setImage(image);
@@ -728,8 +607,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
 
             if (item.getMessageType() == MessageItem.LEFT_ATTACHMENT
                     || item.getMessageType() == MessageItem.LEFT_IMAGE
-                    || item.getMessageType() == MessageItem.LEFT_TEXT)
-            {
+                    || item.getMessageType() == MessageItem.LEFT_TEXT) {
                 bindAvatarAction(holder.avatar, item.getSenderUsername());
             }
         }
@@ -742,14 +620,11 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
     }
 
 
-    private void bindAvatarAction(JLabel avatarLabel, String username)
-    {
+    private void bindAvatarAction(JLabel avatarLabel, String username) {
 
-        avatarLabel.addMouseListener(new MessageMouseListener()
-        {
+        avatarLabel.addMouseListener(new MessageMouseListener() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 UserInfoPopup popup = new UserInfoPopup(username, ContactsTools.getContactDisplayNameByUserName(username));
                 popup.show(e.getComponent(), e.getX(), e.getY());
 
@@ -759,60 +634,49 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
     }
 
     @Override
-    public int getCount()
-    {
+    public int getCount() {
         return messageItems.size();
     }
 
-    private void attachPopupMenu(ViewHolder viewHolder, int messageType)
-    {
+    private void attachPopupMenu(ViewHolder viewHolder, int messageType) {
         JComponent contentComponent = null;
         RCMessageBubble messageBubble = null;
 
-        switch (messageType)
-        {
-            case MessageItem.RIGHT_TEXT:
-            {
+        switch (messageType) {
+            case MessageItem.RIGHT_TEXT: {
                 MessageRightTextViewHolder holder = (MessageRightTextViewHolder) viewHolder;
                 contentComponent = holder.text;
                 messageBubble = holder.messageBubble;
 
                 break;
             }
-            case MessageItem.LEFT_TEXT:
-            {
+            case MessageItem.LEFT_TEXT: {
                 MessageLeftTextViewHolder holder = (MessageLeftTextViewHolder) viewHolder;
                 contentComponent = holder.text;
                 messageBubble = holder.messageBubble;
                 break;
             }
-            case MessageItem.RIGHT_IMAGE:
-            {
+            case MessageItem.RIGHT_IMAGE: {
                 MessageRightImageViewHolder holder = (MessageRightImageViewHolder) viewHolder;
                 contentComponent = holder.image;
                 messageBubble = holder.imageBubble;
                 break;
             }
-            case MessageItem.LEFT_IMAGE:
-            {
+            case MessageItem.LEFT_IMAGE: {
                 MessageLeftImageViewHolder holder = (MessageLeftImageViewHolder) viewHolder;
                 contentComponent = holder.image;
                 messageBubble = holder.imageBubble;
                 break;
             }
-            case MessageItem.RIGHT_ATTACHMENT:
-            {
+            case MessageItem.RIGHT_ATTACHMENT: {
                 MessageRightAttachmentViewHolder holder = (MessageRightAttachmentViewHolder) viewHolder;
                 contentComponent = holder.attachmentPanel;
                 messageBubble = holder.messageBubble;
 
-                holder.attachmentTitle.addMouseListener(new MessageMouseListener()
-                {
+                holder.attachmentTitle.addMouseListener(new MessageMouseListener() {
                     @Override
-                    public void mouseReleased(MouseEvent e)
-                    {
-                        if (e.getButton() == MouseEvent.BUTTON3)
-                        {
+                    public void mouseReleased(MouseEvent e) {
+                        if (e.getButton() == MouseEvent.BUTTON3) {
                             // 通过holder.attachmentPane.getTag()可以获取文件附件信息
                             popupMenu.show(holder.attachmentPanel, e.getX(), e.getY(), MessageItem.RIGHT_ATTACHMENT);
                         }
@@ -820,19 +684,15 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
                 });
                 break;
             }
-            case MessageItem.LEFT_ATTACHMENT:
-            {
+            case MessageItem.LEFT_ATTACHMENT: {
                 MessageLeftAttachmentViewHolder holder = (MessageLeftAttachmentViewHolder) viewHolder;
                 contentComponent = holder.attachmentPanel;
                 messageBubble = holder.messageBubble;
 
-                holder.attachmentTitle.addMouseListener(new MessageMouseListener()
-                {
+                holder.attachmentTitle.addMouseListener(new MessageMouseListener() {
                     @Override
-                    public void mouseReleased(MouseEvent e)
-                    {
-                        if (e.getButton() == MouseEvent.BUTTON3)
-                        {
+                    public void mouseReleased(MouseEvent e) {
+                        if (e.getButton() == MouseEvent.BUTTON3) {
                             popupMenu.show(holder.attachmentPanel, e.getX(), e.getY(), MessageItem.LEFT_ATTACHMENT);
                         }
                     }
@@ -844,30 +704,24 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
         JComponent finalContentComponent = contentComponent;
         RCMessageBubble finalMessageBubble = messageBubble;
 
-        contentComponent.addMouseListener(new MessageMouseListener()
-        {
+        contentComponent.addMouseListener(new MessageMouseListener() {
             @Override
-            public void mouseExited(MouseEvent e)
-            {
-                if (e.getX() > finalContentComponent.getWidth() || e.getY() > finalContentComponent.getHeight())
-                {
+            public void mouseExited(MouseEvent e) {
+                if (e.getX() > finalContentComponent.getWidth() || e.getY() > finalContentComponent.getHeight()) {
                     finalMessageBubble.setBackgroundIcon(finalMessageBubble.getBackgroundNormalIcon());
                 }
                 super.mouseExited(e);
             }
 
             @Override
-            public void mouseEntered(MouseEvent e)
-            {
+            public void mouseEntered(MouseEvent e) {
                 finalMessageBubble.setBackgroundIcon(finalMessageBubble.getBackgroundActiveIcon());
                 super.mouseEntered(e);
             }
 
             @Override
-            public void mouseReleased(MouseEvent e)
-            {
-                if (e.getButton() == MouseEvent.BUTTON3)
-                {
+            public void mouseReleased(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3) {
                     popupMenu.show((Component) e.getSource(), e.getX(), e.getY(), messageType);
                 }
 
@@ -875,13 +729,10 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder>
             }
         });
 
-        messageBubble.addMouseListener(new MessageMouseListener()
-        {
+        messageBubble.addMouseListener(new MessageMouseListener() {
             @Override
-            public void mouseReleased(MouseEvent e)
-            {
-                if (e.getButton() == MouseEvent.BUTTON3)
-                {
+            public void mouseReleased(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3) {
                     popupMenu.show(finalContentComponent, e.getX(), e.getY(), messageType);
                 }
             }

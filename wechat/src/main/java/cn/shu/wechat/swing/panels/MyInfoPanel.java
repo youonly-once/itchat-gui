@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.panels;
 
+import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
@@ -12,6 +13,7 @@ import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang.StringUtils;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -31,10 +33,8 @@ public class MyInfoPanel extends ParentAvailablePanel
     private JLabel avatar;
     private JLabel username;
     private JLabel menuIcon;
-    private CurrentUserService currentUserService = Launcher.currentUserService;
 
     MainOperationPopupMenu mainOperationPopupMenu;
-    private String currentUsername;
 
 
     public MyInfoPanel(JPanel parent)
@@ -53,15 +53,19 @@ public class MyInfoPanel extends ParentAvailablePanel
 
         //GImage.setBorder(new SubtleSquareBorder(true));
        // currentUsername = currentUserService.findAll().get(0).getUsername();
-        JSONObject userSelf = Core.getUserSelf();
-        currentUsername=userSelf.getString("NickName");
-        String headImage = Core.getContactHeadImgPath().get(userSelf.getString("UserName"));
+        Contacts userSelf = Core.getUserSelf();
+        String headImage = Core.getContactHeadImgPath().get(userSelf.getUsername());
         avatar = new JLabel();
+        if (StringUtils.isEmpty(headImage)){
+            avatar.setIcon(new ImageIcon(AvatarUtil.createOrLoadUserAvatar(userSelf.getNickname()).getScaledInstance(50,50,Image.SCALE_SMOOTH)));
+        }else{
+            try {
+                avatar.setIcon(new ImageIcon(ImageIO.read(new File(headImage)).getScaledInstance(50,50,Image.SCALE_SMOOTH)));
+            } catch (IOException e) {
+                avatar.setIcon(new ImageIcon(AvatarUtil.createOrLoadUserAvatar(userSelf.getNickname()).getScaledInstance(50,50,Image.SCALE_SMOOTH)));
+                e.printStackTrace();
+            }
 
-        try {
-            avatar.setIcon(new ImageIcon(ImageIO.read(new File(headImage)).getScaledInstance(50,50,Image.SCALE_SMOOTH)));
-        } catch (Exception e) {
-            avatar.setIcon(new ImageIcon(AvatarUtil.createOrLoadUserAvatar(currentUsername).getScaledInstance(50,50,Image.SCALE_SMOOTH)));
         }
 
         avatar.setPreferredSize(new Dimension(50, 50));
@@ -69,7 +73,7 @@ public class MyInfoPanel extends ParentAvailablePanel
 
 
         username = new JLabel();
-        username.setText(currentUsername);
+        username.setText(userSelf.getNickname());
         username.setFont(FontUtil.getDefaultFont(16));
         username.setForeground(Colors.FONT_WHITE);
 
@@ -130,7 +134,7 @@ public class MyInfoPanel extends ParentAvailablePanel
        // currentUsername = currentUserService.findAll().get(0).getUsername();
         //Image image = AvatarUtil.createOrLoadUserAvatar(currentUsername);
         //avatar.setImage(image);
-        avatar.setIcon(new ImageIcon(AvatarUtil.createOrLoadUserAvatar(currentUsername).getScaledInstance(50,50,Image.SCALE_SMOOTH)));
+        avatar.setIcon(new ImageIcon(AvatarUtil.createOrLoadUserAvatar(Core.getUserSelf().getNickname()).getScaledInstance(50,50,Image.SCALE_SMOOTH)));
 
 
 

@@ -58,8 +58,10 @@ public class AvatarUtil {
     private static final String CUSTOM_AVATAR_CACHE_ROOT;
     private static final int DEFAULT_AVATAR = 0;
     private static final int CUSTOM_AVATAR = 1;
-
-    private static Map<String, Image> avatarCache = new HashMap<>();
+    /**
+     * 图片缓存
+     */
+    private static final Map<String, Image> avatarCache = new HashMap<>();
 
     static {
         AVATAR_CACHE_ROOT = Launcher.appFilesBasePath + "/cache/avatar";
@@ -67,14 +69,14 @@ public class AvatarUtil {
         File file = new File(AVATAR_CACHE_ROOT);
         if (!file.exists()) {
             file.mkdirs();
-            System.out.println("创建头像缓存目录：" + file.getAbsolutePath());
+            log.info("创建头像缓存目录：{}" , file.getAbsolutePath());
         }
 
         CUSTOM_AVATAR_CACHE_ROOT = AVATAR_CACHE_ROOT + "/custom";
         file = new File(CUSTOM_AVATAR_CACHE_ROOT);
         if (!file.exists()) {
             file.mkdirs();
-            System.out.println("创建用户自定义头像缓存目录：" + file.getAbsolutePath());
+            log.info("创建用户自定义头像缓存目录：{}" , file.getAbsolutePath());
         }
     }
 

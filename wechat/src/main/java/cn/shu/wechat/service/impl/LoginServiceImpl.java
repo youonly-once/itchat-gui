@@ -199,7 +199,7 @@ public class LoginServiceImpl implements ILoginService {
             Core.getLoginInfoMap().put(StorageLoginInfoEnum.synckey.getKey(), synckey.substring(0, synckey.length() - 1));
             Core.setUserName(user.getString("UserName"));
             Core.setNickName(user.getString("NickName"));
-            Core.setUserSelf(obj.getJSONObject("User"));
+            Core.setUserSelf(JSON.parseObject(JSON.toJSONString(obj.getJSONObject("User")),Contacts.class));
 
             //初始化列表的联系人
             //最近聊天的联系人

@@ -86,8 +86,7 @@ public class LogUtil {
      * @return 日志内容
      */
     public static String printFromMeg(String fromUserName, String content) {
-        String myNickName = Core.getUserSelf().getString("NickName");
-        Core.getUserSelf().getString("UserName");
+        String myNickName = Core.getUserSelf().getNickname();
         String fromRemarkName = ContactsTools.getContactDisplayNameByUserName(fromUserName);
         return String.format("【%s ->>>>>>> %s: %s】", fromRemarkName, myNickName, content);
     }

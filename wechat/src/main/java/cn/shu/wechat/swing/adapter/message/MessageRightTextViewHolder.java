@@ -10,6 +10,7 @@ import cn.shu.wechat.swing.utils.FontUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Objects;
 
 /**
  * Created by song on 17-6-2.
@@ -46,14 +47,14 @@ public class MessageRightTextViewHolder extends BaseMessageViewHolder
         time.setForeground(Colors.FONT_GRAY);
         time.setFont(FontUtil.getDefaultFont(12));
 
-        ImageIcon resendIcon = new ImageIcon(getClass().getResource("/image/resend.png"));
+        ImageIcon resendIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/image/resend.png")));
         resendIcon.setImage(resendIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
         resend.setIcon(resendIcon);
         resend.setVisible(false);
         resend.setToolTipText("消息发送失败，点击重新发送");
         resend.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        ImageIcon sendingIcon = new ImageIcon(getClass().getResource("/image/sending.gif"));
+        ImageIcon sendingIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/image/sending.gif")));
         sendingProgress.setIcon(sendingIcon);
         sendingProgress.setVisible(false);
 
@@ -68,10 +69,10 @@ public class MessageRightTextViewHolder extends BaseMessageViewHolder
         timePanel.add(time);
 
         messageBubble.add(text, BorderLayout.CENTER);
-
+        messageBubble.setBackground(Color.BLUE);
         JPanel resendTextPanel = new JPanel();
-        resendTextPanel.setBackground(Colors.WINDOW_BACKGROUND);
-
+        //resendTextPanel.setBackground(Colors.WINDOW_BACKGROUND);
+        resendTextPanel.setBackground(Colors.LIGHT_GRAY);
         resendTextPanel.add(resend, BorderLayout.WEST);
         resendTextPanel.add(sendingProgress, BorderLayout.WEST);
         resendTextPanel.add(messageBubble, BorderLayout.CENTER);

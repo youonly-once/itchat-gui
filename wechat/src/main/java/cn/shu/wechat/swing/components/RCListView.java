@@ -15,8 +15,7 @@ import java.util.List;
 /**
  * Created by song on 17-5-30.
  */
-public class RCListView extends JScrollPane
-{
+public class RCListView extends JScrollPane {
     private BaseAdapter adapter;
     private JPanel contentPanel;
     private int vGap;
@@ -38,13 +37,11 @@ public class RCListView extends JScrollPane
     private boolean messageLoading = false;
     private long lastWeelTime = 0;
 
-    public RCListView()
-    {
+    public RCListView() {
         this(0, 0);
     }
 
-    public RCListView(int hGap, int vGap)
-    {
+    public RCListView(int hGap, int vGap) {
         this.vGap = vGap;
         this.hGap = hGap;
 
@@ -52,16 +49,12 @@ public class RCListView extends JScrollPane
         setListeners();
     }
 
-    public void setScrollHiddenOnMouseLeave(JComponent component)
-    {
-        if (scrollMouseListener == null)
-        {
+    public void setScrollHiddenOnMouseLeave(JComponent component) {
+        if (scrollMouseListener == null) {
 
-            scrollMouseListener = new MouseAdapter()
-            {
+            scrollMouseListener = new MouseAdapter() {
                 @Override
-                public void mouseEntered(MouseEvent e)
-                {
+                public void mouseEntered(MouseEvent e) {
                     setScrollBarColor(Colors.SCROLL_BAR_THUMB, Colors.WINDOW_BACKGROUND);
                     getVerticalScrollBar().repaint();
 
@@ -69,8 +62,7 @@ public class RCListView extends JScrollPane
                 }
 
                 @Override
-                public void mouseExited(MouseEvent e)
-                {
+                public void mouseExited(MouseEvent e) {
                     setScrollBarColor(Colors.WINDOW_BACKGROUND, Colors.WINDOW_BACKGROUND);
                     getVerticalScrollBar().repaint();
 
@@ -79,8 +71,7 @@ public class RCListView extends JScrollPane
             };
         }
 
-        if (!scrollAttachMouseListener)
-        {
+        if (!scrollAttachMouseListener) {
             getVerticalScrollBar().addMouseListener(scrollMouseListener);
             scrollAttachMouseListener = true;
         }
@@ -94,23 +85,18 @@ public class RCListView extends JScrollPane
      * @param thumbColor
      * @param trackColor
      */
-    public void setScrollBarColor(Color thumbColor, Color trackColor)
-    {
-        if (scrollUI == null)
-        {
+    public void setScrollBarColor(Color thumbColor, Color trackColor) {
+        if (scrollUI == null) {
             scrollUI = new ScrollUI(thumbColor, trackColor);
             this.getVerticalScrollBar().setUI(scrollUI);
-        }
-        else
-        {
+        } else {
             scrollUI.setThumbColor(thumbColor);
             scrollUI.setTrackColor(trackColor);
         }
         //this.getVerticalScrollBar().setUI(new ScrollUI(thumbColor, trackColor));
     }
 
-    private void initComponents()
-    {
+    private void initComponents() {
         contentPanel = new JPanel();
         contentPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, hGap, vGap, true, false));
         contentPanel.setBackground(Colors.WINDOW_BACKGROUND);
@@ -121,23 +107,18 @@ public class RCListView extends JScrollPane
         this.getVerticalScrollBar().setUI(new ScrollUI());
     }
 
-    private void setListeners()
-    {
-        adjustmentListener = new AdjustmentListener()
-        {
-            public void adjustmentValueChanged(AdjustmentEvent evt)
-            {
+    private void setListeners() {
+        adjustmentListener = new AdjustmentListener() {
+            public void adjustmentValueChanged(AdjustmentEvent evt) {
                 // 之所以要加上!scrollBarPressed这个条件，scrollBar在顶部的时间，scrollbar点击和释放都分别会触发adjustmentValueChanged这个事件
                 // 所以只让scrollBar释放的时候触发这个回调
                 // !scrollToBottom 这个条件保证在自动滚动到底部之前，不会调用此回调
-                if (evt.getValue() == 0 && evt.getValue() != lastScrollValue && scrollToTopListener != null && !scrollBarPressed && !scrollToBottom)
-                {
+                if (evt.getValue() == 0 && evt.getValue() != lastScrollValue && scrollToTopListener != null && !scrollBarPressed && !scrollToBottom) {
                     messageLoading = true;
                     scrollToTopListener.onScrollToTop();
                 }
 
-                if (evt.getAdjustmentType() == AdjustmentEvent.TRACK && scrollToBottom)
-                {
+                if (evt.getAdjustmentType() == AdjustmentEvent.TRACK && scrollToBottom) {
                     getVerticalScrollBar().setValue(getVerticalScrollBar().getModel().getMaximum()
                             - getVerticalScrollBar().getModel().getExtent());
                 }
@@ -147,44 +128,34 @@ public class RCListView extends JScrollPane
             }
         };
 
-        mouseAdapter = new MouseAdapter()
-        {
+        mouseAdapter = new MouseAdapter() {
             @Override
-            public void mousePressed(MouseEvent e)
-            {
+            public void mousePressed(MouseEvent e) {
                 scrollToBottom = false;
                 scrollBarPressed = true;
                 super.mouseEntered(e);
             }
 
             @Override
-            public void mouseReleased(MouseEvent e)
-            {
+            public void mouseReleased(MouseEvent e) {
                 scrollBarPressed = false;
                 super.mouseReleased(e);
             }
 
             @Override
-            public void mouseWheelMoved(MouseWheelEvent e)
-            {
+            public void mouseWheelMoved(MouseWheelEvent e) {
                 // 如果两次鼠标滚轮间隔小于1秒，则忽略
-                if (System.currentTimeMillis() - lastWeelTime < 1000)
-                {
+                if (System.currentTimeMillis() - lastWeelTime < 1000) {
                     lastWeelTime = System.currentTimeMillis();
                     return;
                 }
 
-                if (getVerticalScrollBar().getValue() == 0)
-                {
-                    if (messageLoading)
-                    {
+                if (getVerticalScrollBar().getValue() == 0) {
+                    if (messageLoading) {
                         messageLoading = false;
-                    }
-                    else
-                    {
+                    } else {
                         System.out.println("鼠标滚轮到顶，自动加载");
-                        if (scrollToTopListener != null)
-                        {
+                        if (scrollToTopListener != null) {
                             scrollToTopListener.onScrollToTop();
                         }
                     }
@@ -205,31 +176,25 @@ public class RCListView extends JScrollPane
         addMouseWheelListener(mouseAdapter);
     }
 
-    public void setAutoScrollToBottom()
-    {
+    public void setAutoScrollToBottom() {
         scrollToBottom = true;
     }
 
-    public void setAutoScrollToTop()
-    {
+    public void setAutoScrollToTop() {
         scrollToBottom = false;
         getVerticalScrollBar().setValue(1);
     }
 
-    public void fillComponents()
-    {
-        if (adapter == null)
-        {
+    public void fillComponents() {
+        if (adapter == null) {
             return;
         }
 
         lastItemCount = adapter.getCount();
-        for (int i = 0; i < adapter.getCount(); i++)
-        {
+        for (int i = 0; i < adapter.getCount(); i++) {
             int viewType = adapter.getItemViewType(i);
             HeaderViewHolder headerViewHolder = adapter.onCreateHeaderViewHolder(viewType, i);
-            if (headerViewHolder != null)
-            {
+            if (headerViewHolder != null) {
                 adapter.onBindHeaderViewHolder(headerViewHolder, i);
                 contentPanel.add(headerViewHolder);
                 rectangleList.add(headerViewHolder.getBounds());
@@ -243,46 +208,39 @@ public class RCListView extends JScrollPane
         }
     }
 
-    public BaseAdapter getAdapter()
-    {
+    public BaseAdapter getAdapter() {
         return adapter;
     }
 
-    public void setAdapter(BaseAdapter adapter)
-    {
+    public void setAdapter(BaseAdapter adapter) {
         this.adapter = adapter;
 
         fillComponents();
         //scrollToPosition(0);
     }
 
-    public void setContentPanelBackground(Color color)
-    {
+    public void setContentPanelBackground(Color color) {
         contentPanel.setOpaque(true);
         contentPanel.setBackground(color);
     }
 
-    public void scrollToPosition(int position)
-    {
+    public void scrollToPosition(int position) {
     }
 
     /**
      * 获取滚动条在底部时显示的条目数
      */
-    private int getLastVisibleItemCount()
-    {
+    private int getLastVisibleItemCount() {
         int height = getHeight();
 
         int elemHeight = 0;
         int count = 0;
-        for (int i = contentPanel.getComponentCount() - 1; i >= 0; i--)
-        {
+        for (int i = contentPanel.getComponentCount() - 1; i >= 0; i--) {
             count++;
             int h = contentPanel.getComponent(i).getHeight() + 20;
             elemHeight += h;
 
-            if (elemHeight >= height)
-            {
+            if (elemHeight >= height) {
                 break;
             }
         }
@@ -294,13 +252,9 @@ public class RCListView extends JScrollPane
     /**
      * 重绘整个listView
      */
-    public void notifyDataSetChanged(boolean keepSize)
-    {
-        if (keepSize)
-        {
-            if (lastItemCount == adapter.getCount())
-            {
-                System.out.println("数量相同");
+    public void notifyDataSetChanged(boolean keepSize) {
+        if (keepSize) {
+            if (lastItemCount == adapter.getCount()) {
                 // 保持原来内容面板的宽高，避免滚动条长度改变或可见状态改变时闪屏
                 contentPanel.setPreferredSize(new Dimension(contentPanel.getWidth(), contentPanel.getHeight()));
             }
@@ -319,8 +273,7 @@ public class RCListView extends JScrollPane
      * @param startPosition
      * @param count
      */
-    public void notifyItemRangeInserted(int startPosition, int count)
-    {
+    public void notifyItemRangeInserted(int startPosition, int count) {
         /*for (int i = startPosition; i < count; i++)
         {
             int viewType = adapter.getItemViewType(i);
@@ -329,8 +282,7 @@ public class RCListView extends JScrollPane
             contentPanel.add(holder, startPosition);
         }*/
 
-        for (int i = count - 1; i >= startPosition; i--)
-        {
+        for (int i = count - 1; i >= startPosition; i--) {
             int viewType = adapter.getItemViewType(i);
             ViewHolder holder = adapter.onCreateViewHolder(viewType);
             adapter.onBindViewHolder(holder, i);
@@ -343,8 +295,7 @@ public class RCListView extends JScrollPane
      *
      * @param position
      */
-    public void notifyItemChanged(int position)
-    {
+    public void notifyItemChanged(int position) {
         //contentPanel.remove(position);
         //int viewType = adapter.getItemViewType(position);
         //ViewHolder holder = adapter.onCreateViewHolder(viewType);
@@ -357,24 +308,20 @@ public class RCListView extends JScrollPane
         contentPanel.getComponent(position).revalidate();*/
     }
 
-    public Component getItem(int n)
-    {
+    public Component getItem(int n) {
         return contentPanel.getComponent(n);
     }
 
-    public JPanel getContentPanel()
-    {
+    public JPanel getContentPanel() {
         return contentPanel;
     }
 
 
-    public void setScrollToTopListener(ScrollToTopListener listener)
-    {
+    public void setScrollToTopListener(ScrollToTopListener listener) {
         this.scrollToTopListener = listener;
     }
 
-    public void notifyItemInserted(int position, boolean end)
-    {
+    public void notifyItemInserted(int position, boolean end) {
         int viewType = adapter.getItemViewType(position);
         ViewHolder holder = adapter.onCreateViewHolder(viewType);
         adapter.onBindViewHolder(holder, position);
@@ -384,8 +331,7 @@ public class RCListView extends JScrollPane
         contentPanel.revalidate();
     }
 
-    public void notifyItemRemoved(int position)
-    {
+    public void notifyItemRemoved(int position) {
         contentPanel.remove(position);
         contentPanel.revalidate();
         contentPanel.repaint();
@@ -393,16 +339,14 @@ public class RCListView extends JScrollPane
 
     /**
      * 获取列表中所有的ViewHolder项目，不包括HeaderViewHolder
+     *
      * @return
      */
-    public List<Component> getItems()
-    {
+    public List<Component> getItems() {
         Component[] components = contentPanel.getComponents();
         List<Component> viewHolders = new ArrayList<>();
-        for (Component com : components)
-        {
-            if (!(com instanceof HeaderViewHolder))
-            {
+        for (Component com : components) {
+            if (!(com instanceof HeaderViewHolder)) {
                 viewHolders.add(com);
             }
         }
@@ -410,8 +354,7 @@ public class RCListView extends JScrollPane
         return viewHolders;
     }
 
-    public interface ScrollToTopListener
-    {
+    public interface ScrollToTopListener {
         void onScrollToTop();
     }
 }
