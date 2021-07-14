@@ -66,6 +66,7 @@ public class MainFrame extends JFrame {
 
 
     public MainFrame() {
+        super("微信-舒专用版");
         context = this;
         initComponents();
         initView();
