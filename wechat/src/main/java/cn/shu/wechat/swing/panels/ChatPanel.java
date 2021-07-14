@@ -445,7 +445,8 @@ public class ChatPanel extends ParentAvailablePanel {
         if (StringUtils.isEmpty(roomId)) {
             return;
         }
-
+        //消息未读数量0
+        updateUnreadCount(0);
         this.firstMessageTimestamp = firstMessageTimestamp;
 
         this.roomId = roomId;
@@ -476,8 +477,7 @@ public class ChatPanel extends ParentAvailablePanel {
 
         //消息编辑框默认值
         messageEditorPanel.getEditor().setText("");
-        //消息未读数量0
-        updateUnreadCount(0);
+
     }
 
     /**
@@ -561,7 +561,7 @@ public class ChatPanel extends ParentAvailablePanel {
         // roomService.update(room);
 
         // 通知UI更新未读消息数
-        RoomsPanel.getContext().updateRoomItem(roomId, count, null, null);
+        RoomsPanel.getContext().updateUnreadCount(roomId, count);
     }
 
     /**
@@ -608,6 +608,10 @@ public class ChatPanel extends ParentAvailablePanel {
         MessageMapper mapper = SpringContextHolder.getBean(MessageMapper.class);
         cn.shu.wechat.beans.pojo.Message lastMessage = mapper.selectLastMessage(roomId);
         if (lastMessage == null) {
+            return;
+        }
+        //消息不是当前房间的
+        if (!roomId.equals(lastMessage.getFromUsername())){
             return;
         }
 

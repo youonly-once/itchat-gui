@@ -20,8 +20,7 @@ import java.util.Set;
  * 左侧聊天列表
  * Created by song on 17-5-30.
  */
-public class RoomsPanel extends ParentAvailablePanel
-{
+public class RoomsPanel extends ParentAvailablePanel {
     private static RoomsPanel context;
     /**
      * 聊天列表视图数据
@@ -34,9 +33,7 @@ public class RoomsPanel extends ParentAvailablePanel
     private List<RoomItem> roomItemList = new ArrayList<>();
 
 
-
-    public RoomsPanel(JPanel parent)
-    {
+    public RoomsPanel(JPanel parent) {
         super(parent);
         context = this;
 
@@ -46,21 +43,18 @@ public class RoomsPanel extends ParentAvailablePanel
         roomItemsListView.setAdapter(new RoomItemsAdapter(roomItemList));
     }
 
-    private void initComponents()
-    {
+    private void initComponents() {
         roomItemsListView = new RCListView();
     }
 
-    private void initView()
-    {
+    private void initView() {
         setLayout(new GridBagLayout());
         roomItemsListView.setContentPanelBackground(Colors.DARK);
         add(roomItemsListView, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 1));
         //add(scrollPane, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 1));
     }
 
-    private void initData()
-    {
+    private void initData() {
         roomItemList.clear();
         //从核心类加载房间列表
         Set<Contacts> recentContacts = Core.getRecentContacts();
@@ -78,25 +72,28 @@ public class RoomsPanel extends ParentAvailablePanel
 
     /**
      * 添加房间
+     *
      * @param recentContact 联系人
-     * @param latestMsg 最新消息
+     * @param latestMsg     最新消息
      */
-    public void addRoom(Contacts recentContact,String latestMsg){
+    public void addRoom(Contacts recentContact, String latestMsg,int msgCount) {
         RoomItem item = new RoomItem();
         item.setRoomId(recentContact.getUsername());
         item.setTimestamp(System.currentTimeMillis());
         item.setName(ContactsTools.getContactDisplayNameByUserName(recentContact.getUsername()));
         item.setGroup(recentContact.getUsername().startsWith("@@"));
         item.setLastMessage(latestMsg);
-        item.setUnreadCount(ChatPanel.getContext().getRoomId().equals(recentContact.getUsername())?0:1);
-        roomItemList.add(0,item);
-        roomItemsListView.notifyDataSetChanged(true);
+        String roomId = ChatPanel.getContext().getRoomId();
+        item.setUnreadCount(msgCount);
+
+        roomItemList.add(0, item);
+        roomItemsListView.notifyDataSetChanged(false);
     }
+
     /**
      * 重绘整个列表
      */
-    public void notifyDataSetChanged(boolean keepSize)
-    {
+    public void notifyDataSetChanged(boolean keepSize) {
         initData();
         roomItemsListView.notifyDataSetChanged(keepSize);
     }
@@ -106,100 +103,119 @@ public class RoomsPanel extends ParentAvailablePanel
      * 当这条消息所在的房间在当前房间列表中排在第一位时，此时房间列表项目顺序不变，无需重新排列
      * 因此无需更新整个房间列表，只需更新第一个项目即可
      *
-     * @param msgRoomId
+     * @param msgRoomId 房间ID
      */
-    public void updateRoomsList(String msgRoomId)
-    {
+    public void updateRoomsList(String msgRoomId) {
         String roomId = (String) ((RoomItemViewHolder) (roomItemsListView.getItem(0))).getTag();
-        if (roomId.equals(msgRoomId))
-        {
+        if (roomId.equals(msgRoomId)) {
             Room room = null;//roomService.findById(roomId);
-            for (RoomItem roomItem : roomItemList)
-            {
-                if (roomItem.getRoomId().equals(roomId))
-                {
-                    roomItem.setUnreadCount(room.getUnreadCount());
-                    roomItem.setTimestamp(room.getLastChatAt());
-                    roomItem.setLastMessage(room.getLastMessage());
+            for (RoomItem roomItem : roomItemList) {
+                if (roomItem.getRoomId().equals(roomId)) {
+                    roomItem.setUnreadCount(100);
+                    //roomItem.setTimestamp(room.getLastChatAt());
+                   // roomItem.setLastMessage(room.getLastMessage());
                     break;
                 }
             }
 
             roomItemsListView.notifyItemChanged(0);
-        }
-        else
-        {
+        } else {
             notifyDataSetChanged(false);
         }
     }
 
     /**
-     * 更新指定位置的房间项目
-     * @param roomId
+     * 更新房间未读消息数
+     * @param roomId 房间id
+     * @param unReadCount 消息数
      */
-    public void updateRoomItem(String roomId,int unReadCount,String lastMsg,Long time)
-    {
-        if (roomId == null || roomId.isEmpty())
-        {
-            notifyDataSetChanged(true);
-            return;
-        }
-
-        for (int i = 0; i < roomItemList.size(); i++)
-        {
+    public void updateUnreadCount(String roomId, int unReadCount) {
+        for (int i = 0; i < roomItemList.size(); i++) {
             RoomItem item = roomItemList.get(i);
-            if (item.getRoomId().equals(roomId))
-            {
-                //Room room = roomService.findById(item.getRoomId());
-               // if (room != null)
-               // {
-                    if (lastMsg!=null){
-                        item.setLastMessage(lastMsg);
-                    }
-                    if (time!=null){
-                        item.setTimestamp(time);
-                    }
+            if (item.getRoomId().equals(roomId)) {
+                //找到对应房间
+                if (unReadCount == 0) {
+                    item.setUnreadCount(0);
+                }else if (unReadCount != -1) {
+                        item.setUnreadCount(item.getUnreadCount() + unReadCount);
 
-
-                    if (unReadCount == 0){
-                        item.setUnreadCount(unReadCount);
-                    }else if (unReadCount!=-1){
-                        item.setUnreadCount(item.getUnreadCount()+unReadCount);
-                    }
-
-                    roomItemsListView.notifyItemChanged(i);
-              //  }
+                }
+                roomItemsListView.notifyItemChanged(i);
                 break;
             }
         }
     }
+    /**
+     * 更新指定位置的房间项目
+     *
+     * @param roomId
+     */
+    public void updateRoomItem(String roomId, int unReadCount, String lastMsg, Long time) {
+        if (roomId == null || roomId.isEmpty()) {
+            notifyDataSetChanged(true);
+            return;
+        }
+        //updateRoomsList(roomId);
+
+        for (int i = 0; i < roomItemList.size(); i++) {
+            RoomItem item = roomItemList.get(i);
+            if (item.getRoomId().equals(roomId)) {
+                //找到对应房间
+
+                if (lastMsg != null) {
+                    item.setLastMessage(lastMsg);
+                }
+                if (time != null) {
+                    item.setTimestamp(time);
+                }
+                if (roomId .equals( ChatPanel.getContext().getRoomId())){
+                    //当前显示的房间和新消息房间一样，则不需要在房间条目上显示未读消息数量
+                    item.setUnreadCount(0);
+                }else if (unReadCount!=-1){
+                     item.setUnreadCount(item.getUnreadCount()+unReadCount);
+                }
+                //最新消息移到首行
+                if (i!=0){
+                    roomItemList.add(0, roomItemList.remove(i));
+                    //重绘整个列表
+                    roomItemsListView.notifyDataSetChanged(true);
+                  /*  //假如本来再2位置的移到0位置  那么只需重绘前三个View
+                    roomItemsListView.notifyItemRangeInserted(0,i+1);*/
+                }else{
+                    //当前消息位于首行，则无需重绘整个列表
+                    roomItemsListView.notifyItemChanged(0);
+                }
+                return;
+            }
+        }
+
+    }
 
     /**
      * 激活指定的房间项目
+     *
      * @param position
      */
-    public void activeItem(int position)
-    {
+    public void activeItem(int position) {
         RoomItemViewHolder holder = (RoomItemViewHolder) roomItemsListView.getItem(position);
         setItemBackground(holder, Colors.ITEM_SELECTED);
     }
 
     /**
      * 设置每个房间项目的背影色
+     *
      * @param holder
      * @param color
      */
-    private void setItemBackground(RoomItemViewHolder holder, Color color)
-    {
+    private void setItemBackground(RoomItemViewHolder holder, Color color) {
         holder.setBackground(color);
         holder.nameBrief.setBackground(color);
         holder.timeUnread.setBackground(color);
     }
 
 
-
-    public static RoomsPanel getContext()
-    {
+    public static RoomsPanel getContext() {
         return context;
     }
+
 }

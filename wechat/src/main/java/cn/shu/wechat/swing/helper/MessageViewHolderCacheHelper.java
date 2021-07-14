@@ -55,7 +55,7 @@ public class MessageViewHolderCacheHelper
 
     private void initHolders()
     {
-        new Thread(new Runnable()
+   /*     new Thread(new Runnable()
         {
             @Override
             public void run()
@@ -69,7 +69,7 @@ public class MessageViewHolderCacheHelper
                 initLeftAttachmentViewHolders();
                 initSystemMessageViewHolders();
             }
-        }).start();
+        }).start();*/
     }
 
     private void initRightTextViewHolders()
@@ -97,27 +97,27 @@ public class MessageViewHolderCacheHelper
     }
 
 
-    private void initLeftTextViewHolders()
+    private void initLeftTextViewHolders(boolean isGroup)
     {
         for (int i = 0; i < CACHE_CAPACITY; i++)
         {
-            leftTextViewHolders.add(new MessageLeftTextViewHolder());
+            leftTextViewHolders.add(new MessageLeftTextViewHolder(isGroup));
         }
     }
 
-    private void initLeftImageViewHolders()
+    private void initLeftImageViewHolders(boolean isGroup)
     {
         for (int i = 0; i < CACHE_CAPACITY; i++)
         {
-            leftImageViewHolders.add(new MessageLeftImageViewHolder());
+            leftImageViewHolders.add(new MessageLeftImageViewHolder(isGroup));
         }
     }
 
-    private void initLeftAttachmentViewHolders()
+    private void initLeftAttachmentViewHolders(boolean isGroup)
     {
         for (int i = 0; i < CACHE_CAPACITY; i++)
         {
-            leftAttachmentViewHolders.add(new MessageLeftAttachmentViewHolder());
+            leftAttachmentViewHolders.add(new MessageLeftAttachmentViewHolder(isGroup));
         }
     }
 

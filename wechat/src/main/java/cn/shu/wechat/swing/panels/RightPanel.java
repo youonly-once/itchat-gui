@@ -13,6 +13,10 @@ import java.awt.*;
 @Data
 public class RightPanel extends JPanel
 {
+    public static RightPanel getContext() {
+        return context;
+    }
+
     private static RightPanel context;
     private TitlePanel titlePanel;
     private RoomMembersPanel roomMembersPanel;

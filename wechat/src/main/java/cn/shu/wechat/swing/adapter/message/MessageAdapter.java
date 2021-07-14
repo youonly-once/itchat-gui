@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.adapter.message;
 
 import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.adapter.BaseAdapter;
 import cn.shu.wechat.swing.adapter.ViewHolder;
 import cn.shu.wechat.swing.app.Launcher;
@@ -65,7 +66,12 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     }
 
     @Override
-    public BaseMessageViewHolder onCreateViewHolder(int viewType) {
+    public boolean isGroup(int position) {
+        return  messageItems.get(position).getSenderId().startsWith("@@");
+    }
+
+    @Override
+    public BaseMessageViewHolder onCreateViewHolder(int viewType,int position) {
         switch (viewType) {
             case MessageItem.SYSTEM_MESSAGE: {
                 MessageSystemMessageViewHolder holder = messageViewHolderCacheHelper.tryGetSystemMessageViewHolder();
@@ -86,7 +92,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             case MessageItem.LEFT_TEXT: {
                 MessageLeftTextViewHolder holder = messageViewHolderCacheHelper.tryGetLeftTextViewHolder();
                 if (holder == null) {
-                    holder = new MessageLeftTextViewHolder();
+                    holder = new MessageLeftTextViewHolder(messageItems.get(position).isGroupable());
                 }
 
                 return holder;
@@ -102,7 +108,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             case MessageItem.LEFT_IMAGE: {
                 MessageLeftImageViewHolder holder = messageViewHolderCacheHelper.tryGetLeftImageViewHolder();
                 if (holder == null) {
-                    holder = new MessageLeftImageViewHolder();
+                    holder = new MessageLeftImageViewHolder(messageItems.get(position).isGroupable());
                 }
 
                 return holder;
@@ -118,7 +124,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             case MessageItem.LEFT_ATTACHMENT: {
                 MessageLeftAttachmentViewHolder holder = messageViewHolderCacheHelper.tryGetLeftAttachmentViewHolder();
                 if (holder == null) {
-                    holder = new MessageLeftAttachmentViewHolder();
+                    holder = new MessageLeftAttachmentViewHolder(messageItems.get(position).isGroupable());
                 }
 
                 return holder;
@@ -173,6 +179,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
         ImageIcon attachmentTypeIcon = attachmentIconHelper.getImageIcon(item.getFileAttachment().getTitle());
         holder.attachmentIcon.setIcon(attachmentTypeIcon);
+
         holder.sender.setText(item.getSenderUsername());
 
         setAttachmentClickListener(holder, item);
@@ -625,7 +632,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         avatarLabel.addMouseListener(new MessageMouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                UserInfoPopup popup = new UserInfoPopup(username, ContactsTools.getContactDisplayNameByUserName(username));
+                UserInfoPopup popup = new UserInfoPopup(Core.getMemberMap().get(username));
                 popup.show(e.getComponent(), e.getX(), e.getY());
 
                 super.mouseClicked(e);

@@ -10,6 +10,7 @@ import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.FontUtil;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 
 /**
@@ -25,12 +26,13 @@ public class MessageLeftTextViewHolder extends BaseMessageViewHolder
     public SizeAutoAdjustTextArea text;
     public RCLeftImageMessageBubble messageBubble = new RCLeftImageMessageBubble();
 
-    private JPanel timePanel = new JPanel();
+    private JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER,5,0));
     private JPanel messageAvatarPanel = new JPanel();
     private MessagePopupMenu popupMenu = new MessagePopupMenu();
-
-    public MessageLeftTextViewHolder()
+    private boolean isGroup = true;
+    public MessageLeftTextViewHolder(boolean isGroup)
     {
+        this.isGroup = isGroup;
         initComponents();
         initView();
     }
@@ -55,22 +57,25 @@ public class MessageLeftTextViewHolder extends BaseMessageViewHolder
     {
         setLayout(new BorderLayout());
         timePanel.add(time);
-
+       // text.setBorder(new LineBorder(Color.YELLOW));
         messageBubble.add(text);
-
-        JPanel senderMessagePanel = new JPanel();
+        messageBubble.setBackground(Colors.LIGHT_GRAY);
+        JPanel senderMessagePanel = new JPanel(new FlowLayout(FlowLayout.LEFT,5,0));
         senderMessagePanel.setBackground(Colors.WINDOW_BACKGROUND);
         senderMessagePanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0,0,true, false));
-        senderMessagePanel.add(sender);
+        if (isGroup){
+           senderMessagePanel.add(sender);
+        }
         senderMessagePanel.add(messageBubble);
-
+        senderMessagePanel.setBackground(Colors.LIGHT_GRAY);
+        //senderMessagePanel.setBorder(new LineBorder(Color.blue));
         messageAvatarPanel.setLayout(new GridBagLayout());
-        messageAvatarPanel.add(avatar, new GBC(1, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(4,5,0,0));
+        messageAvatarPanel.add(avatar, new GBC(1, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0,5,0,0));
         messageAvatarPanel.add(senderMessagePanel, new GBC(2, 0)
                 .setWeight(1000, 1)
                 .setAnchor(GBC.WEST)
-                .setInsets(0,5,5,0));
-
+                .setInsets(0,5,0,0));
+        //messageAvatarPanel.setBorder(new LineBorder(Color.black));
         add(timePanel, BorderLayout.NORTH);
         add(messageAvatarPanel, BorderLayout.CENTER);
     }

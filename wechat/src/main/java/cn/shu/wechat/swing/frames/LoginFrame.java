@@ -215,6 +215,9 @@ public class LoginFrame extends JFrame
         frame.setVisible(true);
 
 
+        statusLabel.setText("12 开始接收消息");
+        log.info("12. 开始接收消息");
+        loginService.startReceiving();
     }
 
 
@@ -350,10 +353,6 @@ public class LoginFrame extends JFrame
             }
             statusLabel.setText("头像下载完成");
             log.info("头像下载完成");
-
-            statusLabel.setText("12 开始接收消息");
-            log.info("12. 开始接收消息");
-            loginService.startReceiving();
             doLogin();
         });
 

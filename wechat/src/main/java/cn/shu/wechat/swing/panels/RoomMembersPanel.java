@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.panels;
 
+import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.adapter.RoomMembersAdapter;
@@ -28,8 +29,7 @@ import java.util.List;
 /**
  * Created by song on 07/06/2017.
  */
-public class RoomMembersPanel extends ParentAvailablePanel
-{
+public class RoomMembersPanel extends ParentAvailablePanel {
     public static final int ROOM_MEMBER_PANEL_WIDTH = 200;
     private static RoomMembersPanel roomMembersPanel;
 
@@ -37,7 +37,7 @@ public class RoomMembersPanel extends ParentAvailablePanel
     private JPanel operationPanel = new JPanel();
     private JButton leaveButton;
 
-    private List<String> members = new ArrayList<>();
+    private List<Contacts> members = new ArrayList<>();
     private String roomId;
     private RoomService roomService = Launcher.roomService;
     private CurrentUserService currentUserService = Launcher.currentUserService;
@@ -47,8 +47,7 @@ public class RoomMembersPanel extends ParentAvailablePanel
     private RoomMembersAdapter adapter;
     private AddOrRemoveMemberDialog addOrRemoveMemberDialog;
 
-    public RoomMembersPanel(JPanel parent)
-    {
+    public RoomMembersPanel(JPanel parent) {
         super(parent);
         roomMembersPanel = this;
 
@@ -56,11 +55,10 @@ public class RoomMembersPanel extends ParentAvailablePanel
         initView();
         setListeners();
 
-       // currentUser = currentUserService.findAll().get(0);
+        // currentUser = currentUserService.findAll().get(0);
     }
 
-    private void initComponents()
-    {
+    private void initComponents() {
         setBorder(new LineBorder(Colors.LIGHT_GRAY));
         setBackground(Colors.FONT_WHITE);
 
@@ -80,8 +78,7 @@ public class RoomMembersPanel extends ParentAvailablePanel
 
     }
 
-    private void initView()
-    {
+    private void initView() {
         operationPanel.add(leaveButton);
 
         setLayout(new GridBagLayout());
@@ -92,51 +89,34 @@ public class RoomMembersPanel extends ParentAvailablePanel
         listView.setAdapter(adapter);
     }
 
-    public void setRoomId(String roomId)
-    {
+    public void setRoomId(String roomId) {
         this.roomId = roomId;
         room = roomService.findById(roomId);
     }
-    public void setRoomId(String roomId,Room room)
-    {
+
+    public void setRoomId(String roomId, Room room) {
         this.roomId = roomId;
-       this. room = room;
+        this.room = room;
     }
-    public void setVisibleAndUpdateUI(boolean aFlag)
-    {
-        if (aFlag)
-        {
+
+    public void setVisibleAndUpdateUI(boolean aFlag) {
+        if (aFlag) {
             updateUI();
-            setVisible(aFlag);
         }
 
         setVisible(aFlag);
     }
 
     @Override
-    public void updateUI()
-    {
-        if (roomId != null)
-        {
-   /*         try
-            {
-                room = roomService.findById(roomId);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-                room = roomService.findById(roomId);
-            }*/
+    public void updateUI() {
+        if (roomId != null) {
 
             getRoomMembers();
 
             // 单独聊天，不显示退出按钮
-            if (!roomId.startsWith("@@"))
-            {
+            if (!roomId.startsWith("@@")) {
                 leaveButton.setVisible(false);
-            }
-            else
-            {
+            } else {
                 leaveButton.setVisible(true);
             }
 
@@ -144,60 +124,41 @@ public class RoomMembersPanel extends ParentAvailablePanel
 
             setLeaveButtonVisibility(true);
 
-            if (isRoomCreator())
-            {
+            if (isRoomCreator()) {
                 leaveButton.setText("解散群聊");
-            }
-            else
-            {
+            } else {
                 leaveButton.setText("退出群聊");
             }
 
         }
     }
 
-    private void getRoomMembers()
-    {
+    private void getRoomMembers() {
         members.clear();
 
         // 单独聊天，成员只显示两人
-        if (!roomId.startsWith("@@")){
-            members.add(currentUser.getUsername());
-            Contacts user = Core.getMemberMap().get(roomId);
-            members.add(user.getNickname());
-        }
-        else {
+        if (!roomId.startsWith("@@")) {
+            //显示自己
+            members.add(Core.getUserSelf());
+            //显示另外个人
+            members.add(Core.getMemberMap().get(roomId));
+        } else {
             //获取成员
             Contacts group = Core.getMemberMap().get(roomId);
-            List<Contacts> memberList = group.getMemberlist();
-            if (memberList == null){
+            members .addAll(group.getMemberlist());
+            if (members == null) {
                 return;
             }
-
-            if (isRoomCreator())
-            {
+            if (isRoomCreator()) {
                 members.remove("添加成员");
-                members.add("添加成员");
-
-                if (memberList.size() > 1)
-                {
+                members.add(Contacts.builder().displayname("添加成员").build());
+                if (members.size() > 1) {
                     members.remove("删除成员");
-                    members.add("删除成员");
+                    members.add(Contacts.builder().displayname("删除成员").build());
                 }
             }
 
-    /*        if (room.getCreatorName() != null)
-            {
-                members.add(room.getCreatorName());
-            }*/
 
-            for (Object o : memberList) {
-                JSONObject jsonObject = (JSONObject)o;
-                if (!members.contains(jsonObject.getString("NickName")))
-                {
-                    members.add(jsonObject.getString("NickName"));
-                }
-            }
         }
     }
 
@@ -207,62 +168,47 @@ public class RoomMembersPanel extends ParentAvailablePanel
      *
      * @return
      */
-    private boolean isRoomCreator()
-    {
+    private boolean isRoomCreator() {
         return room.getCreatorName() != null && room.getCreatorName().equals(currentUser.getUsername());
     }
 
 
-    public static RoomMembersPanel getContext()
-    {
+    public static RoomMembersPanel getContext() {
         return roomMembersPanel;
     }
 
-    public void setLeaveButtonVisibility(boolean visible)
-    {
+    public void setLeaveButtonVisibility(boolean visible) {
         operationPanel.setVisible(visible);
     }
 
-    private void setListeners()
-    {
-        adapter.setAddMemberButtonMouseListener(new MouseAdapter()
-        {
+    private void setListeners() {
+        adapter.setAddMemberButtonMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 selectAndAddRoomMember();
                 super.mouseClicked(e);
             }
         });
 
-        adapter.setRemoveMemberButtonMouseListener(new MouseAdapter()
-        {
+        adapter.setRemoveMemberButtonMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 selectAndRemoveRoomMember();
                 super.mouseClicked(e);
             }
         });
 
-        leaveButton.addMouseListener(new MouseAdapter()
-        {
+        leaveButton.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
-                if (isRoomCreator())
-                {
+            public void mouseClicked(MouseEvent e) {
+                if (isRoomCreator()) {
                     int ret = JOptionPane.showConfirmDialog(MainFrame.getContext(), "确认解散群聊？", "确认解散群聊", JOptionPane.YES_NO_OPTION);
-                    if (ret == JOptionPane.YES_OPTION)
-                    {
+                    if (ret == JOptionPane.YES_OPTION) {
                         deleteChannelOrGroup(room.getRoomId());
                     }
-                }
-                else
-                {
+                } else {
                     int ret = JOptionPane.showConfirmDialog(MainFrame.getContext(), "退出群聊，并从聊天列表中删除该群聊", "确认退出群聊", JOptionPane.YES_NO_OPTION);
-                    if (ret == JOptionPane.YES_OPTION)
-                    {
+                    if (ret == JOptionPane.YES_OPTION) {
                         leaveChannelOrGroup(room.getRoomId());
                     }
                 }
@@ -275,32 +221,25 @@ public class RoomMembersPanel extends ParentAvailablePanel
     /**
      * 选择并添加群成员
      */
-    private void selectAndAddRoomMember()
-    {
+    private void selectAndAddRoomMember() {
         List<ContactsUser> contactsUsers = contactsUserService.findAll();
         List<SelectUserData> selectUsers = new ArrayList<>();
 
-        for (ContactsUser contactsUser : contactsUsers)
-        {
-            if (!members.contains(contactsUser.getUsername()))
-            {
+        for (ContactsUser contactsUser : contactsUsers) {
+            if (!members.contains(contactsUser.getUsername())) {
                 selectUsers.add(new SelectUserData(contactsUser.getUsername(), false));
             }
         }
         addOrRemoveMemberDialog = new AddOrRemoveMemberDialog(MainFrame.getContext(), true, selectUsers);
         addOrRemoveMemberDialog.getOkButton().setText("添加");
-        addOrRemoveMemberDialog.getOkButton().addMouseListener(new MouseAdapter()
-        {
+        addOrRemoveMemberDialog.getOkButton().addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
-                if (((JButton) e.getSource()).isEnabled())
-                {
+            public void mouseClicked(MouseEvent e) {
+                if (((JButton) e.getSource()).isEnabled()) {
                     ((JButton) e.getSource()).setEnabled(false);
                     List<SelectUserData> selectedUsers = addOrRemoveMemberDialog.getSelectedUser();
                     String[] userArr = new String[selectedUsers.size()];
-                    for (int i = 0; i < selectedUsers.size(); i++)
-                    {
+                    for (int i = 0; i < selectedUsers.size(); i++) {
                         userArr[i] = selectedUsers.get(i).getName();
                     }
 
@@ -315,32 +254,28 @@ public class RoomMembersPanel extends ParentAvailablePanel
     /**
      * 选择并移除群成员
      */
-    private void selectAndRemoveRoomMember()
-    {
+    private void selectAndRemoveRoomMember() {
         List<SelectUserData> userDataList = new ArrayList<>();
-        for (String member : members)
+        //TODO
+   /*     for (String member : members)
         {
             if (member.equals(room.getCreatorName()) || member.equals("添加成员") || member.equals("删除成员"))
             {
                 continue;
             }
             userDataList.add(new SelectUserData(member, false));
-        }
+        }*/
 
         addOrRemoveMemberDialog = new AddOrRemoveMemberDialog(MainFrame.getContext(), true, userDataList);
         addOrRemoveMemberDialog.getOkButton().setText("移除");
-        addOrRemoveMemberDialog.getOkButton().addMouseListener(new MouseAdapter()
-        {
+        addOrRemoveMemberDialog.getOkButton().addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
-                if (((JButton) e.getSource()).isEnabled())
-                {
+            public void mouseClicked(MouseEvent e) {
+                if (((JButton) e.getSource()).isEnabled()) {
                     ((JButton) e.getSource()).setEnabled(false);
                     List<SelectUserData> selectedUsers = addOrRemoveMemberDialog.getSelectedUser();
                     String[] userArr = new String[selectedUsers.size()];
-                    for (int i = 0; i < selectedUsers.size(); i++)
-                    {
+                    for (int i = 0; i < selectedUsers.size(); i++) {
                         userArr[i] = selectedUsers.get(i).getName();
                     }
 
@@ -354,8 +289,7 @@ public class RoomMembersPanel extends ParentAvailablePanel
     }
 
 
-    private void inviteOrKick(final String[] usernames, String type)
-    {
+    private void inviteOrKick(final String[] usernames, String type) {
         // TODO: 添加或删除成员
         JOptionPane.showMessageDialog(null, usernames, type, JOptionPane.INFORMATION_MESSAGE);
     }
@@ -365,8 +299,7 @@ public class RoomMembersPanel extends ParentAvailablePanel
      *
      * @param roomId
      */
-    private void deleteChannelOrGroup(String roomId)
-    {
+    private void deleteChannelOrGroup(String roomId) {
         JOptionPane.showMessageDialog(null, "删除群聊：" + roomId, "删除群聊", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -375,8 +308,7 @@ public class RoomMembersPanel extends ParentAvailablePanel
      *
      * @param roomId
      */
-    private void leaveChannelOrGroup(final String roomId)
-    {
+    private void leaveChannelOrGroup(final String roomId) {
         JOptionPane.showMessageDialog(null, "退出群聊：" + roomId, "退出群聊", JOptionPane.INFORMATION_MESSAGE);
     }
 

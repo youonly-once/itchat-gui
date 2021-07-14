@@ -25,6 +25,11 @@ public class TabOperationPanel extends ParentAvailablePanel
     private ImageIcon meIconNormal;
     private ImageIcon meIconActive;
 
+    public static TabOperationPanel getContext() {
+        return context;
+    }
+
+    private static TabOperationPanel context;
     private LeftPanel parent;
 
     public TabOperationPanel(JPanel parent)
@@ -33,6 +38,7 @@ public class TabOperationPanel extends ParentAvailablePanel
 
         initComponents();
         initView();
+        context = this;
     }
 
     private void initComponents()
@@ -86,7 +92,41 @@ public class TabOperationPanel extends ParentAvailablePanel
     {
         super.printBorder(g);
     }
+    /**
+     * 切换窗口
+     * @param e 事件
+     */
+    private void switchOperationPanel(MouseEvent e){
 
+        if (e.getComponent() == chatLabel)
+        {
+            switchToChatLabel();
+
+        } else if (e.getComponent() == contactsLabel)
+        {
+            chatLabel.setIcon(chatIconNormal);
+            contactsLabel.setIcon(contactIconActive);
+            meLable.setIcon(meIconNormal);
+            parent.getListPanel().showPanel(ListPanel.CONTACTS);
+        }
+        else if (e.getComponent() == meLable)
+        {
+            chatLabel.setIcon(chatIconNormal);
+            contactsLabel.setIcon(contactIconNormal);
+            meLable.setIcon(meIconActive);
+            parent.getListPanel().showPanel(ListPanel.COLLECTIONS);
+        }
+    }
+
+    /**
+     * 切换到聊天列表
+     */
+    public void switchToChatLabel(){
+        chatLabel.setIcon(chatIconActive);
+        contactsLabel.setIcon(contactIconNormal);
+        meLable.setIcon(meIconNormal);
+        parent.getListPanel().showPanel(ListPanel.CHAT);
+    }
     class TabItemClickListener implements MouseListener
     {
 
@@ -95,28 +135,7 @@ public class TabOperationPanel extends ParentAvailablePanel
         {
             // 搜索框内容清空
             SearchPanel.getContext().clearSearchText();
-
-            if (e.getComponent() == chatLabel)
-            {
-                chatLabel.setIcon(chatIconActive);
-                contactsLabel.setIcon(contactIconNormal);
-                meLable.setIcon(meIconNormal);
-                parent.getListPanel().showPanel(ListPanel.CHAT);
-
-            } else if (e.getComponent() == contactsLabel)
-            {
-                chatLabel.setIcon(chatIconNormal);
-                contactsLabel.setIcon(contactIconActive);
-                meLable.setIcon(meIconNormal);
-                parent.getListPanel().showPanel(ListPanel.CONTACTS);
-            }
-            else if (e.getComponent() == meLable)
-            {
-                chatLabel.setIcon(chatIconNormal);
-                contactsLabel.setIcon(contactIconNormal);
-                meLable.setIcon(meIconActive);
-                parent.getListPanel().showPanel(ListPanel.COLLECTIONS);
-            }
+            switchOperationPanel(e);
         }
 
         @Override

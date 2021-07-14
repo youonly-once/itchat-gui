@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder>
 {
-    private List<String> members;
+    private List<Contacts> members;
     private List<RoomMembersItemViewHolder> viewHolders = new ArrayList<>();
     private CurrentUser currentUser;
     private CurrentUserService currentUserService = Launcher.currentUserService;
@@ -33,14 +33,14 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder>
     private MouseAdapter removeMemberButtonMouseListener;
 
 
-    public RoomMembersAdapter(List<String> members)
+    public RoomMembersAdapter(List<Contacts> members)
     {
         this.members = members;
         //currentUser = currentUserService.findAll().get(0);
     }
 
     @Override
-    public RoomMembersItemViewHolder onCreateViewHolder(int viewType)
+    public RoomMembersItemViewHolder onCreateViewHolder(int viewType, int position)
     {
         return new RoomMembersItemViewHolder();
     }
@@ -53,7 +53,7 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder>
             viewHolders.add(viewHolder);
         }
 
-        String userName = members.get(position);
+        String userName = members.get(position).getUsername();
         String name = ContactsTools.getContactDisplayNameByUserName(userName);
         viewHolder.roomName.setText(name);
 
@@ -128,10 +128,10 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder>
         } else
         {
             ImageIcon imageIcon = new ImageIcon();
-            imageIcon.setImage(AvatarUtil.createOrLoadUserAvatar(name).getScaledInstance(30, 30, Image.SCALE_SMOOTH));
+            imageIcon.setImage(AvatarUtil.createOrLoadUserAvatar(userName).getScaledInstance(30, 30, Image.SCALE_SMOOTH));
             viewHolder.avatar.setIcon(imageIcon);
-
-            UserInfoPopup userInfoPopup = new UserInfoPopup(userName,name);
+            viewHolder.roomName.setText(ContactsTools.getContactDisplayNameByUserName(userName));
+            UserInfoPopup userInfoPopup = new UserInfoPopup(members.get(position));
 
 
             if (!name.equals(Core.getNickName()))

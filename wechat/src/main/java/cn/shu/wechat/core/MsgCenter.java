@@ -115,18 +115,13 @@ public class MsgCenter {
             //刷新消息
             ChatPanel.getContext().addOrUpdateMessageItem();
 
-            Contacts contacts;
-            if ("filehelper".equals(userName)){
-                contacts = new Contacts();
-                contacts.setUsername(userName);
-            }else{
-                contacts = Core.getMemberMap().get(userName);
-            }
-
+            Contacts contacts = Core.getMemberMap().get(userName);
             if (!Core.getRecentContacts().contains(contacts)) {
-                RoomsPanel.getContext().addRoom(contacts, msg.getContent());
+                //添加新房间并制定
+                RoomsPanel.getContext().addRoom(contacts, msg.getContent(),1);
                 Core.getRecentContacts().add(contacts);
             } else {
+                //更新消息 置顶
                 RoomsPanel.getContext().updateRoomItem(userName, 1, msg.getContent(), System.currentTimeMillis());
             }
         }

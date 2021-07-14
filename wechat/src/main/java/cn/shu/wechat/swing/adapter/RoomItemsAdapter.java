@@ -8,7 +8,6 @@ import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.TimeUtil;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import javax.swing.*;
@@ -45,7 +44,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
     }
 
     @Override
-    public RoomItemViewHolder onCreateViewHolder(int viewType) {
+    public RoomItemViewHolder onCreateViewHolder(int viewType, int position) {
         return new RoomItemViewHolder();
     }
 

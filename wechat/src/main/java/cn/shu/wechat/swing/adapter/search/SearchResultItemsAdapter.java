@@ -93,7 +93,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
 
 
     @Override
-    public SearchResultItemViewHolder onCreateViewHolder(int viewType)
+    public SearchResultItemViewHolder onCreateViewHolder(int viewType, int position)
     {
         switch (viewType)
         {

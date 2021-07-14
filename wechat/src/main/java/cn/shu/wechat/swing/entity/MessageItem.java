@@ -62,7 +62,13 @@ public class MessageItem implements Comparable<MessageItem>
         this.setGroupable(message.getFromUsername().startsWith("@@"));
         this.setRoomId(roomId);
         this.setSenderId(message.getFromUsername());
-        this.setSenderUsername(ContactsTools.getContactDisplayNameByUserName(message.getFromUsername()));
+        if (this.groupable){
+            //如果是群则显示群成员名称
+            this.setSenderUsername(message.getFromMemberOfGroupDisplayname());
+        }else{
+            this.setSenderUsername(ContactsTools.getContactDisplayNameByUserName(message.getFromUsername()));
+        }
+
         this.setTimestamp(message.getCreateTime().getTime());
         this.setUpdatedAt(message.getCreateTime().getTime());
         this.setNeedToResend(false);

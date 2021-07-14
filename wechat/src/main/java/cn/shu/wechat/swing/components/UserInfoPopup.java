@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.components;
 
+import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.db.model.ContactsUser;
@@ -9,6 +10,7 @@ import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.panels.ContactsPanel;
 import cn.shu.wechat.swing.panels.RoomsPanel;
+import cn.shu.wechat.swing.panels.TabOperationPanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
 import com.alibaba.fastjson.JSON;
@@ -30,13 +32,11 @@ public class UserInfoPopup extends JPopupMenu
     private JLabel avatarLabel;
     private JLabel usernameLabel;
     private JButton sendButton;
-    private String username;
-    private String displayName;
+    private Contacts contacts;
 
-    public UserInfoPopup(String username,String displayName)
+    public UserInfoPopup(Contacts contacts)
     {
-        this.username = username;
-        this.displayName = displayName;
+        this.contacts = contacts;
         initComponents();
         initView();
         setListener();
@@ -47,7 +47,7 @@ public class UserInfoPopup extends JPopupMenu
 
     private void updateAvatar()
     {
-        ContactsPanel.getContext().getUserAvatar(this.username, true);
+        ContactsPanel.getContext().getUserAvatar(contacts.getUsername(), true);
     }
 
     private void initComponents()
@@ -61,11 +61,11 @@ public class UserInfoPopup extends JPopupMenu
 
         avatarLabel = new JLabel();
         ImageIcon imageIcon = new ImageIcon();
-        imageIcon.setImage(AvatarUtil.createOrLoadUserAvatar(username).getScaledInstance(60, 60, Image.SCALE_SMOOTH));
+        imageIcon.setImage(AvatarUtil.createOrLoadUserAvatar(contacts.getUsername()).getScaledInstance(60, 60, Image.SCALE_SMOOTH));
         avatarLabel.setIcon(imageIcon);
 
         usernameLabel = new JLabel();
-        usernameLabel.setText(username);
+        usernameLabel.setText(ContactsTools.getContactDisplayNameByUserName(contacts.getUsername()));
 
         /*sendButton = new RCButton("发消息");
         sendButton.setPreferredSize(new Dimension(180, 40));
@@ -119,7 +119,7 @@ public class UserInfoPopup extends JPopupMenu
             {
                 setVisible(false);
 
-                ImageIcon icon = new ImageIcon(AvatarUtil.createOrLoadUserAvatar(username));
+                ImageIcon icon = new ImageIcon(AvatarUtil.createOrLoadUserAvatar(contacts.getUsername()));
                 Image image = icon.getImage().getScaledInstance(200,200,Image.SCALE_SMOOTH);
                // ImageViewerFrame imageViewerFrame = new ImageViewerFrame(image);
                // imageViewerFrame.setVisible(true);
@@ -131,7 +131,6 @@ public class UserInfoPopup extends JPopupMenu
 
     private void openOrCreateDirectChat()
     {
-        Contacts contacts  = Core.getMemberMap().get(username);
         /*ContactsUser user  = contactsUserService.find("username", username).get(0);*/
         if (!Core.getRecentContacts().contains(contacts)){
             // 房间bu存在，直接打开，否则发送请求创建房间
@@ -148,9 +147,9 @@ public class UserInfoPopup extends JPopupMenu
     private void createDirectChat(Contacts contacts)
     {
         // JOptionPane.showMessageDialog(MainFrame.getContext(), "发起聊天", "发起聊天", JOptionPane.INFORMATION_MESSAGE);
-        RoomsPanel.getContext().addRoom(contacts,"");
+        RoomsPanel.getContext().addRoom(contacts,"",0);
         Core.getRecentContacts().add(contacts);
-
+        TabOperationPanel.getContext().switchToChatLabel();
     }
 
 }

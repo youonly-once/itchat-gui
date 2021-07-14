@@ -14,7 +14,7 @@ public class MessageSystemMessageViewHolder extends BaseMessageViewHolder
 {
     //public JLabel size = new JLabel();
     public JLabel text = new JLabel();
-    private JPanel timePanel = new JPanel();
+    private JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER,5,0));
     private JPanel textPanel;
 
     public MessageSystemMessageViewHolder()

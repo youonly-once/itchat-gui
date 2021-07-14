@@ -2,11 +2,9 @@ package cn.shu.wechat.swing.components;
 
 import cn.shu.wechat.swing.adapter.BaseAdapter;
 import cn.shu.wechat.swing.adapter.HeaderViewHolder;
-import cn.shu.wechat.swing.adapter.SelectUserItemViewHolder;
 import cn.shu.wechat.swing.adapter.ViewHolder;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
@@ -109,6 +107,7 @@ public class RCListView extends JScrollPane {
 
     private void setListeners() {
         adjustmentListener = new AdjustmentListener() {
+            @Override
             public void adjustmentValueChanged(AdjustmentEvent evt) {
                 // 之所以要加上!scrollBarPressed这个条件，scrollBar在顶部的时间，scrollbar点击和释放都分别会触发adjustmentValueChanged这个事件
                 // 所以只让scrollBar释放的时候触发这个回调
@@ -199,9 +198,8 @@ public class RCListView extends JScrollPane {
                 contentPanel.add(headerViewHolder);
                 rectangleList.add(headerViewHolder.getBounds());
             }
-
             //long startTime = System.currentTimeMillis();
-            ViewHolder holder = adapter.onCreateViewHolder(viewType);
+            ViewHolder holder = adapter.onCreateViewHolder(viewType,i);
             adapter.onBindViewHolder(holder, i);
             contentPanel.add(holder);
             //System.out.println("加载完成 ，用时 " + (System.currentTimeMillis() - startTime));
@@ -284,7 +282,7 @@ public class RCListView extends JScrollPane {
 
         for (int i = count - 1; i >= startPosition; i--) {
             int viewType = adapter.getItemViewType(i);
-            ViewHolder holder = adapter.onCreateViewHolder(viewType);
+            ViewHolder holder = adapter.onCreateViewHolder(viewType, i);
             adapter.onBindViewHolder(holder, i);
             contentPanel.add(holder, startPosition);
         }
@@ -323,7 +321,7 @@ public class RCListView extends JScrollPane {
 
     public void notifyItemInserted(int position, boolean end) {
         int viewType = adapter.getItemViewType(position);
-        ViewHolder holder = adapter.onCreateViewHolder(viewType);
+        ViewHolder holder = adapter.onCreateViewHolder(viewType, position);
         adapter.onBindViewHolder(holder, position);
 
         position = end ? -1 : position;

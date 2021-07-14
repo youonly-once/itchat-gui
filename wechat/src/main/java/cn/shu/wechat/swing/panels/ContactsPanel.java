@@ -129,13 +129,15 @@ public class ContactsPanel extends ParentAvailablePanel {
         // TODO: 服务器获取头像，这里从资源文件夹中获取
         try {
             //  URL url = getClass().getResource("/avatar/" + username + ".png");
-            String head = "E://default.png";
-            if (Core.getContactHeadImgPath() != null && StringUtils.isNotEmpty(Core.getContactHeadImgPath().get(username))) {
-                head = Core.getContactHeadImgPath().get(username);
+            String head = Core.getContactHeadImgPath().get(username);
+            Image  image;
+            if (StringUtils.isNotEmpty(head)){
+                image = ImageIO.read(new File(head));
+            }else{
+                image = AvatarUtil.createOrLoadUserAvatar(username);
             }
 
-            BufferedImage image = ImageIO.read(new File(head));
-            processAvatarData(image, username);
+            processAvatarData((BufferedImage) image, username);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -49,7 +49,7 @@ public class SelectUserItemsAdapter extends BaseAdapter<SelectUserItemViewHolder
     }
 
     @Override
-    public SelectUserItemViewHolder onCreateViewHolder(int viewType)
+    public SelectUserItemViewHolder onCreateViewHolder(int viewType, int position)
     {
         return new SelectUserItemViewHolder();
     }

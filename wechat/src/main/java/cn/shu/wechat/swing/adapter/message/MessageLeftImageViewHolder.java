@@ -20,11 +20,12 @@ public class MessageLeftImageViewHolder extends BaseMessageViewHolder
     //public JLabel size = new JLabel();
     public MessageImageLabel image = new MessageImageLabel();
     public RCLeftImageMessageBubble imageBubble = new RCLeftImageMessageBubble();
-    private JPanel timePanel = new JPanel();
+    private JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER,5,0));
     private JPanel messageAvatarPanel = new JPanel();
-
-    public MessageLeftImageViewHolder()
+    private boolean isGroup = true;
+    public MessageLeftImageViewHolder(boolean isGroup)
     {
+        this.isGroup = isGroup;
         initComponents();
         initView();
     }
@@ -50,18 +51,20 @@ public class MessageLeftImageViewHolder extends BaseMessageViewHolder
         setLayout(new BorderLayout());
         timePanel.add(time);
 
-        JPanel senderMessagePanel = new JPanel();
+        JPanel senderMessagePanel = new JPanel(new FlowLayout(FlowLayout.LEFT,5,0));
         senderMessagePanel.setBackground(Colors.WINDOW_BACKGROUND);
         senderMessagePanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0,0,true, false));
-        senderMessagePanel.add(sender);
+        if (isGroup) {
+            senderMessagePanel.add(sender);
+        }
         senderMessagePanel.add(imageBubble);
 
         messageAvatarPanel.setLayout(new GridBagLayout());
-        messageAvatarPanel.add(avatar, new GBC(1, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(4, 5,0,0));
+        messageAvatarPanel.add(avatar, new GBC(1, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 5,0,0));
         messageAvatarPanel.add(senderMessagePanel, new GBC(2, 0)
                 .setWeight(1000, 1)
                 .setAnchor(GBC.WEST)
-                .setInsets(0,5,5,0));
+                .setInsets(0,5,0,0));
 
         add(timePanel, BorderLayout.NORTH);
         add(messageAvatarPanel, BorderLayout.CENTER);

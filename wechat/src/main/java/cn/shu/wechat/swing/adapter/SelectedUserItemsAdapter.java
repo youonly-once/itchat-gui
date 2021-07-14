@@ -1,6 +1,5 @@
 package cn.shu.wechat.swing.adapter;
 
-import cn.shu.wechat.swing.entity.ContactsItem;
 import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.utils.AvatarUtil;
@@ -38,7 +37,7 @@ public class SelectedUserItemsAdapter extends BaseAdapter<SelectedUserItemViewHo
     }
 
     @Override
-    public SelectedUserItemViewHolder onCreateViewHolder(int viewType)
+    public SelectedUserItemViewHolder onCreateViewHolder(int viewType, int position)
     {
         return new SelectedUserItemViewHolder();
     }

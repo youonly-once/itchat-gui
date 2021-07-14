@@ -113,6 +113,9 @@ public class UserInfoPanel extends ParentAvailablePanel
         });
     }
 
+    /**
+     * 打开或创建新聊天房
+     */
     private void openOrCreateDirectChat()
     {
         Contacts user = Core.getMemberMap().get(userId);
@@ -132,8 +135,9 @@ public class UserInfoPanel extends ParentAvailablePanel
     private void createDirectChat(Contacts contacts)
     {
        // JOptionPane.showMessageDialog(MainFrame.getContext(), "发起聊天", "发起聊天", JOptionPane.INFORMATION_MESSAGE);
-        RoomsPanel.getContext().addRoom(contacts,"");
+        RoomsPanel.getContext().addRoom(contacts,"",0);
         Core.getRecentContacts().add(contacts);
+        TabOperationPanel.getContext().switchToChatLabel();
 
     }
 

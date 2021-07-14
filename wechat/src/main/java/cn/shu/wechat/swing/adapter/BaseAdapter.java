@@ -1,9 +1,5 @@
 package cn.shu.wechat.swing.adapter;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by song on 17-5-30.
  */
@@ -15,7 +11,7 @@ public abstract class BaseAdapter<T extends ViewHolder>
     }
 
 
-    public abstract T onCreateViewHolder(int viewType);
+    public abstract T onCreateViewHolder(int viewType, int position);
 
     public HeaderViewHolder onCreateHeaderViewHolder(int viewType, int position)
     {
@@ -25,6 +21,10 @@ public abstract class BaseAdapter<T extends ViewHolder>
     public int getItemViewType(int position)
     {
         return 0;
+    }
+
+    public boolean isGroup(int position) {
+        return false;
     }
 
     public abstract void onBindViewHolder(T viewHolder, int position) ;

@@ -13,9 +13,10 @@ import java.awt.*;
 public class MessageLeftAttachmentViewHolder extends MessageAttachmentViewHolder
 {
     public JLabel sender = new JLabel();
-
-    public MessageLeftAttachmentViewHolder()
+    private boolean isGroup = true;
+    public MessageLeftAttachmentViewHolder(boolean isGroup)
     {
+        this.isGroup = isGroup;
         initComponents();
         initView();
     }
@@ -75,7 +76,10 @@ public class MessageLeftAttachmentViewHolder extends MessageAttachmentViewHolder
         JPanel senderMessagePanel = new JPanel();
         senderMessagePanel.setBackground(Colors.WINDOW_BACKGROUND);
         senderMessagePanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0,0,true, false));
-        senderMessagePanel.add(sender);
+         if (isGroup){
+           senderMessagePanel.add(sender);
+         }
+
         senderMessagePanel.add(messageBubble);
 
         messageAvatarPanel.setLayout(new GridBagLayout());

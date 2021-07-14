@@ -23,8 +23,6 @@ import java.util.List;
  */
 public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
 
-    @Resource
-    private RightPanel rightPanel;
     private List<ContactsItem> contactsItems;
     private List<ContactsItemViewHolder> viewHolders = new ArrayList<>();
     Map<Integer, String> positionMap = new HashMap<>();
@@ -44,7 +42,7 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
     }
 
     @Override
-    public ContactsItemViewHolder onCreateViewHolder(int viewType) {
+    public ContactsItemViewHolder onCreateViewHolder(int viewType, int position) {
         return new ContactsItemViewHolder();
     }
 
@@ -87,7 +85,7 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
 
             if (StringUtils.isEmpty(item.getHeadImgPath())) {
                 //根据名称生成
-                icon.setImage(AvatarUtil.createOrLoadUserAvatar(item.getDisplayName())
+                icon.setImage(AvatarUtil.createOrLoadUserAvatar(item.getId())
                         .getScaledInstance(30, 30, Image.SCALE_SMOOTH));
             } else {
                 //加载头像文件
@@ -107,9 +105,9 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
         viewHolder.addMouseListener(new AbstractMouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                rightPanel.getUserInfoPanel().setUsername(item.getDisplayName());
-                rightPanel.getUserInfoPanel().setUserId(item.getId());
-                rightPanel.showPanel(RightPanel.USER_INFO);
+                RightPanel.getContext().getUserInfoPanel().setUsername(item.getDisplayName());
+                RightPanel.getContext().getUserInfoPanel().setUserId(item.getId());
+                RightPanel.getContext().showPanel(RightPanel.USER_INFO);
 
                 setBackground(viewHolder, Colors.ITEM_SELECTED);
                 selectedViewHolder = viewHolder;
