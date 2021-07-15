@@ -5,9 +5,9 @@ import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.beans.msg.send.WebWXSendMsgResponse;
 import cn.shu.wechat.beans.msg.send.WebWXUploadMediaResponse;
 import cn.shu.wechat.beans.pojo.Contacts;
+import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXSendMsgCodeEnum;
-import cn.shu.wechat.exception.WebWXException;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.swing.RoomTypeEnum;
 import cn.shu.wechat.swing.adapter.message.*;
@@ -20,7 +20,6 @@ import cn.shu.wechat.swing.components.message.FileEditorThumbnail;
 import cn.shu.wechat.swing.components.message.RemindUserPopup;
 import cn.shu.wechat.swing.db.model.FileAttachment;
 import cn.shu.wechat.swing.db.model.ImageAttachment;
-import cn.shu.wechat.swing.db.model.Message;
 import cn.shu.wechat.swing.db.model.Room;
 import cn.shu.wechat.swing.db.service.*;
 import cn.shu.wechat.swing.entity.FileAttachmentItem;
@@ -29,9 +28,7 @@ import cn.shu.wechat.swing.entity.MessageItem;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
 import cn.shu.wechat.swing.listener.ExpressionListener;
-import cn.shu.wechat.swing.tasks.DownloadTask;
-import cn.shu.wechat.swing.tasks.HttpResponseListener;
-import cn.shu.wechat.swing.tasks.UploadTaskCallback;
+import cn.shu.wechat.swing.tasks.*;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 import cn.shu.wechat.swing.utils.FileCache;
 import cn.shu.wechat.swing.utils.HttpUtil;
@@ -203,10 +200,8 @@ public class ChatPanel extends ParentAvailablePanel {
             public void onScrollToTop() {
                 // 当滚动到顶部时，继续拿前面的消息
                 if (roomId != null) {
-                    SqlSession session = DataBaseUtil.getSession();
-                    MessageMapper mapper = session.getMapper(MessageMapper.class);
+                    MessageMapper mapper = SpringContextHolder.getBean(MessageMapper.class);
                     List<cn.shu.wechat.beans.pojo.Message> messageList = mapper.selectByPage(messageItems.size(), messageItems.size() + PAGE_LENGTH, roomId);
-                    session.close();
 
                     //List<Message> messages = messageService.findOffset(roomId, messageItems.size(), PAGE_LENGTH);
                     //TODO
@@ -323,7 +318,7 @@ public class ChatPanel extends ParentAvailablePanel {
         for (Object data : inputDatas) {
             //文本消息
             if (data instanceof String && !data.equals("\n")) {
-                ExecutorServiceUtil.getGlobalExecutorService().submit(() -> sendTextMessage(null, data.toString()));
+                sendTextMessage(null, data.toString());
 
             } else if (data instanceof JLabel) {
                 //图片消息
@@ -513,9 +508,9 @@ public class ChatPanel extends ParentAvailablePanel {
      * @param firstMessageTimestamp
      */
     private void loadMessageWithEarliestTime(long firstMessageTimestamp) {
-        List<Message> messages = messageService.findBetween(roomId, firstMessageTimestamp, System.currentTimeMillis());
+        List<cn.shu.wechat.swing.db.model.Message> messages = messageService.findBetween(roomId, firstMessageTimestamp, System.currentTimeMillis());
         if (messages.size() > 0) {
-            for (Message message : messages) {
+            for (cn.shu.wechat.swing.db.model.Message message : messages) {
                 if (!message.isDeleted()) {
                     //TODO
                     MessageItem item = new MessageItem(new cn.shu.wechat.beans.pojo.Message(), Core.getUserSelf().getUsername(), roomId);
@@ -535,10 +530,8 @@ public class ChatPanel extends ParentAvailablePanel {
      */
     private void loadLocalHistory() {
         //List<Message> messages = messageService.findByPage(roomId, messageItems.size(), PAGE_LENGTH);
-        SqlSession session = DataBaseUtil.getSession();
-        MessageMapper mapper = session.getMapper(MessageMapper.class);
+        MessageMapper mapper = SpringContextHolder.getBean(MessageMapper.class);
         List<cn.shu.wechat.beans.pojo.Message> messageList = mapper.selectByPage(messageItems.size(), messageItems.size() + PAGE_LENGTH, roomId);
-        session.close();
 
         for (cn.shu.wechat.beans.pojo.Message message : messageList) {
             MessageItem item = new MessageItem(message, Core.getUserSelf().getUsername(), roomId);
@@ -611,7 +604,14 @@ public class ChatPanel extends ParentAvailablePanel {
 
         //Message message = messageService.findLastMessage(roomId);
         MessageMapper mapper = SpringContextHolder.getBean(MessageMapper.class);
-        cn.shu.wechat.beans.pojo.Message lastMessage = mapper.selectLastMessage(roomId);
+        Message lastMessage = mapper.selectLastMessage(roomId);
+        addOrUpdateMessageItem(lastMessage);
+    }
+    /**
+     * 添加一条消息到最后，或者更新已有消息
+     */
+    public void addOrUpdateMessageItem(Message lastMessage) {
+
         if (lastMessage == null) {
             return;
         }
@@ -640,7 +640,6 @@ public class ChatPanel extends ParentAvailablePanel {
             messagePanel.getMessageListView().setAutoScrollToBottom();
         }
     }
-
     /**
      * 添加一条消息到消息列表最后
      *
@@ -660,7 +659,33 @@ public class ChatPanel extends ParentAvailablePanel {
      * 如果messageId不为null, 则认为重发该消息，否则发送一条新的消息
      */
     public void sendTextMessage(String messageId, String content) {
-        Message dbMessage = null;
+        //添加消息块
+        addOrUpdateMessageItem();
+        SwingWorker<Object, WebWXSendMsgResponse> swingWorker = new SwingWorker<Object, WebWXSendMsgResponse>() {
+
+            @Override
+            protected Object doInBackground() throws Exception {
+                //后台发送消息
+                WebWXSendMsgResponse webWXSendMsgResponse = MessageTools.sendMsgByUserId(
+                        MessageTools.Message.builder().content(content)
+                                .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT).build()
+                        , roomId);
+                publish(webWXSendMsgResponse);
+                return webWXSendMsgResponse;
+            }
+
+            @Override
+            protected void process(List<WebWXSendMsgResponse> chunks) {
+                super.process(chunks);
+            }
+
+            @Override
+            protected void done() {
+                super.done();
+            }
+        };
+        swingWorker.execute();
+        cn.shu.wechat.swing.db.model.Message dbMessage = null;
    /*     if (messageId == null)
         {
             MessageItem item = new MessageItem();
@@ -726,11 +751,8 @@ public class ChatPanel extends ParentAvailablePanel {
 /*            dbMessage.setUpdatedAt(System.currentTimeMillis());
             messageService.insertOrUpdate(dbMessage);*/
             // 更新消息列表
-            MessageTools.sendMsgByUserId(
-                    MessageTools.Result.builder().content(content)
-                            .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT).build()
-                    , roomId);
-            addOrUpdateMessageItem();
+
+
 
             // 更新房间信息以及房间列表
  /*           Room room = roomService.findById(dbMessage.getRoomId());
@@ -745,7 +767,7 @@ public class ChatPanel extends ParentAvailablePanel {
 
 
         // 10秒后如果发送不成功，则显示重发按钮
-        /*MessageResendTask task = new MessageResendTask();
+ /*       MessageResendTask task = new MessageResendTask();
         task.setListener(new ResendTaskCallback(10000)
         {
             @Override
@@ -755,7 +777,6 @@ public class ChatPanel extends ParentAvailablePanel {
                 if (msg.getUpdatedAt() == 0)
                 {
                     // 更新消息列表
-
                     int pos = findMessageItemPositionInViewReverse(messageId);
                     if (pos > -1)
                     {
@@ -834,7 +855,7 @@ public class ChatPanel extends ParentAvailablePanel {
      * @param type
      */
     public void resendFileMessage(String messageId, String type) {
-        Message dbMessage = messageService.findById(messageId);
+        cn.shu.wechat.swing.db.model.Message dbMessage = messageService.findById(messageId);
         String path = null;
 
         if (type.equals("file")) {
@@ -890,6 +911,7 @@ public class ChatPanel extends ParentAvailablePanel {
      * @param uploadFilename
      */
     private void uploadFile(String uploadFilename, String fileId) {
+        //新增消息项
         final MessageItem item = new MessageItem();
         String type = MimeTypeUtil.getMime(uploadFilename.substring(uploadFilename.lastIndexOf(".")));
         final boolean isImage = type.startsWith("image/");
@@ -900,7 +922,7 @@ public class ChatPanel extends ParentAvailablePanel {
 
         FileAttachment fileAttachment = null;
         ImageAttachment imageAttachment = null;
-        Message dbMessage = new Message();
+        cn.shu.wechat.swing.db.model.Message dbMessage = new cn.shu.wechat.swing.db.model.Message();
         dbMessage.setProgress(-1);
 
         if (isImage) {
@@ -965,17 +987,6 @@ public class ChatPanel extends ParentAvailablePanel {
                             File file = new File(uploadFilename);
                             //file.delete();
                         }
-                        try {
-                            //调用微信发送图片消息
-                            WebWXSendMsgResponse webWXSendMsgResponse = MessageTools.sendPicMsgByUserId(roomId, webWXUploadMediaResponse.getMediaId());
-                            ArrayList<MessageTools.Result> objects = new ArrayList<>();
-                            objects.add(MessageTools.Result.builder().filePath(uploadFilename).toUserName(roomId).replyMsgTypeEnum(WXSendMsgCodeEnum.PIC).build());
-                            MessageTools.storeMsgToDB(objects, webWXSendMsgResponse, roomId);
-                        } catch (WebWXException e) {
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
                     }
 
 
@@ -1022,20 +1033,13 @@ public class ChatPanel extends ParentAvailablePanel {
                 public void onTaskError() {
                 }
             };
-            //  try {
-            try {
-                //上传图片 上传完成后回调
-                MessageTools.webWxUploadMedia(uploadFilename, Core.getUserName(), roomId, callback);
-            } catch (WebWXException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            // WebWXUploadMediaResponse webWXUploadMediaResponse = ExecutorServiceUtil.getGlobalExecutorService().submit(() -> ).get();
-       /*     } catch ( InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }*/
-            //sendDataPart(0, dataParts, callback);
+                //发送消息
+                MessageTools.sendMsgByUserId(MessageTools.Message
+                        .builder()
+                        .filePath(uploadFilename)
+                .replyMsgTypeEnum(isImage?WXSendMsgCodeEnum.PIC:WXSendMsgCodeEnum.APP)
+                .toUserName(roomId)
+                .build(),roomId,callback);
         }
     }
 
@@ -1126,24 +1130,29 @@ public class ChatPanel extends ParentAvailablePanel {
     /**
      * 打开文件，如果文件不存在，则下载
      *
-     * @param messageId
+     * @param messageId 数据库主键 消息id
      */
     public void downloadOrOpenFile(String messageId) {
-        Message message = messageService.findById(messageId);
+        MessageMapper messageMapper = SpringContextHolder.getBean(MessageMapper.class);
+        Message message = messageMapper.selectByPrimaryKey(messageId);
         FileAttachment fileAttachment;
-        if (message == null) {
+/*        if (message == null) {
             // 如果没有messageId对应的message, 尝试寻找messageId对应的file attachment，因为在自己上传文件时，此时是以fileId作为临时的messageId
             fileAttachment = fileAttachmentService.findById(messageId);
         } else {
             fileAttachment = fileAttachmentService.findById(message.getFileAttachmentId());
-        }
+        }*/
 
-        if (fileAttachment == null) {
+  /*      if (fileAttachment == null) {
             JOptionPane.showMessageDialog(null, "无效的附件消息", "消息无效", JOptionPane.ERROR_MESSAGE);
             return;
+        }*/
+        if (message.getFilePath() == null){
+            JOptionPane.showMessageDialog(null, "文件不存在", "打开失败", JOptionPane.ERROR_MESSAGE);
+        }else{
+            openFileWithDefaultApplication(message.getFilePath());
         }
-
-        String filepath = fileCache.tryGetFileCache(fileAttachment.getId(), fileAttachment.getTitle());
+   /*     String filepath = fileCache.tryGetFileCache(fileAttachment.getId(), fileAttachment.getTitle());
         if (filepath == null) {
             // 服务器上的文件
             if (fileAttachment.getLink().startsWith("/file-upload")) {
@@ -1155,7 +1164,7 @@ public class ChatPanel extends ParentAvailablePanel {
             }
         } else {
             openFileWithDefaultApplication(filepath);
-        }
+        }*/
     }
 
     /**

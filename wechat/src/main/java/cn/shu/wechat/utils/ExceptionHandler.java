@@ -24,7 +24,7 @@ public class ExceptionHandler {
         }
 
         MessageTools.sendMsgByUserId(
-                MessageTools.Result.builder()
+                MessageTools.Message.builder()
                         .content(e.getMessage())
                         .toUserName(toUserName)
                         .build(), toUserName);

@@ -21,7 +21,7 @@ public class MessageRightImageViewHolder extends BaseMessageViewHolder {
     public JLabel sendingProgress = new JLabel(); // 正在发送
 
     public RCRightImageMessageBubble imageBubble = new RCRightImageMessageBubble();
-    private JPanel timePanel = new JPanel();
+    private JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER,5,0));
     private JPanel messageAvatarPanel = new JPanel();
     private MessagePopupMenu popupMenu = new MessagePopupMenu();
 
@@ -63,8 +63,8 @@ public class MessageRightImageViewHolder extends BaseMessageViewHolder {
         resendImagePanel.add(imageBubble, BorderLayout.CENTER);
 
         messageAvatarPanel.setLayout(new GridBagLayout());
-        messageAvatarPanel.add(resendImagePanel, new GBC(1, 0).setWeight(1000, 1).setAnchor(GBC.EAST).setInsets(0, 0, 5, 0));
-        messageAvatarPanel.add(avatar, new GBC(2, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(5, 0, 0, 10));
+        messageAvatarPanel.add(resendImagePanel, new GBC(1, 0).setWeight(1000, 1).setAnchor(GBC.EAST).setInsets(0, 0, 0, 0));
+        messageAvatarPanel.add(avatar, new GBC(2, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 0, 0, 10));
 
         add(timePanel, BorderLayout.NORTH);
         add(messageAvatarPanel, BorderLayout.CENTER);

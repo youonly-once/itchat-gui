@@ -10,6 +10,7 @@ import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.FontUtil;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -19,7 +20,7 @@ import java.awt.event.MouseEvent;
 public class MessageAttachmentViewHolder extends BaseMessageViewHolder {
     public SizeAutoAdjustTextArea attachmentTitle;
     public RCProgressBar progressBar = new RCProgressBar(); // 进度条
-    public JPanel timePanel = new JPanel(); // 时间面板
+    public JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER,5,0)); // 时间面板
     public JPanel messageAvatarPanel = new JPanel(); // 消息 + 头像组合面板
     public AttachmentPanel attachmentPanel = new AttachmentPanel(); // 附件面板
     public JLabel attachmentIcon = new JLabel(); // 附件类型icon

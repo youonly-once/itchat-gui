@@ -3,7 +3,6 @@ package cn.shu.wechat.utils;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.beans.pojo.Contacts;
-import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.beans.pojo.MessageExample;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
@@ -348,10 +347,10 @@ public class ChartUtil {
         messageExample.or().andToUsernameEqualTo(userName);
         messageExample.or().andToRemarknameEqualTo(ContactsTools.getContactRemarkNameByUserName(userName));
 
-        List<Message> messages = messageMapper.selectByExample(messageExample);
+        List<cn.shu.wechat.beans.pojo.Message> messages = messageMapper.selectByExample(messageExample);
 
         Map<String, AtomicInteger> msgCount = new HashMap<>();
-        for (Message message : messages) {
+        for (cn.shu.wechat.beans.pojo.Message message : messages) {
             String fromMemberOfGroupDisplayname = message.getFromMemberOfGroupDisplayname();
             if (StringUtils.isEmpty(fromMemberOfGroupDisplayname)) {
                 fromMemberOfGroupDisplayname = message.getFromNickname();
@@ -407,10 +406,10 @@ public class ChartUtil {
         messageExample.or().andToNicknameEqualTo(ContactsTools.getContactNickNameByUserName(userName));
         messageExample.or().andToUsernameEqualTo(userName);
         messageExample.or().andToRemarknameEqualTo(ContactsTools.getContactRemarkNameByUserName(userName));
-        List<Message> messages = messageMapper.selectByExample(messageExample);
+        List<cn.shu.wechat.beans.pojo.Message> messages = messageMapper.selectByExample(messageExample);
 
         Map<String, AtomicInteger> msgCount = new HashMap<>();
-        for (Message message : messages) {
+        for (cn.shu.wechat.beans.pojo.Message message : messages) {
             String fromMemberOfGroupDisplayname = message.getFromMemberOfGroupDisplayname();
             if (StringUtils.isEmpty(fromMemberOfGroupDisplayname)) {
                 fromMemberOfGroupDisplayname = message.getFromNickname();
@@ -471,11 +470,11 @@ public class ChartUtil {
             messageExample.or().andToRemarknameEqualTo(contactRemarkNameByUserName);
         }
 
-        List<Message> messages = messageMapper.selectByExample(messageExample);
+        List<cn.shu.wechat.beans.pojo.Message> messages = messageMapper.selectByExample(messageExample);
 
         Map<String, AtomicInteger> msgType = new HashMap<>();
         Map<String, AtomicInteger> msgTerm = new HashMap<>();
-        for (Message message : messages) {
+        for (cn.shu.wechat.beans.pojo.Message message : messages) {
             String msg = message.getContent();
             String type = message.getMsgDesc();
             msgType.computeIfAbsent(type, v -> new AtomicInteger()).getAndIncrement();
@@ -1072,13 +1071,13 @@ public class ChartUtil {
             ChartUtils.writeChartAsPNG(fos_jpg, chart, width, height);
             //发送消息
             fos_jpg.close();//先关流才能使用文件发送
-            ArrayList<MessageTools.Result> results = new ArrayList<>();
-            MessageTools.Result filehelper = MessageTools.Result.builder()
+            ArrayList<MessageTools.Message> messages = new ArrayList<>();
+            MessageTools.Message filehelper = MessageTools.Message.builder()
                     .content(chartName)
                     .toUserName("filehelper")
                     .replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
                     .build();
-            results.add(filehelper);
+            messages.add(filehelper);
             //MessageTools.sendMsgByUserId(results, "filehelper");
             return chartName;
         } catch (Exception e) {

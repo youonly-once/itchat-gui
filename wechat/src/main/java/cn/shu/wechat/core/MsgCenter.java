@@ -91,7 +91,7 @@ public class MsgCenter {
             msg.setFilePath(path);
         }
         //存储消息
-        storeMsgToDB(msg);
+        Message message = storeMsgToDB(msg);
         //打印日志
         String s = LogUtil.printFromMeg(msg, msgType.getDesc());
         if (s.startsWith("系统通知")) {
@@ -111,9 +111,13 @@ public class MsgCenter {
         if (msgType.getCode() < 51) {
             //只显示常规消息
             //刷新消息
-            ChatPanel.getContext().addOrUpdateMessageItem();
+            ChatPanel.getContext().addOrUpdateMessageItem(message);
 
             Contacts contacts = Core.getMemberMap().get(userName);
+            if (contacts == null){
+                contacts = Contacts.builder().username(userName).build();
+                Core.getMemberMap().put(userName,contacts);
+            }
             if (!Core.getRecentContacts().contains(contacts)) {
                 //添加新房间并制定
                 RoomsPanel.getContext().addRoom(contacts, msg.getContent(), 1);
@@ -124,29 +128,29 @@ public class MsgCenter {
             }
         }
         //需要发送的消息
-        List<MessageTools.Result> results = null;
+        List<MessageTools.Message> messages = null;
         switch (msgType) {
             case MSGTYPE_MAP:
-                results = msgHandler.mapMsgHandle(msg);
+                messages = msgHandler.mapMsgHandle(msg);
                 break;
             case MSGTYPE_TEXT:
                 //文本消息
                 msg.setText(msg.getContent());
-                results = msgHandler.textMsgHandle(msg);
+                messages = msgHandler.textMsgHandle(msg);
                 break;
             case MSGTYPE_IMAGE:
                 //存储消息
-                results = msgHandler.picMsgHandle(msg);
+                messages = msgHandler.picMsgHandle(msg);
                 break;
             case MSGTYPE_VOICE:
-                results = msgHandler.voiceMsgHandle(msg);
+                messages = msgHandler.voiceMsgHandle(msg);
                 break;
             case MSGTYPE_VIDEO:
             case MSGTYPE_MICROVIDEO:
-                results = msgHandler.videoMsgHandle(msg);
+                messages = msgHandler.videoMsgHandle(msg);
                 break;
             case MSGTYPE_EMOTICON:
-                results = msgHandler.emotionMsgHandle(msg);
+                messages = msgHandler.emotionMsgHandle(msg);
                 break;
             case MSGTYPE_APP:
                 switch (WXReceiveMsgCodeOfAppEnum.getByCode(msg.getAppMsgType())) {
@@ -159,7 +163,7 @@ public class MsgCenter {
                     case PROGRAM:
                         break;
                 }
-                results = msgHandler.appMsgHandle(msg);
+                messages = msgHandler.appMsgHandle(msg);
                 break;
             case MSGTYPE_VOIPMSG:
                 break;
@@ -173,20 +177,20 @@ public class MsgCenter {
             case MSGTYPE_STATUSNOTIFY:
                 //当打开聊天窗口时会像该联系人发送该类型的消息
                 //StatusNotifyCode = 1发送图片、视频消息完成  2进入聊天框  0发送文字完成
-                results = msgHandler.systemMsgHandle(msg);
+                messages = msgHandler.systemMsgHandle(msg);
                 break;
             case MSGTYPE_SYSNOTICE:
                 break;
             case MSGTYPE_POSSIBLEFRIEND_MSG:
                 break;
             case MSGTYPE_VERIFYMSG:
-                results = msgHandler.addFriendMsgHandle(msg);
+                messages = msgHandler.addFriendMsgHandle(msg);
                 break;
             case MSGTYPE_SHARECARD:
-                results = msgHandler.nameCardMsgHandle(msg);
+                messages = msgHandler.nameCardMsgHandle(msg);
                 break;
             case MSGTYPE_RECALLED:
-                results = msgHandler.undoMsgHandle(msg);
+                messages = msgHandler.undoMsgHandle(msg);
                 break;
             case UNKNOWN:
             default:
@@ -195,7 +199,7 @@ public class MsgCenter {
         }
 
         //发送消息
-        MessageTools.sendMsgByUserId(results, msg.getFromUserName());
+        MessageTools.sendMsgByUserId(messages, msg.getFromUserName());
         threadLocalOfMsg.remove();
     }
 
@@ -205,11 +209,11 @@ public class MsgCenter {
      *
      * @param msg 消息
      */
-    private void storeMsgToDB(AddMsgList msg) {
+    private Message storeMsgToDB(AddMsgList msg) {
         try {
             boolean isFromSelf = msg.getFromUserName().endsWith(Core.getUserName());
             boolean isToSelf = msg.getToUserName().endsWith(Core.getUserName());
-            Message build = Message
+            Message build = cn.shu.wechat.beans.pojo.Message
                     .builder()
                     .content(msg.getContent())
                     .filePath(msg.getFilePath())
@@ -232,9 +236,11 @@ public class MsgCenter {
                     .fromMemberOfGroupUsername(msg.isGroupMsg() ? msg.getMemberName() : null)
                     .build();
             int insert = messageMapper.insert(build);
+            return build;
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return null;
     }
 
     /**
@@ -255,7 +261,7 @@ public class MsgCenter {
             if (oldV == null) {
                 return;
             }
-            ArrayList<MessageTools.Result> results = new ArrayList<>();
+            ArrayList<MessageTools.Message> messages = new ArrayList<>();
             String name = oldV.getString("remarkName");
             if (StringUtil.isBlank(name)) {
                 name = oldV.getString("nickName");
@@ -267,14 +273,14 @@ public class MsgCenter {
                 String tip = "联系人";
                 log.info("{}（{}）属性更新：{}", tip, name, differenceMap);
                 //发送消息
-                results.add(MessageTools.Result.builder().content(tip + "（" + name + "）属性更新：" + mapToString(differenceMap))
+                messages.add(MessageTools.Message.builder().content(tip + "（" + name + "）属性更新：" + mapToString(differenceMap))
                         .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                         .build());
                 // Core.getContactMap().put(msg.getUserName(), newV);
                 //存储数据库
-                store(differenceMap, oldV, results);
+                store(differenceMap, oldV, messages);
 
-                MessageTools.sendMsgByUserId(results, msg.getUserName());
+                MessageTools.sendMsgByUserId(messages, msg.getUserName());
             }
         }
 
@@ -287,7 +293,7 @@ public class MsgCenter {
      * @param differenceMap
      * @param oldV
      */
-    private static void store(Map<String, Map<String, String>> differenceMap, JSONObject oldV, ArrayList<MessageTools.Result> results) {
+    private static void store(Map<String, Map<String, String>> differenceMap, JSONObject oldV, ArrayList<MessageTools.Message> messages) {
         ArrayList<AttrHistory> attrHistories = new ArrayList<>();
         for (Map.Entry<String, Map<String, String>> stringMapEntry : differenceMap.entrySet()) {
             for (Map.Entry<String, String> stringStringEntry : stringMapEntry.getValue().entrySet()) {
@@ -300,12 +306,12 @@ public class MsgCenter {
                             , oldV.getString("userName"));
                     Core.getContactHeadImgPath().put(oldV.getString("userName"), newHeadPath);
                     //更换前
-                    results.add(MessageTools.Result.builder()
+                    messages.add(MessageTools.Message.builder()
                             .replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
                             //.toUserName("filehelper")
                             .content(oldHeadPath).build());
                     //更换后
-                    results.add(MessageTools.Result.builder()
+                    messages.add(MessageTools.Message.builder()
                             .replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
                             //.toUserName("filehelper")
                             .content(newHeadPath).build());

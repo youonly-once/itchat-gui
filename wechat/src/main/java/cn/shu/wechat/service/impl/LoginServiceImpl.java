@@ -848,19 +848,19 @@ public class LoginServiceImpl implements ILoginService {
         Map<String, Map<String, String>> differenceMap = JSONObjectUtil.getDifferenceMap(oldV, newV);
         if (differenceMap.size() > 0) {
             //待发消息列表
-            ArrayList<MessageTools.Result> results = new ArrayList<>();
+            ArrayList<MessageTools.Message> messages = new ArrayList<>();
             String s = mapToString(differenceMap);
             //发送消息
-            results.add(MessageTools.Result.builder().content(tip + "（" + name + "）属性更新：" + s)
+            messages.add(MessageTools.Message.builder().content(tip + "（" + name + "）属性更新：" + s)
                     .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                     .build());
             //Old与New存在差异
 //            log.info("{}（{}）属性更新：{}", tip, name, s);
             //差异存到数据库
-            store(differenceMap, oldV, results);
+            store(differenceMap, oldV, messages);
             String userName = newV.getUsername();
             userName = "filehelper";
-            MessageTools.sendMsgByUserId(results, userName);
+            MessageTools.sendMsgByUserId(messages, userName);
         }
 
     }
@@ -871,7 +871,7 @@ public class LoginServiceImpl implements ILoginService {
      * @param differenceMap
      * @param oldV
      */
-    private void store(Map<String, Map<String, String>> differenceMap, Contacts oldV, ArrayList<MessageTools.Result> results) {
+    private void store(Map<String, Map<String, String>> differenceMap, Contacts oldV, ArrayList<MessageTools.Message> messages) {
         ArrayList<AttrHistory> attrHistories = new ArrayList<>();
         for (Entry<String, Map<String, String>> stringMapEntry : differenceMap.entrySet()) {
             for (Entry<String, String> stringStringEntry : stringMapEntry.getValue().entrySet()) {
@@ -884,11 +884,11 @@ public class LoginServiceImpl implements ILoginService {
                     Core.getContactHeadImgPath().put(oldV.getUsername(), newHeadPath);
                     //更换头像需要发送图片
                     //更换前
-                    results.add(MessageTools.Result.builder()
+                    messages.add(MessageTools.Message.builder()
                             .replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
                             .filePath(oldHeadPath).build());
                     //更换后
-                    results.add(MessageTools.Result.builder()
+                    messages.add(MessageTools.Message.builder()
                             .replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
                             .filePath(newHeadPath).build());
                     AttrHistory build = AttrHistory.builder()
