@@ -5,57 +5,47 @@ package cn.shu.wechat.swing.entity;
  * Created by song on 24/03/2017.
  */
 
-public class SearchResultItem implements Comparable<SearchResultItem>
-{
+public class SearchResultItem implements Comparable<SearchResultItem> {
     private String id;
     private String name;
     private String type;
     private Object tag;
 
-    public SearchResultItem()
-    {
+    public SearchResultItem() {
     }
 
-    public SearchResultItem(String id, String name, String type)
-    {
+    public SearchResultItem(String id, String name, String type) {
         this.id = id;
         this.name = name;
         this.type = type;
     }
 
-    public String getId()
-    {
+    public String getId() {
         return id;
     }
 
-    public void setId(String id)
-    {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
-    public void setName(String name)
-    {
+    public void setName(String name) {
         this.name = name;
     }
 
-    public String getType()
-    {
+    public String getType() {
         return type;
     }
 
-    public void setType(String type)
-    {
+    public void setType(String type) {
         this.type = type;
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "SearchResultItem{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
@@ -64,18 +54,15 @@ public class SearchResultItem implements Comparable<SearchResultItem>
     }
 
     @Override
-    public int compareTo(SearchResultItem o)
-    {
+    public int compareTo(SearchResultItem o) {
         return 0;
     }
 
-    public Object getTag()
-    {
+    public Object getTag() {
         return tag;
     }
 
-    public void setTag(Object tag)
-    {
+    public void setTag(Object tag) {
         this.tag = tag;
     }
 }

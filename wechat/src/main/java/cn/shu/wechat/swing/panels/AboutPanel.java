@@ -12,21 +12,18 @@ import java.awt.*;
 /**
  * Created by song on 26/06/2017.
  */
-public class AboutPanel extends JPanel
-{
+public class AboutPanel extends JPanel {
     private JLabel imageLabel;
     private JLabel versionLabel;
 
-    public AboutPanel()
-    {
+    public AboutPanel() {
         initComponents();
         initView();
     }
 
-    private void initComponents()
-    {
+    private void initComponents() {
         imageLabel = new JLabel();
-        ImageIcon icon  = IconUtil.getIcon(this, "/image/ic_launcher.png", 100,100);
+        ImageIcon icon = IconUtil.getIcon(this, "/image/ic_launcher.png", 100, 100);
         imageLabel.setIcon(icon);
 
         versionLabel = new JLabel();
@@ -35,8 +32,7 @@ public class AboutPanel extends JPanel
         versionLabel.setForeground(Colors.FONT_GRAY_DARKER);
     }
 
-    private void initView()
-    {
+    private void initView() {
         this.setLayout(new GridBagLayout());
 
         JPanel avatarNamePanel = new JPanel();
@@ -44,6 +40,6 @@ public class AboutPanel extends JPanel
         avatarNamePanel.add(imageLabel, BorderLayout.WEST);
         avatarNamePanel.add(versionLabel, BorderLayout.CENTER);
 
-        add(avatarNamePanel, new GBC(0,0).setWeight(1,1).setAnchor(GBC.CENTER).setFill(GBC.BOTH).setInsets(50,0,0,0));
+        add(avatarNamePanel, new GBC(0, 0).setWeight(1, 1).setAnchor(GBC.CENTER).setFill(GBC.BOTH).setInsets(50, 0, 0, 0));
     }
 }

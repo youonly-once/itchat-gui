@@ -58,15 +58,16 @@ public class JSONObjectUtil {
                     } //判断头像是否更改
                 } else {
 */
-                    HashMap<String, String> temp = new HashMap<>(1);
-                    temp.put(CommonTools.emojiFormatter(StringUtil.toString(oldV)), CommonTools.emojiFormatter(newV));
-                    difference.put(UserInfo.getName(StringUtil.toString(entry.getKey())), temp);
-              //  }
+                HashMap<String, String> temp = new HashMap<>(1);
+                temp.put(CommonTools.emojiFormatter(StringUtil.toString(oldV)), CommonTools.emojiFormatter(newV));
+                difference.put(UserInfo.getName(StringUtil.toString(entry.getKey())), temp);
+                //  }
 
             }
         }
         return difference;
     }
+
     /**
      * 返回二个JSONObject的差异
      *
@@ -77,9 +78,10 @@ public class JSONObjectUtil {
     public static Map<String, Map<String, String>> getDifferenceMap(Contacts oldO, Contacts newO) {
         JSONObject old = JSONObject.parseObject(JSON.toJSONString(oldO));
         JSONObject new_ = JSONObject.parseObject(JSON.toJSONString(newO));
-        return getDifferenceMap(old,new_);
+        return getDifferenceMap(old, new_);
 
     }
+
     enum UserInfo {
         NickName("昵称更换"),
         HeadImgUrl("头像更换"),

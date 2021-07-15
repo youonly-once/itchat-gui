@@ -1,9 +1,9 @@
 package cn.shu.wechat.beans.pojo;
 
-import java.util.Date;
-
 import lombok.Builder;
 import lombok.Data;
+
+import java.util.Date;
 
 /**
  * @作者 舒新胜

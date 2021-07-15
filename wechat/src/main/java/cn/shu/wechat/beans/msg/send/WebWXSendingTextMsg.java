@@ -1,10 +1,6 @@
 package cn.shu.wechat.beans.msg.send;
 
-import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXSendMsgCodeEnum;
-
-import java.util.Date;
-import java.util.Random;
 
 /**
  * @作者 舒新胜

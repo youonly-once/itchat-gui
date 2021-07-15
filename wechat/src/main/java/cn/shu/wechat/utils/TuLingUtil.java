@@ -5,7 +5,6 @@ import cn.shu.wechat.beans.tuling.response.TuLingResponseBean;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.http.HttpEntity;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
@@ -20,6 +19,7 @@ public class TuLingUtil {
 
     /**
      * 调用图灵机器人
+     *
      * @param msg 消息
      * @return 结果
      * @throws IOException
@@ -50,9 +50,9 @@ public class TuLingUtil {
                         .apiKey("f6446c50c3a24c0c85fded541c8613a7")
                         .userId("324129").build()).build();
         String data = JSON.toJSONString(tuLingRequestBean);
-       // HttpEntity httpEntity = ;
+        // HttpEntity httpEntity = ;
         String result = EntityUtils.toString(MyHttpClient.doPost(requestUrl, data));
-       // String result = HttpUtil.sendPost(requestUrl, data);
+        // String result = HttpUtil.sendPost(requestUrl, data);
         result = result.replaceAll("\"values\":\\{\"(url|image|video|new|voice)\":", "\"values\":{\"text\":");
         return JSON.parseObject(result, TuLingResponseBean.class);
     }
@@ -60,6 +60,7 @@ public class TuLingUtil {
 
     /**
      * 调用青云客机器人
+     *
      * @param msg 消息
      * @return 结果
      * @throws IOException

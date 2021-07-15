@@ -1,18 +1,9 @@
 package cn.shu.wechat.swing.app;
 
-import cn.shu.wechat.controller.LoginController;
 import cn.shu.wechat.swing.db.service.*;
 import cn.shu.wechat.swing.frames.LoginFrame;
-import cn.shu.wechat.swing.frames.MainFrame;
-import cn.shu.wechat.swing.tasks.HttpGetTask;
-import cn.shu.wechat.swing.tasks.HttpResponseListener;
-import cn.shu.wechat.swing.utils.DbUtils;
-import cn.shu.wechat.utils.SpringApplicationContextUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import org.apache.ibatis.session.SqlSession;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
@@ -28,8 +19,7 @@ import java.nio.channels.FileLock;
  */
 
 @Component
-public class Launcher
-{
+public class Launcher {
     private static Launcher context;
 
     public static SqlSession sqlSession;
@@ -48,8 +38,7 @@ public class Launcher
     public static String appFilesBasePath;
 
 
-    static
-    {
+    static {
         //sqlSession = DbUtils.getSqlSession();
         roomService = new RoomService(sqlSession);
         currentUserService = new CurrentUserService(sqlSession);
@@ -62,37 +51,30 @@ public class Launcher
     private LoginFrame currentFrame;
 
 
-    public Launcher()
-    {
+    public Launcher() {
         context = this;
     }
 
-    public void launch()
-    {
+    public void launch() {
         config();
 
-        if (!isApplicationRunning())
-        {
+        if (!isApplicationRunning()) {
             openFrame();
-        }
-        else
-        {
+        } else {
             System.exit(-1);
         }
     }
 
 
-    private void openFrame()
-    {
+    private void openFrame() {
         LoginFrame currentFrame = SpringContextHolder.getBean(LoginFrame.class);
         //currentFrame = new LoginFrame();
-            currentFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            currentFrame.setVisible(true);
-            currentFrame.login(false);
+        currentFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        currentFrame.setVisible(true);
+        currentFrame.login(false);
     }
 
-    private void config()
-    {
+    private void config() {
         userHome = System.getProperty("user.home");
 
         appFilesBasePath = userHome + System.getProperty("file.separator") + "wechat";
@@ -104,21 +86,17 @@ public class Launcher
      *
      * @return 如果正在运行返回true，否则返回false
      */
-    private static boolean isApplicationRunning()
-    {
+    private static boolean isApplicationRunning() {
         boolean rv = false;
-        try
-        {
+        try {
             String path = appFilesBasePath + System.getProperty("file.separator") + "appLock";
             File dir = new File(path);
-            if (!dir.exists())
-            {
+            if (!dir.exists()) {
                 dir.mkdirs();
             }
 
             File lockFile = new File(path + System.getProperty("file.separator") + "appLaunch.lock");
-            if (!lockFile.exists())
-            {
+            if (!lockFile.exists()) {
                 lockFile.createNewFile();
             }
 
@@ -126,26 +104,20 @@ public class Launcher
             RandomAccessFile fis = new RandomAccessFile(lockFile.getAbsolutePath(), "rw");
             FileChannel fileChannel = fis.getChannel();
             FileLock fileLock = fileChannel.tryLock();
-            if (fileLock == null)
-            {
+            if (fileLock == null) {
                 System.out.println("程序已在运行.");
                 rv = true;
             }
-        }
-        catch (FileNotFoundException e1)
-        {
+        } catch (FileNotFoundException e1) {
             e1.printStackTrace();
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return rv;
     }
 
 
-    public static Launcher getContext()
-    {
+    public static Launcher getContext() {
         return context;
     }
 

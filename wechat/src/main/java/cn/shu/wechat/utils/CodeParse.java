@@ -1,5 +1,13 @@
 package cn.shu.wechat.utils;
 
+import com.google.zxing.*;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.common.HybridBinarizer;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import lombok.extern.log4j.Log4j2;
+
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.DataInputStream;
 import java.io.FileOutputStream;
@@ -9,24 +17,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-
-import javax.imageio.ImageIO;
-
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.Binarizer;
-import com.google.zxing.BinaryBitmap;
-import com.google.zxing.DecodeHintType;
-import com.google.zxing.EncodeHintType;
-import com.google.zxing.LuminanceSource;
-import com.google.zxing.MultiFormatReader;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.Result;
-import com.google.zxing.client.j2se.MatrixToImageWriter;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.common.HybridBinarizer;
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-
-import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class CodeParse {

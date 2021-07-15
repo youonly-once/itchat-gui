@@ -7,13 +7,13 @@ import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
 import cn.shu.wechat.utils.Config;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
+import cn.shu.wechat.utils.MD5Util;
 import cn.shu.wechat.utils.MyHttpClient;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import cn.shu.wechat.utils.MD5Util;
 
 import java.io.File;
 import java.io.FileOutputStream;

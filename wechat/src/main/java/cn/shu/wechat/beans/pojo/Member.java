@@ -3,10 +3,10 @@ package cn.shu.wechat.beans.pojo;
 import lombok.Data;
 
 /**
-  *@作者     舒新胜
-  *@项目     AutoWechat
-  *@创建时间  6/14/2021 6:42 PM
-*/
+ * @作者 舒新胜
+ * @项目 AutoWechat
+ * @创建时间 6/14/2021 6:42 PM
+ */
 @Data
 public class Member {
     private String username;

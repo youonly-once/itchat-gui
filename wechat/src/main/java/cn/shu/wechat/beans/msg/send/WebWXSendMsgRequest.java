@@ -2,9 +2,6 @@ package cn.shu.wechat.beans.msg.send;
 
 
 import cn.shu.wechat.beans.msg.BaseRequest;
-import com.alibaba.fastjson.annotation.JSONField;
-import lombok.Builder;
-import lombok.Data;
 
 /**
  * @作者 舒新胜

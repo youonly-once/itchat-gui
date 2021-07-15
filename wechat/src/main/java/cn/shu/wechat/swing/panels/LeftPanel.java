@@ -9,8 +9,7 @@ import java.awt.*;
 /**
  * Created by song on 17-5-29.
  */
-public class LeftPanel extends JPanel
-{
+public class LeftPanel extends JPanel {
     /**
      * 个人信息面板
      */
@@ -28,15 +27,13 @@ public class LeftPanel extends JPanel
      */
     private ListPanel listPanel;
 
-    public LeftPanel()
-    {
+    public LeftPanel() {
 
         initComponents();
         initView();
     }
 
-    private void initComponents()
-    {
+    private void initComponents() {
         myInfoPanel = new MyInfoPanel(this);
 
         searchPanel = new SearchPanel(this);
@@ -48,8 +45,7 @@ public class LeftPanel extends JPanel
         listPanel.setBackground(Colors.DARK);
     }
 
-    private void initView()
-    {
+    private void initView() {
         this.setBackground(Colors.DARK);
         this.setLayout(new GridBagLayout());
 
@@ -60,8 +56,7 @@ public class LeftPanel extends JPanel
 
     }
 
-    public ListPanel getListPanel()
-    {
+    public ListPanel getListPanel() {
         return this.listPanel;
     }
 

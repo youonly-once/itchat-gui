@@ -11,13 +11,11 @@ import java.awt.geom.RoundRectangle2D;
 /**
  * Created by song on 17-5-29.
  */
-public class RCSearchTextField extends JTextField
-{
+public class RCSearchTextField extends JTextField {
 
     private RoundRectangle2D.Double shape;
 
-    public RCSearchTextField()
-    {
+    public RCSearchTextField() {
         setBorder(null);
         setBackground(Colors.DARK);
         setForeground(Colors.FONT_WHITE);
@@ -25,26 +23,21 @@ public class RCSearchTextField extends JTextField
 
         setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        getDocument().addDocumentListener(new DocumentListener()
-        {
+        getDocument().addDocumentListener(new DocumentListener() {
             @Override
-            public void insertUpdate(DocumentEvent e)
-            {
+            public void insertUpdate(DocumentEvent e) {
             }
 
             @Override
-            public void removeUpdate(DocumentEvent e)
-            {
-                if (getText().isEmpty())
-                {
+            public void removeUpdate(DocumentEvent e) {
+                if (getText().isEmpty()) {
                     repaint();
                 }
 
             }
 
             @Override
-            public void changedUpdate(DocumentEvent e)
-            {
+            public void changedUpdate(DocumentEvent e) {
 
             }
         });
@@ -52,22 +45,20 @@ public class RCSearchTextField extends JTextField
 
     @Override
     public boolean contains(int x, int y) {
-        shape = new RoundRectangle2D.Double(0, 0, getWidth(), getHeight() , 15 , 15) ;
+        shape = new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 15, 15);
         return shape.contains(x, y);
     }
 
     @Override
-    protected void paintComponent(Graphics g)
-    {
+    protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Graphics2D g2 = (Graphics2D) g ;
+        Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setColor(new Color(30, 30, 30, 100));
-        g2.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 10, 10);
-        g2.fillRoundRect(0, 0, getWidth()-1, getHeight()-1, 10, 10);
+        g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+        g2.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
 
-        if (getText().isEmpty()/* && !(FocusManager.getCurrentKeyboardFocusManager().getFocusOwner() == this)*/)
-        {
+        if (getText().isEmpty()/* && !(FocusManager.getCurrentKeyboardFocusManager().getFocusOwner() == this)*/) {
             g2.setBackground(Color.gray);
             g2.setFont(FontUtil.getDefaultFont());
             g2.setColor(Color.GRAY);

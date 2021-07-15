@@ -6,8 +6,7 @@ import cn.shu.wechat.swing.db.model.ImageAttachment;
  * Created by song on 17/05/2017.
  */
 
-public class ImageAttachmentItem
-{
+public class ImageAttachmentItem {
     private String id;
     private String title;
     private String description;
@@ -16,17 +15,14 @@ public class ImageAttachmentItem
     private int height;
     private long imagesize;
 
-    public ImageAttachmentItem()
-    {
+    public ImageAttachmentItem() {
     }
 
-    public ImageAttachmentItem(String imageUrl)
-    {
+    public ImageAttachmentItem(String imageUrl) {
         this.imageUrl = imageUrl;
     }
 
-    public ImageAttachmentItem(ImageAttachment ia)
-    {
+    public ImageAttachmentItem(ImageAttachment ia) {
         this.id = ia.getId();
         this.title = ia.getTitle();
         this.description = ia.getDescription();
@@ -36,73 +32,59 @@ public class ImageAttachmentItem
         this.imagesize = ia.getImagesize();
     }
 
-    public String getId()
-    {
+    public String getId() {
         return id;
     }
 
-    public void setId(String id)
-    {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public String getTitle()
-    {
+    public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title)
-    {
+    public void setTitle(String title) {
         this.title = title;
     }
 
-    public String getDescription()
-    {
+    public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description)
-    {
+    public void setDescription(String description) {
         this.description = description;
     }
 
-    public String getImageUrl()
-    {
+    public String getImageUrl() {
         return imageUrl;
     }
 
-    public void setImageUrl(String imageUrl)
-    {
+    public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
 
-    public int getWidth()
-    {
+    public int getWidth() {
         return width;
     }
 
-    public void setWidth(int width)
-    {
+    public void setWidth(int width) {
         this.width = width;
     }
 
-    public int getHeight()
-    {
+    public int getHeight() {
         return height;
     }
 
-    public void setHeight(int height)
-    {
+    public void setHeight(int height) {
         this.height = height;
     }
 
-    public long getImagesize()
-    {
+    public long getImagesize() {
         return imagesize;
     }
 
-    public void setImagesize(long imagesize)
-    {
+    public void setImagesize(long imagesize) {
         this.imagesize = imagesize;
     }
 }

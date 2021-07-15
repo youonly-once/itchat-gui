@@ -2,71 +2,56 @@ package cn.shu.wechat.swing.db.service;
 
 import cn.shu.wechat.swing.db.dao.BasicDao;
 import cn.shu.wechat.swing.db.model.BasicModel;
-import cn.shu.wechat.swing.db.model.CurrentUser;
-import org.apache.ibatis.session.SqlSession;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by song on 09/06/2017.
  */
-public class BasicService<T extends BasicDao, E extends BasicModel>
-{
+public class BasicService<T extends BasicDao, E extends BasicModel> {
     T dao;
 
-    public void setDao(T dao)
-    {
+    public void setDao(T dao) {
         this.dao = dao;
     }
 
-    public int insert(BasicModel model)
-    {
+    public int insert(BasicModel model) {
         return dao.insert(model);
     }
 
-    public List<E> findAll()
-    {
+    public List<E> findAll() {
         return dao.findAll();
     }
 
-    public E findById(String id)
-    {
+    public E findById(String id) {
         return (E) dao.findById(id);
     }
 
-    public List<E> find(String field, Object val)
-    {
+    public List<E> find(String field, Object val) {
         return dao.find(field, val);
     }
 
-    public int delete(String id)
-    {
+    public int delete(String id) {
         return dao.delete(id);
     }
 
-    public int deleteAll()
-    {
+    public int deleteAll() {
         return dao.deleteAll();
     }
 
-    public int update(BasicModel model)
-    {
+    public int update(BasicModel model) {
         return dao.update(model);
     }
 
-    public int updateIgnoreNull(BasicModel model)
-    {
+    public int updateIgnoreNull(BasicModel model) {
         return dao.updateIgnoreNull(model);
     }
 
-    public int count()
-    {
+    public int count() {
         return dao.count();
     }
 
-    public boolean exist(String id)
-    {
+    public boolean exist(String id) {
         return dao.exist(id);
     }
 }

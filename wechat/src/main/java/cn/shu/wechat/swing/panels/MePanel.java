@@ -19,8 +19,7 @@ import java.awt.event.MouseEvent;
 /**
  * Created by song on 26/06/2017.
  */
-public class MePanel extends JPanel
-{
+public class MePanel extends JPanel {
     private JPanel contentPanel;
     private JLabel imageLabel;
     private JLabel nameLabel;
@@ -28,21 +27,19 @@ public class MePanel extends JPanel
     private CurrentUserService currentUserService = Launcher.currentUserService;
     private CurrentUser currentUser;
 
-    public MePanel()
-    {
+    public MePanel() {
         //currentUser = currentUserService.findAll().get(0);
         initComponents();
         initView();
         setListeners();
     }
 
-    private void initComponents()
-    {
+    private void initComponents() {
         contentPanel = new JPanel();
         contentPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.CENTER, 0, 20, true, false));
 
         imageLabel = new JLabel();
-        ImageIcon icon = new ImageIcon(AvatarUtil.createOrLoadUserAvatar(currentUser.getUsername()).getScaledInstance(100,100, Image.SCALE_SMOOTH));
+        ImageIcon icon = new ImageIcon(AvatarUtil.createOrLoadUserAvatar(currentUser.getUsername()).getScaledInstance(100, 100, Image.SCALE_SMOOTH));
         imageLabel.setIcon(icon);
 
         nameLabel = new JLabel();
@@ -56,8 +53,7 @@ public class MePanel extends JPanel
 
     }
 
-    private void initView()
-    {
+    private void initView() {
         this.setLayout(new GridBagLayout());
 
         JPanel avatarNamePanel = new JPanel();
@@ -68,20 +64,16 @@ public class MePanel extends JPanel
         contentPanel.add(avatarNamePanel);
         contentPanel.add(button);
 
-        add(contentPanel, new GBC(0,0).setWeight(1,1).setAnchor(GBC.CENTER).setInsets(0,0,250,0));
+        add(contentPanel, new GBC(0, 0).setWeight(1, 1).setAnchor(GBC.CENTER).setInsets(0, 0, 250, 0));
     }
 
 
-    private void setListeners()
-    {
-        button.addMouseListener(new MouseAdapter()
-        {
+    private void setListeners() {
+        button.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 int ret = JOptionPane.showConfirmDialog(MainFrame.getContext(), "确认退出登录？", "确认退出", JOptionPane.YES_NO_OPTION);
-                if (ret == JOptionPane.YES_OPTION)
-                {
+                if (ret == JOptionPane.YES_OPTION) {
                     JOptionPane.showMessageDialog(MainFrame.getContext(), "退出登录", "退出登录", JOptionPane.INFORMATION_MESSAGE);
                 }
 

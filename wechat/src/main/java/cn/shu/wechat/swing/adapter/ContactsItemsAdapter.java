@@ -3,20 +3,19 @@ package cn.shu.wechat.swing.adapter;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.swing.entity.ContactsItem;
-import cn.shu.wechat.swing.panels.RightPanel;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
+import cn.shu.wechat.swing.panels.RightPanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.CharacterParser;
 import org.apache.commons.lang.StringUtils;
 
-import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 /**
  * Created by song on 17-5-30.

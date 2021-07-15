@@ -4,6 +4,7 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -17,8 +18,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class ScreenShot extends JFrame
-{
+public class ScreenShot extends JFrame {
     private int startX;
     private int startY;
     private int endX;
@@ -54,8 +54,7 @@ public class ScreenShot extends JFrame
 
     private int mouseDownArea = OUTSIDE_SELECTED;
 
-    public ScreenShot() throws AWTException
-    {
+    public ScreenShot() throws AWTException {
         setUndecorated(true);
         setBackground(Colors.DARK);
 
@@ -78,13 +77,10 @@ public class ScreenShot extends JFrame
         setListeners();
     }
 
-    private void setListeners()
-    {
-        this.addMouseListener(new MouseAdapter()
-        {
+    private void setListeners() {
+        this.addMouseListener(new MouseAdapter() {
             @Override
-            public void mousePressed(MouseEvent e)
-            {
+            public void mousePressed(MouseEvent e) {
                 mouseDownArea = getMousePosition(e);
 
                 startX = e.getX();
@@ -92,10 +88,8 @@ public class ScreenShot extends JFrame
             }
 
             @Override
-            public void mouseReleased(MouseEvent e)
-            {
-                if (mouseDragged)
-                {
+            public void mouseReleased(MouseEvent e) {
+                if (mouseDragged) {
                     mouseDragged = false;
 
                     controlDialog.setBounds(drawX + 8, drawY + selectedHeight + 10, 200, 50);
@@ -105,10 +99,8 @@ public class ScreenShot extends JFrame
 
 
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
-                if (e.getClickCount() >= 2)
-                {
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() >= 2) {
                     close();
                     ClipboardUtil.copyImage(saveImage);
                     ChatPanel.getContext().paste();
@@ -118,11 +110,9 @@ public class ScreenShot extends JFrame
             }
         });
 
-        this.addMouseMotionListener(new MouseMotionAdapter()
-        {
+        this.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
-            public void mouseDragged(MouseEvent e)
-            {
+            public void mouseDragged(MouseEvent e) {
                 mouseDragged = true;
                 endX = e.getX();
                 endY = e.getY();
@@ -132,8 +122,7 @@ public class ScreenShot extends JFrame
                 g.drawImage(tempImage, 0, 0, null);
 
                 // 如果鼠标落在选定区域内，则鼠标移动时移动选定区域
-                if (mouseDownArea == IN_SELECTED_AREA)
-                {
+                if (mouseDownArea == IN_SELECTED_AREA) {
                     int xDistance = e.getX() - startX;
                     int yDistance = e.getY() - startY;
 
@@ -150,24 +139,20 @@ public class ScreenShot extends JFrame
                     startY = e.getY();
                 }
                 // 选定新的区域
-                else if (mouseDownArea == OUTSIDE_SELECTED)
-                {
+                else if (mouseDownArea == OUTSIDE_SELECTED) {
                     drawX = Math.min(startX, endX);
                     drawY = Math.min(startY, endY);
                     selectedWidth = Math.abs(endX - startX) + 1;
                     selectedHeight = Math.abs(endY - startY) + 1;
                 }
                 // 落在四个角
-                else
-                {
+                else {
                     int xDistance = e.getX() - startX;
                     int yDistance = e.getY() - startY;
 
 
-                    switch (mouseDownArea)
-                    {
-                        case LEFT_TOP:
-                        {
+                    switch (mouseDownArea) {
+                        case LEFT_TOP: {
                             drawX += xDistance;
                             drawY += yDistance;
                             selectedWidth -= xDistance;
@@ -175,8 +160,7 @@ public class ScreenShot extends JFrame
 
                             break;
                         }
-                        case LEFT_BOTTOM:
-                        {
+                        case LEFT_BOTTOM: {
                             drawX += xDistance;
 
                             selectedWidth -= xDistance;
@@ -184,8 +168,7 @@ public class ScreenShot extends JFrame
 
                             break;
                         }
-                        case RIGHT_TOP:
-                        {
+                        case RIGHT_TOP: {
                             drawY += yDistance;
 
                             selectedWidth += xDistance;
@@ -193,8 +176,7 @@ public class ScreenShot extends JFrame
 
                             break;
                         }
-                        case RIGHT_BOTTOM:
-                        {
+                        case RIGHT_BOTTOM: {
 
                             selectedWidth += xDistance;
                             selectedHeight += yDistance;
@@ -230,46 +212,37 @@ public class ScreenShot extends JFrame
                 ScreenShot.this.getGraphics().drawImage(tempImage2,
                         0, 0, ScreenShot.this);
 
-                if (controlDialog.isVisible())
-                {
+                if (controlDialog.isVisible()) {
                     controlDialog.setVisible(false);
                 }
 
             }
 
             @Override
-            public void mouseMoved(MouseEvent e)
-            {
+            public void mouseMoved(MouseEvent e) {
                 int mousePosition = getMousePosition(e);
-                switch (mousePosition)
-                {
-                    case IN_SELECTED_AREA:
-                    {
+                switch (mousePosition) {
+                    case IN_SELECTED_AREA: {
                         setCursor(moveCursor);
                         break;
                     }
-                    case OUTSIDE_SELECTED:
-                    {
+                    case OUTSIDE_SELECTED: {
                         setCursor(crossCursor);
                         break;
                     }
-                    case LEFT_TOP:
-                    {
+                    case LEFT_TOP: {
                         setCursor(NWresizeCursor);
                         break;
                     }
-                    case LEFT_BOTTOM:
-                    {
+                    case LEFT_BOTTOM: {
                         setCursor(SWresizeCursor);
                         break;
                     }
-                    case RIGHT_TOP:
-                    {
+                    case RIGHT_TOP: {
                         setCursor(NEresizeCursor);
                         break;
                     }
-                    case RIGHT_BOTTOM:
-                    {
+                    case RIGHT_BOTTOM: {
                         setCursor(SEresizeCursor);
                         break;
                     }
@@ -279,17 +252,12 @@ public class ScreenShot extends JFrame
             }
         });
 
-        KeyListener keyListener = new KeyAdapter()
-        {
+        KeyListener keyListener = new KeyAdapter() {
             @Override
-            public void keyPressed(KeyEvent e)
-            {
-                if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-                {
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                     close();
-                }
-                else if (e.getKeyCode() == KeyEvent.VK_ENTER)
-                {
+                } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     close();
                     ClipboardUtil.copyImage(saveImage);
                     ChatPanel.getContext().paste();
@@ -301,39 +269,26 @@ public class ScreenShot extends JFrame
         controlDialog.addKeyListener(keyListener);
     }
 
-    private int getMousePosition(MouseEvent e)
-    {
+    private int getMousePosition(MouseEvent e) {
         int x = e.getX();
         int y = e.getY();
 
-        if (x >= drawX && x <= drawX + selectedWidth && y >= drawY && y <= drawY + selectedHeight)
-        {
+        if (x >= drawX && x <= drawX + selectedWidth && y >= drawY && y <= drawY + selectedHeight) {
             return IN_SELECTED_AREA;
-        }
-        else if (x >= drawX - 8 && x <= drawX && y >= drawY - 8 && y <= drawY)
-        {
+        } else if (x >= drawX - 8 && x <= drawX && y >= drawY - 8 && y <= drawY) {
             return LEFT_TOP;
-        }
-        else if (x >= drawX + selectedWidth && x <= drawX + selectedWidth + 8 && y >= drawY - 8 && y <= drawY)
-        {
+        } else if (x >= drawX + selectedWidth && x <= drawX + selectedWidth + 8 && y >= drawY - 8 && y <= drawY) {
             return RIGHT_TOP;
-        }
-        else if (x >= drawX - 8 && x <= drawX && y >= drawY + selectedHeight && y <= drawY + selectedHeight + 8)
-        {
+        } else if (x >= drawX - 8 && x <= drawX && y >= drawY + selectedHeight && y <= drawY + selectedHeight + 8) {
             return LEFT_BOTTOM;
-        }
-        else if (x >= drawX + selectedWidth && x <= drawX + selectedWidth + 8 && y >= drawY + selectedHeight && y <= drawY + selectedHeight + 8)
-        {
+        } else if (x >= drawX + selectedWidth && x <= drawX + selectedWidth + 8 && y >= drawY + selectedHeight && y <= drawY + selectedHeight + 8) {
             return RIGHT_BOTTOM;
-        }
-        else
-        {
+        } else {
             return OUTSIDE_SELECTED;
         }
     }
 
-    private void screenShot() throws AWTException
-    {
+    private void screenShot() throws AWTException {
         //获取默认屏幕设备
         GraphicsEnvironment environment = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice screen = environment.getDefaultScreenDevice();
@@ -350,8 +305,7 @@ public class ScreenShot extends JFrame
         maxHeight = image.getHeight();
     }
 
-    private void initControlDialog()
-    {
+    private void initControlDialog() {
         controlDialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         controlDialog.setAlwaysOnTop(true);
         controlDialog.setUndecorated(true);
@@ -375,43 +329,34 @@ public class ScreenShot extends JFrame
         cancelLabel.setToolTipText("取消");
 
 
-        downloadLabel.addMouseListener(new MouseAdapter()
-        {
+        downloadLabel.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 close();
-                try
-                {
+                try {
                     saveImage();
-                }
-                catch (IOException e1)
-                {
+                } catch (IOException e1) {
                     e1.printStackTrace();
                 }
                 super.mouseClicked(e);
             }
 
             @Override
-            public void mouseEntered(MouseEvent e)
-            {
+            public void mouseEntered(MouseEvent e) {
                 downloadLabel.setIcon(IconUtil.getIcon(this, "/image/download_active.png"));
                 super.mouseEntered(e);
             }
 
             @Override
-            public void mouseExited(MouseEvent e)
-            {
+            public void mouseExited(MouseEvent e) {
                 downloadLabel.setIcon(IconUtil.getIcon(this, "/image/download.png"));
                 super.mouseExited(e);
             }
         });
 
-        okLabel.addMouseListener(new MouseAdapter()
-        {
+        okLabel.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 close();
                 ClipboardUtil.copyImage(saveImage);
                 ChatPanel.getContext().paste();
@@ -419,38 +364,32 @@ public class ScreenShot extends JFrame
             }
 
             @Override
-            public void mouseEntered(MouseEvent e)
-            {
+            public void mouseEntered(MouseEvent e) {
                 okLabel.setIcon(IconUtil.getIcon(this, "/image/ok_active.png"));
                 super.mouseEntered(e);
             }
 
             @Override
-            public void mouseExited(MouseEvent e)
-            {
+            public void mouseExited(MouseEvent e) {
                 okLabel.setIcon(IconUtil.getIcon(this, "/image/ok.png"));
                 super.mouseExited(e);
             }
         });
-        cancelLabel.addMouseListener(new MouseAdapter()
-        {
+        cancelLabel.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 close();
                 super.mouseClicked(e);
             }
 
             @Override
-            public void mouseEntered(MouseEvent e)
-            {
+            public void mouseEntered(MouseEvent e) {
                 cancelLabel.setIcon(IconUtil.getIcon(this, "/image/cancel_active.png"));
                 super.mouseEntered(e);
             }
 
             @Override
-            public void mouseExited(MouseEvent e)
-            {
+            public void mouseExited(MouseEvent e) {
                 cancelLabel.setIcon(IconUtil.getIcon(this, "/image/cancel.png"));
                 super.mouseExited(e);
             }
@@ -462,22 +401,19 @@ public class ScreenShot extends JFrame
     }
 
     @Override
-    public void paint(Graphics g)
-    {
+    public void paint(Graphics g) {
         RescaleOp ro = new RescaleOp(0.6f, 0, null);
         tempImage = ro.filter(image, null);
         g.drawImage(tempImage, 0, 0, this);
 
-        if (!isShown)
-        {
+        if (!isShown) {
             setOpacity(1);
             isShown = true;
         }
     }
 
     //保存图像到文件
-    public void saveImage() throws IOException
-    {
+    public void saveImage() throws IOException {
         JFileChooser jfc = new JFileChooser();
         jfc.setDialogTitle("保存");
 
@@ -493,12 +429,10 @@ public class ScreenShot extends JFrame
         jfc.setSelectedFile(defaultFile);
 
         int flag = jfc.showSaveDialog(this);
-        if (flag == JFileChooser.APPROVE_OPTION)
-        {
+        if (flag == JFileChooser.APPROVE_OPTION) {
             File file = jfc.getSelectedFile();
             String path = file.getPath();
-            if (!(path.endsWith(".png") || path.endsWith("PNG")))
-            {
+            if (!(path.endsWith(".png") || path.endsWith("PNG"))) {
                 path += ".png";
             }
             //写入文件
@@ -507,8 +441,7 @@ public class ScreenShot extends JFrame
     }
 
 
-    private void close()
-    {
+    private void close() {
         controlDialog.setVisible(false);
         setVisible(false);
         dispose();

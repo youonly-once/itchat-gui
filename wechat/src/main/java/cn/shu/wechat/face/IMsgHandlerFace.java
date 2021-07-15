@@ -1,7 +1,6 @@
 package cn.shu.wechat.face;
 
 import cn.shu.wechat.api.MessageTools;
-
 import cn.shu.wechat.beans.msg.sync.AddMsgList;
 
 import java.util.List;

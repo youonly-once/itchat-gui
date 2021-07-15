@@ -16,8 +16,7 @@ import java.awt.event.MouseEvent;
 /**
  * Created by song on 16/06/2017.
  */
-public class MessageAttachmentViewHolder extends BaseMessageViewHolder
-{
+public class MessageAttachmentViewHolder extends BaseMessageViewHolder {
     public SizeAutoAdjustTextArea attachmentTitle;
     public RCProgressBar progressBar = new RCProgressBar(); // 进度条
     public JPanel timePanel = new JPanel(); // 时间面板
@@ -27,26 +26,21 @@ public class MessageAttachmentViewHolder extends BaseMessageViewHolder
     public JLabel sizeLabel = new JLabel();
     public RCAttachmentMessageBubble messageBubble;
 
-    public MessageAttachmentViewHolder()
-    {
+    public MessageAttachmentViewHolder() {
         initComponents();
         setListeners();
     }
 
-    private void setListeners()
-    {
-        MouseAdapter listener = new MouseAdapter()
-        {
+    private void setListeners() {
+        MouseAdapter listener = new MouseAdapter() {
             @Override
-            public void mouseEntered(MouseEvent e)
-            {
+            public void mouseEntered(MouseEvent e) {
                 messageBubble.setActiveStatus(true);
                 super.mouseEntered(e);
             }
 
             @Override
-            public void mouseExited(MouseEvent e)
-            {
+            public void mouseExited(MouseEvent e) {
                 messageBubble.setActiveStatus(false);
                 super.mouseExited(e);
             }
@@ -57,8 +51,7 @@ public class MessageAttachmentViewHolder extends BaseMessageViewHolder
 
     }
 
-    private void initComponents()
-    {
+    private void initComponents() {
         int maxWidth = (int) (MainFrame.getContext().currentWindowWidth * 0.427);
         attachmentTitle = new SizeAutoAdjustTextArea(maxWidth);
 

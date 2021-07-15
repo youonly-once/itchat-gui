@@ -6,26 +6,22 @@ import cn.shu.wechat.swing.db.model.FileAttachment;
  * Created by song on 17/05/2017.
  */
 
-public class FileAttachmentItem
-{
+public class FileAttachmentItem {
     private String id;
     private String title;
     private String link;
     private String description;
 
-    public FileAttachmentItem()
-    {
+    public FileAttachmentItem() {
 
     }
 
-    public FileAttachmentItem(String link)
-    {
+    public FileAttachmentItem(String link) {
 
         this.link = link;
     }
 
-    public FileAttachmentItem(FileAttachment fa)
-    {
+    public FileAttachmentItem(FileAttachment fa) {
         this.id = fa.getId();
         this.title = fa.getTitle();
         this.link = fa.getLink();
@@ -40,43 +36,35 @@ public class FileAttachmentItem
         this.description = fa.getDescription();
     }*/
 
-    public String getId()
-    {
+    public String getId() {
         return id;
     }
 
-    public void setId(String id)
-    {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public String getTitle()
-    {
+    public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title)
-    {
+    public void setTitle(String title) {
         this.title = title;
     }
 
-    public String getLink()
-    {
+    public String getLink() {
         return link;
     }
 
-    public void setLink(String link)
-    {
+    public void setLink(String link) {
         this.link = link;
     }
 
-    public String getDescription()
-    {
+    public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description)
-    {
+    public void setDescription(String description) {
         this.description = description;
     }
 }

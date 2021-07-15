@@ -14,24 +14,19 @@ import java.awt.event.ActionEvent;
 /**
  * Created by song on 2017/6/5.
  */
-public class MainOperationPopupMenu extends JPopupMenu
-{
-    public MainOperationPopupMenu()
-    {
+public class MainOperationPopupMenu extends JPopupMenu {
+    public MainOperationPopupMenu() {
         initMenuItem();
     }
 
-    private void initMenuItem()
-    {
+    private void initMenuItem() {
         JMenuItem item1 = new JMenuItem("创建群聊");
         JMenuItem item2 = new JMenuItem("设置");
 
         item1.setUI(new RCMainOperationMenuItemUI());
-        item1.addActionListener(new AbstractAction()
-        {
+        item1.addActionListener(new AbstractAction() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 showCreateGroupDialog();
             }
         });
@@ -42,11 +37,9 @@ public class MainOperationPopupMenu extends JPopupMenu
 
 
         item2.setUI(new RCMainOperationMenuItemUI());
-        item2.addActionListener(new AbstractAction()
-        {
+        item2.addActionListener(new AbstractAction() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 //System.out.println("系统设置");
                 SystemConfigDialog dialog = new SystemConfigDialog(MainFrame.getContext(), true);
                 dialog.setVisible(true);
@@ -68,8 +61,7 @@ public class MainOperationPopupMenu extends JPopupMenu
     /**
      * 弹出创建群聊窗口
      */
-    private void showCreateGroupDialog()
-    {
+    private void showCreateGroupDialog() {
         CreateGroupDialog dialog = new CreateGroupDialog(null, true);
         dialog.setVisible(true);
 

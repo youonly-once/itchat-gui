@@ -1,14 +1,10 @@
 package cn.shu.wechat.utils;
 
 import cn.shu.wechat.beans.pojo.AttrHistory;
-import cn.shu.wechat.core.Core;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
 import lombok.extern.log4j.Log4j2;
 
-import javax.annotation.Resource;
 import java.io.File;
-import java.nio.file.Path;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 

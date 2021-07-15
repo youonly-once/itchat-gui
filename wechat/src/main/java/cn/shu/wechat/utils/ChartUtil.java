@@ -1,18 +1,17 @@
 package cn.shu.wechat.utils;
 
-import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.beans.pojo.MessageExample;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
-import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.enums.WXSendMsgCodeEnum;
+import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.mapper.ContactsMapper;
 import cn.shu.wechat.mapper.MessageMapper;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.ansj.domain.Result;
@@ -53,11 +52,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.jfree.data.general.DatasetUtils.createCategoryDataset;
 
 
 /**
@@ -494,12 +491,12 @@ public class ChartUtil {
                     switch (natureStr) {
                         //case "e":
                         case "n":
-                        //case "v":
+                            //case "v":
                         case "t":
 
-                        //case "a":
-                      //  case "b":
-                       // case "d":
+                            //case "a":
+                            //  case "b":
+                            // case "d":
                             // case "r":
                             msgTerm.computeIfAbsent(term.toString(), v -> new AtomicInteger()).getAndIncrement();
                             break;

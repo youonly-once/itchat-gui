@@ -1,16 +1,14 @@
 package cn.shu.wechat.api;
 
 
-import cn.shu.wechat.beans.msg.sync.MemberList;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.utils.CommonTools;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.StringUtils;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 微信联系人工具，如获好友昵称、备注等
@@ -107,11 +105,11 @@ public class ContactsTools {
         }
         try {
 
-        for (Contacts contacts : memberList) {
-            if (userName.equals(contacts.getUsername())) {
-                return contacts;
+            for (Contacts contacts : memberList) {
+                if (userName.equals(contacts.getUsername())) {
+                    return contacts;
+                }
             }
-        }
         } catch (Exception e) {
             e.printStackTrace();
             log.warn(e.getMessage());

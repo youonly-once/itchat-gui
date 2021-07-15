@@ -1,7 +1,5 @@
 package cn.shu.wechat.swing.panels;
 
-/*import com.melloware.jintellitype.HotkeyListener;
-import com.melloware.jintellitype.JIntellitype;*/
 import cn.shu.wechat.swing.components.*;
 import cn.shu.wechat.swing.components.message.ChatEditorPopupMenu;
 import cn.shu.wechat.swing.frames.ScreenShot;
@@ -9,6 +7,8 @@ import cn.shu.wechat.swing.listener.ExpressionListener;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.OSUtil;
+import com.melloware.jintellitype.HotkeyListener;
+import com.melloware.jintellitype.JIntellitype;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,8 +18,7 @@ import java.awt.event.MouseEvent;
 /**
  * Created by song on 17-5-30.
  */
-public class MessageEditorPanel extends ParentAvailablePanel
-{
+public class MessageEditorPanel extends ParentAvailablePanel {
     private JPanel controlLabel;
     private JLabel fileLabel;
     private JLabel expressionLabel;
@@ -41,40 +40,33 @@ public class MessageEditorPanel extends ParentAvailablePanel
 
     private ExpressionPopup expressionPopup;
 
-    public MessageEditorPanel(JPanel parent)
-    {
+    public MessageEditorPanel(JPanel parent) {
         super(parent);
 
         initComponents();
         initView();
         setListeners();
 
-        if (OSUtil.getOsType() == OSUtil.Windows)
-        {
+        if (OSUtil.getOsType() == OSUtil.Windows) {
             registerHotKey();
         }
     }
 
-    private void registerHotKey()
-    {
+    private void registerHotKey() {
         int SCREEN_SHOT_CODE = 10001;
-        //JIntellitype.getInstance().registerHotKey(SCREEN_SHOT_CODE, JIntellitype.MOD_ALT, 'S');
+        JIntellitype.getInstance().registerHotKey(SCREEN_SHOT_CODE, JIntellitype.MOD_ALT, 'S');
 
-      //  JIntellitype.getInstance().addHotKeyListener(new HotkeyListener()
-/*        {
+        JIntellitype.getInstance().addHotKeyListener(new HotkeyListener() {
             @Override
-            public void onHotKey(int markCode)
-            {
-                if (markCode == SCREEN_SHOT_CODE)
-                {
+            public void onHotKey(int markCode) {
+                if (markCode == SCREEN_SHOT_CODE) {
                     screenShot();
                 }
             }
-        });*/
+        });
     }
 
-    private void initComponents()
-    {
+    private void initComponents() {
         Cursor handCursor = new Cursor(Cursor.HAND_CURSOR);
         controlLabel = new JPanel();
         controlLabel.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 7));
@@ -98,12 +90,9 @@ public class MessageEditorPanel extends ParentAvailablePanel
         cutActiveIcon = IconUtil.getIcon(this, "/image/cut_active.png");
         cutLabel.setIcon(cutNormalIcon);
         cutLabel.setCursor(handCursor);
-        if (OSUtil.getOsType() == OSUtil.Windows)
-        {
+        if (OSUtil.getOsType() == OSUtil.Windows) {
             cutLabel.setToolTipText("截图(Alt + S)");
-        }
-        else
-        {
+        } else {
             cutLabel.setToolTipText("截图(当前系统下不支持全局热键)");
         }
 
@@ -133,8 +122,7 @@ public class MessageEditorPanel extends ParentAvailablePanel
         expressionPopup = new ExpressionPopup();
     }
 
-    private void initView()
-    {
+    private void initView() {
         this.setLayout(new GridBagLayout());
 
         controlLabel.add(expressionLabel);
@@ -146,80 +134,65 @@ public class MessageEditorPanel extends ParentAvailablePanel
         add(sendPanel, new GBC(0, 2).setFill(GBC.BOTH).setWeight(1, 1).setInsets(0, 0, 10, 10));
     }
 
-    private void setListeners()
-    {
-        fileLabel.addMouseListener(new MouseAdapter()
-        {
+    private void setListeners() {
+        fileLabel.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseEntered(MouseEvent e)
-            {
+            public void mouseEntered(MouseEvent e) {
                 fileLabel.setIcon(fileActiveIcon);
                 super.mouseEntered(e);
             }
 
             @Override
-            public void mouseExited(MouseEvent e)
-            {
+            public void mouseExited(MouseEvent e) {
                 fileLabel.setIcon(fileNormalIcon);
                 super.mouseExited(e);
             }
         });
 
-        expressionLabel.addMouseListener(new MouseAdapter()
-        {
+        expressionLabel.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseEntered(MouseEvent e)
-            {
+            public void mouseEntered(MouseEvent e) {
                 expressionLabel.setIcon(emotionActiveIcon);
                 super.mouseEntered(e);
             }
 
             @Override
-            public void mouseExited(MouseEvent e)
-            {
+            public void mouseExited(MouseEvent e) {
                 expressionLabel.setIcon(emotionNormalIcon);
                 super.mouseExited(e);
             }
 
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 expressionPopup.show((Component) e.getSource(), e.getX() - 200, e.getY() - 320);
                 super.mouseClicked(e);
             }
         });
 
-        cutLabel.addMouseListener(new MouseAdapter()
-        {
+        cutLabel.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseEntered(MouseEvent e)
-            {
+            public void mouseEntered(MouseEvent e) {
                 cutLabel.setIcon(cutActiveIcon);
                 super.mouseEntered(e);
             }
 
             @Override
-            public void mouseExited(MouseEvent e)
-            {
+            public void mouseExited(MouseEvent e) {
                 cutLabel.setIcon(cutNormalIcon);
                 super.mouseExited(e);
             }
 
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 screenShot();
                 super.mouseClicked(e);
             }
         });
 
-        textEditor.addMouseListener(new MouseAdapter()
-        {
+        textEditor.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseReleased(MouseEvent e)
-            {
-                if (e.getButton() == MouseEvent.BUTTON3)
-                {
+            public void mouseReleased(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3) {
                     chatEditorPopupMenu.show((Component) e.getSource(), e.getX(), e.getY());
                 }
                 super.mouseClicked(e);
@@ -227,36 +200,28 @@ public class MessageEditorPanel extends ParentAvailablePanel
         });
     }
 
-    private void screenShot()
-    {
-        try
-        {
+    private void screenShot() {
+        try {
             ScreenShot ssw = new ScreenShot();
             ssw.setVisible(true);
-        }
-        catch (AWTException e1)
-        {
+        } catch (AWTException e1) {
             e1.printStackTrace();
         }
     }
 
-    public void setExpressionListener(ExpressionListener listener)
-    {
+    public void setExpressionListener(ExpressionListener listener) {
         expressionPopup.setExpressionListener(listener);
     }
 
-    public RCTextEditor getEditor()
-    {
+    public RCTextEditor getEditor() {
         return textEditor;
     }
 
-    public JButton getSendButton()
-    {
+    public JButton getSendButton() {
         return sendButton;
     }
 
-    public JLabel getUploadFileLabel()
-    {
+    public JLabel getUploadFileLabel() {
         return fileLabel;
     }
 

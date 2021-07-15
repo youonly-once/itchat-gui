@@ -8,17 +8,14 @@ import javax.swing.*;
  * Created by song on 17-5-30.
  */
 @NoArgsConstructor
-public class ParentAvailablePanel extends JPanel
-{
+public class ParentAvailablePanel extends JPanel {
     private JPanel parent;
 
-    public ParentAvailablePanel(JPanel parent)
-    {
+    public ParentAvailablePanel(JPanel parent) {
         this.parent = parent;
     }
 
-    public JPanel getParentPanel()
-    {
+    public JPanel getParentPanel() {
         return parent;
     }
 }

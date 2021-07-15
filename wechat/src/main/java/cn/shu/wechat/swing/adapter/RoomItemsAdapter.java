@@ -4,8 +4,8 @@ import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.entity.RoomItem;
-import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
+import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.TimeUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -192,6 +192,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
 
     /**
      * 进入房间
+     *
      * @param roomId 房间id
      */
     private void enterRoom(String roomId) {

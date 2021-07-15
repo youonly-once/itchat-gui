@@ -4,16 +4,12 @@ import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.adapter.ContactsItemsAdapter;
-import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCListView;
 import cn.shu.wechat.swing.db.model.ContactsUser;
-import cn.shu.wechat.swing.db.service.ContactsUserService;
-import cn.shu.wechat.swing.db.service.CurrentUserService;
 import cn.shu.wechat.swing.entity.ContactsItem;
 import cn.shu.wechat.swing.utils.AvatarUtil;
-
 import org.apache.commons.lang.StringUtils;
 
 import javax.imageio.ImageIO;
@@ -88,7 +84,7 @@ public class ContactsPanel extends ParentAvailablePanel {
         contactsListView.notifyDataSetChanged(false);
 
         // 通讯录更新后，获取头像
-       getContactsUserAvatar();
+        getContactsUserAvatar();
     }
 
     public static ContactsPanel getContext() {
@@ -130,10 +126,10 @@ public class ContactsPanel extends ParentAvailablePanel {
         try {
             //  URL url = getClass().getResource("/avatar/" + username + ".png");
             String head = Core.getContactHeadImgPath().get(username);
-            Image  image;
-            if (StringUtils.isNotEmpty(head)){
+            Image image;
+            if (StringUtils.isNotEmpty(head)) {
                 image = ImageIO.read(new File(head));
-            }else{
+            } else {
                 image = AvatarUtil.createOrLoadUserAvatar(username);
             }
 

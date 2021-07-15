@@ -5,25 +5,21 @@
 
 package cn.shu.wechat.api;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.StorageLoginInfoEnum;
 import cn.shu.wechat.enums.URLEnum;
 import cn.shu.wechat.utils.MyHttpClient;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import lombok.extern.log4j.Log4j2;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 微信工具类

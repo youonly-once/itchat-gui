@@ -1,10 +1,6 @@
 package cn.shu.wechat.swing.components;
 
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Insets;
+import java.awt.*;
 
 /**
  * VerticalFlowLayout is similar to FlowLayout except it lays out components
@@ -241,8 +237,7 @@ public class VerticalFlowLayout extends FlowLayout {
                 if (this.hfill) {
                     m.setSize(maxwidth, d.height);
                     d.width = maxwidth;
-                }
-                else {
+                } else {
                     m.setSize(d.width, d.height);
                 }
 
@@ -252,8 +247,7 @@ public class VerticalFlowLayout extends FlowLayout {
                     x += hgap + colw;
                     colw = d.width;
                     start = i;
-                }
-                else {
+                } else {
                     if (y > 0)
                         y += vgap;
                     y += d.height;

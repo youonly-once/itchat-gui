@@ -9,12 +9,10 @@ import java.awt.*;
 /**
  * Created by song on 17-5-30.
  */
-public class MessagePanel extends ParentAvailablePanel
-{
+public class MessagePanel extends ParentAvailablePanel {
     RCListView listView;
 
-    public MessagePanel(JPanel parent)
-    {
+    public MessagePanel(JPanel parent) {
         super(parent);
 
         initComponents();
@@ -23,8 +21,7 @@ public class MessagePanel extends ParentAvailablePanel
     }
 
 
-    private void initComponents()
-    {
+    private void initComponents() {
         listView = new RCListView(0, 15);
         listView.setScrollBarColor(Colors.WINDOW_BACKGROUND, Colors.WINDOW_BACKGROUND);
         listView.setHorizontalScrollBarPolicy(
@@ -34,8 +31,7 @@ public class MessagePanel extends ParentAvailablePanel
 
     }
 
-    private void setListeners()
-    {
+    private void setListeners() {
         /*listView.addMouseListener(new AbstractMouseListener(){
 
             @Override
@@ -47,8 +43,7 @@ public class MessagePanel extends ParentAvailablePanel
         });*/
     }
 
-    private void initView()
-    {
+    private void initView() {
         this.setLayout(new BorderLayout());
         add(listView, BorderLayout.CENTER);
         /*listView.repaint();
@@ -65,8 +60,7 @@ public class MessagePanel extends ParentAvailablePanel
         });*/
     }
 
-    public RCListView getMessageListView()
-    {
+    public RCListView getMessageListView() {
         return listView;
     }
 }

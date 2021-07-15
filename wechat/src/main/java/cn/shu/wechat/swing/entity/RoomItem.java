@@ -13,8 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RoomItem implements Comparable<RoomItem>
-{
+public class RoomItem implements Comparable<RoomItem> {
     /**
      * 房间id 对应微信用户的UserName以@开头或@@
      */
@@ -46,11 +45,8 @@ public class RoomItem implements Comparable<RoomItem>
     private boolean isGroup;
 
 
-
-
     @Override
-    public int compareTo(RoomItem o)
-    {
+    public int compareTo(RoomItem o) {
         // 注意，不能强制转int, 两个时间相差太远时有可能溢出
         // 忽略结果为0的情况，两个item必有先后，没有相同
         long ret = o.getTimestamp() - this.getTimestamp();

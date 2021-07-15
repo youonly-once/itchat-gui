@@ -1,8 +1,6 @@
 package cn.shu.wechat.beans.msg;
 
 import cn.shu.wechat.core.Core;
-import com.alibaba.fastjson.annotation.JSONField;
-import lombok.Data;
 
 /**
  * @作者 舒新胜

@@ -1,10 +1,10 @@
 package cn.shu.wechat.utils;
 
+import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.msg.sync.AddMsgList;
 import cn.shu.wechat.core.Core;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.StringUtils;
-import cn.shu.wechat.api.ContactsTools;
 
 /**
  * @作者 舒新胜

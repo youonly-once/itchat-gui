@@ -3,7 +3,10 @@ package cn.shu.wechat.swing.panels;
 import cn.shu.wechat.swing.adapter.SelectUserItemViewHolder;
 import cn.shu.wechat.swing.adapter.SelectUserItemsAdapter;
 import cn.shu.wechat.swing.adapter.SelectedUserItemsAdapter;
-import cn.shu.wechat.swing.components.*;
+import cn.shu.wechat.swing.components.Colors;
+import cn.shu.wechat.swing.components.GBC;
+import cn.shu.wechat.swing.components.RCBorder;
+import cn.shu.wechat.swing.components.RCListView;
 import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.utils.IconUtil;
@@ -18,8 +21,7 @@ import java.util.List;
 /**
  * Created by song on 19/06/2017.
  */
-public class SelectUserPanel extends JPanel
-{
+public class SelectUserPanel extends JPanel {
     private JPanel leftPanel;
     private JPanel rightPanel;
     private RCListView selectUserListView;
@@ -40,8 +42,7 @@ public class SelectUserPanel extends JPanel
     private ImageIcon uncheckIcon;
 
 
-    public SelectUserPanel(int width, int height, List<SelectUserData> leftUserList)
-    {
+    public SelectUserPanel(int width, int height, List<SelectUserData> leftUserList) {
         this.width = width;
         this.height = height;
         this.leftUserList = leftUserList;
@@ -51,8 +52,7 @@ public class SelectUserPanel extends JPanel
     }
 
 
-    private void initComponents()
-    {
+    private void initComponents() {
         checkIcon = IconUtil.getIcon(this, "/image/check.png");
         uncheckIcon = IconUtil.getIcon(this, "/image/uncheck.png");
 
@@ -68,20 +68,15 @@ public class SelectUserPanel extends JPanel
         selectUserListView = new RCListView();
 
         selectUserItemsAdapter = new SelectUserItemsAdapter(leftUserList);
-        selectUserItemsAdapter.setMouseListener(new AbstractMouseListener()
-        {
+        selectUserItemsAdapter.setMouseListener(new AbstractMouseListener() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 SelectUserItemViewHolder holder = (SelectUserItemViewHolder) e.getSource();
 
                 String username = holder.username.getText();
-                if (unSelectUser(username))
-                {
+                if (unSelectUser(username)) {
                     holder.icon.setIcon(uncheckIcon);
-                }
-                else
-                {
+                } else {
                     selectUser(username);
                     holder.icon.setIcon(checkIcon);
                 }
@@ -95,18 +90,13 @@ public class SelectUserPanel extends JPanel
         // 已选中用户列表
         selectedUserListView = new RCListView();
         selectedUserItemsAdapter = new SelectedUserItemsAdapter(selectedUserList);
-        selectedUserItemsAdapter.setItemRemoveListener(new SelectedUserItemsAdapter.ItemRemoveListener()
-        {
+        selectedUserItemsAdapter.setItemRemoveListener(new SelectedUserItemsAdapter.ItemRemoveListener() {
             @Override
-            public void onRemove(String username)
-            {
-                if (unSelectUser(username))
-                {
-                    for (Component holder : selectUserListView.getItems())
-                    {
+            public void onRemove(String username) {
+                if (unSelectUser(username)) {
+                    for (Component holder : selectUserListView.getItems()) {
                         SelectUserItemViewHolder viewHolder = (SelectUserItemViewHolder) holder;
-                        if (viewHolder.username.getText().equals(username))
-                        {
+                        if (viewHolder.username.getText().equals(username)) {
                             viewHolder.icon.setIcon(uncheckIcon);
                             break;
                         }
@@ -118,8 +108,7 @@ public class SelectUserPanel extends JPanel
         selectedUserListView.setAdapter(selectedUserItemsAdapter);
     }
 
-    private void initView()
-    {
+    private void initView() {
         JPanel panel = new JPanel();
         panel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 10));
         panel.add(leftPanel);
@@ -139,12 +128,9 @@ public class SelectUserPanel extends JPanel
      *
      * @param username
      */
-    private void selectUser(String username)
-    {
-        for (SelectUserData item  : leftUserList)
-        {
-            if (item.getName().equals(username))
-            {
+    private void selectUser(String username) {
+        for (SelectUserData item : leftUserList) {
+            if (item.getName().equals(username)) {
                 selectedUserList.add(item);
                 selectedUserListView.notifyDataSetChanged(false);
                 break;
@@ -152,36 +138,30 @@ public class SelectUserPanel extends JPanel
         }
     }
 
-    private boolean unSelectUser(String username)
-    {
+    private boolean unSelectUser(String username) {
         Iterator<SelectUserData> itemIterator = selectedUserList.iterator();
         boolean dataChanged = false;
-        while (itemIterator.hasNext())
-        {
+        while (itemIterator.hasNext()) {
             SelectUserData user = itemIterator.next();
-            if (user.getName().equals(username))
-            {
+            if (user.getName().equals(username)) {
                 dataChanged = true;
                 itemIterator.remove();
                 break;
             }
         }
 
-        if (dataChanged)
-        {
+        if (dataChanged) {
             selectedUserListView.notifyDataSetChanged(false);
         }
 
         return dataChanged;
     }
 
-    public List<SelectUserData> getSelectedUser()
-    {
+    public List<SelectUserData> getSelectedUser() {
         return selectedUserList;
     }
 
-    public void notifyDataSetChanged(List<SelectUserData> users)
-    {
+    public void notifyDataSetChanged(List<SelectUserData> users) {
         leftUserList = users;
         selectUserItemsAdapter.setUserList(leftUserList);
         selectUserListView.notifyDataSetChanged(false);

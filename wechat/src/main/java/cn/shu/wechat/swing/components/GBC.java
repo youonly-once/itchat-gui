@@ -5,19 +5,19 @@ import java.awt.*;
 /**
  * Created by song on 17-5-28.
  */
-public class GBC extends GridBagConstraints{
+public class GBC extends GridBagConstraints {
     /*
      * constructs a GBC with a given gridx and gridy position and all other grid
      * bag constraint values set to the default
      * @param gridx the gridx position
      * @param gridy the gridy position
      */
-    public GBC(int gridx, int gridy){
+    public GBC(int gridx, int gridy) {
         this.gridx = gridx;
         this.gridy = gridy;
     }
 
-    public GBC(int gridx, int gridy, int gridWidth, int gridHeight){
+    public GBC(int gridx, int gridy, int gridWidth, int gridHeight) {
         this.gridx = gridx;
         this.gridy = gridy;
         this.gridwidth = gridWidth;
@@ -30,7 +30,7 @@ public class GBC extends GridBagConstraints{
      * @return this object for further modification
      */
 
-    public GBC setAnchor(int anchor){
+    public GBC setAnchor(int anchor) {
         this.anchor = anchor;
         return this;
     }
@@ -41,7 +41,7 @@ public class GBC extends GridBagConstraints{
      * @return this object for further modification
      */
 
-    public GBC setFill(int fill){
+    public GBC setFill(int fill) {
         this.fill = fill;
         return this;
     }
@@ -53,7 +53,7 @@ public class GBC extends GridBagConstraints{
      * @return this object for further modification
      */
 
-    public GBC setWeight(int weightx, int weighty){
+    public GBC setWeight(int weightx, int weighty) {
         this.weightx = weightx;
         this.weighty = weighty;
         return this;
@@ -65,7 +65,7 @@ public class GBC extends GridBagConstraints{
      * @return this object for further modification
      */
 
-    public GBC setInsets(int distance){
+    public GBC setInsets(int distance) {
         this.insets = new Insets(distance, distance, distance, distance);
         return this;
     }
@@ -79,7 +79,7 @@ public class GBC extends GridBagConstraints{
      * @return this object for further modification
      */
 
-    public GBC setInsets(int top, int left,int bottom,int right){
+    public GBC setInsets(int top, int left, int bottom, int right) {
         this.insets = new Insets(top, left, bottom, right);
         return this;
     }
@@ -90,7 +90,7 @@ public class GBC extends GridBagConstraints{
      * @return this object for further modification
      */
 
-    public GBC setIpad(int ipadx, int ipady){
+    public GBC setIpad(int ipadx, int ipady) {
         this.ipadx = ipadx;
         this.ipadx = ipadx;
         return this;

@@ -1,14 +1,13 @@
 package cn.shu.wechat.controller;
 
+import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.beans.pojo.Contacts;
-import cn.shu.wechat.mapper.ContactsMapper;
-import cn.shu.wechat.mapper.MemberGroupRMapper;
-import cn.shu.wechat.service.impl.LoginServiceImpl;
-import cn.shu.wechat.utils.*;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.service.ILoginService;
-import cn.shu.wechat.api.DownloadTools;
-import com.alibaba.fastjson.JSONObject;
+import cn.shu.wechat.utils.CommonTools;
+import cn.shu.wechat.utils.Config;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
+import cn.shu.wechat.utils.SleepUtils;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -45,14 +44,12 @@ public class LoginController {
      * 登陆服务实现类
      */
     @Resource
-    private ILoginService loginService ;//= LoginServiceImpl.getLoginService();
+    private ILoginService loginService;//= LoginServiceImpl.getLoginService();
 
     /**
      * 登录重试次数
      */
     private int loginRetryCount = 10;
-
-
 
 
     /**
@@ -62,6 +59,7 @@ public class LoginController {
     private int port;
 
     private static AtomicInteger count = new AtomicInteger();
+
     public void login(boolean dHImg) {
         // 防止SSL错误
         System.setProperty("jsse.enableSNIExtension", "false");
@@ -93,7 +91,7 @@ public class LoginController {
                         log.info("请手动打开二维码图片进行扫码登录：" + qrPath);
                     }
                     break;
-                } else if (count == loginRetryCount-1) {
+                } else if (count == loginRetryCount - 1) {
                     log.error("2.2. 获取登陆二维码图片失败，系统退出");
                     System.exit(0);
                 }
@@ -142,7 +140,7 @@ public class LoginController {
  /*       // 登陆成功后缓存本次登陆好友相关消息（NickName, UserName）
         WeChatTool.setUserInfo();*/
         //删除无效头像
-       // HeadImageUtil.deleteLoseEfficacyHeadImg(Config.PIC_DIR + "/headimg/");
+        // HeadImageUtil.deleteLoseEfficacyHeadImg(Config.PIC_DIR + "/headimg/");
         if (dHImg) {
             log.info("12. 下载联系人头像");
             for (Map.Entry<String, Contacts> entry : Core.getMemberMap().entrySet()) {
@@ -169,11 +167,13 @@ public class LoginController {
 
 
     }
+
     @ResponseBody
-     @RequestMapping("/getPort")
-    public int getPort(){
+    @RequestMapping("/getPort")
+    public int getPort() {
         return port;
     }
+
     /**
      * @param dHImg 是否下载头像
      * @return 提示信息
@@ -195,7 +195,7 @@ public class LoginController {
     @RequestMapping("/test")
     @ResponseBody
     public String test() throws InterruptedException {
-        log.info("开始了:{}",count.getAndIncrement());
+        log.info("开始了:{}", count.getAndIncrement());
         Thread.sleep(10000);
         log.info("ok\n");
         return "ok";

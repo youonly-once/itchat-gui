@@ -1,12 +1,16 @@
 package cn.shu.wechat.swing.frames;
 
 import cn.shu.wechat.swing.app.Launcher;
-import cn.shu.wechat.swing.components.*;
+import cn.shu.wechat.swing.components.Colors;
+import cn.shu.wechat.swing.components.GBC;
+import cn.shu.wechat.swing.components.RCButton;
+import cn.shu.wechat.swing.components.RCTextField;
 import cn.shu.wechat.swing.db.model.ContactsUser;
 import cn.shu.wechat.swing.db.service.ContactsUserService;
 import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.panels.SelectUserPanel;
 import cn.shu.wechat.swing.utils.FontUtil;
+
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
@@ -20,8 +24,7 @@ import static cn.shu.wechat.swing.app.Launcher.roomService;
 /**
  * Created by song on 07/06/2017.
  */
-public class CreateGroupDialog extends JDialog
-{
+public class CreateGroupDialog extends JDialog {
     private static CreateGroupDialog context;
     private JPanel editorPanel;
     private RCTextField groupNameTextField;
@@ -40,8 +43,7 @@ public class CreateGroupDialog extends JDialog
     public static final int DIALOG_HEIGHT = 500;
 
 
-    public CreateGroupDialog(Frame owner, boolean modal)
-    {
+    public CreateGroupDialog(Frame owner, boolean modal) {
         super(owner, modal);
         context = this;
 
@@ -52,11 +54,9 @@ public class CreateGroupDialog extends JDialog
         setListeners();
     }
 
-    private void initData()
-    {
+    private void initData() {
         List<ContactsUser> contactsUsers = contactsUserService.findAll();
-        for (ContactsUser con : contactsUsers)
-        {
+        for (ContactsUser con : contactsUsers) {
             /*if (con.getUsername().equals("admin") || con.getUsername().equals("appStoreTest"))
             {
                 continue;
@@ -69,8 +69,7 @@ public class CreateGroupDialog extends JDialog
     }
 
 
-    private void initComponents()
-    {
+    private void initComponents() {
         int posX = MainFrame.getContext().getX();
         int posY = MainFrame.getContext().getY();
 
@@ -116,8 +115,7 @@ public class CreateGroupDialog extends JDialog
     }
 
 
-    private void initView()
-    {
+    private void initView() {
         editorPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
         editorPanel.add(groupNameTextField);
         editorPanel.add(privateCheckBox);
@@ -131,31 +129,24 @@ public class CreateGroupDialog extends JDialog
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    private void setListeners()
-    {
-        cancelButton.addMouseListener(new MouseAdapter()
-        {
+    private void setListeners() {
+        cancelButton.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 setVisible(false);
 
                 super.mouseClicked(e);
             }
         });
 
-        okButton.addMouseListener(new MouseAdapter()
-        {
+        okButton.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
-                if (okButton.isEnabled())
-                {
+            public void mouseClicked(MouseEvent e) {
+                if (okButton.isEnabled()) {
                     okButton.setEnabled(false);
 
                     String roomName = groupNameTextField.getText();
-                    if (roomName == null || roomName.isEmpty())
-                    {
+                    if (roomName == null || roomName.isEmpty()) {
                         JOptionPane.showMessageDialog(null, "请输入群聊名称", "请输入群聊名称", JOptionPane.WARNING_MESSAGE);
                         groupNameTextField.requestFocus();
                         okButton.setEnabled(true);
@@ -171,20 +162,15 @@ public class CreateGroupDialog extends JDialog
         });
     }
 
-    private void checkRoomExists(String name)
-    {
-        if (roomService.findByName(name) != null)
-        {
+    private void checkRoomExists(String name) {
+        if (roomService.findByName(name) != null) {
             showRoomExistMessage(name);
             okButton.setEnabled(true);
-        }
-        else
-        {
+        } else {
             List<SelectUserData> list = selectUserPanel.getSelectedUser();
             String[] usernames = new String[list.size()];
 
-            for (int i = 0; i < list.size(); i++)
-            {
+            for (int i = 0; i < list.size(); i++) {
                 usernames[i] = list.get(i).getName();
             }
 
@@ -199,15 +185,12 @@ public class CreateGroupDialog extends JDialog
      * @param privateGroup
      * @param usernames
      */
-    private void createChannelOrGroup(String name, boolean privateGroup, String[] usernames)
-    {
+    private void createChannelOrGroup(String name, boolean privateGroup, String[] usernames) {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
-        for (int i = 0; i < usernames.length; i++)
-        {
+        for (int i = 0; i < usernames.length; i++) {
             sb.append("\"" + usernames[i] + "\"");
-            if (i < usernames.length - 1)
-            {
+            if (i < usernames.length - 1) {
                 sb.append(",");
             }
         }
@@ -216,13 +199,11 @@ public class CreateGroupDialog extends JDialog
         JOptionPane.showMessageDialog(MainFrame.getContext(), "创建群聊", "创建群聊", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    public static CreateGroupDialog getContext()
-    {
+    public static CreateGroupDialog getContext() {
         return context;
     }
 
-    public void showRoomExistMessage(String roomName)
-    {
+    public void showRoomExistMessage(String roomName) {
         JOptionPane.showMessageDialog(null, "群组\"" + roomName + "\"已存在", "群组已存在", JOptionPane.WARNING_MESSAGE);
         groupNameTextField.setText("");
         groupNameTextField.requestFocus();

@@ -8,32 +8,27 @@ import java.awt.*;
 /**
  * Created by song on 12/06/2017.
  */
-public class SystemMessagePanel extends JPanel
-{
+public class SystemMessagePanel extends JPanel {
     private String text;
     FontMetrics fm = getFontMetrics(getFont());
 
-    public SystemMessagePanel()
-    {
-        setPreferredSize(new Dimension(21,21));
+    public SystemMessagePanel() {
+        setPreferredSize(new Dimension(21, 21));
     }
 
-    public void setText(String text)
-    {
+    public void setText(String text) {
         this.text = text;
     }
 
 
-
-    public void paint(Graphics g)
-    {
+    public void paint(Graphics g) {
         int strWidth = fm.stringWidth(text);
         int strHeight = fm.getHeight();
 
         int width = strWidth + 6;
         int height = strHeight + 4;
 
-        System.out.println(text + " == " + width +  " , " +  height);
+        System.out.println(text + " == " + width + " , " + height);
 
         setPreferredSize(new Dimension(width, height));
 

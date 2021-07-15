@@ -1,7 +1,6 @@
 package cn.shu.wechat.swing.components;
 
 import cn.shu.wechat.swing.components.message.FileEditorThumbnail;
-
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 
 import javax.swing.*;
@@ -12,34 +11,24 @@ import java.awt.event.MouseEvent;
 /**
  * Created by song on 03/07/2017.
  */
-public class RCTextEditor extends JTextPane
-{
+public class RCTextEditor extends JTextPane {
     @Override
-    public void paste()
-    {
+    public void paste() {
         Object data = ClipboardUtil.paste();
-        if (data instanceof String)
-        {
+        if (data instanceof String) {
             this.replaceSelection((String) data);
-        }
-        else if (data instanceof ImageIcon)
-        {
+        } else if (data instanceof ImageIcon) {
             ImageIcon icon = (ImageIcon) data;
             adjustAndInsertIcon(icon);
-        }
-        else if (data instanceof java.util.List)
-        {
+        } else if (data instanceof java.util.List) {
             java.util.List<Object> list = (java.util.List<Object>) data;
-            for (Object obj : list)
-            {
+            for (Object obj : list) {
                 // 图像
-                if (obj instanceof ImageIcon)
-                {
+                if (obj instanceof ImageIcon) {
                     adjustAndInsertIcon((ImageIcon) obj);
                 }
                 // 文件
-                else if (obj instanceof String)
-                {
+                else if (obj instanceof String) {
                     FileEditorThumbnail thumbnail = new FileEditorThumbnail((String) obj);
                     this.insertComponent(thumbnail);
                 }
@@ -52,49 +41,39 @@ public class RCTextEditor extends JTextPane
      *
      * @param icon
      */
-    private void adjustAndInsertIcon(ImageIcon icon)
-    {
+    private void adjustAndInsertIcon(ImageIcon icon) {
         String path = icon.getDescription();
         int iconWidth = icon.getIconWidth();
         int iconHeight = icon.getIconHeight();
         float scale = iconWidth * 1.0F / iconHeight;
         boolean needToScale = false;
         int max = 100;
-        if (iconWidth >= iconHeight && iconWidth > max)
-        {
+        if (iconWidth >= iconHeight && iconWidth > max) {
             iconWidth = max;
             iconHeight = (int) (iconWidth / scale);
             needToScale = true;
-        }
-        else if (iconHeight >= iconWidth && iconHeight > max)
-        {
+        } else if (iconHeight >= iconWidth && iconHeight > max) {
             iconHeight = max;
             iconWidth = (int) (iconHeight * scale);
             needToScale = true;
         }
 
         JLabel label = new JLabel();
-        if (needToScale)
-        {
+        if (needToScale) {
             ImageIcon scaledIcon = new ImageIcon(icon.getImage().getScaledInstance(iconWidth, iconHeight, Image.SCALE_SMOOTH));
             scaledIcon.setDescription(icon.getDescription());
             //this.insertIcon(scaledIcon);
             label.setIcon(scaledIcon);
-        }
-        else
-        {
+        } else {
             //this.insertIcon(icon);
             label.setIcon(icon);
         }
 
-        label.addMouseListener(new MouseAdapter()
-        {
+        label.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 // 双击预览选中的图片
-                if (e.getClickCount() == 2)
-                {
+                if (e.getClickCount() == 2) {
               /*      ImageViewerFrame frame = new ImageViewerFrame(path);
                     frame.setVisible(true);*/
                 }

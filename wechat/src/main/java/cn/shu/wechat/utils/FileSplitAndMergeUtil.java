@@ -2,6 +2,7 @@ package cn.shu.wechat.utils;
 
 /**
  * 文件分割工具类
+ *
  * @作者 舒新胜
  * @项目 AutoWeChat
  * @创建时间 3/10/2021 11:46 AM
@@ -9,18 +10,7 @@ package cn.shu.wechat.utils;
 
 import lombok.extern.log4j.Log4j2;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.*;
 import java.util.*;
 
 @Log4j2

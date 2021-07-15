@@ -5,17 +5,7 @@ package cn.shu.wechat.swing.components.message;
  */
 
 import javax.swing.*;
-import javax.swing.text.AbstractDocument;
-import javax.swing.text.BoxView;
-import javax.swing.text.ComponentView;
-import javax.swing.text.Element;
-import javax.swing.text.IconView;
-import javax.swing.text.LabelView;
-import javax.swing.text.ParagraphView;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledEditorKit;
-import javax.swing.text.View;
-import javax.swing.text.ViewFactory;
+import javax.swing.text.*;
 
 /**
  * 该类是真正实现超长单词都能自动换行的 JTextPane 的子类
@@ -24,61 +14,44 @@ import javax.swing.text.ViewFactory;
  * 换行，导致 JTextPane 的实际宽度变大，使得滚动条出现。
  * 下面的方法是对这个 bug 的较好修复。
  */
-public class JIMSendTextPane extends JTextPane
-{
+public class JIMSendTextPane extends JTextPane {
 
     private Object tag;
 
-    public Object getTag()
-    {
+    public Object getTag() {
         return tag;
     }
 
-    public void setTag(Object tag)
-    {
+    public void setTag(Object tag) {
         this.tag = tag;
     }
     // 内部类
     // 以下内部类全都用于实现自动强制折行
 
-    private class WarpEditorKit extends StyledEditorKit
-    {
+    private class WarpEditorKit extends StyledEditorKit {
 
         private ViewFactory defaultFactory = new WarpColumnFactory();
 
         @Override
-        public ViewFactory getViewFactory()
-        {
+        public ViewFactory getViewFactory() {
             return defaultFactory;
         }
     }
 
-    private class WarpColumnFactory implements ViewFactory
-    {
+    private class WarpColumnFactory implements ViewFactory {
 
-        public View create(Element elem)
-        {
+        public View create(Element elem) {
             String kind = elem.getName();
-            if (kind != null)
-            {
-                if (kind.equals(AbstractDocument.ContentElementName))
-                {
+            if (kind != null) {
+                if (kind.equals(AbstractDocument.ContentElementName)) {
                     return new WarpLabelView(elem);
-                }
-                else if (kind.equals(AbstractDocument.ParagraphElementName))
-                {
+                } else if (kind.equals(AbstractDocument.ParagraphElementName)) {
                     return new ParagraphView(elem);
-                }
-                else if (kind.equals(AbstractDocument.SectionElementName))
-                {
+                } else if (kind.equals(AbstractDocument.SectionElementName)) {
                     return new BoxView(elem, View.Y_AXIS);
-                }
-                else if (kind.equals(StyleConstants.ComponentElementName))
-                {
+                } else if (kind.equals(StyleConstants.ComponentElementName)) {
                     return new ComponentView(elem);
-                }
-                else if (kind.equals(StyleConstants.IconElementName))
-                {
+                } else if (kind.equals(StyleConstants.IconElementName)) {
                     return new WarpIconView(elem);
                 }
             }
@@ -88,19 +61,15 @@ public class JIMSendTextPane extends JTextPane
         }
     }
 
-    private class WarpLabelView extends LabelView
-    {
+    private class WarpLabelView extends LabelView {
 
-        public WarpLabelView(Element elem)
-        {
+        public WarpLabelView(Element elem) {
             super(elem);
         }
 
         @Override
-        public float getMinimumSpan(int axis)
-        {
-            switch (axis)
-            {
+        public float getMinimumSpan(int axis) {
+            switch (axis) {
                 case View.X_AXIS:
                     return 0;
                 case View.Y_AXIS:
@@ -111,19 +80,15 @@ public class JIMSendTextPane extends JTextPane
         }
     }
 
-    private class WarpIconView extends IconView
-    {
+    private class WarpIconView extends IconView {
 
-        public WarpIconView(Element elem)
-        {
+        public WarpIconView(Element elem) {
             super(elem);
         }
 
         @Override
-        public float getMinimumSpan(int axis)
-        {
-            switch (axis)
-            {
+        public float getMinimumSpan(int axis) {
+            switch (axis) {
                 case View.X_AXIS:
                     return 0;
                 case View.Y_AXIS:
@@ -137,8 +102,7 @@ public class JIMSendTextPane extends JTextPane
     // 本类
 
     // 构造函数
-    public JIMSendTextPane()
-    {
+    public JIMSendTextPane() {
         super();
         this.setEditorKit(new WarpEditorKit());
     }

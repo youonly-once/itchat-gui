@@ -3,18 +3,15 @@ package cn.shu.wechat.swing.adapter;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCBorder;
-import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 
 /**
  * Created by song on 17-5-30.
  */
-public class RoomItemViewHolder extends ViewHolder
-{
+public class RoomItemViewHolder extends ViewHolder {
     public JLabel avatar = new JLabel();
     public JLabel roomName = new JLabel();
     public JLabel brief = new JLabel();
@@ -24,15 +21,13 @@ public class RoomItemViewHolder extends ViewHolder
     public JPanel timeUnread = new JPanel();
     private Object tag;
 
-    public RoomItemViewHolder()
-    {
+    public RoomItemViewHolder() {
         initComponents();
         initView();
 
     }
 
-    private void initComponents()
-    {
+    private void initComponents() {
         setPreferredSize(new Dimension(100, 64));
         setBackground(Colors.DARK);
         setBorder(new RCBorder(RCBorder.BOTTOM));
@@ -75,8 +70,7 @@ public class RoomItemViewHolder extends ViewHolder
 
     }
 
-    private void initView()
-    {
+    private void initView() {
         setLayout(new GridBagLayout());
         add(avatar, new GBC(0, 0).setWeight(2, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0));
         add(nameBrief, new GBC(1, 0).setWeight(100, 1).setFill(GBC.BOTH).setInsets(5, 5, 0, 0));
@@ -85,13 +79,11 @@ public class RoomItemViewHolder extends ViewHolder
     }
 
 
-    public Object getTag()
-    {
+    public Object getTag() {
         return tag;
     }
 
-    public void setTag(Object tag)
-    {
+    public void setTag(Object tag) {
         this.tag = tag;
     }
 }

@@ -17,20 +17,20 @@ public class SpringContextHolder implements ApplicationContextAware {
         SpringContextHolder.applicationContext = applicationContext;
     }
 
-    public static ApplicationContext getApplicationContext(){
+    public static ApplicationContext getApplicationContext() {
         return applicationContext;
     }
 
-    public static <T> T getBean(Class<T> clazz){
+    public static <T> T getBean(Class<T> clazz) {
         return applicationContext.getBean(clazz);
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T getBean(String name){
-        return (T)applicationContext.getBean(name);
+    public static <T> T getBean(String name) {
+        return (T) applicationContext.getBean(name);
     }
 
-    public static <T> T getBean(String name, Class<T> clazz){
+    public static <T> T getBean(String name, Class<T> clazz) {
         return getApplicationContext().getBean(name, clazz);
     }
 

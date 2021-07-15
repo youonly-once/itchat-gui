@@ -1,25 +1,22 @@
 package cn.shu.wechat.swing.frames;
 
 import cn.shu.wechat.api.DownloadTools;
-import cn.shu.wechat.api.WeChatTool;
 import cn.shu.wechat.beans.pojo.Contacts;
-import cn.shu.wechat.controller.LoginController;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.service.ILoginService;
-import cn.shu.wechat.service.impl.LoginServiceImpl;
-import cn.shu.wechat.swing.app.Launcher;
-import cn.shu.wechat.swing.components.*;
-import cn.shu.wechat.swing.db.model.CurrentUser;
+import cn.shu.wechat.swing.components.Colors;
+import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.db.service.CurrentUserService;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
-import cn.shu.wechat.swing.utils.*;
-import cn.shu.wechat.timedtask.TimedTask;
-import cn.shu.wechat.utils.*;
+import cn.shu.wechat.swing.utils.DbUtils;
+import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.swing.utils.OSUtil;
+import cn.shu.wechat.utils.CommonTools;
+import cn.shu.wechat.utils.Config;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
+import cn.shu.wechat.utils.SleepUtils;
 import lombok.extern.log4j.Log4j2;
 import org.apache.ibatis.session.SqlSession;
-import org.json.JSONObject;
-import cn.shu.wechat.swing.tasks.HttpPostTask;
-import cn.shu.wechat.swing.tasks.HttpResponseListener;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -27,11 +24,12 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -39,13 +37,12 @@ import java.util.concurrent.TimeUnit;
  */
 @Log4j2
 @Component
-public class LoginFrame extends JFrame
-{
+public class LoginFrame extends JFrame {
     /**
      * 登陆服务实现类
      */
     @Resource
-    private ILoginService loginService ;
+    private ILoginService loginService;
 
     /**
      * 登录重试次数
@@ -63,12 +60,11 @@ public class LoginFrame extends JFrame
     private static Point origin = new Point();
 
     private SqlSession sqlSession;
-    private CurrentUserService currentUserService ;
+    private CurrentUserService currentUserService;
     private String username;
 
 
-    public LoginFrame()
-    {
+    public LoginFrame() {
         super("微信-舒专用版");
         initService();
         initComponents();
@@ -78,16 +74,13 @@ public class LoginFrame extends JFrame
     }
 
 
-
-    private void initService()
-    {
+    private void initService() {
         sqlSession = DbUtils.getSqlSession();
         currentUserService = new CurrentUserService(sqlSession);
     }
 
 
-    private void initComponents()
-    {
+    private void initComponents() {
         Dimension windowSize = new Dimension(windowWidth, windowHeight);
         setMinimumSize(windowSize);
         setMaximumSize(windowSize);
@@ -104,15 +97,13 @@ public class LoginFrame extends JFrame
         closeLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
 
-
         statusLabel = new JLabel();
         statusLabel.setForeground(Colors.FONT_GRAY);
         statusLabel.setText("正在加载二维码...");
         statusLabel.setVisible(true);
     }
 
-    private void initView()
-    {
+    private void initView() {
         JPanel contentPanel = new JPanel();
         contentPanel.setBorder(new LineBorder(Colors.LIGHT_GRAY));
         contentPanel.setLayout(new GridBagLayout());
@@ -122,8 +113,7 @@ public class LoginFrame extends JFrame
         JLabel titleJLabel = new JLabel("微信-舒专用版");
         titleJPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5));
         titleJPanel.add(titleJLabel);
-        if (OSUtil.getOsType() != OSUtil.Mac_OS)
-        {
+        if (OSUtil.getOsType() != OSUtil.Mac_OS) {
             setUndecorated(true);
             contentPanel.add(titleJPanel, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 1).setInsets(5, 0, 0, 0));
             contentPanel.add(controlPanel, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 1).setInsets(5, 0, 0, 0));
@@ -143,57 +133,46 @@ public class LoginFrame extends JFrame
     /**
      * 使窗口在屏幕中央显示
      */
-    private void centerScreen()
-    {
+    private void centerScreen() {
         Toolkit tk = Toolkit.getDefaultToolkit();
         this.setLocation((tk.getScreenSize().width - windowWidth) / 2,
                 (tk.getScreenSize().height - windowHeight) / 2);
     }
 
-    private void setListeners()
-    {
-        closeLabel.addMouseListener(new AbstractMouseListener()
-        {
+    private void setListeners() {
+        closeLabel.addMouseListener(new AbstractMouseListener() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 System.exit(1);
                 super.mouseClicked(e);
             }
 
             @Override
-            public void mouseEntered(MouseEvent e)
-            {
+            public void mouseEntered(MouseEvent e) {
                 closeLabel.setBackground(Colors.LIGHT_GRAY);
                 super.mouseEntered(e);
             }
 
             @Override
-            public void mouseExited(MouseEvent e)
-            {
+            public void mouseExited(MouseEvent e) {
                 closeLabel.setBackground(Colors.WINDOW_BACKGROUND);
                 super.mouseExited(e);
             }
         });
 
-        if (OSUtil.getOsType() != OSUtil.Mac_OS)
-        {
-            addMouseListener(new MouseAdapter()
-            {
+        if (OSUtil.getOsType() != OSUtil.Mac_OS) {
+            addMouseListener(new MouseAdapter() {
                 @Override
-                public void mousePressed(MouseEvent e)
-                {
+                public void mousePressed(MouseEvent e) {
                     // 当鼠标按下的时候获得窗口当前的位置
                     origin.x = e.getX();
                     origin.y = e.getY();
                 }
             });
 
-            addMouseMotionListener(new MouseMotionAdapter()
-            {
+            addMouseMotionListener(new MouseMotionAdapter() {
                 @Override
-                public void mouseDragged(MouseEvent e)
-                {
+                public void mouseDragged(MouseEvent e) {
                     // 当鼠标拖动时获取窗口当前位置
                     Point p = LoginFrame.this.getLocation();
                     // 设置窗口的位置
@@ -206,8 +185,7 @@ public class LoginFrame extends JFrame
 
     }
 
-    private void doLogin()
-    {
+    private void doLogin() {
         this.dispose();
 
         MainFrame frame = new MainFrame();
@@ -221,10 +199,8 @@ public class LoginFrame extends JFrame
     }
 
 
-    private void showMessage(String message)
-    {
-        if (!statusLabel.isVisible())
-        {
+    private void showMessage(String message) {
+        if (!statusLabel.isVisible()) {
             statusLabel.setVisible(true);
         }
 
@@ -262,7 +238,7 @@ public class LoginFrame extends JFrame
                     try {
                         JLabel label = new JLabel();
                         try {
-                            label.setIcon(new ImageIcon(ImageIO.read(new File(qrPath)).getScaledInstance(250,250,Image.SCALE_SMOOTH)));
+                            label.setIcon(new ImageIcon(ImageIO.read(new File(qrPath)).getScaledInstance(250, 250, Image.SCALE_SMOOTH)));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -270,13 +246,13 @@ public class LoginFrame extends JFrame
                         this.repaint();
                         this.revalidate();
                         // 使用图片查看器打开登陆二维码图片
-                       // process = CommonTools.printQr(qrPath);
+                        // process = CommonTools.printQr(qrPath);
                     } catch (Exception e) {
                         log.info(e.getMessage());
                         log.info("请手动打开二维码图片进行扫码登录：" + qrPath);
                     }
                     break;
-                } else if (count == loginRetryCount-1) {
+                } else if (count == loginRetryCount - 1) {
                     log.error("2.2. 获取登陆二维码图片失败，系统退出");
                     System.exit(0);
                 }
@@ -320,7 +296,6 @@ public class LoginFrame extends JFrame
         statusLabel.setText("9. 获取群好友及群好友列表");
         log.info("9. 获取群好友及群好友列表");
         loginService.WebWxBatchGetContact();
-
 
 
         statusLabel.setText("10. 缓存本次登陆好友相关消息");

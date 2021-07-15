@@ -1,14 +1,10 @@
 package cn.shu.wechat.swing.helper;
 
 import cn.shu.wechat.swing.adapter.message.*;
-import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
 import cn.shu.wechat.swing.panels.ChatPanel;
-import com.sun.glass.ui.Size;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.MouseListener;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,8 +21,7 @@ import java.util.List;
  * <p>
  * Created by song on 2017/6/24.
  */
-public class MessageViewHolderCacheHelper
-{
+public class MessageViewHolderCacheHelper {
     private final int CACHE_CAPACITY = 10;
 
     private List<MessageRightTextViewHolder> rightTextViewHolders = new ArrayList<>();
@@ -48,13 +43,11 @@ public class MessageViewHolderCacheHelper
     private int systemMessagePosition = 0;
 
 
-    public MessageViewHolderCacheHelper()
-    {
+    public MessageViewHolderCacheHelper() {
         initHolders();
     }
 
-    private void initHolders()
-    {
+    private void initHolders() {
    /*     new Thread(new Runnable()
         {
             @Override
@@ -72,68 +65,52 @@ public class MessageViewHolderCacheHelper
         }).start();*/
     }
 
-    private void initRightTextViewHolders()
-    {
-        for (int i = 0; i < CACHE_CAPACITY; i++)
-        {
+    private void initRightTextViewHolders() {
+        for (int i = 0; i < CACHE_CAPACITY; i++) {
             rightTextViewHolders.add(new MessageRightTextViewHolder());
         }
     }
 
-    private void initRightImageViewHolders()
-    {
-        for (int i = 0; i < CACHE_CAPACITY; i++)
-        {
+    private void initRightImageViewHolders() {
+        for (int i = 0; i < CACHE_CAPACITY; i++) {
             rightImageViewHolders.add(new MessageRightImageViewHolder());
         }
     }
 
-    private void initRightAttachmentViewHolders()
-    {
-        for (int i = 0; i < CACHE_CAPACITY; i++)
-        {
+    private void initRightAttachmentViewHolders() {
+        for (int i = 0; i < CACHE_CAPACITY; i++) {
             rightAttachmentViewHolders.add(new MessageRightAttachmentViewHolder());
         }
     }
 
 
-    private void initLeftTextViewHolders(boolean isGroup)
-    {
-        for (int i = 0; i < CACHE_CAPACITY; i++)
-        {
+    private void initLeftTextViewHolders(boolean isGroup) {
+        for (int i = 0; i < CACHE_CAPACITY; i++) {
             leftTextViewHolders.add(new MessageLeftTextViewHolder(isGroup));
         }
     }
 
-    private void initLeftImageViewHolders(boolean isGroup)
-    {
-        for (int i = 0; i < CACHE_CAPACITY; i++)
-        {
+    private void initLeftImageViewHolders(boolean isGroup) {
+        for (int i = 0; i < CACHE_CAPACITY; i++) {
             leftImageViewHolders.add(new MessageLeftImageViewHolder(isGroup));
         }
     }
 
-    private void initLeftAttachmentViewHolders(boolean isGroup)
-    {
-        for (int i = 0; i < CACHE_CAPACITY; i++)
-        {
+    private void initLeftAttachmentViewHolders(boolean isGroup) {
+        for (int i = 0; i < CACHE_CAPACITY; i++) {
             leftAttachmentViewHolders.add(new MessageLeftAttachmentViewHolder(isGroup));
         }
     }
 
-    private void initSystemMessageViewHolders()
-    {
-        for (int i = 0; i < CACHE_CAPACITY; i++)
-        {
+    private void initSystemMessageViewHolders() {
+        for (int i = 0; i < CACHE_CAPACITY; i++) {
             systemMessageViewHolders.add(new MessageSystemMessageViewHolder());
         }
     }
 
-    public synchronized MessageRightTextViewHolder tryGetRightTextViewHolder()
-    {
+    public synchronized MessageRightTextViewHolder tryGetRightTextViewHolder() {
         MessageRightTextViewHolder holder = null;
-        if (rightTextPosition < CACHE_CAPACITY && rightTextViewHolders.size() > 0)
-        {
+        if (rightTextPosition < CACHE_CAPACITY && rightTextViewHolders.size() > 0) {
             holder = rightTextViewHolders.get(rightTextPosition);
             rightTextPosition++;
         }
@@ -141,11 +118,9 @@ public class MessageViewHolderCacheHelper
         return holder;
     }
 
-    public synchronized MessageRightImageViewHolder tryGetRightImageViewHolder()
-    {
+    public synchronized MessageRightImageViewHolder tryGetRightImageViewHolder() {
         MessageRightImageViewHolder holder = null;
-        if (rightImagePosition < CACHE_CAPACITY && rightImageViewHolders.size() > 0)
-        {
+        if (rightImagePosition < CACHE_CAPACITY && rightImageViewHolders.size() > 0) {
             holder = rightImageViewHolders.get(rightImagePosition);
             rightImagePosition++;
         }
@@ -153,11 +128,9 @@ public class MessageViewHolderCacheHelper
         return holder;
     }
 
-    public synchronized MessageRightAttachmentViewHolder tryGetRightAttachmentViewHolder()
-    {
+    public synchronized MessageRightAttachmentViewHolder tryGetRightAttachmentViewHolder() {
         MessageRightAttachmentViewHolder holder = null;
-        if (rightAttachmentPosition < CACHE_CAPACITY && rightAttachmentViewHolders.size() > 0)
-        {
+        if (rightAttachmentPosition < CACHE_CAPACITY && rightAttachmentViewHolders.size() > 0) {
             holder = rightAttachmentViewHolders.get(rightAttachmentPosition);
             rightAttachmentPosition++;
         }
@@ -165,11 +138,9 @@ public class MessageViewHolderCacheHelper
         return holder;
     }
 
-    public synchronized MessageLeftTextViewHolder tryGetLeftTextViewHolder()
-    {
+    public synchronized MessageLeftTextViewHolder tryGetLeftTextViewHolder() {
         MessageLeftTextViewHolder holder = null;
-        if (leftTextPosition < CACHE_CAPACITY && leftTextViewHolders.size() > 0)
-        {
+        if (leftTextPosition < CACHE_CAPACITY && leftTextViewHolders.size() > 0) {
             holder = leftTextViewHolders.get(leftTextPosition);
             leftTextPosition++;
         }
@@ -177,11 +148,9 @@ public class MessageViewHolderCacheHelper
         return holder;
     }
 
-    public synchronized MessageLeftImageViewHolder tryGetLeftImageViewHolder()
-    {
+    public synchronized MessageLeftImageViewHolder tryGetLeftImageViewHolder() {
         MessageLeftImageViewHolder holder = null;
-        if (leftImagePosition < CACHE_CAPACITY && leftImageViewHolders.size() > 0)
-        {
+        if (leftImagePosition < CACHE_CAPACITY && leftImageViewHolders.size() > 0) {
             holder = leftImageViewHolders.get(leftImagePosition);
             leftImagePosition++;
         }
@@ -189,11 +158,9 @@ public class MessageViewHolderCacheHelper
         return holder;
     }
 
-    public synchronized MessageLeftAttachmentViewHolder tryGetLeftAttachmentViewHolder()
-    {
+    public synchronized MessageLeftAttachmentViewHolder tryGetLeftAttachmentViewHolder() {
         MessageLeftAttachmentViewHolder holder = null;
-        if (leftAttachmentPosition < CACHE_CAPACITY && leftAttachmentViewHolders.size() > 0)
-        {
+        if (leftAttachmentPosition < CACHE_CAPACITY && leftAttachmentViewHolders.size() > 0) {
             holder = leftAttachmentViewHolders.get(leftAttachmentPosition);
             leftAttachmentPosition++;
         }
@@ -201,11 +168,9 @@ public class MessageViewHolderCacheHelper
         return holder;
     }
 
-    public synchronized MessageSystemMessageViewHolder tryGetSystemMessageViewHolder()
-    {
+    public synchronized MessageSystemMessageViewHolder tryGetSystemMessageViewHolder() {
         MessageSystemMessageViewHolder holder = null;
-        if (systemMessagePosition < CACHE_CAPACITY && systemMessageViewHolders.size() > 0)
-        {
+        if (systemMessagePosition < CACHE_CAPACITY && systemMessageViewHolders.size() > 0) {
             holder = systemMessageViewHolders.get(systemMessagePosition);
             systemMessagePosition++;
         }
@@ -213,13 +178,11 @@ public class MessageViewHolderCacheHelper
         return holder;
     }
 
-    public synchronized void reset()
-    {
+    public synchronized void reset() {
         //long start = System.currentTimeMillis();
 
         //for (MessageRightTextViewHolder viewHolder : rightTextViewHolders)
-        for (int i = 0; i < rightTextPosition; i++)
-        {
+        for (int i = 0; i < rightTextPosition; i++) {
             MessageRightTextViewHolder viewHolder = rightTextViewHolders.get(i);
             clearMouseListener(viewHolder.messageBubble);
             clearMouseListener(viewHolder.resend);
@@ -228,9 +191,8 @@ public class MessageViewHolderCacheHelper
 
         //System.out.println("花费时间 ：" + (System.currentTimeMillis() - start));
 
-       //for (MessageRightImageViewHolder viewHolder : rightImageViewHolders)
-        for (int i = 0; i < rightImagePosition; i++)
-        {
+        //for (MessageRightImageViewHolder viewHolder : rightImageViewHolders)
+        for (int i = 0; i < rightImagePosition; i++) {
             MessageRightImageViewHolder viewHolder = rightImageViewHolders.get(i);
             clearMouseListener(viewHolder.image);
             clearMouseListener(viewHolder.imageBubble);
@@ -238,8 +200,7 @@ public class MessageViewHolderCacheHelper
         }
 
         //for (MessageRightAttachmentViewHolder viewHolder : rightAttachmentViewHolders)
-        for (int i = 0; i < rightAttachmentPosition; i++)
-        {
+        for (int i = 0; i < rightAttachmentPosition; i++) {
             MessageRightAttachmentViewHolder viewHolder = rightAttachmentViewHolders.get(i);
             clearMouseListener(viewHolder.resend);
             clearMouseListener(viewHolder.messageBubble);
@@ -248,8 +209,7 @@ public class MessageViewHolderCacheHelper
         }
 
         //for (MessageLeftTextViewHolder viewHolder : leftTextViewHolders)
-        for (int i = 0; i < leftTextPosition; i++)
-        {
+        for (int i = 0; i < leftTextPosition; i++) {
             MessageLeftTextViewHolder viewHolder = leftTextViewHolders.get(i);
 
             clearMouseListener(viewHolder.text);
@@ -258,8 +218,7 @@ public class MessageViewHolderCacheHelper
         }
 
         //for (MessageLeftImageViewHolder viewHolder : leftImageViewHolders)
-        for (int i = 0; i < leftImagePosition; i++)
-        {
+        for (int i = 0; i < leftImagePosition; i++) {
             MessageLeftImageViewHolder viewHolder = leftImageViewHolders.get(i);
 
             clearMouseListener(viewHolder.image);
@@ -268,8 +227,7 @@ public class MessageViewHolderCacheHelper
         }
 
         //for (MessageLeftAttachmentViewHolder viewHolder : leftAttachmentViewHolders)
-        for (int i = 0; i < leftAttachmentPosition; i++)
-        {
+        for (int i = 0; i < leftAttachmentPosition; i++) {
             MessageLeftAttachmentViewHolder viewHolder = leftAttachmentViewHolders.get(i);
 
             clearMouseListener(viewHolder.attachmentPanel);
@@ -290,13 +248,10 @@ public class MessageViewHolderCacheHelper
         systemMessagePosition = 0;
     }
 
-    private void clearMouseListener(JComponent component)
-    {
-        for (MouseListener l : component.getMouseListeners())
-        {
-            if (l instanceof MessageMouseListener)
-            {
-               component.removeMouseListener(l);
+    private void clearMouseListener(JComponent component) {
+        for (MouseListener l : component.getMouseListeners()) {
+            if (l instanceof MessageMouseListener) {
+                component.removeMouseListener(l);
             }
         }
     }

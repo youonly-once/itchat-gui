@@ -13,8 +13,7 @@ import java.awt.*;
 /**
  * Created by song on 17-6-3.
  */
-public class MessageRightImageViewHolder extends BaseMessageViewHolder
-{
+public class MessageRightImageViewHolder extends BaseMessageViewHolder {
     public MessageImageLabel image = new MessageImageLabel();
     //public JLabel avatar = new JLabel();
     //public JLabel size = new JLabel();
@@ -22,18 +21,16 @@ public class MessageRightImageViewHolder extends BaseMessageViewHolder
     public JLabel sendingProgress = new JLabel(); // 正在发送
 
     public RCRightImageMessageBubble imageBubble = new RCRightImageMessageBubble();
-    private JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER,5,0));
+    private JPanel timePanel = new JPanel();
     private JPanel messageAvatarPanel = new JPanel();
     private MessagePopupMenu popupMenu = new MessagePopupMenu();
 
-    public MessageRightImageViewHolder()
-    {
+    public MessageRightImageViewHolder() {
         initComponents();
         initView();
     }
 
-    private void initComponents()
-    {
+    private void initComponents() {
         timePanel.setBackground(Colors.WINDOW_BACKGROUND);
         messageAvatarPanel.setBackground(Colors.WINDOW_BACKGROUND);
 
@@ -55,20 +52,19 @@ public class MessageRightImageViewHolder extends BaseMessageViewHolder
         sendingProgress.setVisible(false);
     }
 
-    private void initView()
-    {
+    private void initView() {
         setLayout(new BorderLayout());
         timePanel.add(time);
 
-        JPanel resendImagePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT,5,0));
+        JPanel resendImagePanel = new JPanel();
         resendImagePanel.setBackground(Colors.WINDOW_BACKGROUND);
         resendImagePanel.add(resend, BorderLayout.WEST);
         resendImagePanel.add(sendingProgress, BorderLayout.WEST);
         resendImagePanel.add(imageBubble, BorderLayout.CENTER);
 
         messageAvatarPanel.setLayout(new GridBagLayout());
-        messageAvatarPanel.add(resendImagePanel, new GBC(1, 0).setWeight(1000, 1).setAnchor(GBC.EAST).setInsets(0, 0, 0, 0));
-        messageAvatarPanel.add(avatar, new GBC(2, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 0, 0, 10));
+        messageAvatarPanel.add(resendImagePanel, new GBC(1, 0).setWeight(1000, 1).setAnchor(GBC.EAST).setInsets(0, 0, 5, 0));
+        messageAvatarPanel.add(avatar, new GBC(2, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(5, 0, 0, 10));
 
         add(timePanel, BorderLayout.NORTH);
         add(messageAvatarPanel, BorderLayout.CENTER);

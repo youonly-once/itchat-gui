@@ -14,7 +14,8 @@ import java.io.IOException;
  */
 public class DataBaseUtil {
     private static SqlSessionFactory sqlSessionFactory = null;
-    static{
+
+    static {
         SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSessionFactoryBuilder();
         try {
             sqlSessionFactory = sqlSessionFactoryBuilder.build(Resources.getResourceAsStream("mybatis.xml"));
@@ -23,7 +24,7 @@ public class DataBaseUtil {
         }
     }
 
-    public static SqlSession getSession(){
+    public static SqlSession getSession() {
         return sqlSessionFactory.openSession();
     }
 }

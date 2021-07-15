@@ -1,35 +1,29 @@
 package cn.shu.wechat.service.impl;
 
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-
 import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.api.MessageTools;
-import cn.shu.wechat.beans.pojo.*;
 import cn.shu.wechat.beans.msg.sync.AddMsgList;
 import cn.shu.wechat.beans.msg.sync.WebWxSyncMsg;
+import cn.shu.wechat.beans.pojo.AttrHistory;
+import cn.shu.wechat.beans.pojo.Contacts;
+import cn.shu.wechat.beans.pojo.MemberGroupR;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.core.MsgCenter;
 import cn.shu.wechat.enums.*;
-import cn.shu.wechat.mapper.AttrHistoryMapper;
-import cn.shu.wechat.mapper.ContactsMapper;
-import cn.shu.wechat.mapper.MemberGroupRMapper;
-import cn.shu.wechat.mapper.MemberMapper;
-import cn.shu.wechat.service.ILoginService;
-import cn.shu.wechat.utils.*;
 import cn.shu.wechat.enums.parameters.BaseParaEnum;
 import cn.shu.wechat.enums.parameters.LoginParaEnum;
 import cn.shu.wechat.enums.parameters.StatusNotifyParaEnum;
 import cn.shu.wechat.enums.parameters.UUIDParaEnum;
-import cn.shu.wechat.utils.CommonTools;
-import cn.shu.wechat.api.DownloadTools;
+import cn.shu.wechat.mapper.AttrHistoryMapper;
+import cn.shu.wechat.mapper.ContactsMapper;
+import cn.shu.wechat.mapper.MemberGroupRMapper;
+import cn.shu.wechat.service.ILoginService;
+import cn.shu.wechat.utils.*;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.SystemUtils;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.message.BasicNameValuePair;
@@ -37,11 +31,12 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
 import javax.annotation.Resource;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
 
 /**
  * 登陆服务实现类
@@ -58,7 +53,7 @@ public class LoginServiceImpl implements ILoginService {
     private AttrHistoryMapper attrHistoryMapper;
 
     @Resource
-    private MsgCenter msgCenter ;//= MsgCenter.getMessageCenter();
+    private MsgCenter msgCenter;//= MsgCenter.getMessageCenter();
 
     @Resource
     private ContactsMapper contactsMapper;
@@ -199,7 +194,7 @@ public class LoginServiceImpl implements ILoginService {
             Core.getLoginInfoMap().put(StorageLoginInfoEnum.synckey.getKey(), synckey.substring(0, synckey.length() - 1));
             Core.setUserName(user.getString("UserName"));
             Core.setNickName(user.getString("NickName"));
-            Core.setUserSelf(JSON.parseObject(JSON.toJSONString(obj.getJSONObject("User")),Contacts.class));
+            Core.setUserSelf(JSON.parseObject(JSON.toJSONString(obj.getJSONObject("User")), Contacts.class));
 
             //初始化列表的联系人
             //最近聊天的联系人
@@ -289,7 +284,7 @@ public class LoginServiceImpl implements ILoginService {
                                             List<AddMsgList> addMsgLists = webWxSyncMsg.getAddMsgList();
                                             for (AddMsgList msg : addMsgLists) {
                                                 ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
-                                                        msgCenter.handleNewMsg(msg);
+                                                    msgCenter.handleNewMsg(msg);
                                                 });
                                             }
                                             //联系人修改消息
@@ -347,8 +342,8 @@ public class LoginServiceImpl implements ILoginService {
             }
         };
         ExecutorServiceUtil.getReceivingExecutorService().execute(runnable);
-/*        while (Core.isAlive()) {
-*//*            try {
+        /*        while (Core.isAlive()) {
+         *//*            try {
                 boolean b = ExecutorServiceUtil.getReceivingExecutorService().awaitTermination(30, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -442,8 +437,8 @@ public class LoginServiceImpl implements ILoginService {
             }
             Core.getMemberMap().put("filehelper",
                     Contacts.builder().username("filehelper").displayname("文件传输助手").build());
-            if (!contactsList.isEmpty()){
-               // contactsMapper.deleteByExample(new ContactsExample());
+            if (!contactsList.isEmpty()) {
+                // contactsMapper.deleteByExample(new ContactsExample());
                 //contactsMapper.batchInsert(contactsList);
             }
 
@@ -744,11 +739,11 @@ public class LoginServiceImpl implements ILoginService {
         String paramStr = JSON.toJSONString(paramMap);
         try {
             Long start = System.currentTimeMillis();
-           // log.info("同步消息开始webWxSync-params：{}",paramMap.toString());
+            // log.info("同步消息开始webWxSync-params：{}",paramMap.toString());
             HttpEntity entity = MyHttpClient.doPost(url, paramStr);
             String text = EntityUtils.toString(entity, Consts.UTF_8);
             Long end = System.currentTimeMillis();
-          //  log.info("同步消息结束webWxSync({}s)-----------------------result：{}",    ((double)(end-start))/1000,text.replace("\n",""));
+            //  log.info("同步消息结束webWxSync({}s)-----------------------result：{}",    ((double)(end-start))/1000,text.replace("\n",""));
             JSONObject obj = JSON.parseObject(text);
             if (obj.getJSONObject("BaseResponse").getInteger("Ret") != 0) {
                 result = null;
@@ -838,7 +833,7 @@ public class LoginServiceImpl implements ILoginService {
      * 联系人相关map的put操作
      * put前统计哪些信息变了
      *
-     * @param oldV  旧值
+     * @param oldV 旧值
      * @param key  联系人key
      * @param newV 新值
      * @param tip  提示信息

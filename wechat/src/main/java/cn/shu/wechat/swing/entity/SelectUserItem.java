@@ -5,56 +5,46 @@ import cn.shu.wechat.swing.utils.CharacterParser;
 /**
  * Created by song on 17-5-30.
  */
-public class SelectUserItem implements Comparable<SelectUserItem>
-{
+public class SelectUserItem implements Comparable<SelectUserItem> {
     private String id;
     private String name;
     private String type;
 
-    public SelectUserItem()
-    {
+    public SelectUserItem() {
     }
 
-    public SelectUserItem(String id, String name, String type)
-    {
+    public SelectUserItem(String id, String name, String type) {
         this.id = id;
         this.name = name;
         this.type = type;
     }
 
-    public String getId()
-    {
+    public String getId() {
         return id;
     }
 
-    public void setId(String id)
-    {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
-    public void setName(String name)
-    {
+    public void setName(String name) {
         this.name = name;
     }
 
-    public String getType()
-    {
+    public String getType() {
         return type;
     }
 
-    public void setType(String type)
-    {
+    public void setType(String type) {
         this.type = type;
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "SelectUserItem{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
@@ -63,8 +53,7 @@ public class SelectUserItem implements Comparable<SelectUserItem>
     }
 
     @Override
-    public int compareTo(SelectUserItem o)
-    {
+    public int compareTo(SelectUserItem o) {
         String tc = CharacterParser.getSelling(this.getName());
         String oc = CharacterParser.getSelling(o.getName());
         return tc.compareTo(oc);

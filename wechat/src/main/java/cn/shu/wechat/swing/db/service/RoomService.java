@@ -1,9 +1,6 @@
 package cn.shu.wechat.swing.db.service;
 
-import cn.shu.wechat.swing.db.dao.CurrentUserDao;
 import cn.shu.wechat.swing.db.dao.RoomDao;
-import cn.shu.wechat.swing.db.model.BasicModel;
-import cn.shu.wechat.swing.db.model.CurrentUser;
 import cn.shu.wechat.swing.db.model.Room;
 import org.apache.ibatis.session.SqlSession;
 
@@ -12,42 +9,33 @@ import java.util.List;
 /**
  * Created by song on 08/06/2017.
  */
-public class RoomService extends BasicService<RoomDao, Room>
-{
-    public RoomService(SqlSession session)
-    {
+public class RoomService extends BasicService<RoomDao, Room> {
+    public RoomService(SqlSession session) {
         dao = new RoomDao(session);
         super.setDao(dao);
     }
 
-    public int insertOrUpdate(Room room)
-    {
-        if (exist(room.getRoomId()))
-        {
+    public int insertOrUpdate(Room room) {
+        if (exist(room.getRoomId())) {
             return update(room);
-        }else
-        {
+        } else {
             return insert(room);
         }
     }
 
-    public Room findRelativeRoomIdByUserId(String userId)
-    {
+    public Room findRelativeRoomIdByUserId(String userId) {
         return dao.findRelativeRoomIdByUserId(userId);
     }
 
-    public Room findByName(String name)
-    {
+    public Room findByName(String name) {
         List list = dao.find("name", name);
-        if (list.size() > 0)
-        {
+        if (list.size() > 0) {
             return (Room) list.get(0);
         }
         return null;
     }
 
-    public List<Room> searchByName(String name)
-    {
+    public List<Room> searchByName(String name) {
         return dao.searchByName(name);
     }
 }

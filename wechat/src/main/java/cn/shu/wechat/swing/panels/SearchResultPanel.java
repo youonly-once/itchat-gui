@@ -16,8 +16,7 @@ import java.util.List;
  * 左侧搜索结果列表
  * Created by song on 17-6-21.
  */
-public class SearchResultPanel extends ParentAvailablePanel
-{
+public class SearchResultPanel extends ParentAvailablePanel {
     private static SearchResultPanel context;
     private final SearchResultItemsAdapter searchResultItemsAdapter;
 
@@ -25,8 +24,7 @@ public class SearchResultPanel extends ParentAvailablePanel
     private List<SearchResultItem> searchResultItems = new ArrayList<>();
     private JLabel tipLabel;
 
-    public SearchResultPanel(JPanel parent)
-    {
+    public SearchResultPanel(JPanel parent) {
         super(parent);
         context = this;
 
@@ -37,8 +35,7 @@ public class SearchResultPanel extends ParentAvailablePanel
         resultItemsListView.setAdapter(searchResultItemsAdapter);
     }
 
-    private void initComponents()
-    {
+    private void initComponents() {
         resultItemsListView = new RCListView();
         this.setBackground(Colors.DARK);
 
@@ -48,8 +45,7 @@ public class SearchResultPanel extends ParentAvailablePanel
         tipLabel.setVisible(false);
     }
 
-    private void initView()
-    {
+    private void initView() {
         setLayout(new GridBagLayout());
         resultItemsListView.setContentPanelBackground(Colors.DARK);
         add(tipLabel, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 1).setInsets(10, 0, 0, 0));
@@ -57,13 +53,11 @@ public class SearchResultPanel extends ParentAvailablePanel
     }
 
 
-    public JLabel getTipLabel()
-    {
+    public JLabel getTipLabel() {
         return tipLabel;
     }
 
-    public void setData(List<SearchResultItem> data)
-    {
+    public void setData(List<SearchResultItem> data) {
         searchResultItems.clear();
         searchResultItems.addAll(data);
         /*List<Room> rooms = roomService.findAll();
@@ -78,8 +72,7 @@ public class SearchResultPanel extends ParentAvailablePanel
     /**
      * 重绘整个列表
      */
-    public void notifyDataSetChanged(boolean keepSize)
-    {
+    public void notifyDataSetChanged(boolean keepSize) {
         //initData();
         resultItemsListView.notifyDataSetChanged(keepSize);
     }
@@ -91,36 +84,30 @@ public class SearchResultPanel extends ParentAvailablePanel
      * @param holder
      * @param color
      */
-    private void setItemBackground(RoomItemViewHolder holder, Color color)
-    {
+    private void setItemBackground(RoomItemViewHolder holder, Color color) {
         holder.setBackground(color);
         holder.nameBrief.setBackground(color);
         holder.timeUnread.setBackground(color);
     }
 
 
-    public static SearchResultPanel getContext()
-    {
+    public static SearchResultPanel getContext() {
         return context;
     }
 
-    public void setKeyWord(String keyWord)
-    {
+    public void setKeyWord(String keyWord) {
         this.searchResultItemsAdapter.setKeyWord(keyWord);
     }
 
-    public void setSearchMessageOrFileListener(SearchResultItemsAdapter.SearchMessageOrFileListener searchMessageOrFileListener)
-    {
-        if (this.searchResultItemsAdapter == null)
-        {
+    public void setSearchMessageOrFileListener(SearchResultItemsAdapter.SearchMessageOrFileListener searchMessageOrFileListener) {
+        if (this.searchResultItemsAdapter == null) {
             throw new RuntimeException("请先设置adapter!");
         }
 
         this.searchResultItemsAdapter.setSearchMessageOrFileListener(searchMessageOrFileListener);
     }
 
-    public void moveToNextItem()
-    {
+    public void moveToNextItem() {
 
     }
 }

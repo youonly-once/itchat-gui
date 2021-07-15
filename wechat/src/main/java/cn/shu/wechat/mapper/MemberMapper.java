@@ -2,14 +2,15 @@ package cn.shu.wechat.mapper;
 
 import cn.shu.wechat.beans.pojo.Member;
 import cn.shu.wechat.beans.pojo.MemberExample;
-import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
-  *@作者     舒新胜
-  *@项目     AutoWechat
-  *@创建时间  6/14/2021 6:42 PM
-*/
+ * @作者 舒新胜
+ * @项目 AutoWechat
+ * @创建时间 6/14/2021 6:42 PM
+ */
 public interface MemberMapper {
     long countByExample(MemberExample example);
 

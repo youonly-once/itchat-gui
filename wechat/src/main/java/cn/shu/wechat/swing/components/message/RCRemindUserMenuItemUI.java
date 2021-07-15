@@ -1,7 +1,6 @@
 package cn.shu.wechat.swing.components.message;
 
 import cn.shu.wechat.swing.components.Colors;
-import cn.shu.wechat.swing.components.RCMenuItemUI;
 import cn.shu.wechat.swing.utils.FontUtil;
 
 import javax.swing.*;
@@ -11,26 +10,22 @@ import java.awt.*;
 /**
  * Created by song on 21/06/2017.
  */
-public class RCRemindUserMenuItemUI extends BasicMenuItemUI
-{
+public class RCRemindUserMenuItemUI extends BasicMenuItemUI {
     private int width;
     private int height;
 
-    public RCRemindUserMenuItemUI()
-    {
+    public RCRemindUserMenuItemUI() {
         this(100, 30);
     }
 
-    public RCRemindUserMenuItemUI(int width, int height)
-    {
+    public RCRemindUserMenuItemUI(int width, int height) {
 
         this.width = width;
         this.height = height;
     }
 
     @Override
-    public void installUI(JComponent c)
-    {
+    public void installUI(JComponent c) {
         super.installUI(c);
         c.setPreferredSize(new Dimension(width, height));
         c.setBackground(Colors.FONT_WHITE);
@@ -42,10 +37,9 @@ public class RCRemindUserMenuItemUI extends BasicMenuItemUI
 
 
     @Override
-    protected void paintText(Graphics g, JMenuItem menuItem, Rectangle textRect, String text)
-    {
+    protected void paintText(Graphics g, JMenuItem menuItem, Rectangle textRect, String text) {
         g.setColor(Colors.FONT_BLACK);
-        Rectangle newRect =  new Rectangle(28, textRect.y, textRect.width, textRect.height);
+        Rectangle newRect = new Rectangle(28, textRect.y, textRect.width, textRect.height);
         super.paintText(g, menuItem, newRect, text);
     }
 }

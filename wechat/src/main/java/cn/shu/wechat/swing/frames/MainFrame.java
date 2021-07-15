@@ -12,7 +12,6 @@ import cn.shu.wechat.utils.ExecutorServiceUtil;
 import sun.audio.AudioPlayer;
 import sun.audio.AudioStream;
 
-import javax.annotation.Resource;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;

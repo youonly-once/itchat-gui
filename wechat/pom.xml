@@ -52,11 +52,11 @@
             <artifactId>emoji-java</artifactId>
             <version>4.0.0</version>
         </dependency>
- <!--       <dependency>
-            <groupId>com.xuggle</groupId>
-            <artifactId>xuggle-xuggler</artifactId>
-            <version>5.4.0</version>
-        </dependency>-->
+        <!--       <dependency>
+                   <groupId>com.xuggle</groupId>
+                   <artifactId>xuggle-xuggler</artifactId>
+                   <version>5.4.0</version>
+               </dependency>-->
         <!--监听数据库操作-->
         <dependency>
             <groupId>org.bgee.log4jdbc-log4j2</groupId>
@@ -137,17 +137,17 @@
                 </exclusion>
             </exclusions>
         </dependency>
-<!--        <dependency>
-            <groupId>org.mybatis.spring.boot</ groupId>
-            <artifactId>mybatis-spring-boot-starter</artifactId>
-            <version>2.1.2</version>
-        </dependency>-->
+        <!--        <dependency>
+                    <groupId>org.mybatis.spring.boot</ groupId>
+                    <artifactId>mybatis-spring-boot-starter</artifactId>
+                    <version>2.1.2</version>
+                </dependency>-->
 
-<!--        <dependency>
-                  <groupId>org.mybatis</groupId>
-                  <artifactId>mybatis</artifactId>
-                  <version>3.1.1</version>
-              </dependency>-->
+        <!--        <dependency>
+                          <groupId>org.mybatis</groupId>
+                          <artifactId>mybatis</artifactId>
+                          <version>3.1.1</version>
+                      </dependency>-->
         <!--mysql-->
         <dependency>
             <groupId>mysql</groupId>
@@ -228,6 +228,12 @@
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.github.freeseawind/NinePatch -->
+        <dependency>
+            <groupId>com.github.freeseawind</groupId>
+            <artifactId>NinePatch</artifactId>
+            <version>1.0</version>
         </dependency>
     </dependencies>
     <build>

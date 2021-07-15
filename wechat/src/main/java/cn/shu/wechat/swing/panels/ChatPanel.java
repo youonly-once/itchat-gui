@@ -6,7 +6,6 @@ import cn.shu.wechat.beans.msg.send.WebWXSendMsgResponse;
 import cn.shu.wechat.beans.msg.send.WebWXUploadMediaResponse;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXSendMsgCodeEnum;
 import cn.shu.wechat.exception.WebWXException;
 import cn.shu.wechat.mapper.MessageMapper;
@@ -19,7 +18,10 @@ import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.swing.components.RCListView;
 import cn.shu.wechat.swing.components.message.FileEditorThumbnail;
 import cn.shu.wechat.swing.components.message.RemindUserPopup;
-import cn.shu.wechat.swing.db.model.*;
+import cn.shu.wechat.swing.db.model.FileAttachment;
+import cn.shu.wechat.swing.db.model.ImageAttachment;
+import cn.shu.wechat.swing.db.model.Message;
+import cn.shu.wechat.swing.db.model.Room;
 import cn.shu.wechat.swing.db.service.*;
 import cn.shu.wechat.swing.entity.FileAttachmentItem;
 import cn.shu.wechat.swing.entity.ImageAttachmentItem;
@@ -27,22 +29,26 @@ import cn.shu.wechat.swing.entity.MessageItem;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
 import cn.shu.wechat.swing.listener.ExpressionListener;
-import cn.shu.wechat.swing.utils.*;
+import cn.shu.wechat.swing.tasks.DownloadTask;
+import cn.shu.wechat.swing.tasks.HttpResponseListener;
+import cn.shu.wechat.swing.tasks.UploadTaskCallback;
+import cn.shu.wechat.swing.utils.ClipboardUtil;
+import cn.shu.wechat.swing.utils.FileCache;
+import cn.shu.wechat.swing.utils.HttpUtil;
+import cn.shu.wechat.swing.utils.MimeTypeUtil;
 import cn.shu.wechat.utils.DataBaseUtil;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
-import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringEscapeUtils;
-
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.SqlSession;
-import org.json.JSONArray;
-import org.json.JSONException;
-import cn.shu.wechat.swing.tasks.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.text.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.Element;
+import javax.swing.text.StyleConstants;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -50,18 +56,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
+import java.util.Queue;
+import java.util.*;
 
 /**
  * 右侧聊天面板
  * <p>
  * Created by song on 17-5-30.
  */
+@Log4j2
 public class ChatPanel extends ParentAvailablePanel {
     /**
      * 消息面板
@@ -127,9 +131,6 @@ public class ChatPanel extends ParentAvailablePanel {
     public String getRoomId() {
         return roomId;
     }
-
-
-
 
 
     private RemindUserPopup remindUserPopup = new RemindUserPopup();
@@ -320,30 +321,34 @@ public class ChatPanel extends ParentAvailablePanel {
         List<Object> inputDatas = parseEditorInput();
         boolean isImageOrFile = false;
         for (Object data : inputDatas) {
+            //文本消息
             if (data instanceof String && !data.equals("\n")) {
                 ExecutorServiceUtil.getGlobalExecutorService().submit(() -> sendTextMessage(null, data.toString()));
 
             } else if (data instanceof JLabel) {
+                //图片消息
                 isImageOrFile = true;
                 JLabel label = (JLabel) data;
                 ImageIcon icon = (ImageIcon) label.getIcon();
                 String path = icon.getDescription();
                 if (path != null && !path.isEmpty()) {
-                    /*sendFileMessage(path);
+                   /* sendFileMessage(path);
                     showSendingMessage();*/
-
+                    //多个图片消息添加到队列中
                     shareAttachmentUploadQueue.add(path);
                 }
             } else if (data instanceof FileEditorThumbnail) {
+                //文件消息
                 isImageOrFile = true;
 
                 FileEditorThumbnail component = (FileEditorThumbnail) data;
                 System.out.println(component.getPath());
+                //多个文件消息添加到队列中
                 shareAttachmentUploadQueue.add(component.getPath());
 
             }
         }
-
+        //上传队列中的文件
         if (isImageOrFile) {
             // 先上传第一个图片/文件
             dequeueAndUpload();
@@ -419,7 +424,7 @@ public class ChatPanel extends ParentAvailablePanel {
         String path = shareAttachmentUploadQueue.poll();
 
         if (path != null) {
-            System.out.println("上传文件：" + path);
+            log.info("上传文件：{}", path);
 
             sendFileMessage(path);
             showSendingMessage();
@@ -438,7 +443,7 @@ public class ChatPanel extends ParentAvailablePanel {
     /**
      * 进入指定房间
      *
-     * @param roomId 房间id
+     * @param roomId                房间id
      * @param firstMessageTimestamp 最新消息时间
      */
     public void enterRoom(String roomId, long firstMessageTimestamp) {
@@ -459,9 +464,9 @@ public class ChatPanel extends ParentAvailablePanel {
         room.setMsgSum(0);
         room.setLastChatAt(System.currentTimeMillis());
 
-        if (room.getType() == RoomTypeEnum.G){
+        if (room.getType() == RoomTypeEnum.G) {
             room.setMemberList(contacts.getMemberlist());
-        }else{
+        } else {
             room.setMemberList(new ArrayList<>());
         }
         // room.setUpdatedAt(System.currentTimeMillis().);
@@ -610,8 +615,9 @@ public class ChatPanel extends ParentAvailablePanel {
         if (lastMessage == null) {
             return;
         }
-        //消息不是当前房间的
-        if (!roomId.equals(lastMessage.getFromUsername())){
+        //消息不是当前房间的 则不用添加panel
+        if (!roomId.equals(lastMessage.getFromUsername())
+                && !lastMessage.getFromUsername().equals(Core.getUserSelf().getUsername())) {
             return;
         }
 
@@ -957,10 +963,10 @@ public class ChatPanel extends ParentAvailablePanel {
 
                         if (uploadFilename.startsWith(ClipboardUtil.CLIPBOARD_TEMP_DIR)) {
                             File file = new File(uploadFilename);
-                            file.delete();
+                            //file.delete();
                         }
                         try {
-
+                            //调用微信发送图片消息
                             WebWXSendMsgResponse webWXSendMsgResponse = MessageTools.sendPicMsgByUserId(roomId, webWXUploadMediaResponse.getMediaId());
                             ArrayList<MessageTools.Result> objects = new ArrayList<>();
                             objects.add(MessageTools.Result.builder().filePath(uploadFilename).toUserName(roomId).replyMsgTypeEnum(WXSendMsgCodeEnum.PIC).build());
@@ -1018,6 +1024,7 @@ public class ChatPanel extends ParentAvailablePanel {
             };
             //  try {
             try {
+                //上传图片 上传完成后回调
                 MessageTools.webWxUploadMedia(uploadFilename, Core.getUserName(), roomId, callback);
             } catch (WebWXException e) {
                 e.printStackTrace();
@@ -1243,11 +1250,9 @@ public class ChatPanel extends ParentAvailablePanel {
      *
      * @param messageId
      */
-    public void deleteMessage(String messageId)
-    {
+    public void deleteMessage(String messageId) {
         int pos = findMessageItemPositionInViewReverse(messageId);
-        if (pos > -1)
-        {
+        if (pos > -1) {
             messageItems.remove(pos);
             messagePanel.getMessageListView().notifyItemRemoved(pos);
             messageService.markDeleted(messageId);
@@ -1257,14 +1262,12 @@ public class ChatPanel extends ParentAvailablePanel {
     /**
      * 粘贴
      */
-    public void paste()
-    {
+    public void paste() {
         messageEditorPanel.getEditor().paste();
         messageEditorPanel.getEditor().requestFocus();
     }
 
-    public void restoreRemoteHistoryLoadedRooms()
-    {
+    public void restoreRemoteHistoryLoadedRooms() {
         remoteHistoryLoadedRooms.clear();
     }
 }

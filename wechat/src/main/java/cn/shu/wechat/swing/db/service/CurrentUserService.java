@@ -2,31 +2,21 @@ package cn.shu.wechat.swing.db.service;
 
 import cn.shu.wechat.swing.db.dao.CurrentUserDao;
 import cn.shu.wechat.swing.db.model.CurrentUser;
-import cn.shu.wechat.swing.utils.DbUtils;
 import org.apache.ibatis.session.SqlSession;
-
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by song on 08/06/2017.
  */
-public class CurrentUserService extends BasicService<CurrentUserDao, CurrentUser>
-{
-    public CurrentUserService(SqlSession session)
-    {
+public class CurrentUserService extends BasicService<CurrentUserDao, CurrentUser> {
+    public CurrentUserService(SqlSession session) {
         dao = new CurrentUserDao(session);
         super.setDao(dao);
     }
 
-    public int insertOrUpdate(CurrentUser currentUser)
-    {
-        if (exist(currentUser.getUserId()))
-        {
+    public int insertOrUpdate(CurrentUser currentUser) {
+        if (exist(currentUser.getUserId())) {
             return update(currentUser);
-        }else
-        {
+        } else {
             return insert(currentUser);
         }
     }

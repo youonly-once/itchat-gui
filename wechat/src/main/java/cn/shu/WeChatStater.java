@@ -24,7 +24,7 @@ public class WeChatStater {
 
     public static void main(String[] args) {
 
-        new SwingWorker(){
+        new SwingWorker() {
 
             @Override
             protected Object doInBackground() throws Exception {
@@ -38,8 +38,6 @@ public class WeChatStater {
         }.execute();
         SleepUtils.sleep(Long.MAX_VALUE);
     }
-
-
 
 
 }

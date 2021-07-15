@@ -3,39 +3,29 @@ package cn.shu.wechat.swing.components;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.swing.db.model.ContactsUser;
-import cn.shu.wechat.swing.db.model.Room;
-//import cn.shu.wechat.swing.forms.ImageViewerFrame;
-import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.panels.ContactsPanel;
 import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.swing.panels.TabOperationPanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import static cn.shu.wechat.swing.app.Launcher.contactsUserService;
-import static cn.shu.wechat.swing.app.Launcher.roomService;
 
 /**
  * Created by song on 07/06/2017.
  */
-public class UserInfoPopup extends JPopupMenu
-{
+public class UserInfoPopup extends JPopupMenu {
     private JPanel contentPanel;
     private JLabel avatarLabel;
     private JLabel usernameLabel;
     private JButton sendButton;
     private Contacts contacts;
 
-    public UserInfoPopup(Contacts contacts)
-    {
+    public UserInfoPopup(Contacts contacts) {
         this.contacts = contacts;
         initComponents();
         initView();
@@ -45,13 +35,11 @@ public class UserInfoPopup extends JPopupMenu
         updateAvatar();
     }
 
-    private void updateAvatar()
-    {
+    private void updateAvatar() {
         ContactsPanel.getContext().getUserAvatar(contacts.getUsername(), true);
     }
 
-    private void initComponents()
-    {
+    private void initComponents() {
         setBackground(Colors.WINDOW_BACKGROUND_LIGHT);
 
 
@@ -76,8 +64,7 @@ public class UserInfoPopup extends JPopupMenu
         sendButton.setFont(FontUtil.getDefaultFont(15));
     }
 
-    private void initView()
-    {
+    private void initView() {
         add(contentPanel);
 
         contentPanel.setLayout(new GridBagLayout());
@@ -95,44 +82,38 @@ public class UserInfoPopup extends JPopupMenu
         sendButtonPanel.setBackground(Colors.WINDOW_BACKGROUND_LIGHT);
         sendButtonPanel.add(sendButton);
 
-        contentPanel.add(avatarUsernamePanel, new GBC(0,0).setWeight(1,1));
-        contentPanel.add(sendButtonPanel, new GBC(0,1).setWeight(1,1));
+        contentPanel.add(avatarUsernamePanel, new GBC(0, 0).setWeight(1, 1));
+        contentPanel.add(sendButtonPanel, new GBC(0, 1).setWeight(1, 1));
 
     }
 
-    private void setListener()
-    {
-        sendButton.addMouseListener(new MouseAdapter()
-        {
+    private void setListener() {
+        sendButton.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 openOrCreateDirectChat();
                 super.mouseClicked(e);
             }
         });
 
-        avatarLabel.addMouseListener(new MouseAdapter()
-        {
+        avatarLabel.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 setVisible(false);
 
                 ImageIcon icon = new ImageIcon(AvatarUtil.createOrLoadUserAvatar(contacts.getUsername()));
-                Image image = icon.getImage().getScaledInstance(200,200,Image.SCALE_SMOOTH);
-               // ImageViewerFrame imageViewerFrame = new ImageViewerFrame(image);
-               // imageViewerFrame.setVisible(true);
-               // imageViewerFrame.toFront();
+                Image image = icon.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
+                // ImageViewerFrame imageViewerFrame = new ImageViewerFrame(image);
+                // imageViewerFrame.setVisible(true);
+                // imageViewerFrame.toFront();
                 super.mouseClicked(e);
             }
         });
     }
 
-    private void openOrCreateDirectChat()
-    {
+    private void openOrCreateDirectChat() {
         /*ContactsUser user  = contactsUserService.find("username", username).get(0);*/
-        if (!Core.getRecentContacts().contains(contacts)){
+        if (!Core.getRecentContacts().contains(contacts)) {
             // 房间bu存在，直接打开，否则发送请求创建房间
             createDirectChat(contacts);
         }
@@ -144,10 +125,9 @@ public class UserInfoPopup extends JPopupMenu
      *
      * @param contacts
      */
-    private void createDirectChat(Contacts contacts)
-    {
+    private void createDirectChat(Contacts contacts) {
         // JOptionPane.showMessageDialog(MainFrame.getContext(), "发起聊天", "发起聊天", JOptionPane.INFORMATION_MESSAGE);
-        RoomsPanel.getContext().addRoom(contacts,"",0);
+        RoomsPanel.getContext().addRoom(contacts, "", 0);
         Core.getRecentContacts().add(contacts);
         TabOperationPanel.getContext().switchToChatLabel();
     }

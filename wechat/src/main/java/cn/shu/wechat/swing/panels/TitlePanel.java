@@ -6,18 +6,18 @@ import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
-import cn.shu.wechat.swing.utils.*;
+import cn.shu.wechat.swing.utils.FontUtil;
+import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.swing.utils.OSUtil;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
 
 /**
  * Created by song on 17-5-30.
  */
-public class TitlePanel extends ParentAvailablePanel
-{
+public class TitlePanel extends ParentAvailablePanel {
     private static TitlePanel context;
 
     private JPanel titlePanel;
@@ -39,8 +39,7 @@ public class TitlePanel extends ParentAvailablePanel
     private static Point origin = new Point();
 
 
-    public TitlePanel(JPanel parent)
-    {
+    public TitlePanel(JPanel parent) {
         super(parent);
         context = this;
 
@@ -51,8 +50,7 @@ public class TitlePanel extends ParentAvailablePanel
 
     }
 
-    private void initBounds()
-    {
+    private void initBounds() {
         Toolkit tk = Toolkit.getDefaultToolkit();
         Dimension screenSize = tk.getScreenSize();
         //上面这种方式获取的是整个显示屏幕的大小，包含了任务栏的高度。
@@ -71,23 +69,17 @@ public class TitlePanel extends ParentAvailablePanel
 
     }
 
-    private void setListeners()
-    {
-        MouseListener mouseListener = new AbstractMouseListener()
-        {
+    private void setListeners() {
+        MouseListener mouseListener = new AbstractMouseListener() {
             @Override
-            public void mouseReleased(MouseEvent e)
-            {
+            public void mouseReleased(MouseEvent e) {
                 //if (roomInfoButton.isVisible())
                 {
                     RoomMembersPanel roomMemberPanel = ((RightPanel) getParentPanel()).getRoomMembersPanel();
-                    if (roomMemberPanel.isVisible())
-                    {
+                    if (roomMemberPanel.isVisible()) {
                         roomInfoButton.setIcon(new ImageIcon(getClass().getResource("/image/options.png")));
                         roomMemberPanel.setVisibleAndUpdateUI(false);
-                    }
-                    else
-                    {
+                    } else {
                         roomInfoButton.setIcon(new ImageIcon(getClass().getResource("/image/options_restore.png")));
                         roomMemberPanel.setVisibleAndUpdateUI(true);
                     }
@@ -99,15 +91,11 @@ public class TitlePanel extends ParentAvailablePanel
         roomInfoButton.addMouseListener(mouseListener);
 
 
-        if (OSUtil.getOsType() != OSUtil.Mac_OS)
-        {
-            MouseAdapter mouseAdapter = new MouseAdapter()
-            {
+        if (OSUtil.getOsType() != OSUtil.Mac_OS) {
+            MouseAdapter mouseAdapter = new MouseAdapter() {
                 @Override
-                public void mouseClicked(MouseEvent e)
-                {
-                    if (System.currentTimeMillis() - lastClickTime < 500)
-                    {
+                public void mouseClicked(MouseEvent e) {
+                    if (System.currentTimeMillis() - lastClickTime < 500) {
                         maxOrRestoreWindow();
                     }
 
@@ -115,18 +103,15 @@ public class TitlePanel extends ParentAvailablePanel
                     super.mouseClicked(e);
                 }
 
-                public void mousePressed(MouseEvent e)
-                {
+                public void mousePressed(MouseEvent e) {
                     // 当鼠标按下的时候获得窗口当前的位置
                     origin.x = e.getX();
                     origin.y = e.getY();
                 }
             };
 
-            MouseMotionListener mouseMotionListener = new MouseMotionAdapter()
-            {
-                public void mouseDragged(MouseEvent e)
-                {
+            MouseMotionListener mouseMotionListener = new MouseMotionAdapter() {
+                public void mouseDragged(MouseEvent e) {
                     // 当鼠标拖动时获取窗口当前位置
                     Point p = MainFrame.getContext().getLocation();
                     // 设置窗口的位置
@@ -143,16 +128,12 @@ public class TitlePanel extends ParentAvailablePanel
         }
     }
 
-    private void maxOrRestoreWindow()
-    {
-        if (windowMax)
-        {
+    private void maxOrRestoreWindow() {
+        if (windowMax) {
             MainFrame.getContext().setBounds(normalBounds);
             maxLabel.setIcon(maxIcon);
             windowMax = false;
-        }
-        else
-        {
+        } else {
             MainFrame.getContext().setBounds(desktopBounds);
             maxLabel.setIcon(restoreIcon);
             windowMax = true;
@@ -162,11 +143,9 @@ public class TitlePanel extends ParentAvailablePanel
     /**
      * 隐藏群成员面板
      */
-    public void hideRoomMembersPanel()
-    {
+    public void hideRoomMembersPanel() {
         JPanel roomMemberPanel = ((RightPanel) getParentPanel()).getRoomMembersPanel();
-        if (roomMemberPanel.isVisible())
-        {
+        if (roomMemberPanel.isVisible()) {
             roomInfoButton.setIcon(new ImageIcon(getClass().getResource("/image/options.png")));
             roomMemberPanel.setVisible(false);
         }
@@ -175,17 +154,14 @@ public class TitlePanel extends ParentAvailablePanel
     /**
      * 显示群成员面板
      */
-    public void showRoomMembersPanel()
-    {
+    public void showRoomMembersPanel() {
         JPanel roomMemberPanel = ((RightPanel) getParentPanel()).getRoomMembersPanel();
         roomInfoButton.setIcon(new ImageIcon(getClass().getResource("/image/options_restore.png")));
         roomMemberPanel.setVisible(true);
     }
 
 
-
-    private void initComponents()
-    {
+    private void initComponents() {
         Cursor handCursor = new Cursor(Cursor.HAND_CURSOR);
         maxIcon = new ImageIcon(getClass().getResource("/image/window_max.png"));
         restoreIcon = new ImageIcon(getClass().getResource("/image/window_restore.png"));
@@ -246,8 +222,7 @@ public class TitlePanel extends ParentAvailablePanel
         minLabel.setCursor(handCursor);
     }
 
-    private void initView()
-    {
+    private void initView() {
         setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, true));
 
         setBorder(null);
@@ -259,15 +234,12 @@ public class TitlePanel extends ParentAvailablePanel
         controlPanel.add(closeLabel);
 
         int margin;
-        if (OSUtil.getOsType() != OSUtil.Mac_OS)
-        {
+        if (OSUtil.getOsType() != OSUtil.Mac_OS) {
             add(controlPanel);
             add(titlePanel);
 
             margin = 5;
-        }
-        else
-        {
+        } else {
             //add(controlPanel);
 
             add(titlePanel);
@@ -275,20 +247,17 @@ public class TitlePanel extends ParentAvailablePanel
         }
 
 
-
         titlePanel.add(titleLabel, new GBC(0, 0).setFill(GBC.BOTH).setWeight(300, 1).setInsets(margin, margin, 0, 0));
         titlePanel.add(statusLabel, new GBC(1, 0).setFill(GBC.BOTH).setWeight(800, 1).setInsets(margin, margin, 0, 0));
         titlePanel.add(roomInfoButton, new GBC(2, 0).setFill(GBC.BOTH).setWeight(1, 1).setInsets(margin, 0, 0, margin));
     }
 
-    public static TitlePanel getContext()
-    {
+    public static TitlePanel getContext() {
         return context;
     }
 
 
-    public void updateRoomTitle(String title)
-    {
+    public void updateRoomTitle(String title) {
         this.titleLabel.setText(title);
 
         roomInfoButton.setVisible(true);
@@ -296,18 +265,17 @@ public class TitlePanel extends ParentAvailablePanel
         parent.showPanel(RightPanel.MESSAGE);
     }
 
-    public void showAppTitle()
-    {
+    public void showAppTitle() {
         this.titleLabel.setText("微信");
         roomInfoButton.setVisible(false);
     }
 
     /**
      * 显示状态栏
+     *
      * @param text
      */
-    public void showStatusLabel(String text)
-    {
+    public void showStatusLabel(String text) {
         this.statusLabel.setText(text);
         this.statusLabel.setVisible(true);
     }
@@ -315,41 +283,31 @@ public class TitlePanel extends ParentAvailablePanel
     /**
      * 隐藏状态栏
      */
-    public void hideStatusLabel()
-    {
+    public void hideStatusLabel() {
         this.statusLabel.setVisible(false);
     }
 
 
-    private class ControlLabelMouseListener extends AbstractMouseListener
-    {
+    private class ControlLabelMouseListener extends AbstractMouseListener {
         @Override
-        public void mouseClicked(MouseEvent e)
-        {
-            if (e.getComponent() == closeLabel)
-            {
+        public void mouseClicked(MouseEvent e) {
+            if (e.getComponent() == closeLabel) {
                 MainFrame.getContext().setVisible(false);
-            }
-            else if (e.getComponent() == maxLabel)
-            {
+            } else if (e.getComponent() == maxLabel) {
                 maxOrRestoreWindow();
-            }
-            else if (e.getComponent() == minLabel)
-            {
+            } else if (e.getComponent() == minLabel) {
                 MainFrame.getContext().setExtendedState(JFrame.ICONIFIED);
             }
         }
 
         @Override
-        public void mouseEntered(MouseEvent e)
-        {
+        public void mouseEntered(MouseEvent e) {
             ((JLabel) e.getSource()).setBackground(Colors.LIGHT_GRAY);
             super.mouseEntered(e);
         }
 
         @Override
-        public void mouseExited(MouseEvent e)
-        {
+        public void mouseExited(MouseEvent e) {
             ((JLabel) e.getSource()).setBackground(Colors.WINDOW_BACKGROUND);
             super.mouseExited(e);
         }

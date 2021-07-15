@@ -2,6 +2,8 @@ package cn.shu.wechat.api;
 
 
 import cn.shu.wechat.beans.msg.send.*;
+import cn.shu.wechat.beans.msg.sync.AddMsgList;
+import cn.shu.wechat.beans.msg.sync.RecommendInfo;
 import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.*;
@@ -21,13 +23,11 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.util.EntityUtils;
-import cn.shu.wechat.beans.msg.sync.AddMsgList;
-import cn.shu.wechat.beans.msg.sync.RecommendInfo;
-import org.apache.ibatis.session.SqlSession;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -65,13 +65,13 @@ public class MessageTools {
     /**
      * 根据指定类型发送消息
      *
-     * @param result    消息列表
+     * @param result     消息列表
      * @param toUserName 接收方username
      */
     public static void sendMsgByUserId(Result result, String toUserName) {
         ArrayList<Result> results = new ArrayList<>();
         results.add(result);
-        sendMsgByUserId(results,toUserName);
+        sendMsgByUserId(results, toUserName);
     }
 
     /**
@@ -348,8 +348,8 @@ public class MessageTools {
             HttpEntity reqEntity = builder.build();
             HttpEntity resultEntity = MyHttpClient.doPostFile(url, reqEntity);
             result = EntityUtils.toString(resultEntity, Consts.UTF_8);
-            if (callback!=null){
-                callback.onTaskSuccess(1,1,  JSON.parseObject(result, WebWXUploadMediaResponse.class));
+            if (callback != null) {
+                callback.onTaskSuccess(1, 1, JSON.parseObject(result, WebWXUploadMediaResponse.class));
             }
 
         } else {
@@ -380,8 +380,8 @@ public class MessageTools {
                     //不关闭下次执行会卡住
                     resultEntity.getContent().close();
                 }
-                if (callback!=null){
-                    callback.onTaskSuccess(i+1,partFilePathList.size(),JSON.parseObject(result, WebWXUploadMediaResponse.class));
+                if (callback != null) {
+                    callback.onTaskSuccess(i + 1, partFilePathList.size(), JSON.parseObject(result, WebWXUploadMediaResponse.class));
                 }
             }
             //删除分片文件
@@ -411,7 +411,7 @@ public class MessageTools {
     public static WebWXSendMsgResponse sendPicMsgByUserId(String userId, String filePath, String content) throws WebWXException, IOException {
         String mediaId = "";
         if (StringUtils.isEmpty(content) || !content.startsWith("@")) {
-            WebWXUploadMediaResponse resp = webWxUploadMedia(filePath, Core.getUserName(), userId,null);
+            WebWXUploadMediaResponse resp = webWxUploadMedia(filePath, Core.getUserName(), userId, null);
             mediaId = resp.getMediaId();
             content = "";
         }
@@ -427,16 +427,17 @@ public class MessageTools {
         return sendMsg(msgRequest, url);
 
     }
+
     /**
      * 根据用户id发送图片消息
      *
-     * @param userId   消息接收者UserName
+     * @param userId  消息接收者UserName
      * @param mediaId 消息id
      * @return {@link WebWXSendMsgResponse}
      * @author SXS
      * @date 2017年5月7日 下午10:34:24
      */
-    public static WebWXSendMsgResponse sendPicMsgByUserId(String userId,  String mediaId) throws WebWXException, IOException {
+    public static WebWXSendMsgResponse sendPicMsgByUserId(String userId, String mediaId) throws WebWXException, IOException {
         String url = String.format(URLEnum.WEB_WX_SEND_PIC_MSG.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()),
                 Core.getLoginInfoMap().get("pass_ticket"));
 
@@ -480,7 +481,7 @@ public class MessageTools {
         }
 
         if (md5 == null) {
-            WebWXUploadMediaResponse resp = webWxUploadMedia(filePath, Core.getUserName(), userId,null);
+            WebWXUploadMediaResponse resp = webWxUploadMedia(filePath, Core.getUserName(), userId, null);
             textMsg.MediaId = resp.getMediaId();
             textMsg.EmojiFlag = 2;
         } else {
@@ -538,7 +539,7 @@ public class MessageTools {
     public static WebWXSendMsgResponse sendVideoMsgByUserId(String userId, String filePath, String content) throws WebWXException, IOException {
         String mediaId = "";
         if (StringUtils.isEmpty(content) || !content.startsWith("@")) {
-            WebWXUploadMediaResponse resp = webWxUploadMedia(filePath, Core.getUserName(), userId,null);
+            WebWXUploadMediaResponse resp = webWxUploadMedia(filePath, Core.getUserName(), userId, null);
             mediaId = resp.getMediaId();
             content = "";
         }
@@ -576,7 +577,7 @@ public class MessageTools {
             if (fileext == null) {
                 fileext = "";
             }
-            WebWXUploadMediaResponse webWXUploadMediaResponse = webWxUploadMedia(filePath, Core.getUserName(), userId,null);
+            WebWXUploadMediaResponse webWXUploadMediaResponse = webWxUploadMedia(filePath, Core.getUserName(), userId, null);
             long totallen = webWXUploadMediaResponse.getStartPos();
             String attachid = webWXUploadMediaResponse.getMediaId();
             content = "<appmsg appid='wxeb7ec651dd0aefa9' sdkver=''>" +

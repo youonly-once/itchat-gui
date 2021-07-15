@@ -11,8 +11,7 @@ import java.awt.*;
  * Created by song on 17-5-29.
  */
 @Data
-public class RightPanel extends JPanel
-{
+public class RightPanel extends JPanel {
     public static RightPanel getContext() {
         return context;
     }
@@ -35,17 +34,14 @@ public class RightPanel extends JPanel
     public static final String USER_INFO = "USER_INFO";
 
 
-
-    public RightPanel()
-    {
+    public RightPanel() {
         context = this;
         initComponents();
         initView();
 
     }
 
-    private void initComponents()
-    {
+    private void initComponents() {
         cardLayout = new CardLayout();
         contentPanel = new JPanel();
         contentPanel.setLayout(cardLayout);
@@ -59,8 +55,7 @@ public class RightPanel extends JPanel
         setBorder(new LineBorder(Colors.SCROLL_BAR_TRACK_LIGHT));
     }
 
-    private void initView()
-    {
+    private void initView() {
         contentPanel.add(tipPanel, TIP);
         contentPanel.add(userInfoPanel, USER_INFO);
         contentPanel.add(chatPanel, MESSAGE);
@@ -76,12 +71,9 @@ public class RightPanel extends JPanel
         //add(tipPanel, BorderLayout.CENTER);
     }
 
-    public void showPanel(String who)
-    {
+    public void showPanel(String who) {
         cardLayout.show(contentPanel, who);
     }
-
-
 
 
 }

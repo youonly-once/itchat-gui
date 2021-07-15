@@ -3,8 +3,7 @@ package cn.shu.wechat.swing.db.model;
 /**
  * Created by song on 08/06/2017.
  */
-public class CurrentUser extends BasicModel
-{
+public class CurrentUser extends BasicModel {
     private String userId;
 
     private String username;
@@ -23,12 +22,10 @@ public class CurrentUser extends BasicModel
 
     private String avatarOrigin;
 
-    public CurrentUser()
-    {
+    public CurrentUser() {
     }
 
-    public CurrentUser(String userId, String username, String authToken, String password, String rawPassword, String expireDate, String realName, String bcrypt, String avatarOrigin)
-    {
+    public CurrentUser(String userId, String username, String authToken, String password, String rawPassword, String expireDate, String realName, String bcrypt, String avatarOrigin) {
         this.userId = userId;
         this.username = username;
         this.authToken = authToken;
@@ -40,99 +37,80 @@ public class CurrentUser extends BasicModel
         this.avatarOrigin = avatarOrigin;
     }
 
-    public String getUserId()
-    {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId)
-    {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 
-    public String getUsername()
-    {
+    public String getUsername() {
         return username;
     }
 
-    public void setUsername(String username)
-    {
+    public void setUsername(String username) {
         this.username = username;
     }
 
-    public String getAuthToken()
-    {
+    public String getAuthToken() {
         return authToken;
     }
 
-    public void setAuthToken(String authToken)
-    {
+    public void setAuthToken(String authToken) {
         this.authToken = authToken;
     }
 
-    public String getPassword()
-    {
+    public String getPassword() {
         return password;
     }
 
-    public void setPassword(String password)
-    {
+    public void setPassword(String password) {
         this.password = password;
     }
 
-    public String getRawPassword()
-    {
+    public String getRawPassword() {
         return rawPassword;
     }
 
-    public void setRawPassword(String rawPassword)
-    {
+    public void setRawPassword(String rawPassword) {
         this.rawPassword = rawPassword;
     }
 
-    public String getExpireDate()
-    {
+    public String getExpireDate() {
         return expireDate;
     }
 
-    public void setExpireDate(String expireDate)
-    {
+    public void setExpireDate(String expireDate) {
         this.expireDate = expireDate;
     }
 
-    public String getRealName()
-    {
+    public String getRealName() {
         return realName;
     }
 
-    public void setRealName(String realName)
-    {
+    public void setRealName(String realName) {
         this.realName = realName;
     }
 
-    public String getBcrypt()
-    {
+    public String getBcrypt() {
         return bcrypt;
     }
 
-    public void setBcrypt(String bcrypt)
-    {
+    public void setBcrypt(String bcrypt) {
         this.bcrypt = bcrypt;
     }
 
-    public String getAvatarOrigin()
-    {
+    public String getAvatarOrigin() {
         return avatarOrigin;
     }
 
-    public void setAvatarOrigin(String avatarOrigin)
-    {
+    public void setAvatarOrigin(String avatarOrigin) {
         this.avatarOrigin = avatarOrigin;
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "CurrentUser{" +
                 "userId='" + userId + '\'' +
                 ", username='" + username + '\'' +

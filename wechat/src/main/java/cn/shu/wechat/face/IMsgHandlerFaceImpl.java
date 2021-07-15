@@ -1,36 +1,31 @@
 package cn.shu.wechat.face;
 
-import java.io.*;
-import java.util.*;
-
-import cn.shu.wechat.beans.tuling.enums.ResultType;
-import cn.shu.wechat.beans.tuling.response.Results;
-import cn.shu.wechat.beans.tuling.response.TuLingResponseBean;
-import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.beans.msg.sync.AddMsgList;
 import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.beans.pojo.MessageExample;
 import cn.shu.wechat.beans.pojo.Status;
 import cn.shu.wechat.beans.pojo.StatusExample;
+import cn.shu.wechat.beans.tuling.enums.ResultType;
+import cn.shu.wechat.beans.tuling.response.Results;
+import cn.shu.wechat.beans.tuling.response.TuLingResponseBean;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
+import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
+import cn.shu.wechat.enums.WXSendMsgCodeEnum;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.mapper.StatusMapper;
 import cn.shu.wechat.utils.*;
-import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
-import cn.shu.wechat.enums.WXSendMsgCodeEnum;
-
 import com.alibaba.fastjson.JSON;
 import lombok.extern.log4j.Log4j2;
-
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.ibatis.session.SqlSession;
 import org.springframework.stereotype.Component;
-import cn.shu.wechat.utils.TuLingUtil;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.io.IOException;
+import java.util.*;
 
 
 @Log4j2
@@ -51,13 +46,13 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     /**
      * 自动聊天联系人列表，包括个人、群...
      */
-    private final  Set<String> autoChatUserNameList = new HashSet<>();
+    private final Set<String> autoChatUserNameList = new HashSet<>();
 
     /*//public static IMsgHandlerFaceImpl getiMsgHandlerFace() {
         return iMsgHandlerFace;
     }*/
 
-  //  private static IMsgHandlerFaceImpl iMsgHandlerFace =new IMsgHandlerFaceImpl();
+    //  private static IMsgHandlerFaceImpl iMsgHandlerFace =new IMsgHandlerFaceImpl();
     @Resource
     private ChartUtil chartUtil;
 
@@ -68,18 +63,19 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     private final Set<String> nonPreventUndoMsgUserName = new HashSet<>();
 
     @PostConstruct
-    private void initSet(){
+    private void initSet() {
         log.info("11. 获取自动聊天列表及防撤回列表");
         List<Status> statuses = statusMapper.selectByExample(new StatusExample());
         for (Status status : statuses) {
-            if (status.getAutoStatus()!=null && status.getAutoStatus() == 1){
+            if (status.getAutoStatus() != null && status.getAutoStatus() == 1) {
                 autoChatUserNameList.add(status.getName());
             }
-            if (status.getUndoStatus()!=null && status.getUndoStatus() == 2){
+            if (status.getUndoStatus() != null && status.getUndoStatus() == 2) {
                 nonPreventUndoMsgUserName.add(status.getName());
             }
         }
     }
+
     /**
      * 消息控制命令
      *
@@ -195,7 +191,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 autoChatUserNameList.add(to);
                 Status status = new Status();
                 status.setName(to);
-                status.setAutoStatus((short)1);
+                status.setAutoStatus((short) 1);
                 statusMapper.insertOrUpdateSelective(status);
                 results.add(MessageTools.Result.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                         .content("已开启【" + remarkNameByGroupUserName + "】自动回复功能")
@@ -207,7 +203,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 autoChatUserNameList.remove(to);
                 status = new Status();
                 status.setName(to);
-                status.setAutoStatus((short)2);
+                status.setAutoStatus((short) 2);
                 statusMapper.insertOrUpdateSelective(status);
                 results.add(MessageTools.Result.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                         .content("已关闭【" + remarkNameByGroupUserName + "】自动回复功能")
@@ -219,7 +215,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 nonPreventUndoMsgUserName.remove(to);
                 status = new Status();
                 status.setName(to);
-                status.setUndoStatus((short)1);
+                status.setUndoStatus((short) 1);
                 statusMapper.insertOrUpdateSelective(status);
                 results.add(MessageTools.Result.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                         .content("已开启【" + remarkNameByGroupUserName + "】防撤回功能")
@@ -230,7 +226,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 to = ContactsTools.getContactDisplayNameByUserName(toUserName);
                 status = new Status();
                 status.setName(to);
-                status.setUndoStatus((short)2);
+                status.setUndoStatus((short) 2);
                 statusMapper.insertOrUpdateSelective(status);
                 //群消息
                 nonPreventUndoMsgUserName.add(to);

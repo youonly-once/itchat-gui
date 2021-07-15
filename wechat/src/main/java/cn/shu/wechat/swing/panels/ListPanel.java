@@ -6,8 +6,7 @@ import java.awt.*;
 /**
  * Created by song on 17-5-30.
  */
-public class ListPanel extends ParentAvailablePanel
-{
+public class ListPanel extends ParentAvailablePanel {
     private static ListPanel context;
     private RoomsPanel roomsPanel;
     private ContactsPanel contactsPanel;
@@ -25,8 +24,7 @@ public class ListPanel extends ParentAvailablePanel
     private CardLayout cardLayout = new CardLayout();
 
 
-    public ListPanel(JPanel parent)
-    {
+    public ListPanel(JPanel parent) {
         super(parent);
         context = this;
 
@@ -35,8 +33,7 @@ public class ListPanel extends ParentAvailablePanel
     }
 
 
-    private void initComponents()
-    {
+    private void initComponents() {
         //群panel
         roomsPanel = new RoomsPanel(this);
         //联系人
@@ -48,8 +45,7 @@ public class ListPanel extends ParentAvailablePanel
 
     }
 
-    private void initView()
-    {
+    private void initView() {
         this.setLayout(cardLayout);
         add(roomsPanel, CHAT);
         add(contactsPanel, CONTACTS);
@@ -62,11 +58,9 @@ public class ListPanel extends ParentAvailablePanel
      *
      * @param who
      */
-    public void showPanel(String who)
-    {
+    public void showPanel(String who) {
         previousTab = currentTab;
-        if (!who.equals(SEARCH))
-        {
+        if (!who.equals(SEARCH)) {
             currentTab = who;
         }
         cardLayout.show(this, who);
@@ -74,24 +68,23 @@ public class ListPanel extends ParentAvailablePanel
 
     /**
      * 获取上一个tab，如果上一个tab是搜索tab，则返回搜索tab之前的tab
+     *
      * @return
      */
-    public String getPreviousTab()
-    {
+    public String getPreviousTab() {
         return previousTab;
     }
 
     /**
      * 获取当前选中的tab, 如果当前的tab是搜索tab，则返回搜索tab之前的tab
+     *
      * @return
      */
-    public String getCurrentTab()
-    {
+    public String getCurrentTab() {
         return currentTab;
     }
 
-    public static ListPanel getContext()
-    {
+    public static ListPanel getContext() {
         return context;
     }
 

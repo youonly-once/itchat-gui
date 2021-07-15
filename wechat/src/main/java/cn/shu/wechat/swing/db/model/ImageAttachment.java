@@ -1,7 +1,6 @@
 package cn.shu.wechat.swing.db.model;
 
-public class ImageAttachment extends BasicModel
-{
+public class ImageAttachment extends BasicModel {
     private String id;
     private String title;
     private String description;
@@ -10,79 +9,64 @@ public class ImageAttachment extends BasicModel
     private int height;
     private long imagesize;
 
-    public String getId()
-    {
+    public String getId() {
         return id;
     }
 
-    public String getTitle()
-    {
+    public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title)
-    {
+    public void setTitle(String title) {
         this.title = title;
     }
 
-    public String getDescription()
-    {
+    public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description)
-    {
+    public void setDescription(String description) {
         this.description = description;
     }
 
-    public String getImageUrl()
-    {
+    public String getImageUrl() {
         return imageUrl;
     }
 
-    public void setImageUrl(String imageUrl)
-    {
+    public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
 
-    public long getImagesize()
-    {
+    public long getImagesize() {
         return imagesize;
     }
 
-    public int getWidth()
-    {
+    public int getWidth() {
         return width;
     }
 
-    public void setWidth(int width)
-    {
+    public void setWidth(int width) {
         this.width = width;
     }
 
-    public int getHeight()
-    {
+    public int getHeight() {
         return height;
     }
 
-    public void setHeight(int height)
-    {
+    public void setHeight(int height) {
         this.height = height;
     }
 
-    public void setImagesize(long imagesize)
-    {
+    public void setImagesize(long imagesize) {
         this.imagesize = imagesize;
     }
 
-    public void setId(String id)
-    {
+    public void setId(String id) {
         this.id = id;
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "ImageAttachment{" +
                 "id='" + id + '\'' +
                 ", title='" + title + '\'' +

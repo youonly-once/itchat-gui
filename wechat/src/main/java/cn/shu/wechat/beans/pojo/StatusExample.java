@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
-  *@作者     舒新胜
-  *@项目     AutoWechat
-  *@创建时间  7/1/2021 6:24 PM
-*/
+ * @作者 舒新胜
+ * @项目 AutoWechat
+ * @创建时间 7/1/2021 6:24 PM
+ */
 public class StatusExample {
     protected String orderByClause;
 

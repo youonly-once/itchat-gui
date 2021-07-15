@@ -5,20 +5,15 @@ import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
-import cn.shu.wechat.utils.CommonTools;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import lombok.extern.log4j.Log4j;
 import lombok.extern.log4j.Log4j2;
 
 import javax.imageio.ImageIO;
-import javax.imageio.stream.FileImageInputStream;
-import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.*;
-import java.net.URL;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,14 +64,14 @@ public class AvatarUtil {
         File file = new File(AVATAR_CACHE_ROOT);
         if (!file.exists()) {
             file.mkdirs();
-            log.info("创建头像缓存目录：{}" , file.getAbsolutePath());
+            log.info("创建头像缓存目录：{}", file.getAbsolutePath());
         }
 
         CUSTOM_AVATAR_CACHE_ROOT = AVATAR_CACHE_ROOT + "/custom";
         file = new File(CUSTOM_AVATAR_CACHE_ROOT);
         if (!file.exists()) {
             file.mkdirs();
-            log.info("创建用户自定义头像缓存目录：{}" , file.getAbsolutePath());
+            log.info("创建用户自定义头像缓存目录：{}", file.getAbsolutePath());
         }
     }
 
@@ -101,7 +96,7 @@ public class AvatarUtil {
                 Map<String, Contacts> memberMap = Core.getMemberMap();
                 Contacts contacts = memberMap.get(roomId);
                 // 如果尚未从服务器获取群成员，则获取默认群组头像
-                if (contacts == null || contacts.getMemberlist()==null || contacts.getMemberlist().isEmpty()) {
+                if (contacts == null || contacts.getMemberlist() == null || contacts.getMemberlist().isEmpty()) {
                     //获取 ##.png头像
                     String sign = "##";
                     avatar = getCachedImageAvatar(sign);
@@ -113,7 +108,7 @@ public class AvatarUtil {
                 } else {
                     List<Contacts> memberList = contacts.getMemberlist();
                     // 有群成员，根据群成员的头像合成群头像
-                    log.info("创建群组个性头像 : {}" , roomId);
+                    log.info("创建群组个性头像 : {}", roomId);
                     avatar = createGroupAvatar(roomId, memberList);
                 }
             }
@@ -126,6 +121,7 @@ public class AvatarUtil {
 
     /**
      * 创建或读取普通用户头像
+     *
      * @param userName 用户名也是房间id
      * @return 头像
      */
@@ -158,6 +154,7 @@ public class AvatarUtil {
 
     /**
      * 创建头像
+     *
      * @param displayName 显示名称
      * @return 头像
      */
@@ -249,6 +246,7 @@ public class AvatarUtil {
 
     /**
      * 获取缓存在磁盘的用户头像
+     *
      * @param username 用户名
      * @return 头像
      */

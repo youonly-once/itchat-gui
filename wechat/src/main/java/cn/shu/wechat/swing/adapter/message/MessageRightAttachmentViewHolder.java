@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.adapter.message;
 
-import cn.shu.wechat.swing.components.*;
+import cn.shu.wechat.swing.components.Colors;
+import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.message.RCRightAttachmentMessageBubble;
 
 import javax.swing.*;
@@ -9,19 +10,16 @@ import java.awt.*;
 /**
  * Created by song on 17-6-3.
  */
-public class MessageRightAttachmentViewHolder extends MessageAttachmentViewHolder
-{
+public class MessageRightAttachmentViewHolder extends MessageAttachmentViewHolder {
     public JLabel resend = new JLabel(); // 重发按钮
 
 
-    public MessageRightAttachmentViewHolder()
-    {
+    public MessageRightAttachmentViewHolder() {
         initComponents();
         initView();
     }
 
-    private void initComponents()
-    {
+    private void initComponents() {
         messageBubble = new RCRightAttachmentMessageBubble();
 
         /*timePanel.setBackground(Colors.WINDOW_BACKGROUND);
@@ -55,18 +53,17 @@ public class MessageRightAttachmentViewHolder extends MessageAttachmentViewHolde
 
     }
 
-    private void initView()
-    {
+    private void initView() {
         setLayout(new BorderLayout());
 
         timePanel.add(time);
 
         attachmentPanel.setLayout(new GridBagLayout());
-        attachmentPanel.add(attachmentIcon, new GBC(0, 0).setWeight(1, 1).setInsets(5,5,5,0));
+        attachmentPanel.add(attachmentIcon, new GBC(0, 0).setWeight(1, 1).setInsets(5, 5, 5, 0));
         attachmentPanel.add(attachmentTitle, new GBC(1, 0).setWeight(100, 1).setAnchor(GBC.NORTH)
                 .setInsets(5, 5, 0, 5));
         attachmentPanel.add(progressBar, new GBC(1, 1).setWeight(1, 1).setFill(GBC.HORIZONTAL).setAnchor(GBC.SOUTH).setInsets(0, 8, 5, 5));
-        attachmentPanel.add(sizeLabel, new GBC(1, 1).setWeight(1, 1).setFill(GBC.HORIZONTAL).setAnchor(GBC.SOUTH).setInsets(-20,8,0,0));
+        attachmentPanel.add(sizeLabel, new GBC(1, 1).setWeight(1, 1).setFill(GBC.HORIZONTAL).setAnchor(GBC.SOUTH).setInsets(-20, 8, 0, 0));
 
         messageBubble.add(attachmentPanel);
 

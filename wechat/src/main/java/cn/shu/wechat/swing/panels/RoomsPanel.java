@@ -5,10 +5,11 @@ import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.adapter.RoomItemViewHolder;
 import cn.shu.wechat.swing.adapter.RoomItemsAdapter;
-import cn.shu.wechat.swing.components.*;
+import cn.shu.wechat.swing.components.Colors;
+import cn.shu.wechat.swing.components.GBC;
+import cn.shu.wechat.swing.components.RCListView;
 import cn.shu.wechat.swing.db.model.Room;
 import cn.shu.wechat.swing.entity.RoomItem;
-import org.apache.commons.lang.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -76,7 +77,7 @@ public class RoomsPanel extends ParentAvailablePanel {
      * @param recentContact 联系人
      * @param latestMsg     最新消息
      */
-    public void addRoom(Contacts recentContact, String latestMsg,int msgCount) {
+    public void addRoom(Contacts recentContact, String latestMsg, int msgCount) {
         RoomItem item = new RoomItem();
         item.setRoomId(recentContact.getUsername());
         item.setTimestamp(System.currentTimeMillis());
@@ -113,7 +114,7 @@ public class RoomsPanel extends ParentAvailablePanel {
                 if (roomItem.getRoomId().equals(roomId)) {
                     roomItem.setUnreadCount(100);
                     //roomItem.setTimestamp(room.getLastChatAt());
-                   // roomItem.setLastMessage(room.getLastMessage());
+                    // roomItem.setLastMessage(room.getLastMessage());
                     break;
                 }
             }
@@ -126,7 +127,8 @@ public class RoomsPanel extends ParentAvailablePanel {
 
     /**
      * 更新房间未读消息数
-     * @param roomId 房间id
+     *
+     * @param roomId      房间id
      * @param unReadCount 消息数
      */
     public void updateUnreadCount(String roomId, int unReadCount) {
@@ -136,8 +138,8 @@ public class RoomsPanel extends ParentAvailablePanel {
                 //找到对应房间
                 if (unReadCount == 0) {
                     item.setUnreadCount(0);
-                }else if (unReadCount != -1) {
-                        item.setUnreadCount(item.getUnreadCount() + unReadCount);
+                } else if (unReadCount != -1) {
+                    item.setUnreadCount(item.getUnreadCount() + unReadCount);
 
                 }
                 roomItemsListView.notifyItemChanged(i);
@@ -145,6 +147,7 @@ public class RoomsPanel extends ParentAvailablePanel {
             }
         }
     }
+
     /**
      * 更新指定位置的房间项目
      *
@@ -168,20 +171,20 @@ public class RoomsPanel extends ParentAvailablePanel {
                 if (time != null) {
                     item.setTimestamp(time);
                 }
-                if (roomId .equals( ChatPanel.getContext().getRoomId())){
+                if (roomId.equals(ChatPanel.getContext().getRoomId())) {
                     //当前显示的房间和新消息房间一样，则不需要在房间条目上显示未读消息数量
                     item.setUnreadCount(0);
-                }else if (unReadCount!=-1){
-                     item.setUnreadCount(item.getUnreadCount()+unReadCount);
+                } else if (unReadCount != -1) {
+                    item.setUnreadCount(item.getUnreadCount() + unReadCount);
                 }
                 //最新消息移到首行
-                if (i!=0){
+                if (i != 0) {
                     roomItemList.add(0, roomItemList.remove(i));
                     //重绘整个列表
                     roomItemsListView.notifyDataSetChanged(true);
                   /*  //假如本来再2位置的移到0位置  那么只需重绘前三个View
                     roomItemsListView.notifyItemRangeInserted(0,i+1);*/
-                }else{
+                } else {
                     //当前消息位于首行，则无需重绘整个列表
                     roomItemsListView.notifyItemChanged(0);
                 }

@@ -7,34 +7,43 @@
     <cache/>
 
     <insert id="insert">
-		INSERT INTO image_attachment(id, title, imageUrl, description, width, height, imagesize)
-		VALUES (#{id}, #{title}, #{imageUrl}, #{description}, #{width}, #{height}, #{imagesize})
-	</insert>
+        INSERT INTO image_attachment(id, title, imageUrl, description, width, height, imagesize)
+        VALUES (#{id}, #{title}, #{imageUrl}, #{description}, #{width}, #{height}, #{imagesize})
+    </insert>
 
 
     <select id="findById" resultType="ImageAttachment">
-		SELECT * FROM image_attachment where id = #{id}
-	</select>
+        SELECT *
+        FROM image_attachment
+        where id = #{id}
+    </select>
 
     <select id="findAll" resultType="ImageAttachment">
-		SELECT * FROM image_attachment
-	</select>
+        SELECT *
+        FROM image_attachment
+    </select>
 
     <select id="find" resultType="ImageAttachment" statementType="STATEMENT" parameterType="map">
-        SELECT * FROM image_attachment where ${field} = ${val}
+        SELECT *
+        FROM image_attachment
+        where ${field} = ${val}
     </select>
 
     <select id="count" resultType="java.lang.Integer">
-		SELECT count(1) FROM image_attachment
-	</select>
+        SELECT count(1)
+        FROM image_attachment
+    </select>
 
     <select id="exist" resultType="java.lang.Integer">
-		SELECT count(1) FROM image_attachment where id = #{id}
-	</select>
+        SELECT count(1)
+        FROM image_attachment
+        where id = #{id}
+    </select>
 
     <delete id="deleteAll">
-		delete from image_attachment
-	</delete>
+        delete
+        from image_attachment
+    </delete>
 
     <update id="update">
         UPDATE image_attachment

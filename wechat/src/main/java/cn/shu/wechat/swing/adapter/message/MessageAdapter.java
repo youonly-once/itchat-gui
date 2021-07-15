@@ -1,12 +1,13 @@
 package cn.shu.wechat.swing.adapter.message;
 
-import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.swing.ImageViewer.src.com.rc.forms.ImageViewerFrame;
 import cn.shu.wechat.swing.adapter.BaseAdapter;
 import cn.shu.wechat.swing.adapter.ViewHolder;
 import cn.shu.wechat.swing.app.Launcher;
-import cn.shu.wechat.swing.components.message.MessageImageLabel;
 import cn.shu.wechat.swing.components.RCListView;
+import cn.shu.wechat.swing.components.UserInfoPopup;
+import cn.shu.wechat.swing.components.message.MessageImageLabel;
 import cn.shu.wechat.swing.components.message.MessagePopupMenu;
 import cn.shu.wechat.swing.components.message.RCMessageBubble;
 import cn.shu.wechat.swing.db.model.CurrentUser;
@@ -15,14 +16,11 @@ import cn.shu.wechat.swing.db.service.CurrentUserService;
 import cn.shu.wechat.swing.db.service.MessageService;
 import cn.shu.wechat.swing.entity.FileAttachmentItem;
 import cn.shu.wechat.swing.entity.MessageItem;
-
-import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.frames.MainFrame;
-import cn.shu.wechat.swing.components.UserInfoPopup;
 import cn.shu.wechat.swing.helper.AttachmentIconHelper;
 import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
+import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.utils.*;
-
 
 import javax.swing.*;
 import java.awt.*;
@@ -67,11 +65,11 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
     @Override
     public boolean isGroup(int position) {
-        return  messageItems.get(position).getSenderId().startsWith("@@");
+        return messageItems.get(position).getSenderId().startsWith("@@");
     }
 
     @Override
-    public BaseMessageViewHolder onCreateViewHolder(int viewType,int position) {
+    public BaseMessageViewHolder onCreateViewHolder(int viewType, int position) {
         switch (viewType) {
             case MessageItem.SYSTEM_MESSAGE: {
                 MessageSystemMessageViewHolder holder = messageViewHolderCacheHelper.tryGetSystemMessageViewHolder();
@@ -411,8 +409,8 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                         public void onSuccess(ImageIcon icon, String path) {
                             try {
                                 //Desktop.getDesktop().open(new File(path));
-                                //ImageViewerFrame frame = new ImageViewerFrame(path);
-                                // frame.setVisible(true);
+                                ImageViewerFrame frame = new ImageViewerFrame(path);
+                                frame.setVisible(true);
 
                                 // 如果图片获取成功，则重新加载缩略图
                                 ImageIcon thumbIcon = (ImageIcon) imageLabel.getIcon();

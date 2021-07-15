@@ -5,10 +5,8 @@ import java.awt.*;
 /**
  * 左侧文本聊天气泡
  */
-public class RCLeftTextMessageBubble extends RCTextMessageBubble
-{
-    public RCLeftTextMessageBubble()
-    {
+public class RCLeftTextMessageBubble extends RCTextMessageBubble {
+    public RCLeftTextMessageBubble() {
         NinePatchImageIcon backgroundNormal = new NinePatchImageIcon(this.getClass().getResource("/image/left.9.png"));
         NinePatchImageIcon backgroundActive = new NinePatchImageIcon(this.getClass().getResource("/image/left_active.9.png"));
         setBackgroundNormalIcon(backgroundNormal);
@@ -17,8 +15,7 @@ public class RCLeftTextMessageBubble extends RCTextMessageBubble
     }
 
     @Override
-    public Insets getInsets()
-    {
+    public Insets getInsets() {
         return new Insets(10, 15, 10, 10);
     }
 }

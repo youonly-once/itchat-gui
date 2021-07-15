@@ -1,15 +1,10 @@
 package cn.shu.wechat.timedtask;
 
-import cn.shu.wechat.beans.pojo.ContactsExample;
-import cn.shu.wechat.beans.pojo.MemberExample;
-import cn.shu.wechat.beans.pojo.MemberGroupRExample;
 import cn.shu.wechat.controller.LoginController;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.mapper.ContactsMapper;
 import cn.shu.wechat.mapper.MemberGroupRMapper;
-import cn.shu.wechat.mapper.MemberMapper;
 import cn.shu.wechat.service.ILoginService;
-import cn.shu.wechat.service.impl.LoginServiceImpl;
 import cn.shu.wechat.utils.ChartUtil;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import lombok.extern.log4j.Log4j2;
@@ -42,9 +37,8 @@ public class TimedTask {
     }
 
     //public static TimedTask getTimedTask() {
-       // return timedTask;
+    // return timedTask;
     //}
-
 
 
     //private static TimedTask timedTask = new TimedTask();
@@ -52,7 +46,7 @@ public class TimedTask {
      * 登录服务
      */
     @Resource
-    private ILoginService loginService ;//= LoginServiceImpl.getLoginService();
+    private ILoginService loginService;//= LoginServiceImpl.getLoginService();
     /**
      * 登录服务
      */
@@ -83,10 +77,9 @@ public class TimedTask {
             loginService.webWxGetContact();
 
             loginService.WebWxBatchGetContact();
-          //  log.info("更新联系人完成！");
+            //  log.info("更新联系人完成！");
         }
     }
-    
 
 
     /**
@@ -104,7 +97,7 @@ public class TimedTask {
                 // 心跳检测不准确
                 log.error("微信已离线");
                 //重新开启 好像是线程循环出了问题
-                log.error("活跃线程数量：{}",( (ThreadPoolExecutor)ExecutorServiceUtil.getReceivingExecutorService()).getActiveCount());
+                log.error("活跃线程数量：{}", ((ThreadPoolExecutor) ExecutorServiceUtil.getReceivingExecutorService()).getActiveCount());
 
                 loginService.startReceiving();
             }

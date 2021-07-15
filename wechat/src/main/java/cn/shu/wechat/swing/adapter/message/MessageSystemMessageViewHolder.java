@@ -10,22 +10,19 @@ import java.awt.*;
 /**
  * Created by song on 17-6-2.
  */
-public class MessageSystemMessageViewHolder extends BaseMessageViewHolder
-{
+public class MessageSystemMessageViewHolder extends BaseMessageViewHolder {
     //public JLabel size = new JLabel();
     public JLabel text = new JLabel();
-    private JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER,5,0));
+    private JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
     private JPanel textPanel;
 
-    public MessageSystemMessageViewHolder()
-    {
+    public MessageSystemMessageViewHolder() {
         avatar = null;
         initComponents();
         initView();
     }
 
-    private void initComponents()
-    {
+    private void initComponents() {
         setBackground(Colors.WINDOW_BACKGROUND);
         timePanel.setBackground(Colors.WINDOW_BACKGROUND);
 
@@ -33,16 +30,13 @@ public class MessageSystemMessageViewHolder extends BaseMessageViewHolder
         time.setFont(FontUtil.getDefaultFont(12));
         text.setHorizontalTextPosition(SwingConstants.CENTER);
         text.setFont(FontUtil.getDefaultFont(12));
-        textPanel = new JPanel()
-        {
+        textPanel = new JPanel() {
             @Override
-            public Insets getInsets()
-            {
+            public Insets getInsets() {
                 return new Insets(-3, 0, -3, 0);
             }
 
-            public void paint(Graphics g)
-            {
+            public void paint(Graphics g) {
                 Graphics2D g2d = (Graphics2D) g.create();
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2d.setColor(new Color(195, 195, 195));
@@ -58,8 +52,7 @@ public class MessageSystemMessageViewHolder extends BaseMessageViewHolder
         textPanel.setFont(FontUtil.getDefaultFont(12));
     }
 
-    private void initView()
-    {
+    private void initView() {
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.CENTER, 0, 0, true, false));
         timePanel.add(time);

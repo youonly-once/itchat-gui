@@ -4,7 +4,6 @@ import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.beans.msg.sync.AddMsgList;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.core.MsgCenter;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 
 /**
  * @作者 舒新胜
@@ -14,7 +13,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 //@ControllerAdvice(basePackages = "cn.shu.wechat")
 public class ExceptionHandler {
 
-   // @org.springframework.web.bind.annotation.ExceptionHandler(Exception.class)
+    // @org.springframework.web.bind.annotation.ExceptionHandler(Exception.class)
     public void handler(Exception e) {
         System.out.println(Thread.currentThread().getName());
         AddMsgList msg = MsgCenter.threadLocalOfMsg.get();

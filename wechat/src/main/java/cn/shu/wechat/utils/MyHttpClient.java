@@ -1,13 +1,8 @@
 package cn.shu.wechat.utils;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import lombok.extern.log4j.Log4j2;
-import org.apache.http.*;
+import org.apache.http.Consts;
+import org.apache.http.HttpEntity;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -21,6 +16,12 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * HTTP访问类，对Apache HttpClient进行简单封装，适配器模式
@@ -110,7 +111,7 @@ public class MyHttpClient {
             CloseableHttpResponse response = myHttpClient.execute(httpGet);
             entity = response.getEntity();
         } catch (IOException e) {
-           // log.error(e.getMessage());
+            // log.error(e.getMessage());
         }
 
         return entity;

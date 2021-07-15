@@ -1,13 +1,14 @@
 package cn.shu.wechat.core;
 
-import java.util.*;
+import cn.shu.wechat.beans.pojo.Contacts;
+import cn.shu.wechat.enums.parameters.BaseParaEnum;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-
-import cn.shu.wechat.beans.pojo.Contacts;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import cn.shu.wechat.enums.parameters.BaseParaEnum;
 
 
 /**
@@ -54,7 +55,6 @@ public class Core {
 
     /**
      * 好友+群聊+公众号+特殊账号
-     *
      */
 
     static private Map<String, Contacts> memberMap = new ConcurrentHashMap<>(1024);
@@ -109,8 +109,6 @@ public class Core {
      * 多线程下载 用安全ConcurrentHashMap
      */
     static private Map<String, String> contactHeadImgPath = new ConcurrentHashMap<>();
-
-
 
 
     /**

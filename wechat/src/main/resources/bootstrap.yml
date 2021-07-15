@@ -29,7 +29,7 @@ management:
       base-path: /
       exposure:
         #暴露所有信息
-        include: ["*"]
+        include: [ "*" ]
   endpoint:
     shutdown:
       #允许使用actuator关闭服务

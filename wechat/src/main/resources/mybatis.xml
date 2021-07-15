@@ -5,14 +5,14 @@
     <!-- 引用db.properties配置文件 -->
     <properties resource="db.properties"/>
 
-<!--    <typeAliases>
-        <typeAlias type="cn.shu.wechat.swing.db.model.CurrentUser" alias="CurrentUser"/>
-        <typeAlias type="cn.shu.wechat.swing.db.model.Room" alias="Room"/>
-        <typeAlias type="cn.shu.wechat.swing.db.model.Message" alias="Message"/>
-        <typeAlias type="cn.shu.wechat.swing.db.model.FileAttachment" alias="FileAttachment"/>
-        <typeAlias type="cn.shu.wechat.swing.db.model.ImageAttachment" alias="ImageAttachment"/>
-        <typeAlias type="cn.shu.wechat.swing.db.model.ContactsUser" alias="ContactsUser"/>
-    </typeAliases>-->
+    <!--    <typeAliases>
+            <typeAlias type="cn.shu.wechat.swing.db.model.CurrentUser" alias="CurrentUser"/>
+            <typeAlias type="cn.shu.wechat.swing.db.model.Room" alias="Room"/>
+            <typeAlias type="cn.shu.wechat.swing.db.model.Message" alias="Message"/>
+            <typeAlias type="cn.shu.wechat.swing.db.model.FileAttachment" alias="FileAttachment"/>
+            <typeAlias type="cn.shu.wechat.swing.db.model.ImageAttachment" alias="ImageAttachment"/>
+            <typeAlias type="cn.shu.wechat.swing.db.model.ContactsUser" alias="ContactsUser"/>
+        </typeAliases>-->
 
     <!-- development : 开发模式 work : 工作模式 -->
     <environments default="development">
@@ -31,14 +31,14 @@
 
 
     <mappers>
-<!--        <mapper resource="mapper/TableMapper.xml"/>
+        <!--        <mapper resource="mapper/TableMapper.xml"/>
 
-        <mapper resource="mapper/CurrentUserMapper.xml"/>
-        <mapper resource="mapper/RoomMapper.xml"/>-->
+                <mapper resource="mapper/CurrentUserMapper.xml"/>
+                <mapper resource="mapper/RoomMapper.xml"/>-->
         <mapper resource="mapper/MessageMapper.xml"/>
-<!--        <mapper resource="mapper/FileAttachmentMapper.xml"/>
-        <mapper resource="mapper/ImageAttachmentMapper.xml"/>
-        <mapper resource="mapper/ContactsUserMapper.xml"/>-->
+        <!--        <mapper resource="mapper/FileAttachmentMapper.xml"/>
+                <mapper resource="mapper/ImageAttachmentMapper.xml"/>
+                <mapper resource="mapper/ContactsUserMapper.xml"/>-->
     </mappers>
 
 

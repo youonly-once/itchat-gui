@@ -1,6 +1,5 @@
 package cn.shu.wechat.swing.components.message;
 
-import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.FontUtil;
 
 import javax.swing.*;
@@ -11,19 +10,17 @@ import java.awt.event.MouseListener;
 
 /**
  * 文本气泡
- *
+ * <p>
  * Created by song on 17-6-3.
  */
-public class RCTextMessageBubble extends JTextArea implements RCMessageBubble
-{
-    private  NinePatchImageIcon backgroundNormalIcon;
-    private  NinePatchImageIcon backgroundActiveIcon;
+public class RCTextMessageBubble extends JTextArea implements RCMessageBubble {
+    private NinePatchImageIcon backgroundNormalIcon;
+    private NinePatchImageIcon backgroundActiveIcon;
     private Icon currentBackgroundIcon;
     //private String[] lineArr;
 
 
-    public RCTextMessageBubble()
-    {
+    public RCTextMessageBubble() {
         setOpaque(false);
         setLineWrap(true);
         setWrapStyleWord(false);
@@ -33,37 +30,30 @@ public class RCTextMessageBubble extends JTextArea implements RCMessageBubble
         setListener();
     }
 
-    public void setBackgroundIcon(Icon icon)
-    {
+    public void setBackgroundIcon(Icon icon) {
         currentBackgroundIcon = icon;
     }
 
     @Override
-    protected void paintComponent(Graphics g)
-    {
-        if (currentBackgroundIcon != null)
-        {
+    protected void paintComponent(Graphics g) {
+        if (currentBackgroundIcon != null) {
             currentBackgroundIcon.paintIcon(this, g, 0, 0);
         }
         super.paintComponent(g);
     }
 
-    private void setListener()
-    {
-        addMouseListener(new MouseAdapter()
-        {
+    private void setListener() {
+        addMouseListener(new MouseAdapter() {
 
             @Override
-            public void mouseEntered(MouseEvent e)
-            {
+            public void mouseEntered(MouseEvent e) {
                 setBackgroundIcon(backgroundActiveIcon);
                 repaint();
                 super.mouseEntered(e);
             }
 
             @Override
-            public void mouseExited(MouseEvent e)
-            {
+            public void mouseExited(MouseEvent e) {
                 setBackgroundIcon(backgroundNormalIcon);
                 repaint();
                 super.mouseExited(e);
@@ -112,8 +102,7 @@ public class RCTextMessageBubble extends JTextArea implements RCMessageBubble
     }*/
 
     @Override
-    public Insets getInsets()
-    {
+    public Insets getInsets() {
         return new Insets(10, 10, 10, 10);
     }
 
@@ -140,43 +129,34 @@ public class RCTextMessageBubble extends JTextArea implements RCMessageBubble
     }*/
 
 
-    public NinePatchImageIcon getBackgroundNormalIcon()
-    {
+    public NinePatchImageIcon getBackgroundNormalIcon() {
         return backgroundNormalIcon;
     }
 
-    public void setBackgroundNormalIcon(NinePatchImageIcon backgroundNormalIcon)
-    {
+    public void setBackgroundNormalIcon(NinePatchImageIcon backgroundNormalIcon) {
         this.backgroundNormalIcon = backgroundNormalIcon;
     }
 
-    public NinePatchImageIcon getBackgroundActiveIcon()
-    {
+    public NinePatchImageIcon getBackgroundActiveIcon() {
         return backgroundActiveIcon;
     }
 
-    public void setBackgroundActiveIcon(NinePatchImageIcon backgroundActiveIcon)
-    {
+    public void setBackgroundActiveIcon(NinePatchImageIcon backgroundActiveIcon) {
         this.backgroundActiveIcon = backgroundActiveIcon;
     }
 
-    public Icon getCurrentBackgroundIcon()
-    {
+    public Icon getCurrentBackgroundIcon() {
         return currentBackgroundIcon;
     }
 
-    public void setCurrentBackgroundIcon(Icon currentBackgroundIcon)
-    {
+    public void setCurrentBackgroundIcon(Icon currentBackgroundIcon) {
         this.currentBackgroundIcon = currentBackgroundIcon;
     }
 
     @Override
-    public synchronized void addMouseListener(MouseListener l)
-    {
-        for (MouseListener listener : getMouseListeners())
-        {
-            if (listener == l)
-            {
+    public synchronized void addMouseListener(MouseListener l) {
+        for (MouseListener listener : getMouseListeners()) {
+            if (listener == l) {
                 return;
             }
         }

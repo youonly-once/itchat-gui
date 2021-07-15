@@ -1,8 +1,6 @@
 package cn.shu.wechat.beans.msg.send;
 
 import cn.shu.wechat.core.Core;
-import com.alibaba.fastjson.annotation.JSONField;
-import lombok.Data;
 
 import java.util.Date;
 import java.util.Random;

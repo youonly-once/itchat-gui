@@ -11,8 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ContactsItem implements Comparable<ContactsItem>
-{
+public class ContactsItem implements Comparable<ContactsItem> {
     /**
      * 联系人id
      */
@@ -30,8 +29,7 @@ public class ContactsItem implements Comparable<ContactsItem>
 
 
     @Override
-    public int compareTo(ContactsItem o)
-    {
+    public int compareTo(ContactsItem o) {
         String tc = CharacterParser.getSelling(this.getDisplayName()).toUpperCase();
         String oc = CharacterParser.getSelling(o.getDisplayName()).toUpperCase();
         return tc.compareTo(oc);

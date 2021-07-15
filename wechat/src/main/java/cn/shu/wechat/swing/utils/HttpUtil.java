@@ -1,6 +1,9 @@
 package cn.shu.wechat.swing.utils;
 
 
+import okhttp3.*;
+
+import javax.net.ssl.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,80 +15,48 @@ import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
-import okhttp3.FormBody;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-
-
-public class HttpUtil
-{
+public class HttpUtil {
 
     public static OkHttpClient client = new OkHttpClient();
 
-    static
-    {
-        try
-        {
+    static {
+        try {
             client = initClientBuilder().build();
-        }
-        catch (KeyManagementException e)
-        {
+        } catch (KeyManagementException e) {
             e.printStackTrace();
-        }
-        catch (NoSuchAlgorithmException e)
-        {
+        } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
     }
 
-    public static String get(String url) throws IOException
-    {
+    public static String get(String url) throws IOException {
         return get(url, null, null);
     }
 
-    public static byte[] getBytes(String url, Map<String, String> headers, Map<String, String> params) throws IOException
-    {
+    public static byte[] getBytes(String url, Map<String, String> headers, Map<String, String> params) throws IOException {
         Response response = _get(url, headers, params);
-        if (response != null)
-        {
+        if (response != null) {
             return response.body().bytes();
-        }
-        else
-        {
+        } else {
             throw new IOException("Get请求失败:" + url);
         }
     }
 
-    public static String get(String url, Map<String, String> headers, Map<String, String> params) throws IOException
-    {
+    public static String get(String url, Map<String, String> headers, Map<String, String> params) throws IOException {
         Response response = _get(url, headers, params);
-        if (response != null)
-        {
+        if (response != null) {
             return response.body().string();
-        }
-        else
-        {
+        } else {
             throw new IOException("Get请求失败:" + url);
         }
     }
 
-    private static Response _get(String url, Map<String, String> headers, Map<String, String> params) throws IOException
-    {
-        if (params != null && params.size() > 0)
-        {
+    private static Response _get(String url, Map<String, String> headers, Map<String, String> params) throws IOException {
+        if (params != null && params.size() > 0) {
             StringBuffer buffer = new StringBuffer(url);
             buffer.append("?");
-            for (String key : params.keySet())
-            {
+            for (String key : params.keySet()) {
                 buffer.append(key + "=");
                 buffer.append(params.get(key) + "&");
             }
@@ -93,10 +64,8 @@ public class HttpUtil
         }
 
         Request.Builder reqBuilder = new Request.Builder().url(url);
-        if (headers != null && headers.size() > 0)
-        {
-            for (String key : headers.keySet())
-            {
+        if (headers != null && headers.size() > 0) {
+            for (String key : headers.keySet()) {
                 reqBuilder.addHeader(key, headers.get(key));
             }
         }
@@ -104,31 +73,24 @@ public class HttpUtil
 
         Request request = reqBuilder.build();
         Response response = client.newCall(request).execute();
-        if (response.isSuccessful())
-        {
+        if (response.isSuccessful()) {
             return response;
-        }
-        else
-        {
+        } else {
             throw new IOException("Unexpected code " + response);
         }
     }
 
 
-    public static String post(String url, Map<String, String> headers, Map<String, String> params) throws IOException
-    {
+    public static String post(String url, Map<String, String> headers, Map<String, String> params) throws IOException {
         FormBody.Builder builder = new FormBody.Builder();
-        for (String key : params.keySet())
-        {
+        for (String key : params.keySet()) {
             builder.add(key, params.get(key));
         }
         RequestBody requestBodyPost = builder.build();
 
         Request.Builder reqBuilder = new Request.Builder().url(url);
-        if (headers != null && headers.size() > 0)
-        {
-            for (String key : headers.keySet())
-            {
+        if (headers != null && headers.size() > 0) {
+            for (String key : headers.keySet()) {
                 reqBuilder.addHeader(key, headers.get(key));
             }
         }
@@ -138,35 +100,29 @@ public class HttpUtil
         return response.body().string();
     }
 
-    public static boolean upload(String url, String type, byte[] part) throws IOException
-    {
+    public static boolean upload(String url, String type, byte[] part) throws IOException {
         Request request = new Request.Builder()
                 .url(url)
                 .post(RequestBody.create(MediaType.parse(type), part))
                 .build();
 
         Response response = client.newCall(request).execute();
-        if (response.isSuccessful())
-        {
+        if (response.isSuccessful()) {
             return true;
         }
 
         return false;
     }
 
-    public static byte[] download(String url) throws IOException
-    {
+    public static byte[] download(String url) throws IOException {
         return download(url, null, null, null);
     }
 
-    public static byte[] download(String url, Map<String, String> headers, Map<String, String> params, ProgressListener listener) throws IOException
-    {
-        if (params != null && params.size() > 0)
-        {
+    public static byte[] download(String url, Map<String, String> headers, Map<String, String> params, ProgressListener listener) throws IOException {
+        if (params != null && params.size() > 0) {
             StringBuffer buffer = new StringBuffer(url);
             buffer.append("?");
-            for (String key : params.keySet())
-            {
+            for (String key : params.keySet()) {
                 buffer.append(key + "=");
                 buffer.append(params.get(key) + "&");
             }
@@ -174,10 +130,8 @@ public class HttpUtil
         }
 
         Request.Builder reqBuilder = new Request.Builder().url(url);
-        if (headers != null && headers.size() > 0)
-        {
-            for (String key : headers.keySet())
-            {
+        if (headers != null && headers.size() > 0) {
+            for (String key : headers.keySet()) {
                 reqBuilder.addHeader(key, headers.get(key));
             }
         }
@@ -186,11 +140,9 @@ public class HttpUtil
         Request request = reqBuilder.build();
         byte[] data = null;
         Response response = null;
-        try
-        {
+        try {
             response = client.newCall(request).execute();
-            if (response.isSuccessful())
-            {
+            if (response.isSuccessful()) {
                 InputStream inputStream = response.body().byteStream();
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                 //byte[] buff = new byte[2048000];
@@ -201,13 +153,11 @@ public class HttpUtil
                 //total = response.body().bytes().length;
                 //long total = inputStream.available();
                 long sum = 0L;
-                while ((len = inputStream.read(buff)) > -1)
-                {
+                while ((len = inputStream.read(buff)) > -1) {
                     outputStream.write(buff, 0, len);
                     sum += len;
 
-                    if (listener != null)
-                    {
+                    if (listener != null) {
                         int progress = (int) (sum * 1.0f / total * 100);
                         listener.onProgress(progress);
                     }
@@ -219,15 +169,10 @@ public class HttpUtil
                 inputStream.close();
                 outputStream.close();
             }
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             throw e;
-        }
-        finally
-        {
-            if (response != null)
-            {
+        } finally {
+            if (response != null) {
                 response.close();
             }
         }
@@ -235,26 +180,21 @@ public class HttpUtil
         return data;
     }
 
-    public static OkHttpClient.Builder initClientBuilder() throws KeyManagementException, NoSuchAlgorithmException
-    {
-        X509TrustManager xtm = new X509TrustManager()
-        {
+    public static OkHttpClient.Builder initClientBuilder() throws KeyManagementException, NoSuchAlgorithmException {
+        X509TrustManager xtm = new X509TrustManager() {
 
             @Override
-            public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException
-            {
+            public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
 
             }
 
             @Override
-            public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException
-            {
+            public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
 
             }
 
             @Override
-            public X509Certificate[] getAcceptedIssuers()
-            {
+            public X509Certificate[] getAcceptedIssuers() {
                 X509Certificate[] x509Certificates = new X509Certificate[0];
                 return x509Certificates;
             }
@@ -266,11 +206,9 @@ public class HttpUtil
 
         sslContext.init(null, new TrustManager[]{xtm}, new SecureRandom());
 
-        HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier()
-        {
+        HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
             @Override
-            public boolean verify(String hostname, SSLSession session)
-            {
+            public boolean verify(String hostname, SSLSession session) {
                 return true;
             }
         };
@@ -285,8 +223,7 @@ public class HttpUtil
     }
 
 
-    public interface ProgressListener
-    {
+    public interface ProgressListener {
         void onProgress(int process);
     }
 }

@@ -34,11 +34,11 @@
             useGeneratedKeys="true">
         <!--@mbg.generated-->
         insert into attr_history (UserName, NickName, Attr,
-                                  RemarkName, CreateTime, NewVal,
-                                  OldVal)
+        RemarkName, CreateTime, NewVal,
+        OldVal)
         values (#{username,jdbcType=VARCHAR}, #{nickname,jdbcType=VARCHAR}, #{attr,jdbcType=VARCHAR},
-                #{remarkname,jdbcType=VARCHAR}, #{createtime,jdbcType=TIMESTAMP}, #{newval,jdbcType=VARCHAR},
-                #{oldval,jdbcType=VARCHAR})
+        #{remarkname,jdbcType=VARCHAR}, #{createtime,jdbcType=TIMESTAMP}, #{newval,jdbcType=VARCHAR},
+        #{oldval,jdbcType=VARCHAR})
     </insert>
     <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="cn.shu.wechat.beans.pojo.AttrHistory"
             useGeneratedKeys="true">
@@ -122,13 +122,13 @@
     <update id="updateByPrimaryKey" parameterType="cn.shu.wechat.beans.pojo.AttrHistory">
         <!--@mbg.generated-->
         update attr_history
-        set UserName   = #{username,jdbcType=VARCHAR},
-            NickName   = #{nickname,jdbcType=VARCHAR},
-            Attr       = #{attr,jdbcType=VARCHAR},
-            RemarkName = #{remarkname,jdbcType=VARCHAR},
-            CreateTime = #{createtime,jdbcType=TIMESTAMP},
-            NewVal     = #{newval,jdbcType=VARCHAR},
-            OldVal     = #{oldval,jdbcType=VARCHAR}
+        set UserName = #{username,jdbcType=VARCHAR},
+        NickName = #{nickname,jdbcType=VARCHAR},
+        Attr = #{attr,jdbcType=VARCHAR},
+        RemarkName = #{remarkname,jdbcType=VARCHAR},
+        CreateTime = #{createtime,jdbcType=TIMESTAMP},
+        NewVal = #{newval,jdbcType=VARCHAR},
+        OldVal = #{oldval,jdbcType=VARCHAR}
         where id = #{id,jdbcType=INTEGER}
     </update>
     <update id="updateBatch" parameterType="java.util.List">
@@ -179,13 +179,13 @@
     <insert id="batchInsert" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
         <!--@mbg.generated-->
         insert into attr_history
-                (UserName, NickName, Attr, RemarkName, CreateTime, NewVal, OldVal)
-                values
+        (UserName, NickName, Attr, RemarkName, CreateTime, NewVal, OldVal)
+        values
         <foreach collection="list" item="item" separator=",">
             (#{item.username,jdbcType=VARCHAR}, #{item.nickname,jdbcType=VARCHAR}, #{item.attr,jdbcType=VARCHAR},
-             #{item.remarkname,jdbcType=VARCHAR}, #{item.createtime,jdbcType=TIMESTAMP},
-             #{item.newval,jdbcType=VARCHAR},
-             #{item.oldval,jdbcType=VARCHAR})
+            #{item.remarkname,jdbcType=VARCHAR}, #{item.createtime,jdbcType=TIMESTAMP},
+            #{item.newval,jdbcType=VARCHAR},
+            #{item.oldval,jdbcType=VARCHAR})
         </foreach>
     </insert>
     <insert id="insertOrUpdate" keyColumn="id" keyProperty="id" parameterType="cn.shu.wechat.beans.pojo.AttrHistory"
@@ -223,12 +223,12 @@
                 id = #{id,jdbcType=INTEGER},
             </if>
             UserName = #{username,jdbcType=VARCHAR},
-                    NickName = #{nickname,jdbcType=VARCHAR},
-                    Attr = #{attr,jdbcType=VARCHAR},
-                    RemarkName = #{remarkname,jdbcType=VARCHAR},
-                    CreateTime = #{createtime,jdbcType=TIMESTAMP},
-                    NewVal = #{newval,jdbcType=VARCHAR},
-                    OldVal = #{oldval,jdbcType=VARCHAR},
+            NickName = #{nickname,jdbcType=VARCHAR},
+            Attr = #{attr,jdbcType=VARCHAR},
+            RemarkName = #{remarkname,jdbcType=VARCHAR},
+            CreateTime = #{createtime,jdbcType=TIMESTAMP},
+            NewVal = #{newval,jdbcType=VARCHAR},
+            OldVal = #{oldval,jdbcType=VARCHAR},
         </trim>
     </insert>
     <insert id="insertOrUpdateSelective" keyColumn="id" keyProperty="id"
@@ -320,17 +320,15 @@
         select NickName AS name, COUNT(*) as cou
         from attr_history
         GROUP BY NickName
-        ORDER BY COUNT(*) desc
-        LIMIT 8
-        ,
-        #{top};
+        ORDER BY COUNT(*) desc LIMIT 8
+        , #{top};
     </select>
     <select id="selectUpdateAttrCount" resultType="map">
         select Attr AS name, COUNT(*) as cou
         from attr_history
         GROUP BY Attr
         ORDER BY COUNT(*) desc
-        LIMIT #{top};
+            LIMIT #{top};
     </select>
 
     <select id="selectByAll" resultMap="BaseResultMap">

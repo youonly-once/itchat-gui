@@ -1,45 +1,33 @@
 package cn.shu.wechat.swing.components;
 
-import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageOutputStream;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.geom.GeneralPath;
-import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  * Created by song on 17-5-29.
  */
-public class ImagePanel extends JPanel
-{
+public class ImagePanel extends JPanel {
     private GeneralPath path = new GeneralPath();
     private Image image;
 
-    public ImagePanel(Image image)
-    {
+    public ImagePanel(Image image) {
         this.image = image;
     }
 
-    public ImagePanel()
-    {
+    public ImagePanel() {
 
     }
 
-    public void setImage(Image image)
-    {
+    public void setImage(Image image) {
         this.image = image;
     }
 
 
     @Override
-    public void paint(Graphics g)
-    {
+    public void paint(Graphics g) {
         int width = this.getWidth(), height = this.getHeight();
         // 图像缩放到容器宽高
         //ImageIcon imageIcon = new ImageIcon();
@@ -50,13 +38,11 @@ public class ImagePanel extends JPanel
         //path.append(rect, false);
         //g2.setClip(path);
 
-        try
-        {
+        try {
             Image img = setRadius(this.image, width, height, 10);
             g2.drawImage(img, 0, 0, null);
             g2.dispose();
-        } catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -64,12 +50,13 @@ public class ImagePanel extends JPanel
 
     /**
      * 图片设置圆角
+     *
      * @param srcImage
      * @param radius
      * @return
      * @throws IOException
      */
-    public static BufferedImage setRadius(Image srcImage,int width, int height, int radius) throws IOException{
+    public static BufferedImage setRadius(Image srcImage, int width, int height, int radius) throws IOException {
 
         /*if (srcImage.getWidth(null) > width || srcImage.getHeight(null) > height)
         {

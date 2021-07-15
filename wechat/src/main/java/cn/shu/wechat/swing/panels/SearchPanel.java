@@ -8,18 +8,14 @@ import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCSearchTextField;
-import cn.shu.wechat.swing.db.model.ContactsUser;
 import cn.shu.wechat.swing.db.model.FileAttachment;
 import cn.shu.wechat.swing.db.model.Message;
-import cn.shu.wechat.swing.db.model.Room;
 import cn.shu.wechat.swing.db.service.ContactsUserService;
 import cn.shu.wechat.swing.db.service.FileAttachmentService;
 import cn.shu.wechat.swing.db.service.MessageService;
 import cn.shu.wechat.swing.db.service.RoomService;
 import cn.shu.wechat.swing.entity.SearchResultItem;
 import cn.shu.wechat.swing.utils.FontUtil;
-import cn.shu.wechat.utils.ExecutorServiceUtil;
-import com.alibaba.fastjson.JSONObject;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -27,7 +23,6 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -84,18 +79,18 @@ public class SearchPanel extends ParentAvailablePanel {
           /*      ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
                     @Override
                     public void run() {*/
-                        ListPanel listPanel = ListPanel.getContext();
-                        SearchResultPanel searchResultPanel = SearchResultPanel.getContext();
+                ListPanel listPanel = ListPanel.getContext();
+                SearchResultPanel searchResultPanel = SearchResultPanel.getContext();
 
-                        listPanel.showPanel(ListPanel.SEARCH);
+                listPanel.showPanel(ListPanel.SEARCH);
 
-                        List<SearchResultItem> data = searchUserOrRoom(searchTextField.getText());
-                        searchResultPanel.setData(data);
-                        searchResultPanel.setKeyWord(searchTextField.getText());
-                        searchResultPanel.notifyDataSetChanged(false);
-                        searchResultPanel.getTipLabel().setVisible(false);
-                    }
-                //});
+                List<SearchResultItem> data = searchUserOrRoom(searchTextField.getText());
+                searchResultPanel.setData(data);
+                searchResultPanel.setKeyWord(searchTextField.getText());
+                searchResultPanel.notifyDataSetChanged(false);
+                searchResultPanel.getTipLabel().setVisible(false);
+            }
+            //});
 
 
             //}
@@ -105,23 +100,23 @@ public class SearchPanel extends ParentAvailablePanel {
               /*  ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
                     @Override
                     public void run() {*/
-                        ListPanel listPanel = ListPanel.getContext();
-                        if (searchTextField.getText() == null || searchTextField.getText().isEmpty()) {
-                            listPanel.showPanel(listPanel.getPreviousTab());
-                            return;
-                        }
+                ListPanel listPanel = ListPanel.getContext();
+                if (searchTextField.getText() == null || searchTextField.getText().isEmpty()) {
+                    listPanel.showPanel(listPanel.getPreviousTab());
+                    return;
+                }
 
-                        SearchResultPanel searchResultPanel = SearchResultPanel.getContext();
+                SearchResultPanel searchResultPanel = SearchResultPanel.getContext();
 
-                        listPanel.showPanel(ListPanel.SEARCH);
+                listPanel.showPanel(ListPanel.SEARCH);
 
-                        List<SearchResultItem> data = searchUserOrRoom(searchTextField.getText());
-                        searchResultPanel.setData(data);
-                        searchResultPanel.setKeyWord(searchTextField.getText());
-                        searchResultPanel.notifyDataSetChanged(false);
-                        searchResultPanel.getTipLabel().setVisible(false);
-                    }
-                //});
+                List<SearchResultItem> data = searchUserOrRoom(searchTextField.getText());
+                searchResultPanel.setData(data);
+                searchResultPanel.setKeyWord(searchTextField.getText());
+                searchResultPanel.notifyDataSetChanged(false);
+                searchResultPanel.getTipLabel().setVisible(false);
+            }
+            //});
 
 
             //}

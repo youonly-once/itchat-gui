@@ -1,12 +1,12 @@
 package cn.shu.wechat.utils;
 
+import cn.shu.wechat.enums.OsNameEnum;
+import lombok.extern.log4j.Log4j2;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import lombok.extern.log4j.Log4j2;
-import cn.shu.wechat.enums.OsNameEnum;
 
 /**
  * 配置信息

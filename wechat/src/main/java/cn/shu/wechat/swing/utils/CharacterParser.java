@@ -140,7 +140,7 @@ public class CharacterParser {
     /**
      * 词组解析 * * @param chs * @return
      */
-    public  static String getSelling(String chs) {
+    public static String getSelling(String chs) {
         String key, value;
         StringBuilder buffer = new StringBuilder();
         for (int i = 0; i < chs.length(); i++) {

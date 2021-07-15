@@ -1,38 +1,33 @@
 package cn.shu.wechat.core;
 
-import java.util.*;
-
-import cn.shu.wechat.beans.pojo.AttrHistory;
-import cn.shu.wechat.beans.pojo.Contacts;
-import cn.shu.wechat.beans.pojo.Message;
+import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.api.DownloadTools;
+import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.beans.msg.sync.AddMsgList;
 import cn.shu.wechat.beans.msg.sync.DelContactList;
 import cn.shu.wechat.beans.msg.sync.ModContactList;
+import cn.shu.wechat.beans.pojo.AttrHistory;
+import cn.shu.wechat.beans.pojo.Contacts;
+import cn.shu.wechat.beans.pojo.Message;
+import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
+import cn.shu.wechat.enums.WXSendMsgCodeEnum;
 import cn.shu.wechat.face.IMsgHandlerFace;
-import cn.shu.wechat.face.IMsgHandlerFaceImpl;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.panels.RoomsPanel;
-import cn.shu.wechat.utils.*;
-import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
-import cn.shu.wechat.enums.WXSendMsgCodeEnum;
-import cn.shu.wechat.api.DownloadTools;
+import cn.shu.wechat.utils.CommonTools;
+import cn.shu.wechat.utils.JSONObjectUtil;
+import cn.shu.wechat.utils.LogUtil;
 import com.alibaba.fastjson.JSON;
-import lombok.extern.log4j.Log4j2;
-
 import com.alibaba.fastjson.JSONObject;
-
-import cn.shu.wechat.api.MessageTools;
-import cn.shu.wechat.api.ContactsTools;
-
-
-import org.apache.ibatis.session.SqlSession;
+import lombok.extern.log4j.Log4j2;
 import org.nlpcn.commons.lang.util.StringUtil;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.*;
 
 import static cn.shu.wechat.enums.WXReceiveMsgCodeEnum.MSGTYPE_TEXT;
 
@@ -50,11 +45,11 @@ public class MsgCenter {
      * 消息处理类
      */
     @Resource
-    private IMsgHandlerFace msgHandler ;//= IMsgHandlerFaceImpl.getiMsgHandlerFace();
+    private IMsgHandlerFace msgHandler;//= IMsgHandlerFaceImpl.getiMsgHandlerFace();
 
-   /* //public static MsgCenter getMessageCenter() {
-        return messageCenter;
-    }*/
+    /* //public static MsgCenter getMessageCenter() {
+         return messageCenter;
+     }*/
     @Resource
     private MessageMapper messageMapper;
     //private static MsgCenter messageCenter= new MsgCenter();
@@ -99,9 +94,9 @@ public class MsgCenter {
         storeMsgToDB(msg);
         //打印日志
         String s = LogUtil.printFromMeg(msg, msgType.getDesc());
-        if(s.startsWith("系统通知")){
+        if (s.startsWith("系统通知")) {
             log.debug(s);
-        }else{
+        } else {
             MainFrame.getContext().playMessageSound();
             MainFrame.getContext().setTrayFlashing();
             log.info(s);
@@ -110,10 +105,10 @@ public class MsgCenter {
         //新增消息列表
         ;
         String userName = msg.getFromUserName();
-        if (userName.equals(Core.getUserName())){
+        if (userName.equals(Core.getUserName())) {
             userName = msg.getToUserName();
         }
-        if (msgType.getCode()<51) {
+        if (msgType.getCode() < 51) {
             //只显示常规消息
             //刷新消息
             ChatPanel.getContext().addOrUpdateMessageItem();
@@ -121,7 +116,7 @@ public class MsgCenter {
             Contacts contacts = Core.getMemberMap().get(userName);
             if (!Core.getRecentContacts().contains(contacts)) {
                 //添加新房间并制定
-                RoomsPanel.getContext().addRoom(contacts, msg.getContent(),1);
+                RoomsPanel.getContext().addRoom(contacts, msg.getContent(), 1);
                 Core.getRecentContacts().add(contacts);
             } else {
                 //更新消息 置顶
@@ -275,7 +270,7 @@ public class MsgCenter {
                 results.add(MessageTools.Result.builder().content(tip + "（" + name + "）属性更新：" + mapToString(differenceMap))
                         .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                         .build());
-               // Core.getContactMap().put(msg.getUserName(), newV);
+                // Core.getContactMap().put(msg.getUserName(), newV);
                 //存储数据库
                 store(differenceMap, oldV, results);
 

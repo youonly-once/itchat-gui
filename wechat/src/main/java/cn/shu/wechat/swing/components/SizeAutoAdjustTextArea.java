@@ -11,19 +11,18 @@ import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Created by song on 17-6-4.
  */
-public class SizeAutoAdjustTextArea extends JIMSendTextPane
-{
+public class SizeAutoAdjustTextArea extends JIMSendTextPane {
     private final FontMetrics fontMetrics;
     private String[] lineArr;
     private int maxWidth;
@@ -46,8 +45,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane
     int[][] urlRange;
 
 
-    public SizeAutoAdjustTextArea(int maxWidth)
-    {
+    public SizeAutoAdjustTextArea(int maxWidth) {
         this.maxWidth = maxWidth;
         setOpaque(false);
         //setLineWrap(true);
@@ -64,13 +62,11 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane
 
 
     @Override
-    public void setText(String t)
-    {
+    public void setText(String t) {
         // 对emoji的Unicode编码转别名
         t = EmojiParser.parseToAliases(t);
 
-        if (t == null)
-        {
+        if (t == null) {
             return;
         }
 
@@ -88,26 +84,22 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane
         int targetWidth = 20;
 
 
-        if (lineCount > 0)
-        {
+        if (lineCount > 0) {
             targetWidth = lineWidthArr[maxLengthLinePosition] + 10;
         }
         // 输入全为\n的情况
-        else
-        {
+        else {
             targetHeight = lineHeight;
             t = " ";
         }
 
         int contentWidth = maxWidth - 10;
         // 如果最长的一行宽度超过了最大宽度，就要重新计算高度
-        if (targetWidth > maxWidth)
-        {
+        if (targetWidth > maxWidth) {
             targetWidth = maxWidth;
 
             int totalLine = 0;
-            for (int lineWidth : lineWidthArr)
-            {
+            for (int lineWidth : lineWidthArr) {
                 int ret = lineWidth / contentWidth;
                 int l = ret == 0 ? ret : ret + 1;
                 totalLine += l == 0 ? 1 : l;
@@ -127,19 +119,16 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane
         // 插入emoji表情，并计算需要增加的高度
         Map<Integer, String> emojiPositionMap = insertEmoji(t);
         String exceptEmoji = t.replaceAll("\\r\\n", "\n");
-        for (String emoji : emojiPositionMap.values())
-        {
+        for (String emoji : emojiPositionMap.values()) {
             exceptEmoji = exceptEmoji.replace(emoji, "\0");
         }
         int emojiCount = emojiPositionMap.size();
 
         //全是emoji的情况
-        if (exceptEmoji.matches("\0+"))
-        {
+        if (exceptEmoji.matches("\0+")) {
             int totalWidth = emojiCount * emojiSize;
             targetHeight = emojiSize;
-            if (totalWidth > maxWidth)
-            {
+            if (totalWidth > maxWidth) {
                 targetWidth = maxWidth;
                 int ret = totalWidth / maxWidth;
                 int l = ret == 0 ? ret : ret + 1;
@@ -153,32 +142,27 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane
 
         int emojiExtraHeight = OSUtil.getOsType() == OSUtil.Mac_OS ? 8 : 5;
         int emojiIndex = 1;
-        for (int pos : emojiPositionMap.keySet())
-        {
+        for (int pos : emojiPositionMap.keySet()) {
             String substr = exceptEmoji.substring(0, pos + 1);
             int width = fontMetrics.stringWidth(substr) + emojiSize;
-            if (width > maxWidth || substr.indexOf("\n") > -1)
-            {
+            if (width > maxWidth || substr.indexOf("\n") > -1) {
                 targetHeight += emojiExtraHeight;
                 break;
             }
             emojiIndex++;
         }
-        if (emojiIndex < emojiCount)
-        {
+        if (emojiIndex < emojiCount) {
             targetHeight += (emojiCount - emojiIndex) * emojiExtraHeight;
         }
 
         // 如果有emoji表情，高度就要适当增加
-        if (emojiCount > 0)
-        {
+        if (emojiCount > 0) {
             targetHeight += emojiExtraHeight;
         }
 
         this.setPreferredSize(new Dimension(targetWidth, targetHeight + 2));
 
-        if (parseUrl)
-        {
+        if (parseUrl) {
             // 解析网址
             highlightUrls(t);
         }
@@ -190,8 +174,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane
      *
      * @param src
      */
-    private void highlightUrls(String src)
-    {
+    private void highlightUrls(String src) {
         urlList = parseUrl(src);
         urlRange = new int[urlList.size()][2];
 
@@ -203,12 +186,10 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane
 
         int startIndex = 0;
         int endIndex = 0;
-        for (int i = 0; i < urlList.size(); i++)
-        {
+        for (int i = 0; i < urlList.size(); i++) {
             String url = urlList.get(i);
             startIndex = src.indexOf(url);
-            if (startIndex > -1)
-            {
+            if (startIndex > -1) {
                 endIndex = startIndex + url.length();
                 doc.setCharacterAttributes(src.indexOf(url, startIndex), url.length(), bSet, false);
 
@@ -220,8 +201,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane
         }
     }
 
-    private Map<Integer, String> insertEmoji(String src)
-    {
+    private Map<Integer, String> insertEmoji(String src) {
         src = src.replaceAll("\\r\\n", "\n");
         Document doc = getDocument();
 
@@ -233,19 +213,14 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane
         char ch;
         boolean emojiStart = false;
         int pos = -1;
-        for (int i = 0; i < charArr.length; i++)
-        {
+        for (int i = 0; i < charArr.length; i++) {
             ch = charArr[i];
-            if (ch == ':')
-            {
-                if (!emojiStart)
-                {
+            if (ch == ':') {
+                if (!emojiStart) {
                     emojiStart = true;
                     stringBuilder.append(ch);
                     pos = i;
-                }
-                else
-                {
+                } else {
                     emojiStart = false;
                     stringBuilder.append(ch);
 
@@ -254,8 +229,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane
 
                     Icon icon = EmojiUtil.getEmoji(this, stringBuilder.toString());
 
-                    if (icon != null)
-                    {
+                    if (icon != null) {
                         retMap.put(pos, stringBuilder.toString());
 
                         insertIcon(icon);
@@ -263,27 +237,19 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane
                         charArr = resetCharArr(new String(charArr), stringBuilder.toString());
                         i = pos;
                         stringBuilder.setLength(0);
-                    }
-                    else
-                    {
+                    } else {
                         // 表情不存在，原样输出
-                        try
-                        {
+                        try {
                             doc.insertString(pos, stringBuilder.toString(), getCharacterAttributes());
-                        }
-                        catch (BadLocationException e)
-                        {
+                        } catch (BadLocationException e) {
                             e.printStackTrace();
                         }
                         stringBuilder.setLength(0);
 
                     }
                 }
-            }
-            else
-            {
-                if (emojiStart)
-                {
+            } else {
+                if (emojiStart) {
                     stringBuilder.append(ch);
                 }
             }
@@ -293,8 +259,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane
         return retMap;
     }
 
-    private char[] resetCharArr(String src, String s)
-    {
+    private char[] resetCharArr(String src, String s) {
         String str = src.replaceFirst(s, "#");
         return str.toCharArray();
     }
@@ -305,13 +270,11 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane
      *
      * @return
      */
-    private List<LineEmojiInfo> parseLineEmojiInfo()
-    {
+    private List<LineEmojiInfo> parseLineEmojiInfo() {
         List<LineEmojiInfo> infoList = new ArrayList<>(lineArr.length);
         List<String> emojiList;
         LineEmojiInfo info;
-        for (int i = 0; i < lineArr.length; i++)
-        {
+        for (int i = 0; i < lineArr.length; i++) {
             emojiList = parseEmoji(lineArr[i]);
             info = new LineEmojiInfo(emojiList.size(), emojiList);
             infoList.add(info);
@@ -327,17 +290,14 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane
      * @param src
      * @return
      */
-    private List<String> parseEmoji(String src)
-    {
+    private List<String> parseEmoji(String src) {
         List<String> emojiList = new ArrayList<>();
 
         Matcher emojiMatcher = emojiPattern.matcher(src);
 
-        while (emojiMatcher.find())
-        {
+        while (emojiMatcher.find()) {
             String code = emojiMatcher.group();
-            if (EmojiUtil.isRecognizableEmoji(this, code))
-            {
+            if (EmojiUtil.isRecognizableEmoji(this, code)) {
                 emojiList.add(code);
             }
         }
@@ -352,8 +312,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane
      * @param text 消息文本
      * @return 消息的行数，以\n分隔
      */
-    private int parseLineCount(String text)
-    {
+    private int parseLineCount(String text) {
         lineArr = text.split("\\n");
 
         return lineArr.length;
@@ -366,22 +325,19 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane
      * @param lineEmojiInfoList
      * @return
      */
-    private int[] parseLineActualWidth(List<LineEmojiInfo> lineEmojiInfoList)
-    {
+    private int[] parseLineActualWidth(List<LineEmojiInfo> lineEmojiInfoList) {
         String[] lineArrCopy = lineArr.clone();
         int[] retArr = new int[lineArrCopy.length];
 
         int maxLength = 0;
         maxLengthLinePosition = 0;
 
-        for (int i = 0; i < lineArrCopy.length; i++)
-        {
+        for (int i = 0; i < lineArrCopy.length; i++) {
             //String exceptEmoji = lineArrCopy[i].replaceAll(emojiRegx, "");
             String exceptEmoji = lineArrCopy[i];
 
             List<String> emojiList = lineEmojiInfoList.get(i).getEmojiList();
-            for (String emoji : emojiList)
-            {
+            for (String emoji : emojiList) {
                 exceptEmoji = exceptEmoji.replace(emoji, "");
             }
 
@@ -389,8 +345,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane
             width += lineEmojiInfoList.get(i).getCount() * emojiSize;
             retArr[i] = width;
 
-            if (width > maxLength)
-            {
+            if (width > maxLength) {
                 maxLength = width;
                 maxLengthLinePosition = i;
             }
@@ -399,8 +354,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane
         return retArr;
     }
 
-    private List<String> parseUrl(String src)
-    {
+    private List<String> parseUrl(String src) {
         List<String> urlList = new ArrayList<>();
 
 
@@ -408,8 +362,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane
         String regex = "(?:https?://)?(www\\.)?[\\w]+(?:\\.[\\w]+)+[\\w,\\-_/?&=#%.:]*";
         Pattern urlPattern = Pattern.compile(regex);
         Matcher urlMatcher = urlPattern.matcher(src);
-        while (urlMatcher.find())
-        {
+        while (urlMatcher.find()) {
             urlList.add(urlMatcher.group());
         }
 
@@ -419,21 +372,15 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane
     }
 
 
-    private void setListeners()
-    {
-        this.addMouseListener(new MouseAdapter()
-        {
+    private void setListeners() {
+        this.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
-                if (e.getButton() == MouseEvent.BUTTON1)
-                {
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
                     int position = getCaretPosition();
                     int urlIndex = 0;
-                    for (int[] range : urlRange)
-                    {
-                        if (position >= range[0] && position <= range[1])
-                        {
+                    for (int[] range : urlRange) {
+                        if (position >= range[0] && position <= range[1]) {
                             String url = urlList.get(urlIndex);
                             openUrlWithDefaultBrowser(url);
                         }
@@ -450,38 +397,30 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane
     /**
      * 打开默认浏览器访问页面
      */
-    public static void openUrlWithDefaultBrowser(String url)
-    {
+    public static void openUrlWithDefaultBrowser(String url) {
         //启用系统默认浏览器来打开网址。
-        try
-        {
+        try {
             URI uri = new URI(url);
             Desktop.getDesktop().browse(uri);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             System.out.println("URL打开失败");
         }
     }
 
 
-    public Object getTag()
-    {
+    public Object getTag() {
         return tag;
     }
 
-    public void setTag(Object tag)
-    {
+    public void setTag(Object tag) {
         this.tag = tag;
     }
 
-    public boolean isParseUrl()
-    {
+    public boolean isParseUrl() {
         return parseUrl;
     }
 
-    public void setParseUrl(boolean parseUrl)
-    {
+    public void setParseUrl(boolean parseUrl) {
         this.parseUrl = parseUrl;
     }
 
@@ -501,8 +440,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane
 }
 
 
-class LineEmojiInfo
-{
+class LineEmojiInfo {
     /**
      * emoji 表情的数量
      */
@@ -510,29 +448,24 @@ class LineEmojiInfo
 
     private List<String> emojiList;
 
-    public LineEmojiInfo(int count, List<String> emojiList)
-    {
+    public LineEmojiInfo(int count, List<String> emojiList) {
         this.count = count;
         this.emojiList = emojiList;
     }
 
-    public int getCount()
-    {
+    public int getCount() {
         return count;
     }
 
-    public void setCount(int count)
-    {
+    public void setCount(int count) {
         this.count = count;
     }
 
-    public List<String> getEmojiList()
-    {
+    public List<String> getEmojiList() {
         return emojiList;
     }
 
-    public void setEmojiList(List<String> emojiList)
-    {
+    public void setEmojiList(List<String> emojiList) {
         this.emojiList = emojiList;
     }
 }

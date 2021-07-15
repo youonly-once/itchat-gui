@@ -2,8 +2,9 @@ package cn.shu.wechat.mapper;
 
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.beans.pojo.ContactsExample;
-import java.util.List;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * @作者 舒新胜

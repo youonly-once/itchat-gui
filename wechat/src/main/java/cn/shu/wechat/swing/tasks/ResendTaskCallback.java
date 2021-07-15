@@ -3,17 +3,14 @@ package cn.shu.wechat.swing.tasks;
 /**
  * Created by song on 14/06/2017.
  */
-public abstract class ResendTaskCallback
-{
+public abstract class ResendTaskCallback {
     long time;
 
-    public ResendTaskCallback(long time)
-    {
+    public ResendTaskCallback(long time) {
         this.time = time;
     }
 
-    public long getTime()
-    {
+    public long getTime() {
         return time;
     }
 

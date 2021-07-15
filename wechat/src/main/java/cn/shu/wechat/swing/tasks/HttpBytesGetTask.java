@@ -7,28 +7,19 @@ import java.io.IOException;
 /**
  * Created by song on 2017/6/13.
  */
-public class HttpBytesGetTask extends HttpTask
-{
+public class HttpBytesGetTask extends HttpTask {
     @Override
-    public void execute(String url)
-    {
-        new Thread(new Runnable()
-        {
+    public void execute(String url) {
+        new Thread(new Runnable() {
             @Override
-            public void run()
-            {
-                try
-                {
+            public void run() {
+                try {
                     byte[] ret = HttpUtil.getBytes(url, headers, requestParams);
-                    if (listener != null)
-                    {
+                    if (listener != null) {
                         listener.onSuccess(ret);
                     }
-                }
-                catch (IOException e)
-                {
-                    if (listener != null)
-                    {
+                } catch (IOException e) {
+                    if (listener != null) {
                         listener.onFailed();
                     }
                 }

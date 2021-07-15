@@ -8,8 +8,7 @@ import lombok.Data;
  */
 
 @Data
-public class Message extends BasicModel
-{
+public class Message extends BasicModel {
     private String id;
     private String roomId;
     private String messageContent;
@@ -26,8 +25,7 @@ public class Message extends BasicModel
     private String fileAttachmentId;
     private String imageAttachmentId;
 
-    public Message()
-    {
+    public Message() {
     }
 
 }

@@ -8,11 +8,9 @@ import java.awt.geom.Point2D;
 /**
  * Created by song on 17-6-4.
  */
-public class GradientProgressBarUI extends BasicProgressBarUI
-{
+public class GradientProgressBarUI extends BasicProgressBarUI {
     @Override
-    protected void paintDeterminate(Graphics g, JComponent c)
-    {
+    protected void paintDeterminate(Graphics g, JComponent c) {
         Graphics2D graphics2d = (Graphics2D) g;
 
         Insets b = progressBar.getInsets();

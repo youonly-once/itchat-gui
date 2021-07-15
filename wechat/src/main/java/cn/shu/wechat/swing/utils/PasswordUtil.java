@@ -6,17 +6,13 @@ import java.security.NoSuchAlgorithmException;
 /**
  * Created by song on 09/06/2017.
  */
-public class PasswordUtil
-{
-    public static String encryptPassword(String rawPassword)
-    {
-        try
-        {
+public class PasswordUtil {
+    public static String encryptPassword(String rawPassword) {
+        try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(rawPassword.getBytes());
             return bytes2Hex(md.digest()); // to HexString
-        } catch (NoSuchAlgorithmException e)
-        {
+        } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
 

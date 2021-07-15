@@ -1,7 +1,6 @@
 package cn.shu.wechat.utils;
 
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.commons.lang3.time.DateUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -17,7 +16,7 @@ public class PropertyUtil {
 
     private static final Properties pps = new Properties();
 
-    private static String msgFileName = DateFormatUtils.format(System.currentTimeMillis(),DateFormatConstant.yyyy_mm_dd) + "msg.property";
+    private static String msgFileName = DateFormatUtils.format(System.currentTimeMillis(), DateFormatConstant.yyyy_mm_dd) + "msg.property";
 
     static {
    /*     new Thread(new Runnable() {
@@ -45,7 +44,7 @@ public class PropertyUtil {
         try {
             outputStreamWriter = new OutputStreamWriter(new FileOutputStream(msgFileName, true), StandardCharsets.UTF_8);
             pps.setProperty(msgId, msg);
-            pps.store(outputStreamWriter, DateFormatUtils.format(System.currentTimeMillis(),DateFormatConstant.yyyy_mm_dd_HH_MM_SS));
+            pps.store(outputStreamWriter, DateFormatUtils.format(System.currentTimeMillis(), DateFormatConstant.yyyy_mm_dd_HH_MM_SS));
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -92,7 +91,7 @@ public class PropertyUtil {
         try {
             outputStreamWriter = new OutputStreamWriter(new FileOutputStream(msgFileName, true), StandardCharsets.UTF_8);
             pps.remove(msgId);
-            pps.store(outputStreamWriter, DateFormatUtils.format(System.currentTimeMillis(),DateFormatConstant.yyyy_mm_dd_HH_MM_SS));
+            pps.store(outputStreamWriter, DateFormatUtils.format(System.currentTimeMillis(), DateFormatConstant.yyyy_mm_dd_HH_MM_SS));
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

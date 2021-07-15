@@ -3,41 +3,32 @@ package cn.shu.wechat.swing.components.message;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCMenuItemUI;
 import cn.shu.wechat.swing.components.RCTextEditor;
-import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.*;
-import java.util.List;
 
 /**
  * Created by song on 2017/6/5.
  */
-public class ChatEditorPopupMenu extends JPopupMenu
-{
+public class ChatEditorPopupMenu extends JPopupMenu {
     JMenuItem selectAllItem = new JMenuItem("全选");
     JMenuItem copyItem = new JMenuItem("复制");
     JMenuItem cutItem = new JMenuItem("剪切");
     JMenuItem pasteItem = new JMenuItem("粘贴");
     JMenuItem deleteItem = new JMenuItem("删除");
 
-    public ChatEditorPopupMenu()
-    {
+    public ChatEditorPopupMenu() {
         initMenuItem();
     }
 
-    private void initMenuItem()
-    {
+    private void initMenuItem() {
         selectAllItem.setUI(new RCMenuItemUI(80, 25));
-        selectAllItem.addActionListener(new AbstractAction()
-        {
+        selectAllItem.addActionListener(new AbstractAction() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 JTextPane textPane = (JTextPane) getInvoker();
                 textPane.selectAll();
             }
@@ -45,16 +36,13 @@ public class ChatEditorPopupMenu extends JPopupMenu
 
 
         copyItem.setUI(new RCMenuItemUI(80, 25));
-        copyItem.addActionListener(new AbstractAction()
-        {
+        copyItem.addActionListener(new AbstractAction() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 JTextPane textPane = (JTextPane) getInvoker();
 
                 String text = textPane.getSelectedText();
-                if (text != null)
-                {
+                if (text != null) {
                     ClipboardUtil.copyString(text);
                 }
             }
@@ -62,15 +50,12 @@ public class ChatEditorPopupMenu extends JPopupMenu
 
 
         cutItem.setUI(new RCMenuItemUI(80, 25));
-        cutItem.addActionListener(new AbstractAction()
-        {
+        cutItem.addActionListener(new AbstractAction() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 JTextPane textPane = (JTextPane) getInvoker();
                 String text = textPane.getSelectedText();
-                if (text != null)
-                {
+                if (text != null) {
                     ClipboardUtil.copyString(text);
                     textPane.replaceSelection("");
                 }
@@ -78,11 +63,9 @@ public class ChatEditorPopupMenu extends JPopupMenu
         });
 
         pasteItem.setUI(new RCMenuItemUI(80, 25));
-        pasteItem.addActionListener(new AbstractAction()
-        {
+        pasteItem.addActionListener(new AbstractAction() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 RCTextEditor textEditor = (RCTextEditor) getInvoker();
                 textEditor.paste();
                 //ChatPanel.getContext().paste();
@@ -90,15 +73,12 @@ public class ChatEditorPopupMenu extends JPopupMenu
         });
 
         deleteItem.setUI(new RCMenuItemUI(80, 25));
-        deleteItem.addActionListener(new AbstractAction()
-        {
+        deleteItem.addActionListener(new AbstractAction() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 JTextPane textPane = (JTextPane) getInvoker();
                 String text = textPane.getSelectedText();
-                if (text != null)
-                {
+                if (text != null) {
                     textPane.replaceSelection("");
                 }
 
@@ -119,17 +99,13 @@ public class ChatEditorPopupMenu extends JPopupMenu
     }
 
     @Override
-    public void show(Component invoker, int x, int y)
-    {
+    public void show(Component invoker, int x, int y) {
         RCTextEditor editor = (RCTextEditor) invoker;
-        if (editor.getSelectedText() == null)
-        {
+        if (editor.getSelectedText() == null) {
             copyItem.setEnabled(false);
             cutItem.setEnabled(false);
             deleteItem.setEnabled(false);
-        }
-        else
-        {
+        } else {
             copyItem.setEnabled(true);
             cutItem.setEnabled(true);
             deleteItem.setEnabled(true);

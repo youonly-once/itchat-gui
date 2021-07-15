@@ -6,13 +6,13 @@ package cn.shu.wechat.utils;
  * @创建时间 3/3/2021 10:57 AM
  */
 
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.digest.DigestUtils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
-
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.digest.DigestUtils;
 
 /**
  * MD5计算工具

@@ -12,8 +12,7 @@ import java.awt.event.MouseListener;
 /**
  * Created by song on 17-5-29.
  */
-public class TabOperationPanel extends ParentAvailablePanel
-{
+public class TabOperationPanel extends ParentAvailablePanel {
     private JLabel chatLabel;
     private JLabel contactsLabel;
     private JLabel meLable;
@@ -32,8 +31,7 @@ public class TabOperationPanel extends ParentAvailablePanel
     private static TabOperationPanel context;
     private LeftPanel parent;
 
-    public TabOperationPanel(JPanel parent)
-    {
+    public TabOperationPanel(JPanel parent) {
         super(parent);
 
         initComponents();
@@ -41,8 +39,7 @@ public class TabOperationPanel extends ParentAvailablePanel
         context = this;
     }
 
-    private void initComponents()
-    {
+    private void initComponents() {
         Cursor handCursor = new Cursor(Cursor.HAND_CURSOR);
         clickListener = new TabItemClickListener();
         RCBorder rcBorder = new RCBorder(RCBorder.RIGHT);
@@ -77,40 +74,36 @@ public class TabOperationPanel extends ParentAvailablePanel
         parent = (LeftPanel) getParentPanel();
     }
 
-    private void initView()
-    {
+    private void initView() {
         setLayout(new GridBagLayout());
         setBackground(Colors.DARK);
         setBorder(new RCBorder(RCBorder.BOTTOM));
-        add(chatLabel, new GBC(0, 0).setFill(GBC.HORIZONTAL).setWeight(1,1).setInsets(0,10,0,10));
-        add(contactsLabel, new GBC(1, 0).setFill(GBC.HORIZONTAL).setWeight(1,1).setInsets(0,10,0,10));
-        add(meLable, new GBC(2, 0).setFill(GBC.HORIZONTAL).setWeight(1,1).setInsets(0,10,0,10));
+        add(chatLabel, new GBC(0, 0).setFill(GBC.HORIZONTAL).setWeight(1, 1).setInsets(0, 10, 0, 10));
+        add(contactsLabel, new GBC(1, 0).setFill(GBC.HORIZONTAL).setWeight(1, 1).setInsets(0, 10, 0, 10));
+        add(meLable, new GBC(2, 0).setFill(GBC.HORIZONTAL).setWeight(1, 1).setInsets(0, 10, 0, 10));
     }
 
     @Override
-    protected void printBorder(Graphics g)
-    {
+    protected void printBorder(Graphics g) {
         super.printBorder(g);
     }
+
     /**
      * 切换窗口
+     *
      * @param e 事件
      */
-    private void switchOperationPanel(MouseEvent e){
+    private void switchOperationPanel(MouseEvent e) {
 
-        if (e.getComponent() == chatLabel)
-        {
+        if (e.getComponent() == chatLabel) {
             switchToChatLabel();
 
-        } else if (e.getComponent() == contactsLabel)
-        {
+        } else if (e.getComponent() == contactsLabel) {
             chatLabel.setIcon(chatIconNormal);
             contactsLabel.setIcon(contactIconActive);
             meLable.setIcon(meIconNormal);
             parent.getListPanel().showPanel(ListPanel.CONTACTS);
-        }
-        else if (e.getComponent() == meLable)
-        {
+        } else if (e.getComponent() == meLable) {
             chatLabel.setIcon(chatIconNormal);
             contactsLabel.setIcon(contactIconNormal);
             meLable.setIcon(meIconActive);
@@ -121,44 +114,39 @@ public class TabOperationPanel extends ParentAvailablePanel
     /**
      * 切换到聊天列表
      */
-    public void switchToChatLabel(){
+    public void switchToChatLabel() {
         chatLabel.setIcon(chatIconActive);
         contactsLabel.setIcon(contactIconNormal);
         meLable.setIcon(meIconNormal);
         parent.getListPanel().showPanel(ListPanel.CHAT);
     }
-    class TabItemClickListener implements MouseListener
-    {
+
+    class TabItemClickListener implements MouseListener {
 
         @Override
-        public void mouseClicked(MouseEvent e)
-        {
+        public void mouseClicked(MouseEvent e) {
             // 搜索框内容清空
             SearchPanel.getContext().clearSearchText();
             switchOperationPanel(e);
         }
 
         @Override
-        public void mousePressed(MouseEvent e)
-        {
+        public void mousePressed(MouseEvent e) {
 
         }
 
         @Override
-        public void mouseReleased(MouseEvent e)
-        {
+        public void mouseReleased(MouseEvent e) {
 
         }
 
         @Override
-        public void mouseEntered(MouseEvent e)
-        {
+        public void mouseEntered(MouseEvent e) {
 
         }
 
         @Override
-        public void mouseExited(MouseEvent e)
-        {
+        public void mouseExited(MouseEvent e) {
 
         }
     }

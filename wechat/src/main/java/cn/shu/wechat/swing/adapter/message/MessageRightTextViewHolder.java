@@ -3,21 +3,17 @@ package cn.shu.wechat.swing.adapter.message;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
-import cn.shu.wechat.swing.components.message.JIMSendTextPane;
 import cn.shu.wechat.swing.components.message.RCRightImageMessageBubble;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.FontUtil;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.util.Objects;
 
 /**
  * Created by song on 17-6-2.
  */
-public class MessageRightTextViewHolder extends BaseMessageViewHolder
-{
+public class MessageRightTextViewHolder extends BaseMessageViewHolder {
     //public JLabel avatar = new JLabel();
     //public JLabel size = new JLabel();
     //public SizeAutoAdjustTextArea text;
@@ -27,37 +23,33 @@ public class MessageRightTextViewHolder extends BaseMessageViewHolder
     public JLabel resend = new JLabel(); // 重发按钮
     public JLabel sendingProgress = new JLabel(); // 正在发送
 
-    private JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER,5,0));
+    private JPanel timePanel = new JPanel();
     private JPanel messageAvatarPanel = new JPanel();
 
-    public MessageRightTextViewHolder()
-    {
+    public MessageRightTextViewHolder() {
         initComponents();
         initView();
     }
 
-    private void initComponents()
-    {
+    private void initComponents() {
         timePanel.setBackground(Colors.WINDOW_BACKGROUND);
         messageAvatarPanel.setBackground(Colors.WINDOW_BACKGROUND);
 
         int maxWidth = (int) (MainFrame.getContext().currentWindowWidth * 0.5);
         text = new SizeAutoAdjustTextArea(maxWidth);
-        text.setAlignmentY(Component.LEFT_ALIGNMENT);
         text.setParseUrl(true);
-
 
         time.setForeground(Colors.FONT_GRAY);
         time.setFont(FontUtil.getDefaultFont(12));
 
-        ImageIcon resendIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/image/resend.png")));
+        ImageIcon resendIcon = new ImageIcon(getClass().getResource("/image/resend.png"));
         resendIcon.setImage(resendIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
         resend.setIcon(resendIcon);
         resend.setVisible(false);
         resend.setToolTipText("消息发送失败，点击重新发送");
         resend.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        ImageIcon sendingIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/image/sending.gif")));
+        ImageIcon sendingIcon = new ImageIcon(getClass().getResource("/image/sending.gif"));
         sendingProgress.setIcon(sendingIcon);
         sendingProgress.setVisible(false);
 
@@ -66,29 +58,23 @@ public class MessageRightTextViewHolder extends BaseMessageViewHolder
 
     }
 
-    private void initView()
-    {
+    private void initView() {
         setLayout(new BorderLayout());
         timePanel.add(time);
-        //timePanel.setBorder(new LineBorder(Color.GREEN));
-        //text.setBorder(new LineBorder(Color.YELLOW));
+
         messageBubble.add(text, BorderLayout.CENTER);
-        //messageBubble.setBackground(Color.BLUE);
-       // messageBubble.setAlignmentX(Component.RIGHT_ALIGNMENT);
-       // messageBubble.setBorder(new LineBorder(Colors.RED));
-        //messageBubble.setBackground(Colors.LIGHT_GRAY);
-        JPanel resendTextPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT,5,0));
-        //resendTextPanel.setBackground(Colors.WINDOW_BACKGROUND);
-        resendTextPanel.setBackground(Colors.LIGHT_GRAY);
+
+        JPanel resendTextPanel = new JPanel();
+        resendTextPanel.setBackground(Colors.WINDOW_BACKGROUND);
+
         resendTextPanel.add(resend, BorderLayout.WEST);
         resendTextPanel.add(sendingProgress, BorderLayout.WEST);
         resendTextPanel.add(messageBubble, BorderLayout.CENTER);
-      //  resendTextPanel.setBorder(new LineBorder(Color.blue));
+
         messageAvatarPanel.setLayout(new GridBagLayout());
-        messageAvatarPanel.add(resendTextPanel, new GBC(1, 0).setWeight(1000, 1).setAnchor(GBC.EAST).setInsets(0, 0, 0, 5));
-        messageAvatarPanel.add(avatar, new GBC(2, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 0, 0, 10));
-        //messageAvatarPanel.setBorder(new LineBorder(Color.black));
-        //messageAvatarPanel.setBackground(Colors.LIGHT_GRAY);
+        messageAvatarPanel.add(resendTextPanel, new GBC(1, 0).setWeight(1000, 1).setAnchor(GBC.EAST).setInsets(0, 0, 5, 0));
+        messageAvatarPanel.add(avatar, new GBC(2, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(5, 0, 0, 10));
+
         add(timePanel, BorderLayout.NORTH);
         add(messageAvatarPanel, BorderLayout.CENTER);
     }

@@ -13,23 +13,20 @@ import java.awt.*;
  * 搜索结果中的每一个消息项目
  * Created by song on 17-6-22.
  */
-public class SearchResultMessageItemViewHolder extends SearchResultItemViewHolder
-{
+public class SearchResultMessageItemViewHolder extends SearchResultItemViewHolder {
     public JLabel avatar = new JLabel();
     public JLabel roomName = new JLabel();
     public HighLightLabel brief = new HighLightLabel();
     public JPanel nameBrief = new JPanel();
     public JLabel time = new JLabel();
 
-    public SearchResultMessageItemViewHolder()
-    {
+    public SearchResultMessageItemViewHolder() {
         initComponents();
         initView();
 
     }
 
-    private void initComponents()
-    {
+    private void initComponents() {
         setPreferredSize(new Dimension(100, 64));
         setBackground(Colors.DARK);
         setBorder(new RCBorder(RCBorder.BOTTOM));
@@ -52,8 +49,7 @@ public class SearchResultMessageItemViewHolder extends SearchResultItemViewHolde
         time.setFont(FontUtil.getDefaultFont(12));
     }
 
-    private void initView()
-    {
+    private void initView() {
         setLayout(new GridBagLayout());
         add(avatar, new GBC(0, 0).setWeight(2, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0));
         add(nameBrief, new GBC(1, 0).setWeight(100, 1).setFill(GBC.BOTH).setInsets(5, 5, 0, 0));

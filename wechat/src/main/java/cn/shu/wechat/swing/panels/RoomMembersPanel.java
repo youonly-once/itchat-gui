@@ -1,11 +1,13 @@
 package cn.shu.wechat.swing.panels;
 
-import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.adapter.RoomMembersAdapter;
 import cn.shu.wechat.swing.app.Launcher;
-import cn.shu.wechat.swing.components.*;
+import cn.shu.wechat.swing.components.Colors;
+import cn.shu.wechat.swing.components.GBC;
+import cn.shu.wechat.swing.components.RCButton;
+import cn.shu.wechat.swing.components.RCListView;
 import cn.shu.wechat.swing.db.model.ContactsUser;
 import cn.shu.wechat.swing.db.model.CurrentUser;
 import cn.shu.wechat.swing.db.model.Room;
@@ -15,8 +17,6 @@ import cn.shu.wechat.swing.db.service.RoomService;
 import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.frames.AddOrRemoveMemberDialog;
 import cn.shu.wechat.swing.frames.MainFrame;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -145,7 +145,7 @@ public class RoomMembersPanel extends ParentAvailablePanel {
         } else {
             //获取成员
             Contacts group = Core.getMemberMap().get(roomId);
-            members .addAll(group.getMemberlist());
+            members.addAll(group.getMemberlist());
             if (members == null) {
                 return;
             }

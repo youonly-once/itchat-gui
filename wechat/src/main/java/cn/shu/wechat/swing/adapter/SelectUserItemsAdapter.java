@@ -10,14 +10,13 @@ import cn.shu.wechat.swing.utils.IconUtil;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 /**
  * Created by song on 17-5-30.
  */
-public class SelectUserItemsAdapter extends BaseAdapter<SelectUserItemViewHolder>
-{
+public class SelectUserItemsAdapter extends BaseAdapter<SelectUserItemViewHolder> {
     private final ImageIcon checkIcon;
     private final ImageIcon uncheckIcon;
     private List<SelectUserData> userList;
@@ -25,42 +24,34 @@ public class SelectUserItemsAdapter extends BaseAdapter<SelectUserItemViewHolder
     Map<Integer, String> positionMap = new HashMap<>();
     private AbstractMouseListener mouseListener;
 
-    public SelectUserItemsAdapter(List<SelectUserData> userList)
-    {
+    public SelectUserItemsAdapter(List<SelectUserData> userList) {
         checkIcon = IconUtil.getIcon(this, "/image/check.png");
         uncheckIcon = IconUtil.getIcon(this, "/image/uncheck.png");
         setUserList(userList);
     }
 
-    public void setUserList(List<SelectUserData> userList)
-    {
+    public void setUserList(List<SelectUserData> userList) {
         this.userList = userList;
 
-        if (userList != null)
-        {
+        if (userList != null) {
             processData();
         }
     }
 
     @Override
-    public int getCount()
-    {
+    public int getCount() {
         return userList.size();
     }
 
     @Override
-    public SelectUserItemViewHolder onCreateViewHolder(int viewType, int position)
-    {
+    public SelectUserItemViewHolder onCreateViewHolder(int viewType, int position) {
         return new SelectUserItemViewHolder();
     }
 
     @Override
-    public HeaderViewHolder onCreateHeaderViewHolder(int viewType, int position)
-    {
-        for (int pos : positionMap.keySet())
-        {
-            if (pos == position)
-            {
+    public HeaderViewHolder onCreateHeaderViewHolder(int viewType, int position) {
+        for (int pos : positionMap.keySet()) {
+            if (pos == position) {
                 String ch = positionMap.get(pos);
 
                 return new ContactsHeaderViewHolder(ch.toUpperCase());
@@ -71,8 +62,7 @@ public class SelectUserItemsAdapter extends BaseAdapter<SelectUserItemViewHolder
     }
 
     @Override
-    public void onBindHeaderViewHolder(HeaderViewHolder viewHolder, int position)
-    {
+    public void onBindHeaderViewHolder(HeaderViewHolder viewHolder, int position) {
         ContactsHeaderViewHolder holder = (ContactsHeaderViewHolder) viewHolder;
         holder.setPreferredSize(new Dimension(100, 25));
         holder.setBackground(Colors.LIGHT_GRAY);
@@ -88,24 +78,20 @@ public class SelectUserItemsAdapter extends BaseAdapter<SelectUserItemViewHolder
     }
 
     @Override
-    public void onBindViewHolder(SelectUserItemViewHolder viewHolder, int position)
-    {
+    public void onBindViewHolder(SelectUserItemViewHolder viewHolder, int position) {
         viewHolders.add(position, viewHolder);
-        String name  = userList.get(position).getName();
+        String name = userList.get(position).getName();
 
         // 头像
-        ImageIcon imageIcon = new ImageIcon(AvatarUtil.createOrLoadUserAvatar(name).getScaledInstance(30,30,Image.SCALE_SMOOTH));
+        ImageIcon imageIcon = new ImageIcon(AvatarUtil.createOrLoadUserAvatar(name).getScaledInstance(30, 30, Image.SCALE_SMOOTH));
         viewHolder.avatar.setIcon(imageIcon);
 
         // 名字
         viewHolder.username.setText(name);
 
-        if (userList.get(position).isSelected())
-        {
+        if (userList.get(position).isSelected()) {
             viewHolder.icon.setIcon(checkIcon);
-        }
-        else
-        {
+        } else {
             viewHolder.icon.setIcon(uncheckIcon);
         }
 
@@ -113,13 +99,10 @@ public class SelectUserItemsAdapter extends BaseAdapter<SelectUserItemViewHolder
     }
 
 
-    private void processData()
-    {
-        Collections.sort(userList, new Comparator<SelectUserData>()
-        {
+    private void processData() {
+        Collections.sort(userList, new Comparator<SelectUserData>() {
             @Override
-            public int compare(SelectUserData o1, SelectUserData o2)
-            {
+            public int compare(SelectUserData o1, SelectUserData o2) {
                 String tc = CharacterParser.getSelling(o1.getName().toUpperCase());
                 String oc = CharacterParser.getSelling(o2.getName().toUpperCase());
                 return tc.compareTo(oc);
@@ -128,11 +111,9 @@ public class SelectUserItemsAdapter extends BaseAdapter<SelectUserItemViewHolder
 
         int index = 0;
         String lastChara = "";
-        for (SelectUserData item : userList)
-        {
+        for (SelectUserData item : userList) {
             String ch = CharacterParser.getSelling(item.getName()).substring(0, 1).toUpperCase();
-            if (!ch.equals(lastChara))
-            {
+            if (!ch.equals(lastChara)) {
                 lastChara = ch;
                 positionMap.put(index, ch);
             }
@@ -141,8 +122,7 @@ public class SelectUserItemsAdapter extends BaseAdapter<SelectUserItemViewHolder
         }
     }
 
-    public void setMouseListener(AbstractMouseListener mouseListener)
-    {
+    public void setMouseListener(AbstractMouseListener mouseListener) {
         this.mouseListener = mouseListener;
     }
 }

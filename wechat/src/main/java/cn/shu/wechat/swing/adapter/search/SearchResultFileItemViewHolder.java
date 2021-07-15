@@ -11,23 +11,20 @@ import java.awt.*;
  * 搜索结果中的每一个文件项目
  * Created by song on 17-6-22.
  */
-public class SearchResultFileItemViewHolder extends SearchResultItemViewHolder
-{
+public class SearchResultFileItemViewHolder extends SearchResultItemViewHolder {
     public JLabel avatar = new JLabel();
     public HighLightLabel name = new HighLightLabel();
     public JLabel size = new JLabel();
     public RCProgressBar progressBar = new RCProgressBar(); // 进度条
-    public JPanel nameProgressPanel =  new JPanel();
+    public JPanel nameProgressPanel = new JPanel();
 
-    public SearchResultFileItemViewHolder()
-    {
+    public SearchResultFileItemViewHolder() {
         initComponents();
         initView();
 
     }
 
-    private void initComponents()
-    {
+    private void initComponents() {
         setPreferredSize(new Dimension(100, 50));
         setBackground(Colors.DARK);
         setBorder(new RCBorder(RCBorder.BOTTOM));
@@ -38,7 +35,7 @@ public class SearchResultFileItemViewHolder extends SearchResultItemViewHolder
         name.setForeground(Colors.FONT_WHITE);
 
         //brief.setForeground(Colors.FONT_GRAY);
-       // brief.setFont(FontUtil.getDefaultFont(12));
+        // brief.setFont(FontUtil.getDefaultFont(12));
 
         name.setBorder(new LineBorder(Color.red));
         //nameBrief.add(brief, BorderLayout.CENTER);
@@ -56,8 +53,7 @@ public class SearchResultFileItemViewHolder extends SearchResultItemViewHolder
         progressBar.setVisible(false);
     }
 
-    private void initView()
-    {
+    private void initView() {
         /*setLayout(new GridBagLayout());
         add(avatar, new GBC(0, 0).setWeight(2, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0));
         add(name, new GBC(1, 0).setWeight(100, 1).setFill(GBC.BOTH).setInsets(5, 5, 0, 0));
@@ -65,7 +61,7 @@ public class SearchResultFileItemViewHolder extends SearchResultItemViewHolder
 
         nameProgressPanel.setBackground(Colors.DARK);
 
-        nameProgressPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0,0,true, false));
+        nameProgressPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
         nameProgressPanel.add(name);
         nameProgressPanel.add(progressBar);
         /*namePanel.setLayout(new GridBagLayout());

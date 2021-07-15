@@ -12,11 +12,11 @@ import cn.shu.wechat.swing.db.service.FileAttachmentService;
 import cn.shu.wechat.swing.db.service.MessageService;
 import cn.shu.wechat.swing.db.service.RoomService;
 import cn.shu.wechat.swing.entity.SearchResultItem;
+import cn.shu.wechat.swing.helper.AttachmentIconHelper;
+import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.panels.ListPanel;
 import cn.shu.wechat.swing.panels.SearchPanel;
-import cn.shu.wechat.swing.helper.AttachmentIconHelper;
-import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.tasks.DownloadTask;
 import cn.shu.wechat.swing.tasks.HttpResponseListener;
 import cn.shu.wechat.swing.utils.*;
@@ -27,15 +27,16 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 搜索结果适配器
  * Created by song on 17-5-30.
  */
-public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHolder>
-{
+public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHolder> {
     private List<SearchResultItem> searchResultItems;
     private String keyWord;
     private RoomService roomService = Launcher.roomService;
@@ -57,80 +58,58 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
     private Map<String, SearchResultFileItemViewHolder> fileItemViewHolders = new HashMap<>();
 
 
-    public SearchResultItemsAdapter(List<SearchResultItem> searchResultItems)
-    {
+    public SearchResultItemsAdapter(List<SearchResultItem> searchResultItems) {
         this.searchResultItems = searchResultItems;
     }
 
     @Override
-    public int getCount()
-    {
+    public int getCount() {
         return searchResultItems.size();
     }
 
     @Override
-    public int getItemViewType(int position)
-    {
+    public int getItemViewType(int position) {
         // return super.getItemViewType(position);
         String type = searchResultItems.get(position).getType();
-        if (type.equals("d") || type.equals("c") || type.equals("p") || type.equals("searchMessage") || type.equals("searchFile"))
-        {
+        if (type.equals("d") || type.equals("c") || type.equals("p") || type.equals("searchMessage") || type.equals("searchFile")) {
             return VIEW_TYPE_CONTACTS_ROOM;
-        }
-        else if (type.equals("message"))
-        {
+        } else if (type.equals("message")) {
             return VIEW_TYPE_MESSAGE;
-        }
-        else if (type.equals("file"))
-        {
+        } else if (type.equals("file")) {
             return VIEW_TYPE_FILE;
-        }
-        else
-        {
+        } else {
             throw new RuntimeException("ViewType 不正确");
         }
     }
 
 
     @Override
-    public SearchResultItemViewHolder onCreateViewHolder(int viewType, int position)
-    {
-        switch (viewType)
-        {
-            case VIEW_TYPE_CONTACTS_ROOM:
-            {
+    public SearchResultItemViewHolder onCreateViewHolder(int viewType, int position) {
+        switch (viewType) {
+            case VIEW_TYPE_CONTACTS_ROOM: {
                 return new SearchResultUserItemViewHolder();
             }
-            case VIEW_TYPE_MESSAGE:
-            {
+            case VIEW_TYPE_MESSAGE: {
                 return new SearchResultMessageItemViewHolder();
             }
-            case VIEW_TYPE_FILE:
-            {
+            case VIEW_TYPE_FILE: {
                 return new SearchResultFileItemViewHolder();
             }
-            default:
-            {
+            default: {
                 return null;
             }
         }
     }
 
     @Override
-    public void onBindViewHolder(SearchResultItemViewHolder viewHolder, int position)
-    {
+    public void onBindViewHolder(SearchResultItemViewHolder viewHolder, int position) {
         SearchResultItem item = searchResultItems.get(position);
 
-        if (viewHolder instanceof SearchResultUserItemViewHolder)
-        {
+        if (viewHolder instanceof SearchResultUserItemViewHolder) {
             processContactsOrRoomsResult(viewHolder, item);
-        }
-        else if (viewHolder instanceof SearchResultMessageItemViewHolder)
-        {
+        } else if (viewHolder instanceof SearchResultMessageItemViewHolder) {
             processMessageResult(viewHolder, item);
-        }
-        else if (viewHolder instanceof SearchResultFileItemViewHolder)
-        {
+        } else if (viewHolder instanceof SearchResultFileItemViewHolder) {
             processFileResult(viewHolder, item);
         }
 
@@ -147,23 +126,22 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
 
     /**
      * 处理文件搜索结果
+     *
      * @param viewHolder
      * @param item
      */
-    private void processFileResult(SearchResultItemViewHolder viewHolder, SearchResultItem item)
-    {
+    private void processFileResult(SearchResultItemViewHolder viewHolder, SearchResultItem item) {
         SearchResultFileItemViewHolder holder = (SearchResultFileItemViewHolder) viewHolder;
         //fileItemViewHolders.add(holder);
         fileItemViewHolders.put(item.getId(), holder);
 
         ImageIcon attachmentTypeIcon = attachmentIconHelper.getImageIcon(item.getName());
-        attachmentTypeIcon.setImage(attachmentTypeIcon.getImage().getScaledInstance(30,30,Image.SCALE_SMOOTH));
+        attachmentTypeIcon.setImage(attachmentTypeIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH));
         holder.avatar.setIcon(attachmentTypeIcon);
         holder.name.setKeyWord(keyWord);
 
         String filename = item.getName();
-        if (item.getName().length() > 20)
-        {
+        if (item.getName().length() > 20) {
             String suffix = filename.substring(filename.lastIndexOf("."));
             filename = item.getName().substring(0, 15) + "..." + suffix;
         }
@@ -171,36 +149,28 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
         holder.name.setText(filename);
 
         String filePath = fileCache.tryGetFileCache(item.getId(), item.getName());
-        if (filePath != null)
-        {
+        if (filePath != null) {
             holder.size.setText(fileCache.fileSizeString(filePath));
-        }
-        else
-        {
+        } else {
             holder.size.setText("未下载");
         }
 
         holder.setToolTipText(item.getName());
 
-        holder.addMouseListener(new MouseAdapter()
-        {
+        holder.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseEntered(MouseEvent e)
-            {
+            public void mouseEntered(MouseEvent e) {
                 setBackground(holder, Colors.ITEM_SELECTED_DARK);
             }
 
             @Override
-            public void mouseExited(MouseEvent e)
-            {
+            public void mouseExited(MouseEvent e) {
                 setBackground(holder, Colors.DARK);
             }
 
             @Override
-            public void mouseReleased(MouseEvent e)
-            {
-                if (e.getButton() == MouseEvent.BUTTON1)
-                {
+            public void mouseReleased(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
                     downloadOrOpenFile(item.getId(), holder);
                 }
                 super.mouseReleased(e);
@@ -214,26 +184,22 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
      * @param viewHolder
      * @param item
      */
-    private void processMessageResult(SearchResultItemViewHolder viewHolder, SearchResultItem item)
-    {
+    private void processMessageResult(SearchResultItemViewHolder viewHolder, SearchResultItem item) {
         SearchResultMessageItemViewHolder holder = (SearchResultMessageItemViewHolder) viewHolder;
         Room room = roomService.findById((String) item.getTag());
 
         Message message = messageService.findById(item.getId());
 
-        holder.avatar.setIcon(new ImageIcon(getRoomAvatar(((String) item.getTag()).startsWith("@@"),room.getRoomId())));
+        holder.avatar.setIcon(new ImageIcon(getRoomAvatar(((String) item.getTag()).startsWith("@@"), room.getRoomId())));
         holder.brief.setKeyWord(keyWord);
         holder.brief.setText(item.getName());
         holder.roomName.setText(room.getName());
         holder.time.setText(TimeUtil.diff(message.getTimestamp()));
 
-        holder.addMouseListener(new MouseAdapter()
-        {
+        holder.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseReleased(MouseEvent e)
-            {
-                if (e.getButton() == MouseEvent.BUTTON1)
-                {
+            public void mouseReleased(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
                     enterRoom(room.getRoomId(), message.getTimestamp());
                     clearSearchText();
                 }
@@ -241,51 +207,36 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
             }
 
             @Override
-            public void mouseEntered(MouseEvent e)
-            {
+            public void mouseEntered(MouseEvent e) {
                 setBackground(holder, Colors.ITEM_SELECTED_DARK);
             }
 
             @Override
-            public void mouseExited(MouseEvent e)
-            {
+            public void mouseExited(MouseEvent e) {
                 setBackground(holder, Colors.DARK);
             }
         });
     }
 
-    private void processMouseListeners(SearchResultItemViewHolder viewHolder, SearchResultItem item)
-    {
-        viewHolder.addMouseListener(new AbstractMouseListener()
-        {
+    private void processMouseListeners(SearchResultItemViewHolder viewHolder, SearchResultItem item) {
+        viewHolder.addMouseListener(new AbstractMouseListener() {
             @Override
-            public void mouseReleased(MouseEvent e)
-            {
-                if (e.getButton() == MouseEvent.BUTTON1)
-                {
+            public void mouseReleased(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
 
-                    if (item.getType().equals("d"))
-                    {
+                    if (item.getType().equals("d")) {
                         String roomId = roomService.findRelativeRoomIdByUserId(item.getId()).getRoomId();
                         enterRoom(roomId, 0L);
                         clearSearchText();
-                    }
-                    else if (item.getType().equals("c") || item.getType().equals("p"))
-                    {
+                    } else if (item.getType().equals("c") || item.getType().equals("p")) {
                         enterRoom(item.getId(), 0L);
                         clearSearchText();
-                    }
-                    else if (item.getType().equals("searchMessage"))
-                    {
-                        if (searchMessageOrFileListener != null)
-                        {
+                    } else if (item.getType().equals("searchMessage")) {
+                        if (searchMessageOrFileListener != null) {
                             searchMessageOrFileListener.onSearchMessage();
                         }
-                    }
-                    else if (item.getType().equals("searchFile"))
-                    {
-                        if (searchMessageOrFileListener != null)
-                        {
+                    } else if (item.getType().equals("searchFile")) {
+                        if (searchMessageOrFileListener != null) {
                             searchMessageOrFileListener.onSearchFile();
                         }
                     }
@@ -294,21 +245,18 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
 
 
             @Override
-            public void mouseEntered(MouseEvent e)
-            {
+            public void mouseEntered(MouseEvent e) {
                 setBackground(viewHolder, Colors.ITEM_SELECTED_DARK);
             }
 
             @Override
-            public void mouseExited(MouseEvent e)
-            {
+            public void mouseExited(MouseEvent e) {
                 setBackground(viewHolder, Colors.DARK);
             }
         });
     }
 
-    private void clearSearchText()
-    {
+    private void clearSearchText() {
         ListPanel.getContext().showPanel(ListPanel.CHAT);
         SearchPanel.getContext().clearSearchText();
     }
@@ -319,8 +267,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
      * @param viewHolder
      * @param item
      */
-    private void processContactsOrRoomsResult(SearchResultItemViewHolder viewHolder, SearchResultItem item)
-    {
+    private void processContactsOrRoomsResult(SearchResultItemViewHolder viewHolder, SearchResultItem item) {
         SearchResultUserItemViewHolder holder = (SearchResultUserItemViewHolder) viewHolder;
 
         holder.name.setKeyWord(this.keyWord);
@@ -330,18 +277,12 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
         // 群组头像
         String type = item.getType();
 
-        if (type.equals("c") || type.equals("p") || type.equals("d"))
-        {
+        if (type.equals("c") || type.equals("p") || type.equals("d")) {
             icon.setImage(getRoomAvatar(true, item.getTag().toString()));
-        }
-        else
-        {
-            if (type.equals("searchMessage"))
-            {
+        } else {
+            if (type.equals("searchMessage")) {
                 icon.setImage(IconUtil.getIcon(this, "/image/message.png").getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH));
-            }
-            else if (type.equals("searchFile"))
-            {
+            } else if (type.equals("searchFile")) {
                 icon.setImage(IconUtil.getIcon(this, "/image/file_icon.png").getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH));
             }
             /*else if (type.equals("message"))
@@ -389,18 +330,16 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
      * 根据房间类型获取对应的头像
      *
      * @param isGroup 是否为群
-     * @param roomId 房间id
+     * @param roomId  房间id
      * @return 头像
      */
-    private Image getRoomAvatar(boolean isGroup, String roomId)
-    {
-        if (isGroup){
+    private Image getRoomAvatar(boolean isGroup, String roomId) {
+        if (isGroup) {
             //群头像
             return AvatarUtil.createOrLoadGroupAvatar(roomId).getScaledInstance(35, 35, Image.SCALE_SMOOTH);
         }
         // 私聊头像
-        else
-        {
+        else {
             return AvatarUtil.createOrLoadUserAvatar(roomId).getScaledInstance(35, 35, Image.SCALE_SMOOTH);
         }
 
@@ -408,38 +347,30 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
 
     /**
      * 设置item的背影色
+     *
      * @param holder
      * @param color
      */
-    private void setBackground(SearchResultItemViewHolder holder, Color color)
-    {
+    private void setBackground(SearchResultItemViewHolder holder, Color color) {
         holder.setBackground(color);
-        if (holder instanceof SearchResultUserItemViewHolder)
-        {
+        if (holder instanceof SearchResultUserItemViewHolder) {
             ((SearchResultUserItemViewHolder) holder).name.setBackground(color);
-        }
-        else if (holder instanceof SearchResultMessageItemViewHolder)
-        {
+        } else if (holder instanceof SearchResultMessageItemViewHolder) {
             ((SearchResultMessageItemViewHolder) holder).nameBrief.setBackground(color);
-        }
-        else if (holder instanceof SearchResultFileItemViewHolder)
-        {
+        } else if (holder instanceof SearchResultFileItemViewHolder) {
             ((SearchResultFileItemViewHolder) holder).nameProgressPanel.setBackground(color);
         }
     }
 
-    public void setKeyWord(String keyWord)
-    {
+    public void setKeyWord(String keyWord) {
         this.keyWord = keyWord;
     }
 
-    private void enterRoom(String roomId, long firstMessageTimestamp)
-    {
+    private void enterRoom(String roomId, long firstMessageTimestamp) {
         ChatPanel.getContext().enterRoom(roomId, firstMessageTimestamp);
     }
 
-    public void setSearchMessageOrFileListener(SearchMessageOrFileListener searchMessageOrFileListener)
-    {
+    public void setSearchMessageOrFileListener(SearchMessageOrFileListener searchMessageOrFileListener) {
         this.searchMessageOrFileListener = searchMessageOrFileListener;
     }
 
@@ -449,99 +380,77 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
      * @param fileId
      * @param holder
      */
-    public void downloadOrOpenFile(String fileId, SearchResultFileItemViewHolder holder)
-    {
+    public void downloadOrOpenFile(String fileId, SearchResultFileItemViewHolder holder) {
         FileAttachment fileAttachment = fileAttachmentService.findById(fileId);
 
-        if (fileAttachment == null)
-        {
+        if (fileAttachment == null) {
             JOptionPane.showMessageDialog(null, "无效的附件", "附件无效", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         String filepath = fileCache.tryGetFileCache(fileAttachment.getId(), fileAttachment.getTitle());
-        if (filepath == null)
-        {
+        if (filepath == null) {
             // 服务器上的文件
-            if (fileAttachment.getLink().startsWith("/file-upload"))
-            {
+            if (fileAttachment.getLink().startsWith("/file-upload")) {
                 // 如果当前文件正在下载，则不下载
-                if (downloadingFiles.contains(fileId))
-                {
+                if (downloadingFiles.contains(fileId)) {
                     holder.progressBar.setVisible(true);
                     holder.size.setText("下载中...");
-                }
-                else
-                {
+                } else {
                     downloadFile(fileAttachment);
                 }
             }
             // 本地的文件
-            else
-            {
+            else {
                 openFileWithDefaultApplication(fileAttachment.getLink());
             }
-        }
-        else
-        {
+        } else {
             openFileWithDefaultApplication(filepath);
         }
     }
 
     /**
      * 下载文件
-     *  @param fileAttachment
+     *
+     * @param fileAttachment
      */
-    private void downloadFile(FileAttachment fileAttachment)
-    {
+    private void downloadFile(FileAttachment fileAttachment) {
         downloadingFiles.add(fileAttachment.getId());
         //holder.fileId = fileAttachment.getId();
 
-        final DownloadTask task = new DownloadTask(new HttpUtil.ProgressListener()
-        {
+        final DownloadTask task = new DownloadTask(new HttpUtil.ProgressListener() {
             @Override
-            public void onProgress(int progress)
-            {
+            public void onProgress(int progress) {
                 SearchResultFileItemViewHolder holder = fileItemViewHolders.get(fileAttachment.getId());
-                if (progress >= 0 && progress < 100)
-                {
+                if (progress >= 0 && progress < 100) {
 
-                    if (holder.size.isVisible())
-                    {
+                    if (holder.size.isVisible()) {
                         holder.size.setVisible(false);
                     }
-                    if (!holder.progressBar.isVisible())
-                    {
+                    if (!holder.progressBar.isVisible()) {
                         holder.progressBar.setVisible(true);
                     }
 
                     holder.progressBar.setValue(progress);
-                }
-                else if (progress >= 100)
-                {
+                } else if (progress >= 100) {
                     holder.progressBar.setVisible(false);
                     holder.size.setVisible(true);
                 }
             }
         });
 
-        task.setListener(new HttpResponseListener<byte[]>()
-        {
+        task.setListener(new HttpResponseListener<byte[]>() {
             @Override
-            public void onSuccess(byte[] data)
-            {
+            public void onSuccess(byte[] data) {
                 SearchResultFileItemViewHolder holder = fileItemViewHolders.get(fileAttachment.getId());
 
                 String path = fileCache.cacheFile(fileAttachment.getId(), fileAttachment.getTitle(), data);
 
-                if (path == null)
-                {
+                if (path == null) {
                     holder.size.setVisible(true);
                     holder.size.setText("文件获取失败");
                     holder.progressBar.setVisible(false);
-                }
-                else
-                {
+                } else {
                     holder.size.setVisible(true);
                     System.out.println("文件已缓存在 " + path);
                     holder.size.setText(fileCache.fileSizeString(path));
@@ -567,8 +476,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
             }
 
             @Override
-            public void onFailed()
-            {
+            public void onFailed() {
                 SearchResultFileItemViewHolder holder = fileItemViewHolders.get(fileAttachment.getId());
                 holder.size.setVisible(true);
                 holder.size.setText("文件获取失败");
@@ -586,22 +494,17 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
      *
      * @param path
      */
-    private void openFileWithDefaultApplication(String path)
-    {
-        try
-        {
+    private void openFileWithDefaultApplication(String path) {
+        try {
             Desktop.getDesktop().open(new File(path));
-        }
-        catch (IOException e1)
-        {
+        } catch (IOException e1) {
             JOptionPane.showMessageDialog(null, "文件打开失败，没有找到关联的应用程序", "打开失败", JOptionPane.ERROR_MESSAGE);
             e1.printStackTrace();
         }
     }
 
 
-    public interface SearchMessageOrFileListener
-    {
+    public interface SearchMessageOrFileListener {
         void onSearchMessage();
 
         void onSearchFile();

@@ -1,8 +1,13 @@
 package cn.shu.wechat.swing.panels;
-import cn.shu.wechat.swing.components.*;
+
+import cn.shu.wechat.swing.components.Colors;
+import cn.shu.wechat.swing.components.RCButton;
+import cn.shu.wechat.swing.components.RCPasswordField;
+import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -15,8 +20,7 @@ import java.awt.event.MouseEvent;
  * <p>
  * Created by song on 23/06/2017.
  */
-public class ChangePasswordPanel extends JPanel
-{
+public class ChangePasswordPanel extends JPanel {
     private static ChangePasswordPanel context;
     private RCPasswordField textField;
     private RCPasswordField textFieldConfirm;
@@ -24,8 +28,7 @@ public class ChangePasswordPanel extends JPanel
     private JPanel contentPanel;
     private JLabel statusLabel;
 
-    public ChangePasswordPanel()
-    {
+    public ChangePasswordPanel() {
         context = this;
 
         initComponents();
@@ -35,8 +38,7 @@ public class ChangePasswordPanel extends JPanel
     }
 
 
-    private void initComponents()
-    {
+    private void initComponents() {
         textField = new RCPasswordField();
         textField.setPlaceholder("新密码");
         textField.setPreferredSize(new Dimension(200, 35));
@@ -61,8 +63,7 @@ public class ChangePasswordPanel extends JPanel
         contentPanel = new JPanel();
     }
 
-    private void initView()
-    {
+    private void initView() {
         contentPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 10, true, false));
         contentPanel.add(textField);
         contentPanel.add(textFieldConfirm);
@@ -73,39 +74,31 @@ public class ChangePasswordPanel extends JPanel
         add(contentPanel);
     }
 
-    private void setListener()
-    {
+    private void setListener() {
 
-        okButton.addMouseListener(new MouseAdapter()
-        {
+        okButton.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 doResetPassword();
 
                 super.mouseClicked(e);
             }
         });
 
-        KeyListener keyListener = new KeyListener()
-        {
+        KeyListener keyListener = new KeyListener() {
             @Override
-            public void keyTyped(KeyEvent e)
-            {
+            public void keyTyped(KeyEvent e) {
             }
 
             @Override
-            public void keyPressed(KeyEvent e)
-            {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER)
-                {
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     doResetPassword();
                 }
             }
 
             @Override
-            public void keyReleased(KeyEvent e)
-            {
+            public void keyReleased(KeyEvent e) {
 
             }
         };
@@ -113,28 +106,22 @@ public class ChangePasswordPanel extends JPanel
         textFieldConfirm.addKeyListener(keyListener);
     }
 
-    private void doResetPassword()
-    {
-        if (okButton.isEnabled())
-        {
+    private void doResetPassword() {
+        if (okButton.isEnabled()) {
             String password = new String(textField.getPassword());
             String passwordConfirm = new String(textFieldConfirm.getPassword());
 
-            if (password.isEmpty())
-            {
+            if (password.isEmpty()) {
                 showErrorMessage("请输入新密码");
                 textField.requestFocus();
                 return;
-            }
-            else if (passwordConfirm.isEmpty())
-            {
+            } else if (passwordConfirm.isEmpty()) {
                 showErrorMessage("请再次输入密码");
                 textFieldConfirm.requestFocus();
                 return;
             }
 
-            if (!password.equals(passwordConfirm))
-            {
+            if (!password.equals(passwordConfirm)) {
                 showErrorMessage("两次输入密码不一致");
                 textFieldConfirm.requestFocus();
                 return;
@@ -151,29 +138,25 @@ public class ChangePasswordPanel extends JPanel
     }
 
 
-    public void restoreOKButton()
-    {
+    public void restoreOKButton() {
         okButton.setText("确认修改");
         okButton.setIcon(null);
         okButton.setEnabled(true);
     }
 
-    public void showSuccessMessage()
-    {
+    public void showSuccessMessage() {
         statusLabel.setText("密码修改成功，请重新登录");
         statusLabel.setIcon(IconUtil.getIcon(this, "/image/check.png"));
         statusLabel.setVisible(true);
     }
 
-    public void showErrorMessage(String message)
-    {
+    public void showErrorMessage(String message) {
         statusLabel.setText(message);
         statusLabel.setIcon(new ImageIcon(IconUtil.getIcon(this, "/image/fail.png").getImage().getScaledInstance(15, 15, Image.SCALE_SMOOTH)));
         statusLabel.setVisible(true);
     }
 
-    public static ChangePasswordPanel getContext()
-    {
+    public static ChangePasswordPanel getContext() {
         return context;
     }
 }

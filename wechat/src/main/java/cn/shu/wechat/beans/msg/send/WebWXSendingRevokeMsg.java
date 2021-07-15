@@ -1,7 +1,6 @@
 package cn.shu.wechat.beans.msg.send;
 
 import cn.shu.wechat.beans.msg.BaseRequest;
-import cn.shu.wechat.enums.WXSendMsgCodeEnum;
 
 /**
  * @作者 舒新胜

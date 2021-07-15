@@ -52,7 +52,9 @@ public class AddMsgList {
     private String mentionMeUserNickName;
     private boolean mentionMe;
     private boolean groupMsg;
-    /** 文本消息内容 **/
+    /**
+     * 文本消息内容
+     **/
     private String text;
     private WXReceiveMsgCodeEnum Type;
     private String memberName;

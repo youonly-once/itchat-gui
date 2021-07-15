@@ -1,11 +1,12 @@
 package cn.shu.wechat.swing.frames;
 
-import cn.shu.wechat.swing.components.*;
+import cn.shu.wechat.swing.components.Colors;
+import cn.shu.wechat.swing.components.GBC;
+import cn.shu.wechat.swing.components.RCButton;
+import cn.shu.wechat.swing.components.RCTextField;
 import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.panels.SelectUserPanel;
 import cn.shu.wechat.swing.utils.FontUtil;
-import cn.shu.wechat.swing.utils.OSUtil;
-import com.sun.awt.AWTUtilities;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -21,8 +22,7 @@ import java.util.List;
  * Created by song on 06/20/2017.
  */
 
-public class AddOrRemoveMemberDialog extends JDialog
-{
+public class AddOrRemoveMemberDialog extends JDialog {
     private JPanel editorPanel;
     private RCTextField searchTextField;
 
@@ -37,8 +37,7 @@ public class AddOrRemoveMemberDialog extends JDialog
     public static final int DIALOG_HEIGHT = 500;
 
 
-    public AddOrRemoveMemberDialog(Frame owner, boolean modal, List<SelectUserData> userList)
-    {
+    public AddOrRemoveMemberDialog(Frame owner, boolean modal, List<SelectUserData> userList) {
         super(owner, modal);
         this.userList = userList;
         userListClone = userList;
@@ -49,8 +48,7 @@ public class AddOrRemoveMemberDialog extends JDialog
         setListeners();
     }
 
-    private void initComponents()
-    {
+    private void initComponents() {
         int posX = MainFrame.getContext().getX();
         int posY = MainFrame.getContext().getY();
 
@@ -85,8 +83,7 @@ public class AddOrRemoveMemberDialog extends JDialog
     }
 
 
-    private void initView()
-    {
+    private void initView() {
         editorPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
         editorPanel.add(searchTextField);
 
@@ -108,52 +105,39 @@ public class AddOrRemoveMemberDialog extends JDialog
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    private void setListeners()
-    {
-        cancelButton.addMouseListener(new MouseAdapter()
-        {
+    private void setListeners() {
+        cancelButton.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 setVisible(false);
 
                 super.mouseClicked(e);
             }
         });
 
-        okButton.addMouseListener(new MouseAdapter()
-        {
+        okButton.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
             }
         });
 
-        searchTextField.addKeyListener(new KeyAdapter()
-        {
+        searchTextField.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyReleased(KeyEvent e)
-            {
+            public void keyReleased(KeyEvent e) {
                 searchUsers(searchTextField.getText());
                 super.keyTyped(e);
             }
         });
     }
 
-    private void searchUsers(String key)
-    {
-        if (key == null || key.isEmpty())
-        {
-            for (SelectUserData item : userListClone)
-            {
+    private void searchUsers(String key) {
+        if (key == null || key.isEmpty()) {
+            for (SelectUserData item : userListClone) {
                 List<SelectUserData> selectUserDataList = selectUserPanel.getSelectedUser();
-                if (selectUserDataList.contains(item))
-                {
+                if (selectUserDataList.contains(item)) {
                     item.setSelected(true);
-                }
-                else
-                {
+                } else {
                     item.setSelected(false);
                 }
             }
@@ -164,10 +148,8 @@ public class AddOrRemoveMemberDialog extends JDialog
         key = key.toLowerCase();
         List<SelectUserData> users = new ArrayList<>();
 
-        for (SelectUserData item : userList)
-        {
-            if (item.getName().toLowerCase().indexOf(key) > -1 && (!selectUserPanel.getSelectedUser().contains(item)))
-            {
+        for (SelectUserData item : userList) {
+            if (item.getName().toLowerCase().indexOf(key) > -1 && (!selectUserPanel.getSelectedUser().contains(item))) {
                 users.add(item);
             }
         }
@@ -175,16 +157,13 @@ public class AddOrRemoveMemberDialog extends JDialog
         selectUserPanel.notifyDataSetChanged(users);
     }
 
-    public List<SelectUserData> getSelectedUser()
-    {
+    public List<SelectUserData> getSelectedUser() {
         return selectUserPanel.getSelectedUser();
     }
 
-    public JButton getOkButton()
-    {
+    public JButton getOkButton() {
         return okButton;
     }
-
 
 
 }

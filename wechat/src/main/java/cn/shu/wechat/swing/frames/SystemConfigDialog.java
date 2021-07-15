@@ -13,8 +13,7 @@ import java.awt.event.MouseEvent;
 /**
  * Created by song on 07/06/2017.
  */
-public class SystemConfigDialog extends JDialog
-{
+public class SystemConfigDialog extends JDialog {
     private static SystemConfigDialog context;
     private JPanel buttonPanel;
     //private JButton cancelButton;
@@ -52,8 +51,7 @@ public class SystemConfigDialog extends JDialog
     private Cursor handCursor;
 
 
-    public SystemConfigDialog(Frame owner, boolean modal)
-    {
+    public SystemConfigDialog(Frame owner, boolean modal) {
         super(owner, modal);
         context = this;
 
@@ -64,14 +62,12 @@ public class SystemConfigDialog extends JDialog
         setListeners();
     }
 
-    private void initData()
-    {
+    private void initData() {
 
     }
 
 
-    private void initComponents()
-    {
+    private void initComponents() {
         int posX = MainFrame.getContext().getX();
         int posY = MainFrame.getContext().getY();
 
@@ -139,14 +135,13 @@ public class SystemConfigDialog extends JDialog
     }
 
 
-    private void initView()
-    {
+    private void initView() {
         //buttonPanel.add(cancelButton, new GBC(0, 0).setWeight(1, 1).setInsets(15, 0, 0, 0));
         buttonPanel.add(okButton, new GBC(1, 0).setWeight(1, 1));
 
         settingPanel.setLayout(new GridBagLayout());
-        settingPanel.add(settingMenuPanel, new GBC(0, 0).setWeight(1, 1).setFill(GBC.BOTH).setInsets(10,0,0,0));
-        settingPanel.add(settingAreaPanel, new GBC(1, 0).setWeight(6, 1).setFill(GBC.BOTH).setInsets(10,0,0,0));
+        settingPanel.add(settingMenuPanel, new GBC(0, 0).setWeight(1, 1).setFill(GBC.BOTH).setInsets(10, 0, 0, 0));
+        settingPanel.add(settingAreaPanel, new GBC(1, 0).setWeight(6, 1).setFill(GBC.BOTH).setInsets(10, 0, 0, 0));
 
         settingMenuPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
         settingMenuPanel.add(meLabel);
@@ -169,70 +164,51 @@ public class SystemConfigDialog extends JDialog
         selectedLabel(meLabel);
     }
 
-    private void setListeners()
-    {
-        okButton.addMouseListener(new MouseAdapter()
-        {
+    private void setListeners() {
+        okButton.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 setVisible(false);
 
                 super.mouseClicked(e);
             }
         });
 
-        MouseAdapter itemMouseListener = new MouseAdapter()
-        {
+        MouseAdapter itemMouseListener = new MouseAdapter() {
             @Override
-            public void mouseEntered(MouseEvent e)
-            {
+            public void mouseEntered(MouseEvent e) {
                 JLabel source = ((JLabel) e.getSource());
-                if (source != selectedLabel)
-                {
+                if (source != selectedLabel) {
                     source.setBackground(Colors.ITEM_SELECTED_LIGHT);
                 }
                 super.mouseEntered(e);
             }
 
             @Override
-            public void mouseExited(MouseEvent e)
-            {
+            public void mouseExited(MouseEvent e) {
                 JLabel source = ((JLabel) e.getSource());
-                if (source != selectedLabel)
-                {
+                if (source != selectedLabel) {
                     source.setBackground(Colors.WINDOW_BACKGROUND);
                 }
                 super.mouseExited(e);
             }
 
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 JLabel source = ((JLabel) e.getSource());
 
-                if (source != selectedLabel)
-                {
+                if (source != selectedLabel) {
                     selectedLabel(source);
 
-                    if (source.getText().equals("更改头像"))
-                    {
+                    if (source.getText().equals("更改头像")) {
                         cardLayout.show(settingAreaPanel, CHANGE_AVATAR);
-                    }
-                    else if (source.getText().equals("修改密码"))
-                    {
+                    } else if (source.getText().equals("修改密码")) {
                         cardLayout.show(settingAreaPanel, CHANGE_PASSWORD);
-                    }
-                    else if (source.getText().equals("我"))
-                    {
+                    } else if (source.getText().equals("我")) {
                         cardLayout.show(settingAreaPanel, ME);
-                    }
-                    else if (source.getText().equals("关于"))
-                    {
+                    } else if (source.getText().equals("关于")) {
                         cardLayout.show(settingAreaPanel, ABOUT);
-                    }
-                    else if (source.getText().equals("清除缓存"))
-                    {
+                    } else if (source.getText().equals("清除缓存")) {
                         cardLayout.show(settingAreaPanel, CLEAR_CHACE);
                     }
                 }
@@ -249,12 +225,10 @@ public class SystemConfigDialog extends JDialog
         clearCacheLabel.addMouseListener(itemMouseListener);
     }
 
-    private void selectedLabel(JLabel label)
-    {
+    private void selectedLabel(JLabel label) {
         selectedLabel = label;
 
-        for (Component component : settingMenuPanel.getComponents())
-        {
+        for (Component component : settingMenuPanel.getComponents()) {
             component.setBackground(Colors.WINDOW_BACKGROUND);
         }
 
@@ -262,13 +236,11 @@ public class SystemConfigDialog extends JDialog
     }
 
 
-    public static SystemConfigDialog getContext()
-    {
+    public static SystemConfigDialog getContext() {
         return context;
     }
 
-    private void processButtonLabel(JLabel label)
-    {
+    private void processButtonLabel(JLabel label) {
         label.setFont(FontUtil.getDefaultFont(13));
         label.setForeground(Colors.DARKER);
         label.setBorder(new RCBorder(RCBorder.BOTTOM, Colors.SHADOW));

@@ -7,12 +7,10 @@ import java.util.Map;
  * Created by song on 05/04/2017.
  */
 
-public class MimeTypeUtil
-{
+public class MimeTypeUtil {
     public static Map<String, String> MimeMap;
 
-    static
-    {
+    static {
         MimeMap = new HashMap<>();
         MimeMap.put(".3gp", "video/3gpp");
         MimeMap.put(".apk", "application/vnd.android.package-archive");
@@ -81,13 +79,11 @@ public class MimeTypeUtil
         MimeMap.put(".rar", "application/x-compress");
         MimeMap.put(".7z", "application/x-compress");
         MimeMap.put(".zip", "application/x-zip-compressed");
-       // MimeMap.put("", "*/*");
+        // MimeMap.put("", "*/*");
     }
 
-    public static String getMime(String suffix)
-    {
-        if (!suffix.startsWith("."))
-        {
+    public static String getMime(String suffix) {
+        if (!suffix.startsWith(".")) {
             suffix = "." + suffix;
         }
         return MimeMap.get(suffix);

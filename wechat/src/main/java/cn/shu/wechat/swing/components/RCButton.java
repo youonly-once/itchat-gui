@@ -8,8 +8,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
 
-public class RCButton extends JButton
-{
+public class RCButton extends JButton {
     private static final long serialVersionUID = 39082560987930759L;
     private Color BUTTON_COLOR1 = new Color(236, 236, 236);
     private Color BUTTON_COLOR2 = new Color(228, 228, 228);
@@ -19,13 +18,11 @@ public class RCButton extends JButton
     public static final Color BUTTON_FOREGROUND_COLOR = Color.WHITE;
     private boolean hover;
 
-    public RCButton()
-    {
+    public RCButton() {
         this("");
     }
 
-    public RCButton(String title, Color normal, Color hover, Color press)
-    {
+    public RCButton(String title, Color normal, Color hover, Color press) {
         this(title);
         this.BUTTON_COLOR1 = normal;
         this.BUTTON_COLOR2 = hover;
@@ -33,27 +30,23 @@ public class RCButton extends JButton
         this.borderColor = press;
     }
 
-    public RCButton(String name)
-    {
+    public RCButton(String name) {
         this.setText(name);
         setFont(FontUtil.getDefaultFont(14));
         setBorderPainted(false);
         setForeground(BUTTON_FOREGROUND_COLOR);
         setFocusPainted(false);
         setContentAreaFilled(false);
-        addMouseListener(new MouseAdapter()
-        {
+        addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseEntered(MouseEvent e)
-            {
+            public void mouseEntered(MouseEvent e) {
                 hover = true;
                 setCursor(new Cursor(Cursor.HAND_CURSOR));
                 repaint();
             }
 
             @Override
-            public void mouseExited(MouseEvent e)
-            {
+            public void mouseExited(MouseEvent e) {
                 hover = false;
                 repaint();
             }
@@ -61,8 +54,7 @@ public class RCButton extends JButton
     }
 
     @Override
-    protected void paintComponent(Graphics g)
-    {
+    protected void paintComponent(Graphics g) {
         Graphics2D g2d = (Graphics2D) g.create();
         int h = getHeight();
         int w = getWidth();
@@ -72,20 +64,14 @@ public class RCButton extends JButton
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
 
-        if (getModel().isPressed())
-        {
+        if (getModel().isPressed()) {
             gp = new GradientPaint(0.0F, 0.0F, BUTTON_COLOR3, 0.0F,
                     h, BUTTON_COLOR3, true);
-        }
-        else
-        {
-            if (hover)
-            {
+        } else {
+            if (hover) {
                 gp = new GradientPaint(0.0F, 0.0F, BUTTON_COLOR2, 0.0F,
                         h, BUTTON_COLOR2, true);
-            }
-            else
-            {
+            } else {
                 gp = new GradientPaint(0.0F, 0.0F, BUTTON_COLOR1, 0.0F,
                         h, BUTTON_COLOR1, true);
             }

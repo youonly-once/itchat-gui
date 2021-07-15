@@ -11,18 +11,15 @@ import java.awt.*;
 /**
  * Created by song on 07/06/2017.
  */
-public class RoomMembersItemViewHolder extends ViewHolder
-{
+public class RoomMembersItemViewHolder extends ViewHolder {
     public JLabel avatar = new JLabel();
     public JLabel roomName = new JLabel();
 
-    public RoomMembersItemViewHolder()
-    {
+    public RoomMembersItemViewHolder() {
         initView();
     }
 
-    private void initView()
-    {
+    private void initView() {
         setPreferredSize(new Dimension(40, 45));
         setBackground(Colors.WINDOW_BACKGROUND_LIGHT);
         setBorder(new RCBorder(RCBorder.BOTTOM, new Color(235, 235, 235)));

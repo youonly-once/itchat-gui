@@ -5,7 +5,6 @@ import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.db.model.FileAttachment;
 import cn.shu.wechat.swing.db.model.ImageAttachment;
-import cn.shu.wechat.swing.db.model.Message;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -17,8 +16,7 @@ import java.util.UUID;
  */
 
 @Data
-public class MessageItem implements Comparable<MessageItem>
-{
+public class MessageItem implements Comparable<MessageItem> {
     public static final int SYSTEM_MESSAGE = 0;
     public static final int LEFT_TEXT = 1;
     public static final int LEFT_IMAGE = 2;
@@ -44,28 +42,26 @@ public class MessageItem implements Comparable<MessageItem>
     private int messageType;
     private WXReceiveMsgCodeEnum wxReceiveMsgCodeEnum;
 
-    /*List<FileAttachmentItem> fileAttachments = new ArrayList<>();
-    List<ImageAttachmentItem> imageAttachments = new ArrayList<>();*/
+    List<FileAttachmentItem> fileAttachments = new ArrayList<>();
+    List<ImageAttachmentItem> imageAttachments = new ArrayList<>();
 
     private FileAttachmentItem fileAttachment;
     private ImageAttachmentItem imageAttachment;
 
-    public MessageItem()
-    {
+    public MessageItem() {
     }
 
-    public MessageItem(cn.shu.wechat.beans.pojo.Message message, String currentUserId,String roomId)
-    {
+    public MessageItem(cn.shu.wechat.beans.pojo.Message message, String currentUserId, String roomId) {
         this();
         this.setId(message.getId());
         this.setMessageContent(message.getContent());
         this.setGroupable(message.getFromUsername().startsWith("@@"));
         this.setRoomId(roomId);
         this.setSenderId(message.getFromUsername());
-        if (this.groupable){
+        if (this.groupable) {
             //如果是群则显示群成员名称
             this.setSenderUsername(message.getFromMemberOfGroupDisplayname());
-        }else{
+        } else {
             this.setSenderUsername(ContactsTools.getContactDisplayNameByUserName(message.getFromUsername()));
         }
 
@@ -152,49 +148,39 @@ public class MessageItem implements Comparable<MessageItem>
             this.imageAttachments.add(new ImageAttachmentItem(ia));
         }*/
 
-            // 自己发的消息
-            if (this.getSenderId().equals(currentUserId))
-            {
-                // 文件附件
-                if (isFileAttachment)
-                {
-                    this.setMessageType(RIGHT_ATTACHMENT);
-                }
-                // 图片消息
-                else if (isImageAttachment)
-                {
-                    this.setMessageType(RIGHT_IMAGE);
-                }
-                // 普通文本消息
-                else
-                {
-                    this.setMessageType(RIGHT_TEXT);
-                }
+        // 自己发的消息
+        if (this.getSenderId().equals(currentUserId)) {
+            // 文件附件
+            if (isFileAttachment) {
+                this.setMessageType(RIGHT_ATTACHMENT);
             }
-            else
-            {
-                // 文件附件
-                if (isFileAttachment)
-                {
-                    this.setMessageType(LEFT_ATTACHMENT);
-                }
-                // 图片消息
-                else if (isImageAttachment)
-                {
-                    this.setMessageType(LEFT_IMAGE);
-                }
-                // 普通文本消息
-                else
-                {
-                    this.setMessageType(LEFT_TEXT);
-                }
+            // 图片消息
+            else if (isImageAttachment) {
+                this.setMessageType(RIGHT_IMAGE);
             }
+            // 普通文本消息
+            else {
+                this.setMessageType(RIGHT_TEXT);
+            }
+        } else {
+            // 文件附件
+            if (isFileAttachment) {
+                this.setMessageType(LEFT_ATTACHMENT);
+            }
+            // 图片消息
+            else if (isImageAttachment) {
+                this.setMessageType(LEFT_IMAGE);
+            }
+            // 普通文本消息
+            else {
+                this.setMessageType(LEFT_TEXT);
+            }
+        }
 
     }
 
     @Override
-    public int compareTo( MessageItem o)
-    {
+    public int compareTo(MessageItem o) {
         return (int) (this.getTimestamp() - o.getTimestamp());
 
     }

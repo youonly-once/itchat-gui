@@ -1,11 +1,9 @@
 package cn.shu.wechat.swing.utils;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 
 /**
@@ -13,8 +11,7 @@ import java.io.IOException;
  * <p>
  * Created by song on 2017/6/24.
  */
-public class ImageUtil
-{
+public class ImageUtil {
     /**
      * 图片设置圆角
      *
@@ -23,11 +20,9 @@ public class ImageUtil
      * @return
      * @throws IOException
      */
-    public static BufferedImage setRadius(Image srcImage, int width, int height, int radius) throws IOException
-    {
+    public static BufferedImage setRadius(Image srcImage, int width, int height, int radius) throws IOException {
 
-        if (srcImage.getWidth(null) > width || srcImage.getHeight(null) > height)
-        {
+        if (srcImage.getWidth(null) > width || srcImage.getHeight(null) > height) {
             // 图片过大，进行缩放
             ImageIcon imageIcon = new ImageIcon();
             imageIcon.setImage(srcImage.getScaledInstance(width, height, Image.SCALE_SMOOTH));

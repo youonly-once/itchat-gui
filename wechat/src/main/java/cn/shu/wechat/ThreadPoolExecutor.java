@@ -35,11 +35,7 @@
 
 package cn.shu.wechat;
 
-import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.AbstractQueuedSynchronizer;
