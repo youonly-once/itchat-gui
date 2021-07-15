@@ -237,11 +237,11 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         holder.resend.addMouseListener(new MessageMouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (item.getUpdatedAt() > 0) {
+               /* if (item.getUpdatedAt() > 0) {
                     holder.resend.setVisible(false);
                     System.out.println("这条消息其实已经发送出去了");
                     return;
-                }
+                }*/
 
                 ChatPanel.getContext().resendFileMessage(item.getId(), "file");
 
@@ -251,7 +251,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
         setAttachmentClickListener(holder, item);
 
-        if (item.getUpdatedAt() > 0) {
+        if (item.getProgress() > 0) {
             processAttachmentSize(holder, item);
         } else {
             holder.sizeLabel.setText("等待上传...");
@@ -334,25 +334,21 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
         processImage(item, holder.image, holder);
 
-        if (item.getProgress() != 0 && item.getProgress() != 100) {
-            Message msg = messageService.findById(item.getId());
-            if (msg != null) {
-                item.setProgress(msg.getProgress());
+        if (item.getProgress() != 100) {
+           // Message msg = messageService.findById(item.getId());
+            //if (msg != null) {
+               // item.setProgress(msg.getProgress());
 
                 if (item.getProgress() == 100) {
                     holder.sendingProgress.setVisible(false);
                 } else {
-                    if (!ChatPanel.getContext().uploadingOrDownloadingFiles.contains(item.getImageAttachment().getId())) {
+            /*        if (!ChatPanel.uploadingOrDownloadingFiles.contains(item.getImageAttachment().getId())) {
                         item.setNeedToResend(true);
-                    }
+                    }*/
                 }
-            }
-        } else {
-            if (item.getUpdatedAt() < 1) {
-                holder.sendingProgress.setVisible(true);
-            } else {
-                holder.sendingProgress.setVisible(false);
-            }
+            //}
+        }else{
+            holder.sendingProgress.setVisible(true);
         }
 
 
@@ -366,11 +362,11 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         holder.resend.addMouseListener(new MessageMouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (item.getUpdatedAt() > 0) {
+             /*   if (item.getUpdatedAt() > 0) {
                     holder.resend.setVisible(false);
                     System.out.println("这条消息其实已经发送出去了");
                     return;
-                }
+                }*/
 
                 ChatPanel.getContext().resendFileMessage(item.getId(), "image");
 
@@ -516,9 +512,9 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         //registerMessageTextListener(holder.messageText, item);
 
         // 判断是否显示重发按钮
-        boolean needToUpdateResendStatus = !item.isNeedToResend() && item.getUpdatedAt() < 1 && System.currentTimeMillis() - item.getTimestamp() > 10 * 1000;
+        boolean needToUpdateResendStatus = !item.isNeedToResend() &&  System.currentTimeMillis() - item.getTimestamp() > 10 * 1000;
 
-        if (item.isNeedToResend() || needToUpdateResendStatus) {
+        if (item.isNeedToResend() ) {
             if (needToUpdateResendStatus) {
                 //messageService.updateNeedToResend(item.getId(), true);
             }
@@ -529,7 +525,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         } else {
             holder.resend.setVisible(false);
             // 如果是刚发送的消息，显示正在发送进度条
-            if (item.getUpdatedAt() < 1) {
+            if (item.getProgress()!=100) {
                 holder.sendingProgress.setVisible(true);
             } else {
                 holder.sendingProgress.setVisible(false);
@@ -540,10 +536,10 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         holder.resend.addMouseListener(new MessageMouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (item.getUpdatedAt() > 0) {
+            /*    if (item.getUpdatedAt() > 0) {
                     holder.resend.setVisible(false);
                     return;
-                }
+                }*/
 
                 System.out.println("重发消消息：" + item.getMessageContent());
 

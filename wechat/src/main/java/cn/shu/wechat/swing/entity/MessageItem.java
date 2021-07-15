@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.entity;
 
 import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.db.model.FileAttachment;
@@ -34,7 +35,7 @@ public class MessageItem implements Comparable<MessageItem> {
     private long timestamp;
     private String senderUsername;
     private String senderId;
-    private long updatedAt;
+
     private int unreadCount;
     private boolean needToResend;
     private int progress;
@@ -51,7 +52,7 @@ public class MessageItem implements Comparable<MessageItem> {
     public MessageItem() {
     }
 
-    public MessageItem(cn.shu.wechat.beans.pojo.Message message, String currentUserId, String roomId) {
+    public MessageItem(cn.shu.wechat.beans.pojo.Message message, String roomId) {
         this();
         this.setId(message.getId());
         this.setMessageContent(message.getContent());
@@ -66,10 +67,9 @@ public class MessageItem implements Comparable<MessageItem> {
         }
 
         this.setTimestamp(message.getCreateTime().getTime());
-        this.setUpdatedAt(message.getCreateTime().getTime());
-        this.setNeedToResend(false);
-        this.setProgress(100);
-        this.setDeleted(false);
+        this.setNeedToResend(!message.getIsSend());
+        this.setProgress(message.getProcess());
+        this.setDeleted(message.isDeleted());
         this.setWxReceiveMsgCodeEnum(WXReceiveMsgCodeEnum.getByCode(message.getMsgType()));
 
         boolean isFileAttachment = false;
@@ -86,11 +86,16 @@ public class MessageItem implements Comparable<MessageItem> {
             case MSGTYPE_VOICE:
             case MSGTYPE_VIDEO:
             case MSGTYPE_MICROVIDEO:
+            case MSGTYPE_APP:
                 //文件类消息
                 isFileAttachment = true;
-
-                FileAttachment fa = Launcher.fileAttachmentService.findById(message.getFilePath());
-                this.fileAttachment = new FileAttachmentItem(fa);
+                FileAttachmentItem fileAttachmentItem = new FileAttachmentItem();
+                fileAttachmentItem.setTitle(message.getFilePath());
+                fileAttachmentItem.setId(message.getId());
+                fileAttachmentItem.setDescription("desc");
+                fileAttachmentItem.setLink(message.getFilePath());
+                this.setMessageContent(message.getFilePath());
+                this.fileAttachment = fileAttachmentItem;
                 break;
             case MSGTYPE_IMAGE:
             case MSGTYPE_EMOTICON:
@@ -107,8 +112,7 @@ public class MessageItem implements Comparable<MessageItem> {
                 ia.setImageUrl(message.getFilePath());
                 this.imageAttachment = new ImageAttachmentItem(ia);
                 break;
-            case MSGTYPE_APP:
-                break;
+
             case MSGTYPE_VOIPMSG:
                 break;
             case MSGTYPE_VOIPNOTIFY:
@@ -149,7 +153,7 @@ public class MessageItem implements Comparable<MessageItem> {
         }*/
 
         // 自己发的消息
-        if (this.getSenderId().equals(currentUserId)) {
+        if (this.getSenderId().equals(Core.getUserSelf().getUsername())) {
             // 文件附件
             if (isFileAttachment) {
                 this.setMessageType(RIGHT_ATTACHMENT);

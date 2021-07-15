@@ -62,5 +62,17 @@ public class Message {
     /**
      * 是否是本人发送的消息1是0不是
      */
-    private Boolean isSend;
+    private Boolean isSend = true;
+
+    /**
+     * 消息发送进度
+     */
+    private int process = 100;
+
+    /**
+     * 是否删除
+     */
+    private boolean deleted =false;
+
+
 }

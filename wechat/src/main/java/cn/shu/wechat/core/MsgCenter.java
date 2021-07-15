@@ -27,6 +27,7 @@ import org.nlpcn.commons.lang.util.StringUtil;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import javax.swing.*;
 import java.util.*;
 
 import static cn.shu.wechat.enums.WXReceiveMsgCodeEnum.MSGTYPE_TEXT;
@@ -102,30 +103,39 @@ public class MsgCenter {
             log.info(s);
         }
 
-        //新增消息列表
-        ;
-        String userName = msg.getFromUserName();
-        if (userName.equals(Core.getUserName())) {
-            userName = msg.getToUserName();
-        }
-        if (msgType.getCode() < 51) {
-            //只显示常规消息
-            //刷新消息
-            ChatPanel.getContext().addOrUpdateMessageItem(message);
 
-            Contacts contacts = Core.getMemberMap().get(userName);
-            if (contacts == null){
-                contacts = Contacts.builder().username(userName).build();
-                Core.getMemberMap().put(userName,contacts);
-            }
-            if (!Core.getRecentContacts().contains(contacts)) {
-                //添加新房间并制定
-                RoomsPanel.getContext().addRoom(contacts, msg.getContent(), 1);
-                Core.getRecentContacts().add(contacts);
-            } else {
-                //更新消息 置顶
-                RoomsPanel.getContext().updateRoomItem(userName, 1, msg.getContent(), System.currentTimeMillis());
-            }
+        if (msgType.getCode() < 51) {
+            SwingUtilities.invokeLater(() -> {
+                //新增消息列表
+                ;
+                String userName = msg.getFromUserName();
+                if (userName.equals(Core.getUserName())) {
+                    userName = msg.getToUserName();
+                }
+                //只显示常规消息
+                //刷新消息
+                if (message!=null){
+                    message.setProcess(100);
+                    message.setIsSend(true);
+                    ChatPanel.getContext().addOrUpdateMessageItem(message);
+                }
+
+
+                Contacts contacts = Core.getMemberMap().get(userName);
+                if (contacts == null){
+                    contacts = Contacts.builder().username(userName).build();
+                    Core.getMemberMap().put(userName,contacts);
+                }
+                if (!Core.getRecentContacts().contains(contacts)) {
+                    //添加新房间并制定
+                    RoomsPanel.getContext().addRoom(contacts, msg.getContent(), 1);
+                    Core.getRecentContacts().add(contacts);
+                } else {
+                    //更新消息 置顶
+                    RoomsPanel.getContext().updateRoomItem(userName, 1, msg.getContent(), System.currentTimeMillis());
+                }
+            });
+
         }
         //需要发送的消息
         List<MessageTools.Message> messages = null;
