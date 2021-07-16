@@ -612,17 +612,26 @@ public class ChatPanel extends ParentAvailablePanel {
         addOrUpdateMessageItem(lastMessage);
     }
 
+
     /**
      * 添加一条消息到最后，或者更新已有消息
+     * @param lastMessage 新消息
      */
     public void addOrUpdateMessageItem(Message lastMessage) {
 
-        if (lastMessage == null) {
+        //新消息为空，或者当前没有选择聊天房间，则无需添加聊天面板中的消息记录
+        if (lastMessage == null || roomId == null) {
             return;
         }
-        //消息不是当前房间的 则不用添加panel
-        if (!roomId.equals(lastMessage.getFromUsername())
-                && !lastMessage.getFromUsername().equals(Core.getUserSelf().getUsername())) {
+        //收到的消息不是当前房间，不用添加一条消息到最后
+        //如果是自己发送的消息，当前房间id和toUserName匹配时
+        if (lastMessage.getFromUsername().equals(Core.getUserSelf().getUsername())){
+            if (!roomId.equals(lastMessage.getToUsername())){
+                //不是当前房间的消息
+                return;
+            }
+        }else if(!roomId.equals(lastMessage.getFromUsername())){
+            //不是当前房间的消息
             return;
         }
 
