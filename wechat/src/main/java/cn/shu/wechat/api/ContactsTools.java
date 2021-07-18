@@ -59,6 +59,9 @@ public class ContactsTools {
      * @return 备注
      */
     public static String getContactRemarkNameByUserName(String userName) {
+        if (userName == null){
+            return "";
+        }
         //群只有备注 没有昵称
         if (userName.startsWith("@@")) {
             return getContactNickNameByUserName(userName);
@@ -78,6 +81,9 @@ public class ContactsTools {
      * @return 备注
      */
     public static String getContactNickNameByUserName(String userName) {
+        if (userName == null){
+            return "";
+        }
         Contacts contactByUserName = getContactByUserName(userName);
         if (contactByUserName == null) {
             return null;
@@ -154,16 +160,22 @@ public class ContactsTools {
      * @return 群成员显示名称
      */
     public static String getMemberDisplayNameOfGroup(Contacts memberOfGroup, String userName) {
-        if (memberOfGroup == null) {
+        if (memberOfGroup == null || userName == null) {
             return "";
         }
-        String displayName = memberOfGroup.getDisplayname();
-        if (!StringUtils.isEmpty(displayName)) {
-            return CommonTools.emojiFormatter(displayName);
-        }
-        displayName = memberOfGroup.getNickname();
-        if (!StringUtils.isEmpty(displayName)) {
-            return CommonTools.emojiFormatter(displayName);
+        Map<String, Contacts> memberMap = Core.getMemberMap();
+        Contacts contacts = memberMap.get(userName);
+        if (contacts == null || StringUtils.isEmpty(contacts.getRemarkname())){
+            String displayName = memberOfGroup.getDisplayname();
+            if (!StringUtils.isEmpty(displayName)) {
+                return CommonTools.emojiFormatter(displayName);
+            }
+            displayName = memberOfGroup.getNickname();
+            if (!StringUtils.isEmpty(displayName)) {
+                return CommonTools.emojiFormatter(displayName);
+            }
+        }else{
+            return CommonTools.emojiFormatter(contacts.getRemarkname());
         }
         return userName;
     }

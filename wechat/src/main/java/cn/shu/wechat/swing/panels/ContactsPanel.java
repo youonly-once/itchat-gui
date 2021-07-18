@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -69,8 +70,14 @@ public class ContactsPanel extends ParentAvailablePanel {
                 Map<Integer, String> c = adapter.getPositionMap();
                 //每个联系人大约占用的高度
                 double height = (max * 1.0) / size;
-                //当前应显示的联系人数量
-                int count = (int)Math.ceil(curr / height);
+                //当前应显示的联系人数量 多加载二个
+                int count = (int)Math.ceil(curr / height)+20;
+                boolean loadPre;
+                //启动程序的时候这个顺序还不对，先返回
+                Optional<Integer> max1 = adapter.getPositionMap().keySet().stream().max(Integer::compareTo);
+                if (adapter.getPositionMap().size() == max1.get() + 1){
+                    return;
+                }
                 int i = updatedCount;
                 updatedCount = count;
                 for (; i <count; i ++) {

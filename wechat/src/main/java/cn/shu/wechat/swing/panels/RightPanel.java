@@ -1,79 +1,55 @@
 package cn.shu.wechat.swing.panels;
 
-import cn.shu.wechat.swing.components.Colors;
-import lombok.Data;
+import lombok.Getter;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 
 /**
- * Created by song on 17-5-29.
+ * 右半部分
+ * @作者 舒新胜
+ * @项目 AutoWechat
+ * @创建时间 7/18/2021 15:39
  */
-@Data
+@Getter
 public class RightPanel extends JPanel {
+    /**
+     * 显示聊天房的panel
+     */
+    private final RoomChatPanel roomChatPanel;
+    /**
+     * 显示用户信息的panel
+     */
+    private final UserInfoPanel userInfoPanel;
+
+    public static final String CHAT_ROOM = "CHAT_ROOM";
+    public static final String USER_INFO = "USER_INFO";
+
     public static RightPanel getContext() {
         return context;
     }
 
     private static RightPanel context;
-    private TitlePanel titlePanel;
-    private RoomMembersPanel roomMembersPanel;
-
-    private ChatPanel chatPanel;
-    private TipPanel tipPanel;
-    private UserInfoPanel userInfoPanel;
-
-
-    private JPanel contentPanel;
-
-    private CardLayout cardLayout;
-
-    public static final String MESSAGE = "MESSAGE";
-    public static final String TIP = "TIP";
-    public static final String USER_INFO = "USER_INFO";
-
-
+    /**
+     * 布局
+     */
+    private final CardLayout cardLayout;
     public RightPanel() {
-        context = this;
-        initComponents();
-        initView();
-
-    }
-
-    private void initComponents() {
-        cardLayout = new CardLayout();
-        contentPanel = new JPanel();
-        contentPanel.setLayout(cardLayout);
-
-        titlePanel = new TitlePanel(this);
-        chatPanel = new ChatPanel(this);
-        roomMembersPanel = new RoomMembersPanel(this);
-        tipPanel = new TipPanel(this);
+        context =this;
         userInfoPanel = new UserInfoPanel(this);
-
-        setBorder(new LineBorder(Colors.SCROLL_BAR_TRACK_LIGHT));
+        roomChatPanel = new RoomChatPanel(this);
+        cardLayout = new CardLayout();
+        setLayout(cardLayout);
+        add(userInfoPanel, USER_INFO);
+        add(roomChatPanel, CHAT_ROOM);
+        show(CHAT_ROOM);
     }
 
-    private void initView() {
-        contentPanel.add(tipPanel, TIP);
-        contentPanel.add(userInfoPanel, USER_INFO);
-        contentPanel.add(chatPanel, MESSAGE);
-
-        this.setBackground(Colors.FONT_WHITE);
-        this.setLayout(new BorderLayout());
-        add(titlePanel, BorderLayout.NORTH);
-        add(roomMembersPanel, BorderLayout.EAST);
-        add(contentPanel, BorderLayout.CENTER);
-
-
-        // add(chatPanel, BorderLayout.CENTER);
-        //add(tipPanel, BorderLayout.CENTER);
+    /**
+     * 显示对应层
+     * @param name
+     */
+    public void show(String name){
+        cardLayout.show(this,name);
     }
-
-    public void showPanel(String who) {
-        cardLayout.show(contentPanel, who);
-    }
-
-
 }

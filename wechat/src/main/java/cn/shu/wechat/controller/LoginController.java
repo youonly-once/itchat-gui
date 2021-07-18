@@ -11,8 +11,6 @@ import cn.shu.wechat.utils.SleepUtils;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -51,12 +49,6 @@ public class LoginController {
      */
     private int loginRetryCount = 10;
 
-
-    /**
-     * 登录重试次数
-     */
-    @Value("${server.port}")
-    private int port;
 
     private static AtomicInteger count = new AtomicInteger();
 
@@ -166,38 +158,5 @@ public class LoginController {
         });
 
 
-    }
-
-    @ResponseBody
-    @RequestMapping("/getPort")
-    public int getPort() {
-        return port;
-    }
-
-    /**
-     * @param dHImg 是否下载头像
-     * @return 提示信息
-     */
-    @RequestMapping("/")
-    @ResponseBody
-    public String reLogin(boolean dHImg) {
-        //
-        Core.setAlive(false);
-        //取消上次登录
-        Core.setCancelPreLogin(false);
-        ExecutorServiceUtil.getGlobalExecutorService().execute(
-                () -> login(dHImg)
-        );
-        return "请扫描二维码登录！";
-    }
-
-
-    @RequestMapping("/test")
-    @ResponseBody
-    public String test() throws InterruptedException {
-        log.info("开始了:{}", count.getAndIncrement());
-        Thread.sleep(10000);
-        log.info("ok\n");
-        return "ok";
     }
 }

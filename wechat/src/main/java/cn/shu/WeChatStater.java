@@ -20,6 +20,7 @@ import javax.swing.*;
 @MapperScan("cn.shu.wechat.mapper")
 @EnableScheduling
 @EnableAsync
+
 public class WeChatStater {
 
     public static void main(String[] args) {

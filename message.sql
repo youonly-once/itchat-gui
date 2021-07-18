@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50527
 File Encoding         : 65001
 
-Date: 2021-07-13 06:41:28
+Date: 2021-07-18 23:53:42
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -39,6 +39,9 @@ CREATE TABLE `message` (
   `to_remarkname` varchar(255) DEFAULT NULL,
   `to_nickname` varchar(255) DEFAULT NULL,
   `is_send` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否是本人发送的消息1是0不是',
+  `slave_path` varchar(255) DEFAULT NULL COMMENT '资源文件保存路径',
   PRIMARY KEY (`id`),
-  KEY `msg_id` (`msg_id`(191)) USING BTREE
+  KEY `msg_id` (`msg_id`(191)) USING BTREE,
+  KEY `fromname` (`from_username`(191)) USING BTREE,
+  KEY `toname` (`to_username`(191)) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

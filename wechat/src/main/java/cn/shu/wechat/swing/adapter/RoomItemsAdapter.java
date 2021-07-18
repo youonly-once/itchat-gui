@@ -1,20 +1,15 @@
 package cn.shu.wechat.swing.adapter;
 
-import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
-import cn.shu.wechat.swing.panels.ChatPanel;
-import cn.shu.wechat.swing.panels.LeftPanel;
-import cn.shu.wechat.swing.panels.RoomsPanel;
+import cn.shu.wechat.swing.panels.*;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.TimeUtil;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang.StringUtils;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -66,8 +61,8 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
 
         viewHolder.roomName.setText(roomItem.getName());
 
-        //异步加载头像
-        new SwingWorker<Object, Object>() {
+        //异步加载头像会闪烁
+  /*      new SwingWorker<Object, Object>() {
             Image orLoadAvatar ;
             @Override
             protected Object doInBackground() throws Exception {
@@ -81,9 +76,18 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
                     ImageIcon icon = new ImageIcon();
                     icon.setImage(orLoadAvatar);
                     viewHolder.avatar.setIcon(icon);
+                    RoomsPanel.getContext().getRoomItemsListView().getContentPanel().revalidate();
+
                 }
             }
-        }.execute();
+        }.execute();*/
+        //if (!roomItem.getRoomId().equals("filehelper")){
+            ImageIcon icon = icon = new ImageIcon();
+            icon.setImage(AvatarUtil.createOrLoadAvatar(roomItem.getRoomId()));
+            viewHolder.avatar.setIcon(icon);
+      //  }
+
+
 
 
         // 消息
@@ -108,7 +112,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
         }
 
         // 设置是否激活
-        if (roomItem.getRoomId().equals(ChatPanel.CHAT_ROOM_OPEN_ID)) {
+        if (roomItem.getRoomId().equals(RoomChatPanel.getContext().getCurrRoomId())) {
             setBackground(viewHolder, Colors.ITEM_SELECTED);
             selectedViewHolder = viewHolder;
         }
@@ -208,8 +212,18 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
      */
     private void enterRoom(String roomId) {
         // 加载房间消息
-        ChatPanel.getContext().enterRoom(roomId);
+         //ChatPanel.getContext().enterRoom(roomId);
 
+        //切换显示层
+        RoomChatPanelCard roomChatPanelCard = RoomChatPanel.getContext().createAndShow(roomId);
+        RoomChatPanel.getContext().show(roomId);
+        //显示聊天界面
+        roomChatPanelCard.showPanel(RoomChatPanelCard.MESSAGE);
+        //更新聊天列表未读数量
+        RoomsPanel.getContext().updateUnreadCount(roomId,0);
+
+        //RightPanelParent.getContext().show(roomId);
+        //  rightPanel.getChatPanel().enterRoom(roomId);
         //TitlePanel.getContext().hideRoomMembersPanel();
         /*RoomMembersPanel.getContext().setRoomId(roomId);
         if (RoomMembersPanel.getContext().isVisible())

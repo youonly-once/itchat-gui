@@ -20,7 +20,7 @@ public class RoomMembersItemViewHolder extends ViewHolder {
     }
 
     private void initView() {
-        setPreferredSize(new Dimension(40, 45));
+        setPreferredSize(new Dimension(40, 55));
         setBackground(Colors.WINDOW_BACKGROUND_LIGHT);
         setBorder(new RCBorder(RCBorder.BOTTOM, new Color(235, 235, 235)));
         setOpaque(true);

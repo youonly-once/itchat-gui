@@ -75,7 +75,7 @@ public class TitlePanel extends ParentAvailablePanel {
             public void mouseReleased(MouseEvent e) {
                 //if (roomInfoButton.isVisible())
                 {
-                    RoomMembersPanel roomMemberPanel = ((RightPanel) getParentPanel()).getRoomMembersPanel();
+                    RoomMembersPanel roomMemberPanel = ((RoomChatPanelCard) getParentPanel()).getRoomMembersPanel();
                     if (roomMemberPanel.isVisible()) {
                         roomInfoButton.setIcon(new ImageIcon(getClass().getResource("/image/options.png")));
                         roomMemberPanel.setVisibleAndUpdateUI(false);
@@ -144,7 +144,7 @@ public class TitlePanel extends ParentAvailablePanel {
      * 隐藏群成员面板
      */
     public void hideRoomMembersPanel() {
-        JPanel roomMemberPanel = ((RightPanel) getParentPanel()).getRoomMembersPanel();
+        JPanel roomMemberPanel = ((RoomChatPanelCard) getParentPanel()).getRoomMembersPanel();
         if (roomMemberPanel.isVisible()) {
             roomInfoButton.setIcon(new ImageIcon(getClass().getResource("/image/options.png")));
             roomMemberPanel.setVisible(false);
@@ -155,7 +155,7 @@ public class TitlePanel extends ParentAvailablePanel {
      * 显示群成员面板
      */
     public void showRoomMembersPanel() {
-        JPanel roomMemberPanel = ((RightPanel) getParentPanel()).getRoomMembersPanel();
+        JPanel roomMemberPanel = ((RoomChatPanelCard) getParentPanel()).getRoomMembersPanel();
         roomInfoButton.setIcon(new ImageIcon(getClass().getResource("/image/options_restore.png")));
         roomMemberPanel.setVisible(true);
     }
@@ -261,8 +261,7 @@ public class TitlePanel extends ParentAvailablePanel {
         this.titleLabel.setText(title);
 
         roomInfoButton.setVisible(true);
-        RightPanel parent = (RightPanel) getParent();
-        parent.showPanel(RightPanel.MESSAGE);
+
     }
 
     public void showAppTitle() {

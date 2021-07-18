@@ -1,9 +1,6 @@
 package cn.shu.wechat.swing.panels;
 
-import cn.shu.wechat.api.ContactsTools;
-import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.beans.pojo.Contacts;
-import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.adapter.RoomItemViewHolder;
 import cn.shu.wechat.swing.adapter.RoomItemsAdapter;
 import cn.shu.wechat.swing.components.Colors;
@@ -11,14 +8,11 @@ import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCListView;
 import cn.shu.wechat.swing.db.model.Room;
 import cn.shu.wechat.swing.entity.RoomItem;
-import cn.shu.wechat.swing.utils.AvatarUtil;
-import cn.shu.wechat.utils.ExecutorServiceUtil;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * 左侧聊天列表
@@ -39,7 +33,7 @@ public class RoomsPanel extends ParentAvailablePanel {
     /**
      * 当前聊天列表
      */
-    private List<RoomItem> roomItemList = new ArrayList<>();
+    private final List<RoomItem> roomItemList = new ArrayList<>();
 
 
     public RoomsPanel(JPanel parent) {
@@ -200,7 +194,7 @@ public class RoomsPanel extends ParentAvailablePanel {
                 if (time != null) {
                     item.setTimestamp(time);
                 }
-                if (roomId.equals(ChatPanel.getContext().getRoomId())) {
+                if (roomId.equals(RoomChatPanel.getContext().getCurrRoomId())) {
                     //当前显示的房间和新消息房间一样，则不需要在房间条目上显示未读消息数量
                     item.setUnreadCount(0);
                 } else if (unReadCount != -1) {
@@ -231,7 +225,32 @@ public class RoomsPanel extends ParentAvailablePanel {
     public void activeItem(int position) {
         RoomItemViewHolder holder = (RoomItemViewHolder) roomItemsListView.getItem(position);
         setItemBackground(holder, Colors.ITEM_SELECTED);
+        for (int i = 0; i < roomItemsListView.getItems().size(); i++) {
+            if (i == position) {
+                continue;
+            }
+            holder = (RoomItemViewHolder) roomItemsListView.getItem(i);
+            setItemBackground(holder, Colors.DARK);
+        }
+
     }
+
+    /**
+     * 激活指定的房间项目
+     *
+     * @param name
+     */
+    public void activeItem(String name) {
+        for (int i = 0; i < roomItemList.size(); i++) {
+            RoomItem roomItem = roomItemList.get(i);
+            if (roomItem.getRoomId().equals(name)) {
+                activeItem(i);
+                return;
+            }
+        }
+
+    }
+
 
     /**
      * 设置每个房间项目的背影色
@@ -245,6 +264,9 @@ public class RoomsPanel extends ParentAvailablePanel {
         holder.timeUnread.setBackground(color);
     }
 
+    public void scrollPoint(int point){
+        roomItemsListView.getVerticalScrollBar().setValue(point);
+    }
 
     public static RoomsPanel getContext() {
         return context;

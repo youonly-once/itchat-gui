@@ -52,11 +52,7 @@
             <artifactId>emoji-java</artifactId>
             <version>4.0.0</version>
         </dependency>
-        <!--       <dependency>
-                   <groupId>com.xuggle</groupId>
-                   <artifactId>xuggle-xuggler</artifactId>
-                   <version>5.4.0</version>
-               </dependency>-->
+
         <!--监听数据库操作-->
         <dependency>
             <groupId>org.bgee.log4jdbc-log4j2</groupId>
@@ -137,18 +133,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!--        <dependency>
-                    <groupId>org.mybatis.spring.boot</ groupId>
-                    <artifactId>mybatis-spring-boot-starter</artifactId>
-                    <version>2.1.2</version>
-                </dependency>-->
-
-        <!--        <dependency>
-                          <groupId>org.mybatis</groupId>
-                          <artifactId>mybatis</artifactId>
-                          <version>3.1.1</version>
-                      </dependency>-->
-        <!--mysql-->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
@@ -175,13 +159,6 @@
             <artifactId>com.springsource.org.jfree</artifactId>
             <version>1.0.12</version>
         </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>com.springsource.javax.servlet</artifactId>
-            <version>2.4.0</version>
-            <scope>provided</scope>
-        </dependency>
-
         <!-- ansj分词插件依赖 -->
         <dependency>
             <groupId>org.ansj</groupId>
@@ -203,33 +180,12 @@
             <artifactId>dom4j</artifactId>
             <version>2.1.1</version>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-
-        <!--admin client-->
-        <dependency>
-            <groupId>de.codecentric</groupId>
-            <artifactId>spring-boot-admin-starter-client</artifactId>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.12.0</version>
         </dependency>
-        <!--***************nacos配置信息****************-->
-        <!--注册中心客户端-->
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.github.freeseawind/NinePatch -->
         <dependency>
             <groupId>com.android</groupId>
             <artifactId>ninepatch</artifactId>
@@ -251,13 +207,19 @@
 
                 <configuration>
                     <excludes>
-                        <exclude>*.properties</exclude>
-                        <exclude>*.yml</exclude>
-                        <exclude>*.xml</exclude>
-                        <exclude>*.dic</exclude>
-                        <exclude>*.model</exclude>
-                        <exclude>*.txt</exclude>
-                        <exclude>*.*</exclude>
+                        <exclude>**/*.properties</exclude>
+                        <exclude>**/*.yml</exclude>
+                        <exclude>**/*.xml</exclude>
+                        <exclude>**/*.dic</exclude>
+                        <exclude>**/*.model</exclude>
+                        <exclude>**/*.txt</exclude>
+                        <exclude>**/*.png</exclude>
+                        <exclude>**/*.gif</exclude>
+                        <exclude>**/*.jpg</exclude>
+                        <exclude>**/*.jar</exclude>
+                        <exclude>**/*.map</exclude>
+                        <exclude>**/*.table</exclude>
+                        <exclude>**/*.wav</exclude>
                     </excludes>
                     <outputDirectory>${output-directory}</outputDirectory>
                     <archive>
@@ -294,13 +256,18 @@
                                 <resource>
                                     <directory>${basedir}/target/classes</directory>
                                     <includes>
-                                        <include>*.properties</include>
-                                        <include>*.yml</include>
-                                        <include>*.xml</include>
-                                        <include>*.dic</include>
-                                        <include>*.model</include>
-                                        <include>*.txt</include>
-                                        <include>*.*</include>
+                                        <include>**/*.properties</include>
+                                        <include>**/*.yml</include>
+                                        <include>**/*.xml</include>
+                                        <include>**/*.dic</include>
+                                        <include>**/*.model</include>
+                                        <include>**/*.txt</include>
+                                        <include>**/*.png</include>
+                                        <include>**/*.gif</include>
+                                        <include>**/*.jpg</include>
+                                        <include>**/*.map</include>
+                                        <include>**/*.table</include>
+                                        <include>**/*.wav</include>
                                     </includes>
                                 </resource>
                             </resources>

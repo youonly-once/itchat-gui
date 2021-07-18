@@ -3,8 +3,8 @@ package cn.shu.wechat.swing.frames;
 
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.panels.LeftPanel;
+import cn.shu.wechat.swing.panels.RoomChatPanelCard;
 import cn.shu.wechat.swing.panels.RightPanel;
-import cn.shu.wechat.swing.panels.RightPanelParent;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
@@ -16,18 +16,15 @@ import sun.audio.AudioStream;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyVetoException;
-import java.beans.VetoableChangeListener;
 import java.io.InputStream;
 
 /**
  * Created by song on 17-5-28.
  */
 public class MainFrame extends JFrame  {
-    public static int DEFAULT_WIDTH = 900;
-    public static int DEFAULT_HEIGHT = 650;
-
+    public final static int DEFAULT_WIDTH = 900;
+    public final static int DEFAULT_HEIGHT = 650;
+    public final static int LEFT_PANEL_WIDTH = 260;
     public int currentWindowWidth = DEFAULT_WIDTH;
     public int currentWindowHeight = DEFAULT_HEIGHT;
     /**
@@ -38,7 +35,7 @@ public class MainFrame extends JFrame  {
     /**
      * 主窗口右面板
      */
-    private RightPanel rightPanel;
+    private RoomChatPanelCard rightPanel;
 
     private static MainFrame context;
 
@@ -66,7 +63,7 @@ public class MainFrame extends JFrame  {
      * 消息到来的时候提示音
      */
     private AudioStream messageSound;
-    RightPanelParent filehelper;
+    RightPanel filehelper;
 
     public MainFrame() {
         super("微信-舒专用版");
@@ -224,11 +221,11 @@ public class MainFrame extends JFrame  {
 
 
         leftPanel = new LeftPanel();
-        leftPanel.setPreferredSize(new Dimension(260, currentWindowHeight));
+        leftPanel.setPreferredSize(new Dimension(LEFT_PANEL_WIDTH, currentWindowHeight));
 
        // rightPanel = new RightPanel();
 
-        filehelper = new RightPanelParent("filehelper");
+        filehelper = new RightPanel();
     }
 
     private void initView() {

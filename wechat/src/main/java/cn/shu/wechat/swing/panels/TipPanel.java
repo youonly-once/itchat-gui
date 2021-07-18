@@ -28,5 +28,8 @@ public class TipPanel extends ParentAvailablePanel {
         setLayout(new GridBagLayout());
         add(imageLabel, new GBC(0, 0).setAnchor(GBC.CENTER).setInsets(0, 0, 50, 0));
     }
+    public void setText(String s){
+        imageLabel.setText(s);
+    }
 
 }

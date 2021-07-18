@@ -128,7 +128,15 @@ public class AvatarUtil {
                 }
             }
             //本次生成的头像缓存到内存
-            avatarCache.put(roomId, avatar);
+            if (avatar!=null){
+                try {
+                    avatar = ImageUtil.setRadius(avatar, ((BufferedImage)avatar).getWidth(), ((BufferedImage)avatar).getHeight(), 35);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                avatarCache.put(roomId, avatar);
+            }
+
         }
 
         return avatar;
@@ -141,8 +149,12 @@ public class AvatarUtil {
      * @return 头像
      */
     public static Image createOrLoadUserAvatar(String userName) {
+        if (userName == null){
+            return null;
+        }
         String displayName = ContactsTools.getContactDisplayNameByUserName(userName);
         //获取内存中的头像
+
         Image avatar = avatarCache.get(userName);
         if (avatar == null) {
             Contacts contacts = Core.getMemberMap().get(userName);
@@ -157,7 +169,15 @@ public class AvatarUtil {
                     avatar = createAvatar(displayName);
                 }
             }
-            avatarCache.put(userName, avatar);
+            if (avatar!=null){
+                try {
+                    avatar = ImageUtil.setRadius(avatar, ((BufferedImage)avatar).getWidth(), ((BufferedImage)avatar).getHeight(), 35);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                avatarCache.put(userName, avatar);
+            }
+
         }
 
         return avatar;
@@ -185,7 +205,16 @@ public class AvatarUtil {
                     avatar = createAvatar(displayName);
                 }
             }
-            avatarCache.put(userName, avatar);
+            if (avatar!=null){
+                try {
+                    avatar = ImageUtil.setRadius(avatar, ((BufferedImage)avatar).getWidth(), ((BufferedImage)avatar).getHeight(), 35);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                avatarCache.put(userName, avatar);
+            }
+
+
         }
 
         return avatar;
@@ -218,13 +247,17 @@ public class AvatarUtil {
      * @return 头像
      */
     public static Image createOrLoadAvatar(String userName) {
+        //获取内存中的群头像
+        Image avatar ;
         if (userName.startsWith("@@")) {
             // 群组头像
-            return AvatarUtil.createOrLoadGroupAvatar(userName).getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+            avatar =  AvatarUtil.createOrLoadGroupAvatar(userName).getScaledInstance(40, 40, Image.SCALE_SMOOTH);
         } else {
             // 私聊头像
-           return AvatarUtil.createOrLoadUserAvatar(userName).getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+            avatar =  AvatarUtil.createOrLoadUserAvatar(userName).getScaledInstance(40, 40, Image.SCALE_SMOOTH);
         }
+
+        return avatar;
     }
     /**
      * 刷新用户头像缓存
@@ -240,7 +273,14 @@ public class AvatarUtil {
      * @param username
      */
     public static void putUserAvatarCache(String username,Image image) {
-        avatarCache.put(username, image);
+        if (image!=null){
+            try {
+                image = ImageUtil.setRadius(image, ((BufferedImage)image).getWidth(), ((BufferedImage)image).getHeight(), 35);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            avatarCache.put(username, image);
+        }
     }
 
     /**

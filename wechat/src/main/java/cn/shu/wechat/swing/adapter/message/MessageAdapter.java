@@ -19,10 +19,10 @@ import cn.shu.wechat.swing.db.service.CurrentUserService;
 import cn.shu.wechat.swing.db.service.MessageService;
 import cn.shu.wechat.swing.entity.FileAttachmentItem;
 import cn.shu.wechat.swing.entity.MessageItem;
-import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.helper.AttachmentIconHelper;
 import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
 import cn.shu.wechat.swing.panels.ChatPanel;
+import cn.shu.wechat.swing.panels.RoomChatPanel;
 import cn.shu.wechat.swing.utils.*;
 import org.apache.commons.lang.StringUtils;
 
@@ -457,6 +457,12 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                         public void onSuccess(ImageIcon icon, String path) {
                             try {
                                 //Desktop.getDesktop().open(new File(path));
+                                File file = new File(path);
+                                if (file.length()> 1024*1024){
+                                    ChatPanel.getContext().openFile(path);
+                                    //Desktop.getDesktop().open(new File(path));
+                                    return;
+                                }
                                 ImageViewerFrame frame = new ImageViewerFrame(path);
                                 frame.setVisible(true);
 
@@ -528,7 +534,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 protected void done() {
                     ImageIcon imageIcon = imageCache.tryGetThumbCache(new File(finalPath));
                     if (imageIcon == null) {
-                        imageLabel.setIcon(IconUtil.getIcon(this, "/image/image_loading.gif"));
+                     /*   imageLabel.setIcon(IconUtil.getIcon(this, "/image/image_loading.gif"));
 
                         imageCache.requestThumbAsynchronously(item.getImageAttachment().getId(), finalPath, new ImageCache.ImageCacheRequestListener() {
                             @Override
@@ -545,7 +551,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                                 holder.revalidate();
                                 holder.repaint();
                             }
-                        });
+                        });*/
                     } else {
                        // item.getMessageType()
                         preferredImageSize(imageIcon);
@@ -721,6 +727,11 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     contacts = ContactsTools.getMemberOfGroup(item.getRoomId(), item.getSenderId());
                 }else{
                     contacts = Core.getMemberMap().get(item.getSenderId());
+                }
+                if (contacts == null){
+                    RoomChatPanel.getContext().get(RoomChatPanel.getContext().getCurrRoomId())
+                            .getTipPanel().setText("成员信息加载中...");
+                    return;
                 }
                contacts.setGroupName(item.getRoomId());
                 UserInfoPopup popup = new UserInfoPopup(contacts);

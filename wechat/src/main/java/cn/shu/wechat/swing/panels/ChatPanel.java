@@ -99,7 +99,7 @@ public class ChatPanel extends ParentAvailablePanel {
     /**
      * 当前房间id
      */
-    private String roomId;
+    private final String roomId;
     // 如果是从消息搜索列表中进入房间的，这个属性不为0
     private long firstMessageTimestamp = 0L;
 
@@ -139,9 +139,10 @@ public class ChatPanel extends ParentAvailablePanel {
     private Queue<String> shareAttachmentUploadQueue = new ArrayDeque<>(MAX_SHARE_ATTACHMENT_UPLOAD_COUNT);
 
 
-    public ChatPanel(JPanel parent) {
+    public ChatPanel(JPanel parent,String roomId) {
 
         super(parent);
+        this.roomId = roomId;
         context = this;
         messageViewHolderCacheHelper = new MessageViewHolderCacheHelper();
 
@@ -440,7 +441,7 @@ public class ChatPanel extends ParentAvailablePanel {
      * @param roomId                房间id
      * @param firstMessageTimestamp 最新消息时间
      */
-    public void enterRoom(String roomId, long firstMessageTimestamp) {
+    private void enterRoom(String roomId, long firstMessageTimestamp) {
         if (StringUtils.isEmpty(roomId)) {
             return;
         }
@@ -451,7 +452,6 @@ public class ChatPanel extends ParentAvailablePanel {
 
         this.firstMessageTimestamp = firstMessageTimestamp;
 
-        this.roomId = roomId;
         CHAT_ROOM_OPEN_ID = roomId;
 
         Room room = new Room();
@@ -491,8 +491,6 @@ public class ChatPanel extends ParentAvailablePanel {
         // 更新房间标题，尤其是成员数
         updateRoomTitle();
 
-        //成员面板设置房间id
-        RoomMembersPanel.getContext().setRoomId(roomId, room);
         //消息未读数量0
         updateUnreadCount(0);
         //消息编辑框默认值

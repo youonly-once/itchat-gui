@@ -3,7 +3,6 @@ package cn.shu.wechat.typehandler;
 import cn.shu.wechat.beans.pojo.Contacts;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
-import com.alibaba.nacos.client.naming.utils.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedJdbcTypes;
@@ -40,7 +39,7 @@ public class JSONStringTypeHandler<T extends Object> implements TypeHandler<List
 
     @Override
     public void setParameter(PreparedStatement preparedStatement, int i, List<T> ts, JdbcType jdbcType) throws SQLException {
-        if (CollectionUtils.isEmpty(ts)) {
+        if (ts.isEmpty()) {
             preparedStatement.setString(i, null);
         } else {
             preparedStatement.setString(i, JSON.toJSONString(ts));

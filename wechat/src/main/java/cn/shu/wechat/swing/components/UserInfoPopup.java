@@ -62,14 +62,16 @@ public class UserInfoPopup extends JPopupMenu {
         usernameLabel = new JLabel();
         areaLabel =new JLabel("地区："+contacts.getProvince()+" "+contacts.getCity()+" "+contacts.getAlias());
         genderLabel =new JLabel();
-        genderLabel.setIcon(IconUtil.getIcon(this,contacts.getSex() == 1?"/image/man.png":"/image/woman.png"));
+        if (contacts.getSex() !=null){
+            genderLabel.setIcon(IconUtil.getIcon(this,contacts.getSex() == 1?"/image/man.png":"/image/woman.png"));
+        }
         remarkNameLabel =new JLabel("备注："+contacts.getRemarkname());
         signatureLabel = new JLabel("签名："+contacts.getSignature());
         ImageIcon imageIcon = new ImageIcon();
         if (contacts.getGroupName()!=null&&contacts.getGroupName().startsWith("@@")){
-            usernameLabel.setText(ContactsTools.getMemberDisplayNameOfGroup(contacts.getGroupName(),contacts.getUsername()));
+            usernameLabel.setText(ContactsTools.getMemberNickNameOfGroup(contacts.getGroupName(),contacts.getUsername()));
         }else{
-            usernameLabel.setText(ContactsTools.getContactDisplayNameByUserName(contacts.getUsername()));
+            usernameLabel.setText(ContactsTools.getContactNickNameByUserName(contacts.getUsername()));
         }
         //异步加载头像
         new SwingWorker<Object,Object>() {

@@ -2,6 +2,8 @@ package cn.shu.wechat.swing.frames;
 
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.panels.ChatPanel;
+import cn.shu.wechat.swing.panels.RoomChatPanelCard;
+import cn.shu.wechat.swing.panels.RoomChatPanel;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 
@@ -359,7 +361,8 @@ public class ScreenShot extends JFrame {
             public void mouseClicked(MouseEvent e) {
                 close();
                 ClipboardUtil.copyImage(saveImage);
-                ChatPanel.getContext().paste();
+                RoomChatPanelCard rightPanel = RoomChatPanel.getContext().get(RoomChatPanel.getContext().getCurrRoomId());
+                rightPanel.getChatPanel().paste();
                 super.mouseClicked(e);
             }
 

@@ -2,7 +2,6 @@ package cn.shu.wechat.beans.pojo;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.common.base.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.awt.*;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @作者 舒新胜
@@ -104,7 +104,7 @@ public class Contacts {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Contacts contacts = (Contacts) o;
-        return Objects.equal(username, contacts.username);
+        return contacts.username.equals(username);
     }
 
     @Override

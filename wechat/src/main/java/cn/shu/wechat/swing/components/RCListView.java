@@ -324,7 +324,7 @@ public class RCListView extends JScrollPane {
 
         //contentPanel.revalidate();
         holder.repaint();
-
+        //contentPanel.revalidate();
         /*contentPanel.getComponent(position).setBackground(Color.red);
         contentPanel.getComponent(position).revalidate();*/
     }

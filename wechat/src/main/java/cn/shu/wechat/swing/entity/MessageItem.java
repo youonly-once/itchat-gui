@@ -187,7 +187,7 @@ public class MessageItem implements Comparable<MessageItem> {
         }*/
 
         // 自己发的消息
-        if (this.getSenderId().equals(Core.getUserSelf().getUsername())) {
+        if (Core.getUserSelf().getUsername().equals(this.getSenderId())) {
             // 文件附件
             if (isFileAttachment) {
                 this.setMessageType(RIGHT_ATTACHMENT);

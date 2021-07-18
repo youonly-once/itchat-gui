@@ -4,16 +4,14 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.swing.entity.ContactsItem;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
+import cn.shu.wechat.swing.panels.RoomChatPanelCard;
 import cn.shu.wechat.swing.panels.RightPanel;
-import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.CharacterParser;
 import org.apache.commons.lang.StringUtils;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.util.List;
 import java.util.*;
 
@@ -102,7 +100,7 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
                 RightPanel.getContext().getUserInfoPanel().setUsername(item.getDisplayName());
                 RightPanel.getContext().getUserInfoPanel().setHeadImg(item.getId());
                 RightPanel.getContext().getUserInfoPanel().setUserId(item.getId());
-                RightPanel.getContext().showPanel(RightPanel.USER_INFO);
+                RightPanel.getContext().show(RoomChatPanelCard.USER_INFO);
 
                 setBackground(viewHolder, Colors.ITEM_SELECTED);
                 selectedViewHolder = viewHolder;

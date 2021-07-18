@@ -367,7 +367,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
     }
 
     private void enterRoom(String roomId, long firstMessageTimestamp) {
-        ChatPanel.getContext().enterRoom(roomId, firstMessageTimestamp);
+        //ChatPanel.getContext().enterRoom(roomId, firstMessageTimestamp);
     }
 
     public void setSearchMessageOrFileListener(SearchMessageOrFileListener searchMessageOrFileListener) {

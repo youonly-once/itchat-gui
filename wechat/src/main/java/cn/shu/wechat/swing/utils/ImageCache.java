@@ -2,9 +2,6 @@ package cn.shu.wechat.swing.utils;
 
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.db.model.CurrentUser;
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -237,10 +234,11 @@ public class ImageCache {
             tag.getGraphics().drawImage(image.getScaledInstance(destWidth, destHeight, Image.SCALE_SMOOTH), 0, 0, null);
 
             File cacheFile = new File(IMAGE_CACHE_ROOT_PATH + "/" + identify + "_thumb");
-            FileOutputStream out = new FileOutputStream(cacheFile);
-            JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
-            encoder.encode(tag);
-            out.close();
+           // FileOutputStream out = new FileOutputStream(cacheFile);
+            ImageIO.write(tag,"jpeg",cacheFile);
+            //JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
+           // encoder.encode(tag);
+            //out.close();
         } catch (IOException ex) {
             ex.printStackTrace();
         }

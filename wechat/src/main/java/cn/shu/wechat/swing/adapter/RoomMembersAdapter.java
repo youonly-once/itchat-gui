@@ -48,13 +48,13 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
             viewHolders.add(viewHolder);
         }
         Contacts contacts = members.get(position);
-        String userName = contacts.getUsername();
-        String name = ContactsTools.getMemberDisplayNameOfGroup(contacts,userName);
-        viewHolder.roomName.setText(name);
 
-        if (name.equals("添加成员")) {
+
+
+        if ("添加成员".equals(contacts.getDisplayname())) {
             viewHolder.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
+            String name = contacts.getDisplayname();
+            viewHolder.roomName.setText(name);
             ImageIcon imageIcon = new ImageIcon(getClass().getResource("/image/add_member.png"));
             imageIcon.setImage(imageIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH));
             viewHolder.avatar.setIcon(imageIcon);
@@ -81,9 +81,10 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
 
                 }
             });
-        } else if (name.equals("删除成员")) {
+        } else if ("删除成员".equals(contacts.getDisplayname())) {
             viewHolder.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
+            String name = contacts.getDisplayname();
+            viewHolder.roomName.setText(name);
             ImageIcon imageIcon = new ImageIcon(getClass().getResource("/image/delete_member.png"));
             imageIcon.setImage(imageIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH));
             viewHolder.avatar.setIcon(imageIcon);
@@ -112,6 +113,8 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
             //ImageIcon imageIcon = new ImageIcon();
             //imageIcon.setImage(AvatarUtil.createOrLoadMemberAvatar(RoomMembersPanel.getContext().getRoomId(),userName).getScaledInstance(30, 30, Image.SCALE_SMOOTH));
             //viewHolder.avatar.setIcon(imageIcon);
+            String userName = contacts.getUsername();
+            String name = ContactsTools.getMemberDisplayNameOfGroup(contacts,userName);
             if (contacts.getAvatar() != null){
                 ImageIcon icon = new ImageIcon();
                 icon.setImage(contacts.getAvatar());

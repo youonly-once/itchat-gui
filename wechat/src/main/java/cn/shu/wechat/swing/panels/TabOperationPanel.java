@@ -97,8 +97,10 @@ public class TabOperationPanel extends ParentAvailablePanel {
 
         if (e.getComponent() == chatLabel) {
             switchToChatLabel();
+            RightPanel.getContext().show(RightPanel.CHAT_ROOM);
 
         } else if (e.getComponent() == contactsLabel) {
+            RightPanel.getContext().show(RightPanel.USER_INFO);
             chatLabel.setIcon(chatIconNormal);
             contactsLabel.setIcon(contactIconActive);
             meLable.setIcon(meIconNormal);

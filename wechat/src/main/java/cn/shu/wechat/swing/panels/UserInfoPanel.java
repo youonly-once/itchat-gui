@@ -36,7 +36,7 @@ public class UserInfoPanel extends ParentAvailablePanel {
     private String username;
     private RoomService roomService = Launcher.roomService;
     private ContactsUserService contactsUserService = Launcher.contactsUserService;
-
+    private JPanel titlePanel;
     public UserInfoPanel(JPanel parent) {
         super(parent);
         initComponents();
@@ -61,6 +61,7 @@ public class UserInfoPanel extends ParentAvailablePanel {
         button.setPreferredSize(new Dimension(200, 40));
         button.setFont(FontUtil.getDefaultFont(16));
 
+        titlePanel = new TitlePanel(this);
     }
 
     private void initView() {
@@ -76,7 +77,8 @@ public class UserInfoPanel extends ParentAvailablePanel {
         contentPanel.add(avatarNamePanel);
         contentPanel.add(button);
 
-        add(contentPanel, new GBC(0, 0).setWeight(1, 1).setAnchor(GBC.CENTER).setInsets(0, 0, 250, 0));
+        add(titlePanel, new GBC(0, 0).setWeight(1, 1).setFill(GBC.BOTH).setAnchor(GBC.CENTER).setInsets(0, 0, 0, 0));
+        add(contentPanel, new GBC(0, 1).setWeight(1, 1000).setAnchor(GBC.CENTER).setInsets(0, 0, 250, 0));
     }
 
     public void setUsername(String username) {
@@ -111,8 +113,21 @@ public class UserInfoPanel extends ParentAvailablePanel {
         if (!Core.getRecentContacts().contains(user)) {
             // 房间bu存在，直接打开，否则发送请求创建房间
             createDirectChat(user);
+            RoomsPanel.getContext().activeItem(0);
+        }else{
+            //房间列表激活
+            RoomsPanel.getContext().activeItem(userId);
         }
-        ChatPanel.getContext().enterRoom(user.getUsername());
+        //右侧面板显示聊天框
+        RightPanel.getContext().show(RightPanel.CHAT_ROOM);
+        //创建一层Card
+         RoomChatPanel.getContext().addPanel(userId);
+        RoomChatPanel.getContext().show(userId);
+
+        //控制选项卡切换
+        TabOperationPanel.getContext().switchToChatLabel();
+        RoomsPanel.getContext().scrollPoint(1);
+        //ChatPanel.getContext().enterRoom(user.getUsername());
     }
 
     /**
@@ -124,7 +139,6 @@ public class UserInfoPanel extends ParentAvailablePanel {
         // JOptionPane.showMessageDialog(MainFrame.getContext(), "发起聊天", "发起聊天", JOptionPane.INFORMATION_MESSAGE);
         RoomsPanel.getContext().addRoom(contacts, "", 0);
         Core.getRecentContacts().add(contacts);
-        TabOperationPanel.getContext().switchToChatLabel();
 
     }
 

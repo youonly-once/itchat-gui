@@ -15,7 +15,8 @@ import cn.shu.wechat.enums.WXSendMsgCodeEnum;
 import cn.shu.wechat.face.IMsgHandlerFace;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.swing.frames.MainFrame;
-import cn.shu.wechat.swing.panels.ChatPanel;
+import cn.shu.wechat.swing.panels.RoomChatPanelCard;
+import cn.shu.wechat.swing.panels.RoomChatPanel;
 import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.utils.CommonTools;
 import cn.shu.wechat.utils.JSONObjectUtil;
@@ -131,7 +132,13 @@ public class MsgCenter {
                 if (message!=null){
                     message.setProcess(100);
                     message.setIsSend(true);
-                    ChatPanel.getContext().addOrUpdateMessageItem(message);
+                    //新消息来了后创建房间
+                    //RightPanel rightPanel = RightPanelParent.getContext().createAndShow(message.getFromUsername());
+                    RoomChatPanelCard rightPanel = RoomChatPanel.getContext().get(userName);
+                    if (rightPanel!=null){
+                        rightPanel.addOrUpdateMessageItem(message);
+                    }
+
                 }
 
 
