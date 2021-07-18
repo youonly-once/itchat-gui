@@ -24,7 +24,13 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
 
     private List<ContactsItem> contactsItems;
     private List<ContactsItemViewHolder> viewHolders = new ArrayList<>();
-    Map<Integer, String> positionMap = new HashMap<>();
+
+    @Override
+    public Map<Integer, String> getPositionMap() {
+        return positionMap;
+    }
+
+    Map<Integer, String> positionMap = new TreeMap<>();
     private ContactsItemViewHolder selectedViewHolder;
 
     public ContactsItemsAdapter(List<ContactsItem> contactsItems) {
@@ -76,28 +82,17 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
 
     @Override
     public void onBindViewHolder(ContactsItemViewHolder viewHolder, int position) {
-        viewHolders.add(position, viewHolder);
-        ContactsItem item = contactsItems.get(position);
-        ImageIcon icon = new ImageIcon();
-
-        try {
-
-            if (StringUtils.isEmpty(item.getHeadImgPath())) {
-                //根据名称生成
-                icon.setImage(AvatarUtil.createOrLoadUserAvatar(item.getId())
-                        .getScaledInstance(30, 30, Image.SCALE_SMOOTH));
-            } else {
-                //加载头像文件
-                icon.setImage(ImageIO.read(new File(item.getHeadImgPath()))
-                        .getScaledInstance(30, 30, Image.SCALE_SMOOTH));
-            }
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
+        if (!viewHolders.contains(viewHolder)) {
+            viewHolders.add(viewHolder);
         }
+       // viewHolders.add(position, viewHolder);
+        ContactsItem item = contactsItems.get(position);
 
-        viewHolder.avatar.setIcon(icon);
+        if (item.getAvatar() != null){
+            ImageIcon icon = new ImageIcon();
+            icon.setImage(item.getAvatar());
+            viewHolder.avatar.setIcon(icon);
+        }
 
         viewHolder.roomName.setText(item.getDisplayName());
 
@@ -105,6 +100,7 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
             @Override
             public void mouseClicked(MouseEvent e) {
                 RightPanel.getContext().getUserInfoPanel().setUsername(item.getDisplayName());
+                RightPanel.getContext().getUserInfoPanel().setHeadImg(item.getId());
                 RightPanel.getContext().getUserInfoPanel().setUserId(item.getId());
                 RightPanel.getContext().showPanel(RightPanel.USER_INFO);
 

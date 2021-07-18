@@ -1,5 +1,7 @@
 package cn.shu.wechat.swing.adapter;
 
+import java.util.Map;
+
 /**
  * Created by song on 17-5-30.
  */
@@ -26,6 +28,10 @@ public abstract class BaseAdapter<T extends ViewHolder> {
     public abstract void onBindViewHolder(T viewHolder, int position);
 
     public void onBindHeaderViewHolder(HeaderViewHolder viewHolder, int position) {
+    }
+
+    public Map<Integer, String> getPositionMap() {
+        return null;
     }
 
 

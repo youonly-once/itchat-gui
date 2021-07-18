@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.panels;
 
+import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
@@ -25,8 +26,6 @@ public class MePanel extends JPanel {
     private JLabel nameLabel;
     private RCButton button;
     private CurrentUserService currentUserService = Launcher.currentUserService;
-    private CurrentUser currentUser;
-
     public MePanel() {
         //currentUser = currentUserService.findAll().get(0);
         initComponents();
@@ -39,11 +38,11 @@ public class MePanel extends JPanel {
         contentPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.CENTER, 0, 20, true, false));
 
         imageLabel = new JLabel();
-        ImageIcon icon = new ImageIcon(AvatarUtil.createOrLoadUserAvatar(currentUser.getUsername()).getScaledInstance(100, 100, Image.SCALE_SMOOTH));
+        ImageIcon icon = new ImageIcon(AvatarUtil.createOrLoadUserAvatar(Core.getUserSelf().getUsername()).getScaledInstance(100, 100, Image.SCALE_SMOOTH));
         imageLabel.setIcon(icon);
 
         nameLabel = new JLabel();
-        nameLabel.setText(currentUser.getUsername());
+        nameLabel.setText(Core.getUserSelf().getNickname());
         nameLabel.setFont(FontUtil.getDefaultFont(20));
 
         button = new RCButton("退出登录", Colors.MAIN_COLOR, Colors.MAIN_COLOR_DARKER, Colors.MAIN_COLOR_DARKER);

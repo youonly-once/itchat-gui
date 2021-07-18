@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class ImageAttachmentItem {
+public class VideoAttachmentItem {
     private String id;
     private String title;
     private String description;
@@ -18,13 +18,12 @@ public class ImageAttachmentItem {
     private int width;
     private int height;
     private long imagesize;
-    private boolean isVideo;
 
-    public ImageAttachmentItem(String imageUrl) {
+    public VideoAttachmentItem(String imageUrl) {
         this.imagePath = imageUrl;
     }
 
-    public ImageAttachmentItem(ImageAttachment ia) {
+    public VideoAttachmentItem(ImageAttachment ia) {
         this.id = ia.getId();
         this.title = ia.getTitle();
         this.description = ia.getDescription();

@@ -74,5 +74,9 @@ public class Message {
      */
     private boolean deleted =false;
 
+    /**
+     * 缩略图Url
+     */
+    private String slavePath;
 
 }

@@ -163,7 +163,7 @@ public class ImageViewerFrame extends JDialog {
         int scaledHeight = (int) (image.getHeight(null) * scale);
 
         Image scaledimage = image.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_FAST);
-        return scaledimage;
+        return image;
     }
 
     private void setListeners() {

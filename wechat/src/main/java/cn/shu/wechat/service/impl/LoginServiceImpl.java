@@ -19,6 +19,7 @@ import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.mapper.ContactsMapper;
 import cn.shu.wechat.mapper.MemberGroupRMapper;
 import cn.shu.wechat.service.ILoginService;
+import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -194,12 +195,24 @@ public class LoginServiceImpl implements ILoginService {
             Core.getLoginInfoMap().put(StorageLoginInfoEnum.synckey.getKey(), synckey.substring(0, synckey.length() - 1));
             Core.setUserName(user.getString("UserName"));
             Core.setNickName(user.getString("NickName"));
-            Core.setUserSelf(JSON.parseObject(JSON.toJSONString(obj.getJSONObject("User")), Contacts.class));
-
+            Contacts me = JSON.parseObject(JSON.toJSONString(obj.getJSONObject("User")), Contacts.class);
+            Core.setUserSelf(me);
+            Core.getMemberMap().put(user.getString("UserName"),me);
             //初始化列表的联系人
             //最近聊天的联系人
             JSONArray contactList = obj.getJSONArray("ContactList");
             List<Contacts> contactsList = JSON.parseArray(JSON.toJSONString(contactList), Contacts.class);
+            for (Contacts contacts : contactsList) {
+                //下载头像
+                ExecutorServiceUtil.getHeadImageDownloadExecutorService().submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        AvatarUtil.putUserAvatarCache(contacts.getUsername(),DownloadTools.downloadImage(contacts.getHeadimgurl()));;
+                    }
+                });
+                Core.getMemberMap().put(contacts.getUsername(),contacts);
+            }
+
             Core.setRecentContacts(new HashSet<>(contactsList));
             String chatSet = obj.getString("ChatSet");
             String[] chatSetArray = chatSet.split(",");
@@ -513,7 +526,74 @@ public class LoginServiceImpl implements ILoginService {
         }
     }
 
+    @Override
+    public List<Contacts> WebWxBatchGetContact(String groupName) {
+        log.info("加载群成员开始："+groupName);
+        String url = String.format(URLEnum.WEB_WX_BATCH_GET_CONTACT.getUrl(),
+                Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()), new Date().getTime(),
+                Core.getLoginInfoMap().get(StorageLoginInfoEnum.pass_ticket.getKey()));
+        Map<String, Object> paramMap = Core.getParamMap();
+        paramMap.put("Count", 1);
+        List<Map<String, String>> list = new ArrayList<Map<String, String>>(1);
+        HashMap<String, String> map = new HashMap<String, String>(2);
+        map.put("UserName", groupName);
+        map.put("EncryChatRoomId", "");
+        list.add(map);
+        paramMap.put("List", list);
+        HttpEntity entity = MyHttpClient.doPost(url, JSON.toJSONString(paramMap));
+        try {
+            String text = EntityUtils.toString(entity, Consts.UTF_8);
+            JSONObject obj = JSON.parseObject(text);
+            //群列表
+            JSONArray contactList = obj.getJSONArray("ContactList");
+            List<Contacts> members = new ArrayList<>();
+            ArrayList<MemberGroupR> memberGroupRList = new ArrayList<>();
+            for (int i = 0; i < contactList.size(); i++) {
+                // 群好友
+                JSONObject groupObject = contactList.getJSONObject(i);
+                Contacts group = JSON.parseObject(JSON.toJSONString(groupObject), Contacts.class);
+                String userName = group.getUsername();
+                Core.getMemberMap().put(userName, group);
+                if (userName.startsWith("@@")) {
+                    //以上接口返回的成员属性不全，以下的接口获取群成员详细属性
+                    JSONArray memberArray = WebWxBatchGetContactDetail(groupObject);
+                    List<Contacts> memberList = JSON.parseArray(JSON.toJSONString(memberArray), Contacts.class);
+                    // Core.getGroupMemberMap().put(userName, memberArray);
+                    group.setMemberlist(memberList);
+                    Core.getGroupMap().put(userName, group);
+                    Core.getMemberMap().put(userName, group);
+/*                    List<Contacts> members1 = JSON.parseArray(JSON.toJSONString(memberArray), Contacts.class);
+                    members.addAll(members1);
+                    for (Contacts contacts : members) {
+                        MemberGroupR memberGroupR = new MemberGroupR();
+                        memberGroupR.setGroupusername(userName);
+                        memberGroupR.setMemberusername(contacts.getUsername());
+                        memberGroupR.setId(UUID.randomUUID().toString().replace("-",""));
+                        memberGroupRList.add(memberGroupR);
+                        contacts.setIscontacts(false);
+                    }*/
+                    log.info("加载群成员结束："+Core.getMemberMap().get(groupName).getMemberlist().size());
+                    return memberList;
+                }
+            }
+/*            if (!members.isEmpty()){
+                for (Contacts member : members) {
+                    contactsMapper.insertOrUpdateSelective(member);
+                }
 
+            }
+            if (!memberGroupRList.isEmpty()){
+                memberGroupRMapper.batchInsert(memberGroupRList);
+            }*/
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error(e.getMessage());
+        }
+        log.info("加载群成员结束：0");
+        return new ArrayList<>();
+    }
     @Override
     public JSONArray WebWxBatchGetContactDetail(JSONObject groupObject) {
         String url = String.format(URLEnum.WEB_WX_BATCH_GET_CONTACT.getUrl(),
@@ -879,7 +959,7 @@ public class LoginServiceImpl implements ILoginService {
                         || stringMapEntry.getKey().equals("头像更换")
                         || stringMapEntry.getKey().equals("headimgurl")) {
                     String oldHeadPath = Core.getContactHeadImgPath().get(oldV.getUsername());
-                    String newHeadPath = DownloadTools.downloadHeadImg(stringStringEntry.getValue()
+                    String newHeadPath = DownloadTools.downloadHeadImgBig(stringStringEntry.getValue()
                             , oldV.getUsername());
                     Core.getContactHeadImgPath().put(oldV.getUsername(), newHeadPath);
                     //更换头像需要发送图片

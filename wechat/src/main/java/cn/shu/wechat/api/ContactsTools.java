@@ -93,8 +93,8 @@ public class ContactsTools {
      * @param userName  成员UserName
      * @return 成员
      */
-    private static Contacts getMemberOfGroup(String groupName, String userName) {
-        Map<String, Contacts> groupMemberMap = Core.getGroupMap();
+    public static Contacts getMemberOfGroup(String groupName, String userName) {
+        Map<String, Contacts> groupMemberMap =Core.getMemberMap();
         Contacts group = groupMemberMap.get(groupName);
         if (group == null || userName == null) {
             return null;
@@ -143,6 +143,17 @@ public class ContactsTools {
      */
     public static String getMemberDisplayNameOfGroup(String groupName, String userName) {
         Contacts memberOfGroup = getMemberOfGroup(groupName, userName);
+        return getMemberDisplayNameOfGroup(memberOfGroup,userName);
+    }
+
+    /**
+     * 获取群成员显示名称
+     *
+     * @param memberOfGroup 群
+     * @param userName  成员UserName
+     * @return 群成员显示名称
+     */
+    public static String getMemberDisplayNameOfGroup(Contacts memberOfGroup, String userName) {
         if (memberOfGroup == null) {
             return "";
         }

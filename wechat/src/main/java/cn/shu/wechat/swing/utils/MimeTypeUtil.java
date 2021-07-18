@@ -86,7 +86,7 @@ public class MimeTypeUtil {
         if (!suffix.startsWith(".")) {
             suffix = "." + suffix;
         }
-        return MimeMap.get(suffix);
+        return MimeMap.get(suffix.toLowerCase());
     }
 
 }

@@ -13,6 +13,7 @@ public class FileAttachmentItem {
     private String title;
     private String link;
     private String description;
+    private String slavePath;
 
     public FileAttachmentItem() {
 

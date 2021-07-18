@@ -1,7 +1,10 @@
 package cn.shu.wechat.service;
 
+import cn.shu.wechat.beans.pojo.Contacts;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+
+import java.util.List;
 
 /**
  * 登陆服务接口
@@ -83,6 +86,12 @@ public interface ILoginService {
      * @date 2017年6月22日 下午11:24:35
      */
     void WebWxBatchGetContact();
+
+    /**
+     * 获取群成员信息
+     * @param groupName 群名
+     */
+    List<Contacts> WebWxBatchGetContact(String groupName);
 
     /**
      * 批量获取群成员详细信息

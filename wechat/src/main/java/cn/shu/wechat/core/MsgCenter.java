@@ -83,13 +83,27 @@ public class MsgCenter {
             msgType = WXReceiveMsgCodeEnum.MSGTYPE_MAP;
         }
         //下载资源文件
-        String path = DownloadTools.getDownloadFilePath(msg);
+        String path = DownloadTools.getDownloadFilePath(msg,false);
+        String pathSlave = DownloadTools.getDownloadFilePath(msg,true);
         //false表示当前文件未下载完成，此时其它地方不能使用
         Hashtable<String, Boolean> fileDownloadStatus = DownloadTools.FILE_DOWNLOAD_STATUS;
         if (path != null) {
+            //缩略图
+            switch (msgType) {
+                case MSGTYPE_IMAGE:
+                case MSGTYPE_VIDEO:
+                    fileDownloadStatus.put(pathSlave, false);
+                    DownloadTools.downloadFile(msg, pathSlave,true);
+                    msg.setSlavePath(pathSlave);
+                    break;
+                default:break;
+            }
+
+
             fileDownloadStatus.put(path, false);
-            DownloadTools.downloadFile(msg, path);
+            DownloadTools.downloadFile(msg, path,false);
             msg.setFilePath(path);
+
         }
         //存储消息
         Message message = storeMsgToDB(msg);
@@ -244,6 +258,7 @@ public class MsgCenter {
                     .fromMemberOfGroupDisplayname(msg.isGroupMsg() ? ContactsTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), msg.getMemberName()) : null)
                     .fromMemberOfGroupNickname(msg.isGroupMsg() ? ContactsTools.getMemberNickNameOfGroup(msg.getFromUserName(), msg.getMemberName()) : null)
                     .fromMemberOfGroupUsername(msg.isGroupMsg() ? msg.getMemberName() : null)
+                    .slavePath(msg.getSlavePath())
                     .build();
             int insert = messageMapper.insert(build);
             return build;
@@ -312,7 +327,7 @@ public class MsgCenter {
 /*					String oldHeadPath = DownloadTools.downloadHeadImg(stringStringEntry.getKey()
 							, IMsgHandlerFaceImpl.savePath+File.separator+oldV.getString("UserName")+File.separator);*/
                     String oldHeadPath = Core.getContactHeadImgPath().get(oldV.getString("userName"));
-                    String newHeadPath = DownloadTools.downloadHeadImg(stringStringEntry.getValue()
+                    String newHeadPath = DownloadTools.downloadHeadImgBig(stringStringEntry.getValue()
                             , oldV.getString("userName"));
                     Core.getContactHeadImgPath().put(oldV.getString("userName"), newHeadPath);
                     //更换前

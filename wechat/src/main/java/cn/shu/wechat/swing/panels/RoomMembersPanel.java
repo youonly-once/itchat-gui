@@ -1,7 +1,9 @@
 package cn.shu.wechat.swing.panels;
 
 import cn.shu.wechat.beans.pojo.Contacts;
+import cn.shu.wechat.beans.pojo.Member;
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.service.ILoginService;
 import cn.shu.wechat.swing.adapter.RoomMembersAdapter;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
@@ -14,9 +16,13 @@ import cn.shu.wechat.swing.db.model.Room;
 import cn.shu.wechat.swing.db.service.ContactsUserService;
 import cn.shu.wechat.swing.db.service.CurrentUserService;
 import cn.shu.wechat.swing.db.service.RoomService;
+import cn.shu.wechat.swing.entity.ContactsItem;
 import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.frames.AddOrRemoveMemberDialog;
 import cn.shu.wechat.swing.frames.MainFrame;
+import cn.shu.wechat.swing.utils.AvatarUtil;
+import cn.shu.wechat.utils.SpringContextHolder;
+import lombok.val;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -38,6 +44,11 @@ public class RoomMembersPanel extends ParentAvailablePanel {
     private JButton leaveButton;
 
     private List<Contacts> members = new ArrayList<>();
+
+    public String getRoomId() {
+        return roomId;
+    }
+
     private String roomId;
     private RoomService roomService = Launcher.roomService;
     private CurrentUserService currentUserService = Launcher.currentUserService;
@@ -110,29 +121,35 @@ public class RoomMembersPanel extends ParentAvailablePanel {
     @Override
     public void updateUI() {
         if (roomId != null) {
+            new SwingWorker<Object,Object>(){
 
-            getRoomMembers();
+                @Override
+                protected Object doInBackground() throws Exception {
+                    getRoomMembers();
+                    return null;
+                }
 
-            // 单独聊天，不显示退出按钮
-            if (!roomId.startsWith("@@")) {
-                leaveButton.setVisible(false);
-            } else {
-                leaveButton.setVisible(true);
-            }
+                @Override
+                protected void done() {
+                    listView.notifyDataSetChanged(false);
+                    // 单独聊天，不显示退出按钮
+                    leaveButton.setVisible(roomId.startsWith("@@"));
+                    setLeaveButtonVisibility(true);
 
-            listView.notifyDataSetChanged(false);
-
-            setLeaveButtonVisibility(true);
-
-            if (isRoomCreator()) {
-                leaveButton.setText("解散群聊");
-            } else {
-                leaveButton.setText("退出群聊");
-            }
+                    if (isRoomCreator()) {
+                        leaveButton.setText("解散群聊");
+                    } else {
+                        leaveButton.setText("退出群聊");
+                    }
+                }
+            }.execute();
 
         }
     }
 
+    /**
+     * 获取群成员
+     */
     private void getRoomMembers() {
         members.clear();
 
@@ -145,7 +162,15 @@ public class RoomMembersPanel extends ParentAvailablePanel {
         } else {
             //获取成员
             Contacts group = Core.getMemberMap().get(roomId);
-            members.addAll(group.getMemberlist());
+            List<Contacts> memberlist = group.getMemberlist();
+            if (memberlist == null ||memberlist.isEmpty()){
+                ILoginService bean = SpringContextHolder.getBean(ILoginService.class);
+                memberlist= bean.WebWxBatchGetContact(roomId);
+            }
+            for (Contacts contacts : memberlist) {
+                contacts.setGroupName(roomId);
+            }
+            members.addAll(memberlist);
             if (members == null) {
                 return;
             }
@@ -160,6 +185,29 @@ public class RoomMembersPanel extends ParentAvailablePanel {
 
 
         }
+        //下载头像
+        for (int i = 0; i < members.size(); i++) {
+            Contacts contacts = members.get(i);
+            int finali = i;
+            new SwingWorker<Object,Object>(){
+
+                private Image image;
+                @Override
+                protected Object doInBackground() throws Exception {
+                    //下载头像
+                    image = AvatarUtil.createOrLoadMemberAvatar(roomId, contacts.getUsername());
+                    return null;
+                }
+
+                @Override
+                protected void done() {
+                    //更新头像
+                    updateAvatar(finali,image.getScaledInstance(40, 40, Image.SCALE_SMOOTH));
+                }
+            }.execute();
+        }
+
+
     }
 
 
@@ -311,5 +359,14 @@ public class RoomMembersPanel extends ParentAvailablePanel {
     private void leaveChannelOrGroup(final String roomId) {
         JOptionPane.showMessageDialog(null, "退出群聊：" + roomId, "退出群聊", JOptionPane.INFORMATION_MESSAGE);
     }
-
+    /**
+     * 更新群成员头像
+     * @param pos 联系人位置
+     * @param image 联系人头像
+     */
+    public void updateAvatar(int pos, Image image) {
+        Contacts contacts = members.get(pos);
+        contacts.setAvatar(image);
+        listView.notifyItemChanged(pos);
+    }
 }

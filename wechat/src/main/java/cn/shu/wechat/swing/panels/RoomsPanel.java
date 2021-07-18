@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.panels;
 
 import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.adapter.RoomItemViewHolder;
@@ -10,6 +11,8 @@ import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCListView;
 import cn.shu.wechat.swing.db.model.Room;
 import cn.shu.wechat.swing.entity.RoomItem;
+import cn.shu.wechat.swing.utils.AvatarUtil;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,6 +26,11 @@ import java.util.Set;
  */
 public class RoomsPanel extends ParentAvailablePanel {
     private static RoomsPanel context;
+
+    public RCListView getRoomItemsListView() {
+        return roomItemsListView;
+    }
+
     /**
      * 聊天列表视图数据
      */
@@ -58,7 +66,7 @@ public class RoomsPanel extends ParentAvailablePanel {
     private void initData() {
         roomItemList.clear();
         //从核心类加载房间列表
-        Set<Contacts> recentContacts = Core.getRecentContacts();
+/*        Set<Contacts> recentContacts = Core.getRecentContacts();
         for (Contacts recentContact : recentContacts) {
             RoomItem item = new RoomItem();
             item.setRoomId(recentContact.getUsername());
@@ -67,8 +75,10 @@ public class RoomsPanel extends ParentAvailablePanel {
             item.setLastMessage("");
             item.setUnreadCount(0);
             item.setGroup(recentContact.getUsername().startsWith("@@"));
+            item.setHeadImgPath(recentContact.getHeadimgurl());
+            item.setRefreshHead(true);
             roomItemList.add(item);
-        }
+        }*/
     }
 
     /**
@@ -78,16 +88,24 @@ public class RoomsPanel extends ParentAvailablePanel {
      * @param latestMsg     最新消息
      */
     public void addRoom(Contacts recentContact, String latestMsg, int msgCount) {
-        RoomItem item = new RoomItem();
-        item.setRoomId(recentContact.getUsername());
-        item.setTimestamp(System.currentTimeMillis());
-        item.setName(ContactsTools.getContactDisplayNameByUserName(recentContact.getUsername()));
-        item.setGroup(recentContact.getUsername().startsWith("@@"));
-        item.setLastMessage(latestMsg);
-        String roomId = ChatPanel.getContext().getRoomId();
-        item.setUnreadCount(msgCount);
+        addRoom(new RoomItem(recentContact,latestMsg,msgCount));
+    }
 
+    /**
+     * 添加房间
+     * @param item
+     */
+    public void addRoom(RoomItem item) {
         roomItemList.add(0, item);
+        roomItemsListView.notifyDataSetChanged(false);
+    }
+
+    /**
+     * 批量添加房间
+     * @param items
+     */
+    public void addRoom(List<RoomItem> items) {
+        roomItemList.addAll(items);
         roomItemsListView.notifyDataSetChanged(false);
     }
 
@@ -97,6 +115,17 @@ public class RoomsPanel extends ParentAvailablePanel {
     public void notifyDataSetChanged(boolean keepSize) {
         initData();
         roomItemsListView.notifyDataSetChanged(keepSize);
+    }
+
+    /**
+     * 添加
+     */
+    /**
+     * 指定位置添加元素
+     * @param pos 位置
+     */
+    public void notifyItemInserted(int pos) {
+        roomItemsListView.notifyItemInserted(pos,false);
     }
 
     /**

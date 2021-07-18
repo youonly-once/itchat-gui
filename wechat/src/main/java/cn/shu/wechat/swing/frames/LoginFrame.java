@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.frames;
 
+import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
@@ -7,7 +8,11 @@ import cn.shu.wechat.service.ILoginService;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.db.service.CurrentUserService;
+import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
+import cn.shu.wechat.swing.panels.ContactsPanel;
+import cn.shu.wechat.swing.panels.RoomsPanel;
+import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.DbUtils;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.OSUtil;
@@ -29,8 +34,11 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by song on 08/06/2017.
@@ -190,12 +198,46 @@ public class LoginFrame extends JFrame {
 
         MainFrame frame = new MainFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        Set<Contacts> recentContacts = Core.getRecentContacts();
+/*        new SwingWorker<ArrayList<RoomItem>,Object>(){
+
+            @Override
+            protected ArrayList<RoomItem> doInBackground() throws Exception {
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                super.done();
+            }
+        }.execute();*/
         frame.setVisible(true);
+        //初始化聊天列表
+        ArrayList<RoomItem> rooms = new ArrayList<>();
+        for (Contacts recentContact : recentContacts) {
+            rooms.add(new RoomItem(recentContact,"",0));
+            // RoomsPanel.getContext().addRoom(new RoomItem(recentContact,"",0));
+        }
+        RoomsPanel.getContext().addRoom(rooms);
 
-
-        statusLabel.setText("12 开始接收消息");
-        log.info("12. 开始接收消息");
+        log.info("开启微信状态通知");
+        loginService.wxStatusNotify();
+        log.info(" 开始接收消息");
         loginService.startReceiving();
+
+
+        log.info("获取联系人信息");
+        loginService.webWxGetContact();
+        //重绘联系人
+        ContactsPanel.getContext().notifyDataSetChanged();
+/*        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+
+            }
+        });*/
+
+
     }
 
 
@@ -280,25 +322,20 @@ public class LoginFrame extends JFrame {
             log.info("6. 微信初始化异常");
             System.exit(0);
         }
-        statusLabel.setText("6. 开启微信状态通知");
-        log.info("6. 开启微信状态通知");
-        loginService.wxStatusNotify();
+        //打开窗体
+        doLogin();
 
-        statusLabel.setText("7. 清除。。。。");
-        log.info("7. 清除。。。。");
+        log.info("清除。。。。");
         CommonTools.clearScreen();
         log.info(String.format("欢迎回来， %s", Core.getNickName()));
 
-        statusLabel.setText("8. 获取联系人信息");
-        log.info("8. 获取联系人信息");
-        loginService.webWxGetContact();
 
-        statusLabel.setText("9. 获取群好友及群好友列表");
+
+   /*     statusLabel.setText("9. 获取群好友及群好友列表");
         log.info("9. 获取群好友及群好友列表");
-        loginService.WebWxBatchGetContact();
+        loginService.WebWxBatchGetContact();*/
 
 
-        statusLabel.setText("10. 缓存本次登陆好友相关消息");
         log.info("10. 缓存本次登陆好友相关消息");
         // 登陆成功后缓存本次登陆好友相关消息（NickName, UserName）
         //WeChatTool.setUserInfo();
@@ -310,26 +347,35 @@ public class LoginFrame extends JFrame {
             for (Map.Entry<String, Contacts> entry : Core.getMemberMap().entrySet()) {
                 ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(
                         () -> {
-                            Core.getContactHeadImgPath().put(entry.getValue().getUsername(), DownloadTools.downloadHeadImg(entry.getValue().getHeadimgurl(), entry.getValue().getUsername()));
+                            Core.getContactHeadImgPath().put(entry.getValue().getUsername(), DownloadTools.downloadHeadImgBig(entry.getValue().getHeadimgurl(), entry.getValue().getUsername()));
                             log.info("下载头像：({}):{}", entry.getValue().getNickname(), entry.getValue().getHeadimgurl());
                         });
 
+                ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        AvatarUtil.putUserAvatarCache(entry.getValue().getUsername(),DownloadTools.downloadImage(entry.getValue().getHeadimgurl()));
+                    }
+                });
+
             }
+            ExecutorServiceUtil.getHeadImageDownloadExecutorService().shutdown();
+            ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
+                try {
+                    //等待头像下载完成
+                    boolean b = ExecutorServiceUtil.getHeadImageDownloadExecutorService().awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                statusLabel.setText("头像下载完成");
+                log.info("头像下载完成");
+
+            });
         }
 
 
-        ExecutorServiceUtil.getHeadImageDownloadExecutorService().shutdown();
-        ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
-            try {
-                //等待头像下载完成
-                boolean b = ExecutorServiceUtil.getHeadImageDownloadExecutorService().awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            statusLabel.setText("头像下载完成");
-            log.info("头像下载完成");
-            doLogin();
-        });
+
 
 
     }

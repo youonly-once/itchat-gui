@@ -15,15 +15,16 @@ import org.apache.http.HttpEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 
 /**
  * 下载工具类
@@ -61,9 +62,15 @@ public class DownloadTools {
         HttpEntity entity = null;
         switch (msgTypeEnum) {
             case MSGTYPE_IMAGE:
+                url = String.format(URLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String) Core.getLoginInfoMap().get("url"));
+                params.add(new BasicNameValuePair("msgid", String.valueOf(msg.getNewMsgId())));
+                params.add(new BasicNameValuePair("skey", (String) Core.getLoginInfoMap().get("skey")));
+                entity = MyHttpClient.doGet(url, params, true, headerMap);
+                break;
             case MSGTYPE_EMOTICON:
                 url = String.format(URLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String) Core.getLoginInfoMap().get("url"));
                 params.add(new BasicNameValuePair("msgid", String.valueOf(msg.getNewMsgId())));
+                params.add(new BasicNameValuePair("type", "big"));
                 params.add(new BasicNameValuePair("skey", (String) Core.getLoginInfoMap().get("skey")));
                 entity = MyHttpClient.doGet(url, params, true, headerMap);
                 break;
@@ -142,21 +149,127 @@ public class DownloadTools {
         }
         return false;
     }
+    /**
+     * 下载缩略图
+     *
+     * @param msg  消息对象
+     * @param path 保存路径
+     * @return {@code true} 下载成功
+     * {@code false} 下载失败
+     * @author SXS
+     * @date 2017年4月21日 下午11:00:25
+     */
+    public static boolean getDownloadSlave(AddMsgList msg, String path) {
+        Map<String, String> headerMap = new HashMap<String, String>();
+        List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+        WXReceiveMsgCodeEnum msgTypeEnum = WXReceiveMsgCodeEnum.getByCode(msg.getMsgType());
+        String url = "";
+        HttpEntity entity = null;
+        switch (msgTypeEnum) {
+            case MSGTYPE_IMAGE:
+            case MSGTYPE_VIDEO:
+                url = String.format(URLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String) Core.getLoginInfoMap().get("url"));
+                params.add(new BasicNameValuePair("msgid", String.valueOf(msg.getNewMsgId())));
+                params.add(new BasicNameValuePair("skey", (String) Core.getLoginInfoMap().get("skey")));
+                params.add(new BasicNameValuePair("type", "slave"));
+                entity = MyHttpClient.doGet(url, params, true, headerMap);
 
+            case MSGTYPE_APP:
+
+                break;
+            case MSGTYPE_MAP:
+
+                break;
+            default:
+                break;
+        }
+        if (entity == null){
+            DownloadTools.FILE_DOWNLOAD_STATUS.remove(path);
+            return true;
+        }
+        boolean downloadStatus = false;
+        OutputStream out = null;
+        try {
+            File file = new File(path);
+            if (!file.exists()) {
+                File parentFile = file.getParentFile();
+                if (!parentFile.exists()) {
+                    boolean mkdirs = parentFile.mkdirs();
+                    if (!mkdirs) {
+                        log.error("创建目录失败：{}", parentFile.getAbsolutePath());
+                    }
+                }
+                boolean newFile = file.createNewFile();
+                if (!newFile) {
+                    log.error("创建文件失败：{}", path);
+                }
+
+            }
+            if (entity == null) {
+                log.error("下载失败：response entity is null.");
+            }
+            out = new FileOutputStream(file);
+            byte[] bytes = EntityUtils.toByteArray(entity);
+            out.write(bytes);
+            out.flush();
+            log.info("资源下载完成：{}", path);
+            downloadStatus = true;
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            return false;
+        } finally {
+            DownloadTools.FILE_DOWNLOAD_STATUS.put(path, downloadStatus);
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+        return false;
+    }
 
     /**
      * 下载头像
      *
-     * @param relativeUrl 头像地址
+     * @param relativeUrl 微信头像地址
      * @param userName    用户名
      * @return 下载成功头像保存路径
      * 下载失败 ""
      */
-    public static String downloadHeadImg(String relativeUrl, String userName) {
-
+    public static String downloadHeadImgBig(String relativeUrl, String userName) {
 
         //获取远端对象字节数组
-        String url = String.format(URLEnum.WEB_WX_GET_HEAD_IMAGE.getUrl(), relativeUrl);
+        String url = String.format(URLEnum.WEB_WX_GET_HEAD_IMAGE_BIG.getUrl(), relativeUrl);
+        return downloadHeadImg(url,userName);
+
+    }
+    /**
+     * 下载头像
+     *
+     * @param relativeUrl 微信头像地址
+     * @param userName    用户名
+     * @return 下载成功头像保存路径
+     * 下载失败 ""
+     */
+    public static String downloadHeadImgThum(String relativeUrl, String userName) {
+
+        //获取远端对象字节数组
+        String url = String.format(URLEnum.WEB_WX_GET_HEAD_IMAGE_THUM.getUrl(), relativeUrl);
+        return downloadHeadImg(url,userName);
+
+    }
+    /**
+     * 下载头像
+     *
+     * @param url 头像地址全路径
+     * @param userName    用户名
+     * @return 下载成功头像保存路径
+     * 下载失败 ""
+     */
+    public static String downloadHeadImg(String url, String userName) {
         HttpEntity entity = MyHttpClient.doGet(url, null, false, null);
         byte[] bytes;
         try {
@@ -185,6 +298,7 @@ public class DownloadTools {
                 + File.separator + md5Str + ".jpg";
         Path path = Paths.get(savePath);
         OutputStream out = null;
+        boolean downloadStatus = true;
         try {
             if (!Files.exists(path.getParent())) {
                 Files.createDirectories(path.getParent());
@@ -200,9 +314,11 @@ public class DownloadTools {
             out = new FileOutputStream(file);
             out.write(bytes);
             out.flush();
+            downloadStatus = true;
         } catch (IOException e) {
             log.info(e.getMessage());
         } finally {
+            DownloadTools.FILE_DOWNLOAD_STATUS.put(path.toString(), downloadStatus);
             try {
                 if (out != null) {
                     out.close();
@@ -214,6 +330,36 @@ public class DownloadTools {
         return path.toString();
     }
 
+    /**
+     * 下载头像缩略图
+     * @param relativeUrl 微信头像地址
+     * @return Image对象
+     */
+    public static Image downloadImage(String relativeUrl){
+        String url = String.format(URLEnum.WEB_WX_GET_HEAD_IMAGE_THUM.getUrl(), relativeUrl);
+        HttpEntity entity = MyHttpClient.doGet(url, null, false, null);
+        InputStream content = null;
+        try {
+            content = entity.getContent();
+            if (content == null){
+                return null;
+            }
+            BufferedImage image = ImageIO.read(content);
+            return image;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+           if (content!=null){
+               try {
+                   content.close();
+               } catch (IOException e) {
+                   e.printStackTrace();
+               }
+           }
+        }
+        return null;
+
+    }
     /**
      * 替换字符串中不能用于创建文件或文件夹的字符
      *
@@ -248,13 +394,17 @@ public class DownloadTools {
      * @param msg      消息对象
      * @param saveFile 保存路径
      */
-    public static void downloadFile(AddMsgList msg, String saveFile) {
+    public static void downloadFile(AddMsgList msg, String saveFile,boolean slave) {
         final String path = saveFile;
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
+                if (slave){
+                    DownloadTools.getDownloadSlave(msg, path);
+                }else{
+                    DownloadTools.getDownloadFn(msg, path);
 
-                DownloadTools.getDownloadFn(msg, path);
+                }
             }
         };
         ExecutorServiceUtil.getGlobalExecutorService().execute(runnable);
@@ -268,7 +418,7 @@ public class DownloadTools {
      * @return {@code String} 消息资源文件保存路径
      * {@code null} 获取失败或无需下载的资源
      */
-    public static String getDownloadFilePath(AddMsgList msg) {
+    public static String getDownloadFilePath(AddMsgList msg,boolean slave) {
         //下载文件的后缀名
         WXReceiveMsgCodeEnum msgTypeEnum = WXReceiveMsgCodeEnum.getByCode(msg.getMsgType());
         String ext = null;
@@ -324,6 +474,7 @@ public class DownloadTools {
         String path = Config.PIC_DIR + File.separator + msgTypeEnum + File.separator + username + File.separator;
         String fileName = groupUsername + "-"
                 + new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date()) + "-" + msg.getNewMsgId()
+                + (slave?"_slave":"")
                 + ext;
         fileName = replace(fileName);
 
@@ -344,5 +495,9 @@ public class DownloadTools {
             return logFile.mkdirs();
         }
         return true;
+    }
+    static class Result{
+        private String filePath;
+        private Image image;
     }
 }

@@ -3,6 +3,7 @@ package cn.shu.wechat.core;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.enums.parameters.BaseParaEnum;
 
+import java.awt.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -87,6 +88,11 @@ public class Core {
      */
     static private Map<String, Contacts> specialUsersMap = new ConcurrentHashMap<>(0);
 
+
+    /**
+     * 用户头像
+     */
+    static private Map<String, Image> userHeadImage = new ConcurrentHashMap<>(1024);
     /**
      * 群ID列表
      */
@@ -298,5 +304,9 @@ public class Core {
 
     public static void setLastNormalRetCodeTime(long lastNormalRetCodeTime) {
         Core.lastNormalRetCodeTime = lastNormalRetCodeTime;
+    }
+
+    public static Map<String, Image> getUserHeadImage() {
+        return userHeadImage;
     }
 }

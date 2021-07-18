@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by song on 17-5-30.
@@ -26,6 +27,8 @@ public class RCListView extends JScrollPane {
 
     // 监听滚动到顶部事件
     private ScrollToTopListener scrollToTopListener;
+    // 滚动事件
+    private ScrollListener scrollListener;
     private boolean scrollBarPressed = false;
     private int lastScrollValue = -1;
 
@@ -116,10 +119,13 @@ public class RCListView extends JScrollPane {
                     messageLoading = true;
                     scrollToTopListener.onScrollToTop();
                 }
-
                 if (evt.getAdjustmentType() == AdjustmentEvent.TRACK && scrollToBottom) {
                     getVerticalScrollBar().setValue(getVerticalScrollBar().getModel().getMaximum()
                             - getVerticalScrollBar().getModel().getExtent());
+                }
+                if (scrollListener != null){
+                    scrollListener.onScroll(evt.getValue()+evt.getAdjustable().getVisibleAmount()
+                            ,evt.getAdjustable().getMaximum());
                 }
 
                 lastScrollValue = evt.getValue();
@@ -291,14 +297,31 @@ public class RCListView extends JScrollPane {
     /**
      * 重绘指定位置的元素
      *
-     * @param position
+     * @param position 元素位置  不包括map的位置
      */
     public void notifyItemChanged(int position) {
         //contentPanel.remove(position);
         //int viewType = adapter.getItemViewType(position);
         //ViewHolder holder = adapter.onCreateViewHolder(viewType);
-        ViewHolder holder = (ViewHolder) getItem(position);
-        adapter.onBindViewHolder(holder, position);
+        //加入 0位置有个map，0对应也有一个元素，此时元素在view中的位置应是1
+        Map<Integer,String> positionMap = adapter.getPositionMap();
+        int i =0;
+        if (positionMap!=null){
+            for (Integer integer : positionMap.keySet()) {
+                if (integer <= position){
+                    i++;
+                }
+            }
+        }
+
+        ViewHolder holder = (ViewHolder) getItem(position+i);
+        if (holder instanceof HeaderViewHolder){
+            adapter.onBindHeaderViewHolder((HeaderViewHolder) holder, position);
+        }else{
+            //元素pos
+            adapter.onBindViewHolder(holder, position);
+        }
+
         //contentPanel.revalidate();
         holder.repaint();
 
@@ -319,6 +342,9 @@ public class RCListView extends JScrollPane {
         this.scrollToTopListener = listener;
     }
 
+    public void setScrollListener(ScrollListener listener) {
+        this.scrollListener = listener;
+    }
     public void notifyItemInserted(int position, boolean end) {
         int viewType = adapter.getItemViewType(position);
         ViewHolder holder = adapter.onCreateViewHolder(viewType, position);
@@ -354,5 +380,8 @@ public class RCListView extends JScrollPane {
 
     public interface ScrollToTopListener {
         void onScrollToTop();
+    }
+    public interface ScrollListener {
+        void onScroll(int curr,int max);
     }
 }

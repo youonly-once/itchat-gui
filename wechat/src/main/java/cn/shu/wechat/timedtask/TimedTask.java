@@ -1,10 +1,12 @@
 package cn.shu.wechat.timedtask;
 
+import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.controller.LoginController;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.mapper.ContactsMapper;
 import cn.shu.wechat.mapper.MemberGroupRMapper;
 import cn.shu.wechat.service.ILoginService;
+import cn.shu.wechat.swing.panels.ContactsPanel;
 import cn.shu.wechat.utils.ChartUtil;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import lombok.extern.log4j.Log4j2;

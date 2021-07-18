@@ -6,6 +6,7 @@ import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.db.model.FileAttachment;
 import cn.shu.wechat.swing.db.model.ImageAttachment;
+import cn.shu.wechat.swing.db.model.VideoAttachment;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -22,10 +23,12 @@ public class MessageItem implements Comparable<MessageItem> {
     public static final int LEFT_TEXT = 1;
     public static final int LEFT_IMAGE = 2;
     public static final int LEFT_ATTACHMENT = 3;
+    public static final int LEFT_VIDEO = 4;
 
     public static final int RIGHT_TEXT = -1;
     public static final int RIGHT_IMAGE = -2;
     public static final int RIGHT_ATTACHMENT = -3;
+    public static final int RIGHT_VIDEO = 4;
 
 
     private String id;
@@ -48,7 +51,7 @@ public class MessageItem implements Comparable<MessageItem> {
 
     private FileAttachmentItem fileAttachment;
     private ImageAttachmentItem imageAttachment;
-
+    private VideoAttachmentItem videoAttachmentItem;
     public MessageItem() {
     }
 
@@ -58,7 +61,7 @@ public class MessageItem implements Comparable<MessageItem> {
         this.setMessageContent(message.getContent());
         this.setGroupable(message.getFromUsername().startsWith("@@"));
         this.setRoomId(roomId);
-        this.setSenderId(message.getFromUsername());
+        this.setSenderId(this.isGroupable()?message.getFromMemberOfGroupUsername():message.getFromUsername());
         if (this.groupable) {
             //如果是群则显示群成员名称
             this.setSenderUsername(message.getFromMemberOfGroupDisplayname());
@@ -74,7 +77,7 @@ public class MessageItem implements Comparable<MessageItem> {
 
         boolean isFileAttachment = false;
         boolean isImageAttachment = false;
-
+        boolean isVideoAttachment = false;
 
         switch (this.getWxReceiveMsgCodeEnum()) {
 
@@ -84,9 +87,9 @@ public class MessageItem implements Comparable<MessageItem> {
                 break;
 
             case MSGTYPE_VOICE:
-            case MSGTYPE_VIDEO:
             case MSGTYPE_MICROVIDEO:
             case MSGTYPE_APP:
+            case MSGTYPE_VIDEO:
                 //文件类消息
                 isFileAttachment = true;
                 FileAttachmentItem fileAttachmentItem = new FileAttachmentItem();
@@ -94,6 +97,7 @@ public class MessageItem implements Comparable<MessageItem> {
                 fileAttachmentItem.setId(message.getId());
                 fileAttachmentItem.setDescription("desc");
                 fileAttachmentItem.setLink(message.getFilePath());
+                fileAttachmentItem.setSlavePath(message.getSlavePath());
                 this.setMessageContent(message.getFilePath());
                 this.fileAttachment = fileAttachmentItem;
                 break;
@@ -109,10 +113,40 @@ public class MessageItem implements Comparable<MessageItem> {
                 ia.setTitle("sasd");
                 ia.setImagesize(200);
                 ia.setId(UUID.randomUUID().toString());
-                ia.setImageUrl(message.getFilePath());
+                ia.setSlavePath(message.getSlavePath());
+                ia.setImagePath(message.getFilePath());
                 this.imageAttachment = new ImageAttachmentItem(ia);
                 break;
+/*            case MSGTYPE_VIDEO:
+                //图片类消息
+                isImageAttachment = true;
 
+                ia = new ImageAttachment();
+                ia.setDescription("DESC");
+                ia.setHeight(500);
+                ia.setWidth(400);
+                ia.setTitle("sasd");
+                ia.setImagesize(200);
+                ia.setId(UUID.randomUUID().toString());
+                ia.setSlavePath(message.getSlavePath());
+                ia.setImagePath(message.getFilePath());
+                this.imageAttachment = new ImageAttachmentItem(ia);
+                this.imageAttachment.setVideo(true);
+                break;*/
+/*            case MSGTYPE_VIDEO:
+                //视频类消息
+                isVideoAttachment = true;
+                VideoAttachmentItem videoAttachmentItem = new VideoAttachmentItem();
+                videoAttachmentItem.setDescription("DESC");
+                videoAttachmentItem.setHeight(500);
+                videoAttachmentItem.setWidth(400);
+                videoAttachmentItem.setTitle("sasd");
+                videoAttachmentItem.setImagesize(200);
+                videoAttachmentItem.setId(UUID.randomUUID().toString());
+                videoAttachmentItem.setSlavePath(message.getSlavePath());
+                videoAttachmentItem.setImagePath(message.getFilePath());
+                this.videoAttachmentItem = videoAttachmentItem;
+                break;*/
             case MSGTYPE_VOIPMSG:
                 break;
             case MSGTYPE_VOIPNOTIFY:
@@ -162,10 +196,15 @@ public class MessageItem implements Comparable<MessageItem> {
             else if (isImageAttachment) {
                 this.setMessageType(RIGHT_IMAGE);
             }
+            // 视频消息
+            else if (isVideoAttachment){
+                this.setMessageType(RIGHT_VIDEO);
+            }
             // 普通文本消息
             else {
                 this.setMessageType(RIGHT_TEXT);
             }
+
         } else {
             // 文件附件
             if (isFileAttachment) {
@@ -174,6 +213,10 @@ public class MessageItem implements Comparable<MessageItem> {
             // 图片消息
             else if (isImageAttachment) {
                 this.setMessageType(LEFT_IMAGE);
+            }
+            // 视频消息
+            else if (isVideoAttachment){
+                this.setMessageType(LEFT_VIDEO);
             }
             // 普通文本消息
             else {

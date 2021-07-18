@@ -49,7 +49,7 @@ public class UserInfoPanel extends ParentAvailablePanel {
         contentPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.CENTER, 0, 20, true, false));
 
         imageLabel = new JLabel();
-        ImageIcon icon = new ImageIcon(AvatarUtil.createOrLoadUserAvatar("song").getScaledInstance(100, 100, Image.SCALE_SMOOTH));
+        ImageIcon icon = new ImageIcon(AvatarUtil.createOrLoadUserAvatar(Core.getUserSelf().getUsername()).getScaledInstance(100, 100, Image.SCALE_SMOOTH));
         imageLabel.setIcon(icon);
 
         nameLabel = new JLabel();
@@ -83,7 +83,11 @@ public class UserInfoPanel extends ParentAvailablePanel {
         this.username = username;
         nameLabel.setText(username);
 
-        ImageIcon icon = new ImageIcon(AvatarUtil.createOrLoadUserAvatar(username).getScaledInstance(100, 100, Image.SCALE_SMOOTH));
+
+    }
+    public void setHeadImg(String id){
+        this.userId = userId;
+        ImageIcon icon = new ImageIcon(AvatarUtil.createOrLoadUserAvatar(id).getScaledInstance(100, 100, Image.SCALE_SMOOTH));
         imageLabel.setIcon(icon);
     }
 

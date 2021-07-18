@@ -10,6 +10,7 @@ import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXSendMsgCodeEnum;
 import cn.shu.wechat.mapper.MessageMapper;
+import cn.shu.wechat.service.ILoginService;
 import cn.shu.wechat.swing.RoomTypeEnum;
 import cn.shu.wechat.swing.adapter.message.*;
 import cn.shu.wechat.swing.app.Launcher;
@@ -461,6 +462,23 @@ public class ChatPanel extends ParentAvailablePanel {
         room.setLastChatAt(System.currentTimeMillis());
 
         if (room.getType() == RoomTypeEnum.G) {
+            //加载群成员
+            if (contacts.getMemberlist() == null || contacts.getMemberlist().isEmpty()){
+                new SwingWorker<Object,Object>(){
+
+                    @Override
+                    protected Object doInBackground() throws Exception {
+                        ILoginService bean = SpringContextHolder.getBean(ILoginService.class);
+                        bean.WebWxBatchGetContact(roomId);
+                        return null;
+                    }
+
+                    @Override
+                    protected void done() {
+                        super.done();
+                    }
+                }.execute();
+            }
             room.setMemberList(contacts.getMemberlist());
         } else {
             room.setMemberList(new ArrayList<>());
@@ -899,7 +917,7 @@ public class ChatPanel extends ParentAvailablePanel {
             }
         } else {
             if (dbMessage.getImageAttachmentId() != null) {
-                path = imageAttachmentService.findById(dbMessage.getImageAttachmentId()).getImageUrl();
+                path = imageAttachmentService.findById(dbMessage.getImageAttachmentId()).getImagePath();
             } else {
                 path = null;
 
@@ -962,7 +980,7 @@ public class ChatPanel extends ParentAvailablePanel {
             imageAttachment.setId(fileId);
             imageAttachment.setWidth(bounds[0]);
             imageAttachment.setHeight(bounds[1]);
-            imageAttachment.setImageUrl(uploadFilename);
+            imageAttachment.setImagePath(uploadFilename);
             imageAttachment.setTitle(name);
             item.setImageAttachment(new ImageAttachmentItem(imageAttachment));
             dbMessage.setImageAttachmentId(imageAttachment.getId());
@@ -1166,7 +1184,13 @@ public class ChatPanel extends ParentAvailablePanel {
         }
     }
 
-
+    public void openFile(String filePath){
+        if (filePath == null) {
+            JOptionPane.showMessageDialog(null, "文件不存在", "打开失败", JOptionPane.ERROR_MESSAGE);
+        } else {
+            openFileWithDefaultApplication(filePath);
+        }
+    }
     /**
      * 打开文件，如果文件不存在，则下载
      *
@@ -1187,11 +1211,8 @@ public class ChatPanel extends ParentAvailablePanel {
             JOptionPane.showMessageDialog(null, "无效的附件消息", "消息无效", JOptionPane.ERROR_MESSAGE);
             return;
         }*/
-        if (message.getFilePath() == null) {
-            JOptionPane.showMessageDialog(null, "文件不存在", "打开失败", JOptionPane.ERROR_MESSAGE);
-        } else {
-            openFileWithDefaultApplication(message.getFilePath());
-        }
+
+        openFile(message.getFilePath());
    /*     String filepath = fileCache.tryGetFileCache(fileAttachment.getId(), fileAttachment.getTitle());
         if (filepath == null) {
             // 服务器上的文件

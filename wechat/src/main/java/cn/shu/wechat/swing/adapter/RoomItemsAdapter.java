@@ -1,15 +1,20 @@
 package cn.shu.wechat.swing.adapter;
 
+import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.panels.ChatPanel;
+import cn.shu.wechat.swing.panels.LeftPanel;
+import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.TimeUtil;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang.StringUtils;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -61,18 +66,24 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
 
         viewHolder.roomName.setText(roomItem.getName());
 
+        //异步加载头像
+        new SwingWorker<Object, Object>() {
+            Image orLoadAvatar ;
+            @Override
+            protected Object doInBackground() throws Exception {
+                orLoadAvatar = AvatarUtil.createOrLoadAvatar(roomItem.getRoomId());
+                return null;
+            }
 
-        ImageIcon icon = new ImageIcon();
-
-        if (roomItem.isGroup()) {
-            // 群组头像
-            icon.setImage(AvatarUtil.createOrLoadGroupAvatar(roomItem.getRoomId()).getScaledInstance(40, 40, Image.SCALE_SMOOTH));
-        } else {
-            // 私聊头像
-            Image image = AvatarUtil.createOrLoadUserAvatar(roomItem.getRoomId()).getScaledInstance(40, 40, Image.SCALE_SMOOTH);
-            icon.setImage(image);
-        }
-        viewHolder.avatar.setIcon(icon);
+            @Override
+            protected void done() {
+                if (orLoadAvatar != null) {
+                    ImageIcon icon = new ImageIcon();
+                    icon.setImage(orLoadAvatar);
+                    viewHolder.avatar.setIcon(icon);
+                }
+            }
+        }.execute();
 
 
         // 消息

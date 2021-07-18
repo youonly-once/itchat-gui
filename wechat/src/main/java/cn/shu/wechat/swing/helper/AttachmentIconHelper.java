@@ -42,7 +42,7 @@ public class AttachmentIconHelper {
         return IconUtil.getIcon(this, "/image/unknown.png", width, height);
     }
 
-    private String parseMimeType(String mime) {
+    public String parseMimeType(String mime) {
         String type = mime.substring(0, mime.indexOf("/"));
         String value;
         switch (type) {

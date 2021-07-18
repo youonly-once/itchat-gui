@@ -2,8 +2,12 @@ package cn.shu.wechat.swing.entity;
 
 import cn.shu.wechat.swing.utils.CharacterParser;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.awt.*;
+import java.awt.image.BufferedImage;
 
 /**
  * Created by song on 17-5-30.
@@ -11,6 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class ContactsItem implements Comparable<ContactsItem> {
     /**
      * 联系人id
@@ -21,12 +26,10 @@ public class ContactsItem implements Comparable<ContactsItem> {
      */
     private String displayName;
 
-
     /**
-     * 头像路径
+     * 头像
      */
-    private String headImgPath;
-
+    private Image avatar;
 
     @Override
     public int compareTo(ContactsItem o) {

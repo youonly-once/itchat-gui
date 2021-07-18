@@ -1,11 +1,14 @@
 package cn.shu.wechat.beans.pojo;
 
+import com.alibaba.fastjson.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.awt.*;
 import java.util.List;
 
 /**
@@ -83,8 +86,19 @@ public class Contacts {
     /**
      * 是否为联系人(false则为群成员)
      */
+    @JSONField(serialize = false)
     private Boolean iscontacts;
+    /**
+     * 头像
+     */
+    @JSONField(serialize = false)
+    private Image avatar;
 
+    /**
+     * 群id
+     */
+    @JSONField(serialize = false)
+    private String groupName;
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

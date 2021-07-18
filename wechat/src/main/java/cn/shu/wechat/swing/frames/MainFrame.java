@@ -4,6 +4,7 @@ package cn.shu.wechat.swing.frames;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.panels.LeftPanel;
 import cn.shu.wechat.swing.panels.RightPanel;
+import cn.shu.wechat.swing.panels.RightPanelParent;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
@@ -15,12 +16,15 @@ import sun.audio.AudioStream;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyVetoException;
+import java.beans.VetoableChangeListener;
 import java.io.InputStream;
 
 /**
  * Created by song on 17-5-28.
  */
-public class MainFrame extends JFrame {
+public class MainFrame extends JFrame  {
     public static int DEFAULT_WIDTH = 900;
     public static int DEFAULT_HEIGHT = 650;
 
@@ -62,7 +66,7 @@ public class MainFrame extends JFrame {
      * 消息到来的时候提示音
      */
     private AudioStream messageSound;
-
+    RightPanelParent filehelper;
 
     public MainFrame() {
         super("微信-舒专用版");
@@ -169,11 +173,12 @@ public class MainFrame extends JFrame {
      * 设置任务栏图标闪动
      */
     public void setTrayFlashing() {
+        this.setVisible(true);
         if(trayFlashing){
             return;
         }
         trayFlashing = true;
-        new Thread(new Runnable() {
+        ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
             @Override
             public void run() {
                 while (trayFlashing) {
@@ -188,9 +193,8 @@ public class MainFrame extends JFrame {
                         e.printStackTrace();
                     }
                 }
-
             }
-        }).start();
+        });
     }
 
     public boolean isTrayFlashing() {
@@ -222,7 +226,9 @@ public class MainFrame extends JFrame {
         leftPanel = new LeftPanel();
         leftPanel.setPreferredSize(new Dimension(260, currentWindowHeight));
 
-        rightPanel = new RightPanel();
+       // rightPanel = new RightPanel();
+
+        filehelper = new RightPanelParent("filehelper");
     }
 
     private void initView() {
@@ -246,8 +252,8 @@ public class MainFrame extends JFrame {
 
 
         add(leftPanel, BorderLayout.WEST);
-        add(rightPanel, BorderLayout.CENTER);
-
+        //add(rightPanel, BorderLayout.CENTER);
+        add(filehelper, BorderLayout.CENTER);
         centerScreen();
     }
 
@@ -277,5 +283,7 @@ public class MainFrame extends JFrame {
         SystemTray.getSystemTray().remove(trayIcon);
         super.dispose();
     }
+
+
 }
 

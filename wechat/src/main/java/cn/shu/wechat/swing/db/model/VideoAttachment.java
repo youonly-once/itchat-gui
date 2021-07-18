@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class ImageAttachment extends BasicModel {
+public class VideoAttachment extends BasicModel {
     private String id;
     private String title;
     private String description;

@@ -1,5 +1,8 @@
 package cn.shu.wechat.swing.adapter.message;
 
+import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.api.DownloadTools;
+import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.ImageViewer.src.com.rc.forms.ImageViewerFrame;
 import cn.shu.wechat.swing.adapter.BaseAdapter;
@@ -21,11 +24,15 @@ import cn.shu.wechat.swing.helper.AttachmentIconHelper;
 import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
 import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.utils.*;
+import org.apache.commons.lang.StringUtils;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -197,12 +204,31 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
         Map map = new HashMap();
         map.put("attachmentId", item.getFileAttachment().getId());
-        map.put("name", item.getFileAttachment().getTitle());
+        String filename = item.getFileAttachment().getTitle();
+        map.put("name", filename);
         map.put("messageId", item.getId());
         holder.attachmentPanel.setTag(map);
+        String mime = MimeTypeUtil.getMime(filename.substring(filename.lastIndexOf(".") + 1));
+        mime = attachmentIconHelper.parseMimeType(mime);
 
-        ImageIcon attachmentTypeIcon = attachmentIconHelper.getImageIcon(item.getFileAttachment().getTitle());
-        holder.attachmentIcon.setIcon(attachmentTypeIcon);
+        if ("video".equals(mime) && StringUtils.isNotEmpty(item.getFileAttachment().getSlavePath())){
+            ImageIcon attachmentTypeIcon = null;
+            String path = item.getFileAttachment().getSlavePath();
+            try {
+                BufferedImage read = ImageIO.read(new File(path == null ? item.getFileAttachment().getLink() : path));
+                attachmentTypeIcon = new ImageIcon(read.getScaledInstance(48,48,Image.SCALE_SMOOTH));
+                holder.attachmentIcon.setIcon(attachmentTypeIcon);
+            } catch (IOException e) {
+                attachmentTypeIcon = attachmentIconHelper.getImageIcon(filename);
+                holder.attachmentIcon.setIcon(attachmentTypeIcon);
+                e.printStackTrace();
+            }
+
+        }else{
+            ImageIcon attachmentTypeIcon = attachmentIconHelper.getImageIcon(filename);
+            holder.attachmentIcon.setIcon(attachmentTypeIcon);
+        }
+
 
         if (item.getProgress() != 0 && item.getProgress() != 100) {
             Message msg = messageService.findById(item.getId());
@@ -333,22 +359,18 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         MessageRightImageViewHolder holder = (MessageRightImageViewHolder) viewHolder;
 
         processImage(item, holder.image, holder);
-
         if (item.getProgress() != 100) {
            // Message msg = messageService.findById(item.getId());
             //if (msg != null) {
                // item.setProgress(msg.getProgress());
 
-                if (item.getProgress() == 100) {
-                    holder.sendingProgress.setVisible(false);
-                } else {
             /*        if (!ChatPanel.uploadingOrDownloadingFiles.contains(item.getImageAttachment().getId())) {
                         item.setNeedToResend(true);
                     }*/
-                }
             //}
-        }else{
             holder.sendingProgress.setVisible(true);
+        }else{
+            holder.sendingProgress.setVisible(false);
         }
 
 
@@ -400,7 +422,37 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    imageCache.requestOriginalAsynchronously(item.getImageAttachment().getId(), item.getImageAttachment().getImageUrl(), new ImageCache.ImageCacheRequestListener() {
+                    if (item.getImageAttachment().isVideo()){
+                        ChatPanel.getContext().openFile(item.getImageAttachment().getImagePath());
+                        return;
+                    }
+
+                    //Desktop.getDesktop().open(new File(path));
+                  // final ImageViewerFrame frame = new ImageViewerFrame(this.getClass().getClassLoader().getResource("/image/image_loading.png").getPath());
+                   // frame.setVisible(true);
+       /*             new SwingWorker<Object,Object>(){
+
+                        @Override
+                        protected Object doInBackground() throws Exception {
+                            //循环等待下载完成
+                            Boolean aBoolean = DownloadTools.FILE_DOWNLOAD_STATUS.get( item.getImageAttachment().getImagePath());
+                            while(aBoolean!=null &&  !aBoolean){
+                                aBoolean = DownloadTools.FILE_DOWNLOAD_STATUS.get( item.getImageAttachment().getImagePath());
+                            }
+                            if ( DownloadTools.FILE_DOWNLOAD_STATUS.contains( item.getImageAttachment().getImagePath())){
+                                DownloadTools.FILE_DOWNLOAD_STATUS.remove( item.getImageAttachment().getImagePath());
+                            }
+                            return null;
+                        }
+
+                        @Override
+                        protected void done() {
+                            //frame.dispose();
+                            ImageViewerFrame frame = new ImageViewerFrame(item.getImageAttachment().getImagePath());
+                            frame.setVisible(true);
+                        }
+                    }.execute();*/
+                    imageCache.requestOriginalAsynchronously(item.getImageAttachment().getId(), item.getImageAttachment().getImagePath(), new ImageCache.ImageCacheRequestListener() {
                         @Override
                         public void onSuccess(ImageIcon icon, String path) {
                             try {
@@ -413,6 +465,9 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                                 if (thumbIcon.getDescription().endsWith("image_error.png")) {
                                     loadImageThumb(holder, item, imageLabel);
                                 }
+                            } catch (NullPointerException e1) {
+                               // JOptionPane.showMessageDialog(null, "图像不存在", "图像不存在", JOptionPane.ERROR_MESSAGE);
+                                e1.printStackTrace();
                             } catch (Exception e1) {
                                 JOptionPane.showMessageDialog(null, "图像不存在", "图像不存在", JOptionPane.ERROR_MESSAGE);
                                 e1.printStackTrace();
@@ -426,6 +481,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                             // frame.setVisible(true);
                         }
                     });
+
                 }
                 super.mouseClicked(e);
             }
@@ -433,41 +489,72 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     }
 
     private void loadImageThumb(ViewHolder holder, MessageItem item, MessageImageLabel imageLabel) {
-        String imageUrl = item.getImageAttachment().getImageUrl();
+        //可能文件还没下载完成
 
+        //显示加载中
+        ImageIcon imageIcon = new ImageIcon(getClass().getResource("/image/image_loading.gif"));
+       // preferredImageSize(imageIcon);
+        imageLabel.setIcon(imageIcon);
+        String slavePath = item.getImageAttachment().getSlavePath();
+        if (StringUtils.isEmpty(slavePath )){
+            slavePath = item.getImageAttachment().getImagePath();
+        }
+        final String finalPath = slavePath;
+        //标志
         Map map = new HashMap();
         map.put("attachmentId", item.getImageAttachment().getId());
-        map.put("url", imageUrl);
+        map.put("url", finalPath);
         map.put("messageId", item.getId());
         imageLabel.setTag(map);
 
         // ImageIcon imageIcon = imageCache.tryGetThumbCache(item.getImageAttachment().getId());
-        imageUrl = (imageUrl == null ? "/image/image_loading.gif" : imageUrl);
+            new SwingWorker<Object,Object>(){
 
-        ImageIcon imageIcon = imageCache.tryGetThumbCache(new File(imageUrl));
-        if (imageIcon == null) {
-            imageLabel.setIcon(IconUtil.getIcon(this, "/image/image_loading.gif"));
-
-            imageCache.requestThumbAsynchronously(item.getImageAttachment().getId(), imageUrl, new ImageCache.ImageCacheRequestListener() {
                 @Override
-                public void onSuccess(ImageIcon icon, String path) {
-                    preferredImageSize(icon);
-                    imageLabel.setIcon(icon);
-                    holder.revalidate();
-                    holder.repaint();
+                protected Object doInBackground() throws Exception {
+                    //循环等待下载完成
+                    Boolean aBoolean = DownloadTools.FILE_DOWNLOAD_STATUS.get(finalPath);
+                    while(aBoolean!=null &&  !aBoolean){
+                        Thread.sleep(100);
+                        aBoolean = DownloadTools.FILE_DOWNLOAD_STATUS.get(finalPath);
+                    }
+                    if ( DownloadTools.FILE_DOWNLOAD_STATUS.contains(finalPath)){
+                        DownloadTools.FILE_DOWNLOAD_STATUS.remove(finalPath);
+                    }
+                    return null;
                 }
 
                 @Override
-                public void onFailed(String why) {
-                    imageLabel.setIcon(IconUtil.getIcon(this, "/image/image_error.png", 64, 64));
-                    holder.revalidate();
-                    holder.repaint();
+                protected void done() {
+                    ImageIcon imageIcon = imageCache.tryGetThumbCache(new File(finalPath));
+                    if (imageIcon == null) {
+                        imageLabel.setIcon(IconUtil.getIcon(this, "/image/image_loading.gif"));
+
+                        imageCache.requestThumbAsynchronously(item.getImageAttachment().getId(), finalPath, new ImageCache.ImageCacheRequestListener() {
+                            @Override
+                            public void onSuccess(ImageIcon icon, String path) {
+                                preferredImageSize(icon);
+                                imageLabel.setIcon(icon);
+                                holder.revalidate();
+                                holder.repaint();
+                            }
+
+                            @Override
+                            public void onFailed(String why) {
+                                imageLabel.setIcon(IconUtil.getIcon(this, "/image/image_error.png", 64, 64));
+                                holder.revalidate();
+                                holder.repaint();
+                            }
+                        });
+                    } else {
+                       // item.getMessageType()
+                        preferredImageSize(imageIcon);
+                        imageLabel.setIcon(imageIcon);
+                    }
                 }
-            });
-        } else {
-            preferredImageSize(imageIcon);
-            imageLabel.setIcon(imageIcon);
-        }
+            }.execute();
+
+
     }
 
     /**
@@ -477,12 +564,13 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      * @return
      */
     public ImageIcon preferredImageSize(ImageIcon imageIcon) {
+        //动态图不能使用
         int width = imageIcon.getIconWidth();
         int height = imageIcon.getIconHeight();
         float scale = width * 1.0F / height;
 
         // 限制图片显示大小
-        int maxImageWidth = (int) (MainFrame.getContext().currentWindowWidth * 0.2);
+        int maxImageWidth = (int) (64);
         if (width > maxImageWidth) {
             width = maxImageWidth;
             height = (int) (width / scale);
@@ -602,14 +690,16 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
         if (holder.avatar != null) {
             ImageIcon icon = new ImageIcon();
-            Image image = AvatarUtil.createOrLoadUserAvatar(item.getSenderUsername()).getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+            Image image = AvatarUtil.createOrLoadUserAvatar(item.getSenderId()).getScaledInstance(40, 40, Image.SCALE_SMOOTH);
             icon.setImage(image);
             holder.avatar.setIcon(icon);
 
+            //弹窗
             if (item.getMessageType() == MessageItem.LEFT_ATTACHMENT
                     || item.getMessageType() == MessageItem.LEFT_IMAGE
                     || item.getMessageType() == MessageItem.LEFT_TEXT) {
-                bindAvatarAction(holder.avatar, item.getSenderUsername());
+
+                bindAvatarAction(holder.avatar, item);
             }
         }
 
@@ -621,12 +711,19 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     }
 
 
-    private void bindAvatarAction(JLabel avatarLabel, String username) {
+    private void bindAvatarAction(JLabel avatarLabel, MessageItem item) {
 
         avatarLabel.addMouseListener(new MessageMouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                UserInfoPopup popup = new UserInfoPopup(Core.getMemberMap().get(username));
+                Contacts contacts = null;
+                if (item.isGroupable()){
+                    contacts = ContactsTools.getMemberOfGroup(item.getRoomId(), item.getSenderId());
+                }else{
+                    contacts = Core.getMemberMap().get(item.getSenderId());
+                }
+               contacts.setGroupName(item.getRoomId());
+                UserInfoPopup popup = new UserInfoPopup(contacts);
                 popup.show(e.getComponent(), e.getX(), e.getY());
 
                 super.mouseClicked(e);

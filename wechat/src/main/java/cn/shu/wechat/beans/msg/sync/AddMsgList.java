@@ -58,6 +58,14 @@ public class AddMsgList {
     private String text;
     private WXReceiveMsgCodeEnum Type;
     private String memberName;
+    /**
+     * 文件地址
+     */
     private String filePath;
+
+    /**
+     * 缩略图地址
+     */
+    private String slavePath;
 
 }

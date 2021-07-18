@@ -146,7 +146,7 @@ public class LoginController {
             for (Map.Entry<String, Contacts> entry : Core.getMemberMap().entrySet()) {
                 ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(
                         () -> {
-                            Core.getContactHeadImgPath().put(entry.getValue().getUsername(), DownloadTools.downloadHeadImg(entry.getValue().getHeadimgurl(), entry.getValue().getUsername()));
+                            Core.getContactHeadImgPath().put(entry.getValue().getUsername(), DownloadTools.downloadHeadImgBig(entry.getValue().getHeadimgurl(), entry.getValue().getUsername()));
                             log.info("下载头像：({}):{}", entry.getValue().getNickname(), entry.getValue().getHeadimgurl());
                         });
 

@@ -23,6 +23,7 @@
         <result column="to_remarkname" jdbcType="VARCHAR" property="toRemarkname"/>
         <result column="to_nickname" jdbcType="VARCHAR" property="toNickname"/>
         <result column="is_send" jdbcType="BOOLEAN" property="isSend"/>
+        <result column="slave_path" jdbcType="VARCHAR" property="slavePath"/>
     </resultMap>
     <sql id="Example_Where_Clause">
         <!--@mbg.generated-->
@@ -90,7 +91,7 @@
         <!--@mbg.generated-->
         id, msg_id, msg_type, app_msg_type, msg_desc, create_time, content, file_path, msg_json,
         from_username, from_remarkname, from_nickname, from_member_of_group_username, from_member_of_group_nickname,
-        from_member_of_group_displayname, to_username, to_remarkname, to_nickname, is_send
+        from_member_of_group_displayname, to_username, to_remarkname, to_nickname, is_send,slave_path
     </sql>
     <select id="selectByExample" parameterType="cn.shu.wechat.beans.pojo.MessageExample" resultMap="BaseResultMap">
         <!--@mbg.generated-->
@@ -134,7 +135,7 @@
         from_username, from_remarkname, from_nickname,
         from_member_of_group_username, from_member_of_group_nickname,
         from_member_of_group_displayname, to_username,
-        to_remarkname, to_nickname, is_send
+        to_remarkname, to_nickname, is_send,slave_path
         )
         values (#{id,jdbcType=CHAR}, #{msgId,jdbcType=VARCHAR}, #{msgType,jdbcType=INTEGER},
         #{appMsgType,jdbcType=INTEGER}, #{msgDesc,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP},
@@ -143,6 +144,7 @@
         #{fromMemberOfGroupUsername,jdbcType=VARCHAR}, #{fromMemberOfGroupNickname,jdbcType=VARCHAR},
         #{fromMemberOfGroupDisplayname,jdbcType=VARCHAR}, #{toUsername,jdbcType=VARCHAR},
         #{toRemarkname,jdbcType=VARCHAR}, #{toNickname,jdbcType=VARCHAR}, #{isSend,jdbcType=BOOLEAN}
+        , #{slavePath,jdbcType=VARCHAR}
         )
     </insert>
     <insert id="insertSelective" parameterType="cn.shu.wechat.beans.pojo.Message">

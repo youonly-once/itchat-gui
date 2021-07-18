@@ -10,6 +10,7 @@ import cn.shu.wechat.swing.db.model.CurrentUser;
 import cn.shu.wechat.swing.db.service.ContactsUserService;
 import cn.shu.wechat.swing.db.service.CurrentUserService;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
+import cn.shu.wechat.swing.panels.RoomMembersPanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 
 import javax.swing.*;
@@ -31,7 +32,6 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
     private MouseAdapter addMemberButtonMouseListener;
     private MouseAdapter removeMemberButtonMouseListener;
 
-
     public RoomMembersAdapter(List<Contacts> members) {
         this.members = members;
         //currentUser = currentUserService.findAll().get(0);
@@ -47,9 +47,9 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
         if (!viewHolders.contains(viewHolder)) {
             viewHolders.add(viewHolder);
         }
-
-        String userName = members.get(position).getUsername();
-        String name = ContactsTools.getContactDisplayNameByUserName(userName);
+        Contacts contacts = members.get(position);
+        String userName = contacts.getUsername();
+        String name = ContactsTools.getMemberDisplayNameOfGroup(contacts,userName);
         viewHolder.roomName.setText(name);
 
         if (name.equals("添加成员")) {
@@ -109,12 +109,16 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
                 }
             });
         } else {
-            ImageIcon imageIcon = new ImageIcon();
-            imageIcon.setImage(AvatarUtil.createOrLoadUserAvatar(userName).getScaledInstance(30, 30, Image.SCALE_SMOOTH));
-            viewHolder.avatar.setIcon(imageIcon);
-            viewHolder.roomName.setText(ContactsTools.getContactDisplayNameByUserName(userName));
-            UserInfoPopup userInfoPopup = new UserInfoPopup(members.get(position));
-
+            //ImageIcon imageIcon = new ImageIcon();
+            //imageIcon.setImage(AvatarUtil.createOrLoadMemberAvatar(RoomMembersPanel.getContext().getRoomId(),userName).getScaledInstance(30, 30, Image.SCALE_SMOOTH));
+            //viewHolder.avatar.setIcon(imageIcon);
+            if (contacts.getAvatar() != null){
+                ImageIcon icon = new ImageIcon();
+                icon.setImage(contacts.getAvatar());
+                viewHolder.avatar.setIcon(icon);
+            }
+            viewHolder.roomName.setText(name);
+            UserInfoPopup userInfoPopup = new UserInfoPopup(contacts);
 
             if (!name.equals(Core.getNickName())) {
                 viewHolder.addMouseListener(new AbstractMouseListener() {

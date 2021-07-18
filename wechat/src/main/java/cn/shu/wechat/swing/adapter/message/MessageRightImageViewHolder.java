@@ -34,7 +34,7 @@ public class MessageRightImageViewHolder extends BaseMessageViewHolder {
         timePanel.setBackground(Colors.WINDOW_BACKGROUND);
         messageAvatarPanel.setBackground(Colors.WINDOW_BACKGROUND);
 
-        imageBubble.add(image);
+        //imageBubble.add(image);
 
         time.setForeground(Colors.FONT_GRAY);
         time.setFont(FontUtil.getDefaultFont(12));
@@ -45,7 +45,6 @@ public class MessageRightImageViewHolder extends BaseMessageViewHolder {
         resend.setVisible(false);
         resend.setToolTipText("图片发送失败，点击重新发送");
         resend.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
 
         ImageIcon sendingIcon = new ImageIcon(getClass().getResource("/image/sending.gif"));
         sendingProgress.setIcon(sendingIcon);
@@ -60,7 +59,7 @@ public class MessageRightImageViewHolder extends BaseMessageViewHolder {
         resendImagePanel.setBackground(Colors.WINDOW_BACKGROUND);
         resendImagePanel.add(resend, BorderLayout.WEST);
         resendImagePanel.add(sendingProgress, BorderLayout.WEST);
-        resendImagePanel.add(imageBubble, BorderLayout.CENTER);
+        resendImagePanel.add(image, BorderLayout.CENTER);
 
         messageAvatarPanel.setLayout(new GridBagLayout());
         messageAvatarPanel.add(resendImagePanel, new GBC(1, 0).setWeight(1000, 1).setAnchor(GBC.EAST).setInsets(0, 0, 0, 0));
