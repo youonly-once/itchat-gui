@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50527
 File Encoding         : 65001
 
-Date: 2021-07-18 23:53:42
+Date: 2021-07-20 21:06:37
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -26,6 +26,7 @@ CREATE TABLE `message` (
   `app_msg_type` int(255) DEFAULT NULL,
   `msg_desc` varchar(255) NOT NULL,
   `create_time` datetime NOT NULL,
+  `plaintext` mediumtext,
   `content` mediumtext COMMENT '消息内容',
   `file_path` varchar(255) DEFAULT '' COMMENT '资源文件保存路径',
   `msg_json` mediumtext NOT NULL,
