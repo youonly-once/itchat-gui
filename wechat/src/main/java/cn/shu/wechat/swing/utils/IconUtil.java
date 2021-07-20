@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by song on 2017/6/7.
+ * Created by 舒新胜 on 2017/6/7.
  */
 public class IconUtil {
     private static Map<String, ImageIcon> iconCache = new HashMap<>();

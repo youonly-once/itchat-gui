@@ -8,7 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Created by song on 2017/6/15.
+ * Created by 舒新胜 on 2017/6/15.
  */
 public class TipPanel extends ParentAvailablePanel {
     private JLabel imageLabel;

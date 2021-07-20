@@ -3,7 +3,7 @@ package cn.shu.wechat.swing.components.message;
 import javax.swing.*;
 
 /**
- * Created by song on 27/06/2017.
+ * Created by 舒新胜 on 27/06/2017.
  */
 public class MessageImageLabel extends JLabel {
     private Object tag;

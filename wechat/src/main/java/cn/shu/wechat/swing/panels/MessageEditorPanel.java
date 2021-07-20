@@ -16,7 +16,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * Created by song on 17-5-30.
+ * Created by 舒新胜 on 17-5-30.
  */
 public class MessageEditorPanel extends ParentAvailablePanel {
     private JPanel controlLabel;

@@ -33,7 +33,7 @@ import java.util.Map;
 
 /**
  * 搜索结果适配器
- * Created by song on 17-5-30.
+ * Created by 舒新胜 on 17-5-30.
  */
 public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHolder> {
     private List<SearchResultItem> searchResultItems;

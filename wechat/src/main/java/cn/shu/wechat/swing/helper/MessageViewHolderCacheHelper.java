@@ -19,7 +19,7 @@ import java.util.List;
  * <p>
  * <p>默认初始缓存容量为10。</p>
  * <p>
- * Created by song on 2017/6/24.
+ * Created by 舒新胜 on 2017/6/24.
  */
 public class MessageViewHolderCacheHelper {
     private final int CACHE_CAPACITY = 10;

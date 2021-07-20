@@ -10,7 +10,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 /**
- * Created by song on 17-5-29.
+ * Created by 舒新胜 on 17-5-29.
  */
 public class TabOperationPanel extends ParentAvailablePanel {
     private JLabel chatLabel;

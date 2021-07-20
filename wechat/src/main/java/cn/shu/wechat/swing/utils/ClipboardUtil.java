@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Created by song on 20/06/2017.
+ * Created by 舒新胜 on 20/06/2017.
  */
 public class ClipboardUtil {
     private static Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();

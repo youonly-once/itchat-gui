@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import javax.swing.*;
 
 /**
- * Created by song on 17-5-30.
+ * Created by 舒新胜 on 17-5-30.
  */
 @NoArgsConstructor
 public class ParentAvailablePanel extends JPanel {

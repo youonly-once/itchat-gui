@@ -4,7 +4,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * Created by song on 09/06/2017.
+ * Created by 舒新胜 on 09/06/2017.
  */
 public class PasswordUtil {
     public static String encryptPassword(String rawPassword) {

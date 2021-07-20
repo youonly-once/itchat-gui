@@ -3,7 +3,7 @@ package cn.shu.wechat.swing.utils;
 import java.awt.*;
 
 /**
- * Created by song on 17-5-29.
+ * Created by 舒新胜 on 17-5-29.
  */
 public class FontUtil {
     private static Font font;

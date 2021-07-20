@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by song on 08/06/2017.
+ * Created by 舒新胜 on 08/06/2017.
  */
 public abstract class HttpTask {
     protected HttpResponseListener listener;

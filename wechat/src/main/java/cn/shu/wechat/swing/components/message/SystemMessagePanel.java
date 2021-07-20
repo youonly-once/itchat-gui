@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Created by song on 12/06/2017.
+ * Created by 舒新胜 on 12/06/2017.
  */
 public class SystemMessagePanel extends JPanel {
     private String text;

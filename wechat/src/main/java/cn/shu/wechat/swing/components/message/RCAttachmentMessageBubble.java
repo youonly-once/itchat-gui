@@ -9,7 +9,7 @@ import java.awt.event.MouseListener;
 /**
  * 附件气泡
  * <p>
- * Created by song on 17-6-3.
+ * Created by 舒新胜 on 17-6-3.
  */
 public class RCAttachmentMessageBubble extends JPanel implements RCMessageBubble {
     private NinePatchImageIcon backgroundNormalIcon;

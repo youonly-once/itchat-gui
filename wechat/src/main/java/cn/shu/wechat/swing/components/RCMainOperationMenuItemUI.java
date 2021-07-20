@@ -7,7 +7,7 @@ import javax.swing.plaf.basic.BasicMenuItemUI;
 import java.awt.*;
 
 /**
- * Created by song on 2017/6/5.
+ * Created by 舒新胜 on 2017/6/5.
  */
 public class RCMainOperationMenuItemUI extends BasicMenuItemUI {
     @Override

@@ -9,7 +9,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 
 /**
- * Created by song on 2017/6/11.
+ * Created by 舒新胜 on 2017/6/11.
  */
 public class ImageCache {
     public static final int THUMB = 0;

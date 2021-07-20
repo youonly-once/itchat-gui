@@ -4,7 +4,7 @@ import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import lombok.Data;
 
 /**
- * Created by song on 20/03/2017.
+ * Created by 舒新胜 on 20/03/2017.
  */
 
 @Data

@@ -1,7 +1,7 @@
 package cn.shu.wechat.swing.utils;
 
 /**
- * Created by song on 05/06/2017.
+ * Created by 舒新胜 on 05/06/2017.
  */
 public class OSUtil {
     public static final int Windows = 0;

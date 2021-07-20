@@ -5,7 +5,7 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 
 /**
- * Created by song on 17-6-4.
+ * Created by 舒新胜 on 17-6-4.
  */
 public class RCProgressBar extends JProgressBar {
     public RCProgressBar() {

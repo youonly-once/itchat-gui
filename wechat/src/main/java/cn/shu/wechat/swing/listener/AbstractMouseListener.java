@@ -4,7 +4,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 /**
- * Created by song on 07/06/2017.
+ * Created by 舒新胜 on 07/06/2017.
  */
 public class AbstractMouseListener implements MouseListener {
     @Override

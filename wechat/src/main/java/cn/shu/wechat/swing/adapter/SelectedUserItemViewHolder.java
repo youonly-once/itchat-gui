@@ -11,7 +11,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Created by song on 17-5-30.
+ * Created by 舒新胜 on 17-5-30.
  */
 public class SelectedUserItemViewHolder extends ViewHolder {
     public JLabel avatar = new JLabel();

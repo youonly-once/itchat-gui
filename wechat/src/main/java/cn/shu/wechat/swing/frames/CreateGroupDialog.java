@@ -21,7 +21,7 @@ import java.util.List;
 
 
 /**
- * Created by song on 07/06/2017.
+ * Created by 舒新胜 on 07/06/2017.
  */
 public class CreateGroupDialog extends JDialog {
     private static CreateGroupDialog context;

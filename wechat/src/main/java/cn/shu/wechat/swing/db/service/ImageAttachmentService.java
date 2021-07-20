@@ -5,7 +5,7 @@ import cn.shu.wechat.swing.db.model.ImageAttachment;
 import org.apache.ibatis.session.SqlSession;
 
 /**
- * Created by song on 08/06/2017.
+ * Created by 舒新胜 on 08/06/2017.
  */
 public class ImageAttachmentService extends BasicService<ImageAttachmentDao, ImageAttachment> {
     public ImageAttachmentService(SqlSession session) {

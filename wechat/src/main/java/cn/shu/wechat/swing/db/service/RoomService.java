@@ -7,7 +7,7 @@ import org.apache.ibatis.session.SqlSession;
 import java.util.List;
 
 /**
- * Created by song on 08/06/2017.
+ * Created by 舒新胜 on 08/06/2017.
  */
 public class RoomService extends BasicService<RoomDao, Room> {
     public RoomService(SqlSession session) {

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by song on 05/04/2017.
+ * Created by 舒新胜 on 05/04/2017.
  */
 
 public class MimeTypeUtil {

@@ -1,7 +1,7 @@
 package cn.shu.wechat.swing.tasks;
 
 /**
- * Created by song on 14/06/2017.
+ * Created by 舒新胜 on 14/06/2017.
  */
 public abstract class ResendTaskCallback {
     long time;

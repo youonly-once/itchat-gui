@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by song on 22/06/2017.
+ * Created by 舒新胜 on 22/06/2017.
  */
 public class HighLightLabel extends JLabel {
     private String keyWord;

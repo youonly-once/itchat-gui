@@ -12,7 +12,7 @@ import java.io.File;
 
 /**
  * 文件在输入框中的缩略图，当文件直接被粘贴到输入框时，该文件将会以缩略图的形式显示在输入框中
- * Created by song on 29/06/2017.
+ * Created by 舒新胜 on 29/06/2017.
  */
 public class FileEditorThumbnail extends JPanel {
     private JLabel icon;

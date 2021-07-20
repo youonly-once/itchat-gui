@@ -11,7 +11,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 
 /**
- * Created by song on 2017/6/5.
+ * Created by 舒新胜 on 2017/6/5.
  */
 public class ChatEditorPopupMenu extends JPopupMenu {
     JMenuItem selectAllItem = new JMenuItem("全选");
@@ -83,7 +83,7 @@ public class ChatEditorPopupMenu extends JPopupMenu {
                 }
 
 
-                //textPane.insertComponent(new FileEditorThumbnail("/Users/song/使用说明.doc"));
+                //textPane.insertComponent(new FileEditorThumbnail("/Users/舒新胜/使用说明.doc"));
 
             }
         });

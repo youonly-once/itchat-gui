@@ -5,7 +5,7 @@ import cn.shu.wechat.swing.utils.HttpUtil;
 import java.io.IOException;
 
 /**
- * Created by song on 2017/6/13.
+ * Created by 舒新胜 on 2017/6/13.
  */
 public class HttpBytesGetTask extends HttpTask {
     @Override

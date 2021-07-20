@@ -8,7 +8,7 @@ import lombok.ToString;
 /**
  * 搜索结果条目
  *
- * @author song
+ * @author 舒新胜
  * @date 24/03/2017
  */
 @Data

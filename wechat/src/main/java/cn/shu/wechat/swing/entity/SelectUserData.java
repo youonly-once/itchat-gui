@@ -1,7 +1,7 @@
 package cn.shu.wechat.swing.entity;
 
 /**
- * Created by song on 20/06/2017.
+ * Created by 舒新胜 on 20/06/2017.
  */
 public class SelectUserData {
     private String name;

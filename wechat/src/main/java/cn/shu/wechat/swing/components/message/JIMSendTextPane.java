@@ -1,7 +1,7 @@
 package cn.shu.wechat.swing.components.message;
 
 /**
- * Created by song on 17-6-2.
+ * Created by 舒新胜 on 17-6-2.
  */
 
 import javax.swing.*;

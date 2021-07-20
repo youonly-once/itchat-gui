@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author song
+ * @author 舒新胜
  * @date 17-5-30
  */
 public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {

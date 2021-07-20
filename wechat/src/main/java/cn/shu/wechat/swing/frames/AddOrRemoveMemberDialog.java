@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by song on 06/20/2017.
+ * Created by 舒新胜 on 06/20/2017.
  */
 
 public class AddOrRemoveMemberDialog extends JDialog {

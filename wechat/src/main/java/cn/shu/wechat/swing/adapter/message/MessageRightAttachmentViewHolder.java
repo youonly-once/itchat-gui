@@ -8,7 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Created by song on 17-6-3.
+ * Created by 舒新胜 on 17-6-3.
  */
 public class MessageRightAttachmentViewHolder extends MessageAttachmentViewHolder {
     public JLabel resend = new JLabel(); // 重发按钮

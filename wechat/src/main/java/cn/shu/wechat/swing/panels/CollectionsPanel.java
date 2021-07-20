@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Created by song on 17-5-30.
+ * Created by 舒新胜 on 17-5-30.
  */
 public class CollectionsPanel extends ParentAvailablePanel {
     private JLabel tipLabel;

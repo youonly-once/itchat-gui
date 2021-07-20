@@ -8,7 +8,7 @@ import java.io.*;
 import java.util.Objects;
 
 /**
- * Created by song on 2017/6/25.
+ * Created by 舒新胜 on 2017/6/25.
  */
 public class ImageViewerFrame extends JDialog {
     private int minWidth;

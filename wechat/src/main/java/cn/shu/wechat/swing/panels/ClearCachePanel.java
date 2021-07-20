@@ -15,7 +15,7 @@ import java.io.File;
 import java.text.DecimalFormat;
 
 /**
- * Created by song on 10/07/2017.
+ * Created by 舒新胜 on 10/07/2017.
  */
 public class ClearCachePanel extends JPanel {
     private JLabel infoLabel;

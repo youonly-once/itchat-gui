@@ -8,7 +8,7 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 
 /**
- * Created by song on 17-5-29.
+ * Created by 舒新胜 on 17-5-29.
  */
 public class RCTextField extends JTextField {
     private String placeholder;

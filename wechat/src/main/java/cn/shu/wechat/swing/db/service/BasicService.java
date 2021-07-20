@@ -6,7 +6,7 @@ import cn.shu.wechat.swing.db.model.BasicModel;
 import java.util.List;
 
 /**
- * Created by song on 09/06/2017.
+ * Created by 舒新胜 on 09/06/2017.
  */
 public class BasicService<T extends BasicDao, E extends BasicModel> {
     T dao;

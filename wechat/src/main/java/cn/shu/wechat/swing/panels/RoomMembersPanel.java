@@ -37,7 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by song on 07/06/2017.
+ * Created by 舒新胜 on 07/06/2017.
  */
 @Log4j2
 public class RoomMembersPanel extends ParentAvailablePanel {

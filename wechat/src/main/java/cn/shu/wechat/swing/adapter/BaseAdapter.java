@@ -3,7 +3,7 @@ package cn.shu.wechat.swing.adapter;
 import java.util.Map;
 
 /**
- * Created by song on 17-5-30.
+ * Created by 舒新胜 on 17-5-30.
  */
 public abstract class BaseAdapter<T extends ViewHolder> {
     public int getCount() {

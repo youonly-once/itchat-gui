@@ -22,7 +22,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * Created by song on 2017/6/15.
+ * Created by 舒新胜 on 2017/6/15.
  */
 @EqualsAndHashCode(callSuper = true)
 @Data

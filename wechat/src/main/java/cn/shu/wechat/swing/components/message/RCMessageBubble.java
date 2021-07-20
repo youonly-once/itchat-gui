@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.event.MouseListener;
 
 /**
- * Created by song on 27/06/2017.
+ * Created by 舒新胜 on 27/06/2017.
  */
 public interface RCMessageBubble {
     void addMouseListener(MouseListener l);

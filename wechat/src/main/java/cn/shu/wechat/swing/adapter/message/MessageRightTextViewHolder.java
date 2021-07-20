@@ -12,7 +12,7 @@ import java.awt.*;
 import java.util.List;
 
 /**
- * Created by song on 17-6-2.
+ * Created by 舒新胜 on 17-6-2.
  */
 public class MessageRightTextViewHolder extends BaseMessageViewHolder {
     //public JLabel avatar = new JLabel();

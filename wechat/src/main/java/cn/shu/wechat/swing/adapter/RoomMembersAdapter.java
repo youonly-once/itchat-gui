@@ -23,7 +23,7 @@ import java.util.Random;
 import java.util.UUID;
 
 /**
- * Created by song on 07/06/2017.
+ * Created by 舒新胜 on 07/06/2017.
  */
 public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
     private final List<Contacts> members;

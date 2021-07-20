@@ -3,7 +3,7 @@ package cn.shu.wechat.swing.tasks;
 import cn.shu.wechat.swing.utils.HttpUtil;
 
 /**
- * Created by song on 16/06/2017.
+ * Created by 舒新胜 on 16/06/2017.
  */
 public class DownloadTask extends HttpTask {
     HttpUtil.ProgressListener progressListener;

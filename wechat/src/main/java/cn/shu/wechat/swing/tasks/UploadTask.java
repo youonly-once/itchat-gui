@@ -5,7 +5,7 @@ import cn.shu.wechat.swing.utils.HttpUtil;
 import java.io.IOException;
 
 /**
- * Created by song on 15/06/2017.
+ * Created by 舒新胜 on 15/06/2017.
  */
 public class UploadTask {
     UploadTaskCallback listener;

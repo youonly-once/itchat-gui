@@ -19,7 +19,7 @@ import java.awt.event.*;
 import java.io.InputStream;
 
 /**
- * Created by song on 17-5-28.
+ * Created by 舒新胜 on 17-5-28.
  */
 public class MainFrame extends JFrame  {
     public final static int DEFAULT_WIDTH = 900;

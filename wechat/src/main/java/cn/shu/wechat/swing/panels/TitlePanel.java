@@ -15,7 +15,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 /**
- * Created by song on 17-5-30.
+ * Created by 舒新胜 on 17-5-30.
  */
 public class TitlePanel extends ParentAvailablePanel {
     private static TitlePanel context;

@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 /**
- * Created by song on 17-5-29.
+ * Created by 舒新胜 on 17-5-29.
  */
 public class ImagePanel extends JPanel {
     private GeneralPath path = new GeneralPath();

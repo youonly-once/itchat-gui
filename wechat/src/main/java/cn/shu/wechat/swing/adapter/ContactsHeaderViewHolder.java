@@ -3,7 +3,7 @@ package cn.shu.wechat.swing.adapter;
 import javax.swing.*;
 
 /**
- * Created by song on 17-5-30.
+ * Created by 舒新胜 on 17-5-30.
  */
 public class ContactsHeaderViewHolder extends HeaderViewHolder {
     private String letter;

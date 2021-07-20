@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 /**
  * 消息列表中显示的房间(聊天)条目
  *
- * @author song
+ * @author 舒新胜
  * @date 24/03/2017
  */
 @Data

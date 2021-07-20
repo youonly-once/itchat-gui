@@ -2,7 +2,7 @@ package cn.shu.wechat.swing.db.model;
 
 
 /**
- * Created by song on 09/03/2017.
+ * Created by 舒新胜 on 09/03/2017.
  */
 
 public class ContactsUser extends BasicModel {

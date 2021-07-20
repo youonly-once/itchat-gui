@@ -11,7 +11,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Created by song on 17-6-2.
+ * Created by 舒新胜 on 17-6-2.
  */
 public class MessageLeftImageViewHolder extends BaseMessageViewHolder {
     public JLabel sender = new JLabel();

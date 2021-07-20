@@ -4,7 +4,7 @@ import cn.shu.wechat.swing.db.model.FileAttachment;
 import lombok.Data;
 
 /**
- * Created by song on 17/05/2017.
+ * Created by 舒新胜 on 17/05/2017.
  */
 
 @Data

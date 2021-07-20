@@ -19,7 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Created by song on 19/06/2017.
+ * Created by 舒新胜 on 19/06/2017.
  */
 public class SelectUserPanel extends JPanel {
     private JPanel leftPanel;

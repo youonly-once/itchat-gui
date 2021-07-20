@@ -3,7 +3,7 @@ package cn.shu.wechat.swing.components;
 import java.awt.*;
 
 /**
- * Created by song on 17-5-28.
+ * Created by 舒新胜 on 17-5-28.
  */
 public class GBC extends GridBagConstraints {
     /*

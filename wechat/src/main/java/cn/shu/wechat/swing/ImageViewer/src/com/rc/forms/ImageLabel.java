@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Created by song on 26/06/2017.
+ * Created by 舒新胜 on 26/06/2017.
  */
 public class ImageLabel extends JLabel {
     private Image image;

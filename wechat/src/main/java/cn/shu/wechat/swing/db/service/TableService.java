@@ -4,7 +4,7 @@ import cn.shu.wechat.swing.db.dao.TableDao;
 import org.apache.ibatis.session.SqlSession;
 
 /**
- * Created by song on 08/06/2017.
+ * Created by 舒新胜 on 08/06/2017.
  */
 public class TableService {
     private TableDao dao;

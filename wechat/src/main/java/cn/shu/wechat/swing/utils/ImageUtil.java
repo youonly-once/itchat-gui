@@ -9,7 +9,7 @@ import java.io.IOException;
 /**
  * 图像处理工具类
  * <p>
- * Created by song on 2017/6/24.
+ * Created by 舒新胜 on 2017/6/24.
  */
 public class ImageUtil {
     /**

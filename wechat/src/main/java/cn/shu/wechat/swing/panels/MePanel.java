@@ -18,7 +18,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * Created by song on 26/06/2017.
+ * Created by 舒新胜 on 26/06/2017.
  */
 public class MePanel extends JPanel {
     private JPanel contentPanel;

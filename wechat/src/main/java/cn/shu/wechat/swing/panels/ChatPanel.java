@@ -60,7 +60,7 @@ import java.util.*;
 /**
  * 右侧聊天面板
  * <p>
- * Created by song on 17-5-30.
+ * Created by 舒新胜 on 17-5-30.
  */
 @Log4j2
 public class ChatPanel extends ParentAvailablePanel {

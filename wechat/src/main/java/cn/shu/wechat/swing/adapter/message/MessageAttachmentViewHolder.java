@@ -15,7 +15,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * Created by song on 16/06/2017.
+ * Created by 舒新胜 on 16/06/2017.
  */
 public class MessageAttachmentViewHolder extends BaseMessageViewHolder {
     public SizeAutoAdjustTextArea attachmentTitle;

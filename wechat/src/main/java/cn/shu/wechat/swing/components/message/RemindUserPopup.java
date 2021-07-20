@@ -10,7 +10,7 @@ import java.awt.event.ActionListener;
 import java.util.List;
 
 /**
- * Created by song on 21/06/2017.
+ * Created by 舒新胜 on 21/06/2017.
  */
 public class RemindUserPopup extends JPopupMenu {
     private List<String> users;

@@ -29,7 +29,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
- * Created by song on 17-5-29.
+ * Created by 舒新胜 on 17-5-29.
  */
 public class SearchPanel extends ParentAvailablePanel {
     private static SearchPanel context;

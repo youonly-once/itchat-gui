@@ -6,7 +6,7 @@ import cn.shu.wechat.swing.utils.MimeTypeUtil;
 import javax.swing.*;
 
 /**
- * Created by song on 17-6-4.
+ * Created by 舒新胜 on 17-6-4.
  */
 public class AttachmentIconHelper {
     public ImageIcon getImageIcon(String filename) {

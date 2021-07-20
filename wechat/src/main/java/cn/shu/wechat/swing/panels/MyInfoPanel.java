@@ -21,7 +21,7 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Created by song on 17-5-29.
+ * Created by 舒新胜 on 17-5-29.
  */
 public class MyInfoPanel extends ParentAvailablePanel {
     private static MyInfoPanel context;

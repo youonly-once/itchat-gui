@@ -26,7 +26,7 @@ import java.io.IOException;
 /**
  * 修改头像面板
  * <p>
- * Created by song on 23/06/2017.
+ * Created by 舒新胜 on 23/06/2017.
  */
 public class ChangeAvatarPanel extends JPanel {
     private static ChangeAvatarPanel context;

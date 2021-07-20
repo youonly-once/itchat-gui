@@ -6,7 +6,7 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 
 /**
- * Created by song on 17-6-4.
+ * Created by 舒新胜 on 17-6-4.
  */
 public class GradientProgressBarUI extends BasicProgressBarUI {
     @Override

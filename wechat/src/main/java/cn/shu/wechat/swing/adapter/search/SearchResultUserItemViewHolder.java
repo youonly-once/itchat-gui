@@ -11,7 +11,7 @@ import java.awt.*;
 
 /**
  * 搜索结果每一个通讯录、房间项目
- * Created by song on 17-5-30.
+ * Created by 舒新胜 on 17-5-30.
  */
 public class SearchResultUserItemViewHolder extends SearchResultItemViewHolder {
     public JLabel avatar = new JLabel();

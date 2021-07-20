@@ -11,7 +11,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 /**
- * Created by song on 04/07/2017.
+ * Created by 舒新胜 on 04/07/2017.
  */
 public class EmojiPanel extends JPanel {
     private ExpressionListener expressionListener;

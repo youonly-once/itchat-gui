@@ -4,7 +4,7 @@ import javax.swing.border.Border;
 import java.awt.*;
 
 /**
- * Created by song on 17-5-29.
+ * Created by 舒新胜 on 17-5-29.
  */
 public class RCBorder implements Border {
     public static final int TOP = 0;
