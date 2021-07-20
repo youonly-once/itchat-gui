@@ -34,8 +34,6 @@ public class UserInfoPanel extends ParentAvailablePanel {
     private RCButton button;
     private String userId;
     private String username;
-    private RoomService roomService = Launcher.roomService;
-    private ContactsUserService contactsUserService = Launcher.contactsUserService;
     private JPanel titlePanel;
     public UserInfoPanel(JPanel parent) {
         super(parent);

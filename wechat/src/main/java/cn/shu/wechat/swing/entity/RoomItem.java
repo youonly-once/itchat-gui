@@ -65,7 +65,6 @@ public class RoomItem implements Comparable<RoomItem> {
         return ret > 0 ? 1 : -1;
     }
     public RoomItem (Contacts contacts,String latestMsg, int msgCount){
-        RoomItem item = new RoomItem();
         setRoomId(contacts.getUsername());
         setTimestamp(System.currentTimeMillis());
         setName(ContactsTools.getContactDisplayNameByUserName(contacts.getUsername()));
@@ -73,6 +72,6 @@ public class RoomItem implements Comparable<RoomItem> {
         setLastMessage(latestMsg);
         setHeadImgPath(contacts.getHeadimgurl());
         setRefreshHead(true);
-        item.setUnreadCount(msgCount);
+        setUnreadCount(msgCount);
     }
 }

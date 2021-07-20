@@ -33,9 +33,10 @@ public class MainFrame extends JFrame  {
     private LeftPanel leftPanel;
 
     /**
-     * 主窗口右面板
+     * 右面版
      */
-    private RoomChatPanelCard rightPanel;
+    private RightPanel rightPanel;
+
 
     private static MainFrame context;
 
@@ -63,7 +64,7 @@ public class MainFrame extends JFrame  {
      * 消息到来的时候提示音
      */
     private AudioStream messageSound;
-    RightPanel filehelper;
+
 
     public MainFrame() {
         super("微信-舒专用版");
@@ -71,9 +72,6 @@ public class MainFrame extends JFrame  {
         initComponents();
         initView();
         initResource();
-
-        // 连接WebSocket
-        //startWebSocket();
     }
 
     private void initResource() {
@@ -222,10 +220,7 @@ public class MainFrame extends JFrame  {
 
         leftPanel = new LeftPanel();
         leftPanel.setPreferredSize(new Dimension(LEFT_PANEL_WIDTH, currentWindowHeight));
-
-       // rightPanel = new RightPanel();
-
-        filehelper = new RightPanel();
+        rightPanel = new RightPanel();
     }
 
     private void initView() {
@@ -250,7 +245,7 @@ public class MainFrame extends JFrame  {
 
         add(leftPanel, BorderLayout.WEST);
         //add(rightPanel, BorderLayout.CENTER);
-        add(filehelper, BorderLayout.CENTER);
+        add(rightPanel, BorderLayout.CENTER);
         centerScreen();
     }
 

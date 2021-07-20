@@ -20,15 +20,6 @@ import java.nio.channels.FileLock;
 
 @Component
 public class Launcher {
-    private static Launcher context;
-
-    public static SqlSession sqlSession;
-    public static RoomService roomService;
-    public static CurrentUserService currentUserService;
-    public static MessageService messageService;
-    public static ContactsUserService contactsUserService;
-    public static ImageAttachmentService imageAttachmentService;
-    public static FileAttachmentService fileAttachmentService;
 
     public static final String HOSTNAME = "http://www.baidu.com";
 
@@ -37,23 +28,6 @@ public class Launcher {
     public static String userHome;
     public static String appFilesBasePath;
 
-
-    static {
-        //sqlSession = DbUtils.getSqlSession();
-        roomService = new RoomService(sqlSession);
-        currentUserService = new CurrentUserService(sqlSession);
-        messageService = new MessageService(sqlSession);
-        contactsUserService = new ContactsUserService(sqlSession);
-        imageAttachmentService = new ImageAttachmentService(sqlSession);
-        fileAttachmentService = new FileAttachmentService(sqlSession);
-    }
-
-    private LoginFrame currentFrame;
-
-
-    public Launcher() {
-        context = this;
-    }
 
     public void launch() {
         config();
@@ -114,11 +88,6 @@ public class Launcher {
             e.printStackTrace();
         }
         return rv;
-    }
-
-
-    public static Launcher getContext() {
-        return context;
     }
 
 

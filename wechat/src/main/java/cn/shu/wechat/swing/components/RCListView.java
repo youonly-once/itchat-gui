@@ -348,9 +348,16 @@ public class RCListView extends JScrollPane {
     public void notifyItemInserted(int position, boolean end) {
         int viewType = adapter.getItemViewType(position);
         ViewHolder holder = adapter.onCreateViewHolder(viewType, position);
-        adapter.onBindViewHolder(holder, position);
-
+        try {
+            adapter.onBindViewHolder(holder, position);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         position = end ? -1 : position;
+/*        //如果之前的数据添加失败 数据项和panel组件数量对不上
+        if (position>contentPanel.getComponentCount()){
+            position = contentPanel.getComponentCount();
+        }*/
         contentPanel.add(holder, position);
         contentPanel.revalidate();
     }

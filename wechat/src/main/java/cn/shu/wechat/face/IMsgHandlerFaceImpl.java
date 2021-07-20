@@ -408,9 +408,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             }
         }
         /*============获取被撤回的消息============*/
-        String content = XmlStreamUtil.formatXml(msg.getContent());
-        content = "<root>" + content + "</root>";
-        Map<String, Object> map = XmlStreamUtil.toMap(content);
+        Map<String, Object> map = MessageTools.parseUndoMsg(msg.getContent());
         Object msgid = map.get("root.sysmsg.revokemsg.msgid");
         if (msgid == null) {
             return null;

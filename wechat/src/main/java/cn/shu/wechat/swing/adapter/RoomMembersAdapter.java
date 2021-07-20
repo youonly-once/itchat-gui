@@ -19,22 +19,24 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 /**
  * Created by song on 07/06/2017.
  */
 public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
-    private List<Contacts> members;
-    private List<RoomMembersItemViewHolder> viewHolders = new ArrayList<>();
-    private CurrentUser currentUser;
-    private CurrentUserService currentUserService = Launcher.currentUserService;
-    private ContactsUserService contactsUserService = Launcher.contactsUserService;
+    private final List<Contacts> members;
+    private final List<RoomMembersItemViewHolder> viewHolders = new ArrayList<>();
+
     private MouseAdapter addMemberButtonMouseListener;
     private MouseAdapter removeMemberButtonMouseListener;
-
+    /**
+     * 当前选中的viewHolder
+     */
+    private RoomMembersItemViewHolder selectedViewHolder;
     public RoomMembersAdapter(List<Contacts> members) {
         this.members = members;
-        //currentUser = currentUserService.findAll().get(0);
     }
 
     @Override
@@ -44,12 +46,7 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
 
     @Override
     public void onBindViewHolder(RoomMembersItemViewHolder viewHolder, int position) {
-        if (!viewHolders.contains(viewHolder)) {
-            viewHolders.add(viewHolder);
-        }
         Contacts contacts = members.get(position);
-
-
 
         if ("添加成员".equals(contacts.getDisplayname())) {
             viewHolder.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -127,6 +124,10 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
                 viewHolder.addMouseListener(new AbstractMouseListener() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
+                        if (selectedViewHolder != null){
+                            selectedViewHolder.setBackground(Colors.WINDOW_BACKGROUND_LIGHT);
+                        }
+                        selectedViewHolder = viewHolder;
                         viewHolder.setBackground(Colors.ITEM_SELECTED_LIGHT);
 
                         // 弹出用户信息面板

@@ -33,6 +33,13 @@ public class ContactsItem implements Comparable<ContactsItem> {
 
     @Override
     public int compareTo(ContactsItem o) {
+        //群排第一
+/*        if (this.getId().startsWith("@@")){
+            return -1;
+        }
+        if (o.getId().startsWith("@@")){
+            return 1;
+        }*/
         String tc = CharacterParser.getSelling(this.getDisplayName()).toUpperCase();
         String oc = CharacterParser.getSelling(o.getDisplayName()).toUpperCase();
         return tc.compareTo(oc);

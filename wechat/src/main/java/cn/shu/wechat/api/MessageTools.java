@@ -207,6 +207,7 @@ public class MessageTools {
             cn.shu.wechat.beans.pojo.Message build = cn.shu.wechat.beans.pojo.Message
                     .builder()
                     .content(message.content)
+                    .plaintext(message.plaintext==null?message.content:message.plaintext)
                     .createTime(new Date())
                     .fromNickname(Core.getNickName())
                     .fromRemarkname(Core.getNickName())
@@ -739,11 +740,24 @@ public class MessageTools {
         private final String filePath;
         //消息内容：文本、XML、资源ID
         private final String content;
+        //可显示的消息
+        private final String plaintext;
         //延迟发送
         private final Long sleep;
         //消息接收者
         private final String toUserName;
     }
 
+    /**
+     * 解析撤回消息的XML
+     * @param content
+     * @return
+     */
+    public static Map<String ,Object> parseUndoMsg(String content){
+        content = XmlStreamUtil.formatXml(content);
+        content = "<root>" + content + "</root>";
+        Map<String, Object> map = XmlStreamUtil.toMap(content);
+        return map;
+    }
 
 }

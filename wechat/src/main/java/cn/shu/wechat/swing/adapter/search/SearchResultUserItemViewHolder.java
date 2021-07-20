@@ -16,7 +16,7 @@ import java.awt.*;
 public class SearchResultUserItemViewHolder extends SearchResultItemViewHolder {
     public JLabel avatar = new JLabel();
     public HighLightLabel name = new HighLightLabel();
-
+    public JLabel type = new JLabel();
     public SearchResultUserItemViewHolder() {
         initComponents();
         initView();
@@ -39,6 +39,6 @@ public class SearchResultUserItemViewHolder extends SearchResultItemViewHolder {
         setLayout(new GridBagLayout());
         add(avatar, new GBC(0, 0).setWeight(2, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0));
         add(name, new GBC(1, 0).setWeight(100, 1).setFill(GBC.BOTH).setInsets(3, 5, 0, 0));
-
+        add(type,new GBC(2, 0).setWeight(1, 1).setFill(GBC.BOTH).setInsets(3, 5, 0, 0));
     }
 }

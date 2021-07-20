@@ -27,7 +27,6 @@ public class MessagePopupMenu extends JPopupMenu {
     private int messageType;
     private ImageCache imageCache = new ImageCache();
     private FileCache fileCache = new FileCache();
-    private FileAttachmentService fileAttachmentService = Launcher.fileAttachmentService;
 
     public MessagePopupMenu() {
         initMenuItem();
@@ -92,7 +91,7 @@ public class MessagePopupMenu extends JPopupMenu {
                             if (path != null && !path.isEmpty()) {
                                 ClipboardUtil.copyFile(path);
                             } else {
-                                FileAttachment attachment = fileAttachmentService.findById(id);
+                                FileAttachment attachment = null;// = fileAttachmentService.findById(id);
                                 if (attachment == null) {
                                     JOptionPane.showMessageDialog(MainFrame.getContext(), "文件不存在", "文件不存在", JOptionPane.WARNING_MESSAGE);
                                     return;
@@ -113,7 +112,10 @@ public class MessagePopupMenu extends JPopupMenu {
                             }
                         }
                         break;
+
                     }
+                    default:
+                        break;
                 }
 
             }

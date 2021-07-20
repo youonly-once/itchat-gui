@@ -3,6 +3,7 @@ package cn.shu.wechat.swing.adapter.search;
 import cn.shu.wechat.swing.adapter.BaseAdapter;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
+import cn.shu.wechat.swing.constant.SearchResultType;
 import cn.shu.wechat.swing.db.model.CurrentUser;
 import cn.shu.wechat.swing.db.model.FileAttachment;
 import cn.shu.wechat.swing.db.model.Message;
@@ -14,9 +15,7 @@ import cn.shu.wechat.swing.db.service.RoomService;
 import cn.shu.wechat.swing.entity.SearchResultItem;
 import cn.shu.wechat.swing.helper.AttachmentIconHelper;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
-import cn.shu.wechat.swing.panels.ChatPanel;
-import cn.shu.wechat.swing.panels.ListPanel;
-import cn.shu.wechat.swing.panels.SearchPanel;
+import cn.shu.wechat.swing.panels.*;
 import cn.shu.wechat.swing.tasks.DownloadTask;
 import cn.shu.wechat.swing.tasks.HttpResponseListener;
 import cn.shu.wechat.swing.utils.*;
@@ -39,19 +38,13 @@ import java.util.Map;
 public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHolder> {
     private List<SearchResultItem> searchResultItems;
     private String keyWord;
-    private RoomService roomService = Launcher.roomService;
     private SearchMessageOrFileListener searchMessageOrFileListener;
 
     public static final int VIEW_TYPE_CONTACTS_ROOM = 0;
     public static final int VIEW_TYPE_MESSAGE = 1;
     public static final int VIEW_TYPE_FILE = 2;
-    private MessageService messageService = Launcher.messageService;
     private AttachmentIconHelper attachmentIconHelper = new AttachmentIconHelper();
     private FileCache fileCache = new FileCache();
-    private FileAttachmentService fileAttachmentService = Launcher.fileAttachmentService;
-    private CurrentUser currentUser;
-    private CurrentUserService currentUserService = Launcher.currentUserService;
-
     private List<String> downloadingFiles = new ArrayList<>(); // 正在下载的文件
 
     //private List<SearchResultFileItemViewHolder> fileItemViewHolders = new ArrayList<>();
@@ -70,15 +63,19 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
     @Override
     public int getItemViewType(int position) {
         // return super.getItemViewType(position);
-        String type = searchResultItems.get(position).getType();
-        if (type.equals("d") || type.equals("c") || type.equals("p") || type.equals("searchMessage") || type.equals("searchFile")) {
-            return VIEW_TYPE_CONTACTS_ROOM;
-        } else if (type.equals("message")) {
-            return VIEW_TYPE_MESSAGE;
-        } else if (type.equals("file")) {
-            return VIEW_TYPE_FILE;
-        } else {
-            throw new RuntimeException("ViewType 不正确");
+        SearchResultType byCode = SearchResultType.getByCode(searchResultItems.get(position).getType());
+        switch (byCode) {
+            case SEARCH_MESSAGE:
+            case SEARCH_FILE:
+            case CONTACTS:
+            case ROOM:
+                return VIEW_TYPE_CONTACTS_ROOM;
+            case FILE:
+                return VIEW_TYPE_FILE;
+            case MESSAGE:
+                return VIEW_TYPE_MESSAGE;
+            default:
+                throw new RuntimeException("ViewType 不正确");
         }
     }
 
@@ -186,9 +183,9 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
      */
     private void processMessageResult(SearchResultItemViewHolder viewHolder, SearchResultItem item) {
         SearchResultMessageItemViewHolder holder = (SearchResultMessageItemViewHolder) viewHolder;
-        Room room = roomService.findById((String) item.getTag());
+        Room room = null;
 
-        Message message = messageService.findById(item.getId());
+        Message message = null;
 
         holder.avatar.setIcon(new ImageIcon(getRoomAvatar(((String) item.getTag()).startsWith("@@"), room.getRoomId())));
         holder.brief.setKeyWord(keyWord);
@@ -223,22 +220,31 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
-
-                    if (item.getType().equals("d")) {
-                        String roomId = roomService.findRelativeRoomIdByUserId(item.getId()).getRoomId();
-                        enterRoom(roomId, 0L);
-                        clearSearchText();
-                    } else if (item.getType().equals("c") || item.getType().equals("p")) {
-                        enterRoom(item.getId(), 0L);
-                        clearSearchText();
-                    } else if (item.getType().equals("searchMessage")) {
-                        if (searchMessageOrFileListener != null) {
-                            searchMessageOrFileListener.onSearchMessage();
-                        }
-                    } else if (item.getType().equals("searchFile")) {
-                        if (searchMessageOrFileListener != null) {
-                            searchMessageOrFileListener.onSearchFile();
-                        }
+                    SearchResultType byCode = SearchResultType.getByCode(item.getType());
+                    switch (byCode) {
+                        case CONTACTS:
+                        case ROOM:
+                            enterRoom(item.getId(), 0L);
+                            clearSearchText();
+                            break;
+                        case SEARCH_FILE:
+                            if (searchMessageOrFileListener != null) {
+                                searchMessageOrFileListener.onSearchFile();
+                            }
+                            break;
+                        case SEARCH_MESSAGE:
+                            if (searchMessageOrFileListener != null) {
+                                searchMessageOrFileListener.onSearchMessage();
+                            }
+                        case MESSAGE:
+            /*                Room room = roomService.findById((String) ((Map) item.getTag()).get("roomId"));
+                            if (room != null)
+                            {
+                                icon.setImage(getRoomAvatar(room.getType(), room.getName()));
+                            }*/
+                            break;
+                        default:
+                            throw new RuntimeException("ViewType 不正确");
                     }
                 }
             }
@@ -274,25 +280,30 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
         holder.name.setText(item.getName());
 
         ImageIcon icon = new ImageIcon();
-        // 群组头像
-        String type = item.getType();
-
-        if (type.equals("c") || type.equals("p") || type.equals("d")) {
-            icon.setImage(getRoomAvatar(true, item.getTag().toString()));
-        } else {
-            if (type.equals("searchMessage")) {
-                icon.setImage(IconUtil.getIcon(this, "/image/message.png").getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH));
-            } else if (type.equals("searchFile")) {
+        SearchResultType byCode = SearchResultType.getByCode(item.getType());
+        switch (byCode) {
+            case CONTACTS:
+                icon.setImage(getRoomAvatar(true, item.getTag().toString()));
+                holder.type.setText("联系人");
+                break;
+            case ROOM:
+                icon.setImage(getRoomAvatar(true, item.getTag().toString()));
+                holder.type.setText("聊天房");
+                break;
+            case SEARCH_FILE:
                 icon.setImage(IconUtil.getIcon(this, "/image/file_icon.png").getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH));
-            }
-            /*else if (type.equals("message"))
-            {
-                Room room = roomService.findById((String) ((Map) item.getTag()).get("roomId"));
+                break;
+            case SEARCH_MESSAGE:
+                icon.setImage(IconUtil.getIcon(this, "/image/message.png").getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH));
+            case MESSAGE:
+/*                Room room = roomService.findById((String) ((Map) item.getTag()).get("roomId"));
                 if (room != null)
                 {
                     icon.setImage(getRoomAvatar(room.getType(), room.getName()));
-                }
-            }*/
+                }*/
+                break;
+            default:
+                throw new RuntimeException("ViewType 不正确");
         }
         holder.avatar.setIcon(icon);
 
@@ -367,7 +378,11 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
     }
 
     private void enterRoom(String roomId, long firstMessageTimestamp) {
-        //ChatPanel.getContext().enterRoom(roomId, firstMessageTimestamp);
+        //添加房间
+        RoomsPanel.getContext().addRoomOrOpenRoom(roomId,"",0);
+        //添加聊天房
+         RoomChatPanel.getContext().createAndShow(roomId);
+
     }
 
     public void setSearchMessageOrFileListener(SearchMessageOrFileListener searchMessageOrFileListener) {
@@ -381,7 +396,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
      * @param holder
      */
     public void downloadOrOpenFile(String fileId, SearchResultFileItemViewHolder holder) {
-        FileAttachment fileAttachment = fileAttachmentService.findById(fileId);
+        FileAttachment fileAttachment = null;
 
         if (fileAttachment == null) {
             JOptionPane.showMessageDialog(null, "无效的附件", "附件无效", JOptionPane.ERROR_MESSAGE);
@@ -485,8 +500,8 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
         });
 
         //currentUser = currentUserService.findAll().get(0);
-        String url = Launcher.HOSTNAME + fileAttachment.getLink() + "?rc_uid=" + currentUser.getUserId() + "&rc_token=" + currentUser.getAuthToken();
-        task.execute(url);
+        //String url = Launcher.HOSTNAME + fileAttachment.getLink() + "?rc_uid=" + currentUser.getUserId() + "&rc_token=" + currentUser.getAuthToken();
+        //task.execute(url);
     }
 
     /**

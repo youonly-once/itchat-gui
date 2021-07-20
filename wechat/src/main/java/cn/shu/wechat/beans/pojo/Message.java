@@ -58,7 +58,7 @@ public class Message {
     private String toRemarkname;
 
     private String toNickname;
-
+    private String plaintext;
     /**
      * 是否是本人发送的消息1是0不是
      */

@@ -279,6 +279,7 @@ public class TitlePanel extends ParentAvailablePanel {
         this.statusLabel.setVisible(true);
     }
 
+
     /**
      * 隐藏状态栏
      */

@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.panels;
 
 import cn.shu.wechat.beans.pojo.Contacts;
+import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.adapter.RoomItemViewHolder;
 import cn.shu.wechat.swing.adapter.RoomItemsAdapter;
 import cn.shu.wechat.swing.components.Colors;
@@ -95,6 +96,37 @@ public class RoomsPanel extends ParentAvailablePanel {
     }
 
     /**
+     * 添加房间
+     *
+     * @param contacts 联系人
+     * @param latestMsg  最新消息
+     */
+    public void addRoomOrOpenRoom(Contacts contacts, String latestMsg, int msgCount) {
+        String userName = contacts.getUsername();
+
+        //更新聊天列表
+        if (!Core.getRecentContacts().contains(contacts)) {
+            //添加新房间并制定
+            addRoom(contacts, latestMsg, msgCount);
+            Core.getRecentContacts().add(contacts);
+        } else {
+            //更新消息 置顶
+           updateRoomItem(userName, msgCount, latestMsg, System.currentTimeMillis());
+        }
+        TabOperationPanel.getContext().switchToChatLabel();
+    }
+
+    /**
+     * 添加房间
+     *
+     * @param roomId 联系人id
+     * @param latestMsg  最新消息
+     */
+    public void addRoomOrOpenRoom(String roomId, String latestMsg, int msgCount) {
+        Contacts contacts = Core.getMemberMap().get(roomId);
+        addRoomOrOpenRoom(contacts,latestMsg,msgCount);
+    }
+    /**
      * 批量添加房间
      * @param items
      */
@@ -171,10 +203,14 @@ public class RoomsPanel extends ParentAvailablePanel {
         }
     }
 
+
+
     /**
-     * 更新指定位置的房间项目
-     *
-     * @param roomId
+     * 更新指定房间项目
+     * @param roomId 房间id
+     * @param unReadCount 未读消息数
+     * @param lastMsg 最近的一条消息
+     * @param time 时间
      */
     public void updateRoomItem(String roomId, int unReadCount, String lastMsg, Long time) {
         if (roomId == null || roomId.isEmpty()) {

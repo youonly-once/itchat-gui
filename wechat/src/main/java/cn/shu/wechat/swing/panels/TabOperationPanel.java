@@ -97,14 +97,13 @@ public class TabOperationPanel extends ParentAvailablePanel {
 
         if (e.getComponent() == chatLabel) {
             switchToChatLabel();
-            RightPanel.getContext().show(RightPanel.CHAT_ROOM);
-
         } else if (e.getComponent() == contactsLabel) {
             RightPanel.getContext().show(RightPanel.USER_INFO);
             chatLabel.setIcon(chatIconNormal);
             contactsLabel.setIcon(contactIconActive);
             meLable.setIcon(meIconNormal);
             parent.getListPanel().showPanel(ListPanel.CONTACTS);
+            RightPanel.getContext().show(RightPanel.USER_INFO);
         } else if (e.getComponent() == meLable) {
             chatLabel.setIcon(chatIconNormal);
             contactsLabel.setIcon(contactIconNormal);
@@ -121,6 +120,7 @@ public class TabOperationPanel extends ParentAvailablePanel {
         contactsLabel.setIcon(contactIconNormal);
         meLable.setIcon(meIconNormal);
         parent.getListPanel().showPanel(ListPanel.CHAT);
+        RightPanel.getContext().show(RightPanel.CHAT_ROOM);
     }
 
     class TabItemClickListener implements MouseListener {

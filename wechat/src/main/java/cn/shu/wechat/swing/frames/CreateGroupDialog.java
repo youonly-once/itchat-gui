@@ -19,7 +19,6 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-import static cn.shu.wechat.swing.app.Launcher.roomService;
 
 /**
  * Created by song on 07/06/2017.
@@ -36,7 +35,6 @@ public class CreateGroupDialog extends JDialog {
     private JButton okButton;
     private List<SelectUserData> userList = new ArrayList<>();
 
-    private ContactsUserService contactsUserService = Launcher.contactsUserService;
 
 
     public static final int DIALOG_WIDTH = 580;
@@ -55,7 +53,7 @@ public class CreateGroupDialog extends JDialog {
     }
 
     private void initData() {
-        List<ContactsUser> contactsUsers = contactsUserService.findAll();
+        List<ContactsUser> contactsUsers = null ;//=// contactsUserService.findAll();
         for (ContactsUser con : contactsUsers) {
             /*if (con.getUsername().equals("admin") || con.getUsername().equals("appStoreTest"))
             {
@@ -163,7 +161,7 @@ public class CreateGroupDialog extends JDialog {
     }
 
     private void checkRoomExists(String name) {
-        if (roomService.findByName(name) != null) {
+        if (/*roomService.findByName(name)*/ ""!= null) {
             showRoomExistMessage(name);
             okButton.setEnabled(true);
         } else {

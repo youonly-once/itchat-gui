@@ -103,14 +103,13 @@ public class ChatPanel extends ParentAvailablePanel {
     // 如果是从消息搜索列表中进入房间的，这个属性不为0
     private long firstMessageTimestamp = 0L;
 
+    public void setRoomMembers(List<String> roomMembers) {
+        this.roomMembers = roomMembers;
+    }
+
     // 房间的用户 username
     public List<String> roomMembers = new ArrayList<>();
 
-    private final MessageService messageService = Launcher.messageService;
-    private CurrentUserService currentUserService = Launcher.currentUserService;
-    private RoomService roomService = Launcher.roomService;
-    private ImageAttachmentService imageAttachmentService = Launcher.imageAttachmentService;
-    private FileAttachmentService fileAttachmentService = Launcher.fileAttachmentService;
     public static List<String> uploadingOrDownloadingFiles = new ArrayList<>();
 
     /**
@@ -206,7 +205,7 @@ public class ChatPanel extends ParentAvailablePanel {
 
                     //List<Message> messages = messageService.findOffset(roomId, messageItems.size(), PAGE_LENGTH);
                     //TODO
-                    for (int i = messageList.size() - 1; i >= 0; i--) {
+                    for (int i = 0 ; i < messageList.size(); i++) {
                         MessageItem item = new MessageItem(messageList.get(i), roomId);
                         messageItems.add(0, item);
                     }
@@ -320,6 +319,7 @@ public class ChatPanel extends ParentAvailablePanel {
             //文本消息
             if (data instanceof String && !data.equals("\n")) {
                 sendTextMessage(null, data.toString());
+                RoomsPanel.getContext().updateRoomItem(roomId, 0,  data.toString(), System.currentTimeMillis());
 
             } else if (data instanceof JLabel) {
                 //图片消息
@@ -333,14 +333,17 @@ public class ChatPanel extends ParentAvailablePanel {
                     //多个图片消息添加到队列中
                     shareAttachmentUploadQueue.add(path);
                 }
+                RoomsPanel.getContext().updateRoomItem(roomId, 0, "[图片]", System.currentTimeMillis());
             } else if (data instanceof FileEditorThumbnail) {
                 //文件消息
                 isImageOrFile = true;
                 FileEditorThumbnail component = (FileEditorThumbnail) data;
                 //多个文件消息添加到队列中
                 shareAttachmentUploadQueue.add(component.getPath());
+                RoomsPanel.getContext().updateRoomItem(roomId, 0, "[文件]", System.currentTimeMillis());
 
             }
+
         }
         //上传队列中的文件
         if (isImageOrFile) {
@@ -527,7 +530,7 @@ public class ChatPanel extends ParentAvailablePanel {
      * @param firstMessageTimestamp
      */
     private void loadMessageWithEarliestTime(long firstMessageTimestamp) {
-        List<cn.shu.wechat.swing.db.model.Message> messages = messageService.findBetween(roomId, firstMessageTimestamp, System.currentTimeMillis());
+        List<cn.shu.wechat.swing.db.model.Message> messages = null;//messageService.findBetween(roomId, firstMessageTimestamp, System.currentTimeMillis());
         if (messages.size() > 0) {
             for (cn.shu.wechat.swing.db.model.Message message : messages) {
                 if (!message.isDeleted()) {
@@ -549,19 +552,32 @@ public class ChatPanel extends ParentAvailablePanel {
      */
     private void loadLocalHistory() {
         //List<Message> messages = messageService.findByPage(roomId, messageItems.size(), PAGE_LENGTH);
-        MessageMapper mapper = SpringContextHolder.getBean(MessageMapper.class);
-        List<cn.shu.wechat.beans.pojo.Message> messageList = mapper.selectByPage(messageItems.size(), messageItems.size() + PAGE_LENGTH, roomId);
+        ( (RoomChatPanelCard) this.getParentPanel()).getTitlePanel().showStatusLabel("加载中...");
+        new SwingWorker<Object,Object>(){
 
-        for (cn.shu.wechat.beans.pojo.Message message : messageList) {
-            MessageItem item = new MessageItem(message, roomId);
-            item.setProgress(message.getIsSend()?100:0);
-            messageItems.add(item);
-        }
+            @Override
+            protected Object doInBackground() throws Exception {
+                MessageMapper mapper = SpringContextHolder.getBean(MessageMapper.class);
+                List<cn.shu.wechat.beans.pojo.Message> messageList = mapper.selectByPage(messageItems.size(), messageItems.size() + PAGE_LENGTH, roomId);
 
+                for (int i = messageList.size()-1 ; i >= 0; i--) {
+                    Message message = messageList.get(i);
+                    MessageItem item = new MessageItem(message, roomId);
+                    item.setProgress(message.getIsSend()?100:0);
+                    messageItems.add(item);
+                }
+                return null;
+            }
 
-        messagePanel.getMessageListView().notifyDataSetChanged(false);
+            @Override
+            protected void done() {
+                messagePanel.getMessageListView().notifyDataSetChanged(false);
 
-        messagePanel.getMessageListView().setAutoScrollToBottom();
+                messagePanel.getMessageListView().setAutoScrollToBottom();
+                ( (RoomChatPanelCard) ChatPanel.this.getParentPanel()).getTitlePanel().hideStatusLabel();
+            }
+        }.execute();
+
     }
 
     /**
@@ -591,7 +607,7 @@ public class ChatPanel extends ParentAvailablePanel {
         }
         room.setUnreadCount(unread);
         room.setMsgSum(room.getMsgSum() + totalAdded);
-        roomService.update(room);
+        //roomService.update(room);
     }
 
 
@@ -696,6 +712,7 @@ public class ChatPanel extends ParentAvailablePanel {
         Message message = Message.builder().isSend(false)
                 .id(msgId)
                 .content(content)
+                .plaintext(content)
                 .createTime(new Date())
                 .fromUsername(Core.getUserName())
                 .toUsername(roomId)
@@ -904,18 +921,18 @@ public class ChatPanel extends ParentAvailablePanel {
      * @param type
      */
     public void resendFileMessage(String messageId, String type) {
-        cn.shu.wechat.swing.db.model.Message dbMessage = messageService.findById(messageId);
+        cn.shu.wechat.swing.db.model.Message dbMessage = null;//= messageService.findById(messageId);
         String path = null;
 
         if (type.equals("file")) {
             if (dbMessage.getFileAttachmentId() != null) {
-                path = fileAttachmentService.findById(dbMessage.getFileAttachmentId()).getLink();
+              //  path = fileAttachmentService.findById(dbMessage.getFileAttachmentId()).getLink();
             } else {
                 path = null;
             }
         } else {
             if (dbMessage.getImageAttachmentId() != null) {
-                path = imageAttachmentService.findById(dbMessage.getImageAttachmentId()).getImagePath();
+               // path = imageAttachmentService.findById(dbMessage.getImageAttachmentId()).getImagePath();
             } else {
                 path = null;
 
@@ -929,7 +946,7 @@ public class ChatPanel extends ParentAvailablePanel {
             if (index > -1) {
                 messageItems.remove(index);
                 messagePanel.getMessageListView().notifyItemRemoved(index);
-                messageService.delete(dbMessage.getId());
+               // messageService.delete(dbMessage.getId());
             }
 
             prepareStartUploadFile(path, randomMessageId());
@@ -1032,6 +1049,7 @@ public class ChatPanel extends ParentAvailablePanel {
                 MessageTools.sendMsgByUserId(MessageTools.Message
                         .builder()
                         .filePath(uploadFilename)
+                        .plaintext(isImage?"[图片]":"[文件]")
                         .messageId(messageId)
                         .replyMsgTypeEnum(isImage ? WXSendMsgCodeEnum.PIC : WXSendMsgCodeEnum.APP)
                         .toUserName(roomId)
@@ -1323,7 +1341,7 @@ public class ChatPanel extends ParentAvailablePanel {
         if (pos > -1) {
             messageItems.remove(pos);
             messagePanel.getMessageListView().notifyItemRemoved(pos);
-            messageService.markDeleted(messageId);
+            //messageService.markDeleted(messageId);
         }
     }
 

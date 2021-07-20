@@ -9,22 +9,21 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.Data;
 import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by song on 17-5-29.
  */
 @Getter
+@Log4j2
 public class RoomChatPanelCard extends JPanel {
-    public static RoomChatPanelCard getContext() {
-        return context;
-    }
 
-    private static RoomChatPanelCard context;
     /**
      * 聊天房标题
      */
@@ -74,7 +73,6 @@ public class RoomChatPanelCard extends JPanel {
 
     public RoomChatPanelCard(String roomId) {
         this.roomId = roomId;
-        context = this;
         initComponents();
         initView();
         initData();
@@ -82,11 +80,18 @@ public class RoomChatPanelCard extends JPanel {
     private void initData(){
         //消息发送者信息
         contacts = Core.getMemberMap().get(roomId);
-
+        if (contacts == null){
+            log.error("未知联系人：{}",roomId);
+        }
         //加载群成员
-        loadMemberList();
-        // 更新房间标题，尤其是成员数
-        updateRoomTitle();
+        if (roomId.startsWith("@@")){
+            loadMemberList();
+        }else{
+            // 更新房间标题
+            updateRoomTitle();
+        }
+
+
 
 
         //成员面板设置房间id
@@ -101,13 +106,15 @@ public class RoomChatPanelCard extends JPanel {
      * 加载群成员
      */
     private void loadMemberList(){
-        if (roomId.startsWith("@@")) {
+
             //加载群成员
             if (contacts.getMemberlist() == null || contacts.getMemberlist().isEmpty()){
+                RoomChatPanelCard.this.getTitlePanel().showStatusLabel("加载中...");
                 new SwingWorker<Object,Object>(){
 
                     @Override
                     protected Object doInBackground() throws Exception {
+
                         ILoginService bean = SpringContextHolder.getBean(ILoginService.class);
                         bean.WebWxBatchGetContact(roomId);
                         return null;
@@ -117,11 +124,24 @@ public class RoomChatPanelCard extends JPanel {
                     protected void done() {
                         super.done();
                         contacts = Core.getMemberMap().get(roomId);
+                        ArrayList<String> list = new ArrayList<>();
+                        for (Contacts contacts1 : contacts.getMemberlist()) {
+                            list.add(ContactsTools.getMemberDisplayNameOfGroup(roomId,contacts1.getUsername()));
+                        }
+                        chatPanel.setRoomMembers(list);
+
                         updateRoomTitle();
+                        RoomChatPanelCard.this.getTitlePanel().hideStatusLabel();
                     }
                 }.execute();
+            }else{
+                ArrayList<String> list = new ArrayList<>();
+                for (Contacts contacts1 : contacts.getMemberlist()) {
+                    list.add(ContactsTools.getMemberDisplayNameOfGroup(roomId,contacts1.getUsername()));
+                }
+                chatPanel.setRoomMembers(list);
+                updateRoomTitle();
             }
-        }
     }
     /**
      * 更新房间标题
@@ -129,9 +149,14 @@ public class RoomChatPanelCard extends JPanel {
     public void updateRoomTitle() {
         String title = ContactsTools.getContactDisplayNameByUserName(contacts.getUsername());
         if (roomId.startsWith("@@")) {
-            title += " (" + (contacts.getMemberlist().size()) + ")";
+            if (contacts.getMemberlist() == null){
+                title += " (0)";
+            }else{
+                title += " (" + (contacts.getMemberlist().size()) + ")";
+            }
+
         }
-        // 更新房间标题
+        // 更新房间标/题
         titlePanel.updateRoomTitle(title);
     }
     private void initComponents() {

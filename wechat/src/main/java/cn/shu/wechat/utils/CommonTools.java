@@ -304,6 +304,7 @@ public class CommonTools {
                 msg.setMentionMe(true);
             }
         }
+        msg.setContent(emojiFormatter(msg.getContent()));
     }
 
 }

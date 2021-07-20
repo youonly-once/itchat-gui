@@ -14,6 +14,8 @@ import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
 import cn.shu.wechat.enums.WXSendMsgCodeEnum;
 import cn.shu.wechat.face.IMsgHandlerFace;
 import cn.shu.wechat.mapper.MessageMapper;
+import cn.shu.wechat.service.ILoginService;
+import cn.shu.wechat.service.impl.LoginServiceImpl;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.panels.RoomChatPanelCard;
 import cn.shu.wechat.swing.panels.RoomChatPanel;
@@ -21,6 +23,7 @@ import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.utils.CommonTools;
 import cn.shu.wechat.utils.JSONObjectUtil;
 import cn.shu.wechat.utils.LogUtil;
+import cn.shu.wechat.utils.XmlStreamUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.log4j.Log4j2;
@@ -29,6 +32,9 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import javax.swing.*;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 
 import static cn.shu.wechat.enums.WXReceiveMsgCodeEnum.MSGTYPE_TEXT;
@@ -47,18 +53,13 @@ public class MsgCenter {
      * 消息处理类
      */
     @Resource
-    private IMsgHandlerFace msgHandler;//= IMsgHandlerFaceImpl.getiMsgHandlerFace();
+    private IMsgHandlerFace msgHandler;
 
-    /* //public static MsgCenter getMessageCenter() {
-         return messageCenter;
-     }*/
     @Resource
     private MessageMapper messageMapper;
-    //private static MsgCenter messageCenter= new MsgCenter();
-    /**
-     * 保存消息
-     */
-    public static ThreadLocal<AddMsgList> threadLocalOfMsg = new ThreadLocal<AddMsgList>();
+
+    @Resource
+    private ILoginService loginService;
 
     /**
      * 接收消息，放入队列
@@ -68,21 +69,54 @@ public class MsgCenter {
      * @date 2017年4月23日 下午2:30:48
      */
     public void handleNewMsg(AddMsgList msg) {
+        //消息类型封装
+        WXReceiveMsgCodeEnum msgType = WXReceiveMsgCodeEnum.getByCode(msg.getMsgType());
+        String s = LogUtil.printFromMeg(msg, msgType.getDesc());
 
-        threadLocalOfMsg.set(msg);
+        //用户在其他平台消息已读的通知
+        if (msg.getMsgType() == WXReceiveMsgCodeEnum.MSGTYPE_STATUSNOTIFY.getCode()){
+            log.debug(s);
+            //更新聊天列表未读数量
+
+            RoomsPanel.getContext().updateUnreadCount(msg.getToUserName(),0);
+            return;
+        }else{
+            log.info(s);
+        }
+
         /**
          * 文本消息：content为文本内容
          * 图片视频文件消息：content为资源ID，@开头，发送消息时指定Content字段可直接发送，不需mediaid
-         *                  如果消息是自己发的，content为xml
+         *  如果消息是自己发的，content为xml
          */
         //消息格式化
         CommonTools.msgFormatter(msg);
-        WXReceiveMsgCodeEnum msgType = WXReceiveMsgCodeEnum.getByCode(msg.getMsgType());
+        //地图消息，特殊粗粒
+
         if (msgType == MSGTYPE_TEXT && msg.getUrl().length() != 0) {
             //地图消息
             msg.setMsgType(WXReceiveMsgCodeEnum.MSGTYPE_MAP.getCode());
             msgType = WXReceiveMsgCodeEnum.MSGTYPE_MAP;
         }
+
+        //下载资源文件
+        download(msgType,msg);
+        //存储数据库
+        Message message = storeMsgToDB(msg,getPlainText(msgType,msg));
+        //聊天界面
+       updateUI(message, msg);
+        //处理自定义逻辑
+        processMsg(msg,msgType);
+
+
+    }
+
+    /**
+     * 下载文件
+     * @param msgType
+     * @param msg
+     */
+    private void download(WXReceiveMsgCodeEnum msgType,AddMsgList msg){
         //下载资源文件
         String path = DownloadTools.getDownloadFilePath(msg,false);
         String pathSlave = DownloadTools.getDownloadFilePath(msg,true);
@@ -106,58 +140,64 @@ public class MsgCenter {
             msg.setFilePath(path);
 
         }
-        //存储消息
-        Message message = storeMsgToDB(msg);
-        //打印日志
-        String s = LogUtil.printFromMeg(msg, msgType.getDesc());
-        if (s.startsWith("系统通知")) {
-            log.debug(s);
-        } else {
-            MainFrame.getContext().playMessageSound();
-            MainFrame.getContext().setTrayFlashing();
-            log.info(s);
-        }
-
-
-        if (msgType.getCode() < 51) {
-            SwingUtilities.invokeLater(() -> {
-                //新增消息列表
-                ;
-                String userName = msg.getFromUserName();
-                if (userName.equals(Core.getUserName())) {
-                    userName = msg.getToUserName();
+    }
+    /**
+     * 更新UI
+     * @param message
+     * @param msg
+     */
+    private void updateUI(Message message,AddMsgList msg){
+        //################3聊天面板消息处理###########3333
+        SwingUtilities.invokeLater(() -> {
+            int msgUnReadCount = 1;
+            String lastMsgPrefix  = "";
+            //新增消息列表
+            String userName = msg.getFromUserName();
+            if (userName.equals(Core.getUserName())) {
+                //自己的消息，默认已读
+                msgUnReadCount = 0;
+                userName = msg.getToUserName();
+            }else if(userName.startsWith("@@")){
+                //自己在群里发的消息
+                if ( Core.getUserName().equals(msg.getMemberName())){
+                    lastMsgPrefix =Core.getNickName()+": ";
+                    msgUnReadCount = 0;
+                }else{
+                    MainFrame.getContext().playMessageSound();
+                    MainFrame.getContext().setTrayFlashing();
+                    lastMsgPrefix =ContactsTools.getMemberDisplayNameOfGroup(userName,msg.getMemberName())+": ";
                 }
-                //只显示常规消息
-                //刷新消息
-                if (message!=null){
-                    message.setProcess(100);
-                    message.setIsSend(true);
-                    //新消息来了后创建房间
-                    //RightPanel rightPanel = RightPanelParent.getContext().createAndShow(message.getFromUsername());
-                    RoomChatPanelCard rightPanel = RoomChatPanel.getContext().get(userName);
-                    if (rightPanel!=null){
-                        rightPanel.addOrUpdateMessageItem(message);
-                    }
+            }else{
+                MainFrame.getContext().playMessageSound();
+                MainFrame.getContext().setTrayFlashing();
+            }
 
-                }
+            if (!Core.getMemberMap().containsKey(userName)){
+                //未保存到通讯录的联系人 手动添加
+                loginService.WebWxBatchGetContact(userName);
+            }
+            Contacts contacts = Core.getMemberMap().get(userName);
+            //刷新消息
+            if (message!=null){
+                message.setProcess(100);
+                message.setIsSend(true);
+                //新消息来了后创建房间
+                //RightPanel rightPanel = RightPanelParent.getContext().createAndShow(message.getFromUsername());
+                RoomChatPanelCard roomChatPanelCard = RoomChatPanel.getContext().addPanel(userName);
+                roomChatPanelCard.addOrUpdateMessageItem(message);
 
+            }
+            //新增或选择聊天列表
+            RoomsPanel.getContext().addRoomOrOpenRoom(contacts,lastMsgPrefix+(message==null?msg.getContent():message.getPlaintext()),msgUnReadCount);
 
-                Contacts contacts = Core.getMemberMap().get(userName);
-                if (contacts == null){
-                    contacts = Contacts.builder().username(userName).build();
-                    Core.getMemberMap().put(userName,contacts);
-                }
-                if (!Core.getRecentContacts().contains(contacts)) {
-                    //添加新房间并制定
-                    RoomsPanel.getContext().addRoom(contacts, msg.getContent(), 1);
-                    Core.getRecentContacts().add(contacts);
-                } else {
-                    //更新消息 置顶
-                    RoomsPanel.getContext().updateRoomItem(userName, 1, msg.getContent(), System.currentTimeMillis());
-                }
-            });
-
-        }
+        });
+    }
+    /**
+     * 处理自定义逻辑
+     * @param msg 消息
+     * @param msgType 消息类型
+     */
+    private void processMsg(AddMsgList msg,WXReceiveMsgCodeEnum msgType){
         //需要发送的消息
         List<MessageTools.Message> messages = null;
         switch (msgType) {
@@ -193,6 +233,7 @@ public class MsgCenter {
                         break;
                     case PROGRAM:
                         break;
+                    default:
                 }
                 messages = msgHandler.appMsgHandle(msg);
                 break;
@@ -228,24 +269,97 @@ public class MsgCenter {
                 log.warn(LogUtil.printFromMeg(msg, msgType.getCode()));
                 break;
         }
-
         //发送消息
         MessageTools.sendMsgByUserId(messages, msg.getFromUserName());
-        threadLocalOfMsg.remove();
     }
-
-
+    /**
+     *
+     * @param msgType 消息类型
+     * @return 明文
+     */
+    private String getPlainText(WXReceiveMsgCodeEnum msgType,AddMsgList msg){
+        String plaintext = null;
+        switch (msgType) {
+            case MSGTYPE_MAP:
+                plaintext = "[地图]";
+                break;
+            case MSGTYPE_TEXT:
+                //文本消息
+                break;
+            case MSGTYPE_IMAGE:
+                plaintext = "[图片]";
+                break;
+            case MSGTYPE_VOICE:
+                plaintext = "[语音]";
+                break;
+            case MSGTYPE_VIDEO:
+            case MSGTYPE_MICROVIDEO:
+                plaintext = "[视频]";
+                break;
+            case MSGTYPE_EMOTICON:
+                plaintext = "[表情]";
+                break;
+            case MSGTYPE_APP:
+              /*  switch (WXReceiveMsgCodeOfAppEnum.getByCode(msg.getAppMsgType())) {
+                    case UNKNOWN:
+                        break;
+                    case FAVOURITE:
+                        break;
+                    case FILE:
+                        break;
+                    case PROGRAM:
+                        break;
+                    default:
+                }*/
+                plaintext = "[APP]";
+                break;
+            case MSGTYPE_VOIPMSG:
+                break;
+            case MSGTYPE_VOIPNOTIFY:
+                break;
+            case MSGTYPE_VOIPINVITE:
+                break;
+            case MSGTYPE_LOCATION:
+                plaintext = "[位置]";
+                break;
+            case MSGTYPE_SYS:
+            case MSGTYPE_STATUSNOTIFY:
+                //当打开聊天窗口时会像该联系人发送该类型的消息
+                //StatusNotifyCode = 1发送图片、视频消息完成  2进入聊天框  0发送文字完成
+                plaintext = "[系统消息]";
+                break;
+            case MSGTYPE_SYSNOTICE:
+                break;
+            case MSGTYPE_POSSIBLEFRIEND_MSG:
+                break;
+            case MSGTYPE_VERIFYMSG:
+                break;
+            case MSGTYPE_SHARECARD:
+                plaintext = "[名片]";
+                break;
+            case MSGTYPE_RECALLED:
+                Map<String, Object> map = MessageTools.parseUndoMsg(msg.getContent());
+                plaintext = map.get("root.sysmsg.revokemsg.replacemsg").toString();
+                break;
+            case UNKNOWN:
+            default:
+                break;
+        }
+        return plaintext;
+    }
     /**
      * 保存消息到数据库
      *
      * @param msg 消息
      */
-    private Message storeMsgToDB(AddMsgList msg) {
+    private Message storeMsgToDB(AddMsgList msg,Object plaintext) {
         try {
             boolean isFromSelf = msg.getFromUserName().endsWith(Core.getUserName());
             boolean isToSelf = msg.getToUserName().endsWith(Core.getUserName());
+
             Message build = cn.shu.wechat.beans.pojo.Message
                     .builder()
+                    .plaintext(plaintext ==null?msg.getContent():plaintext.toString())
                     .content(msg.getContent())
                     .filePath(msg.getFilePath())
                     .createTime(new Date())

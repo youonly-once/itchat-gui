@@ -41,6 +41,9 @@ public class RoomChatPanel extends ParentAvailablePanel {
      * @param roomId 房间id
      */
     public RoomChatPanelCard addPanel(String roomId){
+        if (cards.containsKey(roomId)){
+            return cards.get(roomId);
+        }
         RoomChatPanelCard rightPanel = new RoomChatPanelCard(roomId);
         add(rightPanel,roomId);
         cards.put(roomId,rightPanel);

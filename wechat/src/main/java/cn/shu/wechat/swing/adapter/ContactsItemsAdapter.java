@@ -46,7 +46,17 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
 
     @Override
     public ContactsItemViewHolder onCreateViewHolder(int viewType, int position) {
-        return new ContactsItemViewHolder();
+        //避免重复创建
+        if (position< viewHolders.size()){
+            //存在
+            ContactsItemViewHolder contactsItemViewHolder = viewHolders.get(position);
+            if (contactsItemViewHolder != null){
+                return contactsItemViewHolder;
+            }
+        }
+        viewHolders.add(position,new ContactsItemViewHolder());
+        return viewHolders.get(position);
+
     }
 
     @Override
@@ -80,10 +90,7 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
 
     @Override
     public void onBindViewHolder(ContactsItemViewHolder viewHolder, int position) {
-        if (!viewHolders.contains(viewHolder)) {
-            viewHolders.add(viewHolder);
-        }
-       // viewHolders.add(position, viewHolder);
+
         ContactsItem item = contactsItems.get(position);
 
         if (item.getAvatar() != null){

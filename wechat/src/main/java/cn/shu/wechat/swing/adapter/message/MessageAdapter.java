@@ -44,10 +44,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     private List<MessageItem> messageItems;
     private RCListView listView;
     private AttachmentIconHelper attachmentIconHelper = new AttachmentIconHelper();
-    private CurrentUserService currentUserService = Launcher.currentUserService;
-    private CurrentUser currentUser;
     private ImageCache imageCache;
-    private MessageService messageService = Launcher.messageService;
 
     private FileCache fileCache;
     private MessagePopupMenu popupMenu = new MessagePopupMenu();
@@ -231,7 +228,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
 
         if (item.getProgress() != 0 && item.getProgress() != 100) {
-            Message msg = messageService.findById(item.getId());
+            Message msg = null;//= messageService.findById(item.getId());
             if (msg != null) {
                 item.setProgress(msg.getProgress());
 
@@ -507,7 +504,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         }
         final String finalPath = slavePath;
         //标志
-        Map map = new HashMap();
+        Map<String,Object> map = new HashMap<>();
         map.put("attachmentId", item.getImageAttachment().getId());
         map.put("url", finalPath);
         map.put("messageId", item.getId());
@@ -532,6 +529,9 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
                 @Override
                 protected void done() {
+                    if (finalPath == null){
+                        return;
+                    }
                     ImageIcon imageIcon = imageCache.tryGetThumbCache(new File(finalPath));
                     if (imageIcon == null) {
                      /*   imageLabel.setIcon(IconUtil.getIcon(this, "/image/image_loading.gif"));
@@ -638,10 +638,10 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 System.out.println("重发消消息：" + item.getMessageContent());
 
                 // TODO: 向服务器重新发送消息
-                Message message = messageService.findById(item.getId());
+                Message message = null;//= messageService.findById(item.getId());
                 message.setUpdatedAt(System.currentTimeMillis());
                 message.setNeedToResend(false);
-                messageService.update(message);
+                //messageService.update(message);
 
                 super.mouseClicked(e);
             }

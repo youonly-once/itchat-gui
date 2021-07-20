@@ -25,7 +25,6 @@ public class MePanel extends JPanel {
     private JLabel imageLabel;
     private JLabel nameLabel;
     private RCButton button;
-    private CurrentUserService currentUserService = Launcher.currentUserService;
     public MePanel() {
         //currentUser = currentUserService.findAll().get(0);
         initComponents();

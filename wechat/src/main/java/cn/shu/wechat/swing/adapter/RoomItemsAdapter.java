@@ -26,10 +26,6 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
      */
     private final List<RoomItem> roomItems;
     /**
-     * 所有的viewHolder
-     */
-    private final List<RoomItemViewHolder> viewHolders = new ArrayList<>();
-    /**
      * 当前选中的viewHolder
      */
     private RoomItemViewHolder selectedViewHolder;
@@ -50,11 +46,8 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
 
     @Override
     public void onBindViewHolder(RoomItemViewHolder viewHolder, int position) {
-        if (!viewHolders.contains(viewHolder)) {
-            viewHolders.add(viewHolder);
-        }
         //viewHolder.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
+        //System.out.println(viewHolders.size());
         RoomItem roomItem = roomItems.get(position);
 
         viewHolder.setTag(roomItem.getRoomId());
@@ -126,14 +119,16 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
                 if (e.getButton() == MouseEvent.BUTTON1) {
 
                     if (selectedViewHolder != viewHolder) {
+                        //之前选择的房间背景色去掉
+                        setBackground(selectedViewHolder,Colors.DARK);
                         // 进入房间
                         enterRoom(roomItem.getRoomId());
 
-                        for (RoomItemViewHolder holder : viewHolders) {
+                  /*      for (RoomItemViewHolder holder : viewHolders) {
                             if (holder != viewHolder) {
                                 setBackground(holder, Colors.DARK);
                             }
-                        }
+                        }*/
 
                         //setBackground(viewHolder, Colors.ITEM_SELECTED);
                         selectedViewHolder = viewHolder;

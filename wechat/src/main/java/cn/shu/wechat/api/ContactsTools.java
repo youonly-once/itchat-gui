@@ -46,12 +46,39 @@ public class ContactsTools {
             return remarkNameByPersonUserName;
         }
         String nickNameByPersonUserName = getContactNickNameByUserName(userName);
-        if (nickNameByPersonUserName != null) {
+        if (StringUtils.isNotEmpty(nickNameByPersonUserName )) {
             return nickNameByPersonUserName;
+        }
+        String groupDefaultName = getGroupDefaultName(userName);
+        if (StringUtils.isNotEmpty(groupDefaultName )){
+            return groupDefaultName;
         }
         return userName;
     }
 
+    /**
+     * @param userName 用户UserName
+     * @return 默认名称，如果是群，则以群成员的名称开始
+     */
+    public static String getGroupDefaultName(String userName){
+
+        if (userName.startsWith("@@") ){
+            Contacts contactByUserName = getContactByUserName(userName);
+            if (contactByUserName == null){
+                return null;
+            }
+            StringBuilder name = new StringBuilder();
+            List<Contacts> memberlist = contactByUserName.getMemberlist();
+            if (memberlist !=null&& !memberlist.isEmpty()){
+                for (int i = 0; i < Math.min(2, memberlist.size()); i++) {
+                    Contacts contacts = memberlist.get(i);
+                    name.append(contacts.getNickname());
+                }
+                return name.toString();
+            }
+        }
+     return null;
+    }
     /**
      * 根据用户名获取用户备注
      *
@@ -82,7 +109,7 @@ public class ContactsTools {
      */
     public static String getContactNickNameByUserName(String userName) {
         if (userName == null){
-            return "";
+            return null;
         }
         Contacts contactByUserName = getContactByUserName(userName);
         if (contactByUserName == null) {

@@ -4,18 +4,16 @@ import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.adapter.search.SearchResultItemsAdapter;
-import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCSearchTextField;
+import cn.shu.wechat.swing.constant.SearchResultType;
 import cn.shu.wechat.swing.db.model.FileAttachment;
 import cn.shu.wechat.swing.db.model.Message;
-import cn.shu.wechat.swing.db.service.ContactsUserService;
-import cn.shu.wechat.swing.db.service.FileAttachmentService;
-import cn.shu.wechat.swing.db.service.MessageService;
-import cn.shu.wechat.swing.db.service.RoomService;
 import cn.shu.wechat.swing.entity.SearchResultItem;
 import cn.shu.wechat.swing.utils.FontUtil;
+import cn.shu.wechat.utils.CommonTools;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -27,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * Created by song on 17-5-29.
@@ -34,13 +34,7 @@ import java.util.Set;
 public class SearchPanel extends ParentAvailablePanel {
     private static SearchPanel context;
     private RCSearchTextField searchTextField;
-    private RoomService roomService = Launcher.roomService;
     private boolean setSearchMessageOrFileListener = false;
-
-    private ContactsUserService contactsUserService = Launcher.contactsUserService;
-    private MessageService messageService = Launcher.messageService;
-    private FileAttachmentService fileAttachmentService = Launcher.fileAttachmentService;
-
 
     public SearchPanel(JPanel parent) {
         super(parent);
@@ -76,51 +70,13 @@ public class SearchPanel extends ParentAvailablePanel {
         searchTextField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-          /*      ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
-                    @Override
-                    public void run() {*/
-                ListPanel listPanel = ListPanel.getContext();
-                SearchResultPanel searchResultPanel = SearchResultPanel.getContext();
-
-                listPanel.showPanel(ListPanel.SEARCH);
-
-                List<SearchResultItem> data = searchUserOrRoom(searchTextField.getText());
-                searchResultPanel.setData(data);
-                searchResultPanel.setKeyWord(searchTextField.getText());
-                searchResultPanel.notifyDataSetChanged(false);
-                searchResultPanel.getTipLabel().setVisible(false);
+                search();
             }
-            //});
-
-
-            //}
-
             @Override
             public void removeUpdate(DocumentEvent e) {
-              /*  ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
-                    @Override
-                    public void run() {*/
-                ListPanel listPanel = ListPanel.getContext();
-                if (searchTextField.getText() == null || searchTextField.getText().isEmpty()) {
-                    listPanel.showPanel(listPanel.getPreviousTab());
-                    return;
-                }
+                search();
 
-                SearchResultPanel searchResultPanel = SearchResultPanel.getContext();
-
-                listPanel.showPanel(ListPanel.SEARCH);
-
-                List<SearchResultItem> data = searchUserOrRoom(searchTextField.getText());
-                searchResultPanel.setData(data);
-                searchResultPanel.setKeyWord(searchTextField.getText());
-                searchResultPanel.notifyDataSetChanged(false);
-                searchResultPanel.getTipLabel().setVisible(false);
             }
-            //});
-
-
-            //}
-
             @Override
             public void changedUpdate(DocumentEvent e) {
             }
@@ -148,6 +104,34 @@ public class SearchPanel extends ParentAvailablePanel {
     }
 
     /**
+     * 搜索
+     */
+    private void search(){
+        SearchResultPanel searchResultPanel = SearchResultPanel.getContext();
+        ListPanel listPanel = ListPanel.getContext();
+        if (searchTextField.getText() == null || searchTextField.getText().isEmpty()) {
+            listPanel.showPanel(listPanel.getPreviousTab());
+            return;
+        }
+        listPanel.showPanel(ListPanel.SEARCH);
+        new SwingWorker<Object,Object>(){
+            private List<SearchResultItem> data;
+            @Override
+            protected Object doInBackground() throws Exception {
+                data = searchUserOrRoom(searchTextField.getText());
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                searchResultPanel.setData(data);
+                searchResultPanel.setKeyWord(searchTextField.getText());
+                searchResultPanel.notifyDataSetChanged(false);
+                searchResultPanel.getTipLabel().setVisible(false);
+            }
+        }.execute();
+    }
+    /**
      * 清空搜索文本
      */
     public void clearSearchText() {
@@ -164,15 +148,22 @@ public class SearchPanel extends ParentAvailablePanel {
     private List<SearchResultItem> searchUserOrRoom(String key) {
         List<SearchResultItem> list = new ArrayList<>();
 
-        list.add(new SearchResultItem("searchAndListMessage", "搜索 \"" + key + "\" 相关消息", "searchMessage"));
-        list.add(new SearchResultItem("searchFile", "搜索 \"" + key + "\" 相关文件", "searchFile"));
+        list.add(new SearchResultItem("searchAndListMessage", "搜索 \"" + key + "\" 相关消息", SearchResultType.SEARCH_MESSAGE));
+        list.add(new SearchResultItem("searchFile", "搜索 \"" + key + "\" 相关文件", SearchResultType.SEARCH_FILE));
+      /*  long begin =  System.currentTimeMillis();*/
 
         //搜索通讯录
-        list.addAll(searchContacts(key));
-
+        Future<List<SearchResultItem>> contacts = ExecutorServiceUtil.getGlobalExecutorService().submit(() -> searchContacts(key));
         // 搜索房间
-        list.addAll(searchChannelAndGroup(key));
+        Future<List<SearchResultItem>> chanelAndGroup = ExecutorServiceUtil.getGlobalExecutorService().submit(() -> searchChannel(key));
+        try {
+            list.addAll(contacts.get());
+            list.addAll(chanelAndGroup.get());
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
 
+       /* System.out.println((System.currentTimeMillis() - begin)/1000.00);*/
         if (!setSearchMessageOrFileListener) {
             // 查找消息、文件
             SearchResultPanel.getContext().setSearchMessageOrFileListener(new SearchResultItemsAdapter.SearchMessageOrFileListener() {
@@ -200,7 +191,7 @@ public class SearchPanel extends ParentAvailablePanel {
      */
     private void searchAndListMessage(String key) {
         SearchResultPanel searchResultPanel = SearchResultPanel.getContext();
-        List<Message> messages = messageService.search(key);
+        List<Message> messages = null; //= messageService.search(key);
         List<SearchResultItem> searchResultItems = new ArrayList<>();
 
         if (messages == null || messages.size() < 1) {
@@ -221,7 +212,7 @@ public class SearchPanel extends ParentAvailablePanel {
                     content = content.substring(startPos, endPos) + "...";
                 }
 
-                item = new SearchResultItem(msg.getId(), content, "message");
+                item = new SearchResultItem(msg.getId(), content, SearchResultType.MESSAGE);
                 item.setTag(msg.getRoomId());
 
                 searchResultItems.add(item);
@@ -240,7 +231,7 @@ public class SearchPanel extends ParentAvailablePanel {
      */
     private void searchAndListFile(String key) {
         SearchResultPanel searchResultPanel = SearchResultPanel.getContext();
-        List<FileAttachment> fileAttachments = fileAttachmentService.search(key);
+        List<FileAttachment> fileAttachments = null;//fileAttachmentService.search(key);
         List<SearchResultItem> searchResultItems = new ArrayList<>();
 
         if (fileAttachments == null || fileAttachments.size() < 1) {
@@ -252,7 +243,7 @@ public class SearchPanel extends ParentAvailablePanel {
                 String content = file.getTitle();
                 //content = content.length() > 10 ? content.substring(0, 10) : content;
 
-                item = new SearchResultItem(file.getId(), content, "file");
+                item = new SearchResultItem(file.getId(), content, SearchResultType.FILE);
                 //item.setTag(msg.getRoomId());
 
                 searchResultItems.add(item);
@@ -265,23 +256,30 @@ public class SearchPanel extends ParentAvailablePanel {
     }
 
     /**
-     * 搜索房间，但不包含直接聊天
+     * 搜索房间
      *
      * @param key
      * @return
      */
-    private List<SearchResultItem> searchChannelAndGroup(String key) {
-        // List<Room> rooms = roomService.searchByName(key);
+    private List<SearchResultItem> searchChannel(String key) {
         List<SearchResultItem> retList = new ArrayList<>();
         Set<Contacts> recentContacts = Core.getRecentContacts();
         SearchResultItem item;
         for (Contacts recentContact : recentContacts) {
-            String contactDisplayNameByUserName = ContactsTools.getContactDisplayNameByUserName(recentContact.getUsername());
-            if (contactDisplayNameByUserName.startsWith(key) || contactDisplayNameByUserName.endsWith(key)) {
-                item = new SearchResultItem(recentContact.getUsername(), contactDisplayNameByUserName, !recentContact.getUsername().startsWith("@@") ? "d" : "c");
+            try {
+                String remark = recentContact.getRemarkname();
+                String nick = recentContact.getNickname();
+                if (remark.contains(key)){
+                    item = new SearchResultItem(recentContact.getUsername(),remark, SearchResultType.ROOM);
+                }else if(nick.contains(key)){
+                    item = new SearchResultItem(recentContact.getUsername(),nick, SearchResultType.ROOM);
+                }else {
+                    continue;
+                }
                 retList.add(item);
-            }
+            }catch(Exception e){
 
+            }
         }
 
         return retList;
@@ -294,17 +292,28 @@ public class SearchPanel extends ParentAvailablePanel {
      * @return
      */
     private List<SearchResultItem> searchContacts(String key) {
-        // List<ContactsUser> contactsUsers = contactsUserService.searchByUsernameOrName(key, key);
+
         Map<String, Contacts> memberMap = Core.getMemberMap();
         List<SearchResultItem> retList = new ArrayList<>();
-        SearchResultItem item;
-        for (String userName : memberMap.keySet()) {
-            String contactDisplayNameByUserName = ContactsTools.getContactDisplayNameByUserName(userName);
-            if (contactDisplayNameByUserName.startsWith(key) || contactDisplayNameByUserName.endsWith(key)) {
-                item = new SearchResultItem(userName, ContactsTools.getContactDisplayNameByUserName(userName), !userName.startsWith("@@") ? "d" : "c");
+        SearchResultItem item = null;
+        for (Map.Entry<String, Contacts> entry : memberMap.entrySet()) {
+            Contacts recentContact = entry.getValue();
+            try {
+                String remark = recentContact.getRemarkname();
+                String nick = recentContact.getNickname();
+                if (remark.contains(key)){
+                    item = new SearchResultItem(entry.getKey(),remark, SearchResultType.CONTACTS);
+                }else if(nick.contains(key)){
+                    item = new SearchResultItem(entry.getKey(),nick, SearchResultType.CONTACTS);
+                }else {
+                   continue;
+                }
                 retList.add(item);
+            }catch(Exception e){
+
             }
         }
+
         return retList;
     }
 

@@ -23,6 +23,7 @@
         <result column="to_remarkname" jdbcType="VARCHAR" property="toRemarkname"/>
         <result column="to_nickname" jdbcType="VARCHAR" property="toNickname"/>
         <result column="is_send" jdbcType="BOOLEAN" property="isSend"/>
+        <result column="plaintext" jdbcType="VARCHAR" property="plaintext"/>
         <result column="slave_path" jdbcType="VARCHAR" property="slavePath"/>
     </resultMap>
     <sql id="Example_Where_Clause">
@@ -91,7 +92,7 @@
         <!--@mbg.generated-->
         id, msg_id, msg_type, app_msg_type, msg_desc, create_time, content, file_path, msg_json,
         from_username, from_remarkname, from_nickname, from_member_of_group_username, from_member_of_group_nickname,
-        from_member_of_group_displayname, to_username, to_remarkname, to_nickname, is_send,slave_path
+        from_member_of_group_displayname, to_username, to_remarkname, to_nickname, is_send,slave_path,plaintext
     </sql>
     <select id="selectByExample" parameterType="cn.shu.wechat.beans.pojo.MessageExample" resultMap="BaseResultMap">
         <!--@mbg.generated-->
@@ -135,7 +136,7 @@
         from_username, from_remarkname, from_nickname,
         from_member_of_group_username, from_member_of_group_nickname,
         from_member_of_group_displayname, to_username,
-        to_remarkname, to_nickname, is_send,slave_path
+        to_remarkname, to_nickname, is_send,slave_path,plaintext
         )
         values (#{id,jdbcType=CHAR}, #{msgId,jdbcType=VARCHAR}, #{msgType,jdbcType=INTEGER},
         #{appMsgType,jdbcType=INTEGER}, #{msgDesc,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP},
@@ -144,7 +145,7 @@
         #{fromMemberOfGroupUsername,jdbcType=VARCHAR}, #{fromMemberOfGroupNickname,jdbcType=VARCHAR},
         #{fromMemberOfGroupDisplayname,jdbcType=VARCHAR}, #{toUsername,jdbcType=VARCHAR},
         #{toRemarkname,jdbcType=VARCHAR}, #{toNickname,jdbcType=VARCHAR}, #{isSend,jdbcType=BOOLEAN}
-        , #{slavePath,jdbcType=VARCHAR}
+        , #{slavePath,jdbcType=VARCHAR} , #{plaintext,jdbcType=VARCHAR}
         )
     </insert>
     <insert id="insertSelective" parameterType="cn.shu.wechat.beans.pojo.Message">
@@ -803,13 +804,11 @@
         limit 0,1
     </select>
     <select id="selectByPage" resultMap="BaseResultMap">
-        select * from (select
+        select
         <include refid="Base_Column_List"/>
         from message
         where from_username = #{roomId,jdbcType=VARCHAR} or to_username = #{roomId,jdbcType=VARCHAR}
-        and msg_type&lt;51
         order by create_time desc
         limit #{start},#{end}
-        )a order by create_time asc
     </select>
 </mapper>

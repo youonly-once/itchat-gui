@@ -15,10 +15,10 @@ import java.util.*;
  * Created by song on 17-5-30.
  */
 public class SelectedUserItemsAdapter extends BaseAdapter<SelectedUserItemViewHolder> {
-    private List<SelectUserData> userList;
+    private final List<SelectUserData> userList;
     Map<Integer, String> positionMap = new HashMap<>();
     private ItemRemoveListener itemRemoveListener;
-
+    private final List<SelectedUserItemViewHolder> viewHolders = new ArrayList<>();
     public SelectedUserItemsAdapter(List<SelectUserData> userList) {
         this.userList = userList;
 
@@ -34,7 +34,17 @@ public class SelectedUserItemsAdapter extends BaseAdapter<SelectedUserItemViewHo
 
     @Override
     public SelectedUserItemViewHolder onCreateViewHolder(int viewType, int position) {
-        return new SelectedUserItemViewHolder();
+        //避免重复创建
+        if (position< viewHolders.size()){
+            //存在
+            SelectedUserItemViewHolder selectedUserItemViewHolder = viewHolders.get(position);
+            if (selectedUserItemViewHolder != null){
+                return selectedUserItemViewHolder;
+            }
+        }
+        viewHolders.add(position,new SelectedUserItemViewHolder());
+        return viewHolders.get(position);
+
     }
 
     @Override

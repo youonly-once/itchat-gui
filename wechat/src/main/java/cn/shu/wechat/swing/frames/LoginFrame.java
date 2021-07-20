@@ -11,6 +11,8 @@ import cn.shu.wechat.swing.db.service.CurrentUserService;
 import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.panels.ContactsPanel;
+import cn.shu.wechat.swing.panels.RoomChatPanel;
+import cn.shu.wechat.swing.panels.RoomChatPanelCard;
 import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.DbUtils;
@@ -67,25 +69,15 @@ public class LoginFrame extends JFrame {
 
     private static Point origin = new Point();
 
-    private SqlSession sqlSession;
-    private CurrentUserService currentUserService;
-    private String username;
-
 
     public LoginFrame() {
         super("微信-舒专用版");
-        initService();
         initComponents();
         initView();
         centerScreen();
         setListeners();
     }
 
-
-    private void initService() {
-        sqlSession = DbUtils.getSqlSession();
-        currentUserService = new CurrentUserService(sqlSession);
-    }
 
 
     private void initComponents() {
@@ -193,49 +185,63 @@ public class LoginFrame extends JFrame {
 
     }
 
+    /**
+     * 登录成功
+     */
     private void doLogin() {
         this.dispose();
 
         MainFrame frame = new MainFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+
         Set<Contacts> recentContacts = Core.getRecentContacts();
-/*        new SwingWorker<ArrayList<RoomItem>,Object>(){
+        //初始化聊天列表
+        SwingUtilities.invokeLater(() -> {
+            ArrayList<RoomItem> rooms = new ArrayList<>();
+
+            for (Contacts recentContact : recentContacts) {
+                rooms.add(new RoomItem(recentContact,"",0));
+                // RoomsPanel.getContext().addRoom(new RoomItem(recentContact,"",0));
+            }
+            RoomsPanel.getContext().addRoom(rooms);
+        });
+        //初始化聊天房
+/*        SwingUtilities.invokeLater(() -> {
+            for (Contacts recentContact : recentContacts) {
+                RoomChatPanel.getContext().addPanel(recentContact.getUsername());
+            }
+
+        });*/
+
+        new SwingWorker<Object,Object>(){
 
             @Override
-            protected ArrayList<RoomItem> doInBackground() throws Exception {
+            protected Object doInBackground() throws Exception {
+                log.info("获取联系人信息");
+                loginService.webWxGetContact();
                 return null;
             }
 
             @Override
             protected void done() {
-                super.done();
+                log.info("开启微信状态通知");
+                loginService.wxStatusNotify();
+                log.info(" 开始接收消息");
+                loginService.startReceiving();
+                ContactsPanel.getContext().notifyDataSetChanged();
             }
-        }.execute();*/
-        frame.setVisible(true);
-        //初始化聊天列表
-        ArrayList<RoomItem> rooms = new ArrayList<>();
-        for (Contacts recentContact : recentContacts) {
-            rooms.add(new RoomItem(recentContact,"",0));
-            // RoomsPanel.getContext().addRoom(new RoomItem(recentContact,"",0));
-        }
-        RoomsPanel.getContext().addRoom(rooms);
-
-        log.info("开启微信状态通知");
-        loginService.wxStatusNotify();
-        log.info(" 开始接收消息");
-        loginService.startReceiving();
+        }.execute();
 
 
-        log.info("获取联系人信息");
-        loginService.webWxGetContact();
-        //重绘联系人
-        ContactsPanel.getContext().notifyDataSetChanged();
-/*        SwingUtilities.invokeLater(new Runnable() {
+
+        ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
             @Override
             public void run() {
-
+                log.info("9. 获取群好友及群好友列表");
+                loginService.WebWxBatchGetContact();
             }
-        });*/
+        });
 
 
     }
@@ -325,15 +331,7 @@ public class LoginFrame extends JFrame {
         //打开窗体
         doLogin();
 
-        log.info("清除。。。。");
-        CommonTools.clearScreen();
-        log.info(String.format("欢迎回来， %s", Core.getNickName()));
 
-
-
-   /*     statusLabel.setText("9. 获取群好友及群好友列表");
-        log.info("9. 获取群好友及群好友列表");
-        loginService.WebWxBatchGetContact();*/
 
 
         log.info("10. 缓存本次登陆好友相关消息");

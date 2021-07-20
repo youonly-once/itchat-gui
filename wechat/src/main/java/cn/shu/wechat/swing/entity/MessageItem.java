@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.entity;
 
 import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.swing.app.Launcher;
@@ -11,6 +12,7 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -52,13 +54,14 @@ public class MessageItem implements Comparable<MessageItem> {
     private FileAttachmentItem fileAttachment;
     private ImageAttachmentItem imageAttachment;
     private VideoAttachmentItem videoAttachmentItem;
+    private boolean isSystemMsg;
     public MessageItem() {
     }
 
     public MessageItem(cn.shu.wechat.beans.pojo.Message message, String roomId) {
         this();
         this.setId(message.getId());
-        this.setMessageContent(message.getContent());
+        this.setMessageContent(message.getPlaintext());
         this.setGroupable(message.getFromUsername().startsWith("@@"));
         this.setRoomId(roomId);
         this.setSenderId(this.isGroupable()?message.getFromMemberOfGroupUsername():message.getFromUsername());
@@ -161,7 +164,7 @@ public class MessageItem implements Comparable<MessageItem> {
             case MSGTYPE_SYS:
             case MSGTYPE_RECALLED:
                 //系统类消息
-                this.setMessageType(SYSTEM_MESSAGE);
+                isSystemMsg = true;
                 break;
             case MSGTYPE_POSSIBLEFRIEND_MSG:
                 break;
@@ -200,6 +203,9 @@ public class MessageItem implements Comparable<MessageItem> {
             else if (isVideoAttachment){
                 this.setMessageType(RIGHT_VIDEO);
             }
+            else if (isSystemMsg){
+                this.setMessageType(SYSTEM_MESSAGE);
+            }
             // 普通文本消息
             else {
                 this.setMessageType(RIGHT_TEXT);
@@ -217,6 +223,10 @@ public class MessageItem implements Comparable<MessageItem> {
             // 视频消息
             else if (isVideoAttachment){
                 this.setMessageType(LEFT_VIDEO);
+            }
+
+            else if (isSystemMsg){
+                this.setMessageType(SYSTEM_MESSAGE);
             }
             // 普通文本消息
             else {
