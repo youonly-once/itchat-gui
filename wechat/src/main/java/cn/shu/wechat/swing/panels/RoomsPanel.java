@@ -101,7 +101,7 @@ public class RoomsPanel extends ParentAvailablePanel {
      * @param contacts 联系人
      * @param latestMsg  最新消息
      */
-    public void addRoomOrOpenRoom(Contacts contacts, String latestMsg, int msgCount) {
+    public void addRoomOrOpenRoomNotSwitch(Contacts contacts, String latestMsg, int msgCount) {
         String userName = contacts.getUsername();
 
         //更新聊天列表
@@ -113,6 +113,17 @@ public class RoomsPanel extends ParentAvailablePanel {
             //更新消息 置顶
            updateRoomItem(userName, msgCount, latestMsg, System.currentTimeMillis());
         }
+    }
+
+
+    /**
+     * 添加房间
+     *
+     * @param contacts 联系人
+     * @param latestMsg  最新消息
+     */
+    public void addRoomOrOpenRoom(Contacts contacts, String latestMsg, int msgCount) {
+        addRoomOrOpenRoomNotSwitch(contacts,latestMsg,msgCount);
         TabOperationPanel.getContext().switchToChatLabel();
     }
 

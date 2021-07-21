@@ -168,7 +168,6 @@ public class MainFrame extends JFrame  {
      * 设置任务栏图标闪动
      */
     public void setTrayFlashing() {
-        this.setVisible(true);
         if(trayFlashing){
             return;
         }

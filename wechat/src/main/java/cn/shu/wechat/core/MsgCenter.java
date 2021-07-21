@@ -188,7 +188,7 @@ public class MsgCenter {
 
             }
             //新增或选择聊天列表
-            RoomsPanel.getContext().addRoomOrOpenRoom(contacts,lastMsgPrefix+(message==null?msg.getContent():message.getPlaintext()),msgUnReadCount);
+            RoomsPanel.getContext().addRoomOrOpenRoomNotSwitch(contacts,lastMsgPrefix+(message==null?msg.getContent():message.getPlaintext()),msgUnReadCount);
 
         });
     }

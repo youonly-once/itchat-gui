@@ -172,15 +172,34 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     private void processLeftAttachmentMessage(ViewHolder viewHolder, MessageItem item) {
         MessageLeftAttachmentViewHolder holder = (MessageLeftAttachmentViewHolder) viewHolder;
         holder.attachmentTitle.setText(item.getMessageContent());
-
+        String filename = item.getFileAttachment().getTitle();
         Map map = new HashMap();
         map.put("attachmentId", item.getFileAttachment().getId());
-        map.put("name", item.getFileAttachment().getTitle());
+        map.put("name", filename);
         map.put("messageId", item.getId());
+        map.put("filepath", item.getFileAttachment().getLink());
         holder.attachmentPanel.setTag(map);
+        //如果为视频，则显示视频缩略图
+        String mime = MimeTypeUtil.getMime(filename.substring(filename.lastIndexOf(".") + 1));
+        mime = attachmentIconHelper.parseMimeType(mime);
+        if ("video".equals(mime) && StringUtils.isNotEmpty(item.getFileAttachment().getSlavePath())){
+            ImageIcon attachmentTypeIcon = null;
+            String path = item.getFileAttachment().getSlavePath();
+            try {
+                BufferedImage read = ImageIO.read(new File(path == null ? item.getFileAttachment().getLink() : path));
+                attachmentTypeIcon = new ImageIcon(read);
+                attachmentTypeIcon = preferredImageSize(attachmentTypeIcon);
+                holder.attachmentIcon.setIcon(attachmentTypeIcon);
+            } catch (IOException e) {
+                attachmentTypeIcon = attachmentIconHelper.getImageIcon(filename);
+                holder.attachmentIcon.setIcon(attachmentTypeIcon);
+                e.printStackTrace();
+            }
 
-        ImageIcon attachmentTypeIcon = attachmentIconHelper.getImageIcon(item.getFileAttachment().getTitle());
-        holder.attachmentIcon.setIcon(attachmentTypeIcon);
+        }else{
+            ImageIcon attachmentTypeIcon = attachmentIconHelper.getImageIcon(filename);
+            holder.attachmentIcon.setIcon(attachmentTypeIcon);
+        }
 
         holder.sender.setText(item.getSenderUsername());
 
@@ -204,16 +223,18 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         String filename = item.getFileAttachment().getTitle();
         map.put("name", filename);
         map.put("messageId", item.getId());
+        map.put("filepath", item.getFileAttachment().getLink());
         holder.attachmentPanel.setTag(map);
+        //如果为视频，则显示视频缩略图
         String mime = MimeTypeUtil.getMime(filename.substring(filename.lastIndexOf(".") + 1));
         mime = attachmentIconHelper.parseMimeType(mime);
-
         if ("video".equals(mime) && StringUtils.isNotEmpty(item.getFileAttachment().getSlavePath())){
             ImageIcon attachmentTypeIcon = null;
             String path = item.getFileAttachment().getSlavePath();
             try {
                 BufferedImage read = ImageIO.read(new File(path == null ? item.getFileAttachment().getLink() : path));
-                attachmentTypeIcon = new ImageIcon(read.getScaledInstance(48,48,Image.SCALE_SMOOTH));
+                attachmentTypeIcon = new ImageIcon(read);
+                attachmentTypeIcon = preferredImageSize(attachmentTypeIcon);
                 holder.attachmentIcon.setIcon(attachmentTypeIcon);
             } catch (IOException e) {
                 attachmentTypeIcon = attachmentIconHelper.getImageIcon(filename);
@@ -565,18 +586,18 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
     /**
      * 根据图片尺寸大小调整图片显示的大小
-     *
      * @param imageIcon
+     * @param maxWidth
      * @return
      */
-    public ImageIcon preferredImageSize(ImageIcon imageIcon) {
+    public ImageIcon preferredImageSize(ImageIcon imageIcon,int maxWidth) {
         //动态图不能使用
         int width = imageIcon.getIconWidth();
         int height = imageIcon.getIconHeight();
         float scale = width * 1.0F / height;
 
         // 限制图片显示大小
-        int maxImageWidth = (int) (64);
+        int maxImageWidth = maxWidth;
         if (width > maxImageWidth) {
             width = maxImageWidth;
             height = (int) (width / scale);
@@ -584,6 +605,14 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         imageIcon.setImage(imageIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
 
         return imageIcon;
+    }
+    /**
+     * 根据图片尺寸大小调整图片显示的大小
+     * @param imageIcon
+     * @return
+     */
+    public ImageIcon preferredImageSize(ImageIcon imageIcon) {
+        return preferredImageSize(imageIcon,64);
     }
 
     /**

@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.components.message;
 
+import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCMenuItemUI;
@@ -12,6 +13,7 @@ import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 import cn.shu.wechat.swing.utils.FileCache;
 import cn.shu.wechat.swing.utils.ImageCache;
+import cn.shu.wechat.utils.SpringContextHolder;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -91,13 +93,14 @@ public class MessagePopupMenu extends JPopupMenu {
                             if (path != null && !path.isEmpty()) {
                                 ClipboardUtil.copyFile(path);
                             } else {
-                                FileAttachment attachment = null;// = fileAttachmentService.findById(id);
-                                if (attachment == null) {
+                                Object filepath = map.get("filepath");
+
+                                if (filepath == null) {
                                     JOptionPane.showMessageDialog(MainFrame.getContext(), "文件不存在", "文件不存在", JOptionPane.WARNING_MESSAGE);
                                     return;
                                 }
 
-                                String link = attachment.getLink();
+                                String link = filepath.toString();
                                 if (link.startsWith("/file-upload")) {
                                     JOptionPane.showMessageDialog(MainFrame.getContext(), "请先下载文件", "请先下载文件", JOptionPane.WARNING_MESSAGE);
                                     return;
