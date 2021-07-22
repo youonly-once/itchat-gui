@@ -33,6 +33,8 @@ import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 
 import javax.annotation.Resource;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.*;
@@ -154,6 +156,19 @@ public class LoginServiceImpl implements ILoginService {
         }
 
         return true;
+    }
+
+    @Override
+    public BufferedImage getQR() {
+        String qrUrl = URLEnum.QRCODE_URL.getUrl() + Core.getUuid();
+        HttpEntity entity = MyHttpClient.doGet(qrUrl, null, true, null);
+        try {
+            BufferedImage image = ImageIO.read(entity.getContent());
+            return image;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return null;
     }
 
     @Override

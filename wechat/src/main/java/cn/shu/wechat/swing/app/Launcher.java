@@ -20,12 +20,7 @@ import java.nio.channels.FileLock;
 
 @Component
 public class Launcher {
-
-    public static final String HOSTNAME = "http://www.baidu.com";
-
     public static final String APP_VERSION = "1.0.0";
-
-    public static String userHome;
     public static String appFilesBasePath;
 
 
@@ -41,15 +36,14 @@ public class Launcher {
 
 
     private void openFrame() {
-        LoginFrame currentFrame = SpringContextHolder.getBean(LoginFrame.class);
-        //currentFrame = new LoginFrame();
-        currentFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        currentFrame.setVisible(true);
-        currentFrame.login(false);
+        LoginFrame loginFrame = SpringContextHolder.getBean(LoginFrame.class);
+        loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        loginFrame.setVisible(true);
+        loginFrame.login(true);
     }
 
     private void config() {
-        userHome = System.getProperty("user.home");
+        String userHome = System.getProperty("user.home");
 
         appFilesBasePath = userHome + System.getProperty("file.separator") + "wechat";
     }
@@ -82,10 +76,8 @@ public class Launcher {
                 System.out.println("程序已在运行.");
                 rv = true;
             }
-        } catch (FileNotFoundException e1) {
+        } catch (IOException e1) {
             e1.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         return rv;
     }

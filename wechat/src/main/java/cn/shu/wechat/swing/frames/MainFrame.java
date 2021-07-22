@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.frames;
 
 
+import cn.shu.wechat.api.WeChatTool;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.panels.LeftPanel;
 import cn.shu.wechat.swing.panels.RoomChatPanelCard;
@@ -60,11 +61,6 @@ public class MainFrame extends JFrame  {
      */
     private boolean trayFlashing = false;
 
-    /**
-     * 消息到来的时候提示音
-     */
-    private AudioStream messageSound;
-
 
     public MainFrame() {
         super("微信-舒专用版");
@@ -86,7 +82,10 @@ public class MainFrame extends JFrame  {
     public void playMessageSound() {
         try {
             InputStream inputStream = getClass().getResourceAsStream("/wav/msg.wav");
-            messageSound = new AudioStream(inputStream);
+            /**
+             * 消息到来的时候提示音
+             */
+            AudioStream messageSound = new AudioStream(inputStream);
             AudioPlayer.player.start(messageSound);
         } catch (Exception e) {
             e.printStackTrace();
@@ -134,6 +133,7 @@ public class MainFrame extends JFrame  {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     clearClipboardCache();
+                    WeChatTool.webWXLogOut();
                     System.exit(1);
                 }
             });
@@ -273,6 +273,7 @@ public class MainFrame extends JFrame  {
         // 移除托盘图标
         SystemTray.getSystemTray().remove(trayIcon);
         super.dispose();
+        WeChatTool.webWXLogOut();
     }
 
 

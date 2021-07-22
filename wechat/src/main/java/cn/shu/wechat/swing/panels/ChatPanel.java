@@ -31,10 +31,7 @@ import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
 import cn.shu.wechat.swing.listener.ExpressionListener;
 import cn.shu.wechat.swing.tasks.*;
-import cn.shu.wechat.swing.utils.ClipboardUtil;
-import cn.shu.wechat.swing.utils.FileCache;
-import cn.shu.wechat.swing.utils.HttpUtil;
-import cn.shu.wechat.swing.utils.MimeTypeUtil;
+import cn.shu.wechat.swing.utils.*;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.extern.log4j.Log4j2;
@@ -419,13 +416,8 @@ public class ChatPanel extends ParentAvailablePanel {
      */
     public synchronized void dequeueAndUpload() {
         String path = shareAttachmentUploadQueue.poll();
-
         if (path != null) {
-            log.info("上传文件：{}", path);
-
             prepareStartUploadFile(path, randomMessageId());
-            //房间列表显示状态文本
-            showSendingMessage();
         }
     }
 
@@ -724,7 +716,7 @@ public class ChatPanel extends ParentAvailablePanel {
                 .build();
         //消息列表添加消息块
         addOrUpdateMessageItem(message);
-        SwingWorker<WebWXSendMsgResponse, WebWXSendMsgResponse> swingWorker = new SwingWorker<WebWXSendMsgResponse, WebWXSendMsgResponse>() {
+         new SwingWorker<WebWXSendMsgResponse, WebWXSendMsgResponse>() {
             private WebWXSendMsgResponse wxSendMsgResponse;
 
             @Override
@@ -733,6 +725,7 @@ public class ChatPanel extends ParentAvailablePanel {
                 wxSendMsgResponse = MessageTools.sendMsgByUserId(
                         MessageTools.Message.builder().content(content)
                                 .messageId(msgId)
+                                .plaintext(content)
                                 .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT).build()
                         , roomId);
                 return wxSendMsgResponse;
@@ -755,8 +748,7 @@ public class ChatPanel extends ParentAvailablePanel {
                 }
                 addOrUpdateMessageItem(message);
             }
-        };
-        swingWorker.execute();
+        }.execute();
         cn.shu.wechat.swing.db.model.Message dbMessage = null;
    /*     if (messageId == null)
         {
@@ -1035,8 +1027,8 @@ public class ChatPanel extends ParentAvailablePanel {
                 //文件上传回调函数
                 UploadTaskCallback callback = new UploadTaskCallback() {
                     @Override
-                    public void onTaskSuccess(int curr, int size, WebWXUploadMediaResponse webWXUploadMediaResponse) {
-                        int progress = (int) ((curr * 1.0f / size) * 100);
+                    public void onTaskSuccess(int curr, int size) {
+                        int progress = (int) (((curr*1.0f) / size) * 100);
                         publish(progress);
                     }
 
@@ -1049,6 +1041,7 @@ public class ChatPanel extends ParentAvailablePanel {
                 MessageTools.sendMsgByUserId(MessageTools.Message
                         .builder()
                         .filePath(uploadFilename)
+                        .slavePath(uploadFilename)
                         .plaintext(isImage?"[图片]":"[文件]")
                         .messageId(messageId)
                         .replyMsgTypeEnum(isImage ? WXSendMsgCodeEnum.PIC : WXSendMsgCodeEnum.APP)

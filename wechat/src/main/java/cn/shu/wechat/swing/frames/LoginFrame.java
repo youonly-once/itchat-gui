@@ -1,29 +1,20 @@
 package cn.shu.wechat.swing.frames;
 
-import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.service.ILoginService;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.db.service.CurrentUserService;
 import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.panels.ContactsPanel;
-import cn.shu.wechat.swing.panels.RoomChatPanel;
-import cn.shu.wechat.swing.panels.RoomChatPanelCard;
 import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
-import cn.shu.wechat.swing.utils.DbUtils;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.OSUtil;
-import cn.shu.wechat.utils.CommonTools;
-import cn.shu.wechat.utils.Config;
-import cn.shu.wechat.utils.ExecutorServiceUtil;
-import cn.shu.wechat.utils.SleepUtils;
+import cn.shu.wechat.utils.*;
 import lombok.extern.log4j.Log4j2;
-import org.apache.ibatis.session.SqlSession;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -34,13 +25,12 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-import java.io.File;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by 舒新胜 on 08/06/2017.
@@ -54,20 +44,18 @@ public class LoginFrame extends JFrame {
     @Resource
     private ILoginService loginService;
 
-    /**
-     * 登录重试次数
-     */
-    private int loginRetryCount = 10;
-    private static final int windowWidth = 300;
-    private static final int windowHeight = 400;
+
+    private static final int WINDOW_WIDTH = 300;
+    private static final int WINDOW_HEIGHT = 400;
 
     private JPanel controlPanel;
     private JLabel closeLabel;
     private JPanel editPanel;
     private JPanel codePanel;
+    private JLabel codeLabel;
     private JLabel statusLabel;
 
-    private static Point origin = new Point();
+    private static final Point origin = new Point();
 
 
     public LoginFrame() {
@@ -79,9 +67,8 @@ public class LoginFrame extends JFrame {
     }
 
 
-
     private void initComponents() {
-        Dimension windowSize = new Dimension(windowWidth, windowHeight);
+        Dimension windowSize = new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT);
         setMinimumSize(windowSize);
         setMaximumSize(windowSize);
 
@@ -122,6 +109,15 @@ public class LoginFrame extends JFrame {
 
         editPanel = new JPanel();
         codePanel = new JPanel();
+        codeLabel = new JLabel();
+        ImageIcon imageIcon = new ImageIcon();
+        try {
+            imageIcon.setImage(ImageIO.read(getClass().getResource("/image/image_loading.gif")));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        codeLabel.setIcon(imageIcon);
+        codePanel.add(codeLabel);
         editPanel.add(codePanel);
         editPanel.add(statusLabel);
 
@@ -135,8 +131,8 @@ public class LoginFrame extends JFrame {
      */
     private void centerScreen() {
         Toolkit tk = Toolkit.getDefaultToolkit();
-        this.setLocation((tk.getScreenSize().width - windowWidth) / 2,
-                (tk.getScreenSize().height - windowHeight) / 2);
+        this.setLocation((tk.getScreenSize().width - WINDOW_WIDTH) / 2,
+                (tk.getScreenSize().height - WINDOW_HEIGHT) / 2);
     }
 
     private void setListeners() {
@@ -186,67 +182,19 @@ public class LoginFrame extends JFrame {
     }
 
     /**
-     * 登录成功
+     * 打开窗体
      */
-    private void doLogin() {
-        this.dispose();
-
+    private void openFrame() {
         MainFrame frame = new MainFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
-
-        Set<Contacts> recentContacts = Core.getRecentContacts();
-        //初始化聊天列表
-        SwingUtilities.invokeLater(() -> {
-            ArrayList<RoomItem> rooms = new ArrayList<>();
-
-            for (Contacts recentContact : recentContacts) {
-                rooms.add(new RoomItem(recentContact,"",0));
-                // RoomsPanel.getContext().addRoom(new RoomItem(recentContact,"",0));
-            }
-            RoomsPanel.getContext().addRoom(rooms);
-        });
-        //初始化聊天房
-/*        SwingUtilities.invokeLater(() -> {
-            for (Contacts recentContact : recentContacts) {
-                RoomChatPanel.getContext().addPanel(recentContact.getUsername());
-            }
-
-        });*/
-
-        new SwingWorker<Object,Object>(){
-
-            @Override
-            protected Object doInBackground() throws Exception {
-                log.info("获取联系人信息");
-                loginService.webWxGetContact();
-                return null;
-            }
-
-            @Override
-            protected void done() {
-                log.info("开启微信状态通知");
-                loginService.wxStatusNotify();
-                log.info(" 开始接收消息");
-                loginService.startReceiving();
-                ContactsPanel.getContext().notifyDataSetChanged();
-            }
-        }.execute();
-
-
-
-        ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
-            @Override
-            public void run() {
-                log.info("9. 获取群好友及群好友列表");
-                loginService.WebWxBatchGetContact();
-            }
-        });
-
+        this.dispose();
 
     }
 
-
+    /**
+     * 显示消息
+     */
     private void showMessage(String message) {
         if (!statusLabel.isVisible()) {
             statusLabel.setVisible(true);
@@ -261,121 +209,112 @@ public class LoginFrame extends JFrame {
      * @param dHImg 是否下载头像
      */
     public void login(boolean dHImg) {
-        // 防止SSL错误
-        System.setProperty("jsse.enableSNIExtension", "false");
-        String qrPath = Config.QR_PATH;
-        boolean mkdirs = new File(qrPath).getParentFile().mkdirs();
-        // 登陆
-        while (true) {
-            Process process = null;
-            for (int count = 0; count < loginRetryCount; count++) {
-                log.info("获取UUID");
-                while (true) {
-                    log.info("1. 获取微信UUID");
-                    String uuid = loginService.getUuid();
-                    if (uuid != null) {
-                        break;
-                    }
-                    log.warn("1.1. 获取微信UUID失败，两秒后重新获取");
-                    SleepUtils.sleep(2000);
-                }
+        try { // 防止SSL错误
+            System.setProperty("jsse.enableSNIExtension", "false");
+            showMessage("获取UUID");
+            getUUID();
 
-                log.info("2. 获取登陆二维码图片");
+            showMessage(" 获取登陆二维码图片");
+            BufferedImage qr = loginService.getQR();
+            codeLabel.setIcon(new ImageIcon(qr.getScaledInstance(250, 250, Image.SCALE_SMOOTH)));
 
-                if (loginService.getQR(qrPath)) {
-                    try {
-                        JLabel label = new JLabel();
-                        try {
-                            label.setIcon(new ImageIcon(ImageIO.read(new File(qrPath)).getScaledInstance(250, 250, Image.SCALE_SMOOTH)));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        codePanel.add(label);
-                        this.repaint();
-                        this.revalidate();
-                        // 使用图片查看器打开登陆二维码图片
-                        // process = CommonTools.printQr(qrPath);
-                    } catch (Exception e) {
-                        log.info(e.getMessage());
-                        log.info("请手动打开二维码图片进行扫码登录：" + qrPath);
-                    }
-                    break;
-                } else if (count == loginRetryCount - 1) {
-                    log.error("2.2. 获取登陆二维码图片失败，系统退出");
-                    System.exit(0);
-                }
+            showMessage("请使用微信扫一扫以登录");
+            loginService.login();
+            Core.setAlive(true);
+
+            showMessage("登陆成功，微信初始化...");
+            if (!loginService.webWxInit()) {
+                showMessage(" 微信初始化异常");
+                System.exit(0);
             }
-            statusLabel.setText("请使用微信扫一扫以登录");
-            log.info("3. 请扫描二维码图片，并在手机上确认");
-            if (!Core.isAlive()) {
-                try {
-                    loginService.login();
-                } catch (Exception e) {
-                    log.error(e.getMessage());
-                    return;
+            //打开窗体
+            openFrame();
+
+            //初始化聊天列表
+            Set<Contacts> recentContacts = Core.getRecentContacts();
+            SwingUtilities.invokeLater(() -> {
+                ArrayList<RoomItem> rooms = new ArrayList<>();
+                for (Contacts recentContact : recentContacts) {
+                    rooms.add(new RoomItem(recentContact, "", 0));
                 }
-                //TODO 登录成功，关闭打开的二维码图片，暂时没有成功
-                CommonTools.closeQr(process);
-                Core.setAlive(true);
-                log.info(("4、登陆成功"));
+                RoomsPanel.getContext().addRoom(rooms);
+            });
+
+
+            new SwingWorker<Object, Object>() {
+
+                @Override
+                protected Object doInBackground() throws Exception {
+                    log.info("获取联系人信息");
+                    loginService.webWxGetContact();
+                    return null;
+                }
+
+                @Override
+                protected void done() {
+                    log.info("开启微信状态通知");
+                    loginService.wxStatusNotify();
+                    log.info(" 开始接收消息");
+                    loginService.startReceiving();
+                    ContactsPanel.getContext().notifyDataSetChanged();
+
+
+                    ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
+                        log.info("9. 获取群好友及群好友列表");
+                        loginService.WebWxBatchGetContact();
+                        if (dHImg) {
+                            downloadHeadImage();
+                        }
+                    });
+                }
+            }.execute();
+
+
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 循环获取UUID
+     */
+    private void getUUID() {
+        while (true) {
+            log.info("1. 获取微信UUID");
+            String uuid = loginService.getUuid();
+            if (uuid != null) {
                 break;
             }
-            log.info("4. 登陆超时，请重新扫描二维码图片");
+            log.warn("1.1. 获取微信UUID失败，两秒后重新获取");
+            SleepUtils.sleep(2000);
         }
-        statusLabel.setText("5、登陆成功，微信初始化");
-        log.info("5. 登陆成功，微信初始化");
-        if (!loginService.webWxInit()) {
-            log.info("6. 微信初始化异常");
-            System.exit(0);
-        }
-        //打开窗体
-        doLogin();
+    }
 
+    /**
+     * 下载头像
+     */
+    private void downloadHeadImage() {
+        ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(() -> HeadImageUtil.deleteLoseEfficacyHeadImg(Config.PIC_DIR + "/headimg/"));
+        statusLabel.setText("11. 下载联系人头像");
+        log.info("11. 下载联系人头像");
+        for (Map.Entry<String, Contacts> entry : Core.getMemberMap().entrySet()) {
+            SleepUtils.sleep((new Random().nextInt()+1)*1000);
+            ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(
 
+                    () -> {
 
+                        Core.getContactHeadImgPath().put(entry.getValue().getUsername(), DownloadTools.downloadHeadImgBig(entry.getValue().getHeadimgurl(), entry.getValue().getUsername()));
+                        log.info("下载头像：({}):{}", entry.getValue().getNickname(), entry.getValue().getHeadimgurl());
+                    });
 
-        log.info("10. 缓存本次登陆好友相关消息");
-        // 登陆成功后缓存本次登陆好友相关消息（NickName, UserName）
-        //WeChatTool.setUserInfo();
-        //删除无效头像
-        // HeadImageUtil.deleteLoseEfficacyHeadImg(Config.PIC_DIR + "/headimg/");
-        if (dHImg) {
-            statusLabel.setText("11. 下载联系人头像");
-            log.info("11. 下载联系人头像");
-            for (Map.Entry<String, Contacts> entry : Core.getMemberMap().entrySet()) {
-                ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(
-                        () -> {
-                            Core.getContactHeadImgPath().put(entry.getValue().getUsername(), DownloadTools.downloadHeadImgBig(entry.getValue().getHeadimgurl(), entry.getValue().getUsername()));
-                            log.info("下载头像：({}):{}", entry.getValue().getNickname(), entry.getValue().getHeadimgurl());
-                        });
-
-                ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        AvatarUtil.putUserAvatarCache(entry.getValue().getUsername(),DownloadTools.downloadImage(entry.getValue().getHeadimgurl()));
-                    }
-                });
-
-            }
-            ExecutorServiceUtil.getHeadImageDownloadExecutorService().shutdown();
-            ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
-                try {
-                    //等待头像下载完成
-                    boolean b = ExecutorServiceUtil.getHeadImageDownloadExecutorService().awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+            ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
+                @Override
+                public void run() {
+                    AvatarUtil.putUserAvatarCache(entry.getValue().getUsername(), DownloadTools.downloadImage(entry.getValue().getHeadimgurl()));
                 }
-
-                statusLabel.setText("头像下载完成");
-                log.info("头像下载完成");
-
             });
+
         }
-
-
-
-
-
     }
 
 }

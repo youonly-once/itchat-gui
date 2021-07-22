@@ -8,7 +8,7 @@ import cn.shu.wechat.beans.msg.send.WebWXUploadMediaResponse;
 public interface UploadTaskCallback {
 
 
-    void onTaskSuccess(int curr, int size, WebWXUploadMediaResponse webWXUploadMediaResponse);
+    void onTaskSuccess(int curr, int size);
 
     void onTaskError();
 }

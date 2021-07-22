@@ -223,6 +223,7 @@ public class MessageTools {
                     .msgJson(JSON.toJSONString(message))
                     .msgDesc(message.replyMsgTypeEnum.getMsg())
                     .filePath(message.filePath)
+                    .slavePath(message.slavePath)
                     .build();
             messages.add(build);
 
@@ -382,7 +383,7 @@ public class MessageTools {
             HttpEntity resultEntity = MyHttpClient.doPostFile(url, reqEntity);
             result = EntityUtils.toString(resultEntity, Consts.UTF_8);
             if (callback != null) {
-                callback.onTaskSuccess(1, 1, JSON.parseObject(result, WebWXUploadMediaResponse.class));
+                callback.onTaskSuccess(99, 100);
             }
 
         } else {
@@ -414,7 +415,7 @@ public class MessageTools {
                     resultEntity.getContent().close();
                 }
                 if (callback != null) {
-                    callback.onTaskSuccess(i + 1, partFilePathList.size(), JSON.parseObject(result, WebWXUploadMediaResponse.class));
+                    callback.onTaskSuccess(i + 1, partFilePathList.size()+1);
                 }
             }
             //删除分片文件
@@ -457,7 +458,9 @@ public class MessageTools {
         textMsg.ToUserName = userId;
         textMsg.Content = content;
         msgRequest.Msg = textMsg;
-        return sendMsg(msgRequest, url);
+        WebWXSendMsgResponse webWXSendMsgResponse = sendMsg(msgRequest, url);
+        callback.onTaskSuccess(100,100);
+        return webWXSendMsgResponse;
 
     }
 
@@ -562,7 +565,9 @@ public class MessageTools {
         textMsg.ToUserName = userId;
         textMsg.Content = content;
         msgRequest.Msg = textMsg;
-        return sendMsg(msgRequest, url);
+        WebWXSendMsgResponse webWXSendMsgResponse = sendMsg(msgRequest, url);
+        callback.onTaskSuccess(100,100);
+        return webWXSendMsgResponse;
 
 
     }
@@ -617,7 +622,9 @@ public class MessageTools {
         textMsg.ToUserName = userId;
         textMsg.Content = content;
         msgRequest.Msg = textMsg;
-        return sendMsg(msgRequest, url);
+        WebWXSendMsgResponse webWXSendMsgResponse = sendMsg(msgRequest, url);
+        callback.onTaskSuccess(100,100);
+        return webWXSendMsgResponse;
     }
     /**
      * 发送APP消息
@@ -738,6 +745,8 @@ public class MessageTools {
         private final WXSendMsgCodeEnum replyMsgTypeEnum;
         //图片、视频消息文件路径
         private final String filePath;
+        //缩略图
+        private final String slavePath;
         //消息内容：文本、XML、资源ID
         private final String content;
         //可显示的消息

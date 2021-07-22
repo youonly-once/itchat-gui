@@ -4,6 +4,8 @@ import cn.shu.wechat.beans.pojo.Contacts;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import javax.swing.*;
+import java.awt.image.BufferedImage;
 import java.util.List;
 
 /**
@@ -39,6 +41,14 @@ public interface ILoginService {
 
 
     /**
+     * 登录二维码图片
+     *
+     * @author SXS
+     * @date 2017年5月13日 上午12:13:51
+     */
+    BufferedImage getQR();
+
+    /**
      * 登陆
      *
      * @return {@code true} 获取成功 {@code false} 获取失败
@@ -46,6 +56,7 @@ public interface ILoginService {
      * @date 2017年5月13日 上午12:14:07
      */
     boolean login() throws Exception;
+
 
     /**
      * web初始化

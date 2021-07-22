@@ -558,7 +558,7 @@
         insert into message
         (id, msg_id, msg_type, app_msg_type, msg_desc, create_time, content, file_path, msg_json,
         from_username, from_remarkname, from_nickname, from_member_of_group_username, from_member_of_group_nickname,
-        from_member_of_group_displayname, to_username, to_remarkname, to_nickname, is_send
+        from_member_of_group_displayname, to_username, to_remarkname, to_nickname, is_send,plaintext
         )
         values
         <foreach collection="list" item="item" separator=",">
@@ -572,7 +572,7 @@
             #{item.fromMemberOfGroupNickname,jdbcType=VARCHAR}, #{item.fromMemberOfGroupDisplayname,jdbcType=VARCHAR},
             #{item.toUsername,jdbcType=VARCHAR}, #{item.toRemarkname,jdbcType=VARCHAR},
             #{item.toNickname,jdbcType=VARCHAR},
-            #{item.isSend,jdbcType=BOOLEAN})
+            #{item.isSend,jdbcType=BOOLEAN},#{item.plaintext,jdbcType=VARCHAR})
         </foreach>
     </insert>
     <insert id="insertOrUpdate" parameterType="cn.shu.wechat.beans.pojo.Message">

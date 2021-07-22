@@ -2,6 +2,8 @@ package cn.shu.wechat.swing.utils;
 
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.db.model.CurrentUser;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -126,77 +128,74 @@ public class ImageCache {
         String finalSuffix = suffix;
 
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                File cacheFile;
-                if (requestType == THUMB) {
-                    cacheFile = new File(IMAGE_CACHE_ROOT_PATH + "/" + identify + "_thumb");
-                } else {
-                    cacheFile = new File(IMAGE_CACHE_ROOT_PATH + "/" + identify + finalSuffix);
-                }
+        ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
+            File cacheFile;
+            if (requestType == THUMB) {
+                cacheFile = new File(IMAGE_CACHE_ROOT_PATH + "/" + identify + "_thumb");
+            } else {
+                cacheFile = new File(IMAGE_CACHE_ROOT_PATH + "/" + identify + finalSuffix);
+            }
 
-                if (cacheFile.exists()) {
-                    System.out.println("本地缓存获取图片：" + cacheFile.getAbsolutePath());
-                    ImageIcon icon = new ImageIcon(cacheFile.getAbsolutePath());
-                    listener.onSuccess(icon, cacheFile.getAbsolutePath());
-                } else {
-                    try {
-                        byte[] data;
+            if (cacheFile.exists()) {
+                System.out.println("本地缓存获取图片：" + cacheFile.getAbsolutePath());
+                ImageIcon icon = new ImageIcon(cacheFile.getAbsolutePath());
+                listener.onSuccess(icon, cacheFile.getAbsolutePath());
+            } else {
+                try {
+                    byte[] data;
 
-                        String reqUrl = buildRemoteImageUrl(url);
+                    String reqUrl = buildRemoteImageUrl(url);
 
-                        // 本地上传的文件，则从原上传路径复制一份到缓存目录
-                        if (reqUrl.startsWith("file://")) {
-                            //String originUrl = reqUrl.substring(7);
-                            FileInputStream fileInputStream = new FileInputStream(url);
-                            data = new byte[fileInputStream.available()];
-                            fileInputStream.read(data);
-                        }
-                        // 接收的图像，从服务器获取并缓存
-                        else {
-                            System.out.println("服务器获取图片：" + reqUrl);
-                            data = HttpUtil.download(reqUrl);
-                        }
-
-
-                        if (data == null) {
-                            /* logger.debug("图像获取失败");*/
-                        }
-
-                        Image image = ImageIO.read(new ByteArrayInputStream(data));
-
-                        // 生成缩略图并缓存
-                        createThumb(image, identify);
-
-                        if (requestType == THUMB) {
-                            ImageIcon icon = new ImageIcon(cacheFile.getAbsolutePath());
-                            listener.onSuccess(icon, cacheFile.getAbsolutePath());
-                        }
-
-                        // 缓存原图
-                        FileOutputStream fileOutputStream = new FileOutputStream(new File(IMAGE_CACHE_ROOT_PATH + "/" + identify + finalSuffix));
-                        fileOutputStream.write(data);
-
-
-                        if (requestType == ORIGINAL) {
-                            ImageIcon icon = new ImageIcon(cacheFile.getAbsolutePath());
-                            listener.onSuccess(icon, cacheFile.getAbsolutePath());
-                        }
-                    } catch (IOException e) {
-                        listener.onFailed("文件不存在");
-                        //e.printStackTrace();
+                    // 本地上传的文件，则从原上传路径复制一份到缓存目录
+                    if (reqUrl.startsWith("file://")) {
+                        //String originUrl = reqUrl.substring(7);
+                        FileInputStream fileInputStream = new FileInputStream(url);
+                        data = new byte[fileInputStream.available()];
+                        fileInputStream.read(data);
                     }
+                    // 接收的图像，从服务器获取并缓存
+                    else {
+                        System.out.println("服务器获取图片：" + reqUrl);
+                        data = HttpUtil.download(reqUrl);
+                    }
+
+
+                    if (data == null) {
+                        /* logger.debug("图像获取失败");*/
+                    }
+
+                    Image image = ImageIO.read(new ByteArrayInputStream(data));
+
+                    // 生成缩略图并缓存
+                    createThumb(image, identify);
+
+                    if (requestType == THUMB) {
+                        ImageIcon icon = new ImageIcon(cacheFile.getAbsolutePath());
+                        listener.onSuccess(icon, cacheFile.getAbsolutePath());
+                    }
+
+                    // 缓存原图
+                    FileOutputStream fileOutputStream = new FileOutputStream(new File(IMAGE_CACHE_ROOT_PATH + "/" + identify + finalSuffix));
+                    fileOutputStream.write(data);
+
+
+                    if (requestType == ORIGINAL) {
+                        ImageIcon icon = new ImageIcon(cacheFile.getAbsolutePath());
+                        listener.onSuccess(icon, cacheFile.getAbsolutePath());
+                    }
+                } catch (IOException e) {
+                    listener.onFailed("文件不存在");
+                    //e.printStackTrace();
                 }
             }
-        }).start();
+        });
     }
 
     private String buildRemoteImageUrl(String imageUrl) {
         String url;
         // 服务上的图片
         if (imageUrl.startsWith("/file-upload")) {
-            url = Launcher.HOSTNAME + imageUrl + "?rc_uid=" + currentUser.getUserId() + "&rc_token=" + currentUser.getAuthToken();
+            url = /*Launcher.HOSTNAME +*/ imageUrl + "?rc_uid=" + currentUser.getUserId() + "&rc_token=" + currentUser.getAuthToken();
         }
         // 本地的图片
         else {
@@ -244,6 +243,21 @@ public class ImageCache {
         }
     }
 
+    /**
+     *
+     * @param filePath
+     * @return
+     */
+    public String createThumb(String filePath){
+        BufferedImage read = null;
+        try {
+            read = ImageIO.read(getClass().getResource(filePath));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        createThumb(read,"sended_thumb");
+        return IMAGE_CACHE_ROOT_PATH + "/" + "sended_thumb" + "_thumb";
+    }
     public static int[] getImageSize(Image image) {
 
         if (image == null) {
