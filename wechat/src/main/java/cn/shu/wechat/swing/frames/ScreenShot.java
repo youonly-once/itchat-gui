@@ -445,9 +445,11 @@ public class ScreenShot extends JFrame {
 
 
     private void close() {
-        controlDialog.setVisible(false);
+        //controlDialog.setVisible(false);
+        controlDialog.dispose();
         setVisible(false);
         dispose();
+        System.out.println(123123);
     }
 
 }
