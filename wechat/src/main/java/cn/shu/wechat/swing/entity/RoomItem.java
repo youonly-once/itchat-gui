@@ -2,7 +2,6 @@ package cn.shu.wechat.swing.entity;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.pojo.Contacts;
-import cn.shu.wechat.swing.panels.ChatPanel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

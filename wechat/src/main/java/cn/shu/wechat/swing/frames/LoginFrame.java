@@ -13,7 +13,10 @@ import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.OSUtil;
-import cn.shu.wechat.utils.*;
+import cn.shu.wechat.utils.Config;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
+import cn.shu.wechat.utils.HeadImageUtil;
+import cn.shu.wechat.utils.SleepUtils;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 

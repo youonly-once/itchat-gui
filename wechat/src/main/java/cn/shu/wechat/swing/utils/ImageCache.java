@@ -1,7 +1,8 @@
 package cn.shu.wechat.swing.utils;
 
+import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.app.Launcher;
-import cn.shu.wechat.swing.db.model.CurrentUser;
+
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 
 import javax.imageio.ImageIO;
@@ -19,7 +20,7 @@ public class ImageCache {
 
     public String IMAGE_CACHE_ROOT_PATH;
 
-    private CurrentUser currentUser;
+
 
 
     public ImageCache() {
@@ -195,7 +196,7 @@ public class ImageCache {
         String url;
         // 服务上的图片
         if (imageUrl.startsWith("/file-upload")) {
-            url = /*Launcher.HOSTNAME +*/ imageUrl + "?rc_uid=" + currentUser.getUserId() + "&rc_token=" + currentUser.getAuthToken();
+            url = /*Launcher.HOSTNAME +*/ imageUrl + "?rc_uid=" + Core.getUserSelf().getUsername() + "&rc_token=" + Core.getUserSelf().getUsername();
         }
         // 本地的图片
         else {

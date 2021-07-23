@@ -1,19 +1,14 @@
 package cn.shu.wechat.swing.components.message;
 
-import cn.shu.wechat.mapper.MessageMapper;
-import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCMenuItemUI;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
-import cn.shu.wechat.swing.db.model.FileAttachment;
-import cn.shu.wechat.swing.db.service.FileAttachmentService;
 import cn.shu.wechat.swing.entity.MessageItem;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 import cn.shu.wechat.swing.utils.FileCache;
 import cn.shu.wechat.swing.utils.ImageCache;
-import cn.shu.wechat.utils.SpringContextHolder;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;

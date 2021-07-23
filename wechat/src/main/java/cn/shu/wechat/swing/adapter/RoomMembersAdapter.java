@@ -3,15 +3,9 @@ package cn.shu.wechat.swing.adapter;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.UserInfoPopup;
-import cn.shu.wechat.swing.db.model.CurrentUser;
-import cn.shu.wechat.swing.db.service.ContactsUserService;
-import cn.shu.wechat.swing.db.service.CurrentUserService;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
-import cn.shu.wechat.swing.panels.RoomMembersPanel;
-import cn.shu.wechat.swing.utils.AvatarUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,8 +13,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-import java.util.UUID;
 
 /**
  * Created by 舒新胜 on 07/06/2017.

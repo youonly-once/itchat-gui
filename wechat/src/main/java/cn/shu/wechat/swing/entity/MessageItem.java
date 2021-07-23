@@ -1,18 +1,13 @@
 package cn.shu.wechat.swing.entity;
 
 import cn.shu.wechat.api.ContactsTools;
-import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
-import cn.shu.wechat.swing.app.Launcher;
-import cn.shu.wechat.swing.db.model.FileAttachment;
 import cn.shu.wechat.swing.db.model.ImageAttachment;
-import cn.shu.wechat.swing.db.model.VideoAttachment;
 import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /**

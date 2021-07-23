@@ -4,7 +4,6 @@ package cn.shu.wechat.api;
 import cn.shu.wechat.beans.msg.send.*;
 import cn.shu.wechat.beans.msg.sync.AddMsgList;
 import cn.shu.wechat.beans.msg.sync.RecommendInfo;
-import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.*;
 import cn.shu.wechat.exception.WebWXException;

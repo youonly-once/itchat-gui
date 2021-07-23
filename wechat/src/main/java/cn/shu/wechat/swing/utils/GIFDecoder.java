@@ -5,11 +5,16 @@ package cn.shu.wechat.swing.utils;
  * @项目 AutoWechat
  * @创建时间 7/18/2021 01:44
  */
-import java.net.*;
-import java.io.*;
-import java.util.*;
+
 import java.awt.*;
-import java.awt.image.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
 
 public class GIFDecoder {
     /**

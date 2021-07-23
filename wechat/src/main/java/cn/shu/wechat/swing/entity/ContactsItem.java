@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
 
 /**
  * Created by 舒新胜 on 17-5-30.

@@ -1,21 +1,18 @@
 package cn.shu.wechat.swing.adapter.search;
 
 import cn.shu.wechat.swing.adapter.BaseAdapter;
-import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.constant.SearchResultType;
-import cn.shu.wechat.swing.db.model.CurrentUser;
 import cn.shu.wechat.swing.db.model.FileAttachment;
 import cn.shu.wechat.swing.db.model.Message;
 import cn.shu.wechat.swing.db.model.Room;
-import cn.shu.wechat.swing.db.service.CurrentUserService;
-import cn.shu.wechat.swing.db.service.FileAttachmentService;
-import cn.shu.wechat.swing.db.service.MessageService;
-import cn.shu.wechat.swing.db.service.RoomService;
 import cn.shu.wechat.swing.entity.SearchResultItem;
 import cn.shu.wechat.swing.helper.AttachmentIconHelper;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
-import cn.shu.wechat.swing.panels.*;
+import cn.shu.wechat.swing.panels.ListPanel;
+import cn.shu.wechat.swing.panels.RoomChatPanel;
+import cn.shu.wechat.swing.panels.RoomsPanel;
+import cn.shu.wechat.swing.panels.SearchPanel;
 import cn.shu.wechat.swing.tasks.DownloadTask;
 import cn.shu.wechat.swing.tasks.HttpResponseListener;
 import cn.shu.wechat.swing.utils.*;

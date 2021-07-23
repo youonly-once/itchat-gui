@@ -1,4 +1,4 @@
-package cn.shu.wechat.swing.ImageViewer.src.com.rc.forms;
+package cn.shu.wechat.swing.ImageViewer;
 
 import javax.swing.*;
 import java.awt.*;

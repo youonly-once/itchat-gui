@@ -15,15 +15,13 @@ import cn.shu.wechat.enums.WXSendMsgCodeEnum;
 import cn.shu.wechat.face.IMsgHandlerFace;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.service.ILoginService;
-import cn.shu.wechat.service.impl.LoginServiceImpl;
 import cn.shu.wechat.swing.frames.MainFrame;
-import cn.shu.wechat.swing.panels.RoomChatPanelCard;
 import cn.shu.wechat.swing.panels.RoomChatPanel;
+import cn.shu.wechat.swing.panels.RoomChatPanelCard;
 import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.utils.CommonTools;
 import cn.shu.wechat.utils.JSONObjectUtil;
 import cn.shu.wechat.utils.LogUtil;
-import cn.shu.wechat.utils.XmlStreamUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.log4j.Log4j2;
@@ -32,9 +30,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import javax.swing.*;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.*;
 
 import static cn.shu.wechat.enums.WXReceiveMsgCodeEnum.MSGTYPE_TEXT;

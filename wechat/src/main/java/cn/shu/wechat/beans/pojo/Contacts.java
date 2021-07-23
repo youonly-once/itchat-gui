@@ -1,7 +1,6 @@
 package cn.shu.wechat.beans.pojo;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

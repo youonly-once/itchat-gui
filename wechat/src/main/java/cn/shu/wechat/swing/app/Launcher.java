@@ -1,14 +1,11 @@
 package cn.shu.wechat.swing.app;
 
-import cn.shu.wechat.swing.db.service.*;
 import cn.shu.wechat.swing.frames.LoginFrame;
 import cn.shu.wechat.utils.SpringContextHolder;
-import org.apache.ibatis.session.SqlSession;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;

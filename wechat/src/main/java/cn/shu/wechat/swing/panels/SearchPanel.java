@@ -1,6 +1,5 @@
 package cn.shu.wechat.swing.panels;
 
-import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.adapter.search.SearchResultItemsAdapter;
@@ -12,7 +11,6 @@ import cn.shu.wechat.swing.db.model.FileAttachment;
 import cn.shu.wechat.swing.db.model.Message;
 import cn.shu.wechat.swing.entity.SearchResultItem;
 import cn.shu.wechat.swing.utils.FontUtil;
-import cn.shu.wechat.utils.CommonTools;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 
 import javax.swing.*;

@@ -1,38 +1,26 @@
 package cn.shu.wechat.swing.panels;
 
 import cn.shu.wechat.beans.pojo.Contacts;
-import cn.shu.wechat.beans.pojo.Member;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.service.ILoginService;
 import cn.shu.wechat.swing.adapter.RoomMembersAdapter;
-import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCButton;
 import cn.shu.wechat.swing.components.RCListView;
 import cn.shu.wechat.swing.db.model.ContactsUser;
-import cn.shu.wechat.swing.db.model.CurrentUser;
-import cn.shu.wechat.swing.db.model.Room;
-import cn.shu.wechat.swing.db.service.ContactsUserService;
-import cn.shu.wechat.swing.db.service.CurrentUserService;
-import cn.shu.wechat.swing.db.service.RoomService;
-import cn.shu.wechat.swing.entity.ContactsItem;
 import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.frames.AddOrRemoveMemberDialog;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.AvatarUtil;
-import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.extern.log4j.Log4j2;
-import lombok.val;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 

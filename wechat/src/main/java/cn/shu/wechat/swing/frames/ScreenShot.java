@@ -2,8 +2,8 @@ package cn.shu.wechat.swing.frames;
 
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.panels.ChatPanel;
-import cn.shu.wechat.swing.panels.RoomChatPanelCard;
 import cn.shu.wechat.swing.panels.RoomChatPanel;
+import cn.shu.wechat.swing.panels.RoomChatPanelCard;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 

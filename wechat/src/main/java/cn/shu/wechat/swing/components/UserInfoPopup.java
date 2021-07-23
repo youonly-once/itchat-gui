@@ -3,7 +3,7 @@ package cn.shu.wechat.swing.components;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.swing.ImageViewer.src.com.rc.forms.ImageViewerFrame;
+import cn.shu.wechat.swing.ImageViewer.ImageViewerFrame;
 import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.panels.ContactsPanel;
 import cn.shu.wechat.swing.panels.RoomsPanel;
@@ -13,9 +13,6 @@ import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;

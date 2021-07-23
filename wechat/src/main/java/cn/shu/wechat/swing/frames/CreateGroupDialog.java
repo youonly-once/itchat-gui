@@ -1,12 +1,10 @@
 package cn.shu.wechat.swing.frames;
 
-import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCButton;
 import cn.shu.wechat.swing.components.RCTextField;
 import cn.shu.wechat.swing.db.model.ContactsUser;
-import cn.shu.wechat.swing.db.service.ContactsUserService;
 import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.panels.SelectUserPanel;
 import cn.shu.wechat.swing.utils.FontUtil;

@@ -3,13 +3,10 @@ package cn.shu.wechat.swing.panels;
 
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCButton;
 import cn.shu.wechat.swing.components.VerticalFlowLayout;
-import cn.shu.wechat.swing.db.service.ContactsUserService;
-import cn.shu.wechat.swing.db.service.RoomService;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
 import lombok.Data;

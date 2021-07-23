@@ -1,18 +1,14 @@
 package cn.shu.wechat.swing.panels;
 
 import cn.shu.wechat.api.ContactsTools;
-import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.adapter.ContactsItemsAdapter;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCListView;
-import cn.shu.wechat.swing.db.model.ContactsUser;
 import cn.shu.wechat.swing.entity.ContactsItem;
-import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.utils.AvatarUtil;
-import cn.shu.wechat.utils.ExecutorServiceUtil;
 import org.apache.commons.lang.StringUtils;
 
 import javax.imageio.ImageIO;
@@ -25,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by 舒新胜 on 17-5-30.

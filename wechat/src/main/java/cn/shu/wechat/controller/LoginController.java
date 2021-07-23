@@ -9,7 +9,6 @@ import cn.shu.wechat.utils.Config;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.SleepUtils;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 import javax.annotation.Resource;

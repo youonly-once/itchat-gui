@@ -7,7 +7,6 @@ import cn.shu.wechat.core.Core;
 import cn.shu.wechat.service.ILoginService;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.utils.SpringContextHolder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
