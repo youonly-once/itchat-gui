@@ -4,11 +4,9 @@ import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.ImageViewer.ImageViewerFrame;
-import cn.shu.wechat.swing.panels.ChatPanel;
-import cn.shu.wechat.swing.panels.ContactsPanel;
-import cn.shu.wechat.swing.panels.RoomsPanel;
-import cn.shu.wechat.swing.panels.TabOperationPanel;
+import cn.shu.wechat.swing.panels.*;
 import cn.shu.wechat.swing.utils.AvatarUtil;
+import cn.shu.wechat.swing.utils.ChatUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 
@@ -146,7 +144,7 @@ public class UserInfoPopup extends JPopupMenu {
         chat.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                openOrCreateDirectChat();
+                ChatUtil.openOrCreateDirectChat(contacts.getUsername());
                 super.mouseClicked(e);
             }
         });
@@ -167,11 +165,11 @@ public class UserInfoPopup extends JPopupMenu {
     }
 
     private void openOrCreateDirectChat() {
-        if (!Core.getRecentContacts().contains(contacts)) {
+/*        if (!Core.getRecentContacts().contains(contacts)) {
             // 房间bu存在，直接打开，否则发送请求创建房间
             createDirectChat(contacts);
         }
-        ChatPanel.getContext().enterRoom(contacts.getUsername());
+        ChatPanel.getContext().enterRoom(contacts.getUsername());*/
     }
 
     /**

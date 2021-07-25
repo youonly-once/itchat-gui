@@ -39,10 +39,10 @@ public class MessageEditorPanel extends ParentAvailablePanel {
     private ImageIcon cutActiveIcon;
 
     private ExpressionPopup expressionPopup;
-
-    public MessageEditorPanel(JPanel parent) {
+    private final String roomId;
+    public MessageEditorPanel(JPanel parent,String roomId) {
         super(parent);
-
+        this.roomId = roomId;
         initComponents();
         initView();
         setListeners();
@@ -202,7 +202,7 @@ public class MessageEditorPanel extends ParentAvailablePanel {
 
     private void screenShot() {
         try {
-            ScreenShot ssw = new ScreenShot();
+            ScreenShot ssw = new ScreenShot(roomId);
             ssw.setVisible(true);
         } catch (AWTException e1) {
             e1.printStackTrace();

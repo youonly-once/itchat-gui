@@ -80,37 +80,4 @@ public class MessageRightTextViewHolder extends BaseMessageViewHolder {
         add(messageAvatarPanel, BorderLayout.CENTER);
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        JFrame jFrame = new JFrame();
-        JLabel jLabel = new JLabel("123");
-        jFrame.getContentPane().add(jLabel);
-        jFrame.setSize(500, 400);
-        jFrame.setVisible(true);
-
-        SwingWorker<Object, Integer> swingWorker = new SwingWorker<Object, Integer>() {
-
-            @Override
-            protected Object doInBackground() throws Exception {
-                for (int i = 0; i < 10; i++) {
-                    publish(i);
-                    Thread.sleep(1000);
-                }
-                return null;
-            }
-
-            @Override
-            protected void process(List<Integer> chunks) {
-                jLabel.setText(chunks.get(chunks.size() - 1) + "");
-            }
-
-            @Override
-            protected void done() {
-                jLabel.setText("complete");
-            }
-        };
-        swingWorker.execute();
-
-
-
-    }
 }

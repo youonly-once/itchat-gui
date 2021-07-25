@@ -53,10 +53,11 @@ public class ScreenShot extends JFrame {
     private Cursor NEresizeCursor;
     private Cursor SEresizeCursor;
 
-
+    private final String roomId;
     private int mouseDownArea = OUTSIDE_SELECTED;
 
-    public ScreenShot() throws AWTException {
+    public ScreenShot(String roomId) throws AWTException {
+        this.roomId =roomId;
         setUndecorated(true);
         setBackground(Colors.DARK);
 
@@ -105,7 +106,7 @@ public class ScreenShot extends JFrame {
                 if (e.getClickCount() >= 2) {
                     close();
                     ClipboardUtil.copyImage(saveImage);
-                    ChatPanel.getContext().paste();
+                    RoomChatPanel.getContext().get(roomId).getChatPanel().paste();
                 }
 
                 super.mouseClicked(e);
@@ -262,7 +263,7 @@ public class ScreenShot extends JFrame {
                 } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     close();
                     ClipboardUtil.copyImage(saveImage);
-                    ChatPanel.getContext().paste();
+                    RoomChatPanel.getContext().get(roomId).getChatPanel().paste();
                 }
             }
         };

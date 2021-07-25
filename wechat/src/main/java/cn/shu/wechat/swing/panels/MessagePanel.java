@@ -10,7 +10,7 @@ import java.awt.*;
  * Created by 舒新胜 on 17-5-30.
  */
 public class MessagePanel extends ParentAvailablePanel {
-    RCListView listView;
+    private RCListView listView;
 
     public MessagePanel(JPanel parent) {
         super(parent);

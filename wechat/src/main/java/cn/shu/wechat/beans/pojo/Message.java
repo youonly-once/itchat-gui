@@ -79,4 +79,9 @@ public class Message {
      */
     private String slavePath;
 
+    /**
+     * 消息发送结果
+     */
+    private String response;
+
 }

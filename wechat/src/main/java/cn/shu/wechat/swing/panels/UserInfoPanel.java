@@ -8,6 +8,7 @@ import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCButton;
 import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.utils.AvatarUtil;
+import cn.shu.wechat.swing.utils.ChatUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -93,49 +94,13 @@ public class UserInfoPanel extends ParentAvailablePanel {
             @Override
             public void mouseClicked(MouseEvent e) {
 
-                openOrCreateDirectChat();
+                ChatUtil.openOrCreateDirectChat(userId);
                 super.mouseClicked(e);
             }
         });
     }
 
-    /**
-     * 打开或创建新聊天房
-     */
-    private void openOrCreateDirectChat() {
-        Contacts user = Core.getMemberMap().get(userId);
-        /*ContactsUser user  = contactsUserService.find("username", username).get(0);*/
-        if (!Core.getRecentContacts().contains(user)) {
-            // 房间bu存在，直接打开，否则发送请求创建房间
-            createDirectChat(user);
-            RoomsPanel.getContext().activeItem(0);
-        }else{
-            //房间列表激活
-            RoomsPanel.getContext().activeItem(userId);
-        }
-        //右侧面板显示聊天框
-        RightPanel.getContext().show(RightPanel.CHAT_ROOM);
-        //创建一层Card
-         RoomChatPanel.getContext().addPanel(userId);
-        RoomChatPanel.getContext().show(userId);
 
-        //控制选项卡切换
-        TabOperationPanel.getContext().switchToChatLabel();
-        RoomsPanel.getContext().scrollPoint(1);
-        //ChatPanel.getContext().enterRoom(user.getUsername());
-    }
-
-    /**
-     * 创建直接聊天
-     *
-     * @param contacts
-     */
-    private void createDirectChat(Contacts contacts) {
-        // JOptionPane.showMessageDialog(MainFrame.getContext(), "发起聊天", "发起聊天", JOptionPane.INFORMATION_MESSAGE);
-        RoomsPanel.getContext().addRoom(contacts, "", 0);
-        Core.getRecentContacts().add(contacts);
-
-    }
 
 
 }

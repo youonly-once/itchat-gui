@@ -223,6 +223,7 @@ public class MessageTools {
                     .msgDesc(message.replyMsgTypeEnum.getMsg())
                     .filePath(message.filePath)
                     .slavePath(message.slavePath)
+                    .response(JSON.toJSONString(sendMsgResponse))
                     .build();
             messages.add(build);
 
@@ -656,6 +657,33 @@ public class MessageTools {
         textMsg.Content = content;
         msgRequest.Msg = textMsg;
         return sendMsg(msgRequest, url);
+    }
+
+    /**
+     * 发送状态通知
+     *
+     * @param toUserName   消息接收者UserName
+     * @return {@link WebWXSendMsgResponse}
+     * @author SXS
+     * @date 2017年5月10日 上午12:21:28
+     */
+    public static WebWXSendMsgResponse sendStatusNotify(String toUserName) {
+        String url = String.format(URLEnum.WEB_WX_SEND_NOTIFY_MSG.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()));
+        WebWXSendingNotifyMsg webWXSendingNotifyMsg = new WebWXSendingNotifyMsg();
+        webWXSendingNotifyMsg.Code = 1;
+        webWXSendingNotifyMsg.FromUserName = Core.getUserName();
+        webWXSendingNotifyMsg.ToUserName =toUserName;
+        String paramStr = JSON.toJSONString(webWXSendingNotifyMsg);
+        HttpEntity entity = MyHttpClient.doPost(url, paramStr);
+        if (entity != null) {
+            try {
+                String result = EntityUtils.toString(entity, Consts.UTF_8);
+                return JSON.parseObject(result,WebWXSendMsgResponse.class);
+            } catch (Exception e) {
+                log.error("webWxSendMsgImg 错误： {}", e.getMessage());
+            }
+        }
+        return null;
     }
     /**
      * 被动添加好友

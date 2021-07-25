@@ -189,17 +189,30 @@ public class RoomChatPanelCard extends JPanel {
         //add(tipPanel, BorderLayout.CENTER);
     }
 
+    /**
+     * 显示提示或者是消息
+     * @param who
+     */
     public void showPanel(String who) {
         cardLayout.show(contentPanel, who);
     }
 
     /**
-     * 添加一条消息到最后，或者更新已有消息
+     * 更新已有消息
      *
      * @param message 新消息
      */
-    public void addOrUpdateMessageItem(Message message) {
-        chatPanel.addOrUpdateMessageItem(message);
+    public void updateMessageItem(Message message) {
+        chatPanel.updateMessageItem(message);
+    }
+
+    /**
+     * 添加一条消息到最后
+     *
+     * @param message 新消息
+     */
+    public void addMessageItemToEnd(Message message) {
+        chatPanel.addMessageItemToEnd(message);
     }
 
 }

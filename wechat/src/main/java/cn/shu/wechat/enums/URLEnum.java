@@ -34,7 +34,8 @@ public enum URLEnum {
     WEB_WX_SEND_PIC_MSG("%s/webwxsendmsgimg?fun=async&f=json&pass_ticket=%s", "图片消息"),
     WEB_WX_SEND_VIDEO_MSG("%s/webwxsendvideomsg?fun=async&f=json&pass_ticket=%s", "图片消息"),
     WEB_WX_SEND_EMOTION_MSG("%s/webwxsendemoticon?fun=sys", "表情消息"),
-    WEB_WX_SEND_APP_MSG("%s/webwxsendappmsg?fun=async&f=json&pass_ticket=%s", "APP消息");
+    WEB_WX_SEND_APP_MSG("%s/webwxsendappmsg?fun=async&f=json&pass_ticket=%s", "APP消息"),
+    WEB_WX_SEND_NOTIFY_MSG("%s/webwxstatusnotify?lang=zh_CN", "状态通知");
 
     private String url;
     private String msg;

@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.app;
 
 import cn.shu.wechat.swing.frames.LoginFrame;
+import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.utils.SpringContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +33,7 @@ public class Launcher {
     }
 
 
-    private void openFrame() {
+    public void openFrame() {
         LoginFrame loginFrame = SpringContextHolder.getBean(LoginFrame.class);
         loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         loginFrame.setVisible(true);

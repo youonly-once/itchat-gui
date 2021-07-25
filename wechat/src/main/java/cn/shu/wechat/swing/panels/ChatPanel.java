@@ -72,12 +72,6 @@ public class ChatPanel extends ParentAvailablePanel {
      */
     private MessageEditorPanel messageEditorPanel;
 
-    private static ChatPanel context;
-    public static String CHAT_ROOM_OPEN_ID = "";
-
-    // APP启动时，已加载过远程未读消息的Rooms
-    private static final List<String> remoteHistoryLoadedRooms = new ArrayList<>();
-
     /**
      * 消息列表
      */
@@ -90,25 +84,24 @@ public class ChatPanel extends ParentAvailablePanel {
 
 
     /**
-     * 当前房间
-     */
-    private Room room;
-
-    /**
      * 当前房间id
      */
     private final String roomId;
-    // 如果是从消息搜索列表中进入房间的，这个属性不为0
+    /**
+     * 如果是从消息搜索列表中进入房间的，这个属性不为0
+     */
     private long firstMessageTimestamp = 0L;
 
     public void setRoomMembers(List<String> roomMembers) {
         this.roomMembers = roomMembers;
     }
 
-    // 房间的用户 username
+    /**
+     * 房间的用户 username列表
+     */
     public List<String> roomMembers = new ArrayList<>();
 
-    public static List<String> uploadingOrDownloadingFiles = new ArrayList<>();
+    public  List<String> uploadingOrDownloadingFiles = new ArrayList<>();
 
     /**
      * 文件缓存
@@ -121,26 +114,22 @@ public class ChatPanel extends ParentAvailablePanel {
      */
     private static final int PAGE_LENGTH = 10;
 
-
-    public String getRoomId() {
-        return roomId;
-    }
-
-
-    private RemindUserPopup remindUserPopup = new RemindUserPopup();
-    private MessageViewHolderCacheHelper messageViewHolderCacheHelper;
+    /**
+     * @" 用户列表
+     */
+    private final RemindUserPopup remindUserPopup = new RemindUserPopup();
+    private final MessageViewHolderCacheHelper messageViewHolderCacheHelper;
 
 
     private static final int MAX_SHARE_ATTACHMENT_UPLOAD_COUNT = 1024;
 
-    private Queue<String> shareAttachmentUploadQueue = new ArrayDeque<>(MAX_SHARE_ATTACHMENT_UPLOAD_COUNT);
+    private final Queue<String> shareAttachmentUploadQueue = new ArrayDeque<>(MAX_SHARE_ATTACHMENT_UPLOAD_COUNT);
 
 
     public ChatPanel(JPanel parent,String roomId) {
 
         super(parent);
         this.roomId = roomId;
-        context = this;
         messageViewHolderCacheHelper = new MessageViewHolderCacheHelper();
 
         initComponents();
@@ -158,7 +147,7 @@ public class ChatPanel extends ParentAvailablePanel {
         adapter = new MessageAdapter(messageItems, messagePanel.getMessageListView(), messageViewHolderCacheHelper);
         messagePanel.getMessageListView().setAdapter(adapter);
 
-        messageEditorPanel = new MessageEditorPanel(this);
+        messageEditorPanel = new MessageEditorPanel(this,roomId);
         messageEditorPanel.setPreferredSize(new Dimension(MainFrame.DEFAULT_WIDTH, MainFrame.DEFAULT_WIDTH / 4));
     }
 
@@ -172,10 +161,6 @@ public class ChatPanel extends ParentAvailablePanel {
             messagePanel.setVisible(false);
             messageEditorPanel.setVisible(false);
         }
-    }
-
-    public static ChatPanel getContext() {
-        return context;
     }
 
     private void initData() {
@@ -432,92 +417,6 @@ public class ChatPanel extends ParentAvailablePanel {
     }
 
     /**
-     * 进入指定房间
-     *
-     * @param roomId                房间id
-     * @param firstMessageTimestamp 最新消息时间
-     */
-    private void enterRoom(String roomId, long firstMessageTimestamp) {
-        if (StringUtils.isEmpty(roomId)) {
-            return;
-        }
-        Contacts contacts = Core.getMemberMap().get(roomId);
-        if (contacts == null){
-            return;
-        }
-
-        this.firstMessageTimestamp = firstMessageTimestamp;
-
-        CHAT_ROOM_OPEN_ID = roomId;
-
-        Room room = new Room();
-        room.setRoomId(contacts.getUsername());
-        room.setType(roomId.startsWith("@@") ? RoomTypeEnum.G : RoomTypeEnum.P);
-        room.setName(ContactsTools.getContactDisplayNameByUserName(contacts.getUsername()));
-        room.setMsgSum(0);
-        room.setLastChatAt(System.currentTimeMillis());
-
-        if (room.getType() == RoomTypeEnum.G) {
-            //加载群成员
-            if (contacts.getMemberlist() == null || contacts.getMemberlist().isEmpty()){
-                new SwingWorker<Object,Object>(){
-
-                    @Override
-                    protected Object doInBackground() throws Exception {
-                        ILoginService bean = SpringContextHolder.getBean(ILoginService.class);
-                        bean.WebWxBatchGetContact(roomId);
-                        return null;
-                    }
-
-                    @Override
-                    protected void done() {
-                        super.done();
-                    }
-                }.execute();
-            }
-            room.setMemberList(contacts.getMemberlist());
-        } else {
-            room.setMemberList(new ArrayList<>());
-        }
-        // room.setUpdatedAt(System.currentTimeMillis().);
-        this.room = room;
-        // 更新消息列表
-        this.notifyDataSetChanged();
-
-        // 更新房间标题，尤其是成员数
-        updateRoomTitle();
-
-        //消息未读数量0
-        updateUnreadCount(0);
-        //消息编辑框默认值
-        messageEditorPanel.getEditor().setText("");
-
-
-    }
-
-    /**
-     * 进入指定房间
-     *
-     * @param roomId 房间id
-     */
-    public void enterRoom(String roomId) {
-        enterRoom(roomId, 0L);
-    }
-
-    /**
-     * 更新房间标题
-     */
-    public void updateRoomTitle() {
-        String title = room.getName();
-        if (room.getType() == RoomTypeEnum.G) {
-            title += " (" + (room.getMemberList().size()) + ")";
-        }
-        // 更新房间标题
-        TitlePanel.getContext().updateRoomTitle(title);
-    }
-
-
-    /**
      * 加载指定 firstMessageTimestamp 以后的消息
      *
      * @param firstMessageTimestamp
@@ -544,7 +443,6 @@ public class ChatPanel extends ParentAvailablePanel {
      * 从数据库加载本地历史消息
      */
     private void loadLocalHistory() {
-        //List<Message> messages = messageService.findByPage(roomId, messageItems.size(), PAGE_LENGTH);
         ( (RoomChatPanelCard) this.getParentPanel()).getTitlePanel().showStatusLabel("加载中...");
         new SwingWorker<Object,Object>(){
 
@@ -591,18 +489,6 @@ public class ChatPanel extends ParentAvailablePanel {
         RoomsPanel.getContext().updateUnreadCount(roomId, count);
     }
 
-    /**
-     * 更新列表中的未读消息及消息总数
-     */
-    private void updateTotalAndUnreadCount(int totalAdded, int unread) {
-        if (unread < 0) {
-            System.out.println(unread);
-        }
-        room.setUnreadCount(unread);
-        room.setMsgSum(room.getMsgSum() + totalAdded);
-        //roomService.update(room);
-    }
-
 
     /**
      * 通知数据改变，需要重绘整个列表
@@ -626,17 +512,6 @@ public class ChatPanel extends ParentAvailablePanel {
         }).start();
     }
 
-    /**
-     * 添加一条消息到最后，或者更新已有消息
-     */
-    public void addOrUpdateMessageItem() {
-
-        //Message message = messageService.findLastMessage(roomId);
-        MessageMapper mapper = SpringContextHolder.getBean(MessageMapper.class);
-        Message lastMessage = mapper.selectLastMessage(roomId);
-        addOrUpdateMessageItem(lastMessage);
-    }
-
 
     /**
      * 添加一条消息到最后，或者更新已有消息
@@ -645,7 +520,7 @@ public class ChatPanel extends ParentAvailablePanel {
     public void addOrUpdateMessageItem(Message lastMessage) {
 
         //新消息为空，或者当前没有选择聊天房间，则无需添加聊天面板中的消息记录
-        if (lastMessage == null || roomId == null) {
+        if (lastMessage == null) {
             return;
         }
         //收到的消息不是当前房间，不用添加一条消息到最后
@@ -660,15 +535,7 @@ public class ChatPanel extends ParentAvailablePanel {
             return;
         }
 
-        // 已有消息更新状态
-        int pos = findMessageItemPositionInViewReverse(lastMessage.getId());
-        if (pos > -1) {
-            MessageItem messageItem = messageItems.get(pos);
-            messageItem.setNeedToResend(!lastMessage.getIsSend());
-            messageItem.setProgress(lastMessage.getProcess());
-            messagePanel.getMessageListView().notifyItemChanged(pos);
-            return;
-        }
+
 
         // 插入新的消息
         MessageItem messageItem = new MessageItem(lastMessage, roomId);
@@ -685,15 +552,41 @@ public class ChatPanel extends ParentAvailablePanel {
     /**
      * 添加一条消息到消息列表最后
      *
-     * @param item
+     * @param lastMessage 消息
      */
-    private void addMessageItemToEnd(MessageItem item) {
-        this.messageItems.add(item);
+    public void addMessageItemToEnd(Message lastMessage) {
+        MessageItem messageItem = new MessageItem(lastMessage, roomId);
+        addMessageItemToEnd(messageItem);
+    }
+    /**
+     * 添加一条消息到消息列表最后
+     *
+     * @param messageItem 消息
+     */
+    public void addMessageItemToEnd(MessageItem messageItem) {
+        this.messageItems.add(messageItem);
         messagePanel.getMessageListView().notifyItemInserted(messageItems.size() - 1, true);
-        messagePanel.getMessageListView().setAutoScrollToBottom();
-
+        // 只有当滚动条在最底部最，新消到来后才自动滚动到底部
+        JScrollBar scrollBar = messagePanel.getMessageListView().getVerticalScrollBar();
+        if (scrollBar.getValue() == (scrollBar.getModel().getMaximum() - scrollBar.getModel().getExtent())) {
+            messagePanel.getMessageListView().setAutoScrollToBottom();
+        }
     }
 
+    /**
+     *  更新已有消息
+     * @param lastMessage 消息
+     */
+    public void updateMessageItem(Message lastMessage) {
+        // 已有消息更新状态
+        int pos = findMessageItemPositionInViewReverse(lastMessage.getId());
+        if (pos > -1) {
+            MessageItem messageItem = messageItems.get(pos);
+            messageItem.setNeedToResend(!lastMessage.getIsSend());
+            messageItem.setProgress(lastMessage.getProcess());
+            messagePanel.getMessageListView().notifyItemChanged(pos);
+        }
+    }
 
     /**
      * 发送文本消息
@@ -716,7 +609,7 @@ public class ChatPanel extends ParentAvailablePanel {
                 .isSend(true)
                 .build();
         //消息列表添加消息块
-        addOrUpdateMessageItem(message);
+        addMessageItemToEnd(message);
          new SwingWorker<WebWXSendMsgResponse, WebWXSendMsgResponse>() {
             private WebWXSendMsgResponse wxSendMsgResponse;
 
@@ -747,7 +640,7 @@ public class ChatPanel extends ParentAvailablePanel {
                     message.setIsSend(true);
                     message.setProcess(100);
                 }
-                addOrUpdateMessageItem(message);
+                updateMessageItem(message);
             }
         }.execute();
         cn.shu.wechat.swing.db.model.Message dbMessage = null;
@@ -1194,7 +1087,7 @@ public class ChatPanel extends ParentAvailablePanel {
         }
     }
 
-    public void openFile(String filePath){
+    public static void openFile(String filePath){
         if (filePath == null) {
             JOptionPane.showMessageDialog(null, "文件不存在", "打开失败", JOptionPane.ERROR_MESSAGE);
         } else {
@@ -1206,7 +1099,7 @@ public class ChatPanel extends ParentAvailablePanel {
      *
      * @param messageId 数据库主键 消息id
      */
-    public void downloadOrOpenFile(String messageId) {
+    public static void downloadOrOpenFile(String messageId) {
         MessageMapper messageMapper = SpringContextHolder.getBean(MessageMapper.class);
         Message message = messageMapper.selectByPrimaryKey(messageId);
         FileAttachment fileAttachment;
@@ -1313,7 +1206,7 @@ public class ChatPanel extends ParentAvailablePanel {
      *
      * @param path
      */
-    private void openFileWithDefaultApplication(String path) {
+    public static void openFileWithDefaultApplication(String path) {
         try {
             Desktop.getDesktop().open(new File(path));
         } catch (IOException e1) {
@@ -1347,7 +1240,4 @@ public class ChatPanel extends ParentAvailablePanel {
         messageEditorPanel.getEditor().requestFocus();
     }
 
-    public void restoreRemoteHistoryLoadedRooms() {
-        remoteHistoryLoadedRooms.clear();
-    }
 }

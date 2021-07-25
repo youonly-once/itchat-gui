@@ -29,7 +29,8 @@ public class ContactsTools {
      */
     private static Contacts getContactByUserName(String userName) {
         Map<String, Contacts> contactMap = Core.getMemberMap();
-        return contactMap.get(userName);
+        return contactMap.getOrDefault(userName, null);
+
     }
 
     /**
@@ -72,9 +73,13 @@ public class ContactsTools {
             if (memberlist !=null&& !memberlist.isEmpty()){
                 for (int i = 0; i < Math.min(2, memberlist.size()); i++) {
                     Contacts contacts = memberlist.get(i);
-                    name.append(contacts.getNickname());
+                    name.append(contacts.getNickname()).append(",");
                 }
-                return name.toString();
+                String string = name.toString();
+                if (string.isEmpty()){
+                    return string;
+                }
+                return string.substring(0,string.length()-1);
             }
         }
      return null;
@@ -127,9 +132,15 @@ public class ContactsTools {
      * @return 成员
      */
     public static Contacts getMemberOfGroup(String groupName, String userName) {
+        if (userName == null){
+            throw new RuntimeException("userName can not be null");
+        }
+        if (groupName == null){
+            throw new RuntimeException("groupName can not be null");
+        }
         Map<String, Contacts> groupMemberMap =Core.getMemberMap();
-        Contacts group = groupMemberMap.get(groupName);
-        if (group == null || userName == null) {
+        Contacts group = groupMemberMap.getOrDefault(groupName, null);
+        if (group == null) {
             return null;
         }
         List<Contacts> memberList = group.getMemberlist();

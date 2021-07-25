@@ -3,6 +3,7 @@ package cn.shu.wechat.core;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.api.MessageTools;
+import cn.shu.wechat.beans.msg.send.WebWXSendMsgResponse;
 import cn.shu.wechat.beans.msg.sync.AddMsgList;
 import cn.shu.wechat.beans.msg.sync.DelContactList;
 import cn.shu.wechat.beans.msg.sync.ModContactList;
@@ -20,6 +21,7 @@ import cn.shu.wechat.swing.panels.RoomChatPanel;
 import cn.shu.wechat.swing.panels.RoomChatPanelCard;
 import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.utils.CommonTools;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.JSONObjectUtil;
 import cn.shu.wechat.utils.LogUtil;
 import com.alibaba.fastjson.JSON;
@@ -158,8 +160,6 @@ public class MsgCenter {
                     lastMsgPrefix =Core.getNickName()+": ";
                     msgUnReadCount = 0;
                 }else{
-                    MainFrame.getContext().playMessageSound();
-                    MainFrame.getContext().setTrayFlashing();
                     lastMsgPrefix =ContactsTools.getMemberDisplayNameOfGroup(userName,msg.getMemberName())+": ";
                 }
             }else{
@@ -179,12 +179,15 @@ public class MsgCenter {
                 //新消息来了后创建房间
                 //RightPanel rightPanel = RightPanelParent.getContext().createAndShow(message.getFromUsername());
                 RoomChatPanelCard roomChatPanelCard = RoomChatPanel.getContext().addPanel(userName);
-                roomChatPanelCard.addOrUpdateMessageItem(message);
+                roomChatPanelCard.addMessageItemToEnd(message);
 
             }
             //新增或选择聊天列表
             RoomsPanel.getContext().addRoomOrOpenRoomNotSwitch(contacts,lastMsgPrefix+(message==null?msg.getContent():message.getPlaintext()),msgUnReadCount);
-
+            //如果是当前房间 发送已读通知
+            if (RoomChatPanel.getContext().getCurrRoomId().equals(msg.getFromUserName())){
+                ExecutorServiceUtil.getGlobalExecutorService().execute(() -> MessageTools.sendStatusNotify(msg.getFromUserName()));
+            }
         });
     }
     /**
@@ -352,7 +355,7 @@ public class MsgCenter {
             boolean isFromSelf = msg.getFromUserName().endsWith(Core.getUserName());
             boolean isToSelf = msg.getToUserName().endsWith(Core.getUserName());
 
-            Message build = cn.shu.wechat.beans.pojo.Message
+            Message build = Message
                     .builder()
                     .plaintext(plaintext ==null?msg.getContent():plaintext.toString())
                     .content(msg.getContent())
@@ -371,10 +374,17 @@ public class MsgCenter {
                     .appMsgType(msg.getAppMsgType())
                     .msgJson(JSON.toJSONString(msg))
                     .msgDesc(WXReceiveMsgCodeEnum.getByCode(msg.getMsgType()).getDesc())
-                    .fromMemberOfGroupDisplayname(msg.isGroupMsg() ? ContactsTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), msg.getMemberName()) : null)
-                    .fromMemberOfGroupNickname(msg.isGroupMsg() ? ContactsTools.getMemberNickNameOfGroup(msg.getFromUserName(), msg.getMemberName()) : null)
-                    .fromMemberOfGroupUsername(msg.isGroupMsg() ? msg.getMemberName() : null)
+                    .fromMemberOfGroupDisplayname(msg.isGroupMsg()&&!msg.getFromUserName().equals(Core.getUserName())
+                            ? ContactsTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), msg.getMemberName()) : null)
+                    .fromMemberOfGroupNickname(msg.isGroupMsg()&&!msg.getFromUserName().equals(Core.getUserName())
+                            ? ContactsTools.getMemberNickNameOfGroup(msg.getFromUserName(), msg.getMemberName()) : null)
+                    .fromMemberOfGroupUsername(msg.isGroupMsg() &&!msg.getFromUserName().equals(Core.getUserName())
+                            ? msg.getMemberName() : null)
                     .slavePath(msg.getSlavePath())
+                    .response(JSON.toJSONString(WebWXSendMsgResponse.builder()
+                            .BaseResponse(WebWXSendMsgResponse.BaseResponse.builder().Ret(0).build())
+                    .LocalID(msg.getMsgId())
+                    .MsgID(msg.getNewMsgId()+"").build()))
                     .build();
             int insert = messageMapper.insert(build);
             return build;

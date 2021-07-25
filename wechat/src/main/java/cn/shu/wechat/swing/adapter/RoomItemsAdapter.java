@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.adapter;
 
+import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.components.Colors;
@@ -10,6 +11,7 @@ import cn.shu.wechat.swing.panels.RoomChatPanelCard;
 import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.TimeUtil;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
 import com.alibaba.fastjson.JSONObject;
 
 import javax.swing.*;
@@ -218,6 +220,8 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
         roomChatPanelCard.showPanel(RoomChatPanelCard.MESSAGE);
         //更新聊天列表未读数量
         RoomsPanel.getContext().updateUnreadCount(roomId,0);
+        //发送消息已读通知
+        ExecutorServiceUtil.getGlobalExecutorService().execute(() -> MessageTools.sendStatusNotify(roomId));
 
         //RightPanelParent.getContext().show(roomId);
         //  rightPanel.getChatPanel().enterRoom(roomId);

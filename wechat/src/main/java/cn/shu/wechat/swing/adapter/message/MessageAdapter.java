@@ -255,9 +255,9 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 if (item.getProgress() == 100) {
                     holder.progressBar.setVisible(false);
                 } else {
-                    if (!ChatPanel.getContext().uploadingOrDownloadingFiles.contains(item.getFileAttachment().getId())) {
+       /*             if (!ChatPanel.getContext().uploadingOrDownloadingFiles.contains(item.getFileAttachment().getId())) {
                         item.setNeedToResend(true);
-                    }
+                    }*/
                 }
             }
         } else {
@@ -283,7 +283,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     return;
                 }*/
 
-                ChatPanel.getContext().resendFileMessage(item.getId(), "file");
+               //ChatPanel.getContext().resendFileMessage(item.getId(), "file");
 
                 super.mouseClicked(e);
             }
@@ -316,7 +316,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    ChatPanel.getContext().downloadOrOpenFile(item.getId());
+                    ChatPanel.downloadOrOpenFile(item.getId());
                 }
             }
         };
@@ -404,7 +404,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     return;
                 }*/
 
-                ChatPanel.getContext().resendFileMessage(item.getId(), "image");
+                //ChatPanel.getContext().resendFileMessage(item.getId(), "image");
 
                 super.mouseClicked(e);
             }
@@ -437,7 +437,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     if (item.getImageAttachment().isVideo()){
-                        ChatPanel.getContext().openFile(item.getImageAttachment().getImagePath());
+                        ChatPanel.openFile(item.getImageAttachment().getImagePath());
                         return;
                     }
 
@@ -473,7 +473,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                                 //Desktop.getDesktop().open(new File(path));
                                 File file = new File(path);
                                 if (file.length()> 1024*1024){
-                                    ChatPanel.getContext().openFile(path);
+                                    ChatPanel.openFile(path);
                                     //Desktop.getDesktop().open(new File(path));
                                     return;
                                 }

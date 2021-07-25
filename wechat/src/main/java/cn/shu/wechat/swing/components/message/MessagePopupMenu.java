@@ -1,5 +1,10 @@
 package cn.shu.wechat.swing.components.message;
 
+import cn.shu.wechat.api.MessageTools;
+import cn.shu.wechat.api.WeChatTool;
+import cn.shu.wechat.beans.msg.send.WebWXSendMsgResponse;
+import cn.shu.wechat.beans.pojo.Message;
+import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCMenuItemUI;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
@@ -9,6 +14,9 @@ import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 import cn.shu.wechat.swing.utils.FileCache;
 import cn.shu.wechat.swing.utils.ImageCache;
+import cn.shu.wechat.utils.SpringContextHolder;
+import com.alibaba.fastjson.JSON;
+import org.apache.commons.lang.StringUtils;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -33,7 +41,7 @@ public class MessagePopupMenu extends JPopupMenu {
         JMenuItem item1 = new JMenuItem("复制");
         JMenuItem item2 = new JMenuItem("删除");
         JMenuItem item3 = new JMenuItem("转发");
-
+        JMenuItem item4 = new JMenuItem("撤回");
         item1.setUI(new RCMenuItemUI());
         item1.addActionListener(new AbstractAction() {
             @Override
@@ -152,10 +160,11 @@ public class MessagePopupMenu extends JPopupMenu {
                         }
                         break;
                     }
+                    default:
                 }
 
                 if (messageId != null && !messageId.isEmpty()) {
-                    ChatPanel.getContext().deleteMessage(messageId);
+                    //ChatPanel.getContext().deleteMessage(messageId);
                 }
             }
         });
@@ -167,10 +176,56 @@ public class MessagePopupMenu extends JPopupMenu {
                 System.out.println("转发");
             }
         });
+        item4.setUI(new RCMenuItemUI());
+        item4.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String messageId = null;
+                switch (messageType) {
+                    case MessageItem.RIGHT_TEXT:
+                    case MessageItem.LEFT_TEXT: {
+                        SizeAutoAdjustTextArea textArea = (SizeAutoAdjustTextArea) getInvoker();
+                        messageId = textArea.getTag().toString();
+                        break;
+                    }
+                    case (MessageItem.RIGHT_IMAGE):
+                    case (MessageItem.LEFT_IMAGE): {
+                        MessageImageLabel imageLabel = (MessageImageLabel) getInvoker();
+                        Object obj = imageLabel.getTag();
+                        if (obj != null) {
+                            Map map = (Map) obj;
+                            messageId = (String) map.get("messageId");
+                        }
+                        break;
+                    }
+                    case (MessageItem.RIGHT_ATTACHMENT):
+                    case (MessageItem.LEFT_ATTACHMENT): {
+                        AttachmentPanel attachmentPanel = (AttachmentPanel) getInvoker();
+                        Object obj = attachmentPanel.getTag();
+                        if (obj != null) {
+                            Map map = (Map) obj;
+                            messageId = (String) map.get("messageId");
+                        }
+                        break;
+                    }
+                    default:
+                }
 
+                if (!StringUtils.isEmpty(messageId)) {
+                    MessageMapper bean = SpringContextHolder.getBean(MessageMapper.class);
+                    Message message = bean.selectByPrimaryKey(messageId);
+                    String response = message.getResponse();
+                    WebWXSendMsgResponse webWXSendMsgResponse = JSON.parseObject(response, WebWXSendMsgResponse.class);
+                    if (webWXSendMsgResponse.getBaseResponse().getRet() == 0){
+                        boolean b = MessageTools.sendRevokeMsgByUserId(message.getToUsername(), webWXSendMsgResponse.getLocalID(), webWXSendMsgResponse.getMsgID());
+                    }
+                }
+            }
+        });
         this.add(item1);
         this.add(item2);
-        //this.add(item3);
+        this.add(item4);
+       // this.add(item3);
 
         setBorder(new LineBorder(Colors.SCROLL_BAR_TRACK_LIGHT));
         setBackground(Colors.FONT_WHITE);
