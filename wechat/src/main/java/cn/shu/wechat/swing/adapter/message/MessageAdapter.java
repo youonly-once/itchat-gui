@@ -608,7 +608,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      * @return
      */
     public ImageIcon preferredImageSize(ImageIcon imageIcon) {
-        return preferredImageSize(imageIcon,64);
+        return preferredImageSize(imageIcon,128);
     }
 
     /**

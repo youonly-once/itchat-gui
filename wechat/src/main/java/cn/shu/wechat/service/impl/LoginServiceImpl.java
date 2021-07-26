@@ -589,12 +589,17 @@ public class LoginServiceImpl implements ILoginService {
         for (Object o : groupObject.getJSONArray("MemberList")) {
             //遍历群成员
             JSONObject memberO = (JSONObject) o;
-            if (Core.getContactMap().containsKey(memberO.getString("UserName"))) {
-                memberArray.add(Core.getContactMap().get(memberO.getString("UserName")));
+            String userName = memberO.getString("UserName");
+            if (Core.getContactMap().containsKey(userName)) {
+                memberArray.add(Core.getContactMap().get(userName));
+                continue;
+            }
+            if (userName.equals(Core.getUserName())){
+                memberArray.add(Core.getUserSelf());
                 continue;
             }
             HashMap<String, String> map = new HashMap<String, String>();
-            map.put("UserName", memberO.getString("UserName"));
+            map.put("UserName", userName);
             map.put("EncryChatRoomId", groupUserName);
             list.add(map);
         }

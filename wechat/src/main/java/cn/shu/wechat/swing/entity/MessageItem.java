@@ -146,13 +146,9 @@ public class MessageItem implements Comparable<MessageItem> {
                 this.videoAttachmentItem = videoAttachmentItem;
                 break;*/
             case MSGTYPE_VOIPMSG:
-                break;
             case MSGTYPE_VOIPNOTIFY:
-                break;
             case MSGTYPE_VOIPINVITE:
-                break;
             case MSGTYPE_LOCATION:
-                break;
             case MSGTYPE_VERIFYMSG:
             case MSGTYPE_STATUSNOTIFY:
             case MSGTYPE_SYSNOTICE:

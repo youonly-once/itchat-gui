@@ -177,10 +177,13 @@ public class MsgCenter {
                 message.setProcess(100);
                 message.setIsSend(true);
                 //新消息来了后创建房间
-                //RightPanel rightPanel = RightPanelParent.getContext().createAndShow(message.getFromUsername());
-                RoomChatPanelCard roomChatPanelCard = RoomChatPanel.getContext().addPanel(userName);
-                roomChatPanelCard.addMessageItemToEnd(message);
-
+                //创建房间的时候会从数据库加载历史消息，由于这次的消息已经写入了数据库，所以不用再添加了
+                RoomChatPanelCard roomChatPanelCard = RoomChatPanel.getContext().get(userName);
+                if (roomChatPanelCard == null) {
+                    roomChatPanelCard = RoomChatPanel.getContext().addPanel(userName);
+                }else{
+                    roomChatPanelCard.addMessageItemToEnd(message);
+                }
             }
             //新增或选择聊天列表
             RoomsPanel.getContext().addRoomOrOpenRoomNotSwitch(contacts,lastMsgPrefix+(message==null?msg.getContent():message.getPlaintext()),msgUnReadCount);

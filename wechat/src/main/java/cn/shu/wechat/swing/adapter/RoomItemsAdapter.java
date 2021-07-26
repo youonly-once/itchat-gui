@@ -126,7 +126,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
                         //之前选择的房间背景色去掉
                         setBackground(selectedViewHolder,Colors.DARK);
                         // 进入房间
-                        enterRoom(roomItem.getRoomId());
+                        RoomsPanel.getContext().enterRoom(roomItem.getRoomId());
 
                   /*      for (RoomItemViewHolder holder : viewHolders) {
                             if (holder != viewHolder) {
@@ -204,33 +204,6 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
         holder.timeUnread.setBackground(color);
     }
 
-    /**
-     * 进入房间
-     *
-     * @param roomId 房间id
-     */
-    private void enterRoom(String roomId) {
-        // 加载房间消息
-         //ChatPanel.getContext().enterRoom(roomId);
 
-        //切换显示层
-        RoomChatPanelCard roomChatPanelCard = RoomChatPanel.getContext().createAndShow(roomId);
-        RoomChatPanel.getContext().show(roomId);
-        //显示聊天界面
-        roomChatPanelCard.showPanel(RoomChatPanelCard.MESSAGE);
-        //更新聊天列表未读数量
-        RoomsPanel.getContext().updateUnreadCount(roomId,0);
-        //发送消息已读通知
-        ExecutorServiceUtil.getGlobalExecutorService().execute(() -> MessageTools.sendStatusNotify(roomId));
-
-        //RightPanelParent.getContext().show(roomId);
-        //  rightPanel.getChatPanel().enterRoom(roomId);
-        //TitlePanel.getContext().hideRoomMembersPanel();
-        /*RoomMembersPanel.getContext().setRoomId(roomId);
-        if (RoomMembersPanel.getContext().isVisible())
-        {
-            RoomMembersPanel.getContext().updateUI();
-        }*/
-    }
 
 }

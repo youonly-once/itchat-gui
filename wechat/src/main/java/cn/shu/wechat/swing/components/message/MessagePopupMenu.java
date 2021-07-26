@@ -216,7 +216,7 @@ public class MessagePopupMenu extends JPopupMenu {
                     Message message = bean.selectByPrimaryKey(messageId);
                     String response = message.getResponse();
                     WebWXSendMsgResponse webWXSendMsgResponse = JSON.parseObject(response, WebWXSendMsgResponse.class);
-                    if (webWXSendMsgResponse.getBaseResponse().getRet() == 0){
+                    if (webWXSendMsgResponse != null && webWXSendMsgResponse.getBaseResponse().getRet() == 0){
                         boolean b = MessageTools.sendRevokeMsgByUserId(message.getToUsername(), webWXSendMsgResponse.getLocalID(), webWXSendMsgResponse.getMsgID());
                     }
                 }

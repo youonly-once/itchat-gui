@@ -1,7 +1,10 @@
 package cn.shu.wechat.swing.panels;
 
+import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.service.ILoginService;
+import cn.shu.wechat.service.impl.LoginServiceImpl;
 import cn.shu.wechat.swing.adapter.RoomItemViewHolder;
 import cn.shu.wechat.swing.adapter.RoomItemsAdapter;
 import cn.shu.wechat.swing.components.Colors;
@@ -9,6 +12,8 @@ import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCListView;
 import cn.shu.wechat.swing.db.model.Room;
 import cn.shu.wechat.swing.entity.RoomItem;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
+import cn.shu.wechat.utils.SpringContextHolder;
 
 import javax.swing.*;
 import java.awt.*;
@@ -75,7 +80,33 @@ public class RoomsPanel extends ParentAvailablePanel {
             roomItemList.add(item);
         }*/
     }
+    /**
+     * 进入房间
+     *
+     * @param roomId 房间id
+     */
+    public void enterRoom(String roomId) {
+        // 加载房间消息
+        //ChatPanel.getContext().enterRoom(roomId);
 
+        //切换显示层
+        RoomChatPanelCard roomChatPanelCard = RoomChatPanel.getContext().createAndShow(roomId);
+        RoomChatPanel.getContext().show(roomId);
+        //显示聊天界面
+        roomChatPanelCard.showPanel(RoomChatPanelCard.MESSAGE);
+        //更新聊天列表未读数量
+        updateUnreadCount(roomId,0);
+        //发送消息已读通知
+        ExecutorServiceUtil.getGlobalExecutorService().execute(() -> MessageTools.sendStatusNotify(roomId));
+        //RightPanelParent.getContext().show(roomId);
+        //  rightPanel.getChatPanel().enterRoom(roomId);
+        //TitlePanel.getContext().hideRoomMembersPanel();
+        /*RoomMembersPanel.getContext().setRoomId(roomId);
+        if (RoomMembersPanel.getContext().isVisible())
+        {
+            RoomMembersPanel.getContext().updateUI();
+        }*/
+    }
     /**
      * 添加房间
      *

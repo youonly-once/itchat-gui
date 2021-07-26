@@ -99,9 +99,9 @@ public class ChatPanel extends ParentAvailablePanel {
     /**
      * 房间的用户 username列表
      */
-    public List<String> roomMembers = new ArrayList<>();
+    private List<String> roomMembers = new ArrayList<>();
 
-    public  List<String> uploadingOrDownloadingFiles = new ArrayList<>();
+    private  List<String> uploadingOrDownloadingFiles = new ArrayList<>();
 
     /**
      * 文件缓存
@@ -513,41 +513,6 @@ public class ChatPanel extends ParentAvailablePanel {
     }
 
 
-    /**
-     * 添加一条消息到最后，或者更新已有消息
-     * @param lastMessage 新消息
-     */
-    public void addOrUpdateMessageItem(Message lastMessage) {
-
-        //新消息为空，或者当前没有选择聊天房间，则无需添加聊天面板中的消息记录
-        if (lastMessage == null) {
-            return;
-        }
-        //收到的消息不是当前房间，不用添加一条消息到最后
-        //如果是自己发送的消息，当前房间id和toUserName匹配时
-        if (lastMessage.getFromUsername().equals(Core.getUserSelf().getUsername())){
-            if (!roomId.equals(lastMessage.getToUsername())){
-                //不是当前房间的消息
-                return;
-            }
-        }else if(!roomId.equals(lastMessage.getFromUsername())){
-            //不是当前房间的消息
-            return;
-        }
-
-
-
-        // 插入新的消息
-        MessageItem messageItem = new MessageItem(lastMessage, roomId);
-        this.messageItems.add(messageItem);
-        messagePanel.getMessageListView().notifyItemInserted(messageItems.size() - 1, false);
-
-        // 只有当滚动条在最底部最，新消到来后才自动滚动到底部
-        JScrollBar scrollBar = messagePanel.getMessageListView().getVerticalScrollBar();
-        if (scrollBar.getValue() == (scrollBar.getModel().getMaximum() - scrollBar.getModel().getExtent())) {
-            messagePanel.getMessageListView().setAutoScrollToBottom();
-        }
-    }
 
     /**
      * 添加一条消息到消息列表最后
@@ -777,7 +742,6 @@ public class ChatPanel extends ParentAvailablePanel {
 
         return -1;
     }
-
 
     /**
      * 随机生成MessageId
