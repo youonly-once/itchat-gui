@@ -301,8 +301,9 @@ public class LoginFrame extends JFrame {
         statusLabel.setText("11. 下载联系人头像");
         log.info("11. 下载联系人头像");
         for (Map.Entry<String, Contacts> entry : Core.getMemberMap().entrySet()) {
-            SleepUtils.sleep((new Random().nextInt()+1)*1000);
-            ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(
+            Core.getContactHeadImgPath().put(entry.getValue().getUsername(), DownloadTools.downloadHeadImgBig(entry.getValue().getHeadimgurl(), entry.getValue().getUsername()));
+            log.info("下载头像：({}):{}", entry.getValue().getNickname(), entry.getValue().getHeadimgurl());
+        /*    ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(
 
                     () -> {
 
@@ -315,7 +316,7 @@ public class LoginFrame extends JFrame {
                 public void run() {
                     AvatarUtil.putUserAvatarCache(entry.getValue().getUsername(), DownloadTools.downloadImage(entry.getValue().getHeadimgurl()));
                 }
-            });
+            });*/
 
         }
     }

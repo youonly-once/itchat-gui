@@ -60,7 +60,7 @@ public class LoginServiceImpl implements ILoginService {
     private AttrHistoryMapper attrHistoryMapper;
 
     @Resource
-    private MsgCenter msgCenter;//= MsgCenter.getMessageCenter();
+    private MsgCenter msgCenter;
 
     @Resource
     private ContactsMapper contactsMapper;
@@ -468,7 +468,8 @@ public class LoginServiceImpl implements ILoginService {
                     }
                 } else {
                     //比较上次差异
-                    ExecutorServiceUtil.getGlobalExecutorService().execute(() -> compareOld(Core.getContactMap().get(userName), userName, contacts, "普通联系人"));
+                    Contacts old = Core.getContactMap().get(userName);
+                    ExecutorServiceUtil.getGlobalExecutorService().execute(() -> compareOld(old, userName, contacts, "普通联系人"));
                     // 普通联系人
                     Core.getContactMap().put(userName, contacts);
                 }
@@ -982,7 +983,7 @@ public class LoginServiceImpl implements ILoginService {
             }
         }
         try {
-            //attrHistoryMapper.batchInsert(attrHistories);
+            attrHistoryMapper.batchInsert(attrHistories);
         } catch (Exception e) {
 
         }
