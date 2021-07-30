@@ -177,10 +177,10 @@ public class MainFrame extends JFrame  {
                 while (trayFlashing) {
                     try {
                         trayIcon.setImage(emptyTrayIcon);
-                        Thread.sleep(800);
+                        Thread.sleep(500);
 
                         trayIcon.setImage(normalTrayIcon);
-                        Thread.sleep(800);
+                        Thread.sleep(500);
 
                     } catch (InterruptedException e) {
                         e.printStackTrace();

@@ -10,6 +10,7 @@ import cn.shu.wechat.enums.WXSendMsgCodeEnum;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.mapper.ContactsMapper;
 import cn.shu.wechat.mapper.MessageMapper;
+import cn.shu.wechat.service.ILoginService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -68,7 +69,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 @Slf4j
 public class ChartUtil {
-    private static final String CHART_PATH = "F:/1/";
+    private static final String CHART_PATH = "C:/chat/";
 
     @Resource
     private AttrHistoryMapper attrHistoryMapper;
@@ -79,40 +80,9 @@ public class ChartUtil {
     @Resource
     private ContactsMapper contactsMapper;
 
+    @Resource
+    private ILoginService loginService;
 
-    public static void main(String[] args) {
-        // 创建主题样式
-        StandardChartTheme standardChartTheme = new StandardChartTheme("CN");
-        // 设置标题字体
-        standardChartTheme.setExtraLargeFont(new Font("宋书", Font.BOLD, 28));
-        // 设置图例的字体
-        standardChartTheme.setRegularFont(new Font("宋书", Font.PLAIN, 14));
-        // 设置轴向的字体
-        standardChartTheme.setLargeFont(new Font("宋书", Font.PLAIN, 14));
-        // 应用主题样式
-        ChartFactory.setChartTheme(standardChartTheme);
-
-
-        ChartUtil chart = new ChartUtil();
-       /* // 生成单组柱状图
-        chart.makeBarChart();
-        // 生成单组柱状图
-        chart.makeBarChart2();
-        // 生成多组柱状图
-        chart.makeBarGroupChart();
-        // 生成堆积柱状图
-        chart.makeStackedBarChart();
-        // 生成折线图
-        chart.makeLineAndShapeChart();
-
-        // 生成饼状图
-        chart.makeWXContactUpdateAttrBarChart();
-        chart.makeWXContactInfoPieChart();
-
-        */
-        // chart.makeWXContactMessageTop();
-        System.out.println((int) Math.ceil(3 / 50.0));
-    }
 
     public void create() {
         // 创建主题样式
@@ -134,64 +104,56 @@ public class ChartUtil {
     }
 
     /**
-     * 获取群成员性别分布
      *
-     * @param groupName
-     * @param attrName
-     * @return
+     * @param groupName 群id
+     * @param groupRemarkName 群备注
+     * @param attrName 属性名
+     * @param width 图片宽度
+     * @param height 图片高度
+     * @return 图片路径
      */
     public String makeGroupMemberAttrPieChart(String groupName, String groupRemarkName, String attrName, int width, int height) {
         log.info("makeGroupMemberAttrPieChart：" + attrName);
-        List<Contacts> memberlist = Core.getMemberMap().get(groupName).getMemberlist();
+        Contacts group = Core.getMemberMap().get(groupName);
+        List<Contacts> memberlist = null;
+        if (group == null
+                || group.getMemberlist()== null
+                || group.getMemberlist().isEmpty()){
+            memberlist = loginService.WebWxBatchGetContact(groupName);
+        }else{
+            memberlist = group.getMemberlist();
+        }
         if (memberlist == null || memberlist.isEmpty()) {
             return null;
         }
-        String[] sexKeys = {"男", "女", "无"};
-        Class<Contacts> contactsClass = Contacts.class;
-        Field[] declaredFields = contactsClass.getDeclaredFields();
-        HashMap<String, HashMap<String, String>> stringHashMapHashMap = new HashMap<>();
-        //属性值转汉字
-        HashMap<String, String> stringStringHashMap = new HashMap<String, String>();
-        stringStringHashMap.put("0", "未设置");
-        stringStringHashMap.put("1", "男");
-        stringStringHashMap.put("2", "女");
-        stringHashMapHashMap.put("Sex", stringStringHashMap);
-        stringStringHashMap = new HashMap<>();
-        stringStringHashMap.put("", "未设置");
-        stringHashMapHashMap.put("Province", stringStringHashMap);
-        for (Field field : declaredFields) {
+        for (Field field : Contacts.class.getDeclaredFields()) {
             field.setAccessible(true);
             String key = field.getName();
-            if (!key.equals(attrName)) {
+            if (!key.equalsIgnoreCase(attrName)) {
                 continue;
             }
-            String title = key;
-            switch (key) {
-                case "Sex":
-                    title = "【" + groupRemarkName + "】群成员性别比例";
-                    break;
-                case "Province":
-                    title = "【" + groupRemarkName + "】群成员省市分布";
-                    break;
-            }
-
+            String title = "【" + groupRemarkName + "】群成员"+key+"比例";
             Map<String, AtomicInteger> testMap = new HashMap<>(10);
             for (Contacts o : memberlist) {
-                JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(o));
-                String value = null;
-                if (stringHashMapHashMap.get(key) != null) {
-                    value = stringHashMapHashMap.get(key).get(jsonObject.getString(key));
+                Object value = null;
+                try {
+                    value = field.get(o);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
                 }
                 if (value == null) {
-                    value = jsonObject.getString(key);
+                    value = "未设置";
                 }
-
-                testMap.computeIfAbsent(value, v -> new AtomicInteger()).getAndIncrement();
+                //统计次数
+                testMap.computeIfAbsent(value.toString(), v -> new AtomicInteger()).getAndIncrement();
             }
-            String imgPath = createValidityComparePimChar(getDataPieSetByUtil(sortMapByValue(testMap)), title,
-                    UUID.randomUUID().toString().replace("-", "") + "_" + key + ".png", sexKeys, width, height);
+            //排序
+            Map<String, AtomicInteger> sortMap = sortMapByValue(testMap);
+            //创建数据
+            PieDataset dataPieSet = getDataPieSetByUtil(sortMap);
+            String imgPath = createValidityComparePimChar(dataPieSet, title,
+                    UUID.randomUUID().toString().replace("-", "") + "_" + key + ".png",  width, height);
             return imgPath;
-
 
         }
         return null;
@@ -269,7 +231,7 @@ public class ChartUtil {
     public void makeWXContactInfoPieChart() {
         System.out.println("create pie-chart.");
         Map<String, Contacts> contactMap = Core.getContactMap();
-        String[] sexKeys = {"男", "女", "无"};
+
         Set<String> keys = new HashSet<>();
         for (Contacts value : contactMap.values()) {
             Class<Contacts> contactsClass = Contacts.class;
@@ -318,7 +280,7 @@ public class ChartUtil {
                         testMap.computeIfAbsent(s, v -> new AtomicInteger()).getAndIncrement();
                     }
                     createValidityComparePimChar(getDataPieSetByUtil(sortMapByValue(testMap)), title,
-                            key + ".png", sexKeys, 1920, 1080);
+                            key + ".png",  1920, 1080);
                 }
             }).start();
 
@@ -712,7 +674,7 @@ public class ChartUtil {
         DefaultPieDataset dataset = new DefaultPieDataset();
         for (Map.Entry<String, AtomicInteger> stringAtomicIntegerEntry : datas.entrySet()) {
             Object value = stringAtomicIntegerEntry.getValue();
-            dataset.setValue(stringAtomicIntegerEntry.getKey().toString(), value == null ? 0 : Integer.parseInt(value.toString()));
+            dataset.setValue(stringAtomicIntegerEntry.getKey(), value == null ? 0 : Integer.parseInt(value.toString()));
         }
         return dataset;
     }
@@ -851,6 +813,7 @@ public class ChartUtil {
             }
 
             // 每根柱子以初始化的颜色不断轮循
+            @Override
             public Paint getItemPaint(int i, int j) {
                 return colors[j % colors.length];
             }
@@ -1002,11 +965,10 @@ public class ChartUtil {
      * @param dataset    数据集
      * @param chartTitle 图标题
      * @param charName   生成图的名字
-     * @param pieKeys    分饼的名字集
      * @return
      */
     public String createValidityComparePimChar(PieDataset dataset,
-                                               String chartTitle, String charName, String[] pieKeys, int width, int height) {
+                                               String chartTitle, String charName, int width, int height) {
         JFreeChart chart = ChartFactory.createPieChart3D(chartTitle, // chart
                 // title
                 dataset,// data
@@ -1057,6 +1019,7 @@ public class ChartUtil {
         plot.setStartAngle(90);
         plot.setBackgroundPaint(new Color(39, 43, 88));
         // // 设置分饼颜色
+        String[] pieKeys = {"男", "女", "无"};
         plot.setSectionPaint(pieKeys[0], new Color(65, 105, 225));
         plot.setSectionPaint(pieKeys[1], new Color(30, 144, 255));
         plot.setLabelLinkMargin(0.2);
@@ -1071,28 +1034,19 @@ public class ChartUtil {
             ChartUtils.writeChartAsPNG(fos_jpg, chart, width, height);
             //发送消息
             fos_jpg.close();//先关流才能使用文件发送
-            ArrayList<MessageTools.Message> messages = new ArrayList<>();
-            MessageTools.Message filehelper = MessageTools.Message.builder()
-                    .content(chartName)
-                    .toUserName("filehelper")
-                    .replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
-                    .build();
-            messages.add(filehelper);
-            //MessageTools.sendMsgByUserId(results, "filehelper");
             return chartName;
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
+        } finally {
             try {
                 if (fos_jpg != null) {
                     fos_jpg.close();
                 }
 
             } catch (Exception e1) {
-                e.printStackTrace();
+                e1.printStackTrace();
             }
-            return null;
-        } finally {
-
         }
 
     }

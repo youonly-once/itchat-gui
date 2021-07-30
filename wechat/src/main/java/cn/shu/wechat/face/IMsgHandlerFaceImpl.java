@@ -238,9 +238,11 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 if (msg.isGroupMsg()) {
                     String imgPath = chartUtil.makeGroupMemberAttrPieChart(toUserName, remarkNameByGroupUserName, "Sex", 500, 400);
                     //群消息
-                    messages.add(MessageTools.Message.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
-                            .filePath(imgPath)
-                            .toUserName(toUserName).build());
+                    if (imgPath != null){
+                        messages.add(MessageTools.Message.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
+                                .filePath(imgPath)
+                                .toUserName(toUserName).build());
+                    }
                     log.info("计算群【" + remarkNameByGroupUserName + "】成员性别分布图");
                 }
 

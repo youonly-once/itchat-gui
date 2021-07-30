@@ -150,6 +150,7 @@ public class MessageTools {
                 }
 
             } catch (Exception e) {
+                e.printStackTrace();
                 log.error("发送消息失败：{}", e.getMessage());
             }
             List<cn.shu.wechat.beans.pojo.Message> messageList = storeMsgToDB(messages, sendMsgResponse, toUserName);
@@ -459,7 +460,10 @@ public class MessageTools {
         textMsg.Content = content;
         msgRequest.Msg = textMsg;
         WebWXSendMsgResponse webWXSendMsgResponse = sendMsg(msgRequest, url);
-        callback.onTaskSuccess(100,100);
+        if (callback!=null){
+            callback.onTaskSuccess(100,100);
+        }
+
         return webWXSendMsgResponse;
 
     }
@@ -566,7 +570,9 @@ public class MessageTools {
         textMsg.Content = content;
         msgRequest.Msg = textMsg;
         WebWXSendMsgResponse webWXSendMsgResponse = sendMsg(msgRequest, url);
-        callback.onTaskSuccess(100,100);
+        if (callback!=null){
+            callback.onTaskSuccess(100,100);
+        }
         return webWXSendMsgResponse;
 
 

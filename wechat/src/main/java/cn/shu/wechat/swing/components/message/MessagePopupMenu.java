@@ -14,6 +14,7 @@ import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 import cn.shu.wechat.swing.utils.FileCache;
 import cn.shu.wechat.swing.utils.ImageCache;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang.StringUtils;
@@ -210,15 +211,18 @@ public class MessagePopupMenu extends JPopupMenu {
                     }
                     default:
                 }
-
+                final String id = messageId;
                 if (!StringUtils.isEmpty(messageId)) {
-                    MessageMapper bean = SpringContextHolder.getBean(MessageMapper.class);
-                    Message message = bean.selectByPrimaryKey(messageId);
-                    String response = message.getResponse();
-                    WebWXSendMsgResponse webWXSendMsgResponse = JSON.parseObject(response, WebWXSendMsgResponse.class);
-                    if (webWXSendMsgResponse != null && webWXSendMsgResponse.getBaseResponse().getRet() == 0){
-                        boolean b = MessageTools.sendRevokeMsgByUserId(message.getToUsername(), webWXSendMsgResponse.getLocalID(), webWXSendMsgResponse.getMsgID());
-                    }
+                    ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
+                        MessageMapper bean = SpringContextHolder.getBean(MessageMapper.class);
+                        Message message = bean.selectByPrimaryKey(id);
+                        String response = message.getResponse();
+                        WebWXSendMsgResponse webWXSendMsgResponse = JSON.parseObject(response, WebWXSendMsgResponse.class);
+                        if (webWXSendMsgResponse != null && webWXSendMsgResponse.getBaseResponse().getRet() == 0){
+                            boolean b = MessageTools.sendRevokeMsgByUserId(message.getToUsername(), webWXSendMsgResponse.getLocalID(), webWXSendMsgResponse.getMsgID());
+                        }
+                    });
+
                 }
             }
         });
