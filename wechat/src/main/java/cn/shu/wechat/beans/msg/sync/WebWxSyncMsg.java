@@ -3,6 +3,7 @@
  */
 package cn.shu.wechat.beans.msg.sync;
 
+import cn.shu.wechat.beans.pojo.Contacts;
 import lombok.Data;
 
 import java.util.List;
@@ -20,11 +21,11 @@ public class WebWxSyncMsg {
     private int AddMsgCount;
     private List<AddMsgList> AddMsgList;
     private int ModContactCount;
-    private List<ModContactList> ModContactList;
+    private List<Contacts> ModContactList;
     private int DelContactCount;
-    private List<DelContactList> DelContactList;
+    private List<Contacts> DelContactList;
     private int ModChatRoomMemberCount;
-    // private List<String> ModChatRoomMemberList;
+   // private List<String> ModChatRoomMemberList;
     private Profile Profile;
     private int ContinueFlag;
     private SyncKey SyncKey;

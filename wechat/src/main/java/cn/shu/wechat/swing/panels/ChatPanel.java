@@ -1,16 +1,12 @@
 package cn.shu.wechat.swing.panels;
 
-import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.beans.msg.send.WebWXSendMsgResponse;
-import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXSendMsgCodeEnum;
 import cn.shu.wechat.mapper.MessageMapper;
-import cn.shu.wechat.service.ILoginService;
-import cn.shu.wechat.swing.RoomTypeEnum;
 import cn.shu.wechat.swing.adapter.message.*;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
@@ -20,7 +16,6 @@ import cn.shu.wechat.swing.components.message.FileEditorThumbnail;
 import cn.shu.wechat.swing.components.message.RemindUserPopup;
 import cn.shu.wechat.swing.db.model.FileAttachment;
 import cn.shu.wechat.swing.db.model.ImageAttachment;
-import cn.shu.wechat.swing.db.model.Room;
 import cn.shu.wechat.swing.entity.FileAttachmentItem;
 import cn.shu.wechat.swing.entity.ImageAttachmentItem;
 import cn.shu.wechat.swing.entity.MessageItem;
@@ -36,7 +31,6 @@ import cn.shu.wechat.swing.utils.HttpUtil;
 import cn.shu.wechat.swing.utils.MimeTypeUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

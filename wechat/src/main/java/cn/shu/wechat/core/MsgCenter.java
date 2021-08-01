@@ -15,7 +15,7 @@ import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
 import cn.shu.wechat.enums.WXSendMsgCodeEnum;
 import cn.shu.wechat.face.IMsgHandlerFace;
 import cn.shu.wechat.mapper.MessageMapper;
-import cn.shu.wechat.service.ILoginService;
+import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.panels.RoomChatPanel;
 import cn.shu.wechat.swing.panels.RoomChatPanelCard;
@@ -56,7 +56,7 @@ public class MsgCenter {
     private MessageMapper messageMapper;
 
     @Resource
-    private ILoginService loginService;
+    private LoginService loginService;
 
     /**
      * 接收消息，放入队列
@@ -69,7 +69,10 @@ public class MsgCenter {
         //消息类型封装
         WXReceiveMsgCodeEnum msgType = WXReceiveMsgCodeEnum.getByCode(msg.getMsgType());
         String s = LogUtil.printFromMeg(msg, msgType.getDesc());
-
+        //如果是当前房间 发送已读通知
+        if (RoomChatPanel.getContext().getCurrRoomId().equals(msg.getFromUserName())){
+            ExecutorServiceUtil.getGlobalExecutorService().execute(() -> MessageTools.sendStatusNotify(msg.getFromUserName()));
+        }
         //用户在其他平台消息已读的通知
         if (msg.getMsgType() == WXReceiveMsgCodeEnum.MSGTYPE_STATUSNOTIFY.getCode()){
             log.debug(s);
@@ -145,52 +148,53 @@ public class MsgCenter {
      */
     private void updateUI(Message message,AddMsgList msg){
         //################3聊天面板消息处理###########3333
-        SwingUtilities.invokeLater(() -> {
-            int msgUnReadCount = 1;
-            String lastMsgPrefix  = "";
-            //新增消息列表
-            String userName = msg.getFromUserName();
-            if (userName.equals(Core.getUserName())) {
-                //自己的消息，默认已读
+        int msgUnReadCount = 1;
+        String lastMsgPrefix  = "";
+        //新增消息列表
+        String userName = msg.getFromUserName();
+        if (userName.equals(Core.getUserName())) {
+            //自己的消息，默认已读
+            msgUnReadCount = 0;
+            userName = msg.getToUserName();
+        }else if(userName.startsWith("@@")){
+            //自己在群里发的消息
+            if ( Core.getUserName().equals(msg.getMemberName())){
+                lastMsgPrefix =Core.getNickName()+": ";
                 msgUnReadCount = 0;
-                userName = msg.getToUserName();
-            }else if(userName.startsWith("@@")){
-                //自己在群里发的消息
-                if ( Core.getUserName().equals(msg.getMemberName())){
-                    lastMsgPrefix =Core.getNickName()+": ";
-                    msgUnReadCount = 0;
-                }else{
-                    lastMsgPrefix =ContactsTools.getMemberDisplayNameOfGroup(userName,msg.getMemberName())+": ";
-                }
             }else{
-                MainFrame.getContext().playMessageSound();
-                MainFrame.getContext().setTrayFlashing();
+                lastMsgPrefix =ContactsTools.getMemberDisplayNameOfGroup(userName,msg.getMemberName())+": ";
             }
+        }else{
+            MainFrame.getContext().playMessageSound();
+            MainFrame.getContext().setTrayFlashing();
+        }
 
-            if (!Core.getMemberMap().containsKey(userName)){
-                //未保存到通讯录的联系人 手动添加
-                loginService.WebWxBatchGetContact(userName);
-            }
-            Contacts contacts = Core.getMemberMap().get(userName);
+        if (!Core.getMemberMap().containsKey(userName)){
+            //未保存到通讯录的联系人 手动添加
+            loginService.WebWxBatchGetContact(userName);
+        }
+        Contacts contacts = Core.getMemberMap().get(userName);
+        String lastMsg = lastMsgPrefix+(message==null?msg.getContent():message.getPlaintext());
+        String roomId = userName;
+        int count = msgUnReadCount;
+        SwingUtilities.invokeLater(() -> {
+
             //刷新消息
             if (message!=null){
                 message.setProcess(100);
                 message.setIsSend(true);
                 //新消息来了后创建房间
                 //创建房间的时候会从数据库加载历史消息，由于这次的消息已经写入了数据库，所以不用再添加了
-                RoomChatPanelCard roomChatPanelCard = RoomChatPanel.getContext().get(userName);
+                RoomChatPanelCard roomChatPanelCard = RoomChatPanel.getContext().get(roomId);
                 if (roomChatPanelCard == null) {
-                    roomChatPanelCard = RoomChatPanel.getContext().addPanel(userName);
+                    roomChatPanelCard = RoomChatPanel.getContext().addPanel(roomId);
                 }else{
                     roomChatPanelCard.addMessageItemToEnd(message);
                 }
             }
             //新增或选择聊天列表
-            RoomsPanel.getContext().addRoomOrOpenRoomNotSwitch(contacts,lastMsgPrefix+(message==null?msg.getContent():message.getPlaintext()),msgUnReadCount);
-            //如果是当前房间 发送已读通知
-            if (RoomChatPanel.getContext().getCurrRoomId().equals(msg.getFromUserName())){
-                ExecutorServiceUtil.getGlobalExecutorService().execute(() -> MessageTools.sendStatusNotify(msg.getFromUserName()));
-            }
+            RoomsPanel.getContext().addRoomOrOpenRoomNotSwitch(contacts,lastMsg,count);
+
         });
     }
     /**

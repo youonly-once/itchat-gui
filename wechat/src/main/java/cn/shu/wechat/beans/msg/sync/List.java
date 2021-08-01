@@ -3,31 +3,36 @@
  */
 package cn.shu.wechat.beans.msg.sync;
 
+import com.alibaba.fastjson.annotation.JSONField;
+import lombok.Data;
+
 /**
  * Auto-generated: 2021-02-22 13:35:59
  *
  * @author bejson.com (i@bejson.com)
  * @website http://www.bejson.com/java2pojo/
  */
+
 public class List {
 
     private int Key;
+
     private long Val;
 
-    public void setKey(int Key) {
-        this.Key = Key;
-    }
-
+    @JSONField(name = "Key")
     public int getKey() {
         return Key;
     }
-
-    public void setVal(long Val) {
-        this.Val = Val;
-    }
-
+    @JSONField(name = "Val")
     public long getVal() {
         return Val;
     }
-
+    @JSONField(name = "Key")
+    public void setKey(int key) {
+        Key = key;
+    }
+    @JSONField(name = "Val")
+    public void setVal(long val) {
+        Val = val;
+    }
 }

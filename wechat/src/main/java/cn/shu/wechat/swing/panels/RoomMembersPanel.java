@@ -2,7 +2,7 @@ package cn.shu.wechat.swing.panels;
 
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.service.ILoginService;
+import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.adapter.RoomMembersAdapter;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
@@ -173,7 +173,7 @@ public class RoomMembersPanel extends ParentAvailablePanel {
             Contacts group = Core.getMemberMap().get(roomId);
             List<Contacts> memberlist = group.getMemberlist();
             if (memberlist == null || memberlist.isEmpty()){
-                ILoginService bean = SpringContextHolder.getBean(ILoginService.class);
+                LoginService bean = SpringContextHolder.getBean(LoginService.class);
                 memberlist= bean.WebWxBatchGetContact(roomId);
             }else{
                 members.clear();

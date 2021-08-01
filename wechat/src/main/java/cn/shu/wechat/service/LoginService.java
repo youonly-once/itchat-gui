@@ -14,7 +14,7 @@ import java.util.List;
  * @version 1.1
  * @date 创建时间：2017年5月13日 上午12:07:21
  */
-public interface ILoginService {
+public interface LoginService {
 
     public static final String x = "100";
 

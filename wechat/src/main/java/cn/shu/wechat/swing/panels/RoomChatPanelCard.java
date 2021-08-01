@@ -4,7 +4,7 @@ import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.service.ILoginService;
+import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.Getter;
@@ -114,7 +114,7 @@ public class RoomChatPanelCard extends JPanel {
                 @Override
                 protected Object doInBackground() throws Exception {
 
-                    ILoginService bean = SpringContextHolder.getBean(ILoginService.class);
+                    LoginService bean = SpringContextHolder.getBean(LoginService.class);
                     bean.WebWxBatchGetContact(roomId);
                     return null;
                 }

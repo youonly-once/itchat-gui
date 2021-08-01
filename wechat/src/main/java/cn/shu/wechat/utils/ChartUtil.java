@@ -1,16 +1,14 @@
 package cn.shu.wechat.utils;
 
 import cn.shu.wechat.api.ContactsTools;
-import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.beans.pojo.MessageExample;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
-import cn.shu.wechat.enums.WXSendMsgCodeEnum;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.mapper.ContactsMapper;
 import cn.shu.wechat.mapper.MessageMapper;
-import cn.shu.wechat.service.ILoginService;
+import cn.shu.wechat.service.LoginService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -81,7 +79,7 @@ public class ChartUtil {
     private ContactsMapper contactsMapper;
 
     @Resource
-    private ILoginService loginService;
+    private LoginService loginService;
 
 
     public void create() {

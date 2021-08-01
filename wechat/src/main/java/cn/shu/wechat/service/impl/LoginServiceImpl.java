@@ -7,7 +7,6 @@ import cn.shu.wechat.beans.msg.sync.AddMsgList;
 import cn.shu.wechat.beans.msg.sync.WebWxSyncMsg;
 import cn.shu.wechat.beans.pojo.AttrHistory;
 import cn.shu.wechat.beans.pojo.Contacts;
-import cn.shu.wechat.beans.pojo.MemberGroupR;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.core.MsgCenter;
 import cn.shu.wechat.enums.*;
@@ -18,7 +17,7 @@ import cn.shu.wechat.enums.parameters.UUIDParaEnum;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.mapper.ContactsMapper;
 import cn.shu.wechat.mapper.MemberGroupRMapper;
-import cn.shu.wechat.service.ILoginService;
+import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.AvatarUtil;
@@ -36,7 +35,6 @@ import org.w3c.dom.Document;
 
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -54,7 +52,7 @@ import java.util.regex.Matcher;
  */
 @Log4j2
 @Component
-public class LoginServiceImpl implements ILoginService {
+public class LoginServiceImpl implements LoginService {
 
     @Resource
     private AttrHistoryMapper attrHistoryMapper;
@@ -278,8 +276,6 @@ public class LoginServiceImpl implements ILoginService {
     public void startReceiving() {
         Core.setAlive(true);
         Runnable runnable = new Runnable() {
-            int retryCount = 0;
-
             @Override
             public void run() {
                 while (Core.isAlive()) {
@@ -313,55 +309,38 @@ public class LoginServiceImpl implements ILoginService {
                             // 最后收到正常报文时间
                             Core.setLastNormalRetCodeTime(System.currentTimeMillis());
                             //消息同步
-                            JSONObject msgObj = webWxSync();
+                            //JSONObject msgObj = webWxSync();
+                            WebWxSyncMsg webWxSyncMsg = webWxSync();
+                            if (webWxSyncMsg == null){
+                                continue;
+                            }
                             switch (SyncCheckSelectorEnum.getByCode(selector)) {
                                 case NORMAL:
                                     break;
                                 case NEW_MSG:
-                                    if (msgObj != null) {
                                         try {
                                             //新消息
-                                            WebWxSyncMsg webWxSyncMsg = JSON.parseObject(JSON.toJSONString(msgObj), WebWxSyncMsg.class);
                                             List<AddMsgList> addMsgLists = webWxSyncMsg.getAddMsgList();
                                             for (AddMsgList msg : addMsgLists) {
                                                 ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
                                                     msgCenter.handleNewMsg(msg);
                                                 });
                                             }
-                                            //联系人修改消息
-                                            //MsgCenter.produceModContactMsg(webWxSyncMsg.getModContactList());
                                         } catch (Exception e) {
                                             e.printStackTrace();
                                             log.info(e.getMessage());
                                         }
-                                    }
                                     break;
                                 case ADD_OR_DEL_CONTACT:
-                                    if (msgObj != null) {
-                                        try {
-                                            JSONArray msgList = msgObj.getJSONArray("AddMsgList");
-                                            JSONArray modContactList = msgObj.getJSONArray("ModContactList"); // 存在删除或者新增的好友信息
-                                            for (int j = 0; j < msgList.size(); j++) {
-                                                //TODO
-                                                //JSONObject userInfo = modContactList.getJSONObject(j);
-                                                // 存在主动加好友之后的同步联系人到本地
-                                                //Core.getContactMap().put(userInfo.getString("UserName"), contacts);
-                                            }
-                                        } catch (Exception e) {
-
-                                            log.info(e.getMessage());
-                                        }
-                                    }
-
-
+                                    log.info("联系人修改：{}", webWxSyncMsg);
                                     break;
                                 case ENTER_OR_LEAVE_CHAT:
                                     webWxSync();
                                     break;
                                 case MOD_CONTACT:
-                                    log.info("联系人修改：{}", msgObj);
+                                    log.info("联系人修改：{}", webWxSyncMsg);
                                 case A:
-                                    log.info("未知消息：{}", msgObj);
+                                    log.info("未知消息：{}", webWxSyncMsg);
                                     break;
                                 default:
                                     break;
@@ -371,27 +350,13 @@ public class LoginServiceImpl implements ILoginService {
                     } catch (Exception e) {
                         e.printStackTrace();
                         log.error("消息同步错误：{}", e.getMessage());
-                        retryCount += 1;
-                        if (Core.getReceivingRetryCount() < retryCount) {
-                            //  Core.setAlive(false);
-                        } else {
-                            SleepUtils.sleep(1000);
-                        }
+                        SleepUtils.sleep(1000);
                     }
 
                 }
             }
         };
         ExecutorServiceUtil.getReceivingExecutorService().execute(runnable);
-        /*        while (Core.isAlive()) {
-         *//*            try {
-                boolean b = ExecutorServiceUtil.getReceivingExecutorService().awaitTermination(30, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }*//*
-            ExecutorServiceUtil.getReceivingExecutorService().execute(runnable);
-        }*/
-
     }
 
     @Override
@@ -469,7 +434,7 @@ public class LoginServiceImpl implements ILoginService {
                 } else {
                     //比较上次差异
                     Contacts old = Core.getContactMap().get(userName);
-                    ExecutorServiceUtil.getGlobalExecutorService().execute(() -> compareOld(old, userName, contacts, "普通联系人"));
+                    compareOld(old, userName, contacts, "普通联系人");
                     // 普通联系人
                     Core.getContactMap().put(userName, contacts);
                 }
@@ -789,8 +754,7 @@ public class LoginServiceImpl implements ILoginService {
      * @author SXS
      * @date 2017年5月12日 上午12:24:55
      */
-    private JSONObject webWxSync() {
-        JSONObject result = null;
+    private WebWxSyncMsg webWxSync() {
         String url = String.format(URLEnum.WEB_WX_SYNC_URL.getUrl(),
                 Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()),
                 Core.getLoginInfoMap().get(StorageLoginInfoEnum.wxsid.getKey()),
@@ -802,34 +766,27 @@ public class LoginServiceImpl implements ILoginService {
         paramMap.put("rr", -System.currentTimeMillis() / 1000);
         String paramStr = JSON.toJSONString(paramMap);
         try {
-            Long start = System.currentTimeMillis();
-            // log.info("同步消息开始webWxSync-params：{}",paramMap.toString());
             HttpEntity entity = MyHttpClient.doPost(url, paramStr);
             String text = EntityUtils.toString(entity, Consts.UTF_8);
-            Long end = System.currentTimeMillis();
-            //  log.info("同步消息结束webWxSync({}s)-----------------------result：{}",    ((double)(end-start))/1000,text.replace("\n",""));
-            JSONObject obj = JSON.parseObject(text);
-            if (obj.getJSONObject("BaseResponse").getInteger("Ret") != 0) {
-                result = null;
+            WebWxSyncMsg webWxSyncMsg = JSON.parseObject(text, WebWxSyncMsg.class);
+            if (webWxSyncMsg.getBaseResponse().getRet()!=0) {
+                return null;
             } else {
-                result = obj;
-                Core.getLoginInfoMap().put(StorageLoginInfoEnum.SyncKey.getKey(), obj.getJSONObject("SyncCheckKey"));
-                JSONArray syncArray = obj.getJSONObject(StorageLoginInfoEnum.SyncKey.getKey()).getJSONArray("List");
+                Core.getLoginInfoMap().put(StorageLoginInfoEnum.SyncKey.getKey(), webWxSyncMsg.getSyncCheckKey());
                 StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < syncArray.size(); i++) {
-                    sb.append(syncArray.getJSONObject(i).getString("Key") + "_"
-                            + syncArray.getJSONObject(i).getString("Val") + "|");
+                for (cn.shu.wechat.beans.msg.sync.List list : webWxSyncMsg.getSyncCheckKey().getList()) {
+                    sb.append(list.getKey()).append("_").append(list.getVal()).append("|");
                 }
                 String synckey = sb.toString();
-                // 1_656161336|2_656161626|3_656161313|11_656159955|13_656120033|201_1492273724|1000_1492265953|1001_1492250432|1004_1491805192
                 Core.getLoginInfoMap().put(StorageLoginInfoEnum.synckey.getKey(),
                         synckey.substring(0, synckey.length() - 1));
             }
+            return webWxSyncMsg;
         } catch (Exception e) {
             log.info(e.getMessage());
         }
-        return result;
 
+ return null;
     }
 
     /**
@@ -867,7 +824,7 @@ public class LoginServiceImpl implements ILoginService {
             String regEx = "window.synccheck=\\{retcode:\"(\\d+)\",selector:\"(\\d+)\"\\}";
             Matcher matcher = CommonTools.getMatcher(regEx, text);
             if (!matcher.find() || matcher.group(1).equals("2")) {
-                log.info(String.format("Unexpected sync check result: %s", text));
+                log.error(String.format("Unexpected sync check result: %s", text));
             } else {
                 resultMap.put("retcode", matcher.group(1));
                 resultMap.put("selector", matcher.group(2));

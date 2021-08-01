@@ -3,7 +3,7 @@ package cn.shu.wechat.controller;
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.service.ILoginService;
+import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.utils.CommonTools;
 import cn.shu.wechat.utils.Config;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
@@ -41,7 +41,7 @@ public class LoginController {
      * 登陆服务实现类
      */
     @Resource
-    private ILoginService loginService;//= LoginServiceImpl.getLoginService();
+    private LoginService loginService;//= LoginServiceImpl.getLoginService();
 
     /**
      * 登录重试次数

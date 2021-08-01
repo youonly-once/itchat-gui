@@ -3,8 +3,6 @@ package cn.shu.wechat.swing.panels;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.service.ILoginService;
-import cn.shu.wechat.service.impl.LoginServiceImpl;
 import cn.shu.wechat.swing.adapter.RoomItemViewHolder;
 import cn.shu.wechat.swing.adapter.RoomItemsAdapter;
 import cn.shu.wechat.swing.components.Colors;
@@ -13,7 +11,6 @@ import cn.shu.wechat.swing.components.RCListView;
 import cn.shu.wechat.swing.db.model.Room;
 import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
-import cn.shu.wechat.utils.SpringContextHolder;
 
 import javax.swing.*;
 import java.awt.*;

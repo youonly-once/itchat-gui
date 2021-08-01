@@ -24,6 +24,7 @@ public enum StorageLoginInfoEnum {
 
     InviteStartCount("InviteStartCount", new Integer(0)),
     User("User", new JSONObject()),
+
     SyncKey("SyncKey", new JSONObject()),
     synckey("synckey", new String()),
 
