@@ -22,68 +22,70 @@
   
   
 ## 四、设置
-### 个人信息
+### 1、个人信息
 
-  ![image](https://user-images.githubusercontent.com/67832925/127837790-18fe9f99-7799-4a75-b655-109458ac7e6f.png)
+  ![image](https://user-images.githubusercontent.com/67832925/127841304-1e7d6749-837f-4ebc-85dd-ee0549bf0779.png)
   
-### 更改头像
+### 2、更改头像
 
 
   ![image](https://user-images.githubusercontent.com/67832925/127839946-727e6a77-72ca-471c-8333-ba08ad55fc0e.png)
 
   
-### 修改密码
+### 3、修改密码
 
 ![image](https://user-images.githubusercontent.com/67832925/127840748-4440df63-0287-4b33-aeaa-fbf02a755437.png)
   
   
-### 清除缓存
+### 4、清除缓存
 
   ![image](https://user-images.githubusercontent.com/67832925/127837943-c4a43533-a613-452f-aa9c-8a57c33209bb.png)
 
 
-### 关于
+### 5、关于
 
   ![image](https://user-images.githubusercontent.com/67832925/127837960-35d98651-6f78-4f67-8d06-f35d741e3a88.png)
   
   
 ## 五、聊天
 
-### 选择聊天用户
+### 1、选择聊天用户
 
   ![image](https://github.com/itsonglin/wechat_desktop/raw/2.0/descPics/user.png)
   
 
-### 上传附件
+### 2、上传附件
 
     ![image](https://user-images.githubusercontent.com/67832925/127838536-f65f763c-9055-484a-a645-a947cd03532e.png)
 
 
-### 发送图片
+### 3、发送图片
 
  ![image](https://user-images.githubusercontent.com/67832925/127838492-c742209c-580c-47f3-af08-beaa83d51d89.png)
   
   
-### 编辑消息，支持粘贴文字、文件及图片
+### 4、编辑消息，支持粘贴文字、文件及图片
 
   ![image](https://user-images.githubusercontent.com/67832925/127838840-1e12153a-908d-48f5-a498-d9371a9a6a84.png)
   
   
-### 截图
+### 5、截图
 
   ![image](https://user-images.githubusercontent.com/67832925/127839092-1349b3b4-a7b3-4c06-b086-d3720cd1db47.png)
   
 
-### 查看图片
+### 6、查看图片
 
   ![image](https://user-images.githubusercontent.com/67832925/127839251-5a4049ff-4782-4fa9-8016-b124bc8f30d0.png)
 
 
-### 查看群成员
+### 7、查看群成员
 
   ![image](https://user-images.githubusercontent.com/67832925/127839361-a30ea916-9d34-476b-abeb-37459c3dba58.png)
   
-### 用户信息  
+### 8、用户信息  
+![image](https://user-images.githubusercontent.com/67832925/127842065-c84ad1b6-2f34-48f0-a24d-b82ed9d44cd4.png)
+
 
 ## 七、登录
 
