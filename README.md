@@ -2,7 +2,7 @@
 基于网页版微信完成的微信功能扩展
 # GUI版本
  Java swing实现仿微信桌面版UI
- 首页效果如下：
+ ## 首页效果如下：
  
  ![image](https://user-images.githubusercontent.com/67832925/127836900-2dc3dfd2-8e97-40e4-961c-e060a9b22a08.png)
  
@@ -121,4 +121,4 @@
 
 
 > 以上几个功能只是起到抛砖引玉的作用，请打开你的脑洞吧，朋友。
-
+借鉴了开源项目wechat_desktop
