@@ -1,7 +1,7 @@
 # 微信工具
 基于网页版微信完成的微信功能扩展
 # GUI版本
- Java swing实现仿微信桌面版UI
+ Java swing实现仿微信桌面版UI，可以在此基础上做功能增强，例如聊天记录统计分析、防撤回、自动回复、定时消息等。
  ## 首页效果如下：
  
  ![image](https://user-images.githubusercontent.com/67832925/127836900-2dc3dfd2-8e97-40e4-961c-e060a9b22a08.png)
