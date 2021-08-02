@@ -1,5 +1,101 @@
 # 微信工具
 基于网页版微信完成的微信功能扩展
+# GUI版本
+ Java swing实现仿微信桌面版UI
+ 首页效果如下：
+ 
+ ![image](https://user-images.githubusercontent.com/67832925/127836900-2dc3dfd2-8e97-40e4-961c-e060a9b22a08.png)
+ 
+## 通讯录
+ 
+ ![image](https://user-images.githubusercontent.com/67832925/127837839-1187de15-e9c2-46b6-ab4c-047c97974c81.png)
+
+ 
+## 收藏
+ 
+  ![image](https://user-images.githubusercontent.com/67832925/127837864-e1a67f55-c585-4f68-be8e-ac7458580583.png)
+
+
+## 创建群聊
+
+  ![image](https://github.com/itsonglin/wechat_desktop/raw/2.0/descPics/group.png)
+  
+  
+## 设置
+### 个人信息
+
+  ![image](https://user-images.githubusercontent.com/67832925/127837790-18fe9f99-7799-4a75-b655-109458ac7e6f.png)
+  
+### 更改头像
+
+  ![image](https://github.com/itsonglin/wechat_desktop/raw/2.0/descPics/avatar.png)
+  
+  
+### 修改密码
+
+ ![image](https://user-images.githubusercontent.com/67832925/127837924-a3aace00-8007-4d12-9a6a-387244a7d5da.png)
+  
+  
+### 清除缓存
+
+  ![image](https://user-images.githubusercontent.com/67832925/127837943-c4a43533-a613-452f-aa9c-8a57c33209bb.png)
+
+
+### 关于
+
+  ![image](https://user-images.githubusercontent.com/67832925/127837960-35d98651-6f78-4f67-8d06-f35d741e3a88.png)
+  
+  
+## 聊天
+
+### 选择聊天用户
+
+  ![image](https://github.com/itsonglin/wechat_desktop/raw/2.0/descPics/user.png)
+  
+
+### 上传附件
+
+    ![image](https://user-images.githubusercontent.com/67832925/127838536-f65f763c-9055-484a-a645-a947cd03532e.png)
+
+
+### 发送图片
+
+ ![image](https://user-images.githubusercontent.com/67832925/127838492-c742209c-580c-47f3-af08-beaa83d51d89.png)
+  
+  
+### 编辑消息，支持粘贴文字、文件及图片
+
+  ![image](https://user-images.githubusercontent.com/67832925/127838840-1e12153a-908d-48f5-a498-d9371a9a6a84.png)
+  
+  
+### 截图
+
+  ![image](https://user-images.githubusercontent.com/67832925/127839092-1349b3b4-a7b3-4c06-b086-d3720cd1db47.png)
+  
+
+### 查看图片
+
+  ![image](https://user-images.githubusercontent.com/67832925/127839251-5a4049ff-4782-4fa9-8016-b124bc8f30d0.png)
+
+
+### 查看群成员
+
+  ![image](https://user-images.githubusercontent.com/67832925/127839361-a30ea916-9d34-476b-abeb-37459c3dba58.png)
+  
+  
+## 登录
+
+  ![image](https://github.com/itsonglin/wechat_desktop/raw/2.0/descPics/login.png)
+
+  
+
+## 用户信息
+
+  
+
+# 普通版本
+
+
 ## 1、防撤回功能（语音、文字、图片、视频、...）
  >![image](https://user-images.githubusercontent.com/67832925/125043492-90f7ab80-e0cd-11eb-861b-9852e3d9483b.png)![image](https://user-images.githubusercontent.com/67832925/125046970-1597f900-e0d1-11eb-9d57-b51bd689133a.png)
 
