@@ -7,6 +7,8 @@
 ## 一、通讯录
  
  ![image](https://user-images.githubusercontent.com/67832925/127837839-1187de15-e9c2-46b6-ab4c-047c97974c81.png)
+ ### 1、搜索
+ ![image](https://user-images.githubusercontent.com/67832925/127843476-8b84b150-be9b-43e0-90c1-ef7c7f627656.png)
 
  
 ## 二、收藏
@@ -27,7 +29,7 @@
 ### 2、更改头像
 
 
-  ![image](https://user-images.githubusercontent.com/67832925/127839946-727e6a77-72ca-471c-8333-ba08ad55fc0e.png)
+  ![image](https://user-images.githubusercontent.com/67832925/127842960-0d2cde9e-c6d3-43da-a4ca-e240aa5ed043.png)
 
   
 ### 3、修改密码
@@ -50,11 +52,13 @@
 ### 1、选择聊天用户
 
   
-  
+  ![image](https://user-images.githubusercontent.com/67832925/127843170-2d360e69-7027-46d6-aa48-c48afc9e9111.png)
+
 
 ### 2、上传附件
 
-![image](https://user-images.githubusercontent.com/67832925/127838536-f65f763c-9055-484a-a645-a947cd03532e.png)
+![image](https://user-images.githubusercontent.com/67832925/127843050-fe5ed785-33e0-437a-b9c0-89b631322e1f.png)
+
 
 
 ### 3、发送图片
