@@ -6,34 +6,35 @@
  
  ![image](https://user-images.githubusercontent.com/67832925/127836900-2dc3dfd2-8e97-40e4-961c-e060a9b22a08.png)
  
-## 通讯录
+## 一、通讯录
  
  ![image](https://user-images.githubusercontent.com/67832925/127837839-1187de15-e9c2-46b6-ab4c-047c97974c81.png)
 
  
-## 收藏
+## 二、收藏
  
   ![image](https://user-images.githubusercontent.com/67832925/127837864-e1a67f55-c585-4f68-be8e-ac7458580583.png)
 
 
-## 创建群聊
+## 三、创建群聊
 
-  ![image](https://github.com/itsonglin/wechat_desktop/raw/2.0/descPics/group.png)
+
   
   
-## 设置
+## 四、设置
 ### 个人信息
 
   ![image](https://user-images.githubusercontent.com/67832925/127837790-18fe9f99-7799-4a75-b655-109458ac7e6f.png)
   
 ### 更改头像
 
-  ![image](https://github.com/itsonglin/wechat_desktop/raw/2.0/descPics/avatar.png)
-  
+
+  ![image](https://user-images.githubusercontent.com/67832925/127839946-727e6a77-72ca-471c-8333-ba08ad55fc0e.png)
+
   
 ### 修改密码
 
- ![image](https://user-images.githubusercontent.com/67832925/127837924-a3aace00-8007-4d12-9a6a-387244a7d5da.png)
+![image](https://user-images.githubusercontent.com/67832925/127840748-4440df63-0287-4b33-aeaa-fbf02a755437.png)
   
   
 ### 清除缓存
@@ -46,7 +47,7 @@
   ![image](https://user-images.githubusercontent.com/67832925/127837960-35d98651-6f78-4f67-8d06-f35d741e3a88.png)
   
   
-## 聊天
+## 五、聊天
 
 ### 选择聊天用户
 
@@ -82,14 +83,16 @@
 
   ![image](https://user-images.githubusercontent.com/67832925/127839361-a30ea916-9d34-476b-abeb-37459c3dba58.png)
   
+### 用户信息  
+
+## 七、登录
+
+ ![image](https://user-images.githubusercontent.com/67832925/127840593-ad8c9bd5-3499-4fde-bf67-46c0a349b125.png)
+
+
   
-## 登录
 
-  ![image](https://github.com/itsonglin/wechat_desktop/raw/2.0/descPics/login.png)
 
-  
-
-## 用户信息
 
   
 
