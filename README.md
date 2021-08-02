@@ -51,12 +51,12 @@
 
 ### 1、选择聊天用户
 
-  ![image](https://github.com/itsonglin/wechat_desktop/raw/2.0/descPics/user.png)
+  
   
 
 ### 2、上传附件
 
-    ![image](https://user-images.githubusercontent.com/67832925/127838536-f65f763c-9055-484a-a645-a947cd03532e.png)
+![image](https://user-images.githubusercontent.com/67832925/127838536-f65f763c-9055-484a-a645-a947cd03532e.png)
 
 
 ### 3、发送图片
