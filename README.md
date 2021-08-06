@@ -1,6 +1,6 @@
 
 基于网页版微信完成的微信功能扩展。
-# Java swing实现仿微信桌面版UI。
+# Java swing实现微信增强版。
  在此基础上做功能增强，例如聊天记录统计分析、防撤回、自动回复、定时消息等。
 ## 首页效果如下：
  
@@ -61,33 +61,38 @@
 
 ![image](https://user-images.githubusercontent.com/67832925/127843050-fe5ed785-33e0-437a-b9c0-89b631322e1f.png)
 
+### 3、语音消息(播放进度条...)
 
+![image](https://user-images.githubusercontent.com/67832925/128543902-0f913d3c-53ff-4870-833e-d18ca0f59f4a.png)
 
-### 3、发送图片
+### 4、视频消息
+![image](https://user-images.githubusercontent.com/67832925/128544101-2de42c8a-b1be-4fad-a78b-3e936d5ccbe3.png)
+
+### 5、发送图片
 
  ![image](https://user-images.githubusercontent.com/67832925/127838492-c742209c-580c-47f3-af08-beaa83d51d89.png)
+
   
-  
-### 4、编辑消息，支持粘贴文字、文件及图片
+### 6、编辑消息，支持粘贴文字、文件及图片
 
   ![image](https://user-images.githubusercontent.com/67832925/127838840-1e12153a-908d-48f5-a498-d9371a9a6a84.png)
   
   
-### 5、截图
+### 7、截图
 
   ![image](https://user-images.githubusercontent.com/67832925/127839092-1349b3b4-a7b3-4c06-b086-d3720cd1db47.png)
   
 
-### 6、查看图片
+### 8、查看图片
 
   ![image](https://user-images.githubusercontent.com/67832925/127839251-5a4049ff-4782-4fa9-8016-b124bc8f30d0.png)
 
 
-### 7、查看群成员
+### 9、查看群成员
 
   ![image](https://user-images.githubusercontent.com/67832925/127839361-a30ea916-9d34-476b-abeb-37459c3dba58.png)
   
-### 8、用户信息  
+### 10、用户信息  
 ![image](https://user-images.githubusercontent.com/67832925/127842065-c84ad1b6-2f34-48f0-a24d-b82ed9d44cd4.png)
 
 
