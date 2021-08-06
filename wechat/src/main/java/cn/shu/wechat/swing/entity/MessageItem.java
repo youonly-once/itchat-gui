@@ -5,6 +5,7 @@ import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.swing.db.model.ImageAttachment;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,17 +16,20 @@ import java.util.UUID;
  */
 
 @Data
+@NoArgsConstructor
 public class MessageItem implements Comparable<MessageItem> {
     public static final int SYSTEM_MESSAGE = 0;
     public static final int LEFT_TEXT = 1;
     public static final int LEFT_IMAGE = 2;
     public static final int LEFT_ATTACHMENT = 3;
     public static final int LEFT_VIDEO = 4;
+    public static final int LEFT_VOICE = 5;
 
     public static final int RIGHT_TEXT = -1;
     public static final int RIGHT_IMAGE = -2;
     public static final int RIGHT_ATTACHMENT = -3;
-    public static final int RIGHT_VIDEO = 4;
+    public static final int RIGHT_VIDEO = -4;
+    public static final int RIGHT_VOICE = -5;
 
 
     private String id;
@@ -43,15 +47,12 @@ public class MessageItem implements Comparable<MessageItem> {
     private int messageType;
     private WXReceiveMsgCodeEnum wxReceiveMsgCodeEnum;
 
-    List<FileAttachmentItem> fileAttachments = new ArrayList<>();
-    List<ImageAttachmentItem> imageAttachments = new ArrayList<>();
 
     private FileAttachmentItem fileAttachment;
     private ImageAttachmentItem imageAttachment;
     private VideoAttachmentItem videoAttachmentItem;
+    private VoiceAttachmentItem voiceAttachmentItem;
     private boolean isSystemMsg;
-    public MessageItem() {
-    }
 
     public MessageItem(cn.shu.wechat.beans.pojo.Message message, String roomId) {
         this();
@@ -73,23 +74,20 @@ public class MessageItem implements Comparable<MessageItem> {
         this.setDeleted(message.isDeleted());
         this.setWxReceiveMsgCodeEnum(WXReceiveMsgCodeEnum.getByCode(message.getMsgType()));
 
-        boolean isFileAttachment = false;
-        boolean isImageAttachment = false;
-        boolean isVideoAttachment = false;
-
         switch (this.getWxReceiveMsgCodeEnum()) {
-
             case UNKNOWN:
                 break;
             case MSGTYPE_TEXT:
                 break;
-
             case MSGTYPE_VOICE:
+                voiceAttachmentItem = VoiceAttachmentItem.builder()
+                        .id(message.getId())
+                        .voiceLength(message.getVoiceLength())
+                        .voicePath(message.getFilePath()).build();
+                break;
             case MSGTYPE_MICROVIDEO:
             case MSGTYPE_APP:
-            case MSGTYPE_VIDEO:
                 //文件类消息
-                isFileAttachment = true;
                 FileAttachmentItem fileAttachmentItem = new FileAttachmentItem();
                 fileAttachmentItem.setTitle(message.getFilePath());
                 fileAttachmentItem.setId(message.getId());
@@ -99,11 +97,19 @@ public class MessageItem implements Comparable<MessageItem> {
                 this.setMessageContent(message.getFilePath());
                 this.fileAttachment = fileAttachmentItem;
                 break;
+            case MSGTYPE_VIDEO:
+                videoAttachmentItem= VideoAttachmentItem.builder()
+                        .id(message.getId())
+                        .salveImgHeight(message.getImgHeight())
+                        .salveImgWidth(message.getImgWidth())
+                        .slaveImgPath(message.getSlavePath())
+                        .videoLength(message.getPlayLength())
+                        .videoPath(message.getFilePath())
+                        .build();
+                this.setMessageContent(message.getFilePath());
+                break;
             case MSGTYPE_IMAGE:
             case MSGTYPE_EMOTICON:
-                //图片类消息
-                isImageAttachment = true;
-
                 ImageAttachment ia = new ImageAttachment();
                 ia.setDescription("DESC");
                 ia.setHeight(500);
@@ -115,36 +121,6 @@ public class MessageItem implements Comparable<MessageItem> {
                 ia.setImagePath(message.getFilePath());
                 this.imageAttachment = new ImageAttachmentItem(ia);
                 break;
-/*            case MSGTYPE_VIDEO:
-                //图片类消息
-                isImageAttachment = true;
-
-                ia = new ImageAttachment();
-                ia.setDescription("DESC");
-                ia.setHeight(500);
-                ia.setWidth(400);
-                ia.setTitle("sasd");
-                ia.setImagesize(200);
-                ia.setId(UUID.randomUUID().toString());
-                ia.setSlavePath(message.getSlavePath());
-                ia.setImagePath(message.getFilePath());
-                this.imageAttachment = new ImageAttachmentItem(ia);
-                this.imageAttachment.setVideo(true);
-                break;*/
-/*            case MSGTYPE_VIDEO:
-                //视频类消息
-                isVideoAttachment = true;
-                VideoAttachmentItem videoAttachmentItem = new VideoAttachmentItem();
-                videoAttachmentItem.setDescription("DESC");
-                videoAttachmentItem.setHeight(500);
-                videoAttachmentItem.setWidth(400);
-                videoAttachmentItem.setTitle("sasd");
-                videoAttachmentItem.setImagesize(200);
-                videoAttachmentItem.setId(UUID.randomUUID().toString());
-                videoAttachmentItem.setSlavePath(message.getSlavePath());
-                videoAttachmentItem.setImagePath(message.getFilePath());
-                this.videoAttachmentItem = videoAttachmentItem;
-                break;*/
             case MSGTYPE_VOIPMSG:
             case MSGTYPE_VOIPNOTIFY:
             case MSGTYPE_VOIPINVITE:
@@ -167,35 +143,32 @@ public class MessageItem implements Comparable<MessageItem> {
                 break;
         }
 
+        setMessageType();
+    }
 
-
-
-        /*for (FileAttachment fa : message.getFileAttachments())
-        {
-            this.fileAttachments.add(new FileAttachmentItem(fa));
-        }
-
-        for (ImageAttachment ia : message.getImageAttachments())
-        {
-            this.imageAttachments.add(new ImageAttachmentItem(ia));
-        }*/
+    /**
+     * 设置消息类型
+     */
+    private void setMessageType(){
 
         // 自己发的消息
         if (Core.getUserSelf().getUsername().equals(this.getSenderId())) {
             // 文件附件
-            if (isFileAttachment) {
+            if (fileAttachment!=null) {
                 this.setMessageType(RIGHT_ATTACHMENT);
             }
             // 图片消息
-            else if (isImageAttachment) {
+            else if (imageAttachment!=null) {
                 this.setMessageType(RIGHT_IMAGE);
             }
             // 视频消息
-            else if (isVideoAttachment){
+            else if (videoAttachmentItem!=null){
                 this.setMessageType(RIGHT_VIDEO);
             }
             else if (isSystemMsg){
                 this.setMessageType(SYSTEM_MESSAGE);
+            }else if(voiceAttachmentItem!= null){
+                this.setMessageType(RIGHT_VOICE);
             }
             // 普通文本消息
             else {
@@ -204,29 +177,30 @@ public class MessageItem implements Comparable<MessageItem> {
 
         } else {
             // 文件附件
-            if (isFileAttachment) {
+            if (fileAttachment!=null) {
                 this.setMessageType(LEFT_ATTACHMENT);
             }
             // 图片消息
-            else if (isImageAttachment) {
+            else if (imageAttachment!=null) {
                 this.setMessageType(LEFT_IMAGE);
             }
             // 视频消息
-            else if (isVideoAttachment){
+            else if (videoAttachmentItem!=null){
                 this.setMessageType(LEFT_VIDEO);
             }
 
             else if (isSystemMsg){
                 this.setMessageType(SYSTEM_MESSAGE);
             }
+            else if(voiceAttachmentItem!= null){
+                this.setMessageType(LEFT_VOICE);
+            }
             // 普通文本消息
             else {
                 this.setMessageType(LEFT_TEXT);
             }
         }
-
     }
-
     @Override
     public int compareTo(MessageItem o) {
         return (int) (this.getTimestamp() - o.getTimestamp());

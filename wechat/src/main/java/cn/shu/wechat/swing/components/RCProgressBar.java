@@ -8,10 +8,15 @@ import java.awt.*;
  * Created by 舒新胜 on 17-6-4.
  */
 public class RCProgressBar extends JProgressBar {
+    private int height = 6;
     public RCProgressBar() {
         setForeground(Colors.PROGRESS_BAR_START);
 
         setBorder(new LineBorder(Colors.PROGRESS_BAR_END));
+    }
+    public RCProgressBar(int height) {
+        this();
+        this.height = height;
     }
 
     @Override
@@ -21,6 +26,6 @@ public class RCProgressBar extends JProgressBar {
 
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension(getWidth(), 6);
+        return new Dimension(getWidth(), height);
     }
 }

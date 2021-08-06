@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit;
  * @author SXS
  * @since 3/12/2021
  */
-
 public class ExecutorServiceUtil {
     /**
      * 头像下载线程池

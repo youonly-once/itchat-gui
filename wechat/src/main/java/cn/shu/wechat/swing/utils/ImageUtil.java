@@ -40,4 +40,56 @@ public class ImageUtil {
         gs.dispose();
         return image;
     }
+
+    /**
+     * 根据图片尺寸大小调整图片显示的大小
+     * @param imageIcon
+     * @param maxWidth
+     * @return
+     */
+    public static ImageIcon preferredImageSize(ImageIcon imageIcon,int maxWidth) {
+        //动态图不能使用
+        int width = imageIcon.getIconWidth();
+        int height = imageIcon.getIconHeight();
+        Dimension scaleDimen = getScaleDimen(width, height, maxWidth);
+        imageIcon.setImage(imageIcon.getImage().getScaledInstance(scaleDimen.width, scaleDimen.height, Image.SCALE_SMOOTH));
+        return imageIcon;
+    }
+
+    /**
+     * 获取缩放后的尺寸
+     * @param width 宽
+     * @param height 高
+     * @param maxWidth 最大宽度
+     * @return 缩放后的尺寸
+     */
+    public static Dimension getScaleDimen(int width,int height,int maxWidth){
+        //动态图不能使用
+        float scale = width * 1.0F / height;
+
+        // 限制图片显示大小
+        int maxImageWidth = maxWidth;
+        if (width > maxImageWidth) {
+            width = maxImageWidth;
+            height = (int) (width / scale);
+        }
+        return new Dimension(width,height);
+    }
+    /**
+     * 获取缩放后的尺寸
+     * @param width 宽
+     * @param height 高
+     * @return 缩放后的尺寸
+     */
+    public static Dimension getScaleDimen(int width,int height){
+        return getScaleDimen(width,height,128);
+    }
+    /**
+     * 根据图片尺寸大小调整图片显示的大小
+     * @param imageIcon
+     * @return
+     */
+    public static ImageIcon preferredImageSize(ImageIcon imageIcon) {
+        return preferredImageSize(imageIcon,128);
+    }
 }

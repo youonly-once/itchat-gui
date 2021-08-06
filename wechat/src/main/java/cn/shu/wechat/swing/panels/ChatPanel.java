@@ -850,7 +850,6 @@ public class ChatPanel extends ParentAvailablePanel {
 
             fileAttachment = new FileAttachment();
             fileAttachment.setId(fileId);
-            System.out.println(File.separator);
             fileAttachment.setLink(uploadFilename);
             fileAttachment.setTitle(name);
             item.setFileAttachment(new FileAttachmentItem(fileAttachment));

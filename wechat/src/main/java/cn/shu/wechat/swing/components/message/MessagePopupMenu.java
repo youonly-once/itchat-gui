@@ -83,7 +83,10 @@ public class MessagePopupMenu extends JPopupMenu {
                         }
                         break;
                     }
+                    case (MessageItem.LEFT_VIDEO):
+                    case (MessageItem.RIGHT_VIDEO): {
 
+                    }
                     case (MessageItem.RIGHT_ATTACHMENT):
                     case (MessageItem.LEFT_ATTACHMENT): {
                         AttachmentPanel attachmentPanel = (AttachmentPanel) getInvoker();

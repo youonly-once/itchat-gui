@@ -1,37 +1,41 @@
 package cn.shu.wechat.swing.entity;
 
 import cn.shu.wechat.swing.db.model.ImageAttachment;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Created by 舒新胜 on 17/05/2017.
+ *
+ * @author 舒新胜
+ * @date 17/05/2017
  */
 @Data
-@NoArgsConstructor
+@Builder
 public class VideoAttachmentItem {
+    /**
+     * 消息ID
+     */
     private String id;
-    private String title;
-    private String description;
-    private String slavePath;
-    private String imagePath;
-    private int width;
-    private int height;
-    private long imagesize;
-
-    public VideoAttachmentItem(String imageUrl) {
-        this.imagePath = imageUrl;
-    }
-
-    public VideoAttachmentItem(ImageAttachment ia) {
-        this.id = ia.getId();
-        this.title = ia.getTitle();
-        this.description = ia.getDescription();
-        this.slavePath = ia.getSlavePath();
-        this.imagePath = ia.getImagePath();
-        this.width = ia.getWidth();
-        this.height = ia.getHeight();
-        this.imagesize = ia.getImagesize();
-    }
+    /**
+     * 缩略图路径
+     */
+    private String slaveImgPath;
+    /**
+     * 缩略图宽度
+     */
+    private int salveImgWidth;
+    /**
+     * 缩略图高度
+     */
+    private int salveImgHeight;
+    /**
+     * 视频路径
+     */
+    private String videoPath;
+    /**
+     * 视频长度 单位s
+     */
+    private long videoLength;
 
 }

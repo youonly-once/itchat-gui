@@ -57,9 +57,4 @@ public class QRterminal {
         return sb.toString();
     }
 
-    public static void main(String[] args) throws Exception {
-        String text = "https://github.com/zhangshanhai/java-qrcode-terminal ";
-
-        System.out.println(getQr(text));
-    }
 }

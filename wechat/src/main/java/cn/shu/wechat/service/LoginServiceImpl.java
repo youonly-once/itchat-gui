@@ -1,4 +1,4 @@
-package cn.shu.wechat.service.impl;
+package cn.shu.wechat.service;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
@@ -275,85 +275,82 @@ public class LoginServiceImpl implements LoginService {
     @Override
     public void startReceiving() {
         Core.setAlive(true);
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                while (Core.isAlive()) {
-                    try {
-                        //检测是否有新消息
-                        Map<String, String> resultMap = syncCheck();
-                        String retcode = resultMap.get("retcode");
-                        String selector = resultMap.get("selector");
-                        if (retcode.equals(SyncCheckRetCodeEnum.UNKOWN.getCode())) {
-                            //log.info(SyncCheckRetCodeEnum.UNKOWN.getType());
+        Runnable runnable = () -> {
+            while (Core.isAlive()) {
+                try {
+                    //检测是否有新消息
+                    Map<String, String> resultMap = syncCheck();
+                    String retcode = resultMap.get("retcode");
+                    String selector = resultMap.get("selector");
+                    if (retcode.equals(SyncCheckRetCodeEnum.UNKOWN.getCode())) {
+                        //log.info(SyncCheckRetCodeEnum.UNKOWN.getType());
+                        continue;
+                    } else if (retcode.equals(SyncCheckRetCodeEnum.LOGIN_OUT.getCode())) {
+                        // 退出
+                        log.info(SyncCheckRetCodeEnum.LOGIN_OUT.getType());
+                        MainFrame.getContext().dispose();
+                        launcher.openFrame();
+                        break;
+                    } else if (retcode.equals(SyncCheckRetCodeEnum.LOGIN_OTHERWHERE.getCode())) {
+                        // 其它地方登陆
+                        log.info(SyncCheckRetCodeEnum.LOGIN_OTHERWHERE.getType());
+                        MainFrame.getContext().dispose();
+                        launcher.openFrame();
+                        break;
+                    } else if (retcode.equals(SyncCheckRetCodeEnum.MOBILE_LOGIN_OUT.getCode())) {
+                        // 移动端退出
+                        log.info(SyncCheckRetCodeEnum.MOBILE_LOGIN_OUT.getType());
+                        MainFrame.getContext().dispose();
+                        launcher.openFrame();
+                        break;
+                    } else if (retcode.equals(SyncCheckRetCodeEnum.SUCCESS.getCode())) {
+                        // 最后收到正常报文时间
+                        Core.setLastNormalRetCodeTime(System.currentTimeMillis());
+                        //消息同步
+                        //JSONObject msgObj = webWxSync();
+                        WebWxSyncMsg webWxSyncMsg = webWxSync();
+                        if (webWxSyncMsg == null){
                             continue;
-                        } else if (retcode.equals(SyncCheckRetCodeEnum.LOGIN_OUT.getCode())) {
-                            // 退出
-                            log.info(SyncCheckRetCodeEnum.LOGIN_OUT.getType());
-                            MainFrame.getContext().dispose();
-                            launcher.openFrame();
-                            break;
-                        } else if (retcode.equals(SyncCheckRetCodeEnum.LOGIN_OTHERWHERE.getCode())) {
-                            // 其它地方登陆
-                            log.info(SyncCheckRetCodeEnum.LOGIN_OTHERWHERE.getType());
-                            MainFrame.getContext().dispose();
-                            launcher.openFrame();
-                            break;
-                        } else if (retcode.equals(SyncCheckRetCodeEnum.MOBILE_LOGIN_OUT.getCode())) {
-                            // 移动端退出
-                            log.info(SyncCheckRetCodeEnum.MOBILE_LOGIN_OUT.getType());
-                            MainFrame.getContext().dispose();
-                            launcher.openFrame();
-                            break;
-                        } else if (retcode.equals(SyncCheckRetCodeEnum.SUCCESS.getCode())) {
-                            // 最后收到正常报文时间
-                            Core.setLastNormalRetCodeTime(System.currentTimeMillis());
-                            //消息同步
-                            //JSONObject msgObj = webWxSync();
-                            WebWxSyncMsg webWxSyncMsg = webWxSync();
-                            if (webWxSyncMsg == null){
-                                continue;
-                            }
-                            switch (SyncCheckSelectorEnum.getByCode(selector)) {
-                                case NORMAL:
-                                    break;
-                                case NEW_MSG:
-                                        try {
-                                            //新消息
-                                            List<AddMsgList> addMsgLists = webWxSyncMsg.getAddMsgList();
-                                            for (AddMsgList msg : addMsgLists) {
-                                                ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
-                                                    msgCenter.handleNewMsg(msg);
-                                                });
-                                            }
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                            log.info(e.getMessage());
-                                        }
-                                    break;
-                                case ADD_OR_DEL_CONTACT:
-                                    log.info("联系人修改：{}", webWxSyncMsg);
-                                    break;
-                                case ENTER_OR_LEAVE_CHAT:
-                                    webWxSync();
-                                    break;
-                                case MOD_CONTACT:
-                                    log.info("联系人修改：{}", webWxSyncMsg);
-                                case A:
-                                    log.info("未知消息：{}", webWxSyncMsg);
-                                    break;
-                                default:
-                                    break;
-
-                            }
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        log.error("消息同步错误：{}", e.getMessage());
-                        SleepUtils.sleep(1000);
-                    }
+                        switch (SyncCheckSelectorEnum.getByCode(selector)) {
+                            case NORMAL:
+                                break;
+                            case NEW_MSG:
+                                    try {
+                                        //新消息
+                                        List<AddMsgList> addMsgLists = webWxSyncMsg.getAddMsgList();
+                                        for (AddMsgList msg : addMsgLists) {
+                                            ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
+                                                msgCenter.handleNewMsg(msg);
+                                            });
+                                        }
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                        log.info(e.getMessage());
+                                    }
+                                break;
+                            case ADD_OR_DEL_CONTACT:
+                                log.info("联系人修改：{}", webWxSyncMsg);
+                                break;
+                            case ENTER_OR_LEAVE_CHAT:
+                                webWxSync();
+                                break;
+                            case MOD_CONTACT:
+                                log.info("联系人修改：{}", webWxSyncMsg);
+                            case A:
+                                log.info("未知消息：{}", webWxSyncMsg);
+                                break;
+                            default:
+                                break;
 
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    log.error("消息同步错误：{}", e.getMessage());
+                    SleepUtils.sleep(1000);
                 }
+
             }
         };
         ExecutorServiceUtil.getReceivingExecutorService().execute(runnable);

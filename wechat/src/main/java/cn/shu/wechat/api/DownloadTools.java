@@ -40,6 +40,7 @@ public class DownloadTools {
      * 文件路径为KEY、状态为VALUE
      * true： 下载成功
      * false：下载中
+     * null 下载失败
      */
     public final static Hashtable<String, Boolean> FILE_DOWNLOAD_STATUS = new Hashtable<>();
 
@@ -185,9 +186,9 @@ public class DownloadTools {
         }
         if (entity == null){
             DownloadTools.FILE_DOWNLOAD_STATUS.remove(path);
-            return true;
+            log.error("下载失败：response entity is null.");
+            return false;
         }
-        boolean downloadStatus = false;
         OutputStream out = null;
         try {
             File file = new File(path);
@@ -205,20 +206,18 @@ public class DownloadTools {
                 }
 
             }
-            if (entity == null) {
-                log.error("下载失败：response entity is null.");
-            }
             out = new FileOutputStream(file);
             byte[] bytes = EntityUtils.toByteArray(entity);
             out.write(bytes);
             out.flush();
             log.info("资源下载完成：{}", path);
-            downloadStatus = true;
+            DownloadTools.FILE_DOWNLOAD_STATUS.put(path, true);
+            return true;
         } catch (Exception e) {
             log.info(e.getMessage());
+            DownloadTools.FILE_DOWNLOAD_STATUS.remove(path);
             return false;
         } finally {
-            DownloadTools.FILE_DOWNLOAD_STATUS.put(path, downloadStatus);
             if (out != null) {
                 try {
                     out.close();
@@ -228,7 +227,6 @@ public class DownloadTools {
             }
 
         }
-        return false;
     }
 
     /**

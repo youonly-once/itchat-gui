@@ -19,7 +19,7 @@ public class HeadImageUtil {
      * 删除下载的失效头像
      */
     public static void deleteLoseEfficacyHeadImg(String imgPath) {
-        AttrHistoryMapper attrHistoryMapper = SpringApplicationContextUtil.getApplicationContext().getBean(AttrHistoryMapper.class);
+        AttrHistoryMapper attrHistoryMapper = SpringContextHolder.getBean(AttrHistoryMapper.class);
         List<AttrHistory> headImageList = attrHistoryMapper
                 .selectByAll(AttrHistory.builder()
                         .attr("头像更换")

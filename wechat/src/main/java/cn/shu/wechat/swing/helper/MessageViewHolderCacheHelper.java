@@ -30,6 +30,10 @@ public class MessageViewHolderCacheHelper {
 
     private List<MessageLeftTextViewHolder> leftTextViewHolders = new ArrayList<>();
     private List<MessageLeftImageViewHolder> leftImageViewHolders = new ArrayList<>();
+    private List<MessageLeftVideoViewHolder> leftVideoViewHolders = new ArrayList<>();
+    private List<MessageRightVideoViewHolder> rightVideoViewHolders = new ArrayList<>();
+    private List<MessageLeftVoiceViewHolder> leftVoiceViewHolders = new ArrayList<>();
+    private List<MessageRightVoiceViewHolder> rightVoiceViewHolders = new ArrayList<>();
     private List<MessageLeftAttachmentViewHolder> leftAttachmentViewHolders = new ArrayList<>();
 
     private List<MessageSystemMessageViewHolder> systemMessageViewHolders = new ArrayList<>();
@@ -39,6 +43,10 @@ public class MessageViewHolderCacheHelper {
     private int rightAttachmentPosition = 0;
     private int leftTextPosition = 0;
     private int leftImagePosition = 0;
+    private int leftVideoPosition = 0;
+    private int leftVoicePosition = 0;
+    private int rightVideoPosition = 0;
+    private int rightVoicePosition = 0;
     private int leftAttachmentPosition = 0;
     private int systemMessagePosition = 0;
 
@@ -157,7 +165,42 @@ public class MessageViewHolderCacheHelper {
 
         return holder;
     }
+    public synchronized MessageLeftVideoViewHolder tryGetLeftVideoViewHolder() {
+        MessageLeftVideoViewHolder holder = null;
+        if (leftVideoPosition < CACHE_CAPACITY && leftVideoViewHolders.size() > 0) {
+            holder = leftVideoViewHolders.get(leftVideoPosition);
+            leftVideoPosition++;
+        }
 
+        return holder;
+    }
+    public synchronized MessageRightVideoViewHolder tryGetRightVideoViewHolder() {
+        MessageRightVideoViewHolder holder = null;
+        if (rightVideoPosition < CACHE_CAPACITY && rightVideoViewHolders.size() > 0) {
+            holder = rightVideoViewHolders.get(rightVideoPosition);
+            rightVideoPosition++;
+        }
+
+        return holder;
+    }
+    public synchronized MessageLeftVoiceViewHolder tryGetLeftVoiceViewHolder() {
+        MessageLeftVoiceViewHolder holder = null;
+        if (leftVoicePosition < CACHE_CAPACITY && leftVoiceViewHolders.size() > 0) {
+            holder = leftVoiceViewHolders.get(leftVoicePosition);
+            leftVoicePosition++;
+        }
+
+        return holder;
+    }
+    public synchronized MessageRightVoiceViewHolder tryGetRightVoiceViewHolder() {
+        MessageRightVoiceViewHolder holder = null;
+        if (rightVoicePosition < CACHE_CAPACITY && rightVoiceViewHolders.size() > 0) {
+            holder = rightVoiceViewHolders.get(rightVoicePosition);
+            rightVoicePosition++;
+        }
+
+        return holder;
+    }
     public synchronized MessageLeftAttachmentViewHolder tryGetLeftAttachmentViewHolder() {
         MessageLeftAttachmentViewHolder holder = null;
         if (leftAttachmentPosition < CACHE_CAPACITY && leftAttachmentViewHolders.size() > 0) {

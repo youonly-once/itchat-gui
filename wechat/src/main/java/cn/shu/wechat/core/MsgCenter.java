@@ -394,6 +394,10 @@ public class MsgCenter {
                     .MsgID(msg.getNewMsgId()+"").build()))
                     .build();
             int insert = messageMapper.insert(build);
+            build.setPlayLength(msg.getPlayLength());
+            build.setImgHeight(msg.getImgHeight());
+            build.setImgWidth(msg.getImgWidth());
+            build.setVoiceLength(msg.getVoiceLength());
             return build;
         } catch (Exception e) {
             e.printStackTrace();
@@ -401,142 +405,6 @@ public class MsgCenter {
         return null;
     }
 
-    /**
-     * 联系人修改消息
-     *
-     * @param msgLists
-     */
-    public static void produceModContactMsg(List<ModContactList> msgLists) {
-        for (ModContactList msg : msgLists) {
-            JSONObject newV = JSON.parseObject(JSON.toJSONString(msg));
-            JSONObject oldV = null;
-            if (msg.getUserName().startsWith("@@")) {
-                //oldV = Core.getGroupMap().get(msg.getUserName());
-            } else {
-                //oldV = Core.getContactMap().get(msg.getUserName());
-            }
-            oldV = JSON.parseObject(JSON.toJSONString(JSON.toJavaObject(oldV, ModContactList.class)));
-            if (oldV == null) {
-                return;
-            }
-            ArrayList<MessageTools.Message> messages = new ArrayList<>();
-            String name = oldV.getString("remarkName");
-            if (StringUtil.isBlank(name)) {
-                name = oldV.getString("nickName");
-            }
-            //存在key
-            Map<String, Map<String, String>> differenceMap = JSONObjectUtil.getDifferenceMap(oldV, newV);
-            if (differenceMap.size() > 0) {
-                //Old与New存在差异
-                String tip = "联系人";
-                log.info("{}（{}）属性更新：{}", tip, name, differenceMap);
-                //发送消息
-                messages.add(MessageTools.Message.builder().content(tip + "（" + name + "）属性更新：" + mapToString(differenceMap))
-                        .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
-                        .build());
-                // Core.getContactMap().put(msg.getUserName(), newV);
-                //存储数据库
-                store(differenceMap, oldV, messages);
-
-                MessageTools.sendMsgByUserId(messages, msg.getUserName());
-            }
-        }
-
-
-    }
-
-    /**
-     * 保存修改记录到数据库
-     *
-     * @param differenceMap
-     * @param oldV
-     */
-    private static void store(Map<String, Map<String, String>> differenceMap, JSONObject oldV, ArrayList<MessageTools.Message> messages) {
-        ArrayList<AttrHistory> attrHistories = new ArrayList<>();
-        for (Map.Entry<String, Map<String, String>> stringMapEntry : differenceMap.entrySet()) {
-            for (Map.Entry<String, String> stringStringEntry : stringMapEntry.getValue().entrySet()) {
-                if (stringMapEntry.getKey().equals("headImgUrl")
-                        || stringMapEntry.getKey().equals("头像更换")) {
-/*					String oldHeadPath = DownloadTools.downloadHeadImg(stringStringEntry.getKey()
-							, IMsgHandlerFaceImpl.savePath+File.separator+oldV.getString("UserName")+File.separator);*/
-                    String oldHeadPath = Core.getContactHeadImgPath().get(oldV.getString("userName"));
-                    String newHeadPath = DownloadTools.downloadHeadImgBig(stringStringEntry.getValue()
-                            , oldV.getString("userName"));
-                    Core.getContactHeadImgPath().put(oldV.getString("userName"), newHeadPath);
-                    //更换前
-                    messages.add(MessageTools.Message.builder()
-                            .replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
-                            //.toUserName("filehelper")
-                            .content(oldHeadPath).build());
-                    //更换后
-                    messages.add(MessageTools.Message.builder()
-                            .replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
-                            //.toUserName("filehelper")
-                            .content(newHeadPath).build());
-                    AttrHistory build = AttrHistory.builder()
-                            .attr(stringMapEntry.getKey())
-                            .oldval(oldHeadPath)
-                            .newval(newHeadPath)
-                            .id(0)
-                            .nickname(oldV.getString("nickName"))
-                            .remarkname(oldV.getString("remarkName"))
-                            .username(oldV.getString("userName"))
-                            .createtime(new Date())
-                            .build();
-                    attrHistories.add(build);
-                } else {
-                    AttrHistory build = AttrHistory.builder()
-                            .attr(stringMapEntry.getKey())
-                            .oldval(stringStringEntry.getKey())
-                            .newval(stringStringEntry.getValue())
-                            .id(0)
-                            .nickname(oldV.getString("nickName"))
-                            .remarkname(oldV.getString("remarkName"))
-                            .username(oldV.getString("userName"))
-                            .createtime(new Date())
-                            .build();
-                    attrHistories.add(build);
-                }
-
-            }
-        }
-        //attrHistoryMapper.batchInsert(attrHistories);
-    }
-
-    /**
-     * map转string
-     *
-     * @param differenceMap
-     * @return
-     */
-    private static String mapToString(Map<String, Map<String, String>> differenceMap) {
-        String str = "";
-        for (Map.Entry<String, Map<String, String>> stringMapEntry : differenceMap.entrySet()) {
-            Map<String, String> value = stringMapEntry.getValue();
-            for (Map.Entry<String, String> stringStringEntry : value.entrySet()) {
-                str = str + "\n【" + stringMapEntry.getKey() + "】(\"" + stringStringEntry.getKey() + "\" -> \"" + stringStringEntry.getValue() + "\")";
-            }
-        }
-        return str;
-    }
-
-    /**
-     * 联系人删除消息
-     *
-     * @param msgLists
-     */
-    public static void produceDelContactMsg(List<DelContactList> msgLists) {
-
-    }
-
-    /**
-     * 聊天室修改消息
-     *
-     * @param msgLists
-     */
-    public static void produceModChatRoomMemberMsg(List<ModContactList> msgLists) {
-
-    }
 
 
 }

@@ -60,6 +60,16 @@ public class Message {
     private String toNickname;
     private String plaintext;
     /**
+     * 视频长度
+     */
+    private long playLength;
+    private int imgHeight;
+    private int imgWidth;
+    /**
+     * 语音长度 毫秒
+     */
+    private long voiceLength;
+    /**
      * 是否是本人发送的消息1是0不是
      */
     private Boolean isSend = true;

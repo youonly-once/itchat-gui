@@ -7,8 +7,12 @@ import cn.shu.wechat.swing.components.message.MessageImageLabel;
 import cn.shu.wechat.swing.components.message.RCLeftImageMessageBubble;
 import cn.shu.wechat.swing.utils.FontUtil;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by 舒新胜 on 17-6-2.
@@ -63,7 +67,6 @@ public class MessageLeftImageViewHolder extends BaseMessageViewHolder {
                 .setWeight(1000, 1)
                 .setAnchor(GBC.WEST)
                 .setInsets(0, 5, 0, 0));
-
         add(timePanel, BorderLayout.NORTH);
         add(messageAvatarPanel, BorderLayout.CENTER);
     }

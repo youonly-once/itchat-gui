@@ -354,10 +354,10 @@ public class RCListView extends JScrollPane {
             e.printStackTrace();
         }
         position = end ? -1 : position;
-/*        //如果之前的数据添加失败 数据项和panel组件数量对不上
+        //如果之前的数据添加失败 数据项和panel组件数量对不上
         if (position>contentPanel.getComponentCount()){
             position = contentPanel.getComponentCount();
-        }*/
+        }
         contentPanel.add(holder, position);
         contentPanel.revalidate();
     }

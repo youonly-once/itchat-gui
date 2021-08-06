@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 /**
+ * @author user
  * @作者 舒新胜
  * @项目 weixin
  * @创建时间 3/6/2021 11:31 PM
@@ -17,21 +18,6 @@ public class PropertyUtil {
     private static final Properties pps = new Properties();
 
     private static String msgFileName = DateFormatUtils.format(System.currentTimeMillis(), DateFormatConstant.yyyy_mm_dd) + "msg.property";
-
-    static {
-   /*     new Thread(new Runnable() {
-            @Override
-            public void run() {
-                msgFileName = DateUtil.getCurrDate() + "msg.property";
-                try {
-                    Thread.sleep(1000 * 60 * 60 );
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        }, "").start();*/
-    }
 
     /**
      * 存储发送的消息

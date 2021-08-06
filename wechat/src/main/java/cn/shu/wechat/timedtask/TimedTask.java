@@ -1,9 +1,5 @@
 package cn.shu.wechat.timedtask;
-
-import cn.shu.wechat.controller.LoginController;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.mapper.ContactsMapper;
-import cn.shu.wechat.mapper.MemberGroupRMapper;
 import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.utils.ChartUtil;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
@@ -41,17 +37,6 @@ public class TimedTask {
      */
     @Resource
     private LoginService loginService;
-    /**
-     * 登录服务
-     */
-    @Resource
-    private LoginController loginController;
-
-    @Resource
-    private ContactsMapper contactsMapper;
-
-    @Resource
-    private MemberGroupRMapper memberGroupRMapper;
 
 
     /**
