@@ -61,8 +61,8 @@
 
 ![image](https://user-images.githubusercontent.com/67832925/127843050-fe5ed785-33e0-437a-b9c0-89b631322e1f.png)
 
-### 3、语音消息
-播放进度条
+### 3、语音消息(播放进度条...)
+
 ![image](https://user-images.githubusercontent.com/67832925/128543902-0f913d3c-53ff-4870-833e-d18ca0f59f4a.png)
 
 ### 4、视频消息
