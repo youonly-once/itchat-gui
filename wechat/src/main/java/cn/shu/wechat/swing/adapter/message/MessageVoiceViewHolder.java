@@ -1,28 +1,20 @@
 package cn.shu.wechat.swing.adapter.message;
 
 import cn.shu.wechat.swing.components.*;
-import cn.shu.wechat.swing.components.message.AttachmentPanel;
 import cn.shu.wechat.swing.components.message.MessagePopupMenu;
-import cn.shu.wechat.swing.components.message.RCAttachmentMessageBubble;
-import cn.shu.wechat.swing.components.message.RCLeftVoiceMessageBubble;
-import cn.shu.wechat.swing.frames.MainFrame;
+import cn.shu.wechat.swing.components.message.TagPanel;
 import cn.shu.wechat.swing.utils.FontUtil;
-import lombok.Data;
 import lombok.Getter;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.IOException;
 
 /**
  * Created by 舒新胜 on 16/06/2017.
  */
 @Getter
 public class MessageVoiceViewHolder extends BaseMessageViewHolder {
-
+    protected final TagPanel contentTagPanel = new TagPanel();
     protected JLabel durationText;
     protected final JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
     protected final JPanel messageAvatarPanel = new JPanel();

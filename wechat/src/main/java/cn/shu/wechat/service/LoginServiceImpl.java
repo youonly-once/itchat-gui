@@ -41,6 +41,9 @@ import java.io.OutputStream;
 import java.util.*;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 
 /**
@@ -68,6 +71,9 @@ public class LoginServiceImpl implements LoginService {
 
     @Resource
     private Launcher launcher;
+
+
+    private final Map<String, Lock> getBatchContactLock = new HashMap<>();
 
     @Override
     public boolean login() throws Exception {
@@ -289,18 +295,21 @@ public class LoginServiceImpl implements LoginService {
                         // 退出
                         log.info(SyncCheckRetCodeEnum.LOGIN_OUT.getType());
                         MainFrame.getContext().dispose();
+                        Core.setAlive(false);
                         launcher.openFrame();
                         break;
                     } else if (retcode.equals(SyncCheckRetCodeEnum.LOGIN_OTHERWHERE.getCode())) {
                         // 其它地方登陆
                         log.info(SyncCheckRetCodeEnum.LOGIN_OTHERWHERE.getType());
                         MainFrame.getContext().dispose();
+                        Core.setAlive(false);
                         launcher.openFrame();
                         break;
                     } else if (retcode.equals(SyncCheckRetCodeEnum.MOBILE_LOGIN_OUT.getCode())) {
                         // 移动端退出
                         log.info(SyncCheckRetCodeEnum.MOBILE_LOGIN_OUT.getType());
                         MainFrame.getContext().dispose();
+                        Core.setAlive(false);
                         launcher.openFrame();
                         break;
                     } else if (retcode.equals(SyncCheckRetCodeEnum.SUCCESS.getCode())) {
@@ -357,7 +366,7 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public void webWxGetContact() {
+    public  void webWxGetContact() {
         String url = String.format(URLEnum.WEB_WX_GET_CONTACT.getUrl(),
                 Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()));
         Map<String, Object> paramMap = Core.getParamMap();
@@ -447,7 +456,7 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public void WebWxBatchGetContact() {
+    public  void WebWxBatchGetContact() {
         String url = String.format(URLEnum.WEB_WX_BATCH_GET_CONTACT.getUrl(),
                 Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()), new Date().getTime(),
                 Core.getLoginInfoMap().get(StorageLoginInfoEnum.pass_ticket.getKey()));
@@ -474,7 +483,7 @@ public class LoginServiceImpl implements LoginService {
                 String userName = group.getUsername();
                 if (userName.startsWith("@@")) {
                     //以上接口返回的成员属性不全，以下的接口获取群成员详细属性
-                    JSONArray memberArray = WebWxBatchGetContactDetail(groupObject);
+                    JSONArray memberArray = WebWxBatchGetContactDetail(group);
                     List<Contacts> memberList = JSON.parseArray(JSON.toJSONString(memberArray), Contacts.class);
                     group.setMemberlist(memberList);
                     Core.getMemberMap().put(userName, group);
@@ -490,7 +499,32 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public List<Contacts> WebWxBatchGetContact(String groupName) {
+    public  List<Contacts> WebWxBatchGetContact(String groupName) {
+/*        synchronized (getBatchContactLock){
+            Lock lock = getBatchContactLock.get(groupName);
+            if (lock == null){
+                lock = new ReentrantLock();
+                getBatchContactLock.put(groupName,lock);
+            }
+            try {
+                if (!lock.tryLock()){
+                    //获取锁失败 其它线程正在操作
+                    Thread.sleep(5000);
+                    lock.unlock();
+                    return Core.getMemberMap().get(groupName).getMemberlist();
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        //获取锁成功
+        boolean b = lock.tryLock();
+        if (b){
+            return Core.getMemberMap().get(groupName).getMemberlist();
+        }else  {
+            return new ArrayList<>();
+        }*/
+
         log.info("加载群成员开始："+groupName);
         String url = String.format(URLEnum.WEB_WX_BATCH_GET_CONTACT.getUrl(),
                 Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()), new Date().getTime(),
@@ -517,7 +551,7 @@ public class LoginServiceImpl implements LoginService {
                 Core.getMemberMap().put(userName, group);
                 if (userName.startsWith("@@")) {
                     //以上接口返回的成员属性不全，以下的接口获取群成员详细属性
-                    JSONArray memberArray = WebWxBatchGetContactDetail(groupObject);
+                    JSONArray memberArray = WebWxBatchGetContactDetail(group);
                     List<Contacts> memberList = JSON.parseArray(JSON.toJSONString(memberArray), Contacts.class);
                     group.setMemberlist(memberList);
                     Core.getGroupMap().put(userName, group);
@@ -536,23 +570,20 @@ public class LoginServiceImpl implements LoginService {
         return new ArrayList<>();
     }
     @Override
-    public JSONArray WebWxBatchGetContactDetail(JSONObject groupObject) {
+    public  JSONArray WebWxBatchGetContactDetail(Contacts group) {
         String url = String.format(URLEnum.WEB_WX_BATCH_GET_CONTACT.getUrl(),
                 Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()), System.currentTimeMillis(),
                 Core.getLoginInfoMap().get(StorageLoginInfoEnum.pass_ticket.getKey()));
         Map<String, Object> paramMap = Core.getParamMap();
 
-
-        String groupUserName = groupObject.getString("UserName");
         //保存获取的群成员详细信息
         ArrayList<Contacts> groupContactsList = new ArrayList<>();
         JSONArray memberArray = new JSONArray();
         //保存需要获取详细资料的群成员username
-        List<Map<String, String>> list = new ArrayList<Map<String, String>>(groupObject.getJSONArray("MemberList").size());
-        for (Object o : groupObject.getJSONArray("MemberList")) {
+        List<Map<String, String>> list = new ArrayList<Map<String, String>>(group.getMemberlist().size());
+        for (Contacts o : group.getMemberlist()) {
             //遍历群成员
-            JSONObject memberO = (JSONObject) o;
-            String userName = memberO.getString("UserName");
+            String userName = o.getUsername();
             if (Core.getContactMap().containsKey(userName)) {
                 memberArray.add(Core.getContactMap().get(userName));
                 continue;
@@ -563,7 +594,7 @@ public class LoginServiceImpl implements LoginService {
             }
             HashMap<String, String> map = new HashMap<String, String>();
             map.put("UserName", userName);
-            map.put("EncryChatRoomId", groupUserName);
+            map.put("EncryChatRoomId", group.getUsername());
             list.add(map);
         }
         if (list.isEmpty()) {
@@ -780,7 +811,7 @@ public class LoginServiceImpl implements LoginService {
             }
             return webWxSyncMsg;
         } catch (Exception e) {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
         }
 
  return null;
@@ -828,6 +859,7 @@ public class LoginServiceImpl implements LoginService {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            log.error(e.getMessage());
         }
         return resultMap;
     }
@@ -939,7 +971,7 @@ public class LoginServiceImpl implements LoginService {
         try {
             attrHistoryMapper.batchInsert(attrHistories);
         } catch (Exception e) {
-
+            log.warn(e.getMessage());
         }
     }
 

@@ -392,12 +392,13 @@ public class MsgCenter {
                             .BaseResponse(WebWXSendMsgResponse.BaseResponse.builder().Ret(0).build())
                     .LocalID(msg.getMsgId())
                     .MsgID(msg.getNewMsgId()+"").build()))
+                    .playLength(msg.getPlayLength())
+                    .imgHeight(msg.getImgHeight())
+                    .imgWidth(msg.getImgWidth())
+                    .voiceLength(msg.getVoiceLength())
                     .build();
             int insert = messageMapper.insert(build);
-            build.setPlayLength(msg.getPlayLength());
-            build.setImgHeight(msg.getImgHeight());
-            build.setImgWidth(msg.getImgWidth());
-            build.setVoiceLength(msg.getVoiceLength());
+
             return build;
         } catch (Exception e) {
             e.printStackTrace();

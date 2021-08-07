@@ -24,8 +24,8 @@ public class AddMsgList {
     private int Status;
     private int ImgStatus;
     private long CreateTime;
-    private int VoiceLength;
-    private int PlayLength;
+    private long VoiceLength;
+    private long PlayLength;
     private String FileName;
     private String FileSize;
     private String MediaId;

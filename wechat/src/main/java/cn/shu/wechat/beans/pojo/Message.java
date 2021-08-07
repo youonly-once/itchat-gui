@@ -1,16 +1,16 @@
 package cn.shu.wechat.beans.pojo;
 
+import java.util.Date;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-
 /**
  * @作者 舒新胜
- * @项目 AutoWeChat
- * @创建时间 3/10/2021 10:36 PM
+ * @项目 AutoWechat
+ * @创建时间 8/7/2021 12:31
  */
 @Data
 @Builder
@@ -29,6 +29,17 @@ public class Message {
 
     private Date createTime;
 
+    private String plaintext;
+
+    /**
+     * 消息发送进度
+     */
+    private int process = 100;
+
+    /**
+     * 是否删除
+     */
+    private boolean deleted =false;
     /**
      * 消息内容
      */
@@ -58,34 +69,14 @@ public class Message {
     private String toRemarkname;
 
     private String toNickname;
-    private String plaintext;
-    /**
-     * 视频长度
-     */
-    private long playLength;
-    private int imgHeight;
-    private int imgWidth;
-    /**
-     * 语音长度 毫秒
-     */
-    private long voiceLength;
+
     /**
      * 是否是本人发送的消息1是0不是
      */
-    private Boolean isSend = true;
+    private Boolean isSend;
 
     /**
-     * 消息发送进度
-     */
-    private int process = 100;
-
-    /**
-     * 是否删除
-     */
-    private boolean deleted =false;
-
-    /**
-     * 缩略图Url
+     * 缩略图路径
      */
     private String slavePath;
 
@@ -94,4 +85,23 @@ public class Message {
      */
     private String response;
 
+    /**
+     * 视频长度 秒
+     */
+    private Long playLength;
+
+    /**
+     * 缩略图高度
+     */
+    private Integer imgHeight;
+
+    /**
+     * 缩略图宽度
+     */
+    private Integer imgWidth;
+
+    /**
+     * 语音长度 毫秒
+     */
+    private Long voiceLength;
 }

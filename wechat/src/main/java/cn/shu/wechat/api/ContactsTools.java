@@ -3,7 +3,10 @@ package cn.shu.wechat.api;
 
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.utils.CommonTools;
+import cn.shu.wechat.utils.SpringContextHolder;
+import com.alibaba.fastjson.JSONArray;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.StringUtils;
 
@@ -138,6 +141,10 @@ public class ContactsTools {
         if (groupName == null){
             throw new RuntimeException("groupName can not be null");
         }
+        //群成员为自己的好友
+        if (Core.getMemberMap().containsKey(userName)){
+            return Core.getMemberMap().get(userName);
+        }
         Map<String, Contacts> groupMemberMap =Core.getMemberMap();
         Contacts group = groupMemberMap.getOrDefault(groupName, null);
         if (group == null) {
@@ -145,7 +152,11 @@ public class ContactsTools {
         }
         List<Contacts> memberList = group.getMemberlist();
         if (memberList == null || memberList.size() <= 0) {
-            return null;
+            LoginService bean = SpringContextHolder.getBean(LoginService.class);
+            memberList = bean.WebWxBatchGetContact(groupName);
+           if (memberList == null || memberList.size() <= 0){
+               return null;
+           }
         }
         try {
 
@@ -199,11 +210,8 @@ public class ContactsTools {
      */
     public static String getMemberDisplayNameOfGroup(Contacts memberOfGroup, String userName) {
         if (memberOfGroup == null || userName == null) {
-            return "";
+            throw new NullPointerException("memberOfGroup or userName is null");
         }
-        Map<String, Contacts> memberMap = Core.getMemberMap();
-        Contacts contacts = memberMap.get(userName);
-        if (contacts == null || StringUtils.isEmpty(contacts.getRemarkname())){
             String displayName = memberOfGroup.getDisplayname();
             if (!StringUtils.isEmpty(displayName)) {
                 return CommonTools.emojiFormatter(displayName);
@@ -212,9 +220,6 @@ public class ContactsTools {
             if (!StringUtils.isEmpty(displayName)) {
                 return CommonTools.emojiFormatter(displayName);
             }
-        }else{
-            return CommonTools.emojiFormatter(contacts.getRemarkname());
-        }
         return userName;
     }
 

@@ -4,9 +4,7 @@ import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.VerticalFlowLayout;
-import cn.shu.wechat.swing.components.message.MessageImageLabel;
-import cn.shu.wechat.swing.components.message.MessageVideoLabel;
-import cn.shu.wechat.swing.components.message.RCLeftImageMessageBubble;
+import cn.shu.wechat.swing.components.message.*;
 import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.ImageUtil;
@@ -37,10 +35,10 @@ public class MessageLeftVideoViewHolder extends BaseMessageViewHolder {
     /**
      * 视频层
      */
-    private JComponent videoComponent = null;
+    private TagJLayeredPane videoComponent = null;
+    private final TagPanel contentTagPanel = new TagPanel();
 
-
-    private final RCLeftImageMessageBubble imageBubble = new RCLeftImageMessageBubble();
+    private final RCLeftVideoMessageBubble imageBubble = new RCLeftVideoMessageBubble();
     private final JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
     private final JPanel messageAvatarPanel = new JPanel();
     private boolean isGroup = true;
@@ -96,16 +94,15 @@ public class MessageLeftVideoViewHolder extends BaseMessageViewHolder {
         setLayout(new BorderLayout());
         timePanel.add(time);
 
-        JPanel senderMessagePanel = new JPanel();
-        senderMessagePanel.setBackground(Colors.WINDOW_BACKGROUND);
-        senderMessagePanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
+        contentTagPanel.setBackground(Colors.WINDOW_BACKGROUND);
+        contentTagPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
         if (isGroup) {
-            senderMessagePanel.add(sender);
+            contentTagPanel.add(sender);
         }
         try {
             videoComponent = getLayerPanel();
             videoComponent.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            senderMessagePanel.add(videoComponent);
+            contentTagPanel.add(videoComponent);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -113,7 +110,7 @@ public class MessageLeftVideoViewHolder extends BaseMessageViewHolder {
 
         messageAvatarPanel.setLayout(new GridBagLayout());
         messageAvatarPanel.add(avatar, new GBC(1, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 5, 0, 0));
-        messageAvatarPanel.add(senderMessagePanel, new GBC(2, 0)
+        messageAvatarPanel.add(contentTagPanel, new GBC(2, 0)
                 .setWeight(1000, 1)
                 .setAnchor(GBC.WEST)
                 .setInsets(0, 5, 0, 0));
@@ -127,8 +124,8 @@ public class MessageLeftVideoViewHolder extends BaseMessageViewHolder {
      * @return 组件
      * @throws IOException 读取文件异常
      */
-    private JComponent getLayerPanel() throws IOException {
-        JLayeredPane layeredPane = new JLayeredPane();
+    private TagJLayeredPane getLayerPanel() throws IOException {
+        TagJLayeredPane layeredPane = new TagJLayeredPane();
         JPanel imgPanel = new JPanel(new GridLayout(1, 1));
         imgPanel.setBounds(0, 0, slaveImgWidth, slaveImgHeight);
         imgPanel.setOpaque(false);

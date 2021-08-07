@@ -449,7 +449,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
     }
     private void processVoice(MessageItem item, MessageVoiceViewHolder holder, RCAttachmentMessageBubble messageBubble){
-
+        holder.getContentTagPanel().setTag(item.getVoiceAttachmentItem());
         double len = item.getVoiceAttachmentItem().getVoiceLength() * 1.0;
         len = len / 1000;
         long round = Math.round(len);
@@ -558,7 +558,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        holder.getVideoComponent().setTag(item.getVideoAttachmentItem());
         listView.setScrollHiddenOnMouseLeave(holder.getVideoComponent());
         listView.setScrollHiddenOnMouseLeave(holder.getImageBubble());
 
@@ -585,7 +585,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        holder.getVideoComponent().setTag(item.getVideoAttachmentItem());
         listView.setScrollHiddenOnMouseLeave(holder.getVideoComponent());
         listView.setScrollHiddenOnMouseLeave(holder.getImageBubble());
 
@@ -1105,13 +1105,13 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             }
             case MessageItem.LEFT_VOICE: {
                 MessageLeftVoiceViewHolder holder = (MessageLeftVoiceViewHolder) viewHolder;
-                contentComponent = holder.getMessageBubble();
+                contentComponent = holder.getContentTagPanel();
                 messageBubble = holder.getMessageBubble();
                 break;
             }
             case MessageItem.RIGHT_VOICE: {
                 MessageRightVoiceViewHolder holder = (MessageRightVoiceViewHolder) viewHolder;
-                contentComponent = holder.getMessageBubble();
+                contentComponent = holder.getContentTagPanel();
                 messageBubble = holder.getMessageBubble();
                 break;
             }

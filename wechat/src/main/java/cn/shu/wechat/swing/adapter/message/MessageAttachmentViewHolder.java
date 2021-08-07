@@ -4,7 +4,7 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GradientProgressBarUI;
 import cn.shu.wechat.swing.components.RCProgressBar;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
-import cn.shu.wechat.swing.components.message.AttachmentPanel;
+import cn.shu.wechat.swing.components.message.TagPanel;
 import cn.shu.wechat.swing.components.message.RCAttachmentMessageBubble;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.FontUtil;
@@ -22,7 +22,7 @@ public class MessageAttachmentViewHolder extends BaseMessageViewHolder {
     public RCProgressBar progressBar = new RCProgressBar(); // 进度条
     public JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER,5,0)); // 时间面板
     public JPanel messageAvatarPanel = new JPanel(); // 消息 + 头像组合面板
-    public AttachmentPanel attachmentPanel = new AttachmentPanel(); // 附件面板
+    public TagPanel attachmentPanel = new TagPanel(); // 附件面板
     public JLabel attachmentIcon = new JLabel(); // 附件类型icon
     public JLabel sizeLabel = new JLabel();
     public RCAttachmentMessageBubble messageBubble;

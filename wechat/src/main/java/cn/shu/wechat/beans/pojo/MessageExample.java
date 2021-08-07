@@ -5,10 +5,10 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @作者 舒新胜
- * @项目 AutoWeChat
- * @创建时间 3/10/2021 10:36 PM
- */
+  *@作者     舒新胜
+  *@项目     AutoWechat
+  *@创建时间  8/7/2021 12:31
+*/
 public class MessageExample {
     protected String orderByClause;
 
@@ -497,6 +497,76 @@ public class MessageExample {
 
         public Criteria andCreateTimeNotBetween(Date value1, Date value2) {
             addCriterion("create_time not between", value1, value2, "createTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlaintextIsNull() {
+            addCriterion("plaintext is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlaintextIsNotNull() {
+            addCriterion("plaintext is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlaintextEqualTo(String value) {
+            addCriterion("plaintext =", value, "plaintext");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlaintextNotEqualTo(String value) {
+            addCriterion("plaintext <>", value, "plaintext");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlaintextGreaterThan(String value) {
+            addCriterion("plaintext >", value, "plaintext");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlaintextGreaterThanOrEqualTo(String value) {
+            addCriterion("plaintext >=", value, "plaintext");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlaintextLessThan(String value) {
+            addCriterion("plaintext <", value, "plaintext");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlaintextLessThanOrEqualTo(String value) {
+            addCriterion("plaintext <=", value, "plaintext");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlaintextLike(String value) {
+            addCriterion("plaintext like", value, "plaintext");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlaintextNotLike(String value) {
+            addCriterion("plaintext not like", value, "plaintext");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlaintextIn(List<String> values) {
+            addCriterion("plaintext in", values, "plaintext");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlaintextNotIn(List<String> values) {
+            addCriterion("plaintext not in", values, "plaintext");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlaintextBetween(String value1, String value2) {
+            addCriterion("plaintext between", value1, value2, "plaintext");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlaintextNotBetween(String value1, String value2) {
+            addCriterion("plaintext not between", value1, value2, "plaintext");
             return (Criteria) this;
         }
 
@@ -1397,6 +1467,386 @@ public class MessageExample {
 
         public Criteria andIsSendNotBetween(Boolean value1, Boolean value2) {
             addCriterion("is_send not between", value1, value2, "isSend");
+            return (Criteria) this;
+        }
+
+        public Criteria andSlavePathIsNull() {
+            addCriterion("slave_path is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andSlavePathIsNotNull() {
+            addCriterion("slave_path is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andSlavePathEqualTo(String value) {
+            addCriterion("slave_path =", value, "slavePath");
+            return (Criteria) this;
+        }
+
+        public Criteria andSlavePathNotEqualTo(String value) {
+            addCriterion("slave_path <>", value, "slavePath");
+            return (Criteria) this;
+        }
+
+        public Criteria andSlavePathGreaterThan(String value) {
+            addCriterion("slave_path >", value, "slavePath");
+            return (Criteria) this;
+        }
+
+        public Criteria andSlavePathGreaterThanOrEqualTo(String value) {
+            addCriterion("slave_path >=", value, "slavePath");
+            return (Criteria) this;
+        }
+
+        public Criteria andSlavePathLessThan(String value) {
+            addCriterion("slave_path <", value, "slavePath");
+            return (Criteria) this;
+        }
+
+        public Criteria andSlavePathLessThanOrEqualTo(String value) {
+            addCriterion("slave_path <=", value, "slavePath");
+            return (Criteria) this;
+        }
+
+        public Criteria andSlavePathLike(String value) {
+            addCriterion("slave_path like", value, "slavePath");
+            return (Criteria) this;
+        }
+
+        public Criteria andSlavePathNotLike(String value) {
+            addCriterion("slave_path not like", value, "slavePath");
+            return (Criteria) this;
+        }
+
+        public Criteria andSlavePathIn(List<String> values) {
+            addCriterion("slave_path in", values, "slavePath");
+            return (Criteria) this;
+        }
+
+        public Criteria andSlavePathNotIn(List<String> values) {
+            addCriterion("slave_path not in", values, "slavePath");
+            return (Criteria) this;
+        }
+
+        public Criteria andSlavePathBetween(String value1, String value2) {
+            addCriterion("slave_path between", value1, value2, "slavePath");
+            return (Criteria) this;
+        }
+
+        public Criteria andSlavePathNotBetween(String value1, String value2) {
+            addCriterion("slave_path not between", value1, value2, "slavePath");
+            return (Criteria) this;
+        }
+
+        public Criteria andResponseIsNull() {
+            addCriterion("response is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andResponseIsNotNull() {
+            addCriterion("response is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andResponseEqualTo(String value) {
+            addCriterion("response =", value, "response");
+            return (Criteria) this;
+        }
+
+        public Criteria andResponseNotEqualTo(String value) {
+            addCriterion("response <>", value, "response");
+            return (Criteria) this;
+        }
+
+        public Criteria andResponseGreaterThan(String value) {
+            addCriterion("response >", value, "response");
+            return (Criteria) this;
+        }
+
+        public Criteria andResponseGreaterThanOrEqualTo(String value) {
+            addCriterion("response >=", value, "response");
+            return (Criteria) this;
+        }
+
+        public Criteria andResponseLessThan(String value) {
+            addCriterion("response <", value, "response");
+            return (Criteria) this;
+        }
+
+        public Criteria andResponseLessThanOrEqualTo(String value) {
+            addCriterion("response <=", value, "response");
+            return (Criteria) this;
+        }
+
+        public Criteria andResponseLike(String value) {
+            addCriterion("response like", value, "response");
+            return (Criteria) this;
+        }
+
+        public Criteria andResponseNotLike(String value) {
+            addCriterion("response not like", value, "response");
+            return (Criteria) this;
+        }
+
+        public Criteria andResponseIn(List<String> values) {
+            addCriterion("response in", values, "response");
+            return (Criteria) this;
+        }
+
+        public Criteria andResponseNotIn(List<String> values) {
+            addCriterion("response not in", values, "response");
+            return (Criteria) this;
+        }
+
+        public Criteria andResponseBetween(String value1, String value2) {
+            addCriterion("response between", value1, value2, "response");
+            return (Criteria) this;
+        }
+
+        public Criteria andResponseNotBetween(String value1, String value2) {
+            addCriterion("response not between", value1, value2, "response");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlayLengthIsNull() {
+            addCriterion("play_length is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlayLengthIsNotNull() {
+            addCriterion("play_length is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlayLengthEqualTo(Long value) {
+            addCriterion("play_length =", value, "playLength");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlayLengthNotEqualTo(Long value) {
+            addCriterion("play_length <>", value, "playLength");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlayLengthGreaterThan(Long value) {
+            addCriterion("play_length >", value, "playLength");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlayLengthGreaterThanOrEqualTo(Long value) {
+            addCriterion("play_length >=", value, "playLength");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlayLengthLessThan(Long value) {
+            addCriterion("play_length <", value, "playLength");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlayLengthLessThanOrEqualTo(Long value) {
+            addCriterion("play_length <=", value, "playLength");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlayLengthIn(List<Long> values) {
+            addCriterion("play_length in", values, "playLength");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlayLengthNotIn(List<Long> values) {
+            addCriterion("play_length not in", values, "playLength");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlayLengthBetween(Long value1, Long value2) {
+            addCriterion("play_length between", value1, value2, "playLength");
+            return (Criteria) this;
+        }
+
+        public Criteria andPlayLengthNotBetween(Long value1, Long value2) {
+            addCriterion("play_length not between", value1, value2, "playLength");
+            return (Criteria) this;
+        }
+
+        public Criteria andImgHeightIsNull() {
+            addCriterion("img_height is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andImgHeightIsNotNull() {
+            addCriterion("img_height is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andImgHeightEqualTo(Integer value) {
+            addCriterion("img_height =", value, "imgHeight");
+            return (Criteria) this;
+        }
+
+        public Criteria andImgHeightNotEqualTo(Integer value) {
+            addCriterion("img_height <>", value, "imgHeight");
+            return (Criteria) this;
+        }
+
+        public Criteria andImgHeightGreaterThan(Integer value) {
+            addCriterion("img_height >", value, "imgHeight");
+            return (Criteria) this;
+        }
+
+        public Criteria andImgHeightGreaterThanOrEqualTo(Integer value) {
+            addCriterion("img_height >=", value, "imgHeight");
+            return (Criteria) this;
+        }
+
+        public Criteria andImgHeightLessThan(Integer value) {
+            addCriterion("img_height <", value, "imgHeight");
+            return (Criteria) this;
+        }
+
+        public Criteria andImgHeightLessThanOrEqualTo(Integer value) {
+            addCriterion("img_height <=", value, "imgHeight");
+            return (Criteria) this;
+        }
+
+        public Criteria andImgHeightIn(List<Integer> values) {
+            addCriterion("img_height in", values, "imgHeight");
+            return (Criteria) this;
+        }
+
+        public Criteria andImgHeightNotIn(List<Integer> values) {
+            addCriterion("img_height not in", values, "imgHeight");
+            return (Criteria) this;
+        }
+
+        public Criteria andImgHeightBetween(Integer value1, Integer value2) {
+            addCriterion("img_height between", value1, value2, "imgHeight");
+            return (Criteria) this;
+        }
+
+        public Criteria andImgHeightNotBetween(Integer value1, Integer value2) {
+            addCriterion("img_height not between", value1, value2, "imgHeight");
+            return (Criteria) this;
+        }
+
+        public Criteria andImgWidthIsNull() {
+            addCriterion("img_width is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andImgWidthIsNotNull() {
+            addCriterion("img_width is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andImgWidthEqualTo(Integer value) {
+            addCriterion("img_width =", value, "imgWidth");
+            return (Criteria) this;
+        }
+
+        public Criteria andImgWidthNotEqualTo(Integer value) {
+            addCriterion("img_width <>", value, "imgWidth");
+            return (Criteria) this;
+        }
+
+        public Criteria andImgWidthGreaterThan(Integer value) {
+            addCriterion("img_width >", value, "imgWidth");
+            return (Criteria) this;
+        }
+
+        public Criteria andImgWidthGreaterThanOrEqualTo(Integer value) {
+            addCriterion("img_width >=", value, "imgWidth");
+            return (Criteria) this;
+        }
+
+        public Criteria andImgWidthLessThan(Integer value) {
+            addCriterion("img_width <", value, "imgWidth");
+            return (Criteria) this;
+        }
+
+        public Criteria andImgWidthLessThanOrEqualTo(Integer value) {
+            addCriterion("img_width <=", value, "imgWidth");
+            return (Criteria) this;
+        }
+
+        public Criteria andImgWidthIn(List<Integer> values) {
+            addCriterion("img_width in", values, "imgWidth");
+            return (Criteria) this;
+        }
+
+        public Criteria andImgWidthNotIn(List<Integer> values) {
+            addCriterion("img_width not in", values, "imgWidth");
+            return (Criteria) this;
+        }
+
+        public Criteria andImgWidthBetween(Integer value1, Integer value2) {
+            addCriterion("img_width between", value1, value2, "imgWidth");
+            return (Criteria) this;
+        }
+
+        public Criteria andImgWidthNotBetween(Integer value1, Integer value2) {
+            addCriterion("img_width not between", value1, value2, "imgWidth");
+            return (Criteria) this;
+        }
+
+        public Criteria andVoiceLengthIsNull() {
+            addCriterion("voice_length is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andVoiceLengthIsNotNull() {
+            addCriterion("voice_length is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andVoiceLengthEqualTo(Long value) {
+            addCriterion("voice_length =", value, "voiceLength");
+            return (Criteria) this;
+        }
+
+        public Criteria andVoiceLengthNotEqualTo(Long value) {
+            addCriterion("voice_length <>", value, "voiceLength");
+            return (Criteria) this;
+        }
+
+        public Criteria andVoiceLengthGreaterThan(Long value) {
+            addCriterion("voice_length >", value, "voiceLength");
+            return (Criteria) this;
+        }
+
+        public Criteria andVoiceLengthGreaterThanOrEqualTo(Long value) {
+            addCriterion("voice_length >=", value, "voiceLength");
+            return (Criteria) this;
+        }
+
+        public Criteria andVoiceLengthLessThan(Long value) {
+            addCriterion("voice_length <", value, "voiceLength");
+            return (Criteria) this;
+        }
+
+        public Criteria andVoiceLengthLessThanOrEqualTo(Long value) {
+            addCriterion("voice_length <=", value, "voiceLength");
+            return (Criteria) this;
+        }
+
+        public Criteria andVoiceLengthIn(List<Long> values) {
+            addCriterion("voice_length in", values, "voiceLength");
+            return (Criteria) this;
+        }
+
+        public Criteria andVoiceLengthNotIn(List<Long> values) {
+            addCriterion("voice_length not in", values, "voiceLength");
+            return (Criteria) this;
+        }
+
+        public Criteria andVoiceLengthBetween(Long value1, Long value2) {
+            addCriterion("voice_length between", value1, value2, "voiceLength");
+            return (Criteria) this;
+        }
+
+        public Criteria andVoiceLengthNotBetween(Long value1, Long value2) {
+            addCriterion("voice_length not between", value1, value2, "voiceLength");
             return (Criteria) this;
         }
     }

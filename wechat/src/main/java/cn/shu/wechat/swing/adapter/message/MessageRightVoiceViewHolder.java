@@ -4,6 +4,7 @@ import cn.shu.wechat.swing.components.*;
 import cn.shu.wechat.swing.components.message.MessagePopupMenu;
 import cn.shu.wechat.swing.components.message.RCLeftVoiceMessageBubble;
 import cn.shu.wechat.swing.components.message.RCRightVoiceMessageBubble;
+import cn.shu.wechat.swing.components.message.TagPanel;
 import cn.shu.wechat.swing.utils.FontUtil;
 import lombok.Getter;
 
@@ -13,7 +14,9 @@ import java.awt.*;
 import java.io.IOException;
 
 /**
- * Created by 舒新胜 on 17-6-2.
+ *
+ * @author 舒新胜
+ * @date 17-6-2
  */
 @Getter
 public class MessageRightVoiceViewHolder extends MessageVoiceViewHolder {
@@ -34,9 +37,8 @@ public class MessageRightVoiceViewHolder extends MessageVoiceViewHolder {
         messageBubble.add(durationText);
         messageBubble.add(voiceImgLabel);
 
-        JPanel senderMessagePanel = new JPanel();
-        senderMessagePanel.setBackground(Colors.WINDOW_BACKGROUND);
-        senderMessagePanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
+        contentTagPanel.setBackground(Colors.WINDOW_BACKGROUND);
+        contentTagPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
 
         JPanel voicePanel = new JPanel();
         voicePanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
@@ -47,10 +49,10 @@ public class MessageRightVoiceViewHolder extends MessageVoiceViewHolder {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        senderMessagePanel.add(voicePanel);
+        contentTagPanel.add(voicePanel);
 
         messageAvatarPanel.setLayout(new GridBagLayout());
-        messageAvatarPanel.add(senderMessagePanel, new GBC(1, 0).setWeight(1000, 1).setAnchor(GBC.EAST).setInsets(0, 5, 0, 0));
+        messageAvatarPanel.add(contentTagPanel, new GBC(1, 0).setWeight(1000, 1).setAnchor(GBC.EAST).setInsets(0, 5, 0, 0));
         messageAvatarPanel.add(avatar, new GBC(2, 0)
                 .setWeight(1, 1)
                 .setAnchor(GBC.NORTH)

@@ -438,6 +438,7 @@ public class ChatPanel extends ParentAvailablePanel {
      */
     private void loadLocalHistory() {
         ( (RoomChatPanelCard) this.getParentPanel()).getTitlePanel().showStatusLabel("加载中...");
+        //TODO 线程安全问题
         new SwingWorker<Object,Object>(){
 
             @Override

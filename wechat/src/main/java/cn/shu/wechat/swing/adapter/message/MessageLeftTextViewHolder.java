@@ -10,6 +10,7 @@ import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.FontUtil;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 
 /**
@@ -62,16 +63,16 @@ public class MessageLeftTextViewHolder extends BaseMessageViewHolder {
         if (isGroup) {
             senderMessagePanel.add(sender);
         }
-
-        senderMessagePanel.add(messageBubble);
-
+        JPanel contentPanel = new JPanel();
+        contentPanel.add(messageBubble);
+        contentPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        senderMessagePanel.add(contentPanel);
         messageAvatarPanel.setLayout(new GridBagLayout());
         messageAvatarPanel.add(avatar, new GBC(1, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 5, 0, 0));
         messageAvatarPanel.add(senderMessagePanel, new GBC(2, 0)
                 .setWeight(1000, 1)
                 .setAnchor(GBC.WEST)
                 .setInsets(0, 5, 0, 0));
-
         add(timePanel, BorderLayout.NORTH);
         add(messageAvatarPanel, BorderLayout.CENTER);
     }

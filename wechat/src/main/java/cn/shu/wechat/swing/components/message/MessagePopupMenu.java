@@ -1,7 +1,6 @@
 package cn.shu.wechat.swing.components.message;
 
 import cn.shu.wechat.api.MessageTools;
-import cn.shu.wechat.api.WeChatTool;
 import cn.shu.wechat.beans.msg.send.WebWXSendMsgResponse;
 import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.mapper.MessageMapper;
@@ -9,8 +8,9 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCMenuItemUI;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
 import cn.shu.wechat.swing.entity.MessageItem;
+import cn.shu.wechat.swing.entity.VideoAttachmentItem;
+import cn.shu.wechat.swing.entity.VoiceAttachmentItem;
 import cn.shu.wechat.swing.frames.MainFrame;
-import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 import cn.shu.wechat.swing.utils.FileCache;
 import cn.shu.wechat.swing.utils.ImageCache;
@@ -24,6 +24,7 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -39,12 +40,13 @@ public class MessagePopupMenu extends JPopupMenu {
     }
 
     private void initMenuItem() {
-        JMenuItem item1 = new JMenuItem("复制");
-        JMenuItem item2 = new JMenuItem("删除");
-        JMenuItem item3 = new JMenuItem("转发");
-        JMenuItem item4 = new JMenuItem("撤回");
-        item1.setUI(new RCMenuItemUI());
-        item1.addActionListener(new AbstractAction() {
+        JMenuItem copy = new JMenuItem("复制");
+        JMenuItem delItem = new JMenuItem("删除");
+        JMenuItem forwardItem = new JMenuItem("转发");
+        JMenuItem revokeItem = new JMenuItem("撤回");
+        JMenuItem showPathItem = new JMenuItem("文件夹");
+        copy.setUI(new RCMenuItemUI());
+        copy.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 switch (messageType) {
@@ -85,11 +87,41 @@ public class MessagePopupMenu extends JPopupMenu {
                     }
                     case (MessageItem.LEFT_VIDEO):
                     case (MessageItem.RIGHT_VIDEO): {
+                        TagJLayeredPane attachmentPanel = (TagJLayeredPane) getInvoker();
+                        Object obj = attachmentPanel.getTag();
+                        if (obj != null) {
+                            VideoAttachmentItem item = (VideoAttachmentItem)obj;
+                            String videoPath = item.getVideoPath();
+                            if (videoPath != null && !videoPath.isEmpty()) {
+                                ClipboardUtil.copyFile(videoPath);
+                            }else{
+                                JOptionPane.showMessageDialog(MainFrame.getContext(), "文件不存在", "文件不存在", JOptionPane.WARNING_MESSAGE);
+                                return;
+                            }
 
+                        }
+                        break;
+                    }
+                    case (MessageItem.LEFT_VOICE):
+                    case (MessageItem.RIGHT_VOICE): {
+                        TagPanel attachmentPanel = (TagPanel) getInvoker();
+                        Object obj = attachmentPanel.getTag();
+                        if (obj != null) {
+                            VoiceAttachmentItem item = (VoiceAttachmentItem)obj;
+                            String voicePath = item.getVoicePath();
+                            if (voicePath != null && !voicePath.isEmpty()) {
+                                ClipboardUtil.copyFile(voicePath);
+                            }else{
+                                JOptionPane.showMessageDialog(MainFrame.getContext(), "文件不存在", "文件不存在", JOptionPane.WARNING_MESSAGE);
+                                return;
+                            }
+
+                        }
+                        break;
                     }
                     case (MessageItem.RIGHT_ATTACHMENT):
                     case (MessageItem.LEFT_ATTACHMENT): {
-                        AttachmentPanel attachmentPanel = (AttachmentPanel) getInvoker();
+                        TagPanel attachmentPanel = (TagPanel) getInvoker();
                         Object obj = attachmentPanel.getTag();
                         if (obj != null) {
                             Map map = (Map) obj;
@@ -132,8 +164,8 @@ public class MessagePopupMenu extends JPopupMenu {
         });
 
 
-        item2.setUI(new RCMenuItemUI());
-        item2.addActionListener(new AbstractAction() {
+        delItem.setUI(new RCMenuItemUI());
+        delItem.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String messageId = null;
@@ -156,7 +188,7 @@ public class MessagePopupMenu extends JPopupMenu {
                     }
                     case (MessageItem.RIGHT_ATTACHMENT):
                     case (MessageItem.LEFT_ATTACHMENT): {
-                        AttachmentPanel attachmentPanel = (AttachmentPanel) getInvoker();
+                        TagPanel attachmentPanel = (TagPanel) getInvoker();
                         Object obj = attachmentPanel.getTag();
                         if (obj != null) {
                             Map map = (Map) obj;
@@ -173,27 +205,25 @@ public class MessagePopupMenu extends JPopupMenu {
             }
         });
 
-        item3.setUI(new RCMenuItemUI());
-        item3.addActionListener(new AbstractAction() {
+        forwardItem.setUI(new RCMenuItemUI());
+        forwardItem.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("转发");
             }
         });
-        item4.setUI(new RCMenuItemUI());
-        item4.addActionListener(new AbstractAction() {
+        revokeItem.setUI(new RCMenuItemUI());
+        revokeItem.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String messageId = null;
                 switch (messageType) {
-                    case MessageItem.RIGHT_TEXT:
-                    case MessageItem.LEFT_TEXT: {
+                    case MessageItem.RIGHT_TEXT:{
                         SizeAutoAdjustTextArea textArea = (SizeAutoAdjustTextArea) getInvoker();
                         messageId = textArea.getTag().toString();
                         break;
                     }
-                    case (MessageItem.RIGHT_IMAGE):
-                    case (MessageItem.LEFT_IMAGE): {
+                    case (MessageItem.RIGHT_IMAGE):{
                         MessageImageLabel imageLabel = (MessageImageLabel) getInvoker();
                         Object obj = imageLabel.getTag();
                         if (obj != null) {
@@ -202,9 +232,8 @@ public class MessagePopupMenu extends JPopupMenu {
                         }
                         break;
                     }
-                    case (MessageItem.RIGHT_ATTACHMENT):
-                    case (MessageItem.LEFT_ATTACHMENT): {
-                        AttachmentPanel attachmentPanel = (AttachmentPanel) getInvoker();
+                    case (MessageItem.RIGHT_ATTACHMENT):{
+                        TagPanel attachmentPanel = (TagPanel) getInvoker();
                         Object obj = attachmentPanel.getTag();
                         if (obj != null) {
                             Map map = (Map) obj;
@@ -212,6 +241,24 @@ public class MessagePopupMenu extends JPopupMenu {
                         }
                         break;
                     }
+                    case (MessageItem.RIGHT_VIDEO):{
+                        TagJLayeredPane attachmentPanel = (TagJLayeredPane) getInvoker();
+                        Object obj = attachmentPanel.getTag();
+                        if (obj != null) {
+                            VideoAttachmentItem item = (VideoAttachmentItem)obj;
+                            messageId = item.getId();
+                        }
+                        break;
+                    }
+                case (MessageItem.RIGHT_VOICE):{
+                    TagPanel attachmentPanel = (TagPanel) getInvoker();
+                    Object obj = attachmentPanel.getTag();
+                    if (obj != null) {
+                        VoiceAttachmentItem item = (VoiceAttachmentItem)obj;
+                        messageId = item.getId();
+                    }
+                    break;
+                }
                     default:
                 }
                 final String id = messageId;
@@ -229,11 +276,88 @@ public class MessagePopupMenu extends JPopupMenu {
                 }
             }
         });
-        this.add(item1);
-        this.add(item2);
-        this.add(item4);
-       // this.add(item3);
+        showPathItem.setUI(new RCMenuItemUI());
+        showPathItem.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
 
+                        String path = null;
+                        switch (messageType) {
+                            case (MessageItem.RIGHT_IMAGE):
+                            case (MessageItem.LEFT_IMAGE): {
+                                MessageImageLabel imageLabel = (MessageImageLabel) getInvoker();
+                                Object obj = imageLabel.getTag();
+                                if (obj != null) {
+                                    Map map = (Map) obj;
+                                    path = (String) map.get("url");
+                                }
+                                break;
+                            }
+                            case (MessageItem.LEFT_VIDEO):
+                            case (MessageItem.RIGHT_VIDEO): {
+                                TagJLayeredPane attachmentPanel = (TagJLayeredPane) getInvoker();
+                                Object obj = attachmentPanel.getTag();
+                                if (obj != null) {
+                                    VideoAttachmentItem item = (VideoAttachmentItem) obj;
+                                    path = item.getVideoPath();
+                                }
+                                break;
+                            }
+                            case (MessageItem.LEFT_VOICE):
+                            case (MessageItem.RIGHT_VOICE): {
+                                TagPanel attachmentPanel = (TagPanel) getInvoker();
+                                Object obj = attachmentPanel.getTag();
+                                if (obj != null) {
+                                    VoiceAttachmentItem item = (VoiceAttachmentItem) obj;
+                                    path = item.getVoicePath();
+                                }
+                                break;
+                            }
+                            case (MessageItem.RIGHT_ATTACHMENT):
+                            case (MessageItem.LEFT_ATTACHMENT): {
+                                TagPanel attachmentPanel = (TagPanel) getInvoker();
+                                Object obj = attachmentPanel.getTag();
+                                if (obj != null) {
+                                    Map map = (Map) obj;
+                                    String id = (String) map.get("attachmentId");
+                                    String name = (String) map.get("name");
+                                    path = fileCache.tryGetFileCache(id, name);
+                                    if (path != null && !path.isEmpty()) {
+                                        ClipboardUtil.copyFile(path);
+                                    } else {
+                                        path = map.get("filepath").toString();
+                                    }
+                                }
+                                break;
+                            }
+                            default:
+                                break;
+                        }
+                        if (StringUtils.isNotEmpty(path)) {
+                            String finalPath = path;
+                            ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
+                                @Override
+                                public void run() {
+
+                            File file = new File(finalPath);
+                            if (file.exists()) {
+                                try {
+                                    Desktop.getDesktop().open(file.getParentFile());
+                                } catch (IOException ioException) {
+                                    ioException.printStackTrace();
+                                }
+                            }
+                           }});
+                        }
+
+
+            }
+        });
+        this.add(copy);
+        this.add(delItem);
+        this.add(revokeItem);
+        this.add(forwardItem);
+        this.add(showPathItem);
         setBorder(new LineBorder(Colors.SCROLL_BAR_TRACK_LIGHT));
         setBackground(Colors.FONT_WHITE);
     }

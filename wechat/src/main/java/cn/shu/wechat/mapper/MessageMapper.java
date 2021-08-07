@@ -2,14 +2,13 @@ package cn.shu.wechat.mapper;
 
 import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.beans.pojo.MessageExample;
-import org.apache.ibatis.annotations.Param;
-
 import java.util.List;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * @作者 舒新胜
- * @项目 AutoWeChat
- * @创建时间 3/10/2021 10:36 PM
+ * @项目 AutoWechat
+ * @创建时间 8/7/2021 12:31
  */
 public interface MessageMapper {
     long countByExample(MessageExample example);

@@ -3,9 +3,11 @@ package cn.shu.wechat.swing.components.message;
 import javax.swing.*;
 
 /**
- * Created by 舒新胜 on 27/06/2017.
+ *
+ * @author 舒新胜
+ * @date 27/06/2017
  */
-public class AttachmentPanel extends JPanel {
+public class TagJLayeredPane extends JLayeredPane {
     private Object tag;
 
     public Object getTag() {

@@ -108,10 +108,10 @@ public interface LoginService {
      * 和上个方法的区别在于这个方法可以获取群成员的性别、省市等信息
      * 一次只能获取50个，群成员是好友的可以不用获取
      *
-     * @param groupObject 群对象
+     * @param group 群对象
      * @return 群成员数组
      * @date 2017年6月22日 下午11:24:35
      */
-    JSONArray WebWxBatchGetContactDetail(JSONObject groupObject);
+    JSONArray WebWxBatchGetContactDetail(Contacts group);
 
 }
