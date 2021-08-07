@@ -23,6 +23,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,7 +48,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
 
     //private List<SearchResultFileItemViewHolder> fileItemViewHolders = new ArrayList<>();
     private Map<String, SearchResultFileItemViewHolder> fileItemViewHolders = new HashMap<>();
-
+    private List<SoftReference<SearchResultUserItemViewHolder>> searchResultUserItemViewHolderList = new ArrayList<>();
 
     public SearchResultItemsAdapter(List<SearchResultItem> searchResultItems) {
         this.searchResultItems = searchResultItems;
@@ -79,9 +81,18 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
 
     @Override
     public SearchResultItemViewHolder onCreateViewHolder(int viewType, int position) {
+       // System.out.println("searchResultUserItemViewHolderList.size() = " + searchResultUserItemViewHolderList.size());
         switch (viewType) {
             case VIEW_TYPE_CONTACTS_ROOM: {
-                return new SearchResultUserItemViewHolder();
+                SearchResultUserItemViewHolder holder = null;
+                if(searchResultUserItemViewHolderList.size()>position){
+                    holder = searchResultUserItemViewHolderList.get(position).get();
+                }
+                if (holder == null){
+                    holder = new SearchResultUserItemViewHolder();
+                    searchResultUserItemViewHolderList.add(position,new SoftReference<>(holder));
+                }
+                return holder;
             }
             case VIEW_TYPE_MESSAGE: {
                 return new SearchResultMessageItemViewHolder();
