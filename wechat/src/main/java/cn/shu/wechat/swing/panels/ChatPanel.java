@@ -95,7 +95,7 @@ public class ChatPanel extends ParentAvailablePanel {
      */
     private List<String> roomMembers = new ArrayList<>();
 
-    private  List<String> uploadingOrDownloadingFiles = new ArrayList<>();
+    private List<String> uploadingOrDownloadingFiles = new ArrayList<>();
 
     /**
      * 文件缓存
@@ -119,8 +119,9 @@ public class ChatPanel extends ParentAvailablePanel {
 
     private final Queue<String> shareAttachmentUploadQueue = new ArrayDeque<>(MAX_SHARE_ATTACHMENT_UPLOAD_COUNT);
 
+    private boolean isLoadHis = false;
 
-    public ChatPanel(JPanel parent,String roomId) {
+    public ChatPanel(JPanel parent, String roomId) {
 
         super(parent);
         this.roomId = roomId;
@@ -141,7 +142,7 @@ public class ChatPanel extends ParentAvailablePanel {
         adapter = new MessageAdapter(messageItems, messagePanel.getMessageListView(), messageViewHolderCacheHelper);
         messagePanel.getMessageListView().setAdapter(adapter);
 
-        messageEditorPanel = new MessageEditorPanel(this,roomId);
+        messageEditorPanel = new MessageEditorPanel(this, roomId);
         messageEditorPanel.setPreferredSize(new Dimension(MainFrame.DEFAULT_WIDTH, MainFrame.DEFAULT_WIDTH / 4));
     }
 
@@ -164,7 +165,8 @@ public class ChatPanel extends ParentAvailablePanel {
                 loadMessageWithEarliestTime(firstMessageTimestamp);
             } else {
                 // 加载本地消息
-                loadLocalHistory(); // 初次打开房间时加载历史消息
+                //初次打开房间会触发一次到顶的事件，会自动加载，所以这里不加载了
+                // loadLocalHistory(); // 初次打开房间时加载历史消息
 
                 // TODO：从服务器获取本地最后一条消息之后的消，并追回到消息列表
             }
@@ -176,18 +178,40 @@ public class ChatPanel extends ParentAvailablePanel {
             @Override
             public void onScrollToTop() {
                 // 当滚动到顶部时，继续拿前面的消息
+                if (isLoadHis) {
+                    return;
+                }
                 if (roomId != null) {
-                    MessageMapper mapper = SpringContextHolder.getBean(MessageMapper.class);
-                    List<cn.shu.wechat.beans.pojo.Message> messageList = mapper.selectByPage(messageItems.size(), messageItems.size() + PAGE_LENGTH, roomId);
+                    isLoadHis = true;
+                    ((RoomChatPanelCard) ChatPanel.this.getParentPanel()).getTitlePanel().showStatusLabel("加载中...");
 
-                    //List<Message> messages = messageService.findOffset(roomId, messageItems.size(), PAGE_LENGTH);
-                    //TODO
-                    for (int i = 0 ; i < messageList.size(); i++) {
-                        MessageItem item = new MessageItem(messageList.get(i), roomId);
-                        messageItems.add(0, item);
-                    }
+                    new SwingWorker<Object, Object>() {
+                        List<Message> messageList = null;
+                        @Override
+                        protected Object doInBackground() throws Exception {
+                            MessageMapper mapper = SpringContextHolder.getBean(MessageMapper.class);
+                            messageList = mapper.selectByPage(messageItems.size(), messageItems.size() + PAGE_LENGTH, roomId);
+                            //TODO
+                            for (Message message : messageList) {
+                                MessageItem item = new MessageItem(message, roomId);
+                                messageItems.add(0, item);
+                            }
+                            return null;
+                        }
 
-                    messagePanel.getMessageListView().notifyItemRangeInserted(0, messageList.size());
+                        @Override
+                        protected void done() {
+                            try {
+                                if (!this.messageList.isEmpty()) {
+                                    messagePanel.getMessageListView().notifyItemRangeInserted(0, messageList.size());
+                                }
+                            } finally {
+                                isLoadHis = false;
+                                ((RoomChatPanelCard) ChatPanel.this.getParentPanel()).getTitlePanel().hideStatusLabel();
+                            }
+
+                        }
+                    }.execute();
                 }
             }
         });
@@ -296,7 +320,7 @@ public class ChatPanel extends ParentAvailablePanel {
             //文本消息
             if (data instanceof String && !data.equals("\n")) {
                 sendTextMessage(null, data.toString());
-                RoomsPanel.getContext().updateRoomItem(roomId, 0,  data.toString(), System.currentTimeMillis());
+                RoomsPanel.getContext().updateRoomItem(roomId, 0, data.toString(), System.currentTimeMillis());
 
             } else if (data instanceof JLabel) {
                 //图片消息
@@ -437,19 +461,19 @@ public class ChatPanel extends ParentAvailablePanel {
      * 从数据库加载本地历史消息
      */
     private void loadLocalHistory() {
-        ( (RoomChatPanelCard) this.getParentPanel()).getTitlePanel().showStatusLabel("加载中...");
+        ((RoomChatPanelCard) this.getParentPanel()).getTitlePanel().showStatusLabel("加载中...");
         //TODO 线程安全问题
-        new SwingWorker<Object,Object>(){
+        new SwingWorker<Object, Object>() {
 
             @Override
             protected Object doInBackground() throws Exception {
                 MessageMapper mapper = SpringContextHolder.getBean(MessageMapper.class);
                 List<cn.shu.wechat.beans.pojo.Message> messageList = mapper.selectByPage(messageItems.size(), messageItems.size() + PAGE_LENGTH, roomId);
 
-                for (int i = messageList.size()-1 ; i >= 0; i--) {
+                for (int i = messageList.size() - 1; i >= 0; i--) {
                     Message message = messageList.get(i);
                     MessageItem item = new MessageItem(message, roomId);
-                    item.setProgress(message.getIsSend()?100:0);
+                    item.setProgress(message.getIsSend() ? 100 : 0);
                     messageItems.add(item);
                 }
                 return null;
@@ -460,7 +484,7 @@ public class ChatPanel extends ParentAvailablePanel {
                 messagePanel.getMessageListView().notifyDataSetChanged(false);
 
                 messagePanel.getMessageListView().setAutoScrollToBottom();
-                ( (RoomChatPanelCard) ChatPanel.this.getParentPanel()).getTitlePanel().hideStatusLabel();
+                ((RoomChatPanelCard) ChatPanel.this.getParentPanel()).getTitlePanel().hideStatusLabel();
             }
         }.execute();
 
@@ -508,7 +532,6 @@ public class ChatPanel extends ParentAvailablePanel {
     }
 
 
-
     /**
      * 添加一条消息到消息列表最后
      *
@@ -518,6 +541,7 @@ public class ChatPanel extends ParentAvailablePanel {
         MessageItem messageItem = new MessageItem(lastMessage, roomId);
         addMessageItemToEnd(messageItem);
     }
+
     /**
      * 添加一条消息到消息列表最后
      *
@@ -534,7 +558,8 @@ public class ChatPanel extends ParentAvailablePanel {
     }
 
     /**
-     *  更新已有消息
+     * 更新已有消息
+     *
      * @param lastMessage 消息
      */
     public void updateMessageItem(Message lastMessage) {
@@ -570,7 +595,7 @@ public class ChatPanel extends ParentAvailablePanel {
                 .build();
         //消息列表添加消息块
         addMessageItemToEnd(message);
-         new SwingWorker<WebWXSendMsgResponse, WebWXSendMsgResponse>() {
+        new SwingWorker<WebWXSendMsgResponse, WebWXSendMsgResponse>() {
             private WebWXSendMsgResponse wxSendMsgResponse;
 
             @Override
@@ -771,13 +796,13 @@ public class ChatPanel extends ParentAvailablePanel {
 
         if (type.equals("file")) {
             if (dbMessage.getFileAttachmentId() != null) {
-              //  path = fileAttachmentService.findById(dbMessage.getFileAttachmentId()).getLink();
+                //  path = fileAttachmentService.findById(dbMessage.getFileAttachmentId()).getLink();
             } else {
                 path = null;
             }
         } else {
             if (dbMessage.getImageAttachmentId() != null) {
-               // path = imageAttachmentService.findById(dbMessage.getImageAttachmentId()).getImagePath();
+                // path = imageAttachmentService.findById(dbMessage.getImageAttachmentId()).getImagePath();
             } else {
                 path = null;
 
@@ -791,7 +816,7 @@ public class ChatPanel extends ParentAvailablePanel {
             if (index > -1) {
                 messageItems.remove(index);
                 messagePanel.getMessageListView().notifyItemRemoved(index);
-               // messageService.delete(dbMessage.getId());
+                // messageService.delete(dbMessage.getId());
             }
 
             prepareStartUploadFile(path, randomMessageId());
@@ -880,7 +905,7 @@ public class ChatPanel extends ParentAvailablePanel {
                 UploadTaskCallback callback = new UploadTaskCallback() {
                     @Override
                     public void onTaskSuccess(int curr, int size) {
-                        int progress = (int) (((curr*1.0f) / size) * 100);
+                        int progress = (int) (((curr * 1.0f) / size) * 100);
                         publish(progress);
                     }
 
@@ -894,7 +919,7 @@ public class ChatPanel extends ParentAvailablePanel {
                         .builder()
                         .filePath(uploadFilename)
                         .slavePath(uploadFilename)
-                        .plaintext(isImage?"[图片]":"[文件]")
+                        .plaintext(isImage ? "[图片]" : "[文件]")
                         .messageId(messageId)
                         .replyMsgTypeEnum(isImage ? WXSendMsgCodeEnum.PIC : WXSendMsgCodeEnum.APP)
                         .toUserName(roomId)
@@ -929,7 +954,7 @@ public class ChatPanel extends ParentAvailablePanel {
                                 MessageRightImageViewHolder holder = (MessageRightImageViewHolder) viewHolder;
                                 if (progress >= 100) {
                                     holder.sendingProgress.setVisible(false);
-                                }else{
+                                } else {
                                     holder.sendingProgress.setVisible(true);
                                 }
                             } else {
@@ -1045,13 +1070,14 @@ public class ChatPanel extends ParentAvailablePanel {
         }
     }
 
-    public static void openFile(String filePath){
+    public static void openFile(String filePath) {
         if (filePath == null) {
             JOptionPane.showMessageDialog(null, "文件不存在", "打开失败", JOptionPane.ERROR_MESSAGE);
         } else {
             openFileWithDefaultApplication(filePath);
         }
     }
+
     /**
      * 打开文件，如果文件不存在，则下载
      *

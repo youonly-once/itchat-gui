@@ -136,10 +136,10 @@ public class ContactsTools {
      */
     public static Contacts getMemberOfGroup(String groupName, String userName) {
         if (userName == null){
-            throw new RuntimeException("userName can not be null");
+           return null;
         }
         if (groupName == null){
-            throw new RuntimeException("groupName can not be null");
+            return null;
         }
         //群成员为自己的好友
         if (Core.getMemberMap().containsKey(userName)){
@@ -210,7 +210,7 @@ public class ContactsTools {
      */
     public static String getMemberDisplayNameOfGroup(Contacts memberOfGroup, String userName) {
         if (memberOfGroup == null || userName == null) {
-            throw new NullPointerException("memberOfGroup or userName is null");
+            return "";
         }
             String displayName = memberOfGroup.getDisplayname();
             if (!StringUtils.isEmpty(displayName)) {

@@ -214,5 +214,4 @@ public class RoomChatPanelCard extends JPanel {
     public void addMessageItemToEnd(Message message) {
         chatPanel.addMessageItemToEnd(message);
     }
-
 }

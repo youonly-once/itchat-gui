@@ -834,6 +834,10 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         ImageIcon imageIcon = new ImageIcon(getClass().getResource("/image/image_loading.gif"));
         // preferredImageSize(imageIcon);
         imageLabel.setIcon(imageIcon);
+        System.out.println("item.getId() = " + item.getId());
+        if (item.getImageAttachment() == null){
+            System.out.println(item);
+        }
         String slavePath = item.getImageAttachment().getSlavePath();
         if (StringUtils.isEmpty(slavePath)) {
             slavePath = item.getImageAttachment().getImagePath();

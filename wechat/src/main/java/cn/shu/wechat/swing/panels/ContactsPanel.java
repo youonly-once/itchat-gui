@@ -70,7 +70,7 @@ public class ContactsPanel extends ParentAvailablePanel {
                 boolean loadPre;
                 //启动程序的时候这个顺序还不对，先返回
                 Optional<Integer> max1 = adapter.getPositionMap().keySet().stream().max(Integer::compareTo);
-                if (adapter.getPositionMap().size() == max1.get() + 1){
+                if (max1.isPresent() && adapter.getPositionMap().size() == max1.get() + 1){
                     return;
                 }
                 int i = updatedCount;

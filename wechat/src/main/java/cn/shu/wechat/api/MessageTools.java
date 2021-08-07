@@ -797,7 +797,7 @@ public class MessageTools {
      */
     public static Map<String ,Object> parseUndoMsg(String content){
         content = XmlStreamUtil.formatXml(content);
-        content = "<root>" + content + "</root>";
+       // content = "<root>" + content + "</root>";
         Map<String, Object> map = XmlStreamUtil.toMap(content);
         return map;
     }

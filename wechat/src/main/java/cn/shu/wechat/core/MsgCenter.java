@@ -29,6 +29,7 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.extern.log4j.Log4j2;
 import org.nlpcn.commons.lang.util.StringUtil;
 import org.springframework.stereotype.Component;
+import sun.misc.MessageUtils;
 
 import javax.annotation.Resource;
 import javax.swing.*;
@@ -305,18 +306,31 @@ public class MsgCenter {
                 plaintext = "[表情]";
                 break;
             case MSGTYPE_APP:
-              /*  switch (WXReceiveMsgCodeOfAppEnum.getByCode(msg.getAppMsgType())) {
-                    case UNKNOWN:
-                        break;
+                switch (WXReceiveMsgCodeOfAppEnum.getByCode(msg.getAppMsgType())) {
                     case FAVOURITE:
+                        Map<String, Object> stringObjectMap = MessageTools.parseUndoMsg(msg.getContent());
+                        Object o = stringObjectMap.get("msg.appmsg.des");
+                        Object o1 = stringObjectMap.get("msg.appmsg.url");
+                        plaintext = o.toString()+"\n"+o1.toString();
                         break;
                     case FILE:
+                        plaintext = "[文件]";
                         break;
                     case PROGRAM:
+                        plaintext = "[程序]";
                         break;
                     default:
-                }*/
-                plaintext = "[APP]";
+                        stringObjectMap = MessageTools.parseUndoMsg(msg.getContent());
+                        o = stringObjectMap.get("msg.appmsg.des");
+                        if (o!=null){
+                            plaintext ="["+o.toString() +"]";
+                        }else {
+                            plaintext ="[APP消息]";
+                        }
+
+
+                }
+
                 break;
             case MSGTYPE_VOIPMSG:
                 break;
@@ -328,6 +342,8 @@ public class MsgCenter {
                 plaintext = "[位置]";
                 break;
             case MSGTYPE_SYS:
+                plaintext = msg.getContent();
+                break;
             case MSGTYPE_STATUSNOTIFY:
                 //当打开聊天窗口时会像该联系人发送该类型的消息
                 //StatusNotifyCode = 1发送图片、视频消息完成  2进入聊天框  0发送文字完成
@@ -344,7 +360,7 @@ public class MsgCenter {
                 break;
             case MSGTYPE_RECALLED:
                 Map<String, Object> map = MessageTools.parseUndoMsg(msg.getContent());
-                plaintext = map.get("root.sysmsg.revokemsg.replacemsg").toString();
+                plaintext = map.get("sysmsg.revokemsg.replacemsg").toString();
                 break;
             case UNKNOWN:
             default:

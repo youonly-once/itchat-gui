@@ -3,6 +3,7 @@ package cn.shu.wechat.swing.entity;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
+import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
 import cn.shu.wechat.swing.db.model.ImageAttachment;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -87,15 +88,24 @@ public class MessageItem implements Comparable<MessageItem> {
                 break;
             case MSGTYPE_MICROVIDEO:
             case MSGTYPE_APP:
-                //文件类消息
-                FileAttachmentItem fileAttachmentItem = new FileAttachmentItem();
-                fileAttachmentItem.setTitle(message.getFilePath());
-                fileAttachmentItem.setId(message.getId());
-                fileAttachmentItem.setDescription("desc");
-                fileAttachmentItem.setLink(message.getFilePath());
-                fileAttachmentItem.setSlavePath(message.getSlavePath());
-                this.setMessageContent(message.getFilePath());
-                this.fileAttachment = fileAttachmentItem;
+                switch (WXReceiveMsgCodeOfAppEnum.getByCode(message.getAppMsgType())) {
+                    case UNKNOWN:
+                    case FAVOURITE:
+                    case PROGRAM:
+                      break;
+                    case FILE:
+                        //文件类消息
+                        FileAttachmentItem fileAttachmentItem = new FileAttachmentItem();
+                        fileAttachmentItem.setTitle(message.getFilePath());
+                        fileAttachmentItem.setId(message.getId());
+                        fileAttachmentItem.setDescription("desc");
+                        fileAttachmentItem.setLink(message.getFilePath());
+                        fileAttachmentItem.setSlavePath(message.getSlavePath());
+                        this.setMessageContent(message.getFilePath());
+                        this.fileAttachment = fileAttachmentItem;
+                        break;
+                    default:
+                }
                 break;
             case MSGTYPE_VIDEO:
                 videoAttachmentItem= VideoAttachmentItem.builder()
