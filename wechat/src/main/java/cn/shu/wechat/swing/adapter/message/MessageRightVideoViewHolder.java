@@ -22,11 +22,6 @@ import java.io.IOException;
 @Getter
 public class MessageRightVideoViewHolder extends BaseMessageViewHolder {
 
-
-    /**
-     * 发送者
-     */
-    private JLabel sender = new JLabel();
     /**
      * 视频层
      */
@@ -36,7 +31,6 @@ public class MessageRightVideoViewHolder extends BaseMessageViewHolder {
     private final RCRightVideoMessageBubble imageBubble = new RCRightVideoMessageBubble();
     private final JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
     private final JPanel messageAvatarPanel = new JPanel();
-    private boolean isGroup = true;
     private final int slaveImgWidth;
     private final int slaveImgHeight;
     /**
@@ -54,11 +48,9 @@ public class MessageRightVideoViewHolder extends BaseMessageViewHolder {
 
     /**
      *
-     *  @param isGroup 是否为群消息
      * @param dimension 缩略图尺寸
      */
-    public MessageRightVideoViewHolder(boolean isGroup, Dimension dimension) {
-        this.isGroup = isGroup;
+    public MessageRightVideoViewHolder(Dimension dimension) {
         this.slaveImgHeight = dimension.height;
         this.slaveImgWidth = dimension.width;
         initComponents();
@@ -75,8 +67,6 @@ public class MessageRightVideoViewHolder extends BaseMessageViewHolder {
         time.setForeground(Colors.FONT_GRAY);
         time.setFont(FontUtil.getDefaultFont(12));
 
-        sender.setFont(FontUtil.getDefaultFont(12));
-        sender.setForeground(Colors.FONT_GRAY);
         try {
             playImgLabel.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("/image/image_loading.gif"))));
         } catch (IOException e) {
@@ -91,9 +81,6 @@ public class MessageRightVideoViewHolder extends BaseMessageViewHolder {
 
         contentTagPanel.setBackground(Colors.WINDOW_BACKGROUND);
         contentTagPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
-        if (isGroup) {
-            contentTagPanel.add(sender);
-        }
         try {
             videoComponent = getLayerPanel();
             videoComponent.setCursor(new Cursor(Cursor.HAND_CURSOR));

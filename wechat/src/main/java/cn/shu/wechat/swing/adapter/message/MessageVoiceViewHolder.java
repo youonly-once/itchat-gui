@@ -5,6 +5,7 @@ import cn.shu.wechat.swing.components.message.MessagePopupMenu;
 import cn.shu.wechat.swing.components.message.TagPanel;
 import cn.shu.wechat.swing.utils.FontUtil;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,13 +14,14 @@ import java.awt.*;
  * Created by 舒新胜 on 16/06/2017.
  */
 @Getter
+@NoArgsConstructor
 public class MessageVoiceViewHolder extends BaseMessageViewHolder {
     protected final TagPanel contentTagPanel = new TagPanel();
     protected JLabel durationText;
     protected final JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
     protected final JPanel messageAvatarPanel = new JPanel();
     protected final MessagePopupMenu popupMenu = new MessagePopupMenu();
-    protected boolean isGroup = true;
+    protected boolean isGroup;
     protected final JLabel voiceImgLabel = new JLabel();
 
     /**

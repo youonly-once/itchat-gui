@@ -55,6 +55,19 @@ public class ImageUtil {
         imageIcon.setImage(imageIcon.getImage().getScaledInstance(scaleDimen.width, scaleDimen.height, Image.SCALE_SMOOTH));
         return imageIcon;
     }
+    /**
+     * 根据图片尺寸大小调整图片显示的大小
+     * @param image
+     * @param maxWidth
+     * @return
+     */
+    public static Image preferredImageSize(BufferedImage image,int maxWidth) {
+        //动态图不能使用
+        int width = image.getWidth();
+        int height = image.getHeight();
+        Dimension scaleDimen = getScaleDimen(width, height, maxWidth);
+        return image.getScaledInstance(scaleDimen.width, scaleDimen.height, Image.SCALE_SMOOTH);
+    }
 
     /**
      * 获取缩放后的尺寸

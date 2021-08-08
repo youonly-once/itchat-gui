@@ -31,7 +31,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
 
     private String emojiRegx;
     private int emojiSize = 20;
-
+    private  MouseAdapter mouseAdapter;
     private boolean parseUrl = false;
 
 
@@ -373,7 +373,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
 
 
     private void setListeners() {
-        this.addMouseListener(new MouseAdapter() {
+        mouseAdapter = new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
@@ -391,9 +391,12 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
 
                 super.mouseClicked(e);
             }
-        });
+        };
+        this.addMouseListener(mouseAdapter);
     }
-
+    public void removeMouseAdapter() {
+        removeMouseListener(mouseAdapter);
+    }
     /**
      * 打开默认浏览器访问页面
      */

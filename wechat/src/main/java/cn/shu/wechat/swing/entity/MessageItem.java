@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.entity;
 
 import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -25,13 +27,14 @@ public class MessageItem implements Comparable<MessageItem> {
     public static final int LEFT_ATTACHMENT = 3;
     public static final int LEFT_VIDEO = 4;
     public static final int LEFT_VOICE = 5;
+    public static final int LEFT_LINK = 6;
 
     public static final int RIGHT_TEXT = -1;
     public static final int RIGHT_IMAGE = -2;
     public static final int RIGHT_ATTACHMENT = -3;
     public static final int RIGHT_VIDEO = -4;
     public static final int RIGHT_VOICE = -5;
-
+    public static final int RIGHT_LINK = -6;
 
     private String id;
     private String roomId;
@@ -53,6 +56,7 @@ public class MessageItem implements Comparable<MessageItem> {
     private ImageAttachmentItem imageAttachment;
     private VideoAttachmentItem videoAttachmentItem;
     private VoiceAttachmentItem voiceAttachmentItem;
+    private LinkAttachmentItem linkAttachmentItem;
     private boolean isSystemMsg;
 
     public MessageItem(cn.shu.wechat.beans.pojo.Message message, String roomId) {
@@ -91,6 +95,20 @@ public class MessageItem implements Comparable<MessageItem> {
                 switch (WXReceiveMsgCodeOfAppEnum.getByCode(message.getAppMsgType())) {
                     case UNKNOWN:
                     case FAVOURITE:
+                        Map<String, Object> stringObjectMap = MessageTools.parseUndoMsg(message.getContent());
+                        Object desc = stringObjectMap.get("msg.appmsg.des");
+                        Object url = stringObjectMap.get("msg.appmsg.url");
+                        Object title = stringObjectMap.get("msg.appmsg.title");
+                        Object thumbUrl = stringObjectMap.get("msg.appmsg.thumburl");
+                        Object sourceName = stringObjectMap.get("msg.appmsg.sourcedisplayname");
+                        linkAttachmentItem = LinkAttachmentItem.builder()
+                                .desc(desc == null?"":desc.toString())
+                                .thumbUrl(thumbUrl == null?"":thumbUrl.toString())
+                                .id(message.getId())
+                                .title(title == null?"":title.toString())
+                                .url(url == null?"":url.toString())
+                                .sourceName(sourceName == null?"":sourceName.toString())
+                                .build();
                     case PROGRAM:
                       break;
                     case FILE:
@@ -179,6 +197,8 @@ public class MessageItem implements Comparable<MessageItem> {
                 this.setMessageType(SYSTEM_MESSAGE);
             }else if(voiceAttachmentItem!= null){
                 this.setMessageType(RIGHT_VOICE);
+            }else if(linkAttachmentItem!= null){
+                this.setMessageType(RIGHT_LINK);
             }
             // 普通文本消息
             else {
@@ -204,6 +224,8 @@ public class MessageItem implements Comparable<MessageItem> {
             }
             else if(voiceAttachmentItem!= null){
                 this.setMessageType(LEFT_VOICE);
+            }else if(linkAttachmentItem!= null){
+                this.setMessageType(LEFT_LINK);
             }
             // 普通文本消息
             else {

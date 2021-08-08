@@ -287,7 +287,7 @@ public class MsgCenter {
         String plaintext = null;
         switch (msgType) {
             case MSGTYPE_MAP:
-                plaintext = "[地图]";
+                plaintext = "[地图，请在手机上查看]";
                 break;
             case MSGTYPE_TEXT:
                 //文本消息
@@ -309,9 +309,8 @@ public class MsgCenter {
                 switch (WXReceiveMsgCodeOfAppEnum.getByCode(msg.getAppMsgType())) {
                     case FAVOURITE:
                         Map<String, Object> stringObjectMap = MessageTools.parseUndoMsg(msg.getContent());
-                        Object o = stringObjectMap.get("msg.appmsg.des");
-                        Object o1 = stringObjectMap.get("msg.appmsg.url");
-                        plaintext = o.toString()+"\n"+o1.toString();
+                        Object o = stringObjectMap.get("msg.appmsg.title");
+                        plaintext = "[链接]"+o.toString();
                         break;
                     case FILE:
                         plaintext = "[文件]";
@@ -339,7 +338,7 @@ public class MsgCenter {
             case MSGTYPE_VOIPINVITE:
                 break;
             case MSGTYPE_LOCATION:
-                plaintext = "[位置]";
+                plaintext = "[位置，请在手机上查看]";
                 break;
             case MSGTYPE_SYS:
                 plaintext = msg.getContent();
@@ -356,7 +355,7 @@ public class MsgCenter {
             case MSGTYPE_VERIFYMSG:
                 break;
             case MSGTYPE_SHARECARD:
-                plaintext = "[名片]";
+                plaintext = "[名片消息，请在手机上查看]";
                 break;
             case MSGTYPE_RECALLED:
                 Map<String, Object> map = MessageTools.parseUndoMsg(msg.getContent());

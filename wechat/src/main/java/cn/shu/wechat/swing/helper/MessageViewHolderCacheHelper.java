@@ -14,7 +14,8 @@ import java.util.List;
  * <p>对消息的ViewHolder进入缓存能大大加速消息列表的加载速度，在刚进入房间时，默认先加载10条消息，
  * 这10条消息的ViewHolder将从缓存中获取，避免了new ViewHolder花费的时间。</p>
  * <p>
- * <p>在新进入新的房间时，{@link ChatPanel#enterRoom(String)} 方法将会调用本类的{@link MessageViewHolderCacheHelper#reset()} 方法，
+ * <p>在新进入新的房间时，{@link cn.shu.wechat.swing.panels.RoomsPanel#enterRoom(String)}
+ * 方法将会调用本类的{@link MessageViewHolderCacheHelper#reset()} 方法，
  * 对上一个房间所使用的ViewHolder对象进行释放，从而实现循环使用缓存的ViewHolder</p>
  * <p>
  * <p>默认初始缓存容量为10。</p>
@@ -28,13 +29,13 @@ public class MessageViewHolderCacheHelper {
     private List<MessageRightImageViewHolder> rightImageViewHolders = new ArrayList<>();
     private List<MessageRightAttachmentViewHolder> rightAttachmentViewHolders = new ArrayList<>();
 
-    private List<MessageLeftTextViewHolder> leftTextViewHolders = new ArrayList<>();
-    private List<MessageLeftImageViewHolder> leftImageViewHolders = new ArrayList<>();
-    private List<MessageLeftVideoViewHolder> leftVideoViewHolders = new ArrayList<>();
-    private List<MessageRightVideoViewHolder> rightVideoViewHolders = new ArrayList<>();
-    private List<MessageLeftVoiceViewHolder> leftVoiceViewHolders = new ArrayList<>();
-    private List<MessageRightVoiceViewHolder> rightVoiceViewHolders = new ArrayList<>();
-    private List<MessageLeftAttachmentViewHolder> leftAttachmentViewHolders = new ArrayList<>();
+    private final List<MessageLeftTextViewHolder> leftTextViewHolders = new ArrayList<>();
+    private final List<MessageLeftImageViewHolder> leftImageViewHolders = new ArrayList<>();
+    private final List<MessageLeftVideoViewHolder> leftVideoViewHolders = new ArrayList<>();
+    private final List<MessageRightVideoViewHolder> rightVideoViewHolders = new ArrayList<>();
+    private final List<MessageLeftVoiceViewHolder> leftVoiceViewHolders = new ArrayList<>();
+    private final List<MessageRightVoiceViewHolder> rightVoiceViewHolders = new ArrayList<>();
+    private final List<MessageLeftAttachmentViewHolder> leftAttachmentViewHolders = new ArrayList<>();
 
     private List<MessageSystemMessageViewHolder> systemMessageViewHolders = new ArrayList<>();
 

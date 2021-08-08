@@ -13,6 +13,7 @@ import cn.shu.wechat.swing.components.UserInfoPopup;
 import cn.shu.wechat.swing.components.message.*;
 import cn.shu.wechat.swing.db.model.Message;
 import cn.shu.wechat.swing.entity.FileAttachmentItem;
+import cn.shu.wechat.swing.entity.LinkAttachmentItem;
 import cn.shu.wechat.swing.entity.MessageItem;
 import cn.shu.wechat.swing.entity.VideoAttachmentItem;
 import cn.shu.wechat.swing.helper.AttachmentIconHelper;
@@ -34,8 +35,11 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
@@ -79,6 +83,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
     @Override
     public BaseMessageViewHolder onCreateViewHolder(int viewType, int position) {
+        MessageItem messageItem = messageItems.get(position);
         switch (viewType) {
             case MessageItem.SYSTEM_MESSAGE: {
                 MessageSystemMessageViewHolder holder = messageViewHolderCacheHelper.tryGetSystemMessageViewHolder();
@@ -99,7 +104,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             case MessageItem.LEFT_TEXT: {
                 MessageLeftTextViewHolder holder = messageViewHolderCacheHelper.tryGetLeftTextViewHolder();
                 if (holder == null) {
-                    holder = new MessageLeftTextViewHolder(messageItems.get(position).isGroupable());
+                    holder = new MessageLeftTextViewHolder(messageItem.isGroupable());
                 }
 
                 return holder;
@@ -115,7 +120,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             case MessageItem.LEFT_IMAGE: {
                 MessageLeftImageViewHolder holder = messageViewHolderCacheHelper.tryGetLeftImageViewHolder();
                 if (holder == null) {
-                    holder = new MessageLeftImageViewHolder(messageItems.get(position).isGroupable());
+                    holder = new MessageLeftImageViewHolder(messageItem.isGroupable());
                 }
 
                 return holder;
@@ -123,7 +128,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             case MessageItem.LEFT_VIDEO: {
                 MessageLeftVideoViewHolder holder = messageViewHolderCacheHelper.tryGetLeftVideoViewHolder();
                 if (holder == null) {
-                    MessageItem messageItem = messageItems.get(position);
                     holder = new MessageLeftVideoViewHolder(messageItem.isGroupable(),
                             ImageUtil.getScaleDimen(messageItem.getVideoAttachmentItem().getSalveImgWidth()
                                     , messageItem.getVideoAttachmentItem().getSalveImgHeight()));
@@ -134,18 +138,22 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             case MessageItem.RIGHT_VIDEO: {
                 MessageRightVideoViewHolder holder = messageViewHolderCacheHelper.tryGetRightVideoViewHolder();
                 if (holder == null) {
-                    MessageItem messageItem = messageItems.get(position);
-                    holder = new MessageRightVideoViewHolder(messageItem.isGroupable(),
+                    holder = new MessageRightVideoViewHolder(
                             ImageUtil.getScaleDimen(messageItem.getVideoAttachmentItem().getSalveImgWidth()
                                     , messageItem.getVideoAttachmentItem().getSalveImgHeight()));
                 }
 
                 return holder;
             }
+            case MessageItem.LEFT_LINK: {
+                return new MessageLeftLinkViewHolder(messageItem.isGroupable());
+            }
+            case MessageItem.RIGHT_LINK: {
+                return new MessageRightLinkViewHolder();
+            }
             case MessageItem.LEFT_VOICE: {
                 MessageLeftVoiceViewHolder holder = messageViewHolderCacheHelper.tryGetLeftVoiceViewHolder();
                 if (holder == null) {
-                    MessageItem messageItem = messageItems.get(position);
                     holder = new MessageLeftVoiceViewHolder(messageItem.isGroupable());
                 }
 
@@ -154,8 +162,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             case MessageItem.RIGHT_VOICE: {
                 MessageRightVoiceViewHolder holder = messageViewHolderCacheHelper.tryGetRightVoiceViewHolder();
                 if (holder == null) {
-                    MessageItem messageItem = messageItems.get(position);
-                    holder = new MessageRightVoiceViewHolder(messageItem.isGroupable());
+                    holder = new MessageRightVoiceViewHolder();
                 }
 
                 return holder;
@@ -171,11 +178,12 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             case MessageItem.LEFT_ATTACHMENT: {
                 MessageLeftAttachmentViewHolder holder = messageViewHolderCacheHelper.tryGetLeftAttachmentViewHolder();
                 if (holder == null) {
-                    holder = new MessageLeftAttachmentViewHolder(messageItems.get(position).isGroupable());
+                    holder = new MessageLeftAttachmentViewHolder(messageItem.isGroupable());
                 }
 
                 return holder;
             }
+            default:
         }
 
         return null;
@@ -214,14 +222,28 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             processRightAttachmentMessage(viewHolder, item);
         } else if (viewHolder instanceof MessageLeftAttachmentViewHolder) {
             processLeftAttachmentMessage(viewHolder, item);
+        }else if (viewHolder instanceof MessageRightLinkViewHolder) {
+            processRightLinkMessage(viewHolder, item);
+        } else if (viewHolder instanceof MessageLeftLinkViewHolder) {
+            processLeftLinkMessage(viewHolder, item);
         }
     }
 
+    /**
+     * 处理系统消息
+     * @param viewHolder
+     * @param item
+     */
     private void processSystemMessage(ViewHolder viewHolder, MessageItem item) {
         MessageSystemMessageViewHolder holder = (MessageSystemMessageViewHolder) viewHolder;
         holder.text.setText(item.getMessageContent());
     }
 
+    /**
+     * 其它用户的附件消息
+     * @param viewHolder
+     * @param item
+     */
     private void processLeftAttachmentMessage(ViewHolder viewHolder, MessageItem item) {
         MessageLeftAttachmentViewHolder holder = (MessageLeftAttachmentViewHolder) viewHolder;
         holder.attachmentTitle.setText(item.getMessageContent());
@@ -267,6 +289,11 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         attachPopupMenu(viewHolder, MessageItem.LEFT_ATTACHMENT);
     }
 
+    /**
+     * 自己发送的附件消息
+     * @param viewHolder
+     * @param item
+     */
     private void processRightAttachmentMessage(ViewHolder viewHolder, MessageItem item) {
         MessageRightAttachmentViewHolder holder = (MessageRightAttachmentViewHolder) viewHolder;
         holder.attachmentTitle.setText(item.getMessageContent());
@@ -383,6 +410,11 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         viewHolder.attachmentTitle.addMouseListener(listener);
     }
 
+    /**
+     * 附件大小
+     * @param viewHolder
+     * @param item
+     */
     private void processAttachmentSize(MessageAttachmentViewHolder viewHolder, MessageItem item) {
         FileAttachmentItem attachment = item.getFileAttachment();
         String path;
@@ -436,8 +468,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     }
 
     /**
-     *
-     *
+     * 自己发送的语音消息
      * @param viewHolder
      * @param item
      */
@@ -448,6 +479,13 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         attachPopupMenu(viewHolder, MessageItem.RIGHT_VOICE);
 
     }
+
+    /**
+     * 处理语音消息
+     * @param item
+     * @param holder
+     * @param messageBubble
+     */
     private void processVoice(MessageItem item, MessageVoiceViewHolder holder, RCAttachmentMessageBubble messageBubble){
         holder.getContentTagPanel().setTag(item.getVoiceAttachmentItem());
         double len = item.getVoiceAttachmentItem().getVoiceLength() * 1.0;
@@ -574,8 +612,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      */
     private void processRightVideoMessage(ViewHolder viewHolder, MessageItem item) {
         MessageRightVideoViewHolder holder = (MessageRightVideoViewHolder) viewHolder;
-        holder.getSender().setText(item.getSenderUsername());
-
         try {
             processVideo(item
                     , holder.getTimeLabel()
@@ -990,7 +1026,60 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         listView.setScrollHiddenOnMouseLeave(holder.text);
         attachPopupMenu(viewHolder, MessageItem.LEFT_TEXT);
     }
+    private void processLeftLinkMessage(ViewHolder viewHolder, MessageItem item){
+        processLinkMessage(viewHolder,item);
+        ((MessageLeftLinkViewHolder)viewHolder).getSender().setText(item.getSenderUsername());
+        attachPopupMenu(viewHolder, MessageItem.LEFT_LINK);
+    }
+    private void processRightLinkMessage(ViewHolder viewHolder, MessageItem item){
+        processLinkMessage(viewHolder,item);
+        attachPopupMenu(viewHolder, MessageItem.RIGHT_LINK);
+    }
+    private void processLinkMessage(ViewHolder viewHolder, MessageItem item){
+        LinkAttachmentItem linkItem = item.getLinkAttachmentItem();
+        MessageLinkViewHolder linkViewHolder = (MessageLinkViewHolder) viewHolder;
 
+        linkViewHolder.desc.setText(linkItem.getDesc());
+        linkViewHolder.title.setText(linkItem.getTitle());
+        if (StringUtils.isEmpty(linkItem.getSourceName())){
+            linkViewHolder.sourcePanel.setVisible(false);
+        }else{
+            linkViewHolder.sourceName.setText(linkItem.getSourceName());
+        }
+
+        try {
+            BufferedImage image = ImageIO.read(new URL(linkItem.getThumbUrl()));
+            linkViewHolder.icon.setIcon(new ImageIcon(ImageUtil.preferredImageSize(image, MessageLinkViewHolder.thumbWidth)));
+            if (StringUtils.isNotEmpty(linkItem.getSourceName())){
+                linkViewHolder.sourceIcon.setIcon(new ImageIcon(ImageUtil.preferredImageSize(image, 8)));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //点击打开链接
+        MessageMouseListener messageMouseListener = new MessageMouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    try {
+                        Desktop.getDesktop().browse(new URI(linkItem.getUrl()));
+                    } catch (IOException | URISyntaxException ioException) {
+                        ioException.printStackTrace();
+                    }
+                }
+            }
+        };
+        linkViewHolder.desc.addMouseListener(messageMouseListener);
+        linkViewHolder.title.addMouseListener(messageMouseListener);
+       linkViewHolder.icon.addMouseListener(messageMouseListener);
+        linkViewHolder.contentTagPanel.addMouseListener(messageMouseListener);
+        linkViewHolder.messageBubble.addMouseListener(messageMouseListener);
+        listView.setScrollHiddenOnMouseLeave(linkViewHolder.desc);
+        listView.setScrollHiddenOnMouseLeave(linkViewHolder.title);
+        listView.setScrollHiddenOnMouseLeave(linkViewHolder.icon);
+        listView.setScrollHiddenOnMouseLeave(linkViewHolder.contentTagPanel);
+        listView.setScrollHiddenOnMouseLeave(linkViewHolder.messageBubble);
+    }
     /**
      * 处理消息发送时间 以及 消息发送者头像
      *
@@ -1117,6 +1206,18 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 MessageRightVoiceViewHolder holder = (MessageRightVoiceViewHolder) viewHolder;
                 contentComponent = holder.getContentTagPanel();
                 messageBubble = holder.getMessageBubble();
+                break;
+            }
+            case MessageItem.LEFT_LINK: {
+                MessageLeftLinkViewHolder holder = (MessageLeftLinkViewHolder) viewHolder;
+                contentComponent = holder.title;
+                messageBubble = holder.messageBubble;
+                break;
+            }
+            case MessageItem.RIGHT_LINK: {
+                MessageRightLinkViewHolder holder = (MessageRightLinkViewHolder) viewHolder;
+                contentComponent = holder.title;
+                messageBubble = holder.messageBubble;
                 break;
             }
             case MessageItem.RIGHT_ATTACHMENT: {

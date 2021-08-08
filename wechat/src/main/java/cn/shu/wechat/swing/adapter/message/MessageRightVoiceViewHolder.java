@@ -22,8 +22,7 @@ import java.io.IOException;
 public class MessageRightVoiceViewHolder extends MessageVoiceViewHolder {
 
     protected final RCRightVoiceMessageBubble messageBubble = new RCRightVoiceMessageBubble();
-    public MessageRightVoiceViewHolder(boolean isGroup) {
-        super(isGroup);
+    public MessageRightVoiceViewHolder() {
         initComponent();
         initView();
     }
