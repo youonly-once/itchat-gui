@@ -22,6 +22,7 @@ public class RCAttachmentMessageBubble extends JPanel implements RCMessageBubble
         setListener();
     }
 
+    @Override
     public void setBackgroundIcon(Icon icon) {
         currentBackgroundIcon = icon;
     }
@@ -47,7 +48,7 @@ public class RCAttachmentMessageBubble extends JPanel implements RCMessageBubble
             }
         });
     }
-
+    @Override
     public void setActiveStatus(boolean status) {
         if (status) {
             setBackgroundIcon(backgroundActiveIcon);
@@ -59,6 +60,7 @@ public class RCAttachmentMessageBubble extends JPanel implements RCMessageBubble
     }
 
 
+    @Override
     public NinePatchImageIcon getBackgroundNormalIcon() {
         return backgroundNormalIcon;
     }
@@ -67,6 +69,7 @@ public class RCAttachmentMessageBubble extends JPanel implements RCMessageBubble
         this.backgroundNormalIcon = backgroundNormalIcon;
     }
 
+    @Override
     public NinePatchImageIcon getBackgroundActiveIcon() {
         return backgroundActiveIcon;
     }
@@ -93,4 +96,5 @@ public class RCAttachmentMessageBubble extends JPanel implements RCMessageBubble
 
         super.addMouseListener(l);
     }
+
 }

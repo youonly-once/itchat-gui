@@ -9,8 +9,6 @@ import cn.shu.wechat.swing.db.model.ImageAttachment;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -93,8 +91,9 @@ public class MessageItem implements Comparable<MessageItem> {
             case MSGTYPE_MICROVIDEO:
             case MSGTYPE_APP:
                 switch (WXReceiveMsgCodeOfAppEnum.getByCode(message.getAppMsgType())) {
-                    case UNKNOWN:
-                    case FAVOURITE:
+                    case OTHER:
+                        break;
+                    case LINK:
                         Map<String, Object> stringObjectMap = MessageTools.parseUndoMsg(message.getContent());
                         Object desc = stringObjectMap.get("msg.appmsg.des");
                         Object url = stringObjectMap.get("msg.appmsg.url");

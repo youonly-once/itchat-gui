@@ -18,13 +18,13 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * Created by 舒新胜 on 17-6-2.
+ *
+ * @author 舒新胜
+ * @date 17-6-2
  */
 
 public class MessageLinkViewHolder extends BaseMessageViewHolder {
 
-    private final int width = 250;
-    private final int height =  120;
     public static final int thumbWidth = 48;
     protected final JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
     protected final JPanel messageAvatarPanel = new JPanel();
@@ -56,20 +56,7 @@ public class MessageLinkViewHolder extends BaseMessageViewHolder {
 
     }
     private void setListeners() {
-        MouseAdapter listener = new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                messageBubble.setActiveStatus(true);
-                super.mouseEntered(e);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                messageBubble.setActiveStatus(false);
-                super.mouseExited(e);
-            }
-        };
-
+        MouseAdapter listener = messageBubble.getMouseListener();
         contentTagPanel.addMouseListener(listener);
         title.addMouseListener(listener);
         desc.addMouseListener(listener);
@@ -94,6 +81,8 @@ public class MessageLinkViewHolder extends BaseMessageViewHolder {
         sourceName.setFont(new Font("楷体",Font.PLAIN,12));
         sourceName.setOpaque(false);
         sourceName.setForeground(Color.GRAY);
+        int width = 250;
+        int height = 120;
         contentTagPanel.setPreferredSize(new Dimension(width, height));
         contentTagPanel.setOpaque(false);
         descIconPanel.setOpaque(false);

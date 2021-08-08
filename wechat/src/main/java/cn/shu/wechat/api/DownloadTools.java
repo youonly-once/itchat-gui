@@ -435,9 +435,9 @@ public class DownloadTools {
                 break;
             case MSGTYPE_APP:
                 switch (WXReceiveMsgCodeOfAppEnum.getByCode(msg.getAppMsgType())) {
-                    case UNKNOWN:
+                    case OTHER:
                         break;
-                    case FAVOURITE:
+                    case LINK:
                         break;
                     case PROGRAM:
                         break;

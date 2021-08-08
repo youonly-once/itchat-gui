@@ -30,6 +30,7 @@ public class RCTextMessageBubble extends JTextArea implements RCMessageBubble {
         setListener();
     }
 
+    @Override
     public void setBackgroundIcon(Icon icon) {
         currentBackgroundIcon = icon;
     }
@@ -43,22 +44,7 @@ public class RCTextMessageBubble extends JTextArea implements RCMessageBubble {
     }
 
     private void setListener() {
-        addMouseListener(new MouseAdapter() {
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                setBackgroundIcon(backgroundActiveIcon);
-                repaint();
-                super.mouseEntered(e);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                setBackgroundIcon(backgroundNormalIcon);
-                repaint();
-                super.mouseExited(e);
-            }
-        });
+        addMouseListener(getMouseListener());
     }
 
     /*@Override
@@ -129,6 +115,7 @@ public class RCTextMessageBubble extends JTextArea implements RCMessageBubble {
     }*/
 
 
+    @Override
     public NinePatchImageIcon getBackgroundNormalIcon() {
         return backgroundNormalIcon;
     }
@@ -137,9 +124,23 @@ public class RCTextMessageBubble extends JTextArea implements RCMessageBubble {
         this.backgroundNormalIcon = backgroundNormalIcon;
     }
 
+    @Override
     public NinePatchImageIcon getBackgroundActiveIcon() {
         return backgroundActiveIcon;
     }
+
+    @Override
+    public void setActiveStatus(boolean status) {
+        if (status) {
+            setBackgroundIcon(backgroundActiveIcon);
+        } else {
+            setBackgroundIcon(backgroundNormalIcon);
+        }
+
+        this.repaint();
+    }
+
+
 
     public void setBackgroundActiveIcon(NinePatchImageIcon backgroundActiveIcon) {
         this.backgroundActiveIcon = backgroundActiveIcon;

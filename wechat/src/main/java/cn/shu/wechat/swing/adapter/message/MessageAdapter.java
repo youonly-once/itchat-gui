@@ -460,9 +460,9 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      */
     private void processLeftVoiceMessage(ViewHolder viewHolder, MessageItem item) {
         MessageLeftVoiceViewHolder holder = (MessageLeftVoiceViewHolder) viewHolder;
-        processVoice(item,holder,holder.getMessageBubble());
+        processVoice(item,holder);
         holder.getSender().setText(item.getSenderUsername());
-        listView.setScrollHiddenOnMouseLeave(holder.getMessageBubble());
+        listView.setScrollHiddenOnMouseLeave(holder.getUnreadPoint());
         attachPopupMenu(viewHolder, MessageItem.LEFT_VOICE);
 
     }
@@ -474,8 +474,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      */
     private void processRightVoiceMessage(ViewHolder viewHolder, MessageItem item) {
         MessageRightVoiceViewHolder holder = (MessageRightVoiceViewHolder) viewHolder;
-        processVoice(item,holder,holder.getMessageBubble());
-        listView.setScrollHiddenOnMouseLeave(holder.getMessageBubble());
+        processVoice(item,holder);
         attachPopupMenu(viewHolder, MessageItem.RIGHT_VOICE);
 
     }
@@ -484,9 +483,12 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      * 处理语音消息
      * @param item
      * @param holder
-     * @param messageBubble
      */
-    private void processVoice(MessageItem item, MessageVoiceViewHolder holder, RCAttachmentMessageBubble messageBubble){
+    private void processVoice(MessageItem item, MessageVoiceViewHolder holder){
+        listView.setScrollHiddenOnMouseLeave(holder.getMessageBubble());
+        listView.setScrollHiddenOnMouseLeave(holder.getDurationText());
+        listView.setScrollHiddenOnMouseLeave(holder.getVoiceImgLabel());
+        listView.setScrollHiddenOnMouseLeave(holder.getContentTagPanel());
         holder.getContentTagPanel().setTag(item.getVoiceAttachmentItem());
         double len = item.getVoiceAttachmentItem().getVoiceLength() * 1.0;
         len = len / 1000;
@@ -505,7 +507,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
 
         //播放语音
-        messageBubble.addMouseListener(new MessageMouseListener() {
+        holder.getMessageBubble().addMouseListener(new MessageMouseListener() {
             private void closePlayer() {
                 if (player != null) {
                     player.close();
@@ -1198,13 +1200,13 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             }
             case MessageItem.LEFT_VOICE: {
                 MessageLeftVoiceViewHolder holder = (MessageLeftVoiceViewHolder) viewHolder;
-                contentComponent = holder.getContentTagPanel();
+                contentComponent = holder.getMessageBubble();
                 messageBubble = holder.getMessageBubble();
                 break;
             }
             case MessageItem.RIGHT_VOICE: {
                 MessageRightVoiceViewHolder holder = (MessageRightVoiceViewHolder) viewHolder;
-                contentComponent = holder.getContentTagPanel();
+                contentComponent = holder.getMessageBubble();
                 messageBubble = holder.getMessageBubble();
                 break;
             }

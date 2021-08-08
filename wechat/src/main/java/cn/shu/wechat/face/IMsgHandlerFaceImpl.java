@@ -542,9 +542,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 break;
             case MSGTYPE_APP:
                 switch (WXReceiveMsgCodeOfAppEnum.getByCode(oldMessage.getAppMsgType())) {
-                    case UNKNOWN:
+                    case OTHER:
                         break;
-                    case FAVOURITE:
+                    case LINK:
                         Map<String, Object> mapA = XmlStreamUtil.toMap(XmlStreamUtil.formatXml(realMsgContent));
                         Object title = mapA.get("msg.appmsg.title");
                         Object url = mapA.get("msg.appmsg.url");
@@ -608,9 +608,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     @Override
     public List<MessageTools.Message> appMsgHandle(AddMsgList msg) {
         switch (WXReceiveMsgCodeOfAppEnum.getByCode(msg.getAppMsgType())) {
-            case UNKNOWN:
+            case OTHER:
                 break;
-            case FAVOURITE:
+            case LINK:
                 break;
             case FILE:
                 break;

@@ -11,6 +11,8 @@ import lombok.Getter;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 
 /**
@@ -21,8 +23,8 @@ import java.io.IOException;
 @Getter
 public class MessageRightVoiceViewHolder extends MessageVoiceViewHolder {
 
-    protected final RCRightVoiceMessageBubble messageBubble = new RCRightVoiceMessageBubble();
     public MessageRightVoiceViewHolder() {
+        super(new RCRightVoiceMessageBubble());
         initComponent();
         initView();
     }

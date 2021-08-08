@@ -5,14 +5,10 @@ import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.beans.msg.send.WebWXSendMsgResponse;
 import cn.shu.wechat.beans.msg.sync.AddMsgList;
-import cn.shu.wechat.beans.msg.sync.DelContactList;
-import cn.shu.wechat.beans.msg.sync.ModContactList;
-import cn.shu.wechat.beans.pojo.AttrHistory;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
-import cn.shu.wechat.enums.WXSendMsgCodeEnum;
 import cn.shu.wechat.face.IMsgHandlerFace;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.service.LoginService;
@@ -22,14 +18,10 @@ import cn.shu.wechat.swing.panels.RoomChatPanelCard;
 import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.utils.CommonTools;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
-import cn.shu.wechat.utils.JSONObjectUtil;
 import cn.shu.wechat.utils.LogUtil;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import lombok.extern.log4j.Log4j2;
-import org.nlpcn.commons.lang.util.StringUtil;
 import org.springframework.stereotype.Component;
-import sun.misc.MessageUtils;
 
 import javax.annotation.Resource;
 import javax.swing.*;
@@ -231,9 +223,9 @@ public class MsgCenter {
                 break;
             case MSGTYPE_APP:
                 switch (WXReceiveMsgCodeOfAppEnum.getByCode(msg.getAppMsgType())) {
-                    case UNKNOWN:
+                    case OTHER:
                         break;
-                    case FAVOURITE:
+                    case LINK:
                         break;
                     case FILE:
                         break;
@@ -307,7 +299,7 @@ public class MsgCenter {
                 break;
             case MSGTYPE_APP:
                 switch (WXReceiveMsgCodeOfAppEnum.getByCode(msg.getAppMsgType())) {
-                    case FAVOURITE:
+                    case LINK:
                         Map<String, Object> stringObjectMap = MessageTools.parseUndoMsg(msg.getContent());
                         Object o = stringObjectMap.get("msg.appmsg.title");
                         plaintext = "[链接]"+o.toString();
@@ -318,11 +310,16 @@ public class MsgCenter {
                     case PROGRAM:
                         plaintext = "[程序]";
                         break;
+                    case OTHER:
+                        plaintext = msg.getContent();
+                        break;
                     default:
                         stringObjectMap = MessageTools.parseUndoMsg(msg.getContent());
+
                         o = stringObjectMap.get("msg.appmsg.des");
+                        Object url = stringObjectMap.get("msg.appmsg.url");
                         if (o!=null){
-                            plaintext ="["+o.toString() +"]";
+                            plaintext ="["+o.toString() +"]:"+ (url==null?"":url.toString());
                         }else {
                             plaintext ="[APP消息]";
                         }
