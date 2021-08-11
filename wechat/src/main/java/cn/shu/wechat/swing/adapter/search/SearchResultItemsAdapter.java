@@ -34,20 +34,19 @@ import java.util.Map;
  * Created by 舒新胜 on 17-5-30.
  */
 public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHolder> {
-    private List<SearchResultItem> searchResultItems;
+    private final List<SearchResultItem> searchResultItems;
     private String keyWord;
     private SearchMessageOrFileListener searchMessageOrFileListener;
 
     public static final int VIEW_TYPE_CONTACTS_ROOM = 0;
     public static final int VIEW_TYPE_MESSAGE = 1;
     public static final int VIEW_TYPE_FILE = 2;
-    private AttachmentIconHelper attachmentIconHelper = new AttachmentIconHelper();
-    private FileCache fileCache = new FileCache();
-    private List<String> downloadingFiles = new ArrayList<>(); // 正在下载的文件
+    private final AttachmentIconHelper attachmentIconHelper = new AttachmentIconHelper();
+    private final FileCache fileCache = new FileCache();
+    private final List<String> downloadingFiles = new ArrayList<>();
 
-    //private List<SearchResultFileItemViewHolder> fileItemViewHolders = new ArrayList<>();
-    private Map<String, SearchResultFileItemViewHolder> fileItemViewHolders = new HashMap<>();
-    private List<SoftReference<SearchResultUserItemViewHolder>> searchResultUserItemViewHolderList = new ArrayList<>();
+    private final Map<String, SearchResultFileItemViewHolder> fileItemViewHolders = new HashMap<>();
+    private final List<SoftReference<SearchResultUserItemViewHolder>> searchResultUserItemViewHolderList = new ArrayList<>(10);
 
     public SearchResultItemsAdapter(List<SearchResultItem> searchResultItems) {
         this.searchResultItems = searchResultItems;
@@ -60,7 +59,6 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
 
     @Override
     public int getItemViewType(int position) {
-        // return super.getItemViewType(position);
         SearchResultType byCode = SearchResultType.getByCode(searchResultItems.get(position).getType());
         switch (byCode) {
             case SEARCH_MESSAGE:
@@ -80,7 +78,6 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
 
     @Override
     public SearchResultItemViewHolder onCreateViewHolder(int viewType, int position) {
-       // System.out.println("searchResultUserItemViewHolderList.size() = " + searchResultUserItemViewHolderList.size());
         switch (viewType) {
             case VIEW_TYPE_CONTACTS_ROOM: {
                 SearchResultUserItemViewHolder holder = null;
@@ -286,33 +283,48 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
         holder.name.setKeyWord(this.keyWord);
         holder.name.setText(item.getName());
 
-        ImageIcon icon = new ImageIcon();
+
         SearchResultType byCode = SearchResultType.getByCode(item.getType());
-        switch (byCode) {
-            case CONTACTS:
-                icon = AvatarUtil.createOrLoadUserAvatar(item.getTag().toString());
-                holder.type.setText("联系人");
-                break;
-            case ROOM:
-                icon = AvatarUtil.createOrLoadUserAvatar(item.getTag().toString());
-                holder.type.setText("聊天房");
-                break;
-            case SEARCH_FILE:
-                icon.setImage(IconUtil.getIcon(this, "/image/file_icon.png").getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH));
-                break;
-            case SEARCH_MESSAGE:
-                icon.setImage(IconUtil.getIcon(this, "/image/message.png").getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH));
-            case MESSAGE:
-/*                Room room = roomService.findById((String) ((Map) item.getTag()).get("roomId"));
-                if (room != null)
-                {
-                    icon.setImage(getRoomAvatar(room.getType(), room.getName()));
-                }*/
-                break;
-            default:
-                throw new RuntimeException("ViewType 不正确");
-        }
-        holder.avatar.setIcon(icon);
+        new SwingWorker<Object,Object>(){
+            ImageIcon icon = null;
+            @Override
+            protected Object doInBackground() throws Exception {
+                switch (byCode) {
+                    case CONTACTS:
+                        icon = AvatarUtil.createOrLoadUserAvatar(item.getTag().toString());
+                        holder.type.setText("联系人");
+                        break;
+                    case ROOM:
+                        icon = AvatarUtil.createOrLoadUserAvatar(item.getTag().toString());
+                        holder.type.setText("聊天房");
+                        break;
+                    case SEARCH_FILE:
+                        icon.setImage(IconUtil.getIcon(this, "/image/file_icon.png").getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH));
+                        break;
+                    case SEARCH_MESSAGE:
+                        icon.setImage(IconUtil.getIcon(this, "/image/message.png").getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH));
+                    case MESSAGE:
+    /*                Room room = roomService.findById((String) ((Map) item.getTag()).get("roomId"));
+                    if (room != null)
+                    {
+                        icon.setImage(getRoomAvatar(room.getType(), room.getName()));
+                    }*/
+                        break;
+                    default:
+                        throw new RuntimeException("ViewType 不正确");
+                }
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                if (icon!=null){
+                    holder.avatar.setIcon(icon);
+                }
+
+                super.done();
+            }
+        }.execute();
 
         processMouseListeners(viewHolder, item);
     }

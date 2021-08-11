@@ -39,8 +39,9 @@ public class SearchPanel extends ParentAvailablePanel {
     private static SearchPanel context;
     private RCSearchTextField searchTextField;
     private boolean setSearchMessageOrFileListener = false;
+    private final int resultSize = 20;
     private final List<SearchResultItem> searchResultItemList = new ArrayList<>();
-    private volatile int  searchVer = 0;
+    private final AtomicInteger searchVer = new AtomicInteger();
     private final AtomicInteger searchCount = new AtomicInteger();
     public SearchPanel(JPanel parent) {
         super(parent);
@@ -86,7 +87,6 @@ public class SearchPanel extends ParentAvailablePanel {
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-               // System.out.println("456");;
             }
         });
 
@@ -103,9 +103,9 @@ public class SearchPanel extends ParentAvailablePanel {
 
             @Override
             public void keyTyped(KeyEvent e) {
-                if (searchTextField.getText().length() > 8) {
+               /* if (searchTextField.getText().length() > 8) {
                     e.consume();
-                }
+                }*/
             }
         });
 
@@ -123,25 +123,27 @@ public class SearchPanel extends ParentAvailablePanel {
             listPanel.showPanel(listPanel.getPreviousTab());
             return;
         }
-        searchVer++;
+        searchVer.incrementAndGet();
         listPanel.showPanel(ListPanel.SEARCH);
         new SwingWorker<Object, Object>() {
             private List<SearchResultItem> data;
-            final int finalI = searchVer;
+            final int finalI = searchVer.get();
             @Override
             protected Object doInBackground() throws Exception {
                 //TODO 会创建大量 SearchResultItem对象 导致FUllGC卡顿
-                if (finalI >= searchVer) {
+                if (finalI >= searchVer.get()) {
                     searchCount.set(0);
                     searchUserOrRoom(text, finalI);
                     if (searchResultItemList.isEmpty()||searchCount.get()<=0){
                         return null;
                     }
                     try {
-                        data = searchResultItemList.subList(0, searchCount.get() - 1);
+                        data = searchResultItemList.subList(0, Math.min(searchResultItemList.size(),searchCount.get()));
                     }catch (Exception e){
                         e.printStackTrace();
                     }
+                }else{
+                    log.error(finalI+"==="+searchVer.get());
                 }
                 //list.add(new SearchResultItem("searchAndListMessage", "搜索 \"" + key + "\" 相关消息", SearchResultType.SEARCH_MESSAGE));
                 //list.add(new SearchResultItem("searchFile", "搜索 \"" + key + "\" 相关文件", SearchResultType.SEARCH_FILE));
@@ -151,7 +153,8 @@ public class SearchPanel extends ParentAvailablePanel {
 
             @Override
             protected void done() {
-                if (finalI <searchVer) {
+                if (finalI <searchVer.get()) {
+                    log.error(finalI+"==="+searchVer.get());
                     return;
                 }
                 if (data==null ){
@@ -186,8 +189,8 @@ public class SearchPanel extends ParentAvailablePanel {
         //搜索通讯录
        // long start = System.currentTimeMillis();
         searchContacts(key,version);
-        // 搜索房间
-         searchChannel(key,version);
+/*        // 搜索房间
+         searchChannel(key,version);*/
         /* System.out.println((System.currentTimeMillis() - begin)/1000.00);*/
         if (!setSearchMessageOrFileListener) {
             // 查找消息、文件
@@ -292,7 +295,8 @@ public class SearchPanel extends ParentAvailablePanel {
         SearchResultItem item;
         try {
             for (String userId : recentContacts) {
-                if (version!=searchVer){
+                if (version!=searchVer.get()){
+                    log.error("版本号不对，终止");
                     break;
                 }
                 Contacts recentContact = Core.getMemberMap().get(userId);
@@ -300,8 +304,16 @@ public class SearchPanel extends ParentAvailablePanel {
                 String nick = recentContact.getNickname();
                 if (remark.contains(key)||nick.contains(key)) {
                     int i = searchCount.getAndIncrement();
+                    if (i >= resultSize+1){
+                        log.warn("已达搜索条数上限10");
+                        return;
+                    }
                     if (searchResultItemList.size() > i) {
                         item = searchResultItemList.get(i);
+                        if (item == null){
+                            item = new SearchResultItem();
+                            searchResultItemList.add(item);
+                        }
                     } else {
                         item = new SearchResultItem();
                         searchResultItemList.add(item);
@@ -330,22 +342,33 @@ public class SearchPanel extends ParentAvailablePanel {
      * @return
      */
     private void searchContacts(String key,int version) {
-        //long start = System.currentTimeMillis();
         Map<String, Contacts> memberMap = Core.getMemberMap();
         SearchResultItem item = null;
         try {
             for (Map.Entry<String, Contacts> entry : memberMap.entrySet()) {
-                if (version!=searchVer){
+                if (version!=searchVer.get()){
+                    log.error("版本号不对，终止");
                     break;
                 }
                 Contacts recentContact = entry.getValue();
-
                 String remark = recentContact.getRemarkname();
                 String nick = recentContact.getNickname();
-                if (remark.contains(key)||nick.contains(key)){
-                    int i = searchCount.getAndIncrement();
+                String displayname = recentContact.getDisplayname();
+                if ((remark!=null && remark.contains(key))
+                        ||(nick!=null && nick.contains(key))
+                        || (displayname!=null && displayname.contains(key))){
+                    int i = searchCount.get();
+                    if (i >= resultSize){
+                        log.warn("已达搜索条数上限10");
+                        return;
+                    }
+                    searchCount.incrementAndGet();
                     if (searchResultItemList.size()>i) {
                         item = searchResultItemList.get(i);
+                        if (item == null){
+                            item = new SearchResultItem();
+                            searchResultItemList.add(item);
+                        }
                     }else{
                         item = new SearchResultItem();
                         searchResultItemList.add(item);
@@ -353,10 +376,12 @@ public class SearchPanel extends ParentAvailablePanel {
                     item.setType(SearchResultType.CONTACTS.CODE);
                     item.setId(entry.getKey());
                     item.setTag(entry.getKey());
-                    if (remark.contains(key)) {
+                    if (remark!=null && remark.contains(key)) {
                         item.setName(remark);
-                    } else if (nick.contains(key)) {
+                    } else if (nick!=null && nick.contains(key)) {
                         item.setName(nick);
+                    } else if (displayname!=null && displayname.contains(key)) {
+                        item.setName(displayname);
                     }
                 }
 
@@ -365,5 +390,4 @@ public class SearchPanel extends ParentAvailablePanel {
             log.warn(e.getMessage());
         }
     }
-
 }
