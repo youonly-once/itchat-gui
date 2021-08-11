@@ -90,8 +90,12 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             setBackground(viewHolder, Colors.ITEM_SELECTED);
             selectedViewHolder = viewHolder;
         }
+        if (viewHolder.mouseListener!=null){
+            viewHolder.removeMouseListener(viewHolder.mouseListener);
+        }
+
         //鼠标点击事件 点击变色并进入房间
-        viewHolder.addMouseListener(new AbstractMouseListener() {
+        viewHolder.mouseListener = new AbstractMouseListener() {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
@@ -128,7 +132,8 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
                     setBackground(viewHolder, Colors.DARK);
                 }
             }
-        });
+        };
+        viewHolder.addMouseListener(viewHolder.mouseListener);
     }
 
     /**

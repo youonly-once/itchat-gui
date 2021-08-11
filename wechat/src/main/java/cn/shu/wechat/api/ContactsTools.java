@@ -4,6 +4,7 @@ package cn.shu.wechat.api;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.service.LoginService;
+import cn.shu.wechat.swing.utils.EmojiUtil;
 import cn.shu.wechat.utils.CommonTools;
 import cn.shu.wechat.utils.SpringContextHolder;
 import com.alibaba.fastjson.JSONArray;
@@ -256,5 +257,13 @@ public class ContactsTools {
             }
         return userName;
     }
+    public static String getSignatureNameOfGroup(String userName) {
+        Contacts contacts = Core.getMemberMap().get(userName);
+        if (contacts == null){
+            return null;
+        }
+        return CommonTools.emojiFormatter(contacts.getSignature());
+    }
+
 
 }

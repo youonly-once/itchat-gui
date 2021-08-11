@@ -1,5 +1,7 @@
 package cn.shu.wechat.swing.adapter.search;
 
+import cn.shu.wechat.beans.tuling.request.UserInfo;
+import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.adapter.BaseAdapter;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.constant.SearchResultType;
@@ -9,10 +11,7 @@ import cn.shu.wechat.swing.db.model.Room;
 import cn.shu.wechat.swing.entity.SearchResultItem;
 import cn.shu.wechat.swing.helper.AttachmentIconHelper;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
-import cn.shu.wechat.swing.panels.ListPanel;
-import cn.shu.wechat.swing.panels.RoomChatPanel;
-import cn.shu.wechat.swing.panels.RoomsPanel;
-import cn.shu.wechat.swing.panels.SearchPanel;
+import cn.shu.wechat.swing.panels.*;
 import cn.shu.wechat.swing.tasks.DownloadTask;
 import cn.shu.wechat.swing.tasks.HttpResponseListener;
 import cn.shu.wechat.swing.utils.*;
@@ -21,6 +20,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
@@ -220,7 +220,10 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
     }
 
     private void processMouseListeners(SearchResultItemViewHolder viewHolder, SearchResultItem item) {
-        viewHolder.addMouseListener(new AbstractMouseListener() {
+        if (viewHolder.mouseListener!=null){
+            viewHolder.removeMouseListener(viewHolder.mouseListener);
+        }
+        viewHolder.mouseListener = new AbstractMouseListener() {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
@@ -228,8 +231,10 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
                     switch (byCode) {
                         case CONTACTS:
                         case ROOM:
-                            enterRoom(item.getId(), 0L);
-                            clearSearchText();
+                            UserInfoPanel.getContext().setContacts(Core.getMemberMap().get(item.getId()));
+                            RightPanel.getContext().show(RoomChatPanelCard.USER_INFO);
+                            //enterRoom(item.getId(), 0L);
+                            //clearSearchText();
                             break;
                         case SEARCH_FILE:
                             if (searchMessageOrFileListener != null) {
@@ -263,7 +268,8 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
             public void mouseExited(MouseEvent e) {
                 setBackground(viewHolder, Colors.DARK);
             }
-        });
+        };
+        viewHolder.addMouseListener(  viewHolder.mouseListener);
     }
 
     private void clearSearchText() {

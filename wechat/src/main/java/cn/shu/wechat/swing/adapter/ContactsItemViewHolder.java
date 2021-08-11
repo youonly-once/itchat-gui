@@ -7,6 +7,7 @@ import cn.shu.wechat.swing.utils.FontUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseListener;
 
 /**
  * Created by 舒新胜 on 17-5-30.
@@ -14,7 +15,7 @@ import java.awt.*;
 public class ContactsItemViewHolder extends ViewHolder {
     public JLabel avatar = new JLabel();
     public JLabel roomName = new JLabel();
-
+    public MouseListener mouseListener;
     public ContactsItemViewHolder() {
         initComponents();
         initView();

@@ -1,11 +1,13 @@
 package cn.shu.wechat.swing.adapter;
 
+import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.swing.entity.ContactsItem;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.panels.RightPanel;
 import cn.shu.wechat.swing.panels.RoomChatPanelCard;
+import cn.shu.wechat.swing.panels.UserInfoPanel;
 import cn.shu.wechat.swing.utils.CharacterParser;
 import org.apache.commons.lang.StringUtils;
 
@@ -99,13 +101,13 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
         }
 
         viewHolder.roomName.setText(item.getDisplayName());
-
-        viewHolder.addMouseListener(new AbstractMouseListener() {
+        if (viewHolder.mouseListener!=null){
+            viewHolder.removeMouseListener(viewHolder.mouseListener);
+        }
+        viewHolder.mouseListener =  new AbstractMouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                RightPanel.getContext().getUserInfoPanel().setUsername(item.getDisplayName());
-                RightPanel.getContext().getUserInfoPanel().setHeadImg(item.getId());
-                RightPanel.getContext().getUserInfoPanel().setUserId(item.getId());
+                UserInfoPanel.getContext().setContacts(Core.getMemberMap().get(item.getId()));
                 RightPanel.getContext().show(RoomChatPanelCard.USER_INFO);
 
                 setBackground(viewHolder, Colors.ITEM_SELECTED);
@@ -131,7 +133,8 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
                     setBackground(viewHolder, Colors.DARK);
                 }
             }
-        });
+        };
+        viewHolder.addMouseListener(viewHolder.mouseListener);
     }
 
     private void setBackground(ContactsItemViewHolder holder, Color color) {

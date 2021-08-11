@@ -115,7 +115,6 @@ public class SearchPanel extends ParentAvailablePanel {
      * 搜索
      */
     private void search() {
-        System.out.println("searchResultItemList.size() = " + searchResultItemList.size());
         SearchResultPanel searchResultPanel = SearchResultPanel.getContext();
         ListPanel listPanel = ListPanel.getContext();
         final String text = searchTextField.getText();
@@ -143,7 +142,7 @@ public class SearchPanel extends ParentAvailablePanel {
                         e.printStackTrace();
                     }
                 }else{
-                    log.error(finalI+"==="+searchVer.get());
+                    log.warn(finalI+"==="+searchVer.get()+"-版本号异常停止更新");
                 }
                 //list.add(new SearchResultItem("searchAndListMessage", "搜索 \"" + key + "\" 相关消息", SearchResultType.SEARCH_MESSAGE));
                 //list.add(new SearchResultItem("searchFile", "搜索 \"" + key + "\" 相关文件", SearchResultType.SEARCH_FILE));
@@ -154,7 +153,7 @@ public class SearchPanel extends ParentAvailablePanel {
             @Override
             protected void done() {
                 if (finalI <searchVer.get()) {
-                    log.error(finalI+"==="+searchVer.get());
+                    log.warn(finalI+"==="+searchVer.get()+"-版本号异常停止更新");
                     return;
                 }
                 if (data==null ){

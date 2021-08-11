@@ -6,6 +6,7 @@ import cn.shu.wechat.swing.utils.FontUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseListener;
 
 /**
  *
@@ -21,7 +22,7 @@ public class RoomItemViewHolder extends ViewHolder {
     public JLabel unreadCount = new JLabel();
     public JPanel timeUnread = new JPanel();
     private Object tag;
-
+    protected MouseListener mouseListener;
     public RoomItemViewHolder() {
         initComponents();
         initView();
