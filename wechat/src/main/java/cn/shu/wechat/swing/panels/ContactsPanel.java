@@ -79,7 +79,7 @@ public class ContactsPanel extends ParentAvailablePanel {
 
                     int fi = i;
                     new SwingWorker<Object,Object>(){
-                        Image orLoadAvatar =null;
+                        ImageIcon orLoadAvatar =null;
                         int pos;
                         @Override
                         protected Object doInBackground() throws Exception {
@@ -96,7 +96,7 @@ public class ContactsPanel extends ParentAvailablePanel {
                                 return null;
                             }
                             ContactsItem contactsItem = contactsItemList.get(pos);
-                            orLoadAvatar = AvatarUtil.createOrLoadAvatar(contactsItem.getId());
+                            orLoadAvatar = AvatarUtil.createOrLoadUserAvatar(contactsItem.getId());
                             return null;
                         }
 
@@ -154,7 +154,7 @@ public class ContactsPanel extends ParentAvailablePanel {
      * @param contactId 联系人id
      * @param image 联系人头像
      */
-    public void updateAvatar(String contactId, Image image) {
+    public void updateAvatar(String contactId, ImageIcon image) {
         for (int i = 0; i < contactsItemList.size(); i++) {
             ContactsItem contactsItem = contactsItemList.get(i);
             if (contactsItem.getId().equals(contactId)){
@@ -168,7 +168,7 @@ public class ContactsPanel extends ParentAvailablePanel {
      * @param pos 联系人位置
      * @param image 联系人头像
      */
-    public void updateAvatar(int pos, Image image) {
+    public void updateAvatar(int pos, ImageIcon image) {
         ContactsItem contactsItem = contactsItemList.get(pos);
         contactsItem.setAvatar(image);
         contactsListView.notifyItemChanged(pos);
@@ -213,14 +213,16 @@ public class ContactsPanel extends ParentAvailablePanel {
         try {
             //  URL url = getClass().getResource("/avatar/" + username + ".png");
             String head = Core.getContactHeadImgPath().get(username);
-            Image image;
+            ImageIcon imageIcon ;
             if (StringUtils.isNotEmpty(head)) {
-                image = ImageIO.read(new File(head));
+                BufferedImage image = ImageIO.read(new File(head));
+                imageIcon =new ImageIcon();
+                imageIcon.setImage(image);
             } else {
-                image = AvatarUtil.createOrLoadUserAvatar(username);
+                imageIcon = AvatarUtil.createOrLoadUserAvatar(username);
             }
 
-            processAvatarData((BufferedImage) image, username);
+            processAvatarData( imageIcon, username);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -245,8 +247,7 @@ public class ContactsPanel extends ParentAvailablePanel {
         // TODO: 服务器获取头像，这里从资源文件夹中获取
         try {
             BufferedImage image = ImageIO.read(new File(headPath));
-
-            processAvatarData(image, username);
+            processAvatarData(new ImageIcon(image), username);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -266,7 +267,7 @@ public class ContactsPanel extends ParentAvailablePanel {
      * @param image
      * @param username
      */
-    private void processAvatarData(BufferedImage image, String username) {
+    private void processAvatarData(ImageIcon image, String username) {
         if (image != null) {
             AvatarUtil.saveAvatar(image, username);
         } else {

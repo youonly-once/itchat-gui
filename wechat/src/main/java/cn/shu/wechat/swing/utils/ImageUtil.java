@@ -1,9 +1,14 @@
 package cn.shu.wechat.swing.utils;
 
+import cn.shu.wechat.utils.GifUtil;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 /**
@@ -52,6 +57,7 @@ public class ImageUtil {
         int width = imageIcon.getIconWidth();
         int height = imageIcon.getIconHeight();
         Dimension scaleDimen = getScaleDimen(width, height, maxWidth);
+       // GifUtil.zoomGifBySize();
         imageIcon.setImage(imageIcon.getImage().getScaledInstance(scaleDimen.width, scaleDimen.height, Image.SCALE_SMOOTH));
         return imageIcon;
     }
@@ -103,6 +109,33 @@ public class ImageUtil {
      * @return
      */
     public static ImageIcon preferredImageSize(ImageIcon imageIcon) {
+        if (imageIcon == null){
+            return null;
+        }
         return preferredImageSize(imageIcon,128);
+    }
+
+    /**
+     * 根据图片尺寸大小调整图片显示的大小
+     * @param filePath
+     * @return
+     */
+    public static ImageIcon preferredImageSize(String filePath,int w,int h) {
+        if (filePath == null||filePath.isEmpty()){
+            return null;
+        }
+        File file = new File(filePath);
+        if (!file.exists()){
+            return null;
+        }
+        BufferedImage read = null;
+        try {
+            Dimension scaleDimen = getScaleDimen(w, h, 128);
+            GifUtil.zoomGifBySize(filePath,"gif",scaleDimen.width,scaleDimen.height,filePath+".slave");
+            return new ImageIcon(filePath + ".slave");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

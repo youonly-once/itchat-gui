@@ -82,8 +82,8 @@ public class SelectUserItemsAdapter extends BaseAdapter<SelectUserItemViewHolder
         viewHolders.add(position, viewHolder);
         String name = userList.get(position).getName();
 
-        // 头像
-        ImageIcon imageIcon = new ImageIcon(AvatarUtil.createOrLoadUserAvatar(name).getScaledInstance(30, 30, Image.SCALE_SMOOTH));
+        // TODO 小 头像 30 30
+        ImageIcon imageIcon = AvatarUtil.createOrLoadUserAvatar(name);
         viewHolder.avatar.setIcon(imageIcon);
 
         // 名字

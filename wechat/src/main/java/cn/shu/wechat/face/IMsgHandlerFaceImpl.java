@@ -10,6 +10,7 @@ import cn.shu.wechat.beans.tuling.enums.ResultType;
 import cn.shu.wechat.beans.tuling.response.Results;
 import cn.shu.wechat.beans.tuling.response.TuLingResponseBean;
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.core.MsgCenter;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
 import cn.shu.wechat.enums.WXSendMsgCodeEnum;
@@ -18,6 +19,7 @@ import cn.shu.wechat.mapper.StatusMapper;
 import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +35,8 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
 
     @Resource
     private MessageMapper messageMapper;
-
+    @Resource
+    private MsgCenter msgCenter;
     @Resource
     private StatusMapper statusMapper;
     /**
@@ -590,6 +593,22 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         log.info(LogUtil.printFromMeg(msg, WXReceiveMsgCodeEnum.MSGTYPE_VERIFYMSG.getCode()));
         //自动同意
         MessageTools.addFriend(msg, true);
+        String content = msg.getContent();
+        Map<String, Object> stringObjectMap = MessageTools.parseUndoMsg(content);
+        Object o = stringObjectMap.get("msg.attr.content");
+        if (o == null|| StringUtils.isEmpty(o.toString())){
+            content = "添加你为好友";
+        }else{
+            content = o.toString();
+        }
+        AddMsgList addMsgList = new AddMsgList();
+        addMsgList.setFromUserName(msg.getRecommendInfo().getUserName());
+
+        addMsgList.setToUserName(Core.getUserName());
+        addMsgList.setContent(content);
+        addMsgList.setMsgType(WXReceiveMsgCodeEnum.MSGTYPE_SYS.getCode());
+        msgCenter.handleNewMsg(addMsgList);
+
         return null;
     }
 

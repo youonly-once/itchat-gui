@@ -232,11 +232,11 @@ public class LoginFrame extends JFrame {
             openFrame();
 
             //初始化聊天列表
-            Set<Contacts> recentContacts = Core.getRecentContacts();
+            Set<String> recentContacts = Core.getRecentContacts();
             SwingUtilities.invokeLater(() -> {
                 ArrayList<RoomItem> rooms = new ArrayList<>();
-                for (Contacts recentContact : recentContacts) {
-                    rooms.add(new RoomItem(recentContact, "", 0));
+                for (String userId : recentContacts) {
+                    rooms.add(new RoomItem(Core.getMemberMap().get(userId), "", 0));
                 }
                 RoomsPanel.getContext().addRoom(rooms);
             });

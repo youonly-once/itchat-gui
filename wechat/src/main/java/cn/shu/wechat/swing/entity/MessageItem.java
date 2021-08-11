@@ -13,7 +13,9 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Created by 舒新胜 on 20/03/2017.
+ *
+ * @author 舒新胜
+ * @date 20/03/2017
  */
 
 @Data
@@ -112,14 +114,15 @@ public class MessageItem implements Comparable<MessageItem> {
                       break;
                     case FILE:
                         //文件类消息
-                        FileAttachmentItem fileAttachmentItem = new FileAttachmentItem();
-                        fileAttachmentItem.setTitle(message.getFilePath());
-                        fileAttachmentItem.setId(message.getId());
-                        fileAttachmentItem.setDescription("desc");
-                        fileAttachmentItem.setLink(message.getFilePath());
-                        fileAttachmentItem.setSlavePath(message.getSlavePath());
+                        this.fileAttachment =FileAttachmentItem.builder()
+                                .description(message.getFileName())
+                                .fileName(message.getFileName())
+                                .fileSize(message.getFileSize())
+                                .id(message.getId())
+                                .filePath(message.getFilePath())
+                                .slavePath(message.getSlavePath())
+                                .build();
                         this.setMessageContent(message.getFilePath());
-                        this.fileAttachment = fileAttachmentItem;
                         break;
                     default:
                 }
@@ -137,16 +140,15 @@ public class MessageItem implements Comparable<MessageItem> {
                 break;
             case MSGTYPE_IMAGE:
             case MSGTYPE_EMOTICON:
-                ImageAttachment ia = new ImageAttachment();
-                ia.setDescription("DESC");
-                ia.setHeight(500);
-                ia.setWidth(400);
-                ia.setTitle("sasd");
-                ia.setImagesize(200);
-                ia.setId(UUID.randomUUID().toString());
-                ia.setSlavePath(message.getSlavePath());
-                ia.setImagePath(message.getFilePath());
-                this.imageAttachment = new ImageAttachmentItem(ia);
+                this.imageAttachment = ImageAttachmentItem.builder()
+                        .description(message.getFileName())
+                        .id(message.getId())
+                        .imagePath(message.getFilePath())
+                        .slavePath(message.getSlavePath())
+                        .title(message.getFileName())
+                        .width(message.getImgWidth())
+                        .height(message.getImgHeight())
+                        .build();
                 break;
             case MSGTYPE_VOIPMSG:
             case MSGTYPE_VOIPNOTIFY:

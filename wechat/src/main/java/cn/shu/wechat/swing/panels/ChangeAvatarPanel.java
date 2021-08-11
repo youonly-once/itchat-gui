@@ -69,13 +69,14 @@ public class ChangeAvatarPanel extends JPanel {
 
 
     private void initComponents() {
-         Image avatar = new ImageIcon(AvatarUtil.createOrLoadUserAvatar(Core.getUserSelf().getUsername()).getScaledInstance(200, 200, Image.SCALE_SMOOTH)).getImage();
-         imageLabel = new ImageAdjustLabel(imageMaxWidth, imageMaxHeight, avatar);
+        // TODO 大头像
+         ImageIcon avatar = AvatarUtil.createOrLoadUserAvatar(Core.getUserSelf().getUsername());
+         imageLabel = new ImageAdjustLabel(imageMaxWidth, imageMaxHeight, avatar.getImage());
         imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
         imageLabel.setPreferredSize(new Dimension(360, 200));
         //imageLabel.setBorder(new LineBorder(Colors.ITEM_SELECTED_LIGHT));
 
-        //imageLabel.setIcon(new ImageIcon(AvatarUtil.createOrLoadUserAvatar(currentUser.getUsername()).getScaledInstance(200, 200, Image.SCALE_SMOOTH)));
+        //imageLabel.setIcon(new ImageIcon(AvatarUtil.createOrLoadAvatar(currentUser.getUsername()).getScaledInstance(200, 200, Image.SCALE_SMOOTH)));
 
 
         okButton = new RCButton("使用头像", Colors.MAIN_COLOR, Colors.MAIN_COLOR_DARKER, Colors.MAIN_COLOR_DARKER);

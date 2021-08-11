@@ -281,30 +281,30 @@ public class CommonTools {
     public static void groupMsgFormatter(AddMsgList msg) {
         // 群消息与普通消息不同的是在其消息体（Content）中会包含发送者id及":<br/>"消息，
         // 这里需要处理一下，去掉多余信息，只保留消息内容
+        //"群成员UserName:<br/>消息内容"
         String content = msg.getContent();
-        int index = content.indexOf(":<br/>");
+        int index =  content.indexOf(":<br/>");
         if (index != -1) {
-            msg.setContent(content.substring(index + ":<br/>".length()));
+            msg.setContent( content.substring(index + ":<br/>".length()));
             //发送消息的人
-            msg.setMemberName(content.substring(0, index));
+            msg.setMemberName( content.substring(0, index));
         }
+        content = msg.getContent();
         msg.setGroupMsg(Boolean.TRUE);
         //获取自己在群里的备注
         String groupMyUserNickNameOfGroup = ContactsTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), Core.getUserName());
-        if (groupMyUserNickNameOfGroup != null
-                && content.contains("@" + groupMyUserNickNameOfGroup + " ")) {
-            //@自己
-            //获取他的群备注
-            String groupOtherUserNickNameOfGroup = ContactsTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), msg.getMemberName());
-            if (groupOtherUserNickNameOfGroup != null) {
-                msg.setMentionMeUserNickName(groupOtherUserNickNameOfGroup);
-                String replace = content.replace("@" + groupMyUserNickNameOfGroup, "");
-                msg.setContent(replace);
-                msg.setText(replace);
-                msg.setMentionMe(true);
-            }
+        //判断是否@自己
+        if ( groupMyUserNickNameOfGroup!= null
+        && content.contains("@" + groupMyUserNickNameOfGroup + " ")) {
+            msg.setMentionMe(true);
+            //消息发送成员昵称
+            String groupOtherUserNickNameOfGroup =
+                    ContactsTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), msg.getMemberName());
+           msg.setMentionMeUserNickName(groupOtherUserNickNameOfGroup);
         }
-        msg.setContent(emojiFormatter(msg.getContent()));
+        //@用户后面的空白符 JLabel不支持显示  需要替换
+        msg.setContent(content.replace(" "," "));
+        msg.setContent(emojiFormatter(content));
     }
 
 }

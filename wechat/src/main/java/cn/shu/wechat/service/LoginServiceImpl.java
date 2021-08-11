@@ -228,6 +228,7 @@ public class LoginServiceImpl implements LoginService {
             //最近聊天的联系人
             JSONArray contactList = obj.getJSONArray("ContactList");
             List<Contacts> contactsList = JSON.parseArray(JSON.toJSONString(contactList), Contacts.class);
+            Set<String> recentContacts = Core.getRecentContacts();
             for (Contacts contacts : contactsList) {
                 //下载头像
                 ExecutorServiceUtil.getHeadImageDownloadExecutorService().submit(new Runnable() {
@@ -237,9 +238,8 @@ public class LoginServiceImpl implements LoginService {
                     }
                 });
                 Core.getMemberMap().put(contacts.getUsername(),contacts);
+                recentContacts.add(contacts.getUsername());
             }
-
-            Core.setRecentContacts(new HashSet<>(contactsList));
             String chatSet = obj.getString("ChatSet");
             String[] chatSetArray = chatSet.split(",");
      /*       for (String s : chatSetArray) {
@@ -333,19 +333,22 @@ public class LoginServiceImpl implements LoginService {
                                                 msgCenter.handleNewMsg(msg);
                                             });
                                         }
+                                        List<Contacts> modContactList = webWxSyncMsg.getModContactList();
+                                        msgCenter.handleModContact(modContactList);
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                         log.info(e.getMessage());
                                     }
                                 break;
-                            case ADD_OR_DEL_CONTACT:
-                                log.info("联系人修改：{}", webWxSyncMsg);
-                                break;
+
                             case ENTER_OR_LEAVE_CHAT:
                                 webWxSync();
                                 break;
                             case MOD_CONTACT:
+                            case ADD_OR_DEL_CONTACT:
+                                // TODO 删除新增
                                 log.info("联系人修改：{}", webWxSyncMsg);
+                                msgCenter.handleModContact(webWxSyncMsg.getModContactList());
                             case A:
                                 log.info("未知消息：{}", webWxSyncMsg);
                                 break;
@@ -500,74 +503,53 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public  List<Contacts> WebWxBatchGetContact(String groupName) {
-/*        synchronized (getBatchContactLock){
-            Lock lock = getBatchContactLock.get(groupName);
-            if (lock == null){
-                lock = new ReentrantLock();
-                getBatchContactLock.put(groupName,lock);
+
+            log.info("加载群成员开始：" + groupName);
+            String url = String.format(URLEnum.WEB_WX_BATCH_GET_CONTACT.getUrl(),
+                    Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()), new Date().getTime(),
+                    Core.getLoginInfoMap().get(StorageLoginInfoEnum.pass_ticket.getKey()));
+            Map<String, Object> paramMap = Core.getParamMap();
+            paramMap.put("Count", 1);
+            List<Map<String, String>> list = new ArrayList<Map<String, String>>(1);
+            HashMap<String, String> map = new HashMap<String, String>(2);
+            map.put("UserName", groupName);
+            map.put("EncryChatRoomId", "");
+            list.add(map);
+            paramMap.put("List", list);
+            HttpEntity entity = null;
+            synchronized ((groupName+"WebWxBatchGetContact").intern()) {
+                entity = MyHttpClient.doPost(url, JSON.toJSONString(paramMap));
             }
             try {
-                if (!lock.tryLock()){
-                    //获取锁失败 其它线程正在操作
-                    Thread.sleep(5000);
-                    lock.unlock();
-                    return Core.getMemberMap().get(groupName).getMemberlist();
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        //获取锁成功
-        boolean b = lock.tryLock();
-        if (b){
-            return Core.getMemberMap().get(groupName).getMemberlist();
-        }else  {
-            return new ArrayList<>();
-        }*/
-
-        log.info("加载群成员开始："+groupName);
-        String url = String.format(URLEnum.WEB_WX_BATCH_GET_CONTACT.getUrl(),
-                Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()), new Date().getTime(),
-                Core.getLoginInfoMap().get(StorageLoginInfoEnum.pass_ticket.getKey()));
-        Map<String, Object> paramMap = Core.getParamMap();
-        paramMap.put("Count", 1);
-        List<Map<String, String>> list = new ArrayList<Map<String, String>>(1);
-        HashMap<String, String> map = new HashMap<String, String>(2);
-        map.put("UserName", groupName);
-        map.put("EncryChatRoomId", "");
-        list.add(map);
-        paramMap.put("List", list);
-        HttpEntity entity = MyHttpClient.doPost(url, JSON.toJSONString(paramMap));
-        try {
-            String text = EntityUtils.toString(entity, Consts.UTF_8);
-            JSONObject obj = JSON.parseObject(text);
-            //群列表
-            JSONArray contactList = obj.getJSONArray("ContactList");
-            for (int i = 0; i < contactList.size(); i++) {
-                // 群好友
-                JSONObject groupObject = contactList.getJSONObject(i);
-                Contacts group = JSON.parseObject(JSON.toJSONString(groupObject), Contacts.class);
-                String userName = group.getUsername();
-                Core.getMemberMap().put(userName, group);
-                if (userName.startsWith("@@")) {
-                    //以上接口返回的成员属性不全，以下的接口获取群成员详细属性
-                    JSONArray memberArray = WebWxBatchGetContactDetail(group);
-                    List<Contacts> memberList = JSON.parseArray(JSON.toJSONString(memberArray), Contacts.class);
-                    group.setMemberlist(memberList);
-                    Core.getGroupMap().put(userName, group);
+                String text = EntityUtils.toString(entity, Consts.UTF_8);
+                JSONObject obj = JSON.parseObject(text);
+                //群列表
+                JSONArray contactList = obj.getJSONArray("ContactList");
+                for (int i = 0; i < contactList.size(); i++) {
+                    // 群好友
+                    JSONObject groupObject = contactList.getJSONObject(i);
+                    Contacts group = JSON.parseObject(JSON.toJSONString(groupObject), Contacts.class);
+                    String userName = group.getUsername();
                     Core.getMemberMap().put(userName, group);
-                    log.info("加载群成员结束："+Core.getMemberMap().get(groupName).getMemberlist().size());
-                    return memberList;
+                    if (userName.startsWith("@@")) {
+                        //以上接口返回的成员属性不全，以下的接口获取群成员详细属性
+                        JSONArray memberArray = WebWxBatchGetContactDetail(group);
+                        List<Contacts> memberList = JSON.parseArray(JSON.toJSONString(memberArray), Contacts.class);
+                        group.setMemberlist(memberList);
+                        Core.getGroupMap().put(userName, group);
+                        Core.getMemberMap().put(userName, group);
+                        log.info("加载群成员结束：" + Core.getMemberMap().get(groupName).getMemberlist().size());
+                        return memberList;
+                    }
                 }
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                log.error(e.getMessage());
             }
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.error(e.getMessage());
-        }
-        log.info("加载群成员结束：0");
-        return new ArrayList<>();
+            log.info("加载群成员结束：0");
+            return new ArrayList<>();
     }
     @Override
     public  JSONArray WebWxBatchGetContactDetail(Contacts group) {
@@ -612,7 +594,10 @@ public class LoginServiceImpl implements LoginService {
             }
             paramMap.put("Count", subList.size());
             paramMap.put("List", subList);
-            HttpEntity entity = MyHttpClient.doPost(url, JSON.toJSONString(paramMap));
+            HttpEntity entity =null;
+            synchronized ((group.getUsername()+"WebWxBatchGetContact").intern()) {
+                entity = MyHttpClient.doPost(url, JSON.toJSONString(paramMap));
+            }
             try {
                 String text = EntityUtils.toString(entity, Consts.UTF_8);
                 JSONObject obj = JSON.parseObject(text);
@@ -941,6 +926,8 @@ public class LoginServiceImpl implements LoginService {
                     messages.add(MessageTools.Message.builder()
                             .replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
                             .filePath(newHeadPath).build());
+                    //刷新头像
+                    AvatarUtil.putUserAvatarCache(oldV.getUsername(),newHeadPath);
                     AttrHistory build = AttrHistory.builder()
                             .attr(stringMapEntry.getKey())
                             .oldval(oldHeadPath)

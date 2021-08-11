@@ -34,7 +34,8 @@ public class MePanel extends JPanel {
         contentPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.CENTER, 0, 20, true, false));
 
         imageLabel = new JLabel();
-        ImageIcon icon = new ImageIcon(AvatarUtil.createOrLoadUserAvatar(Core.getUserSelf().getUsername()).getScaledInstance(100, 100, Image.SCALE_SMOOTH));
+        //TODO 大头像
+        ImageIcon icon = AvatarUtil.createOrLoadUserAvatar(Core.getUserSelf().getUsername());
         imageLabel.setIcon(icon);
 
         nameLabel = new JLabel();

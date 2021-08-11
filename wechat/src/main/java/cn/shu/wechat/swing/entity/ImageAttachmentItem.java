@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.entity;
 
 import cn.shu.wechat.swing.db.model.ImageAttachment;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -8,7 +9,7 @@ import lombok.NoArgsConstructor;
  * Created by 舒新胜 on 17/05/2017.
  */
 @Data
-@NoArgsConstructor
+@Builder
 public class ImageAttachmentItem {
     private String id;
     private String title;
@@ -17,22 +18,4 @@ public class ImageAttachmentItem {
     private String imagePath;
     private int width;
     private int height;
-    private long imagesize;
-    private boolean isVideo;
-
-    public ImageAttachmentItem(String imageUrl) {
-        this.imagePath = imageUrl;
-    }
-
-    public ImageAttachmentItem(ImageAttachment ia) {
-        this.id = ia.getId();
-        this.title = ia.getTitle();
-        this.description = ia.getDescription();
-        this.slavePath = ia.getSlavePath();
-        this.imagePath = ia.getImagePath();
-        this.width = ia.getWidth();
-        this.height = ia.getHeight();
-        this.imagesize = ia.getImagesize();
-    }
-
 }

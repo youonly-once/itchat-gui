@@ -1,7 +1,6 @@
 package cn.shu.wechat.swing.panels;
 
 
-import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
@@ -45,7 +44,7 @@ public class UserInfoPanel extends ParentAvailablePanel {
         contentPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.CENTER, 0, 20, true, false));
 
         imageLabel = new JLabel();
-        ImageIcon icon = new ImageIcon(AvatarUtil.createOrLoadUserAvatar(Core.getUserSelf().getUsername()).getScaledInstance(100, 100, Image.SCALE_SMOOTH));
+        ImageIcon icon = AvatarUtil.createOrLoadUserAvatar(Core.getUserSelf().getUsername());
         imageLabel.setIcon(icon);
 
         nameLabel = new JLabel();
@@ -67,9 +66,6 @@ public class UserInfoPanel extends ParentAvailablePanel {
         avatarNamePanel.setLayout(new FlowLayout(FlowLayout.CENTER, 15, 0));
         avatarNamePanel.add(imageLabel, BorderLayout.WEST);
         avatarNamePanel.add(nameLabel, BorderLayout.CENTER);
-
-        //add(avatarNamePanel, new GBC(0,0).setAnchor(GBC.CENTER).setWeight(1,1).setInsets(0,0,0,0));
-        //add(button, new GBC(0,1).setAnchor(GBC.CENTER).setWeight(1,1).setInsets(0,0,0,0));
         contentPanel.add(avatarNamePanel);
         contentPanel.add(button);
 
@@ -84,8 +80,8 @@ public class UserInfoPanel extends ParentAvailablePanel {
 
     }
     public void setHeadImg(String id){
-        this.userId = userId;
-        ImageIcon icon = new ImageIcon(AvatarUtil.createOrLoadUserAvatar(id).getScaledInstance(100, 100, Image.SCALE_SMOOTH));
+        this.userId = id;
+        ImageIcon icon = AvatarUtil.createOrLoadUserAvatar(id);
         imageLabel.setIcon(icon);
     }
 

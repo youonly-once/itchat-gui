@@ -9,6 +9,7 @@ import cn.shu.wechat.enums.*;
 import cn.shu.wechat.exception.WebWXException;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.swing.tasks.UploadTaskCallback;
+import cn.shu.wechat.swing.utils.MimeTypeUtil;
 import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -42,6 +43,8 @@ import java.util.*;
 @Log4j2
 @Component
 public class MessageTools {
+    //微信上传最大文件大小
+    public static final long maxFileSize = 1024 * 1024 * 20;
     /**
      * 本次登录以来上传文件的数量
      */
@@ -185,6 +188,7 @@ public class MessageTools {
         for (Message message : results) {
             boolean isToSelf = toUserName.endsWith(Core.getUserName());
             WXReceiveMsgCodeEnum type = WXReceiveMsgCodeEnum.UNKNOWN;
+            WXReceiveMsgCodeOfAppEnum appType = WXReceiveMsgCodeOfAppEnum.OTHER;
             switch (message.replyMsgTypeEnum) {
                 case TEXT:
                     type = WXReceiveMsgCodeEnum.MSGTYPE_TEXT;
@@ -225,6 +229,7 @@ public class MessageTools {
                     .filePath(message.filePath)
                     .slavePath(message.slavePath)
                     .response(JSON.toJSONString(sendMsgResponse))
+                    .appMsgType(appType.getType())
                     .build();
             messages.add(build);
 
@@ -285,8 +290,7 @@ public class MessageTools {
      * @return {@link WebWXSendMsgResponse}
      */
     private static WebWXUploadMediaResponse webWxUploadMedia(String filePath, String fromUserName, String toUserName, UploadTaskCallback callback) throws WebWXException, IOException {
-        //微信上传最大文件大小
-        long maxFileSize = 1024 * 1024 * 20;
+
         //一次上传的文件最大1M
         long singleFileMaxSize = 1048576L;
         File file = new File(filePath);
@@ -339,13 +343,7 @@ public class MessageTools {
             throw new WebWXException("不能上传大于20M的文件：" + filePath);
         }
         int fileId = fileCount++;
-        String fileMime = null;
-        try {
-            fileMime = Files.probeContentType(Paths.get(file.getAbsolutePath()));
-        } catch (IOException e) {
-            throw new WebWXException("不能上传大于20M的文件：" + filePath, e);
-        }
-
+        String fileMime = MimeTypeUtil.getMimeByPath(file.getAbsolutePath());
         String lastModifyFileDate = new SimpleDateFormat("yyyy MM dd HH:mm:ss").format(file.lastModified());
         String passTicket = (String) Core.getLoginInfoMap().get("pass_ticket");
         if (StringUtils.isEmpty(passTicket)) {
@@ -776,6 +774,8 @@ public class MessageTools {
         private final String messageId;
         //消息类型
         private final WXSendMsgCodeEnum replyMsgTypeEnum;
+        //app子消息类型
+        private final WXReceiveMsgCodeOfAppEnum appType;
         //图片、视频消息文件路径
         private final String filePath;
         //缩略图

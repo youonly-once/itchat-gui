@@ -27,7 +27,7 @@ public class AddMsgList {
     private long VoiceLength;
     private long PlayLength;
     private String FileName;
-    private String FileSize;
+    private Long FileSize;
     private String MediaId;
     private String Url;
     private int AppMsgType;

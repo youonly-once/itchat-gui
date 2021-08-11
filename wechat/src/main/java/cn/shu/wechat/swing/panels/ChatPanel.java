@@ -5,6 +5,7 @@ import cn.shu.wechat.beans.msg.send.WebWXSendMsgResponse;
 import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
+import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
 import cn.shu.wechat.enums.WXSendMsgCodeEnum;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.swing.adapter.message.*;
@@ -31,6 +32,7 @@ import cn.shu.wechat.swing.utils.HttpUtil;
 import cn.shu.wechat.swing.utils.MimeTypeUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.util.StringUtils;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -119,12 +121,15 @@ public class ChatPanel extends ParentAvailablePanel {
 
     private final Queue<String> shareAttachmentUploadQueue = new ArrayDeque<>(MAX_SHARE_ATTACHMENT_UPLOAD_COUNT);
 
-    private boolean isLoadHis = false;
+    private volatile boolean isLoadHis = false;
 
     public ChatPanel(JPanel parent, String roomId) {
 
         super(parent);
         this.roomId = roomId;
+        if (StringUtils.isEmpty(roomId)){
+            throw new NullPointerException("roomid can not be null.");
+        }
         messageViewHolderCacheHelper = new MessageViewHolderCacheHelper();
 
         initComponents();
@@ -193,8 +198,13 @@ public class ChatPanel extends ParentAvailablePanel {
                             messageList = mapper.selectByPage(messageItems.size(), messageItems.size() + PAGE_LENGTH, roomId);
                             //TODO
                             for (Message message : messageList) {
-                                MessageItem item = new MessageItem(message, roomId);
-                                messageItems.add(0, item);
+                                try{
+                                    MessageItem item = new MessageItem(message, roomId);
+                                    messageItems.add(0, item);
+                                }catch (Exception e){
+                                    e.printStackTrace();
+                                }
+
                             }
                             return null;
                         }
@@ -202,8 +212,8 @@ public class ChatPanel extends ParentAvailablePanel {
                         @Override
                         protected void done() {
                             try {
-                                if (!this.messageList.isEmpty()) {
-                                    messagePanel.getMessageListView().notifyItemRangeInserted(0, messageList.size());
+                                if (!messageItems.isEmpty()) {
+                                    messagePanel.getMessageListView().notifyItemRangeInserted(0, messageItems.size());
                                 }
                             } finally {
                                 isLoadHis = false;
@@ -292,8 +302,13 @@ public class ChatPanel extends ParentAvailablePanel {
                 File selectedFile = fileChooser.getSelectedFile();
                 if (selectedFile != null) {
                     String path = selectedFile.getAbsolutePath();
-                    prepareStartUploadFile(path, randomMessageId());
-                    showSendingMessage();
+                    if (new File(path).length()>MessageTools.maxFileSize){
+                        JOptionPane.showMessageDialog(MainFrame.getContext(), "只能上传20M以内文件", "文件太大", JOptionPane.ERROR_MESSAGE);
+                    }else{
+                        prepareStartUploadFile(path, randomMessageId());
+                        showSendingMessage();
+                    }
+
                 }
 
                 super.mouseClicked(e);
@@ -840,7 +855,7 @@ public class ChatPanel extends ParentAvailablePanel {
      *
      * @param uploadFilename
      */
-    private void uploadFile(String uploadFilename, String fileId) {
+    private void uploadFile(String uploadFilename, String msgId) {
         File file = new File(uploadFilename);
         if (!file.exists()) {
             JOptionPane.showMessageDialog(null, "文件不存在", "上传失败", JOptionPane.ERROR_MESSAGE);
@@ -853,48 +868,39 @@ public class ChatPanel extends ParentAvailablePanel {
         // 发送的是图片
         int[] bounds;
         String name = uploadFilename.substring(uploadFilename.lastIndexOf(File.separator) + 1); // 文件名
-
-        FileAttachment fileAttachment = null;
-        ImageAttachment imageAttachment = null;
-        cn.shu.wechat.swing.db.model.Message dbMessage = new cn.shu.wechat.swing.db.model.Message();
-        dbMessage.setProgress(-1);
-
         if (isImage) {
             bounds = getImageSize(uploadFilename);
-            imageAttachment = new ImageAttachment();
-            imageAttachment.setId(fileId);
-            imageAttachment.setWidth(bounds[0]);
-            imageAttachment.setHeight(bounds[1]);
-            imageAttachment.setImagePath(uploadFilename);
-            imageAttachment.setTitle(name);
-            item.setImageAttachment(new ImageAttachmentItem(imageAttachment));
-            dbMessage.setImageAttachmentId(imageAttachment.getId());
-            // imageAttachmentService.insertOrUpdate(imageAttachment);
-
+            ImageAttachmentItem imageAttachmentItem = ImageAttachmentItem.builder()
+                    .description(name)
+                    .id(msgId)
+                    .imagePath(uploadFilename)
+                    .slavePath(uploadFilename)
+                    .title(name)
+                    .width(bounds[0])
+                    .height(bounds[1]).build();
+            item.setImageAttachment(imageAttachmentItem);
             item.setMessageType(MessageItem.RIGHT_IMAGE);
         } else {
-
-            fileAttachment = new FileAttachment();
-            fileAttachment.setId(fileId);
-            fileAttachment.setLink(uploadFilename);
-            fileAttachment.setTitle(name);
-            item.setFileAttachment(new FileAttachmentItem(fileAttachment));
-            dbMessage.setFileAttachmentId(fileAttachment.getId());
-            //  fileAttachmentService.insertOrUpdate(fileAttachment);
-
+            FileAttachmentItem fileAttachmentItem = FileAttachmentItem.builder()
+                    .slavePath(uploadFilename)
+                    .filePath(uploadFilename)
+                    .fileSize(file.length())
+                    .id(msgId)
+                    .description(name)
+                    .fileName(name).build();
+            item.setFileAttachment(fileAttachmentItem);
             item.setMessageType(MessageItem.RIGHT_ATTACHMENT);
         }
 
-        final String messageId = randomMessageId();
+
         item.setMessageContent(name);
         item.setTimestamp(System.currentTimeMillis());
         item.setSenderId(Core.getUserSelf().getUsername());
         item.setSenderUsername(Core.getUserSelf().getNickname());
-        item.setId(messageId);
+        item.setId(msgId);
         item.setProgress(0);
-        //添加消息
+        //添加消息 到面板
         addMessageItemToEnd(item);
-
 
         new SwingWorker<Void, Integer>() {
 
@@ -920,8 +926,9 @@ public class ChatPanel extends ParentAvailablePanel {
                         .filePath(uploadFilename)
                         .slavePath(uploadFilename)
                         .plaintext(isImage ? "[图片]" : "[文件]")
-                        .messageId(messageId)
+                        .messageId(msgId)
                         .replyMsgTypeEnum(isImage ? WXSendMsgCodeEnum.PIC : WXSendMsgCodeEnum.APP)
+                        .appType(WXReceiveMsgCodeOfAppEnum.FILE)
                         .toUserName(roomId)
                         .build(), roomId, callback);
 
@@ -934,8 +941,8 @@ public class ChatPanel extends ParentAvailablePanel {
                 Integer progress = chunks.get(chunks.size() - 1);
                 // 上传完成
                 if (progress == 100) {
-                    uploadingOrDownloadingFiles.remove(fileId);
-                    RoomsPanel.getContext().updateRoomItem(roomId, -1, dbMessage.getMessageContent(), System.currentTimeMillis());
+                    uploadingOrDownloadingFiles.remove(msgId);
+                    RoomsPanel.getContext().updateRoomItem(roomId, -1, isImage ? "[图片]" : "[文件]", System.currentTimeMillis());
 
                     if (uploadFilename.startsWith(ClipboardUtil.CLIPBOARD_TEMP_DIR)) {
                         File file = new File(uploadFilename);

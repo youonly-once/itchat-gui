@@ -21,8 +21,10 @@ public class MessageRightTextViewHolder extends BaseMessageViewHolder {
     public SizeAutoAdjustTextArea text;
     public RCRightImageMessageBubble messageBubble = new RCRightImageMessageBubble();
     //public RCRightTextMessageBubble text = new RCRightTextMessageBubble();
-    public JLabel resend = new JLabel(); // 重发按钮
-    public JLabel sendingProgress = new JLabel(); // 正在发送
+    // 重发按钮
+    public JLabel resend = new JLabel();
+    // 正在发送
+    public JLabel sendingProgress = new JLabel();
 
     private JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
     private JPanel messageAvatarPanel = new JPanel();
@@ -67,14 +69,14 @@ public class MessageRightTextViewHolder extends BaseMessageViewHolder {
 
         JPanel resendTextPanel = new JPanel();
         resendTextPanel.setBackground(Colors.WINDOW_BACKGROUND);
-
+        resendTextPanel.setLayout(new BorderLayout());
         resendTextPanel.add(resend, BorderLayout.WEST);
         resendTextPanel.add(sendingProgress, BorderLayout.WEST);
         resendTextPanel.add(messageBubble, BorderLayout.CENTER);
 
         messageAvatarPanel.setLayout(new GridBagLayout());
-        messageAvatarPanel.add(resendTextPanel, new GBC(1, 0).setWeight(1000, 1).setAnchor(GBC.EAST).setInsets(0, 0, 0, 0));
-        messageAvatarPanel.add(avatar, new GBC(2, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 0, 0, 10));
+        messageAvatarPanel.add(resendTextPanel, new GBC(1, 0).setWeight(1000, 1).setAnchor(GBC.EAST).setInsets(0, 0, 0, 5));
+        messageAvatarPanel.add(avatar, new GBC(2, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 0, 0, 5));
 
         add(timePanel, BorderLayout.NORTH);
         add(messageAvatarPanel, BorderLayout.CENTER);

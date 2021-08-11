@@ -16,6 +16,6 @@ public class RCLeftVoiceMessageBubble extends RCAttachmentMessageBubble {
 
     @Override
     public Insets getInsets() {
-        return new Insets(2, 10, 3, 10);
+        return new Insets(5, 10, 5, 10);
     }
 }

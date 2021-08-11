@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.Objects;
@@ -91,7 +92,7 @@ public class Contacts {
      * 头像
      */
     @JSONField(serialize = false)
-    private Image avatar;
+    private ImageIcon avatarIcon;
 
     /**
      * 群id

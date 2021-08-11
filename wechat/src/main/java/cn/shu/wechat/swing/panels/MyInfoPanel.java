@@ -51,12 +51,12 @@ public class MyInfoPanel extends ParentAvailablePanel {
         String headImage = Core.getContactHeadImgPath().get(userSelf.getUsername());
         avatar = new JLabel();
         if (StringUtils.isEmpty(headImage)) {
-            avatar.setIcon(new ImageIcon(AvatarUtil.createOrLoadUserAvatar(userSelf.getUsername()).getScaledInstance(50, 50, Image.SCALE_SMOOTH)));
+            avatar.setIcon(AvatarUtil.createOrLoadUserAvatar(userSelf.getUsername()));
         } else {
             try {
                 avatar.setIcon(new ImageIcon(ImageIO.read(new File(headImage)).getScaledInstance(50, 50, Image.SCALE_SMOOTH)));
             } catch (IOException e) {
-                avatar.setIcon(new ImageIcon(AvatarUtil.createOrLoadUserAvatar(userSelf.getNickname()).getScaledInstance(50, 50, Image.SCALE_SMOOTH)));
+                avatar.setIcon(AvatarUtil.createOrLoadUserAvatar(userSelf.getNickname()));
                 e.printStackTrace();
             }
 
@@ -117,9 +117,9 @@ public class MyInfoPanel extends ParentAvailablePanel {
 
     public void reloadAvatar() {
         // currentUsername = currentUserService.findAll().get(0).getUsername();
-        //Image image = AvatarUtil.createOrLoadUserAvatar(currentUsername);
+        //Image image = AvatarUtil.createOrLoadAvatar(currentUsername);
         //avatar.setImage(image);
-        avatar.setIcon(new ImageIcon(AvatarUtil.createOrLoadAvatar(Core.getUserSelf().getUsername()).getScaledInstance(50, 50, Image.SCALE_SMOOTH)));
+        avatar.setIcon(AvatarUtil.createOrLoadUserAvatar(Core.getUserSelf().getUsername()));
 
 
         avatar.revalidate();

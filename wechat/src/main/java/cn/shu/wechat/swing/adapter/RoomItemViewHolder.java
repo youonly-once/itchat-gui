@@ -1,15 +1,16 @@
 package cn.shu.wechat.swing.adapter;
 
-import cn.shu.wechat.swing.components.Colors;
-import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.components.RCBorder;
+import cn.shu.wechat.swing.components.*;
+import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.FontUtil;
 
 import javax.swing.*;
 import java.awt.*;
 
 /**
- * Created by 舒新胜 on 17-5-30.
+ *
+ * @author 舒新胜
+ * @date 17-5-30
  */
 public class RoomItemViewHolder extends ViewHolder {
     public JLabel avatar = new JLabel();

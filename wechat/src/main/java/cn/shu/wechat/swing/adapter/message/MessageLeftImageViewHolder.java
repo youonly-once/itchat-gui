@@ -9,6 +9,8 @@ import cn.shu.wechat.swing.utils.FontUtil;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -56,9 +58,9 @@ public class MessageLeftImageViewHolder extends BaseMessageViewHolder {
         senderMessagePanel.setBackground(Colors.WINDOW_BACKGROUND);
         senderMessagePanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
         if (isGroup) {
+            sender.setBorder(new EmptyBorder(0,0,5,0));
             senderMessagePanel.add(sender);
         }
-
         senderMessagePanel.add(image);
 
         messageAvatarPanel.setLayout(new GridBagLayout());

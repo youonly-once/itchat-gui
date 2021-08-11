@@ -62,11 +62,18 @@ public class FileCache {
 
     public String fileSizeString(String path) {
         File file = new File(path);
-        if (file == null) {
-            return null;
-        }
 
         long size = file.length();
+       return fileSizeString(size);
+
+    }
+
+    /**
+     * 获取文件大小
+     * @param size 字节
+     * @return 字符串表示
+     */
+    public String fileSizeString(Long size){
         String retString = "";
         if (size < 1024) {
             retString = size + " 字节";
@@ -78,6 +85,4 @@ public class FileCache {
 
         return retString;
     }
-
-
 }

@@ -17,11 +17,9 @@ public class ChatUtil {
      * 打开或创建新聊天房
      */
     public static void openOrCreateDirectChat(String userId) {
-        Contacts user = Core.getMemberMap().get(userId);
-        /*ContactsUser user  = contactsUserService.find("username", username).get(0);*/
-        if (!Core.getRecentContacts().contains(user)) {
+        if (!Core.getRecentContacts().contains(userId)) {
             // 房间bu存在，直接打开，否则发送请求创建房间
-            createDirectChat(user);
+            createDirectChat(userId);
             RoomsPanel.getContext().activeItem(0);
         }else{
             //房间列表激活
@@ -42,12 +40,12 @@ public class ChatUtil {
     /**
      * 创建直接聊天
      *
-     * @param contacts
+     * @param userId
      */
-    public static void createDirectChat(Contacts contacts) {
+    public static void createDirectChat(String userId) {
         // JOptionPane.showMessageDialog(MainFrame.getContext(), "发起聊天", "发起聊天", JOptionPane.INFORMATION_MESSAGE);
-        RoomsPanel.getContext().addRoom(contacts, "", 0);
-        Core.getRecentContacts().add(contacts);
+        RoomsPanel.getContext().addRoom(userId, "", 0);
+        Core.getRecentContacts().add(userId);
 
     }
 }

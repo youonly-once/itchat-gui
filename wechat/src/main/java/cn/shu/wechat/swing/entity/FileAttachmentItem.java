@@ -1,43 +1,24 @@
 package cn.shu.wechat.swing.entity;
 
 import cn.shu.wechat.swing.db.model.FileAttachment;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
- * Created by 舒新胜 on 17/05/2017.
+ *
+ * @author 舒新胜
+ * @date 17/05/2017
  */
 
 @Data
+@Builder
 public class FileAttachmentItem {
     private String id;
-    private String title;
-    private String link;
+    private String fileName;
+    private String filePath;
     private String description;
     private String slavePath;
-
-    public FileAttachmentItem() {
-
-    }
-
-    public FileAttachmentItem(String link) {
-
-        this.link = link;
-    }
-
-    public FileAttachmentItem(FileAttachment fa) {
-        this.id = fa.getId();
-        this.title = fa.getTitle();
-        this.link = fa.getLink();
-        this.description = fa.getDescription();
-    }
-
-    /*public FileAttachmentItem(FileAttachment fa)
-    {
-        this.id = fa.getId();
-        this.title = fa.getTitle();
-        this.link = fa.getLink();
-        this.description = fa.getDescription();
-    }*/
-
+    private Long fileSize;
 
 }

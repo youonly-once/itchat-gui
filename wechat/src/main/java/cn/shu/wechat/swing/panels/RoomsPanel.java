@@ -16,6 +16,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 左侧聊天列表
@@ -107,11 +108,12 @@ public class RoomsPanel extends ParentAvailablePanel {
     /**
      * 添加房间
      *
-     * @param recentContact 联系人
+     * @param roomId 联系人
      * @param latestMsg     最新消息
      */
-    public void addRoom(Contacts recentContact, String latestMsg, int msgCount) {
-        addRoom(new RoomItem(recentContact,latestMsg,msgCount));
+    public void addRoom(String roomId, String latestMsg, int msgCount) {
+        Contacts contacts = Core.getMemberMap().get(roomId);
+        addRoom(new RoomItem(contacts, latestMsg, msgCount));
     }
 
     /**
@@ -126,34 +128,24 @@ public class RoomsPanel extends ParentAvailablePanel {
     /**
      * 添加房间
      *
-     * @param contacts 联系人
+     * @param roomId 联系人
      * @param latestMsg  最新消息
      */
-    public void addRoomOrOpenRoomNotSwitch(Contacts contacts, String latestMsg, int msgCount) {
-        String userName = contacts.getUsername();
+    public void addRoomOrOpenRoomNotSwitch(String roomId, String latestMsg, int msgCount) {
 
         //更新聊天列表
-        if (!Core.getRecentContacts().contains(contacts)) {
+        Set<String> recentContacts = Core.getRecentContacts();
+        if (!recentContacts.contains(roomId)) {
             //添加新房间并制定
-            addRoom(contacts, latestMsg, msgCount);
-            Core.getRecentContacts().add(contacts);
+            addRoom(roomId, latestMsg, msgCount);
+            recentContacts.add(roomId);
         } else {
             //更新消息 置顶
-           updateRoomItem(userName, msgCount, latestMsg, System.currentTimeMillis());
+           updateRoomItem(roomId, msgCount, latestMsg, System.currentTimeMillis());
         }
     }
 
 
-    /**
-     * 添加房间
-     *
-     * @param contacts 联系人
-     * @param latestMsg  最新消息
-     */
-    public void addRoomOrOpenRoom(Contacts contacts, String latestMsg, int msgCount) {
-        addRoomOrOpenRoomNotSwitch(contacts,latestMsg,msgCount);
-        TabOperationPanel.getContext().switchToChatLabel();
-    }
 
     /**
      * 添加房间
@@ -163,7 +155,8 @@ public class RoomsPanel extends ParentAvailablePanel {
      */
     public void addRoomOrOpenRoom(String roomId, String latestMsg, int msgCount) {
         Contacts contacts = Core.getMemberMap().get(roomId);
-        addRoomOrOpenRoom(contacts,latestMsg,msgCount);
+        addRoomOrOpenRoomNotSwitch(roomId,latestMsg,msgCount);
+        TabOperationPanel.getContext().switchToChatLabel();
     }
     /**
      * 批量添加房间

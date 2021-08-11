@@ -12,6 +12,7 @@ import cn.shu.wechat.swing.db.model.Message;
 import cn.shu.wechat.swing.entity.SearchResultItem;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
+import cn.shu.wechat.utils.SleepUtils;
 import lombok.extern.log4j.Log4j2;
 
 import javax.swing.*;
@@ -20,12 +21,15 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by 舒新胜 on 17-5-29.
@@ -35,8 +39,9 @@ public class SearchPanel extends ParentAvailablePanel {
     private static SearchPanel context;
     private RCSearchTextField searchTextField;
     private boolean setSearchMessageOrFileListener = false;
-    private List<SearchResultItem> searchResultItemList = new ArrayList<>();
-
+    private final List<SearchResultItem> searchResultItemList = new ArrayList<>();
+    private volatile int  searchVer = 0;
+    private final AtomicInteger searchCount = new AtomicInteger();
     public SearchPanel(JPanel parent) {
         super(parent);
         context = this;
@@ -76,12 +81,12 @@ public class SearchPanel extends ParentAvailablePanel {
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                search();
-
+               search();
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
+               // System.out.println("456");;
             }
         });
 
@@ -110,26 +115,50 @@ public class SearchPanel extends ParentAvailablePanel {
      * 搜索
      */
     private void search() {
+        System.out.println("searchResultItemList.size() = " + searchResultItemList.size());
         SearchResultPanel searchResultPanel = SearchResultPanel.getContext();
         ListPanel listPanel = ListPanel.getContext();
-        if (searchTextField.getText() == null || searchTextField.getText().isEmpty()) {
+        final String text = searchTextField.getText();
+        if (text == null || text.isEmpty()) {
             listPanel.showPanel(listPanel.getPreviousTab());
             return;
         }
+        searchVer++;
         listPanel.showPanel(ListPanel.SEARCH);
         new SwingWorker<Object, Object>() {
             private List<SearchResultItem> data;
-
+            final int finalI = searchVer;
             @Override
             protected Object doInBackground() throws Exception {
-                data = searchUserOrRoom(searchTextField.getText());
+                //TODO 会创建大量 SearchResultItem对象 导致FUllGC卡顿
+                if (finalI >= searchVer) {
+                    searchCount.set(0);
+                    searchUserOrRoom(text, finalI);
+                    if (searchResultItemList.isEmpty()||searchCount.get()<=0){
+                        return null;
+                    }
+                    try {
+                        data = searchResultItemList.subList(0, searchCount.get() - 1);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+                //list.add(new SearchResultItem("searchAndListMessage", "搜索 \"" + key + "\" 相关消息", SearchResultType.SEARCH_MESSAGE));
+                //list.add(new SearchResultItem("searchFile", "搜索 \"" + key + "\" 相关文件", SearchResultType.SEARCH_FILE));
+
                 return null;
             }
 
             @Override
             protected void done() {
+                if (finalI <searchVer) {
+                    return;
+                }
+                if (data==null ){
+                    data = new ArrayList<>();
+                }
                 searchResultPanel.setData(data);
-                searchResultPanel.setKeyWord(searchTextField.getText());
+                searchResultPanel.setKeyWord(text);
                 searchResultPanel.notifyDataSetChanged(false);
                 searchResultPanel.getTipLabel().setVisible(false);
             }
@@ -150,26 +179,15 @@ public class SearchPanel extends ParentAvailablePanel {
      * @param key
      * @return
      */
-    private List<SearchResultItem> searchUserOrRoom(String key) {
-        List<SearchResultItem> list = new ArrayList<>();
+    private void searchUserOrRoom(String key,int version) {
 
-        list.add(new SearchResultItem("searchAndListMessage", "搜索 \"" + key + "\" 相关消息", SearchResultType.SEARCH_MESSAGE));
-        list.add(new SearchResultItem("searchFile", "搜索 \"" + key + "\" 相关文件", SearchResultType.SEARCH_FILE));
-        /*  long begin =  System.currentTimeMillis();*/
+    /*  long begin =  System.currentTimeMillis();*/
 
         //搜索通讯录
        // long start = System.currentTimeMillis();
-        Future<List<SearchResultItem>> contacts = ExecutorServiceUtil.getGlobalExecutorService().submit(() -> searchContacts(key));
+        searchContacts(key,version);
         // 搜索房间
-        Future<List<SearchResultItem>> chanelAndGroup = ExecutorServiceUtil.getGlobalExecutorService().submit(() -> searchChannel(key));
-        try {
-            list.addAll(contacts.get());
-            list.addAll(chanelAndGroup.get());
-            //System.out.println("System.currentTimeMillis()-start = " + (System.currentTimeMillis() - start));
-        } catch (InterruptedException | ExecutionException e) {
-           log.warn(e.getMessage());
-        }
-
+         searchChannel(key,version);
         /* System.out.println((System.currentTimeMillis() - begin)/1000.00);*/
         if (!setSearchMessageOrFileListener) {
             // 查找消息、文件
@@ -188,7 +206,6 @@ public class SearchPanel extends ParentAvailablePanel {
             setSearchMessageOrFileListener = true;
         }
 
-        return list;
     }
 
     /**
@@ -268,32 +285,42 @@ public class SearchPanel extends ParentAvailablePanel {
      * @param key
      * @return
      */
-    private List<SearchResultItem> searchChannel(String key) {
+    private void searchChannel(String key,int version) {
         List<SearchResultItem> retList = new ArrayList<>();
-        Set<Contacts> recentContacts = Core.getRecentContacts();
+        Set<String> recentContacts = Core.getRecentContacts();
         // long start = System.currentTimeMillis();
-
         SearchResultItem item;
         try {
-            for (Contacts recentContact : recentContacts) {
-
+            for (String userId : recentContacts) {
+                if (version!=searchVer){
+                    break;
+                }
+                Contacts recentContact = Core.getMemberMap().get(userId);
                 String remark = recentContact.getRemarkname();
                 String nick = recentContact.getNickname();
-                if (remark.contains(key)) {
-                    item = new SearchResultItem(recentContact.getUsername(), remark, SearchResultType.ROOM);
-                } else if (nick.contains(key)) {
-                    item = new SearchResultItem(recentContact.getUsername(), nick, SearchResultType.ROOM);
-                } else {
-                    continue;
+                if (remark.contains(key)||nick.contains(key)) {
+                    int i = searchCount.getAndIncrement();
+                    if (searchResultItemList.size() > i) {
+                        item = searchResultItemList.get(i);
+                    } else {
+                        item = new SearchResultItem();
+                        searchResultItemList.add(item);
+                    }
+                    item.setTag(userId);
+                    item.setType(SearchResultType.ROOM.CODE);
+                    item.setId(userId);
+                    if (remark.contains(key)) {
+                        item.setName(remark);
+                    } else if (nick.contains(key)) {
+                        item.setName(nick);
+                    }
                 }
-                retList.add(item);
             }
         } catch (Exception e) {
             log.warn(e.getMessage());
         }
         // System.out.println("System.currentTimeMillis()-start Channel= " + (System.currentTimeMillis() - start));
 
-        return retList;
     }
 
     /**
@@ -302,33 +329,41 @@ public class SearchPanel extends ParentAvailablePanel {
      * @param key
      * @return
      */
-    private List<SearchResultItem> searchContacts(String key) {
+    private void searchContacts(String key,int version) {
         //long start = System.currentTimeMillis();
         Map<String, Contacts> memberMap = Core.getMemberMap();
-        List<SearchResultItem> retList = new ArrayList<>();
         SearchResultItem item = null;
         try {
             for (Map.Entry<String, Contacts> entry : memberMap.entrySet()) {
+                if (version!=searchVer){
+                    break;
+                }
                 Contacts recentContact = entry.getValue();
 
                 String remark = recentContact.getRemarkname();
                 String nick = recentContact.getNickname();
-                if (remark.contains(key)) {
-                    item = new SearchResultItem(entry.getKey(), remark, SearchResultType.CONTACTS);
-                } else if (nick.contains(key)) {
-                    item = new SearchResultItem(entry.getKey(), nick, SearchResultType.CONTACTS);
-                } else {
-                    continue;
+                if (remark.contains(key)||nick.contains(key)){
+                    int i = searchCount.getAndIncrement();
+                    if (searchResultItemList.size()>i) {
+                        item = searchResultItemList.get(i);
+                    }else{
+                        item = new SearchResultItem();
+                        searchResultItemList.add(item);
+                    }
+                    item.setType(SearchResultType.CONTACTS.CODE);
+                    item.setId(entry.getKey());
+                    item.setTag(entry.getKey());
+                    if (remark.contains(key)) {
+                        item.setName(remark);
+                    } else if (nick.contains(key)) {
+                        item.setName(nick);
+                    }
                 }
-                retList.add(item);
 
             }
         } catch (Exception e) {
             log.warn(e.getMessage());
         }
-        //System.out.println("System.currentTimeMillis()-start CONTACTS= " + (System.currentTimeMillis() - start));
-
-        return retList;
     }
 
 }

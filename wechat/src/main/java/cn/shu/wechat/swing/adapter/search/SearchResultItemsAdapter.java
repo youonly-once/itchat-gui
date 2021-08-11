@@ -24,7 +24,6 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -195,7 +194,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
 
         Message message = null;
 
-        holder.avatar.setIcon(new ImageIcon(getRoomAvatar(((String) item.getTag()).startsWith("@@"), room.getRoomId())));
+        holder.avatar.setIcon(AvatarUtil.createOrLoadUserAvatar(room.getRoomId()));
         holder.brief.setKeyWord(keyWord);
         holder.brief.setText(item.getName());
         holder.roomName.setText(room.getName());
@@ -291,11 +290,11 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
         SearchResultType byCode = SearchResultType.getByCode(item.getType());
         switch (byCode) {
             case CONTACTS:
-                icon.setImage(getRoomAvatar(true, item.getTag().toString()));
+                icon = AvatarUtil.createOrLoadUserAvatar(item.getTag().toString());
                 holder.type.setText("联系人");
                 break;
             case ROOM:
-                icon.setImage(getRoomAvatar(true, item.getTag().toString()));
+                icon = AvatarUtil.createOrLoadUserAvatar(item.getTag().toString());
                 holder.type.setText("聊天房");
                 break;
             case SEARCH_FILE:
@@ -339,30 +338,13 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
         // 私聊头像
         else if (type.equals("d"))
         {
-            return AvatarUtil.createOrLoadUserAvatar(name).getScaledInstance(35, 35, Image.SCALE_SMOOTH);
+            return AvatarUtil.createOrLoadAvatar(name).getScaledInstance(35, 35, Image.SCALE_SMOOTH);
         }
 
         return null;
     }*/
 
-    /**
-     * 根据房间类型获取对应的头像
-     *
-     * @param isGroup 是否为群
-     * @param roomId  房间id
-     * @return 头像
-     */
-    private Image getRoomAvatar(boolean isGroup, String roomId) {
-        if (isGroup) {
-            //群头像
-            return AvatarUtil.createOrLoadGroupAvatar(roomId).getScaledInstance(35, 35, Image.SCALE_SMOOTH);
-        }
-        // 私聊头像
-        else {
-            return AvatarUtil.createOrLoadUserAvatar(roomId).getScaledInstance(35, 35, Image.SCALE_SMOOTH);
-        }
 
-    }
 
     /**
      * 设置item的背影色

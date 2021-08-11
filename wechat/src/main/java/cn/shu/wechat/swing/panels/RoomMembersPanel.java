@@ -13,8 +13,11 @@ import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.frames.AddOrRemoveMemberDialog;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.AvatarUtil;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -61,9 +64,12 @@ public class RoomMembersPanel extends ParentAvailablePanel {
      */
     private AddOrRemoveMemberDialog addOrRemoveMemberDialog;
 
+    /**
+     * 同一时间只能一个线程更新成员信息
+     */
+    private volatile boolean isUpdatingUI = false;
 
-    private boolean isUpdatingUI = false;
-    public RoomMembersPanel(JPanel parent,String roomId) {
+    public RoomMembersPanel(JPanel parent, String roomId) {
         super(parent);
         this.roomId = roomId;
         initComponents();
@@ -103,7 +109,11 @@ public class RoomMembersPanel extends ParentAvailablePanel {
     }
 
 
-
+    /**
+     * 设置成员面板显示状态
+     *
+     * @param aFlag {TRUE}显示
+     */
     public void setVisibleAndUpdateUI(boolean aFlag) {
         if (aFlag) {
             updateUI();
@@ -114,41 +124,38 @@ public class RoomMembersPanel extends ParentAvailablePanel {
 
     @Override
     public void updateUI() {
-        if (isUpdatingUI){
-            System.out.println("isUpdatingUI = " + isUpdatingUI);
+        if (isUpdatingUI) {
             return;
         }
-        System.out.println("isUpdatingUI = " + isUpdatingUI);
         if (roomId != null) {
             isUpdatingUI = true;
-            new SwingWorker<Object,Object>(){
+            new SwingWorker<Object, Object>() {
 
                 @Override
                 protected Object doInBackground() throws Exception {
-
                     getRoomMembers();
-                    updateAvatar();
                     return null;
                 }
 
                 @Override
                 protected void done() {
                     try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    listView.notifyDataSetChanged(false);
-                    // 单独聊天，不显示退出按钮
-                    leaveButton.setVisible(roomId.startsWith("@@"));
-                    setLeaveButtonVisibility(true);
+                        //TODO 这一步比较耗时
+                        listView.notifyDataSetChanged(false);
+                        // 单独聊天，不显示退出按钮
+                        leaveButton.setVisible(roomId.startsWith("@@"));
+                        setLeaveButtonVisibility(true);
 
-                    if (isRoomCreator()) {
-                        leaveButton.setText("解散群聊");
-                    } else {
-                        leaveButton.setText("退出群聊");
+                        if (isRoomCreator()) {
+                            leaveButton.setText("解散群聊");
+                        } else {
+                            leaveButton.setText("退出群聊");
+                        }
+                        updateAvatar();
+                    } finally {
+                        isUpdatingUI = false;
                     }
-                    isUpdatingUI = false;
+
                 }
             }.execute();
 
@@ -160,7 +167,6 @@ public class RoomMembersPanel extends ParentAvailablePanel {
      */
     private void getRoomMembers() {
 
-
         // 单独聊天，成员只显示两人
         if (!roomId.startsWith("@@")) {
             members.clear();
@@ -169,13 +175,17 @@ public class RoomMembersPanel extends ParentAvailablePanel {
             //显示另外个人
             members.add(Core.getMemberMap().get(roomId));
         } else {
+            //群聊
             //获取成员
             Contacts group = Core.getMemberMap().get(roomId);
             List<Contacts> memberlist = group.getMemberlist();
-            if (memberlist == null || memberlist.isEmpty()){
+            if (CollectionUtils.isEmpty(memberlist)
+                    || StringUtils.isEmpty(memberlist.get(0).getHeadimgurl())) {
                 LoginService bean = SpringContextHolder.getBean(LoginService.class);
-                memberlist= bean.WebWxBatchGetContact(roomId);
-            }else{
+                memberlist = bean.WebWxBatchGetContact(roomId);
+                members.clear();
+                members.addAll(memberlist);
+            } else {
                 members.clear();
                 members.addAll(memberlist);
             }
@@ -195,71 +205,44 @@ public class RoomMembersPanel extends ParentAvailablePanel {
         }
 
 
-
     }
+
     /**
      * 更新头像
      */
-    private void updateAvatar(){
-        //下载头像
-        for (int i = 0; i < members.size(); i++) {
-            Contacts contacts = members.get(i);
-            int finali = i;
-            new SwingWorker<Object,Object>(){
+    private void updateAvatar() {
+        ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
+            @Override
+            public void run() {
+                //下载头像
+                for (int i = 0; i < members.size(); i++) {
+                    Contacts contacts = members.get(i);
+                    int finali = i;
+                    new SwingWorker<Object, Object>() {
 
-                private Image image;
-                @Override
-                protected Object doInBackground() throws Exception {
-                    //下载头像
-                    if (contacts.getUsername() == null){
-                        return null;
-                    }
-                    image = AvatarUtil.createOrLoadMemberAvatar(roomId, contacts.getUsername());
-                    return null;
-                }
+                        private ImageIcon memberAvatar;
 
-                @Override
-                protected void done() {
-                    //更新头像
-                    if (image != null){
-                        updateAvatar(finali,image.getScaledInstance(40, 40, Image.SCALE_SMOOTH));
-                    }
-                }
-            }.execute();
-        }
-
-        //下载头像
-         /*   new SwingWorker<Object,Integer>(){
-
-                private Image image;
-                @Override
-                protected Object doInBackground() throws Exception {
-                    for (int i = 0; i < members.size(); i++) {
-                        Contacts contacts = members.get(i);
-                        //下载头像
-                        if (contacts.getUsername() == null){
+                        @Override
+                        protected Object doInBackground() throws Exception {
+                            //下载头像
+                            if (contacts.getUsername() == null) {
+                                return null;
+                            }
+                            memberAvatar = AvatarUtil.createOrLoadMemberAvatar(roomId, contacts.getUsername());
                             return null;
                         }
-                        image = AvatarUtil.createOrLoadMemberAvatar(roomId, contacts.getUsername());
-                        publish(i);
-                    }
 
-                    return null;
+                        @Override
+                        protected void done() {
+                            //更新头像
+                            if (memberAvatar != null) {
+                                updateAvatar(finali, memberAvatar);
+                            }
+                        }
+                    }.execute();
                 }
-
-                @Override
-                protected void process(List<Integer> chunks) {
-                    //更新头像
-                    if (image != null){
-                        updateAvatar(chunks.get(chunks.size()-1),image.getScaledInstance(40, 40, Image.SCALE_SMOOTH));
-                    }
-                }
-
-                @Override
-                protected void done() {
-
-                }
-            }.execute();*/
+            }
+        });
 
     }
 
@@ -270,13 +253,12 @@ public class RoomMembersPanel extends ParentAvailablePanel {
      */
     private boolean isRoomCreator() {
         Contacts contacts = Core.getMemberMap().get(roomId);
-        if (contacts ==null || contacts.getIsowner()==null){
+        if (contacts == null || contacts.getIsowner() == null) {
             return false;
         }
         //1群主 0成员
-        return contacts.getIsowner()==1;
+        return contacts.getIsowner() == 1;
     }
-
 
 
     public void setLeaveButtonVisibility(boolean visible) {
@@ -324,7 +306,7 @@ public class RoomMembersPanel extends ParentAvailablePanel {
      * 选择并添加群成员
      */
     private void selectAndAddRoomMember() {
-        List<ContactsUser> contactsUsers =null;// contactsUserService.findAll();
+        List<ContactsUser> contactsUsers = null;// contactsUserService.findAll();
         List<SelectUserData> selectUsers = new ArrayList<>();
 
         for (ContactsUser contactsUser : contactsUsers) {
@@ -413,14 +395,16 @@ public class RoomMembersPanel extends ParentAvailablePanel {
     private void leaveChannelOrGroup(final String roomId) {
         JOptionPane.showMessageDialog(null, "退出群聊：" + roomId, "退出群聊", JOptionPane.INFORMATION_MESSAGE);
     }
+
     /**
      * 更新群成员头像
-     * @param pos 联系人位置
+     *
+     * @param pos   联系人位置
      * @param image 联系人头像
      */
-    public void updateAvatar(int pos, Image image) {
+    public void updateAvatar(int pos, ImageIcon image) {
         Contacts contacts = members.get(pos);
-        contacts.setAvatar(image);
+        contacts.setAvatarIcon(image);
         listView.notifyItemChanged(pos);
     }
 }

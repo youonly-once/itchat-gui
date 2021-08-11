@@ -25,7 +25,7 @@ import java.awt.event.MouseEvent;
 
 public class MessageLinkViewHolder extends BaseMessageViewHolder {
 
-    public static final int thumbWidth = 48;
+    public static final int THUMB_WIDTH = 48;
     protected final JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
     protected final JPanel messageAvatarPanel = new JPanel();
     protected final JTextArea title = new JTextArea();
@@ -67,39 +67,36 @@ public class MessageLinkViewHolder extends BaseMessageViewHolder {
         setLayout(new BorderLayout());
         timePanel.add(time);
 
-        //消息内容
-
-        contentTagPanel.setLayout(new GridBagLayout());
-
-        JPanel descIconPanel = new JPanel(new BorderLayout());
-
         sourcePanel.add(sourceIcon);
         sourcePanel.add(sourceName);
         sourcePanel.setOpaque(false);
-        Color decode = Color.decode("#f2f2f2");
-        sourcePanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, decode));
+        sourcePanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.decode("#f2f2f2")));
         sourceName.setFont(new Font("楷体",Font.PLAIN,12));
         sourceName.setOpaque(false);
         sourceName.setForeground(Color.GRAY);
-        int width = 250;
-        int height = 120;
-        contentTagPanel.setPreferredSize(new Dimension(width, height));
-        contentTagPanel.setOpaque(false);
-        descIconPanel.setOpaque(false);
-        descIconPanel.add(desc,BorderLayout.CENTER);
-        descIconPanel.add(icon,BorderLayout.EAST);
-        title.setFont(new Font("楷体",Font.BOLD,18));
-        title.setEditable(false);
-        title.setOpaque(false);
-        title.setLineWrap(true);
-        title.setWrapStyleWord(true);
+
+
         desc.setLineWrap(true);
         desc.setOpaque(false);
         desc.setEditable(false);
         desc.setWrapStyleWord(true);
         desc.setForeground(Color.GRAY);
-        title.setCursor(new Cursor(Cursor.HAND_CURSOR));
         desc.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        JPanel descIconPanel = new JPanel(new BorderLayout());
+        descIconPanel.setOpaque(false);
+        descIconPanel.add(desc,BorderLayout.CENTER);
+        descIconPanel.add(icon,BorderLayout.EAST);
+
+        title.setFont(new Font("楷体",Font.BOLD,18));
+        title.setEditable(false);
+        title.setOpaque(false);
+        title.setLineWrap(true);
+        title.setWrapStyleWord(true);
+        title.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        contentTagPanel.setLayout(new GridBagLayout());
+        contentTagPanel.setOpaque(false);
         contentTagPanel.add(title, new GBC(0, 0)
                 .setWeight(1, 30)
                 .setFill(GridBagConstraints.BOTH)

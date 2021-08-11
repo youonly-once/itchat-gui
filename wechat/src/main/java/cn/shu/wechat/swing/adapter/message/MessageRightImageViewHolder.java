@@ -55,15 +55,15 @@ public class MessageRightImageViewHolder extends BaseMessageViewHolder {
         setLayout(new BorderLayout());
         timePanel.add(time);
 
-        JPanel resendImagePanel = new JPanel();
+        JPanel resendImagePanel = new JPanel(new BorderLayout());
         resendImagePanel.setBackground(Colors.WINDOW_BACKGROUND);
         resendImagePanel.add(resend, BorderLayout.WEST);
         resendImagePanel.add(sendingProgress, BorderLayout.WEST);
         resendImagePanel.add(image, BorderLayout.CENTER);
 
         messageAvatarPanel.setLayout(new GridBagLayout());
-        messageAvatarPanel.add(resendImagePanel, new GBC(1, 0).setWeight(1000, 1).setAnchor(GBC.EAST).setInsets(0, 0, 0, 0));
-        messageAvatarPanel.add(avatar, new GBC(2, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 0, 0, 10));
+        messageAvatarPanel.add(resendImagePanel, new GBC(1, 0).setWeight(1000, 1).setAnchor(GBC.EAST).setInsets(0, 0, 0, 5));
+        messageAvatarPanel.add(avatar, new GBC(2, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 0, 0, 5));
 
         add(timePanel, BorderLayout.NORTH);
         add(messageAvatarPanel, BorderLayout.CENTER);

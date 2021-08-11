@@ -5,10 +5,7 @@ import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.URLEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
-import cn.shu.wechat.utils.Config;
-import cn.shu.wechat.utils.ExecutorServiceUtil;
-import cn.shu.wechat.utils.MD5Util;
-import cn.shu.wechat.utils.MyHttpClient;
+import cn.shu.wechat.utils.*;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
@@ -422,9 +419,23 @@ public class DownloadTools {
         String ext = null;
         switch (msgTypeEnum) {
             case MSGTYPE_MAP:
-            case MSGTYPE_EMOTICON:
             case MSGTYPE_IMAGE:
-                ext = ".gif";
+                ext = ".jpg";
+                break;
+            case MSGTYPE_EMOTICON:
+                try{
+                    Map<String, Object> stringObjectMap = MessageTools.parseUndoMsg(msg.getContent());
+                    Object o = stringObjectMap.get("msg.emoji.attr.type");
+                    if (o.equals("2")){
+                        ext = ".gif";
+                    }else{
+                        ext = ".jpg";
+                    }
+                }catch (Exception e){
+                    log.warn(e.getMessage());
+                    ext = ".jpg";
+                }
+
                 break;
             case MSGTYPE_VOICE:
                 ext = ".mp3";
@@ -468,7 +479,8 @@ public class DownloadTools {
             groupUsername = ContactsTools.getContactDisplayNameByUserName(msg.getMemberName());
         }
         username = replace(username);
-
+        //username = "test";
+       // groupUsername = "test1";
         String path = Config.PIC_DIR + File.separator + msgTypeEnum + File.separator + username + File.separator;
         String fileName = groupUsername + "-"
                 + new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date()) + "-" + msg.getNewMsgId()
@@ -497,5 +509,20 @@ public class DownloadTools {
     static class Result{
         private String filePath;
         private Image image;
+    }
+
+    /**
+     * 等待下载完成
+     * @param path 文件路径
+     */
+    public static void awaitDownload(String path){
+        Boolean aBoolean = DownloadTools.FILE_DOWNLOAD_STATUS.get(path);
+        while (aBoolean != null && !aBoolean) {
+            SleepUtils.sleep(100);
+            aBoolean = DownloadTools.FILE_DOWNLOAD_STATUS.get(path);
+        }
+        if (DownloadTools.FILE_DOWNLOAD_STATUS.contains(path)) {
+            DownloadTools.FILE_DOWNLOAD_STATUS.remove(path);
+        }
     }
 }

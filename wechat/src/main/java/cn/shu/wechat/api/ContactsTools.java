@@ -9,7 +9,10 @@ import cn.shu.wechat.utils.SpringContextHolder;
 import com.alibaba.fastjson.JSONArray;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.StringUtils;
+import org.nlpcn.commons.lang.util.CollectionUtil;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -135,10 +138,10 @@ public class ContactsTools {
      * @return 成员
      */
     public static Contacts getMemberOfGroup(String groupName, String userName) {
-        if (userName == null){
+        if (StringUtils.isEmpty(userName)){
            return null;
         }
-        if (groupName == null){
+        if (StringUtils.isEmpty(groupName )){
             return null;
         }
         //群成员为自己的好友
@@ -148,21 +151,29 @@ public class ContactsTools {
         Map<String, Contacts> groupMemberMap =Core.getMemberMap();
         Contacts group = groupMemberMap.getOrDefault(groupName, null);
         if (group == null) {
+            log.warn("未找到用户：{}",groupName);
             return null;
         }
         List<Contacts> memberList = group.getMemberlist();
-        if (memberList == null || memberList.size() <= 0) {
-            LoginService bean = SpringContextHolder.getBean(LoginService.class);
-            memberList = bean.WebWxBatchGetContact(groupName);
-           if (memberList == null || memberList.size() <= 0){
+        if (CollectionUtils.isEmpty(memberList)) {
+            /*//群成员为空 远程获取
+            synchronized (groupName.intern()) {
+                if (CollectionUtils.isEmpty(memberList)) {
+                    LoginService bean = SpringContextHolder.getBean(LoginService.class);
+                    memberList = bean.WebWxBatchGetContact(groupName);
+                }
+            }
+           if (CollectionUtils.isEmpty(memberList)){
+               log.warn("群成员为空：{}",groupName);
                return null;
-           }
+           }*/
+            return null;
         }
+        Contacts contacts =null;
         try {
-
-            for (Contacts contacts : memberList) {
-                if (userName.equals(contacts.getUsername())) {
-                    return contacts;
+            for (Contacts temp : memberList) {
+                if (userName.equals(temp.getUsername())) {
+                  contacts = temp;
                 }
             }
         } catch (Exception e) {
@@ -170,7 +181,26 @@ public class ContactsTools {
             log.warn(e.getMessage());
         }
 
-        return null;
+        //群成员中没有找到成员或者成员信息不完整 这里重新获取
+        if (contacts == null ||
+                StringUtils.isEmpty(contacts.getHeadimgurl())){
+          /*  synchronized (userName.intern()) {
+                if (contacts == null ||
+                        StringUtils.isEmpty(contacts.getHeadimgurl())) {
+                    //头像为空，可以理解为该群成员信息未获取到 重新获取
+                    LoginService bean = SpringContextHolder.getBean(LoginService.class);
+                    memberList = bean.WebWxBatchGetContact(groupName);
+                }
+            }
+            for (Contacts contactsT : memberList) {
+                if (userName.equals(contactsT.getUsername())) {
+                    return contactsT;
+                }
+            }*/
+            log.warn("查找群成员失败：{}({})",groupName,userName);
+        }
+
+        return contacts;
     }
 
     /**
@@ -212,7 +242,11 @@ public class ContactsTools {
         if (memberOfGroup == null || userName == null) {
             return "";
         }
-            String displayName = memberOfGroup.getDisplayname();
+            String displayName = memberOfGroup.getRemarkname();
+            if (!StringUtils.isEmpty(displayName)) {
+                return CommonTools.emojiFormatter(displayName);
+            }
+            displayName = memberOfGroup.getDisplayname();
             if (!StringUtils.isEmpty(displayName)) {
                 return CommonTools.emojiFormatter(displayName);
             }

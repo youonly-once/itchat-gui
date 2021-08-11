@@ -175,11 +175,11 @@ public class UserInfoPopup extends JPopupMenu {
     /**
      * 创建直接聊天
      *
-     * @param contacts
+     * @param userId
      */
-    private void createDirectChat(Contacts contacts) {
-        RoomsPanel.getContext().addRoom(contacts, "", 0);
-        Core.getRecentContacts().add(contacts);
+    private void createDirectChat(String userId) {
+        RoomsPanel.getContext().addRoom(userId, "", 0);
+        Core.getRecentContacts().add(userId);
         TabOperationPanel.getContext().switchToChatLabel();
     }
 

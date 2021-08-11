@@ -7,13 +7,14 @@ import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.components.Colors;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang.StringUtils;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -55,14 +56,10 @@ public class AvatarUtil {
     private static final int DEFAULT_AVATAR = 0;
     private static final int CUSTOM_AVATAR = 1;
 
-    public static Map<String, Image> getAvatarCache() {
-        return avatarCache;
-    }
-
     /**
      * 图片缓存
      */
-    private static final Map<String, Image> avatarCache = new ConcurrentHashMap<>();
+    private static final Map<String, ImageIcon> avatarCache = new ConcurrentHashMap<>();
 
     /**
      * 大头像缓存
@@ -89,148 +86,105 @@ public class AvatarUtil {
     /**
      * 创建群头像
      *
-     * @param roomId 房间id
+     * @param userName 房间id
      * @return 头像
      */
-    public static Image createOrLoadGroupAvatar(String roomId) {   //获取群成员
+    public static ImageIcon createOrLoadGroupAvatar(String userName) {   //获取群成员
 
         //获取内存中的群头像
-        Image avatar = avatarCache.get(roomId);
-
+        ImageIcon avatarIcon = avatarCache.get(userName);
+        Image avatar;
         // 如果在内存中的缓存不存在
-        if (avatar == null) {
+        if (avatarIcon == null) {
             //获取网络图片
-            Contacts contacts = Core.getMemberMap().get(roomId);
+            Contacts contacts = Core.getMemberMap().get(userName);
             avatar = DownloadTools.downloadImage(contacts.getHeadimgurl());
             if (avatar == null) {
                 //获取缓存在磁盘的头像
-                avatar = getCachedImageAvatar(roomId);
+                avatar = getCachedImageAvatar(userName);
 
                 // 硬盘中无缓存
                 if (avatar == null) {
                     // 如果尚未从服务器获取群成员，则获取默认群组头像
-                    if ( contacts.getMemberlist() == null || contacts.getMemberlist().isEmpty()) {
+                    if (contacts.getMemberlist() == null || contacts.getMemberlist().isEmpty()) {
                         //获取 ##.png头像
                         String sign = "##";
                         avatar = getCachedImageAvatar(sign);
                         // 默认群组头像不存在，则生成
                         if (avatar == null) {
-                            log.info("创建群组默认头像 : {}", roomId);
-                            avatar = createAvatar(ContactsTools.getContactDisplayNameByUserName(roomId));
+                            log.info("创建群组默认头像 : {}", userName);
+                            avatar = createAvatar(ContactsTools.getContactDisplayNameByUserName(userName));
                         }
                     } else {
                         List<Contacts> memberList = contacts.getMemberlist();
                         // 有群成员，根据群成员的头像合成群头像
-                        log.info("创建群组个性头像 : {}", roomId);
-                        avatar = createGroupAvatar(roomId, memberList);
+                        log.info("创建群组个性头像 : {}", userName);
+                        avatar = createGroupAvatar(userName, memberList);
                     }
                 }
             }
-            //本次生成的头像缓存到内存
-            if (avatar!=null){
-                try {
-                    avatar = ImageUtil.setRadius(avatar, ((BufferedImage)avatar).getWidth(), ((BufferedImage)avatar).getHeight(), 35);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                avatarCache.put(roomId, avatar);
-            }
 
+            avatarIcon = AvatarUtil.putUserAvatarCache(userName, avatar);
         }
-
-        return avatar;
+        return avatarIcon;
     }
+
 
     /**
-     * 创建或读取普通用户头像
+     * 获取用户头像
      *
-     * @param userName 用户名也是房间id
-     * @return 头像
+     * @param userName 用户名
      */
-    public static Image createOrLoadUserAvatar(String userName) {
-        if (userName == null){
-            return null;
-        }
-        String displayName = ContactsTools.getContactDisplayNameByUserName(userName);
+    private static ImageIcon getOrDownloadUserAvatar(String userName, Contacts user) {
         //获取内存中的头像
-
-        Image avatar = avatarCache.get(userName);
-        if (avatar == null) {
-            Contacts contacts = Core.getMemberMap().get(userName);
-            if (contacts!=null){
-                avatar = DownloadTools.downloadImage(contacts.getHeadimgurl());
+        ImageIcon avatarIcon = avatarCache.get(userName);
+        if (avatarIcon != null) {
+            return avatarIcon;
+        }
+        String s = userName + "_avatar";
+        synchronized (s.intern()){
+           avatarIcon = avatarCache.get(userName);
+            if (avatarIcon != null) {
+                return avatarIcon;
             }
-            if (avatar == null){
-                //缓存在磁盘中的文件
-                avatar = getCachedImageAvatar(userName);
-                if (avatar == null) {
-                    //创建文件
-                    avatar = createAvatar(displayName);
-                }
+            Image avatar = null;
+            if (user != null
+                    && StringUtils.isNotEmpty((user.getHeadimgurl()))) {
+                //下载头像
+                avatar = DownloadTools.downloadImage(user.getHeadimgurl());
             }
-            if (avatar!=null){
-                try {
-                    avatar = ImageUtil.setRadius(avatar, ((BufferedImage)avatar).getWidth(), ((BufferedImage)avatar).getHeight(), 35);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                avatarCache.put(userName, avatar);
+            if (avatar != null) {
+                avatarIcon = putUserAvatarCache(userName, avatar);
             }
-
         }
 
-        return avatar;
+        return avatarIcon;
     }
+
     /**
      * 创建或读取群成员头像
      *
      * @param userName 用户名也是房间id
      * @return 头像
      */
-    public static Image createOrLoadMemberAvatar(String groupName,String userName) {
-        Contacts member= ContactsTools.getMemberOfGroup(groupName, userName);
-        String displayName = ContactsTools.getMemberDisplayNameOfGroup(member,userName);
-        //获取内存中的头像
-        Image avatar = avatarCache.get(userName);
-        if (avatar == null) {
-            if (member != null){
-                avatar = DownloadTools.downloadImage(member.getHeadimgurl());
-            }
-            if (avatar == null){
-                //缓存在磁盘中的文件
-                avatar = getCachedImageAvatar(userName);
-                if (avatar == null) {
-                    //创建文件
-                    avatar = createAvatar(displayName);
-                }
-            }
-            if (avatar!=null){
-                try {
-                    avatar = ImageUtil.setRadius(avatar, ((BufferedImage)avatar).getWidth(), ((BufferedImage)avatar).getHeight(), 35);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                avatarCache.put(userName, avatar);
-            }
-
-
-        }
-
-        return avatar;
+    public static ImageIcon createOrLoadMemberAvatar(String groupName, String userName) {
+        Contacts member = ContactsTools.getMemberOfGroup(groupName, userName);
+        return getOrDownloadUserAvatar(userName, member);
     }
+
     /**
      * 创建或读取群成员头像
      *
      * @param userName 用户名也是房间id
      * @return 头像
      */
-    public static Image createOrLoadBigAvatar(String userName,String url) {
+    public static BufferedImage createOrLoadBigAvatar(String userName, String url) {
         String filePath = Core.getContactHeadImgPath().get(userName);
-        if (filePath == null){
-           filePath = DownloadTools.downloadHeadImgBig(url, userName);
+        if (filePath == null) {
+            filePath = DownloadTools.downloadHeadImgBig(url, userName);
         }
-        if (filePath!=null){
-            Core.getContactHeadImgPath().put(userName,filePath);
+        if (filePath != null) {
+            Core.getContactHeadImgPath().put(userName, filePath);
             try {
                 BufferedImage read = ImageIO.read(new File(filePath));
                 return read;
@@ -240,23 +194,17 @@ public class AvatarUtil {
         }
         return null;
     }
+
     /**
      * 获取用户头像
+     *
      * @param userName 用户名
      * @return 头像
      */
-    public static Image createOrLoadAvatar(String userName) {
-        //获取内存中的群头像
-        Image avatar ;
-        if (userName.startsWith("@@")) {
-            // 群组头像
-            avatar =  AvatarUtil.createOrLoadGroupAvatar(userName).getScaledInstance(40, 40, Image.SCALE_SMOOTH);
-        } else {
-            // 私聊头像
-            avatar =  AvatarUtil.createOrLoadUserAvatar(userName).getScaledInstance(40, 40, Image.SCALE_SMOOTH);
-        }
+    public static ImageIcon createOrLoadUserAvatar(String userName) {
 
-        return avatar;
+        Contacts contacts = Core.getMemberMap().get(userName);
+        return getOrDownloadUserAvatar(userName, contacts);
     }
     /**
      * 刷新用户头像缓存
@@ -266,20 +214,63 @@ public class AvatarUtil {
     public static void refreshUserAvatarCache(String username) {
         avatarCache.put(username, null);
     }
+
+    /**
+     * 判断头像是否加载
+     * @param userName
+     * @return
+     */
+    public static boolean avatarExists(String userName){
+        if (!avatarCache.containsKey(userName)){
+            return false;
+        }
+        return avatarCache.get(userName) != null;
+    }
     /**
      * 添加用户头像
      *
-     * @param username
+     * @param username 用户名
+     * @param image    头像
      */
-    public static void putUserAvatarCache(String username,Image image) {
-        if (image!=null){
+    public static ImageIcon putUserAvatarCache(String username, Image image) {
+        ImageIcon imageIcon = null;
+        if (image != null) {
             try {
-                image = ImageUtil.setRadius(image, ((BufferedImage)image).getWidth(), ((BufferedImage)image).getHeight(), 35);
+                image = ImageUtil.setRadius(image, ((BufferedImage) image).getWidth(), ((BufferedImage) image).getHeight(), 35)
+                        .getScaledInstance(40, 40, Image.SCALE_SMOOTH);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            avatarCache.put(username, image);
+            if (avatarCache.containsKey(username)) {
+                imageIcon = avatarCache.get(username);
+                if (imageIcon != null) {
+                    imageIcon.setImage(image);
+                    return imageIcon;
+                }
+            }
+            imageIcon = new ImageIcon();
+            imageIcon.setImage(image);
+            avatarCache.put(username, imageIcon);
         }
+        return imageIcon;
+    }
+
+    /**
+     * 更新头像
+     *
+     * @param username  用户名
+     * @param imagePath 头像路径
+     */
+    public static void putUserAvatarCache(String username, String imagePath) {
+        if (StringUtils.isNotEmpty(imagePath)) {
+            try {
+                BufferedImage read = ImageIO.read(new File(imagePath));
+                putUserAvatarCache(username, read);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     /**
@@ -343,11 +334,11 @@ public class AvatarUtil {
         return colorArr[position];
     }
 
-    public static void saveAvatar(BufferedImage image, String username) {
+    public static void saveAvatar(ImageIcon image, String username) {
         saveAvatar(image, username, CUSTOM_AVATAR);
     }
 
-    private static void saveAvatar(BufferedImage image, String username, int type) {
+    private static void saveAvatar(ImageIcon image, String username, int type) {
         String path = "";
         if (type == DEFAULT_AVATAR) {
             path = AVATAR_CACHE_ROOT + "/" + username + ".png";
@@ -361,14 +352,12 @@ public class AvatarUtil {
 
         try {
             if (image != null) {
-                BufferedImage bufferedImage = ImageUtil.setRadius(image, image.getWidth(), image.getHeight(), 35);
+                BufferedImage bufferedImage = ImageUtil.setRadius(image.getImage(), image.getIconWidth(), image.getIconHeight(), 35);
                 ImageIO.write(bufferedImage, "png", avatarPath);
             } else {
                 throw new RuntimeException("头像保存失败，数据为空");
             }
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -471,8 +460,8 @@ public class AvatarUtil {
             for (int i = 0; i < max; i++) {
                 Contacts member = memberList.get(i);
                 String memUserName = member.getUsername();
-                Image avatar = AvatarUtil.createOrLoadUserAvatar(memUserName);
-                g2d.drawImage(avatar, rectangles[i].x, rectangles[i].y, rectangles[i].width, rectangles[i].height, null);
+                ImageIcon orLoadUserAvatar = AvatarUtil.createOrLoadUserAvatar(memUserName);
+                g2d.drawImage(orLoadUserAvatar.getImage(), rectangles[i].x, rectangles[i].y, rectangles[i].width, rectangles[i].height, null);
             }
 
             g2d.dispose();

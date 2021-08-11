@@ -99,15 +99,10 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
                 }
             });
         } else {
-            //ImageIcon imageIcon = new ImageIcon();
-            //imageIcon.setImage(AvatarUtil.createOrLoadMemberAvatar(RoomMembersPanel.getContext().getRoomId(),userName).getScaledInstance(30, 30, Image.SCALE_SMOOTH));
-            //viewHolder.avatar.setIcon(imageIcon);
             String userName = contacts.getUsername();
             String name = ContactsTools.getMemberDisplayNameOfGroup(contacts,userName);
-            if (contacts.getAvatar() != null){
-                ImageIcon icon = new ImageIcon();
-                icon.setImage(contacts.getAvatar());
-                viewHolder.avatar.setIcon(icon);
+            if (contacts.getAvatarIcon() != null){
+                viewHolder.avatar.setIcon(contacts.getAvatarIcon());
             }
             viewHolder.roomName.setText(name);
             UserInfoPopup userInfoPopup = new UserInfoPopup(contacts);

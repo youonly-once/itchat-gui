@@ -5,6 +5,7 @@ import cn.shu.wechat.swing.utils.EmojiUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.OSUtil;
 import com.vdurmont.emoji.EmojiParser;
+import org.springframework.util.StringUtils;
 
 import javax.swing.*;
 import javax.swing.text.*;
@@ -64,7 +65,12 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
     @Override
     public void setText(String t) {
         // 对emoji的Unicode编码转别名
-        t = EmojiParser.parseToAliases(t);
+
+        try{
+            t = EmojiParser.parseToAliases(t);
+        }catch (Exception e){
+
+        }
 
         if (t == null) {
             return;
@@ -377,6 +383,9 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
+                    if (StringUtils.isEmpty(urlRange)){
+                        return;
+                    }
                     int position = getCaretPosition();
                     int urlIndex = 0;
                     for (int[] range : urlRange) {
@@ -408,15 +417,6 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
         } catch (Exception e) {
             System.out.println("URL打开失败");
         }
-    }
-
-
-    public Object getTag() {
-        return tag;
-    }
-
-    public void setTag(Object tag) {
-        this.tag = tag;
     }
 
     public boolean isParseUrl() {

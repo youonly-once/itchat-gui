@@ -2,12 +2,15 @@ package cn.shu.wechat.swing.adapter.message;
 
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
+import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
 import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.components.message.*;
+import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.FontUtil;
 import lombok.Getter;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
@@ -17,7 +20,7 @@ import java.awt.*;
  */
 @Getter
 public class MessageLeftLinkViewHolder extends MessageLinkViewHolder {
-    private JLabel sender ;
+    private final SizeAutoAdjustTextArea sender = new SizeAutoAdjustTextArea((int)(MainFrame.getContext().currentWindowWidth * 0.5));
     private final boolean isGroup ;
     public MessageLeftLinkViewHolder(boolean isGroup) {
         super(new RCLeftLinkMessageBubble());
@@ -28,9 +31,9 @@ public class MessageLeftLinkViewHolder extends MessageLinkViewHolder {
     private void initView() {
         //群消息显示发送者名称
         if (isGroup) {
-            sender = new JLabel();
             sender.setFont(FontUtil.getDefaultFont(12));
             sender.setForeground(Colors.FONT_GRAY);
+            sender.setBorder(new EmptyBorder(0,messageBubble.getSalientPointPixel(),100,0));
             senderMessagePanel.add(sender,0);
         }
         senderMessagePanel.add(messageBubble,-1);

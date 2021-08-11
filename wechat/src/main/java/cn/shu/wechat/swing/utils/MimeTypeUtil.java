@@ -89,4 +89,8 @@ public class MimeTypeUtil {
         return MimeMap.get(suffix.toLowerCase());
     }
 
+    public static String getMimeByPath(String filename) {
+       return getMime(filename.substring(filename.lastIndexOf(".") + 1));
+    }
+
 }

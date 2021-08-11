@@ -53,9 +53,10 @@ public class RemindUserPopup extends JPopupMenu {
             for (String user : users) {
                 item = new JMenuItem(user);
                 item.setUI(new RCRemindUserMenuItemUI(120, 25));
-                //Image avatar = AvatarUtil.createOrLoadUserAvatar(user).getScaledInstance(15, 15, Image.SCALE_SMOOTH);
+                //Image avatar = AvatarUtil.createOrLoadAvatar(user).getScaledInstance(15, 15, Image.SCALE_SMOOTH);
                 //item.setUI(new RCRemindUserMenuItemUI(80, 25, avatar));
-                item.setIcon(new ImageIcon(AvatarUtil.createOrLoadUserAvatar(user).getScaledInstance(18, 18, Image.SCALE_SMOOTH)));
+                //TODO 小头像 18 18
+                item.setIcon(AvatarUtil.createOrLoadUserAvatar(user));
                 item.setIconTextGap(-2);
 
                 item.addActionListener(new ActionListener() {

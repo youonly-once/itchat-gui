@@ -10,6 +10,7 @@ import lombok.Getter;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -35,16 +36,20 @@ public class MessageRightVoiceViewHolder extends MessageVoiceViewHolder {
         setLayout(new BorderLayout());
         timePanel.add(time);
         messageBubble.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        messageBubble.add(gapText);
         messageBubble.add(durationText);
+        messageBubble.add(unitLabel);
         messageBubble.add(voiceImgLabel);
 
         contentTagPanel.setBackground(Colors.WINDOW_BACKGROUND);
         contentTagPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
-
-        JPanel voicePanel = new JPanel();
+        JPanel processBarPanel = new JPanel(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, true));
+        processBarPanel.setOpaque(false);
+        processBarPanel.add(progressBar);
+        processBarPanel.setBorder(new EmptyBorder(0,0,0,messageBubble.getSalientPointPixel()));
         voicePanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
         voicePanel.add(messageBubble);
-        voicePanel.add(progressBar);
+        voicePanel.add(processBarPanel);
         try {
             voiceImgLabel.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("/image/right_voice.png"))));
         } catch (IOException e) {
@@ -57,7 +62,7 @@ public class MessageRightVoiceViewHolder extends MessageVoiceViewHolder {
         messageAvatarPanel.add(avatar, new GBC(2, 0)
                 .setWeight(1, 1)
                 .setAnchor(GBC.NORTH)
-                .setInsets(0, 5, 0, 0));
+                .setInsets(0, 5, 0, 5));
 
         add(timePanel, BorderLayout.NORTH);
         add(messageAvatarPanel, BorderLayout.CENTER);

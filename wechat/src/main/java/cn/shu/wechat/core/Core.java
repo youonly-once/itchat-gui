@@ -121,13 +121,13 @@ public class Core {
      * 所有好友最新头像路径
      * 多线程下载 用安全ConcurrentHashMap
      */
-    static private Set<Contacts> recentContacts = new HashSet<>();
+    static private Set<String> recentContacts = new CopyOnWriteArraySet<>();
 
-    public static Set<Contacts> getRecentContacts() {
+    public static Set<String> getRecentContacts() {
         return recentContacts;
     }
 
-    public static void setRecentContacts(Set<Contacts> recentContacts) {
+    public static void setRecentContacts(Set<String> recentContacts) {
         Core.recentContacts = recentContacts;
     }
 

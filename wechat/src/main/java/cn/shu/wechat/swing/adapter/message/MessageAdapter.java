@@ -12,10 +12,8 @@ import cn.shu.wechat.swing.components.RCProgressBar;
 import cn.shu.wechat.swing.components.UserInfoPopup;
 import cn.shu.wechat.swing.components.message.*;
 import cn.shu.wechat.swing.db.model.Message;
-import cn.shu.wechat.swing.entity.FileAttachmentItem;
-import cn.shu.wechat.swing.entity.LinkAttachmentItem;
-import cn.shu.wechat.swing.entity.MessageItem;
-import cn.shu.wechat.swing.entity.VideoAttachmentItem;
+import cn.shu.wechat.swing.entity.*;
+import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.helper.AttachmentIconHelper;
 import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
 import cn.shu.wechat.swing.panels.ChatPanel;
@@ -23,25 +21,18 @@ import cn.shu.wechat.swing.panels.RoomChatPanel;
 import cn.shu.wechat.swing.utils.*;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.SleepUtils;
-import com.sun.media.jfxmedia.MediaPlayer;
-import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.Player;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.client.utils.DateUtils;
-import sun.audio.AudioPlayer;
-import sun.audio.AudioStream;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,13 +41,13 @@ import java.util.Map;
  * Created by 舒新胜 on 17-6-2.
  */
 public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
-    private List<MessageItem> messageItems;
-    private RCListView listView;
-    private AttachmentIconHelper attachmentIconHelper = new AttachmentIconHelper();
-    private ImageCache imageCache;
+    private final List<MessageItem> messageItems;
+    private final RCListView listView;
+    private final AttachmentIconHelper attachmentIconHelper = new AttachmentIconHelper();
+    private final ImageCache imageCache;
 
-    private FileCache fileCache;
-    private MessagePopupMenu popupMenu = new MessagePopupMenu();
+    private final FileCache fileCache;
+    private final MessagePopupMenu popupMenu = new MessagePopupMenu();
 
 
     MessageViewHolderCacheHelper messageViewHolderCacheHelper;
@@ -214,7 +205,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             processRightVideoMessage(viewHolder, item);
         } else if (viewHolder instanceof MessageLeftVoiceViewHolder) {
             processLeftVoiceMessage(viewHolder, item);
-        }  else if (viewHolder instanceof MessageRightVoiceViewHolder) {
+        } else if (viewHolder instanceof MessageRightVoiceViewHolder) {
             processRightVoiceMessage(viewHolder, item);
         } else if (viewHolder instanceof MessageLeftImageViewHolder) {
             processLeftImageMessage(viewHolder, item);
@@ -222,7 +213,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             processRightAttachmentMessage(viewHolder, item);
         } else if (viewHolder instanceof MessageLeftAttachmentViewHolder) {
             processLeftAttachmentMessage(viewHolder, item);
-        }else if (viewHolder instanceof MessageRightLinkViewHolder) {
+        } else if (viewHolder instanceof MessageRightLinkViewHolder) {
             processRightLinkMessage(viewHolder, item);
         } else if (viewHolder instanceof MessageLeftLinkViewHolder) {
             processLeftLinkMessage(viewHolder, item);
@@ -231,6 +222,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
     /**
      * 处理系统消息
+     *
      * @param viewHolder
      * @param item
      */
@@ -241,45 +233,30 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
     /**
      * 其它用户的附件消息
+     *
      * @param viewHolder
      * @param item
      */
     private void processLeftAttachmentMessage(ViewHolder viewHolder, MessageItem item) {
         MessageLeftAttachmentViewHolder holder = (MessageLeftAttachmentViewHolder) viewHolder;
-        holder.attachmentTitle.setText(item.getMessageContent());
-        String filename = item.getFileAttachment().getTitle();
-        Map map = new HashMap();
-        map.put("attachmentId", item.getFileAttachment().getId());
-        map.put("name", filename);
+        FileAttachmentItem fileAttachment = item.getFileAttachment();
+
+        String filePath = fileAttachment.getFilePath();
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("attachmentId", fileAttachment.getId());
+        map.put("name", filePath);
         map.put("messageId", item.getId());
-        map.put("filepath", item.getFileAttachment().getLink());
+        map.put("filepath", fileAttachment.getFilePath());
         holder.attachmentPanel.setTag(map);
-        //如果为视频，则显示视频缩略图
-        String mime = MimeTypeUtil.getMime(filename.substring(filename.lastIndexOf(".") + 1));
-        mime = attachmentIconHelper.parseMimeType(mime);
-        if ("video".equals(mime) && StringUtils.isNotEmpty(item.getFileAttachment().getSlavePath())) {
-            ImageIcon attachmentTypeIcon = null;
-            String path = item.getFileAttachment().getSlavePath();
-            try {
-                BufferedImage read = ImageIO.read(new File(path == null ? item.getFileAttachment().getLink() : path));
-                attachmentTypeIcon = new ImageIcon(read);
-                attachmentTypeIcon = ImageUtil.preferredImageSize(attachmentTypeIcon);
-                holder.attachmentIcon.setIcon(attachmentTypeIcon);
-            } catch (IOException e) {
-                attachmentTypeIcon = attachmentIconHelper.getImageIcon(filename);
-                holder.attachmentIcon.setIcon(attachmentTypeIcon);
-                e.printStackTrace();
-            }
 
-        } else {
-            ImageIcon attachmentTypeIcon = attachmentIconHelper.getImageIcon(filename);
-            holder.attachmentIcon.setIcon(attachmentTypeIcon);
-        }
-
+        ImageIcon attachmentTypeIcon = attachmentIconHelper.getImageIcon(filePath);
+        holder.attachmentIcon.setIcon(attachmentTypeIcon);
+        holder.attachmentTitle.setText(fileAttachment.getFileName());
         holder.sender.setText(item.getSenderUsername());
+        holder.sizeLabel.setText(fileCache.fileSizeString(fileAttachment.getFileSize()));
 
         setAttachmentClickListener(holder, item);
-        processAttachmentSize(holder, item);
 
         listView.setScrollHiddenOnMouseLeave(holder.attachmentPanel);
         listView.setScrollHiddenOnMouseLeave(holder.messageBubble);
@@ -291,42 +268,24 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
     /**
      * 自己发送的附件消息
+     *
      * @param viewHolder
      * @param item
      */
     private void processRightAttachmentMessage(ViewHolder viewHolder, MessageItem item) {
         MessageRightAttachmentViewHolder holder = (MessageRightAttachmentViewHolder) viewHolder;
-        holder.attachmentTitle.setText(item.getMessageContent());
+        FileAttachmentItem fileAttachment = item.getFileAttachment();
 
-        Map map = new HashMap();
-        map.put("attachmentId", item.getFileAttachment().getId());
-        String filename = item.getFileAttachment().getTitle();
+        Map<String, Object> map = new HashMap<>();
+        map.put("attachmentId", fileAttachment.getId());
+        String filename = fileAttachment.getFileName();
         map.put("name", filename);
         map.put("messageId", item.getId());
-        map.put("filepath", item.getFileAttachment().getLink());
+        map.put("filepath", fileAttachment.getFilePath());
         holder.attachmentPanel.setTag(map);
-        //如果为视频，则显示视频缩略图
-        String mime = MimeTypeUtil.getMime(filename.substring(filename.lastIndexOf(".") + 1));
-        mime = attachmentIconHelper.parseMimeType(mime);
-        if ("video".equals(mime) && StringUtils.isNotEmpty(item.getFileAttachment().getSlavePath())) {
-            ImageIcon attachmentTypeIcon = null;
-            String path = item.getFileAttachment().getSlavePath();
-            try {
-                BufferedImage read = ImageIO.read(new File(path == null ? item.getFileAttachment().getLink() : path));
-                attachmentTypeIcon = new ImageIcon(read);
-                attachmentTypeIcon = ImageUtil.preferredImageSize(attachmentTypeIcon);
-                holder.attachmentIcon.setIcon(attachmentTypeIcon);
-            } catch (IOException e) {
-                attachmentTypeIcon = attachmentIconHelper.getImageIcon(filename);
-                holder.attachmentIcon.setIcon(attachmentTypeIcon);
-                e.printStackTrace();
-            }
-
-        } else {
-            ImageIcon attachmentTypeIcon = attachmentIconHelper.getImageIcon(filename);
-            holder.attachmentIcon.setIcon(attachmentTypeIcon);
-        }
-
+        ImageIcon attachmentTypeIcon = attachmentIconHelper.getImageIcon(filename);
+        holder.attachmentIcon.setIcon(attachmentTypeIcon);
+        holder.attachmentTitle.setText(fileAttachment.getFileName());
 
         if (item.getProgress() != 0 && item.getProgress() != 100) {
             Message msg = null;//= messageService.findById(item.getId());
@@ -376,7 +335,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         setAttachmentClickListener(holder, item);
 
         if (item.getProgress() > 0) {
-            processAttachmentSize(holder, item);
+            holder.sizeLabel.setText(fileCache.fileSizeString(fileAttachment.getFileSize()));
         } else {
             holder.sizeLabel.setText("等待上传...");
         }
@@ -412,6 +371,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
     /**
      * 附件大小
+     *
      * @param viewHolder
      * @param item
      */
@@ -419,12 +379,12 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         FileAttachmentItem attachment = item.getFileAttachment();
         String path;
         // 远程服务器文件
-        if (attachment.getLink().startsWith("/file-upload")) {
-            path = fileCache.tryGetFileCache(item.getFileAttachment().getId(), item.getFileAttachment().getTitle());
+        if (attachment.getFilePath().startsWith("/file-upload")) {
+            path = fileCache.tryGetFileCache(item.getFileAttachment().getId(), item.getFileAttachment().getFileName());
         }
         // 我自己上传的文件
         else {
-            path = attachment.getLink();
+            path = attachment.getFilePath();
         }
 
         if (path != null) {
@@ -443,7 +403,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         MessageLeftImageViewHolder holder = (MessageLeftImageViewHolder) viewHolder;
         holder.sender.setText(item.getSenderUsername());
 
-        processImage(item, holder.image, holder);
+        processImage(item, holder.image);
 
         listView.setScrollHiddenOnMouseLeave(holder.image);
         listView.setScrollHiddenOnMouseLeave(holder.imageBubble);
@@ -460,48 +420,44 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      */
     private void processLeftVoiceMessage(ViewHolder viewHolder, MessageItem item) {
         MessageLeftVoiceViewHolder holder = (MessageLeftVoiceViewHolder) viewHolder;
-        processVoice(item,holder);
+        processVoice(item, holder);
         holder.getSender().setText(item.getSenderUsername());
-        listView.setScrollHiddenOnMouseLeave(holder.getUnreadPoint());
         attachPopupMenu(viewHolder, MessageItem.LEFT_VOICE);
 
     }
 
     /**
      * 自己发送的语音消息
+     *
      * @param viewHolder
      * @param item
      */
     private void processRightVoiceMessage(ViewHolder viewHolder, MessageItem item) {
         MessageRightVoiceViewHolder holder = (MessageRightVoiceViewHolder) viewHolder;
-        processVoice(item,holder);
+        processVoice(item, holder);
         attachPopupMenu(viewHolder, MessageItem.RIGHT_VOICE);
 
     }
 
     /**
      * 处理语音消息
+     *
      * @param item
      * @param holder
      */
-    private void processVoice(MessageItem item, MessageVoiceViewHolder holder){
-        listView.setScrollHiddenOnMouseLeave(holder.getMessageBubble());
-        listView.setScrollHiddenOnMouseLeave(holder.getDurationText());
-        listView.setScrollHiddenOnMouseLeave(holder.getVoiceImgLabel());
-        listView.setScrollHiddenOnMouseLeave(holder.getContentTagPanel());
+    private void processVoice(MessageItem item, MessageVoiceViewHolder holder) {
+
         holder.getContentTagPanel().setTag(item.getVoiceAttachmentItem());
         double len = item.getVoiceAttachmentItem().getVoiceLength() * 1.0;
+
         len = len / 1000;
         long round = Math.round(len);
+        holder.getDurationText().setText(String.valueOf(round));
         StringBuilder t = new StringBuilder();
         for (long i = 0; i < round / 2; i++) {
             t.append(" ");
         }
-        if (holder instanceof MessageLeftVoiceViewHolder){
-            holder.getDurationText().setText(round +"''"+t.toString());
-        }else{
-            holder.getDurationText().setText( t.toString()+round +"''");
-        }
+        holder.getGapText().setText(t.toString());
 
         //holder.getDurationText().setTag(item.getId());
 
@@ -512,9 +468,12 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 if (player != null) {
                     player.close();
                     player = null;
+                    holder.durationText.stop();
                 }
             }
+
             private Player player = null;
+
             @Override
             public void mouseReleased(MouseEvent e) {
 
@@ -534,6 +493,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                         RCProgressBar progressBar = holder.getProgressBar();
                         progressBar.setVisible(true);
                         progressBar.setMaximum((int) item.getVoiceAttachmentItem().getVoiceLength());
+                        //刷新进度条
                         new SwingWorker<Object, Integer>() {
                             @Override
                             protected Object doInBackground() throws Exception {
@@ -570,7 +530,8 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                                 progressBar.setVisible(false);
                             }
                         }.execute();
-
+                        //倒计时
+                        holder.durationText.start();
 
                     }
 
@@ -579,6 +540,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             }
         });
     }
+
     /**
      * 对方发送的图片
      *
@@ -592,9 +554,9 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         try {
             processVideo(item
                     , holder.getTimeLabel()
-                    ,holder.getPlayImgLabel()
-                    ,holder.getSlaveImgLabel()
-                    ,holder.getVideoComponent());
+                    , holder.getPlayImgLabel()
+                    , holder.getSlaveImgLabel()
+                    , holder.getVideoComponent());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -617,9 +579,9 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         try {
             processVideo(item
                     , holder.getTimeLabel()
-                    ,holder.getPlayImgLabel()
-                    ,holder.getSlaveImgLabel()
-                    ,holder.getVideoComponent());
+                    , holder.getPlayImgLabel()
+                    , holder.getSlaveImgLabel()
+                    , holder.getVideoComponent());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -640,29 +602,14 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     private void processRightImageMessage(ViewHolder viewHolder, MessageItem item) {
         MessageRightImageViewHolder holder = (MessageRightImageViewHolder) viewHolder;
 
-        processImage(item, holder.image, holder);
-        if (item.getProgress() != 100) {
-            // Message msg = messageService.findById(item.getId());
-            //if (msg != null) {
-            // item.setProgress(msg.getProgress());
-
-            /*        if (!ChatPanel.uploadingOrDownloadingFiles.contains(item.getImageAttachment().getId())) {
-                        item.setNeedToResend(true);
-                    }*/
-            //}
-            holder.sendingProgress.setVisible(true);
-        } else {
-            holder.sendingProgress.setVisible(false);
-        }
+        processImage(item, holder.image);
+        holder.sendingProgress.setVisible(item.getProgress() != 100);
 
 
         // 判断是否显示重发按钮
-        if (item.isNeedToResend()) {
-            holder.resend.setVisible(true);
-        } else {
-            holder.resend.setVisible(false);
-        }
+        holder.resend.setVisible(item.isNeedToResend());
 
+        //TODO 重发消息
         holder.resend.addMouseListener(new MessageMouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -704,10 +651,10 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     /**
      * 处理视频
      *
-     * @param item   消息项
+     * @param item 消息项
      * @throws IOException 视频缩略图读取异常
      */
-    private void processVideo(MessageItem item, JLabel timeLabel,JLabel playImgLabel,JLabel slaveImgLabel,JComponent videoComponent) throws IOException {
+    private void processVideo(MessageItem item, JLabel timeLabel, JLabel playImgLabel, JLabel slaveImgLabel, JComponent videoComponent) throws IOException {
         VideoAttachmentItem videoItem = item.getVideoAttachmentItem();
         //#############判断缩略图是否下载完成#########################
         String slaveImgPath = videoItem.getSlaveImgPath();
@@ -728,6 +675,8 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             new SwingWorker<Object, Object>() {
                 private final long startTime = System.currentTimeMillis();
                 private boolean status = false;
+                private ImageIcon imageIcon = null;
+                private ImageIcon playImg = null;
 
                 @Override
                 protected Object doInBackground() throws Exception {
@@ -741,23 +690,19 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                             break;
                         }
                     }
+                    File file = new File(slaveImgPath);
+                    imageIcon = new ImageIcon(ImageIO.read(file));
+                    ImageUtil.preferredImageSize(imageIcon);
+                    playImg = new ImageIcon(ImageIO.read(getClass().getResource("/image/play48.png")));
                     return null;
                 }
 
                 @Override
                 protected void done() {
-                    try {
-                        if (status) {
-                            File file = new File(slaveImgPath);
-                            slaveImgLabel.setIcon(ImageUtil.preferredImageSize(new ImageIcon(ImageIO.read(file))));
-                        } else {
-                            //缩略图下载失败
-                            // holder.getSlaveImgLabel().setIcon(new ImageIcon(ImageIO.read(getClass().getResource("/image/image_error.png"))));
-                        }
-                        playImgLabel.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("/image/play48.png"))));
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    if (status) {
+                        slaveImgLabel.setIcon(imageIcon);
                     }
+                    playImgLabel.setIcon(playImg);
                 }
             }.execute();
         }
@@ -774,170 +719,107 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         });
     }
 
-    private void processImage(MessageItem item, MessageImageLabel imageLabel, ViewHolder holder) {
-       /* String url;
-        if (imageUrl.startsWith("/file-upload"))
-        {
-            //url = Launcher.HOSTNAME + imageUrl + ".jpg?rc_uid=" + currentUser.getUserId() + "&rc_token=" + currentUser.getAuthToken();
-            url = Launcher.HOSTNAME + imageUrl + "?rc_uid=" + currentUser.getUserId() + "&rc_token=" + currentUser.getAuthToken();
-        }
-        else
-        {
-            url = "file://" + imageUrl;
-        }*/
-
-        loadImageThumb(holder, item, imageLabel);
-
-        // 当点击图片时，使用默认程序打开图片
-        imageLabel.addMouseListener(new MessageMouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON1) {
-                    if (item.getImageAttachment().isVideo()) {
-                        ChatPanel.openFile(item.getImageAttachment().getImagePath());
-                        return;
-                    }
-
-                    //Desktop.getDesktop().open(new File(path));
-                    // final ImageViewerFrame frame = new ImageViewerFrame(this.getClass().getClassLoader().getResource("/image/image_loading.png").getPath());
-                    // frame.setVisible(true);
-       /*             new SwingWorker<Object,Object>(){
-
-                        @Override
-                        protected Object doInBackground() throws Exception {
-                            //循环等待下载完成
-                            Boolean aBoolean = DownloadTools.FILE_DOWNLOAD_STATUS.get( item.getImageAttachment().getImagePath());
-                            while(aBoolean!=null &&  !aBoolean){
-                                aBoolean = DownloadTools.FILE_DOWNLOAD_STATUS.get( item.getImageAttachment().getImagePath());
-                            }
-                            if ( DownloadTools.FILE_DOWNLOAD_STATUS.contains( item.getImageAttachment().getImagePath())){
-                                DownloadTools.FILE_DOWNLOAD_STATUS.remove( item.getImageAttachment().getImagePath());
-                            }
-                            return null;
-                        }
-
-                        @Override
-                        protected void done() {
-                            //frame.dispose();
-                            ImageViewerFrame frame = new ImageViewerFrame(item.getImageAttachment().getImagePath());
-                            frame.setVisible(true);
-                        }
-                    }.execute();*/
-                    imageCache.requestOriginalAsynchronously(item.getImageAttachment().getId(), item.getImageAttachment().getImagePath(), new ImageCache.ImageCacheRequestListener() {
-                        @Override
-                        public void onSuccess(ImageIcon icon, String path) {
-                            try {
-                                //Desktop.getDesktop().open(new File(path));
-                                File file = new File(path);
-                                if (file.length() > 1024 * 1024) {
-                                    ChatPanel.openFile(path);
-                                    //Desktop.getDesktop().open(new File(path));
-                                    return;
-                                }
-                                ImageViewerFrame frame = new ImageViewerFrame(path);
-                                frame.setVisible(true);
-
-                                // 如果图片获取成功，则重新加载缩略图
-                                ImageIcon thumbIcon = (ImageIcon) imageLabel.getIcon();
-                                if (thumbIcon.getDescription().endsWith("image_error.png")) {
-                                    loadImageThumb(holder, item, imageLabel);
-                                }
-                            } catch (NullPointerException e1) {
-                                // JOptionPane.showMessageDialog(null, "图像不存在", "图像不存在", JOptionPane.ERROR_MESSAGE);
-                                e1.printStackTrace();
-                            } catch (Exception e1) {
-                                JOptionPane.showMessageDialog(null, "图像不存在", "图像不存在", JOptionPane.ERROR_MESSAGE);
-                                e1.printStackTrace();
-                            }
-                        }
-
-                        @Override
-                        public void onFailed(String why) {
-                            // 图片不存在，显示错误图片
-                            //ImageViewerFrame frame = new ImageViewerFrame(getClass().getResource("/image/image_error.png").getPath());
-                            // frame.setVisible(true);
-                        }
-                    });
-
-                }
-                super.mouseClicked(e);
-            }
-        });
-    }
-
-    private void loadImageThumb(ViewHolder holder, MessageItem item, MessageImageLabel imageLabel) {
-        //可能文件还没下载完成
-
+    /**
+     * 处理图片消息
+     *
+     * @param item
+     * @param imageLabel
+     */
+    private void processImage(MessageItem item, MessageImageLabel imageLabel) {
+        final ImageAttachmentItem imageAttachment = item.getImageAttachment();
         //显示加载中
         ImageIcon imageIcon = new ImageIcon(getClass().getResource("/image/image_loading.gif"));
-        // preferredImageSize(imageIcon);
         imageLabel.setIcon(imageIcon);
-        System.out.println("item.getId() = " + item.getId());
-        if (item.getImageAttachment() == null){
-            System.out.println(item);
-        }
-        String slavePath = item.getImageAttachment().getSlavePath();
+        String slavePath = imageAttachment.getSlavePath();
+
         if (StringUtils.isEmpty(slavePath)) {
-            slavePath = item.getImageAttachment().getImagePath();
+            slavePath = imageAttachment.getImagePath();
         }
         final String finalPath = slavePath;
         //标志
         Map<String, Object> map = new HashMap<>();
-        map.put("attachmentId", item.getImageAttachment().getId());
+        map.put("attachmentId", imageAttachment.getId());
         map.put("url", finalPath);
         map.put("messageId", item.getId());
         imageLabel.setTag(map);
 
-        // ImageIcon imageIcon = imageCache.tryGetThumbCache(item.getImageAttachment().getId());
         new SwingWorker<Object, Object>() {
+            private ImageIcon imageIcon;
 
             @Override
             protected Object doInBackground() throws Exception {
                 //循环等待下载完成
-                Boolean aBoolean = DownloadTools.FILE_DOWNLOAD_STATUS.get(finalPath);
-                while (aBoolean != null && !aBoolean) {
-                    Thread.sleep(100);
-                    aBoolean = DownloadTools.FILE_DOWNLOAD_STATUS.get(finalPath);
+                if (finalPath == null) {
+                    return null;
                 }
-                if (DownloadTools.FILE_DOWNLOAD_STATUS.contains(finalPath)) {
-                    DownloadTools.FILE_DOWNLOAD_STATUS.remove(finalPath);
+                //阻塞
+                DownloadTools.awaitDownload(finalPath);
+
+                File file = new File(finalPath);
+                if (file.length()>0){
+                    if (finalPath.endsWith(".gif")){
+                        imageIcon = ImageUtil.preferredImageSize(finalPath, imageAttachment.getWidth(), imageAttachment.getHeight());
+                    }else{
+                        imageIcon = imageCache.tryGetThumbCache(file);
+                        ImageUtil.preferredImageSize(imageIcon);
+                    }
+
+
                 }
+
                 return null;
             }
 
             @Override
             protected void done() {
-                if (finalPath == null) {
-                    return;
-                }
-                ImageIcon imageIcon = imageCache.tryGetThumbCache(new File(finalPath));
-                if (imageIcon == null) {
-                     /*   imageLabel.setIcon(IconUtil.getIcon(this, "/image/image_loading.gif"));
-
-                        imageCache.requestThumbAsynchronously(item.getImageAttachment().getId(), finalPath, new ImageCache.ImageCacheRequestListener() {
-                            @Override
-                            public void onSuccess(ImageIcon icon, String path) {
-                                preferredImageSize(icon);
-                                imageLabel.setIcon(icon);
-                                holder.revalidate();
-                                holder.repaint();
-                            }
-
-                            @Override
-                            public void onFailed(String why) {
-                                imageLabel.setIcon(IconUtil.getIcon(this, "/image/image_error.png", 64, 64));
-                                holder.revalidate();
-                                holder.repaint();
-                            }
-                        });*/
-                } else {
-                    // item.getMessageType()
-                    ImageUtil.preferredImageSize(imageIcon);
+                if (imageIcon != null) {
                     imageLabel.setIcon(imageIcon);
+                    // 当点击图片时，使用默认程序打开图片
+                    imageLabel.addMouseListener(new MessageMouseListener() {
+                        @Override
+                        public void mouseClicked(MouseEvent e) {
+                            if (finalPath == null) {
+                                super.mouseClicked(e);
+                                return;
+                            }
+                            ImageViewerFrame frame = new ImageViewerFrame( new ImageIcon( getClass().getResource("/image/image_loading.gif")));
+                            frame.setVisible(true);
+                            File file = new File(imageAttachment.getImagePath());
+                            new SwingWorker<Object,Object>(){
+                                ImageIcon imageIcon =null;
+                                @Override
+                                protected Object doInBackground() throws Exception {
+                                    //阻塞
+                                    DownloadTools.awaitDownload(imageAttachment.getImagePath());
+                                    if (file.exists() &&  file.length() <= 1024 * 1024) {
+                                        imageIcon = new ImageIcon(imageAttachment.getImagePath());
+                                    }else {
+                                      ChatPanel.openFile(imageAttachment.getImagePath());
+                                    }
+                                    return null;
+                                }
+
+                                @Override
+                                protected void done() {
+                                    if (imageIcon == null){
+                                        JOptionPane.showMessageDialog(MainFrame.getContext(), "图片下载中...", "文件不存在", JOptionPane.WARNING_MESSAGE);
+                                        return;
+                                    }
+
+                                    frame.setImageIcon( imageIcon);
+
+                                }
+                            }.execute();
+                            super.mouseClicked(e);
+                        }
+                    });
+                }else{
+                    imageLabel.setIcon(null);
+                    imageLabel.setText("[不支持的表情消息，请在手机上查看]");
                 }
+
             }
         }.execute();
-
 
     }
 
@@ -1028,31 +910,34 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         listView.setScrollHiddenOnMouseLeave(holder.text);
         attachPopupMenu(viewHolder, MessageItem.LEFT_TEXT);
     }
-    private void processLeftLinkMessage(ViewHolder viewHolder, MessageItem item){
-        processLinkMessage(viewHolder,item);
-        ((MessageLeftLinkViewHolder)viewHolder).getSender().setText(item.getSenderUsername());
+
+    private void processLeftLinkMessage(ViewHolder viewHolder, MessageItem item) {
+        processLinkMessage(viewHolder, item);
+        ((MessageLeftLinkViewHolder) viewHolder).getSender().setText(item.getSenderUsername());
         attachPopupMenu(viewHolder, MessageItem.LEFT_LINK);
     }
-    private void processRightLinkMessage(ViewHolder viewHolder, MessageItem item){
-        processLinkMessage(viewHolder,item);
+
+    private void processRightLinkMessage(ViewHolder viewHolder, MessageItem item) {
+        processLinkMessage(viewHolder, item);
         attachPopupMenu(viewHolder, MessageItem.RIGHT_LINK);
     }
-    private void processLinkMessage(ViewHolder viewHolder, MessageItem item){
+
+    private void processLinkMessage(ViewHolder viewHolder, MessageItem item) {
         LinkAttachmentItem linkItem = item.getLinkAttachmentItem();
         MessageLinkViewHolder linkViewHolder = (MessageLinkViewHolder) viewHolder;
 
         linkViewHolder.desc.setText(linkItem.getDesc());
         linkViewHolder.title.setText(linkItem.getTitle());
-        if (StringUtils.isEmpty(linkItem.getSourceName())){
+        if (StringUtils.isEmpty(linkItem.getSourceName())) {
             linkViewHolder.sourcePanel.setVisible(false);
-        }else{
+        } else {
             linkViewHolder.sourceName.setText(linkItem.getSourceName());
         }
 
         try {
             BufferedImage image = ImageIO.read(new URL(linkItem.getThumbUrl()));
-            linkViewHolder.icon.setIcon(new ImageIcon(ImageUtil.preferredImageSize(image, MessageLinkViewHolder.thumbWidth)));
-            if (StringUtils.isNotEmpty(linkItem.getSourceName())){
+            linkViewHolder.icon.setIcon(new ImageIcon(ImageUtil.preferredImageSize(image, MessageLinkViewHolder.THUMB_WIDTH)));
+            if (StringUtils.isNotEmpty(linkItem.getSourceName())) {
                 linkViewHolder.sourceIcon.setIcon(new ImageIcon(ImageUtil.preferredImageSize(image, 8)));
             }
         } catch (IOException e) {
@@ -1073,7 +958,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         };
         linkViewHolder.desc.addMouseListener(messageMouseListener);
         linkViewHolder.title.addMouseListener(messageMouseListener);
-       linkViewHolder.icon.addMouseListener(messageMouseListener);
+        linkViewHolder.icon.addMouseListener(messageMouseListener);
         linkViewHolder.contentTagPanel.addMouseListener(messageMouseListener);
         linkViewHolder.messageBubble.addMouseListener(messageMouseListener);
         listView.setScrollHiddenOnMouseLeave(linkViewHolder.desc);
@@ -1081,7 +966,16 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         listView.setScrollHiddenOnMouseLeave(linkViewHolder.icon);
         listView.setScrollHiddenOnMouseLeave(linkViewHolder.contentTagPanel);
         listView.setScrollHiddenOnMouseLeave(linkViewHolder.messageBubble);
+        Dimension preferredSize = linkViewHolder.contentTagPanel.getPreferredSize();
+        if (preferredSize.height < 120) {
+            preferredSize.height = 120;
+        }
+        preferredSize.width = 250;
+        //固定宽度
+        linkViewHolder.contentTagPanel.setPreferredSize(preferredSize);
+        linkViewHolder.messageBubble.repaint();
     }
+
     /**
      * 处理消息发送时间 以及 消息发送者头像
      *
@@ -1104,10 +998,37 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         }
 
         if (holder.avatar != null) {
-            ImageIcon icon = new ImageIcon();
-            Image image = AvatarUtil.createOrLoadUserAvatar(item.getSenderId()).getScaledInstance(40, 40, Image.SCALE_SMOOTH);
-            icon.setImage(image);
-            holder.avatar.setIcon(icon);
+            ImageIcon icon = null;
+            if (AvatarUtil.avatarExists(item.getSenderId())){
+                //已存在图片缓存
+                if (item.getRoomId().startsWith("@@")){
+                    icon = AvatarUtil.createOrLoadMemberAvatar(item.getRoomId(),item.getSenderId());
+
+                }else {
+                    icon = AvatarUtil.createOrLoadUserAvatar(item.getSenderId());
+                }
+                holder.avatar.setIcon(icon);
+            }else {
+                //异步从网络加载
+                new SwingWorker<Object,Object>(){
+                    ImageIcon icon = null;
+                    @Override
+                    protected Object doInBackground() throws Exception {
+                        if (item.getRoomId().startsWith("@@")){
+                            icon = AvatarUtil.createOrLoadMemberAvatar(item.getRoomId(),item.getSenderId());
+
+                        }else {
+                            icon = AvatarUtil.createOrLoadUserAvatar(item.getRoomId());
+                        }
+                        return null;
+                    }
+                    @Override
+                    protected void done() {
+                        holder.avatar.setIcon(icon);
+                    }
+                }.execute();
+            }
+
 
             //弹窗
             if (item.getMessageType() == MessageItem.LEFT_ATTACHMENT
@@ -1118,11 +1039,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             }
         }
 
-
-        /*
-        {
-            holder.avatar.setImageBitmap(AvatarUtil.createOrLoadUserAvatar(this.activity, item.getSenderUsername()));
-        }*/
     }
 
 

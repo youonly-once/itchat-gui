@@ -1,17 +1,15 @@
 package cn.shu.wechat.swing.adapter;
 
-import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.panels.RoomChatPanel;
-import cn.shu.wechat.swing.panels.RoomChatPanelCard;
 import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.TimeUtil;
-import cn.shu.wechat.utils.ExecutorServiceUtil;
+import cn.shu.wechat.utils.CommonTools;
 import com.alibaba.fastjson.JSONObject;
 
 import javax.swing.*;
@@ -50,43 +48,22 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
 
     @Override
     public void onBindViewHolder(RoomItemViewHolder viewHolder, int position) {
-        //viewHolder.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        //System.out.println(viewHolders.size());
         RoomItem roomItem = roomItems.get(position);
-
         viewHolder.setTag(roomItem.getRoomId());
-
         viewHolder.roomName.setText(roomItem.getName());
-
-        //异步加载头像会闪烁
-  /*      new SwingWorker<Object, Object>() {
-            Image orLoadAvatar ;
+        new SwingWorker<Object,Object>(){
+            ImageIcon orLoadAvatar = null;
             @Override
             protected Object doInBackground() throws Exception {
-                orLoadAvatar = AvatarUtil.createOrLoadAvatar(roomItem.getRoomId());
+                orLoadAvatar = AvatarUtil.createOrLoadUserAvatar(roomItem.getRoomId());
                 return null;
             }
 
             @Override
             protected void done() {
-                if (orLoadAvatar != null) {
-                    ImageIcon icon = new ImageIcon();
-                    icon.setImage(orLoadAvatar);
-                    viewHolder.avatar.setIcon(icon);
-                    RoomsPanel.getContext().getRoomItemsListView().getContentPanel().revalidate();
-
-                }
+                viewHolder.avatar.setIcon(orLoadAvatar);
             }
-        }.execute();*/
-        //if (!roomItem.getRoomId().equals("filehelper")){
-            ImageIcon icon = icon = new ImageIcon();
-            icon.setImage(AvatarUtil.createOrLoadAvatar(roomItem.getRoomId()));
-            viewHolder.avatar.setIcon(icon);
-      //  }
-
-
-
-
+        }.execute();
         // 消息
         viewHolder.brief.setText(roomItem.getLastMessage());
         if (roomItem.getLastMessage() != null && roomItem.getLastMessage().length() > 15) {
@@ -113,9 +90,6 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             setBackground(viewHolder, Colors.ITEM_SELECTED);
             selectedViewHolder = viewHolder;
         }
-        //viewHolder.unreadCount.setVisible(true);
-        //viewHolder.unreadCount.setText(roomItem.getUnreadCount() + "1");
-
         //鼠标点击事件 点击变色并进入房间
         viewHolder.addMouseListener(new AbstractMouseListener() {
             @Override
@@ -173,26 +147,6 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             JSONObject meber = (JSONObject) o1;
             roomMembers.add(meber.getString("NickName"));
         }
-
-      /*  if (members != null)
-        {
-            String[] userArr = members.split(",");
-            for (int i = 0; i < userArr.length; i++)
-            {
-                if (!roomMembers.contains(userArr[i]))
-                {
-                    roomMembers.add(userArr[i]);
-                }
-            }
-        }
-        String creator = room.getCreatorName();
-        if (creator != null)
-        {
-            if (!roomMembers.equals(creator))
-            {
-                roomMembers.add(creator);
-            }
-        }*/
 
         memberArr = roomMembers.toArray(new String[]{});
         return memberArr;

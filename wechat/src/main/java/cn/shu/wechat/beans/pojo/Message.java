@@ -104,4 +104,6 @@ public class Message {
      * 语音长度 毫秒
      */
     private Long voiceLength;
+    private String fileName;
+    private Long fileSize;
 }

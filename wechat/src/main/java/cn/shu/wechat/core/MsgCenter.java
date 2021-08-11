@@ -22,6 +22,8 @@ import cn.shu.wechat.utils.LogUtil;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import javax.swing.*;
@@ -84,14 +86,14 @@ public class MsgCenter {
          */
         //消息格式化
         CommonTools.msgFormatter(msg);
-        //地图消息，特殊粗粒
-
-        if (msgType == MSGTYPE_TEXT && msg.getUrl().length() != 0) {
+        //地图消息，特殊处理
+        if (msgType == MSGTYPE_TEXT && !StringUtils.isEmpty(msg.getUrl())) {
             //地图消息
             msg.setMsgType(WXReceiveMsgCodeEnum.MSGTYPE_MAP.getCode());
             msgType = WXReceiveMsgCodeEnum.MSGTYPE_MAP;
         }
-
+        //加载群成员
+        loadUserInfo(msg);
         //下载资源文件
         download(msgType,msg);
         //存储数据库
@@ -104,6 +106,31 @@ public class MsgCenter {
 
     }
 
+    /**
+     *  第一次收到群消息 加载群成员详细细腻
+     * @param msg 消息
+     */
+    private void loadUserInfo(AddMsgList msg){
+
+        String userName = msg.getFromUserName();
+        Contacts contacts = Core.getMemberMap().get(userName);
+        if (contacts==null){
+            loginService.WebWxBatchGetContact(userName);
+            contacts = Core.getMemberMap().get(userName);
+        }
+        if (userName.startsWith("@@")
+                &&!StringUtils.isEmpty(msg.getMemberName())&&
+                !Core.getMemberMap().containsKey(msg.getMemberName())){
+            //群成员非好友时，获取群成员的详细信息
+            if (!Core.getMemberMap().containsKey(userName)
+                    || CollectionUtils.isEmpty(contacts.getMemberlist())
+                    || StringUtils.isEmpty(contacts.getMemberlist().get(0).getHeadimgurl())){
+                //使用头像地址来判断是否获取过成员详细信息
+                List<Contacts> contactsList = loginService.WebWxBatchGetContact(userName);
+                contacts.setMemberlist(contactsList);
+            }
+        }
+    }
     /**
      * 下载文件
      * @param msgType
@@ -162,11 +189,6 @@ public class MsgCenter {
             MainFrame.getContext().setTrayFlashing();
         }
 
-        if (!Core.getMemberMap().containsKey(userName)){
-            //未保存到通讯录的联系人 手动添加
-            loginService.WebWxBatchGetContact(userName);
-        }
-        Contacts contacts = Core.getMemberMap().get(userName);
         String lastMsg = lastMsgPrefix+(message==null?msg.getContent():message.getPlaintext());
         String roomId = userName;
         int count = msgUnReadCount;
@@ -186,7 +208,7 @@ public class MsgCenter {
                 }
             }
             //新增或选择聊天列表
-            RoomsPanel.getContext().addRoomOrOpenRoomNotSwitch(contacts,lastMsg,count);
+            RoomsPanel.getContext().addRoomOrOpenRoomNotSwitch(roomId,lastMsg,count);
 
         });
     }
@@ -408,6 +430,8 @@ public class MsgCenter {
                     .imgHeight(msg.getImgHeight())
                     .imgWidth(msg.getImgWidth())
                     .voiceLength(msg.getVoiceLength())
+                    .fileName(msg.getFileName())
+                    .fileSize(msg.getFileSize())
                     .build();
             int insert = messageMapper.insert(build);
 
@@ -419,5 +443,30 @@ public class MsgCenter {
     }
 
 
+    /**
+     * 处理联系人修改消息
+     * @param contacts
+     */
+    public void handleModContact(Contacts contacts){
+
+        if (contacts!=null){
+            Core.getMemberMap().put(contacts.getUsername(),contacts);
+        }
+
+    }
+    /**
+     * 处理联系人修改消息
+     * @param modContactList
+     */
+    public void handleModContact(  List<Contacts> modContactList){
+
+        if (modContactList!=null && !modContactList.isEmpty()){
+            for (Contacts contacts : modContactList) {
+                Core.getMemberMap().put(contacts.getUsername(),contacts);
+            }
+
+        }
+
+    }
 
 }

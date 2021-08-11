@@ -10,6 +10,7 @@ import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.OSUtil;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
+import lombok.Getter;
 import sun.audio.AudioPlayer;
 import sun.audio.AudioStream;
 
@@ -21,6 +22,7 @@ import java.io.InputStream;
 /**
  * Created by 舒新胜 on 17-5-28.
  */
+@Getter
 public class MainFrame extends JFrame  {
     public final static int DEFAULT_WIDTH = 900;
     public final static int DEFAULT_HEIGHT = 650;

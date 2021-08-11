@@ -22,13 +22,16 @@ import java.awt.event.MouseEvent;
 @Getter
 public class MessageVoiceViewHolder extends BaseMessageViewHolder {
     protected final TagPanel contentTagPanel = new TagPanel();
-    protected JLabel durationText;
+    protected CountDownJLabel durationText = new CountDownJLabel();;
+    protected JLabel gapText = new JLabel();
+    protected JLabel unitLabel = new JLabel("''");
     protected final JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
     protected final JPanel messageAvatarPanel = new JPanel();
     protected final MessagePopupMenu popupMenu = new MessagePopupMenu();
     protected boolean isGroup;
     protected final JLabel voiceImgLabel = new JLabel();
     protected final RCAttachmentMessageBubble messageBubble;
+    protected final JPanel voicePanel = new JPanel();
     /**
      *播放进度条
      */
@@ -45,18 +48,13 @@ public class MessageVoiceViewHolder extends BaseMessageViewHolder {
     }
     private void setListeners() {
         MouseAdapter mouseListener = messageBubble.getMouseListener();
-        durationText.addMouseListener(mouseListener);
-        voiceImgLabel.addMouseListener(mouseListener);
+        /*durationText.addMouseListener(mouseListener);
+        voiceImgLabel.addMouseListener(mouseListener);*/
     }
     private void initComponents() {
-        durationText = new JLabel();
 
         time.setForeground(Colors.FONT_GRAY);
         time.setFont(FontUtil.getDefaultFont(12));
-
-
-
-
 
         messageAvatarPanel.setBackground(Colors.WINDOW_BACKGROUND);
         timePanel.setBackground(Colors.WINDOW_BACKGROUND);

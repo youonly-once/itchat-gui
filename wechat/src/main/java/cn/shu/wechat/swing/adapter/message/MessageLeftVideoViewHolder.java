@@ -3,8 +3,10 @@ package cn.shu.wechat.swing.adapter.message;
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
+import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
 import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.components.message.*;
+import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.ImageUtil;
@@ -13,6 +15,7 @@ import lombok.Getter;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -31,7 +34,8 @@ public class MessageLeftVideoViewHolder extends BaseMessageViewHolder {
     /**
      * 发送者
      */
-    private JLabel sender = new JLabel();
+    private final SizeAutoAdjustTextArea sender = new SizeAutoAdjustTextArea((int)(MainFrame.getContext().currentWindowWidth * 0.5));
+
     /**
      * 视频层
      */
@@ -97,6 +101,7 @@ public class MessageLeftVideoViewHolder extends BaseMessageViewHolder {
         contentTagPanel.setBackground(Colors.WINDOW_BACKGROUND);
         contentTagPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
         if (isGroup) {
+            sender.setBorder(new EmptyBorder(0,0,5,0));
             contentTagPanel.add(sender);
         }
         try {

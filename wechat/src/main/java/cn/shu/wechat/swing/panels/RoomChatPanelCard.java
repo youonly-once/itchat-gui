@@ -56,15 +56,7 @@ public class RoomChatPanelCard extends JPanel {
     /**
      * 房间成员
      */
-    private String roomId;
-    /**
-     * 房间标题
-     */
-    private String title;
-    /**
-     * 房间成员
-     */
-    private List<Contacts> memberList;
+    private final String roomId;
 
     /**
      * 用户信息
@@ -91,14 +83,6 @@ public class RoomChatPanelCard extends JPanel {
             // 更新房间标题
             updateRoomTitle();
         }
-
-
-        //成员面板设置房间id
-        // RoomMembersPanel.getContext().setRoomId(roomId, room);
-        //消息未读数量0
-        //updateUnreadCount(0);
-        //消息编辑框默认值
-        //messageEditorPanel.getEditor().setText("");
     }
 
     /**
@@ -184,9 +168,6 @@ public class RoomChatPanelCard extends JPanel {
         add(roomMembersPanel, BorderLayout.EAST);
         add(contentPanel, BorderLayout.CENTER);
         showPanel(MESSAGE);
-
-        // add(chatPanel, BorderLayout.CENTER);
-        //add(tipPanel, BorderLayout.CENTER);
     }
 
     /**
@@ -197,14 +178,6 @@ public class RoomChatPanelCard extends JPanel {
         cardLayout.show(contentPanel, who);
     }
 
-    /**
-     * 更新已有消息
-     *
-     * @param message 新消息
-     */
-    public void updateMessageItem(Message message) {
-        chatPanel.updateMessageItem(message);
-    }
 
     /**
      * 添加一条消息到最后

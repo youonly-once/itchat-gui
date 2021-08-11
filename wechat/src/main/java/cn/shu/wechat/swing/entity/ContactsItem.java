@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.swing.*;
 import java.awt.*;
 
 /**
@@ -28,17 +29,10 @@ public class ContactsItem implements Comparable<ContactsItem> {
     /**
      * 头像
      */
-    private Image avatar;
+    private ImageIcon avatar;
 
     @Override
     public int compareTo(ContactsItem o) {
-        //群排第一
-/*        if (this.getId().startsWith("@@")){
-            return -1;
-        }
-        if (o.getId().startsWith("@@")){
-            return 1;
-        }*/
         String tc = CharacterParser.getSelling(this.getDisplayName()).toUpperCase();
         String oc = CharacterParser.getSelling(o.getDisplayName()).toUpperCase();
         return tc.compareTo(oc);

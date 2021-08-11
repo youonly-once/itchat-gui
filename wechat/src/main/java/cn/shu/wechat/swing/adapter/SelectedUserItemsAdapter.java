@@ -6,7 +6,6 @@ import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.CharacterParser;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.*;
@@ -53,7 +52,8 @@ public class SelectedUserItemsAdapter extends BaseAdapter<SelectedUserItemViewHo
         SelectUserData user = userList.get(position);
 
         // 头像
-        ImageIcon imageIcon = new ImageIcon(AvatarUtil.createOrLoadUserAvatar(user.getName()).getScaledInstance(30, 30, Image.SCALE_SMOOTH));
+        //TODO 小头像 30 30
+        ImageIcon imageIcon = AvatarUtil.createOrLoadUserAvatar(user.getName());
         viewHolder.avatar.setIcon(imageIcon);
 
         // 名字
