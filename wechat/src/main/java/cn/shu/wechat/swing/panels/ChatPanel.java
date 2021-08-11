@@ -899,6 +899,7 @@ public class ChatPanel extends ParentAvailablePanel {
         item.setSenderUsername(Core.getUserSelf().getNickname());
         item.setId(msgId);
         item.setProgress(0);
+        item.setRoomId(roomId);
         //添加消息 到面板
         addMessageItemToEnd(item);
 
