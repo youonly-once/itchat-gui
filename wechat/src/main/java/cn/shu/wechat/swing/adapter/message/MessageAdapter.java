@@ -936,7 +936,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             linkViewHolder.sourceName.setText(linkItem.getSourceName());
         }
         BufferedImage image = linkItem.getImage();
-        if (image!= null && StringUtils.isNotEmpty(linkItem.getThumbUrl())) {
+        if (image == null && StringUtils.isNotEmpty(linkItem.getThumbUrl())) {
             try {
                 image = ImageIO.read(new URL(linkItem.getThumbUrl()));
             } catch (IOException e) {
