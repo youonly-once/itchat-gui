@@ -786,14 +786,14 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                             ImageViewerFrame frame = new ImageViewerFrame( new ImageIcon( getClass().getResource("/image/image_loading.gif")));
                             frame.setVisible(true);
                             File file = new File(imageAttachment.getImagePath());
-                            new SwingWorker<Object,Object>(){
-                                ImageIcon imageIcon =null;
+                            new SwingWorker<Object,ImageIcon>(){
                                 @Override
                                 protected Object doInBackground() throws Exception {
                                     //阻塞
                                     DownloadTools.awaitDownload(imageAttachment.getImagePath());
                                     if (file.exists() &&  file.length() <= 1024 * 1024) {
-                                        imageIcon = new ImageIcon(imageAttachment.getImagePath());
+                                        ImageIcon imageIcon = new ImageIcon(imageAttachment.getImagePath());
+                                        publish(imageIcon);
                                     }else {
                                       ChatPanel.openFile(imageAttachment.getImagePath());
                                     }
@@ -801,15 +801,15 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                                 }
 
                                 @Override
-                                protected void done() {
-                                    if (imageIcon == null){
+                                protected void process(List<ImageIcon> chunks) {
+                                    ImageIcon imageIcon = chunks.get(chunks.size() - 1);
+                                    if (imageIcon == null ){
                                         JOptionPane.showMessageDialog(MainFrame.getContext(), "图片下载中...", "文件不存在", JOptionPane.WARNING_MESSAGE);
                                         return;
                                     }
-
-                                    frame.setImageIcon( imageIcon);
-
+                                    frame.setImageIcon(imageIcon);
                                 }
+
                             }.execute();
                             super.mouseClicked(e);
                         }
@@ -935,19 +935,20 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         } else {
             linkViewHolder.sourceName.setText(linkItem.getSourceName());
         }
-        if (StringUtils.isNotEmpty(linkItem.getThumbUrl())) {
+        BufferedImage image = linkItem.getImage();
+        if (image!= null && StringUtils.isNotEmpty(linkItem.getThumbUrl())) {
             try {
-                BufferedImage image = ImageIO.read(new URL(linkItem.getThumbUrl()));
-                linkViewHolder.icon.setIcon(new ImageIcon(ImageUtil.preferredImageSize(image, MessageLinkViewHolder.THUMB_WIDTH)));
-                if (StringUtils.isNotEmpty(linkItem.getSourceName())) {
-                    linkViewHolder.sourceIcon.setIcon(new ImageIcon(ImageUtil.preferredImageSize(image, 8)));
-                }
-                //有图片时缩短宽度，让其与无图的Panel尽量一致
-                linkViewHolder.desc.setColumns(16);
+                image = ImageIO.read(new URL(linkItem.getThumbUrl()));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        if (image!=null){
+            linkViewHolder.icon.setIcon(new ImageIcon(ImageUtil.preferredImageSize(image, MessageLinkViewHolder.THUMB_WIDTH)));
+            //有图片时缩短宽度，让其与无图的Panel尽量一致
+            linkViewHolder.desc.setColumns(16);
+        }
+
         //点击打开链接
         MessageMouseListener messageMouseListener = new MessageMouseListener() {
             @Override
@@ -1066,8 +1067,9 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     return;
                 }
                 contacts.setGroupName(item.getRoomId());
-                UserInfoPopup popup = new UserInfoPopup(contacts);
-                popup.show(e.getComponent(), e.getX(), e.getY());
+                UserInfoPopup instance = UserInfoPopup.getInstance();
+                instance.setContacts(contacts);
+                instance.show(e.getComponent(), e.getX(), e.getY());
 
                 super.mouseClicked(e);
             }

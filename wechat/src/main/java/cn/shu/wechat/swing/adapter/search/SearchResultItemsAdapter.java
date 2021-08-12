@@ -26,6 +26,7 @@ import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +49,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
     private final List<String> downloadingFiles = new ArrayList<>();
 
     private final Map<String, SearchResultFileItemViewHolder> fileItemViewHolders = new HashMap<>();
-    private final List<SoftReference<SearchResultUserItemViewHolder>> searchResultUserItemViewHolderList = new ArrayList<>(10);
+    private final List<WeakReference<SearchResultUserItemViewHolder>> searchResultUserItemViewHolderList = new ArrayList<>(10);
 
     public SearchResultItemsAdapter(List<SearchResultItem> searchResultItems) {
         this.searchResultItems = searchResultItems;
@@ -88,11 +89,11 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
                     holder = searchResultUserItemViewHolderList.get(position).get();
                     if (holder == null){
                         holder = new SearchResultUserItemViewHolder();
-                        searchResultUserItemViewHolderList.set(position,new SoftReference<>(holder));
+                        searchResultUserItemViewHolderList.set(position,new WeakReference<>(holder));
                     }
                 }else{
                     holder = new SearchResultUserItemViewHolder();
-                    searchResultUserItemViewHolderList.add(position,new SoftReference<>(holder));
+                    searchResultUserItemViewHolderList.add(position,new WeakReference<>(holder));
                 }
                 return holder;
             }

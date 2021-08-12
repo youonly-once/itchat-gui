@@ -98,7 +98,7 @@ public class AvatarUtil {
         if (avatarIcon == null) {
             //获取网络图片
             Contacts contacts = Core.getMemberMap().get(userName);
-            avatar = DownloadTools.downloadImage(contacts.getHeadimgurl());
+            avatar = DownloadTools.downloadImgByRelativeUrl(contacts.getHeadimgurl());
             if (avatar == null) {
                 //获取缓存在磁盘的头像
                 avatar = getCachedImageAvatar(userName);
@@ -151,7 +151,7 @@ public class AvatarUtil {
             if (user != null
                     && StringUtils.isNotEmpty((user.getHeadimgurl()))) {
                 //下载头像
-                avatar = DownloadTools.downloadImage(user.getHeadimgurl());
+                avatar = DownloadTools.downloadImgByRelativeUrl(user.getHeadimgurl());
             }
             if (avatar != null) {
                 avatarIcon = putUserAvatarCache(userName, avatar);

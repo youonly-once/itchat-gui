@@ -1,7 +1,10 @@
 package cn.shu.wechat.swing.entity;
 
 import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.api.MessageTools;
+import cn.shu.wechat.beans.msg.url.WXImgUrl;
+import cn.shu.wechat.beans.msg.url.WXMsgUrl;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
@@ -9,7 +12,9 @@ import cn.shu.wechat.swing.db.model.ImageAttachment;
 import cn.shu.wechat.utils.XmlStreamUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang.StringUtils;
 
+import java.awt.image.BufferedImage;
 import java.util.Map;
 import java.util.UUID;
 
@@ -103,9 +108,16 @@ public class MessageItem implements Comparable<MessageItem> {
                         Object title = stringObjectMap.get("msg.appmsg.title");
                         Object thumbUrl = stringObjectMap.get("msg.appmsg.thumburl");
                         Object sourceName = stringObjectMap.get("msg.appmsg.sourcedisplayname");
+                        BufferedImage image = null;
+                        if (thumbUrl == null|| thumbUrl.toString().isEmpty()){
+                            image = DownloadTools.downloadImgByMsgID(message.getMsgId(),WXMsgUrl.SLAVE_TYPE);
+                        }
+
+
                         linkAttachmentItem = LinkAttachmentItem.builder()
                                 .desc(desc == null?"":desc.toString())
                                 .thumbUrl(thumbUrl == null?"":thumbUrl.toString())
+                                .image(image)
                                 .id(message.getId())
                                 .title(title == null?"":title.toString())
                                 .url(url == null?"":url.toString())

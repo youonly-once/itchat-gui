@@ -184,11 +184,16 @@ public class RoomMembersPanel extends ParentAvailablePanel {
                 LoginService bean = SpringContextHolder.getBean(LoginService.class);
                 memberlist = bean.WebWxBatchGetContact(roomId);
                 members.clear();
+                Contacts contacts1 = Core.getMemberMap().get(Core.getUserName());
+                boolean remove = memberlist.remove(contacts1);
                 members.addAll(memberlist);
             } else {
                 members.clear();
+                Contacts contacts1 = Core.getMemberMap().get(Core.getUserName());
+                boolean remove = memberlist.remove(contacts1);
                 members.addAll(memberlist);
             }
+
             for (Contacts contacts : memberlist) {
                 contacts.setGroupName(roomId);
             }

@@ -1,5 +1,7 @@
 package cn.shu.wechat.enums;
 
+import lombok.Builder;
+
 /**
  * URL
  * Created by SXS on 2017/5/6.
@@ -49,4 +51,5 @@ public enum URLEnum {
     public String getUrl() {
         return url;
     }
+
 }

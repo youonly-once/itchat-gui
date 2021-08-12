@@ -14,6 +14,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.Map;
 import java.util.Objects;
 
@@ -24,51 +25,51 @@ public class UserInfoPopup extends JPopupMenu {
     private JPanel contentPanel;
     private JLabel avatarLabel;
     private JLabel usernameLabel;
-    private JButton sendButton;
     private Contacts contacts;
     private JLabel areaLabel;
     private JLabel genderLabel;
     private JLabel remarkNameLabel;
     private JLabel signatureLabel;
     private JLabel chat;
-    public UserInfoPopup(Contacts contacts) {
-        this.contacts = contacts;
+    private static UserInfoPopup Context;
+
+    private UserInfoPopup() {
         initComponents();
         initView();
         setListener();
 
-        // 更新对方头像
-        //updateAvatar();
+    }
+    public static UserInfoPopup getInstance(){
+        if (Context == null){
+            synchronized (UserInfoPopup.class){
+                if (Context == null){
+                    Context = new UserInfoPopup();
+                }
+            }
+        }
+        return Context;
     }
 
-    private void updateAvatar() {
-        ContactsPanel.getContext().getUserAvatar(contacts.getUsername(), true);
-    }
-
-    private void initComponents() {
-        setBackground(Colors.WINDOW_BACKGROUND_LIGHT);
-
-
-        contentPanel = new JPanel();
-        contentPanel.setPreferredSize(new Dimension(220, 350));
-        contentPanel.setBackground(Colors.WINDOW_BACKGROUND_LIGHT);
-
-        avatarLabel = new JLabel();
-
-        usernameLabel = new JLabel();
-        areaLabel =new JLabel("地区："+contacts.getProvince()+" "+contacts.getCity()+" "+contacts.getAlias());
-        genderLabel =new JLabel();
+    /**
+     * 显示指定联系人信息
+     * @param contacts
+     */
+    public void setContacts(Contacts contacts){
+        this.contacts =contacts;
+        areaLabel.setText("地区："+contacts.getProvince()+" "+contacts.getCity()+" "+contacts.getAlias());
         if (contacts.getSex() !=null){
             genderLabel.setIcon(IconUtil.getIcon(this,contacts.getSex() == 1?"/image/man.png":"/image/woman.png"));
+        }else{
+            genderLabel.setIcon(null);
         }
-        remarkNameLabel =new JLabel("备注："+contacts.getRemarkname());
-        signatureLabel = new JLabel("签名："+contacts.getSignature());
-        ImageIcon imageIcon = new ImageIcon();
         if (contacts.getGroupName()!=null&&contacts.getGroupName().startsWith("@@")){
             usernameLabel.setText(ContactsTools.getMemberNickNameOfGroup(contacts.getGroupName(),contacts.getUsername()));
         }else{
             usernameLabel.setText(ContactsTools.getContactNickNameByUserName(contacts.getUsername()));
         }
+        chat.setVisible(Core.getMemberMap().containsKey(contacts.getUsername()));
+        ImageIcon imageIcon = new ImageIcon();
+
         //异步加载头像
         new SwingWorker<Object,Object>() {
             Image orLoadBigAvatar ;
@@ -81,20 +82,36 @@ public class UserInfoPopup extends JPopupMenu {
             protected void done() {
                 if (orLoadBigAvatar!=null){
                     imageIcon.setImage(orLoadBigAvatar.getScaledInstance(220,220,Image.SCALE_SMOOTH));
-                    avatarLabel.setIcon(imageIcon);
                 }
-
+                avatarLabel.setIcon(imageIcon);
             }
         }.execute();
+        remarkNameLabel.setText("备注："+contacts.getRemarkname());
+        signatureLabel.setText("签名："+contacts.getSignature());
+    }
+    private void initComponents() {
+        setBackground(Colors.WINDOW_BACKGROUND_LIGHT);
+        contentPanel = new JPanel();
+        contentPanel.setPreferredSize(new Dimension(220, 350));
+        contentPanel.setBackground(Colors.WINDOW_BACKGROUND_LIGHT);
 
+        avatarLabel = new JLabel();
+        usernameLabel = new JLabel();
 
-        /*sendButton = new RCButton("发消息");
-        sendButton.setPreferredSize(new Dimension(180, 40));
-        sendButton.setForeground(Colors.FONT_BLACK);*/
-        sendButton = new RCButton("发消息", Colors.MAIN_COLOR, Colors.MAIN_COLOR_DARKER, Colors.MAIN_COLOR_DARKER);
-        sendButton.setBackground(Colors.PROGRESS_BAR_START);
-        sendButton.setPreferredSize(new Dimension(180, 35));
-        sendButton.setFont(FontUtil.getDefaultFont(15));
+        areaLabel =new JLabel();
+        areaLabel.setForeground(Color.GRAY);
+        areaLabel.setFont(FontUtil.getDefaultFont(12));
+
+        genderLabel =new JLabel();
+
+        remarkNameLabel =new JLabel();
+        remarkNameLabel.setForeground(Color.GRAY);
+        remarkNameLabel.setFont(FontUtil.getDefaultFont(12));
+
+        signatureLabel = new JLabel();
+        signatureLabel.setForeground(Color.GRAY);
+        signatureLabel.setFont(FontUtil.getDefaultFont(12));
+
         chat = new JLabel();
     }
 
@@ -112,29 +129,21 @@ public class UserInfoPopup extends JPopupMenu {
         infoPanel.setPreferredSize(new Dimension(220, 114));
         infoPanel.setBackground(Color.white);
         JPanel nickNameArea = new JPanel(new BorderLayout(0,0));
-      //  Border emptyBorder = BorderFactory.createEmptyBorder(20,20,10,20);
-        //nickNameArea.setBorder(emptyBorder);
         nickNameArea.setBackground(Color.white);
         nickNameArea.add(usernameLabel,BorderLayout.WEST);
         nickNameArea.add(genderLabel,BorderLayout.CENTER);
 
+
         ImageIcon icon = IconUtil.getIcon(this, "/image/chat.png", 20, 20);
         chat.setIcon(icon);
         nickNameArea.add(chat,BorderLayout.EAST);
-        // signatureLabel.setBorder(emptyBorder);
         infoPanel.setBorder(BorderFactory.createEmptyBorder(0,10,10,10));
         usernameLabel.setFont(FontUtil.getDefaultFont(16));
         infoPanel.add(nickNameArea);
-        infoPanel.add(signatureLabel);
-        signatureLabel.setForeground(Color.GRAY);
-        signatureLabel.setFont(FontUtil.getDefaultFont(12));
-        infoPanel.add(remarkNameLabel);
-        remarkNameLabel.setForeground(Color.GRAY);
-        remarkNameLabel.setFont(FontUtil.getDefaultFont(12));
-        infoPanel.add(areaLabel);
-        areaLabel.setForeground(Color.GRAY);
-        areaLabel.setFont(FontUtil.getDefaultFont(12));
 
+        infoPanel.add(signatureLabel);
+        infoPanel.add(remarkNameLabel);
+        infoPanel.add(areaLabel);
 
         contentPanel.add(avatarPanel, new GBC(0, 0).setWeight(1, 1));
         contentPanel.add(infoPanel, new GBC(0, 1).setWeight(1, 1));
@@ -145,7 +154,11 @@ public class UserInfoPopup extends JPopupMenu {
         chat.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                ChatUtil.openOrCreateDirectChat(contacts.getUsername());
+                if (Core.getMemberMap().containsKey(contacts.getUsername())) {
+                    ChatUtil.openOrCreateDirectChat(contacts.getUsername());
+                    setVisible(false);;
+                }
+
                 super.mouseClicked(e);
             }
         });
@@ -165,23 +178,5 @@ public class UserInfoPopup extends JPopupMenu {
         });
     }
 
-    private void openOrCreateDirectChat() {
-/*        if (!Core.getRecentContacts().contains(contacts)) {
-            // 房间bu存在，直接打开，否则发送请求创建房间
-            createDirectChat(contacts);
-        }
-        ChatPanel.getContext().enterRoom(contacts.getUsername());*/
-    }
-
-    /**
-     * 创建直接聊天
-     *
-     * @param userId
-     */
-    private void createDirectChat(String userId) {
-        RoomsPanel.getContext().addRoom(userId, "", 0);
-        Core.getRecentContacts().add(userId);
-        TabOperationPanel.getContext().switchToChatLabel();
-    }
 
 }

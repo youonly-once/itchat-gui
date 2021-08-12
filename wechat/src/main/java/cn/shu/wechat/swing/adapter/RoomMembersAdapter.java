@@ -105,9 +105,9 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
                 viewHolder.avatar.setIcon(contacts.getAvatarIcon());
             }
             viewHolder.roomName.setText(name);
-            UserInfoPopup userInfoPopup = new UserInfoPopup(contacts);
 
             if (!name.equals(Core.getNickName())) {
+                //TODO 重复添加事件了
                 viewHolder.addMouseListener(new AbstractMouseListener() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
@@ -119,6 +119,8 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
 
                         // 弹出用户信息面板
                         if (e.getButton() == MouseEvent.BUTTON1) {
+                            UserInfoPopup userInfoPopup = UserInfoPopup.getInstance();
+                            userInfoPopup.setContacts(contacts);
                             userInfoPopup.show(e.getComponent(), e.getX(), e.getY());
                         }
 

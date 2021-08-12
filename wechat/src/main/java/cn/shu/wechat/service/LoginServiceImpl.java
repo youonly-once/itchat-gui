@@ -17,7 +17,6 @@ import cn.shu.wechat.enums.parameters.UUIDParaEnum;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.mapper.ContactsMapper;
 import cn.shu.wechat.mapper.MemberGroupRMapper;
-import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.AvatarUtil;
@@ -41,9 +40,7 @@ import java.io.OutputStream;
 import java.util.*;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 
 /**
@@ -234,7 +231,7 @@ public class LoginServiceImpl implements LoginService {
                 ExecutorServiceUtil.getHeadImageDownloadExecutorService().submit(new Runnable() {
                     @Override
                     public void run() {
-                        AvatarUtil.putUserAvatarCache(contacts.getUsername(),DownloadTools.downloadImage(contacts.getHeadimgurl()));;
+                        AvatarUtil.putUserAvatarCache(contacts.getUsername(),DownloadTools.downloadImgByRelativeUrl(contacts.getHeadimgurl()));;
                     }
                 });
                 Core.getMemberMap().put(contacts.getUsername(),contacts);

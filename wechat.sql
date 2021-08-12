@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50527
 File Encoding         : 65001
 
-Date: 2021-08-02 22:29:34
+Date: 2021-08-12 22:40:53
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -22,7 +22,7 @@ DROP TABLE IF EXISTS `attr_history`;
 CREATE TABLE `attr_history` (
 `id`  int(11) NOT NULL AUTO_INCREMENT ,
 `UserName`  varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '用户名' ,
-`NickName`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '昵称' ,
+`NickName`  varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '昵称' ,
 `RemarkName`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '备注名' ,
 `CreateTime`  datetime NULL DEFAULT NULL ,
 `Attr`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '属性' ,
@@ -32,7 +32,7 @@ PRIMARY KEY (`id`)
 )
 ENGINE=InnoDB
 DEFAULT CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci
-AUTO_INCREMENT=4667
+AUTO_INCREMENT=4803
 
 ;
 
@@ -120,12 +120,16 @@ CREATE TABLE `message` (
 `to_remarkname`  varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL ,
 `to_nickname`  varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL ,
 `is_send`  tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否是本人发送的消息1是0不是' ,
-`slave_path`  varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '资源文件保存路径' ,
+`slave_path`  varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '缩略图路径' ,
 `response`  varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '消息发送结果' ,
+`play_length`  bigint(20) NULL DEFAULT 0 COMMENT '视频长度' ,
+`img_height`  int(11) NULL DEFAULT 0 COMMENT '缩略图高度' ,
+`img_width`  int(11) NULL DEFAULT 0 COMMENT '缩略图宽度' ,
+`voice_length`  bigint(20) NULL DEFAULT 0 COMMENT '语音长度' ,
 PRIMARY KEY (`id`),
 INDEX `msg_id` (`msg_id`(191)) USING BTREE ,
-INDEX `fromname` (`from_username`(191)) USING BTREE ,
-INDEX `toname` (`to_username`(191)) USING BTREE 
+INDEX `create_time` (`create_time`) USING BTREE ,
+INDEX `union_index` (`from_username`(191), `to_username`(191)) USING BTREE 
 )
 ENGINE=InnoDB
 DEFAULT CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci
@@ -245,4 +249,4 @@ DEFAULT CHARACTER SET=utf8 COLLATE=utf8_general_ci
 -- ----------------------------
 -- Auto increment value for attr_history
 -- ----------------------------
-ALTER TABLE `attr_history` AUTO_INCREMENT=4667;
+ALTER TABLE `attr_history` AUTO_INCREMENT=4803;

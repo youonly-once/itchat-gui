@@ -1,6 +1,7 @@
 package cn.shu.wechat.api;
 
 import cn.shu.wechat.beans.msg.sync.AddMsgList;
+import cn.shu.wechat.beans.msg.url.WXMsgUrl;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.URLEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
@@ -55,35 +56,33 @@ public class DownloadTools {
     public static boolean getDownloadFn(AddMsgList msg, String path) {
         Map<String, String> headerMap = new HashMap<String, String>();
         List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+
         WXReceiveMsgCodeEnum msgTypeEnum = WXReceiveMsgCodeEnum.getByCode(msg.getMsgType());
         String url = "";
         HttpEntity entity = null;
         switch (msgTypeEnum) {
             case MSGTYPE_IMAGE:
                 url = String.format(URLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String) Core.getLoginInfoMap().get("url"));
-                params.add(new BasicNameValuePair("msgid", String.valueOf(msg.getNewMsgId())));
-                params.add(new BasicNameValuePair("skey", (String) Core.getLoginInfoMap().get("skey")));
-                entity = MyHttpClient.doGet(url, params, true, headerMap);
+                entity = downloadEntityByMsgID(
+                        url,String.valueOf(msg.getNewMsgId())
+                        ,null,headerMap,true);
                 break;
             case MSGTYPE_EMOTICON:
                 url = String.format(URLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String) Core.getLoginInfoMap().get("url"));
-                params.add(new BasicNameValuePair("msgid", String.valueOf(msg.getNewMsgId())));
-                params.add(new BasicNameValuePair("type", "big"));
-                params.add(new BasicNameValuePair("skey", (String) Core.getLoginInfoMap().get("skey")));
-                entity = MyHttpClient.doGet(url, params, true, headerMap);
+                entity = downloadEntityByMsgID(url,String.valueOf(msg.getNewMsgId()), WXMsgUrl.BIG_TYPE,headerMap,true);
                 break;
             case MSGTYPE_VOICE:
                 url = String.format(URLEnum.WEB_WX_GET_VOICE.getUrl(), (String) Core.getLoginInfoMap().get("url"));
-                params.add(new BasicNameValuePair("msgid", String.valueOf(msg.getNewMsgId())));
-                params.add(new BasicNameValuePair("skey", (String) Core.getLoginInfoMap().get("skey")));
-                entity = MyHttpClient.doGet(url, params, true, headerMap);
+                entity = downloadEntityByMsgID(
+                        url,String.valueOf(msg.getNewMsgId())
+                        ,null,headerMap,true);
                 break;
             case MSGTYPE_VIDEO:
                 headerMap.put("Range", "bytes=0-");
                 url = String.format(URLEnum.WEB_WX_GET_VIEDO.getUrl(), (String) Core.getLoginInfoMap().get("url"));
-                params.add(new BasicNameValuePair("msgid", String.valueOf(msg.getNewMsgId())));
-                params.add(new BasicNameValuePair("skey", (String) Core.getLoginInfoMap().get("skey")));
-                entity = MyHttpClient.doGet(url, params, true, headerMap);
+                entity = downloadEntityByMsgID(
+                        url,String.valueOf(msg.getNewMsgId())
+                        ,null,headerMap,true);
                 break;
             case MSGTYPE_APP:
                 headerMap.put("Range", "bytes=0-");
@@ -103,7 +102,60 @@ public class DownloadTools {
             default:
                 break;
         }
+        entity2File(entity,path);
+        return false;
+    }
+    /**
+     * 下载缩略图
+     *
+     * @param msg  消息对象
+     * @param path 保存路径
+     * @return {@code true} 下载成功
+     * {@code false} 下载失败
+     * @author SXS
+     * @date 2017年4月21日 下午11:00:25
+     */
+    public static void getDownloadSlave(AddMsgList msg, String path) {
+        Map<String, String> headerMap = new HashMap<String, String>();
+        List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+        WXReceiveMsgCodeEnum msgTypeEnum = WXReceiveMsgCodeEnum.getByCode(msg.getMsgType());
+        String url = "";
+        HttpEntity entity = null;
+        switch (msgTypeEnum) {
+            case MSGTYPE_IMAGE:
+            case MSGTYPE_VIDEO:
+                url = String.format(URLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String) Core.getLoginInfoMap().get("url"));
+                entity = downloadEntityByMsgID(
+                        url,String.valueOf(msg.getNewMsgId())
+                        ,WXMsgUrl.SLAVE_TYPE,headerMap,true);
+            case MSGTYPE_APP:
 
+                break;
+            case MSGTYPE_MAP:
+
+                break;
+            default:
+                break;
+        }
+        if (entity == null){
+            DownloadTools.FILE_DOWNLOAD_STATUS.remove(path);
+            log.error("下载失败：response entity is null.");
+        }
+        entity2File(entity,path);
+
+    }
+
+    /**
+     * entity 2 file
+     * @param entity
+     * @param path
+     */
+    private static void entity2File(HttpEntity entity,String path){
+        if (entity == null){
+            DownloadTools.FILE_DOWNLOAD_STATUS.remove(path);
+            log.error("下载失败：response entity is null.");
+            return;
+        }
         boolean downloadStatus = false;
         OutputStream out = null;
         try {
@@ -133,7 +185,6 @@ public class DownloadTools {
             downloadStatus = true;
         } catch (Exception e) {
             log.info(e.getMessage());
-            return false;
         } finally {
             DownloadTools.FILE_DOWNLOAD_STATUS.put(path, downloadStatus);
             if (out != null) {
@@ -145,87 +196,34 @@ public class DownloadTools {
             }
 
         }
-        return false;
     }
     /**
-     * 下载缩略图
-     *
-     * @param msg  消息对象
-     * @param path 保存路径
-     * @return {@code true} 下载成功
-     * {@code false} 下载失败
-     * @author SXS
-     * @date 2017年4月21日 下午11:00:25
+     * entity to image
+     * @param entity entity
+     * @return
      */
-    public static boolean getDownloadSlave(AddMsgList msg, String path) {
-        Map<String, String> headerMap = new HashMap<String, String>();
-        List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
-        WXReceiveMsgCodeEnum msgTypeEnum = WXReceiveMsgCodeEnum.getByCode(msg.getMsgType());
-        String url = "";
-        HttpEntity entity = null;
-        switch (msgTypeEnum) {
-            case MSGTYPE_IMAGE:
-            case MSGTYPE_VIDEO:
-                url = String.format(URLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String) Core.getLoginInfoMap().get("url"));
-                params.add(new BasicNameValuePair("msgid", String.valueOf(msg.getNewMsgId())));
-                params.add(new BasicNameValuePair("skey", (String) Core.getLoginInfoMap().get("skey")));
-                params.add(new BasicNameValuePair("type", "slave"));
-                entity = MyHttpClient.doGet(url, params, true, headerMap);
-
-            case MSGTYPE_APP:
-
-                break;
-            case MSGTYPE_MAP:
-
-                break;
-            default:
-                break;
-        }
-        if (entity == null){
-            DownloadTools.FILE_DOWNLOAD_STATUS.remove(path);
-            log.error("下载失败：response entity is null.");
-            return false;
-        }
-        OutputStream out = null;
+    private static BufferedImage entity2Image(HttpEntity entity){
+        InputStream content = null;
         try {
-            File file = new File(path);
-            if (!file.exists()) {
-                File parentFile = file.getParentFile();
-                if (!parentFile.exists()) {
-                    boolean mkdirs = parentFile.mkdirs();
-                    if (!mkdirs) {
-                        log.error("创建目录失败：{}", parentFile.getAbsolutePath());
-                    }
-                }
-                boolean newFile = file.createNewFile();
-                if (!newFile) {
-                    log.error("创建文件失败：{}", path);
-                }
-
+            content = entity.getContent();
+            if (content == null){
+                return null;
             }
-            out = new FileOutputStream(file);
-            byte[] bytes = EntityUtils.toByteArray(entity);
-            out.write(bytes);
-            out.flush();
-            log.info("资源下载完成：{}", path);
-            DownloadTools.FILE_DOWNLOAD_STATUS.put(path, true);
-            return true;
-        } catch (Exception e) {
-            log.info(e.getMessage());
-            DownloadTools.FILE_DOWNLOAD_STATUS.remove(path);
-            return false;
-        } finally {
-            if (out != null) {
+            BufferedImage image = ImageIO.read(content);
+            return image;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            if (content!=null){
                 try {
-                    out.close();
+                    content.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-
         }
+        return null;
     }
-
     /**
      * 下载头像
      *
@@ -235,7 +233,6 @@ public class DownloadTools {
      * 下载失败 ""
      */
     public static String downloadHeadImgBig(String relativeUrl, String userName) {
-
         //获取远端对象字节数组
         String url = String.format(URLEnum.WEB_WX_GET_HEAD_IMAGE_BIG.getUrl(), relativeUrl);
         return downloadHeadImg(url,userName);
@@ -330,30 +327,52 @@ public class DownloadTools {
      * @param relativeUrl 微信头像地址
      * @return Image对象
      */
-    public static Image downloadImage(String relativeUrl){
+    public static Image downloadImgByRelativeUrl(String relativeUrl){
         String url = String.format(URLEnum.WEB_WX_GET_HEAD_IMAGE_THUM.getUrl(), relativeUrl);
-        HttpEntity entity = MyHttpClient.doGet(url, null, false, null);
-        InputStream content = null;
-        try {
-            content = entity.getContent();
-            if (content == null){
-                return null;
-            }
-            BufferedImage image = ImageIO.read(content);
-            return image;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }finally {
-           if (content!=null){
-               try {
-                   content.close();
-               } catch (IOException e) {
-                   e.printStackTrace();
-               }
-           }
-        }
-        return null;
+       return downloadImgByAbsoluteUrl(url);
 
+    }
+    /**
+     * 下载图片
+     * @param url 图片地址
+     * @return Image对象
+     */
+    public static BufferedImage downloadImgByAbsoluteUrl(String url){
+        HttpEntity entity = MyHttpClient.doGet(url, null, true, null);
+       return entity2Image(entity);
+    }
+
+
+    /**
+     * 下载图片根据消息id
+     * @param msgId 消息ID
+     * @param type 类型
+     * @return Image
+     */
+    public static BufferedImage downloadImgByMsgID(String msgId,String type){
+       String url = String.format(URLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String) Core.getLoginInfoMap().get("url"));
+        HttpEntity entity = downloadEntityByMsgID(
+                url, String.valueOf(msgId), type
+                , null, true);
+        return entity2Image(entity);
+    }
+
+    /**
+     * 下载资源根据消息id
+     * @param msgId 消息ID
+     * @param type 类型
+     * @return Image
+     */
+    public static HttpEntity downloadEntityByMsgID(String url,String msgId,String type,Map<String, String> headerMap,boolean redirect){
+
+        List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+        params.add(new BasicNameValuePair("msgid", String.valueOf(msgId)));
+        if (StringUtils.isNotEmpty(type)){
+            params.add(new BasicNameValuePair("type", type));
+        }
+        params.add(new BasicNameValuePair("skey", (String) Core.getLoginInfoMap().get("skey")));
+        HttpEntity entity = MyHttpClient.doGet(url, params, redirect, headerMap);
+        return entity;
     }
     /**
      * 替换字符串中不能用于创建文件或文件夹的字符
@@ -491,25 +510,6 @@ public class DownloadTools {
         return path + fileName;
     }
 
-    /**
-     * @param dir 目录
-     * @return {@code true} 创建成功
-     * {@code false} 创建失败
-     */
-    public static boolean createLogDir(String dir) {
-        File logFile = new File(dir);
-        if (!logFile.exists()) {
-            if (logFile.isFile()) {
-                boolean mkdirs = logFile.getParentFile().mkdirs();
-            }
-            return logFile.mkdirs();
-        }
-        return true;
-    }
-    static class Result{
-        private String filePath;
-        private Image image;
-    }
 
     /**
      * 等待下载完成

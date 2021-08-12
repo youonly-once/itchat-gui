@@ -3,6 +3,8 @@ package cn.shu.wechat.swing.entity;
 import lombok.Builder;
 import lombok.Data;
 
+import java.awt.image.BufferedImage;
+
 /**
  *
  * @author 舒新胜
@@ -37,6 +39,11 @@ public class LinkAttachmentItem {
      * 来源名词
      */
     private String sourceName;
+
+    /**
+     * 图标Image
+     */
+    private BufferedImage image;
 
 
 
