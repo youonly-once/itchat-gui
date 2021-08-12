@@ -439,22 +439,8 @@ public class DownloadTools {
         switch (msgTypeEnum) {
             case MSGTYPE_MAP:
             case MSGTYPE_IMAGE:
-                ext = ".jpg";
-                break;
             case MSGTYPE_EMOTICON:
-                try{
-                    Map<String, Object> stringObjectMap = XmlStreamUtil.toMap(msg.getContent());
-                    Object o = stringObjectMap.get("msg.emoji.attr.type");
-                    if (o.equals("2")){
-                        ext = ".gif";
-                    }else{
-                        ext = ".jpg";
-                    }
-                }catch (Exception e){
-                    log.warn(e.getMessage());
-                    ext = ".jpg";
-                }
-
+                ext = ".jpg";
                 break;
             case MSGTYPE_VOICE:
                 ext = ".mp3";

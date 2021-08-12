@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 /**
  * 图像处理工具类
@@ -87,9 +88,8 @@ public class ImageUtil {
         float scale = width * 1.0F / height;
 
         // 限制图片显示大小
-        int maxImageWidth = maxWidth;
-        if (width > maxImageWidth) {
-            width = maxImageWidth;
+        if (width > maxWidth) {
+            width = maxWidth;
             height = (int) (width / scale);
         }
         return new Dimension(width,height);
@@ -131,11 +131,32 @@ public class ImageUtil {
         BufferedImage read = null;
         try {
             Dimension scaleDimen = getScaleDimen(w, h, 128);
+            if (scaleDimen.width ==w && scaleDimen.height == h){
+                return new ImageIcon(filePath);
+            }
             GifUtil.zoomGifBySize(filePath,"gif",scaleDimen.width,scaleDimen.height,filePath+".slave");
             return new ImageIcon(filePath + ".slave");
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * 判断是否为GIF
+     * @param path
+     * @return
+     */
+    public static  boolean isGIF(String path ) {
+        String type = "";
+        try (InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(path))) {
+            char[] bytes = new char[20];
+            int read = inputStreamReader.read(bytes, 0, 3);
+            type = new String(bytes);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return type.startsWith("GIF");
     }
 }

@@ -748,17 +748,16 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             private ImageIcon imageIcon;
 
             @Override
-            protected Object doInBackground() throws Exception {
+            protected Object doInBackground() {
                 //循环等待下载完成
                 if (finalPath == null) {
                     return null;
                 }
                 //阻塞
                 DownloadTools.awaitDownload(finalPath);
-
                 File file = new File(finalPath);
                 if (file.length()>0){
-                    if (finalPath.endsWith(".gif")){
+                    if (ImageUtil.isGIF(finalPath)){
                         imageIcon = ImageUtil.preferredImageSize(finalPath, imageAttachment.getWidth(), imageAttachment.getHeight());
                     }else{
                         imageIcon = imageCache.tryGetThumbCache(file);
