@@ -52,6 +52,7 @@ public class RoomsPanel extends ParentAvailablePanel {
 
     private void initComponents() {
         roomItemsListView = new RCListView();
+        roomItemsListView.getVerticalScrollBar().setUnitIncrement(RoomItemViewHolder.HEIGHT/3);
     }
 
     private void initView() {
@@ -84,9 +85,6 @@ public class RoomsPanel extends ParentAvailablePanel {
      * @param roomId 房间id
      */
     public void enterRoom(String roomId) {
-        // 加载房间消息
-        //ChatPanel.getContext().enterRoom(roomId);
-
         //切换显示层
         RoomChatPanelCard roomChatPanelCard = RoomChatPanel.getContext().createAndShow(roomId);
         RoomChatPanel.getContext().show(roomId);
@@ -96,14 +94,6 @@ public class RoomsPanel extends ParentAvailablePanel {
         updateUnreadCount(roomId,0);
         //发送消息已读通知
         ExecutorServiceUtil.getGlobalExecutorService().execute(() -> MessageTools.sendStatusNotify(roomId));
-        //RightPanelParent.getContext().show(roomId);
-        //  rightPanel.getChatPanel().enterRoom(roomId);
-        //TitlePanel.getContext().hideRoomMembersPanel();
-        /*RoomMembersPanel.getContext().setRoomId(roomId);
-        if (RoomMembersPanel.getContext().isVisible())
-        {
-            RoomMembersPanel.getContext().updateUI();
-        }*/
     }
     /**
      * 添加房间
@@ -115,7 +105,14 @@ public class RoomsPanel extends ParentAvailablePanel {
         Contacts contacts = Core.getMemberMap().get(roomId);
         addRoom(new RoomItem(contacts, latestMsg, msgCount));
     }
-
+    /**
+     * 添加房间
+     *
+     * @param roomId 联系人
+     */
+    public void addRoom(String roomId) {
+        addRoom(roomId, "", 0);
+    }
     /**
      * 添加房间
      * @param item
@@ -123,6 +120,7 @@ public class RoomsPanel extends ParentAvailablePanel {
     public void addRoom(RoomItem item) {
         roomItemList.add(0, item);
         roomItemsListView.notifyDataSetChanged(false);
+        roomItemsListView.scrollToPosition(0);
     }
 
     /**
@@ -293,6 +291,8 @@ public class RoomsPanel extends ParentAvailablePanel {
     public void activeItem(int position) {
         RoomItemViewHolder holder = (RoomItemViewHolder) roomItemsListView.getItem(position);
         setItemBackground(holder, Colors.ITEM_SELECTED);
+        RoomItemsAdapter adapter = (RoomItemsAdapter) (roomItemsListView.getAdapter());
+        adapter.setSelectedViewHolder(holder);
         for (int i = 0; i < roomItemsListView.getItems().size(); i++) {
             if (i == position) {
                 continue;
@@ -300,7 +300,7 @@ public class RoomsPanel extends ParentAvailablePanel {
             holder = (RoomItemViewHolder) roomItemsListView.getItem(i);
             setItemBackground(holder, Colors.DARK);
         }
-
+        roomItemsListView.scrollToPosition(position*RoomItemViewHolder.HEIGHT);
     }
 
     /**

@@ -3,6 +3,7 @@ package cn.shu.wechat.swing.adapter.search;
 import cn.shu.wechat.beans.tuling.request.UserInfo;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.adapter.BaseAdapter;
+import cn.shu.wechat.swing.adapter.RoomItemViewHolder;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.constant.SearchResultType;
 import cn.shu.wechat.swing.db.model.FileAttachment;
@@ -15,6 +16,7 @@ import cn.shu.wechat.swing.panels.*;
 import cn.shu.wechat.swing.tasks.DownloadTask;
 import cn.shu.wechat.swing.tasks.HttpResponseListener;
 import cn.shu.wechat.swing.utils.*;
+import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -80,11 +82,15 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
     public SearchResultItemViewHolder onCreateViewHolder(int viewType, int position) {
         switch (viewType) {
             case VIEW_TYPE_CONTACTS_ROOM: {
+                //避免重复创建
                 SearchResultUserItemViewHolder holder = null;
-                if(searchResultUserItemViewHolderList.size()>position){
+                if(searchResultUserItemViewHolderList.size() > position){
                     holder = searchResultUserItemViewHolderList.get(position).get();
-                }
-                if (holder == null){
+                    if (holder == null){
+                        holder = new SearchResultUserItemViewHolder();
+                        searchResultUserItemViewHolderList.set(position,new SoftReference<>(holder));
+                    }
+                }else{
                     holder = new SearchResultUserItemViewHolder();
                     searchResultUserItemViewHolderList.add(position,new SoftReference<>(holder));
                 }
@@ -220,58 +226,79 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
     }
 
     private void processMouseListeners(SearchResultItemViewHolder viewHolder, SearchResultItem item) {
-        if (viewHolder.mouseListener!=null){
-            viewHolder.removeMouseListener(viewHolder.mouseListener);
+        if (viewHolder.mouseListener != null){
+            viewHolder.mouseListener.fresh(SearchResultType.getByCode(item.getType())
+                    ,item.getId()
+                    ,viewHolder);
+
+        }else{
+            viewHolder.mouseListener = new SearchResultItemAbstractMouseListener( SearchResultType.getByCode(item.getType())
+            ,item.getId()
+            ,viewHolder);
+           viewHolder.addMouseListener(  viewHolder.mouseListener);
         }
-        viewHolder.mouseListener = new AbstractMouseListener() {
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON1) {
-                    SearchResultType byCode = SearchResultType.getByCode(item.getType());
-                    switch (byCode) {
-                        case CONTACTS:
-                        case ROOM:
-                            UserInfoPanel.getContext().setContacts(Core.getMemberMap().get(item.getId()));
-                            RightPanel.getContext().show(RoomChatPanelCard.USER_INFO);
-                            //enterRoom(item.getId(), 0L);
-                            //clearSearchText();
-                            break;
-                        case SEARCH_FILE:
-                            if (searchMessageOrFileListener != null) {
-                                searchMessageOrFileListener.onSearchFile();
-                            }
-                            break;
-                        case SEARCH_MESSAGE:
-                            if (searchMessageOrFileListener != null) {
-                                searchMessageOrFileListener.onSearchMessage();
-                            }
-                        case MESSAGE:
+
+
+    }
+    class SearchResultItemAbstractMouseListener extends AbstractMouseListener {
+        private SearchResultType type;
+        private String id;
+        private SearchResultItemViewHolder holder;
+
+        public void fresh(SearchResultType type, String id, SearchResultItemViewHolder viewHolder) {
+            this.holder = viewHolder;
+            this.id = id;
+            this.type = type;
+        }
+        public SearchResultItemAbstractMouseListener(SearchResultType type, String id, SearchResultItemViewHolder holder) {
+            fresh(type,id,holder);
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            if (e.getButton() == MouseEvent.BUTTON1) {
+                switch (type) {
+                    case CONTACTS:
+                    case ROOM:
+                        UserInfoPanel.getContext().setContacts(Core.getMemberMap().get(id));
+                        RightPanel.getContext().show(RoomChatPanelCard.USER_INFO);
+                        //enterRoom(item.getId(), 0L);
+                        //clearSearchText();
+                        break;
+                    case SEARCH_FILE:
+                        if (searchMessageOrFileListener != null) {
+                            searchMessageOrFileListener.onSearchFile();
+                        }
+                        break;
+                    case SEARCH_MESSAGE:
+                        if (searchMessageOrFileListener != null) {
+                            searchMessageOrFileListener.onSearchMessage();
+                        }
+                    case MESSAGE:
             /*                Room room = roomService.findById((String) ((Map) item.getTag()).get("roomId"));
                             if (room != null)
                             {
                                 icon.setImage(getRoomAvatar(room.getType(), room.getName()));
                             }*/
-                            break;
-                        default:
-                            throw new RuntimeException("ViewType 不正确");
-                    }
+                        break;
+                    default:
+                        throw new RuntimeException("ViewType 不正确");
                 }
             }
+        }
 
 
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                setBackground(viewHolder, Colors.ITEM_SELECTED_DARK);
-            }
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            setBackground(holder, Colors.ITEM_SELECTED_DARK);
+        }
 
-            @Override
-            public void mouseExited(MouseEvent e) {
-                setBackground(viewHolder, Colors.DARK);
-            }
-        };
-        viewHolder.addMouseListener(  viewHolder.mouseListener);
-    }
+        @Override
+        public void mouseExited(MouseEvent e) {
+            setBackground(holder, Colors.DARK);
+        }
 
+    };
     private void clearSearchText() {
         ListPanel.getContext().showPanel(ListPanel.CHAT);
         SearchPanel.getContext().clearSearchText();

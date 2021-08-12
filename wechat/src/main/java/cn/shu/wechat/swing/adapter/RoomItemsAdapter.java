@@ -27,10 +27,17 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
      * 房间条目
      */
     private final List<RoomItem> roomItems;
+
+    public void setSelectedViewHolder(RoomItemViewHolder selectedViewHolder) {
+        this.selectedViewHolder = selectedViewHolder;
+    }
+
     /**
      * 当前选中的viewHolder
      */
     private RoomItemViewHolder selectedViewHolder;
+
+    private final List<RoomItemViewHolder> viewHolders =new ArrayList<>();
 
     public RoomItemsAdapter(List<RoomItem> roomItems) {
         this.roomItems = roomItems;
@@ -43,7 +50,20 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
 
     @Override
     public RoomItemViewHolder onCreateViewHolder(int viewType, int position) {
-        return new RoomItemViewHolder();
+        //避免重复创建
+        RoomItemViewHolder roomItemViewHolder;
+        if (viewHolders.size() > position){
+            //存在
+            roomItemViewHolder = viewHolders.get(position);
+            if (roomItemViewHolder == null){
+                roomItemViewHolder = new RoomItemViewHolder();
+                viewHolders.set(position,roomItemViewHolder);
+            }
+        }else{
+            roomItemViewHolder = new RoomItemViewHolder();
+            viewHolders.add(position,roomItemViewHolder);
+        }
+        return roomItemViewHolder;
     }
 
     @Override
@@ -84,57 +104,74 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
         } else {
             viewHolder.unreadCount.setVisible(false);
         }
-
         // 设置是否激活
         if (roomItem.getRoomId().equals(RoomChatPanel.getContext().getCurrRoomId())) {
             setBackground(viewHolder, Colors.ITEM_SELECTED);
             selectedViewHolder = viewHolder;
+        }else{
+            setBackground(viewHolder, Colors.DARK);
         }
-        if (viewHolder.mouseListener!=null){
-            viewHolder.removeMouseListener(viewHolder.mouseListener);
+
+        //更新鼠标监听器
+        if (viewHolder.mouseListener != null){
+            viewHolder.mouseListener.setMyHolder(viewHolder);
+            viewHolder.mouseListener.setMyRoomId(roomItem.getRoomId());
+        }else{
+            viewHolder.mouseListener = new RoomItemAbstractMouseListener(viewHolder,roomItem.getRoomId());;
+            viewHolder.addMouseListener(viewHolder.mouseListener);
         }
 
-        //鼠标点击事件 点击变色并进入房间
-        viewHolder.mouseListener = new AbstractMouseListener() {
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON1) {
-
-                    if (selectedViewHolder != viewHolder) {
-                        //之前选择的房间背景色去掉
-                        setBackground(selectedViewHolder,Colors.DARK);
-                        // 进入房间
-                        RoomsPanel.getContext().enterRoom(roomItem.getRoomId());
-
-                  /*      for (RoomItemViewHolder holder : viewHolders) {
-                            if (holder != viewHolder) {
-                                setBackground(holder, Colors.DARK);
-                            }
-                        }*/
-
-                        //setBackground(viewHolder, Colors.ITEM_SELECTED);
-                        selectedViewHolder = viewHolder;
-                    }
-                }
-            }
-
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                if (selectedViewHolder != viewHolder) {
-                    setBackground(viewHolder, Colors.ITEM_SELECTED_DARK);
-                }
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                if (selectedViewHolder != viewHolder) {
-                    setBackground(viewHolder, Colors.DARK);
-                }
-            }
-        };
-        viewHolder.addMouseListener(viewHolder.mouseListener);
     }
+
+
+    class RoomItemAbstractMouseListener extends AbstractMouseListener{
+
+        public RoomItemAbstractMouseListener(RoomItemViewHolder myHolder, String myRoomId) {
+            this.myHolder = myHolder;
+            this.myRoomId = myRoomId;
+        }
+
+        public void setMyHolder(RoomItemViewHolder myHolder) {
+            this.myHolder = myHolder;
+        }
+
+        public void setMyRoomId(String myRoomId) {
+            this.myRoomId = myRoomId;
+        }
+
+        private RoomItemViewHolder myHolder ;
+        private String myRoomId ;
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            if (e.getButton() == MouseEvent.BUTTON1) {
+
+                if (selectedViewHolder != myHolder) {
+                    //之前选择的房间背景色去掉
+                    setBackground(selectedViewHolder, Colors.DARK);
+                    // 进入房间
+                    RoomsPanel.getContext().enterRoom(myRoomId);
+
+                    selectedViewHolder = myHolder;
+                }
+            }
+        }
+
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            if (selectedViewHolder != myHolder) {
+                setBackground(myHolder, Colors.ITEM_SELECTED_DARK);
+            }
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            if (selectedViewHolder != myHolder) {
+                setBackground(myHolder, Colors.DARK);
+            }
+        }
+    };
 
     /**
      * 根据房间id获取群成员
@@ -145,7 +182,6 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
     private String[] getRoomMembers(String roomId) {
         Contacts contacts = Core.getMemberMap().get(roomId);
         List<Contacts> memberList = contacts.getMemberlist();
-        //String members = room.getMember();
         List<String> roomMembers = new ArrayList<>();
         String[] memberArr = null;
         for (Object o1 : memberList) {

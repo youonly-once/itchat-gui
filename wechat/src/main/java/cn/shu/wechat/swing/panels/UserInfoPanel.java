@@ -19,6 +19,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.util.Map;
 
 /**
  * Created by 舒新胜 on 2017/6/15.
@@ -48,6 +49,7 @@ public class UserInfoPanel extends ParentAvailablePanel {
         initComponents();
         initView();
         setListeners();
+        setContacts(Core.getUserSelf());
     }
     public static UserInfoPanel getContext() {
         return context;
@@ -131,7 +133,6 @@ public class UserInfoPanel extends ParentAvailablePanel {
         button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-
                 ChatUtil.openOrCreateDirectChat(currUserId);
                 super.mouseClicked(e);
             }
@@ -156,8 +157,6 @@ public class UserInfoPanel extends ParentAvailablePanel {
             setLayout(new FlowLayout(FlowLayout.LEFT,20,0));
             nameLabel.setForeground(Color.GRAY);
             valueLabel.setForeground(Color.BLACK);
-     /*       valueLabel.setWrapStyleWord(true);
-            valueLabel.setLineWrap(true);*/
             add(nameLabel);
             add(valueLabel);
         }

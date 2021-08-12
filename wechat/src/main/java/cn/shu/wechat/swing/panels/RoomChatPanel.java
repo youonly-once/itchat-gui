@@ -47,9 +47,6 @@ public class RoomChatPanel extends ParentAvailablePanel {
         RoomChatPanelCard rightPanel = new RoomChatPanelCard(roomId);
         add(rightPanel,roomId);
         cards.put(roomId,rightPanel);
- /*       if (cards.size()>=5){
-            cards.
-        }*/
         return rightPanel;
     }
 
@@ -91,4 +88,10 @@ public class RoomChatPanel extends ParentAvailablePanel {
         return cards.get(currRoomId);
     }
 
+    /**
+     * 房间是否存在
+     */
+    public boolean exists(String roomId){
+        return cards.containsKey(roomId);
+    }
 }

@@ -424,7 +424,7 @@ public class DownloadTools {
                 break;
             case MSGTYPE_EMOTICON:
                 try{
-                    Map<String, Object> stringObjectMap = MessageTools.parseUndoMsg(msg.getContent());
+                    Map<String, Object> stringObjectMap = XmlStreamUtil.toMap(msg.getContent());
                     Object o = stringObjectMap.get("msg.emoji.attr.type");
                     if (o.equals("2")){
                         ext = ".gif";

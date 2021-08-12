@@ -23,6 +23,7 @@ import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.SleepUtils;
 import javazoom.jl.player.Player;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -926,32 +927,38 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         LinkAttachmentItem linkItem = item.getLinkAttachmentItem();
         MessageLinkViewHolder linkViewHolder = (MessageLinkViewHolder) viewHolder;
 
-        linkViewHolder.desc.setText(linkItem.getDesc());
+
+        linkViewHolder.desc.setText(StringEscapeUtils.unescapeHtml4(linkItem.getDesc()));
         linkViewHolder.title.setText(linkItem.getTitle());
         if (StringUtils.isEmpty(linkItem.getSourceName())) {
             linkViewHolder.sourcePanel.setVisible(false);
         } else {
             linkViewHolder.sourceName.setText(linkItem.getSourceName());
         }
-
-        try {
-            BufferedImage image = ImageIO.read(new URL(linkItem.getThumbUrl()));
-            linkViewHolder.icon.setIcon(new ImageIcon(ImageUtil.preferredImageSize(image, MessageLinkViewHolder.THUMB_WIDTH)));
-            if (StringUtils.isNotEmpty(linkItem.getSourceName())) {
-                linkViewHolder.sourceIcon.setIcon(new ImageIcon(ImageUtil.preferredImageSize(image, 8)));
+        if (StringUtils.isNotEmpty(linkItem.getThumbUrl())) {
+            try {
+                BufferedImage image = ImageIO.read(new URL(linkItem.getThumbUrl()));
+                linkViewHolder.icon.setIcon(new ImageIcon(ImageUtil.preferredImageSize(image, MessageLinkViewHolder.THUMB_WIDTH)));
+                if (StringUtils.isNotEmpty(linkItem.getSourceName())) {
+                    linkViewHolder.sourceIcon.setIcon(new ImageIcon(ImageUtil.preferredImageSize(image, 8)));
+                }
+                //有图片时缩短宽度，让其与无图的Panel尽量一致
+                linkViewHolder.desc.setColumns(16);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         //点击打开链接
         MessageMouseListener messageMouseListener = new MessageMouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    try {
-                        Desktop.getDesktop().browse(new URI(linkItem.getUrl()));
-                    } catch (IOException | URISyntaxException ioException) {
-                        ioException.printStackTrace();
+                    if (StringUtils.isNotEmpty(linkItem.getUrl())) {
+                        try {
+                            Desktop.getDesktop().browse(new URI(linkItem.getUrl()));
+                        } catch (IOException | URISyntaxException ioException) {
+                            ioException.printStackTrace();
+                        }
                     }
                 }
             }
@@ -968,12 +975,12 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         listView.setScrollHiddenOnMouseLeave(linkViewHolder.messageBubble);
         Dimension preferredSize = linkViewHolder.contentTagPanel.getPreferredSize();
         if (preferredSize.height < 120) {
-            preferredSize.height = 120;
+        //    preferredSize.height = 120;
         }
-        preferredSize.width = 250;
+       // preferredSize.width = 250;
         //固定宽度
-        linkViewHolder.contentTagPanel.setPreferredSize(preferredSize);
-        linkViewHolder.messageBubble.repaint();
+       // linkViewHolder.contentTagPanel.setPreferredSize(preferredSize);
+       // linkViewHolder.messageBubble.repaint();
     }
 
     /**

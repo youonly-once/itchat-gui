@@ -413,7 +413,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             }
         }
         /*============获取被撤回的消息============*/
-        Map<String, Object> map = MessageTools.parseUndoMsg(msg.getContent());
+        Map<String, Object> map = XmlStreamUtil.toMap(msg.getContent());
         Object msgid = map.get("sysmsg.revokemsg.msgid");
         if (msgid == null) {
             return null;
@@ -594,7 +594,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         //自动同意
         MessageTools.addFriend(msg, true);
         String content = msg.getContent();
-        Map<String, Object> stringObjectMap = MessageTools.parseUndoMsg(content);
+        Map<String, Object> stringObjectMap = XmlStreamUtil.toMap(content);
         Object o = stringObjectMap.get("msg.attr.content");
         if (o == null|| StringUtils.isEmpty(o.toString())){
             content = "添加你为好友";

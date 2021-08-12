@@ -127,7 +127,6 @@ public class RCListView extends JScrollPane {
                     scrollListener.onScroll(evt.getValue()+evt.getAdjustable().getVisibleAmount()
                             ,evt.getAdjustable().getMaximum());
                 }
-
                 lastScrollValue = evt.getValue();
 
             }
@@ -198,6 +197,7 @@ public class RCListView extends JScrollPane {
         lastItemCount = adapter.getCount();
         for (int i = 0; i < adapter.getCount(); i++) {
             int viewType = adapter.getItemViewType(i);
+            //联系人列表的 Header
             HeaderViewHolder headerViewHolder = adapter.onCreateHeaderViewHolder(viewType, i);
             if (headerViewHolder != null) {
                 adapter.onBindHeaderViewHolder(headerViewHolder, i);
@@ -226,7 +226,8 @@ public class RCListView extends JScrollPane {
         contentPanel.setBackground(color);
     }
 
-    public void scrollToPosition(int position) {
+    public void scrollToPosition(int value) {
+        getVerticalScrollBar().setValue(value);
     }
 
     /**

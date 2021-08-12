@@ -19,6 +19,7 @@ import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.utils.CommonTools;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.LogUtil;
+import cn.shu.wechat.utils.XmlStreamUtil;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
@@ -200,11 +201,10 @@ public class MsgCenter {
                 message.setIsSend(true);
                 //新消息来了后创建房间
                 //创建房间的时候会从数据库加载历史消息，由于这次的消息已经写入了数据库，所以不用再添加了
-                RoomChatPanelCard roomChatPanelCard = RoomChatPanel.getContext().get(roomId);
-                if (roomChatPanelCard == null) {
-                    roomChatPanelCard = RoomChatPanel.getContext().addPanel(roomId);
+                if (RoomChatPanel.getContext().exists(roomId)) {
+                    RoomChatPanel.getContext().get(roomId).addMessageItemToEnd(message);
                 }else{
-                    roomChatPanelCard.addMessageItemToEnd(message);
+                    RoomChatPanel.getContext().addPanel(roomId);
                 }
             }
             //新增或选择聊天列表
@@ -322,7 +322,7 @@ public class MsgCenter {
             case MSGTYPE_APP:
                 switch (WXReceiveMsgCodeOfAppEnum.getByCode(msg.getAppMsgType())) {
                     case LINK:
-                        Map<String, Object> stringObjectMap = MessageTools.parseUndoMsg(msg.getContent());
+                        Map<String, Object> stringObjectMap = XmlStreamUtil.toMap(msg.getContent());
                         Object o = stringObjectMap.get("msg.appmsg.title");
                         plaintext = "[链接]"+o.toString();
                         break;
@@ -336,7 +336,7 @@ public class MsgCenter {
                         plaintext = msg.getContent();
                         break;
                     default:
-                        stringObjectMap = MessageTools.parseUndoMsg(msg.getContent());
+                        stringObjectMap = XmlStreamUtil.toMap(msg.getContent());
 
                         o = stringObjectMap.get("msg.appmsg.des");
                         Object url = stringObjectMap.get("msg.appmsg.url");
@@ -377,7 +377,7 @@ public class MsgCenter {
                 plaintext = "[名片消息，请在手机上查看]";
                 break;
             case MSGTYPE_RECALLED:
-                Map<String, Object> map = MessageTools.parseUndoMsg(msg.getContent());
+                Map<String, Object> map = XmlStreamUtil.toMap(msg.getContent());
                 plaintext = map.get("sysmsg.revokemsg.replacemsg").toString();
                 break;
             case UNKNOWN:

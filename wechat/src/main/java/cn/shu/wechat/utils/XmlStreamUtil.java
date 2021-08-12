@@ -5,6 +5,8 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
 import com.thoughtworks.xstream.security.AnyTypePermission;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -75,6 +77,10 @@ public class XmlStreamUtil {
      * @description 将xml字符串转换成map
      */
     public static Map<String, Object> toMap(String xml) {
+        if (StringUtils.isEmpty(xml)){
+            return new HashMap<>(0);
+        }
+        xml = StringEscapeUtils.unescapeXml(xml);
         Map<String, Object> map = new HashMap<String, Object>();
         Document doc = null;
         try {

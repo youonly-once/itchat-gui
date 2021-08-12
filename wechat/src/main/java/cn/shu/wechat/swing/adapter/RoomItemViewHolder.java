@@ -21,8 +21,9 @@ public class RoomItemViewHolder extends ViewHolder {
     public JLabel time = new JLabel();
     public JLabel unreadCount = new JLabel();
     public JPanel timeUnread = new JPanel();
+    public static final int HEIGHT = 64;
     private Object tag;
-    protected MouseListener mouseListener;
+    protected RoomItemsAdapter.RoomItemAbstractMouseListener mouseListener;
     public RoomItemViewHolder() {
         initComponents();
         initView();
@@ -30,7 +31,7 @@ public class RoomItemViewHolder extends ViewHolder {
     }
 
     private void initComponents() {
-        setPreferredSize(new Dimension(100, 64));
+        setPreferredSize(new Dimension(100, HEIGHT));
         setBackground(Colors.DARK);
         setBorder(new RCBorder(RCBorder.BOTTOM));
         setOpaque(true);

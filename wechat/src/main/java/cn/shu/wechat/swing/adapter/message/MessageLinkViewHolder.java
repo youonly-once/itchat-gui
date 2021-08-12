@@ -81,6 +81,7 @@ public class MessageLinkViewHolder extends BaseMessageViewHolder {
         desc.setEditable(false);
         desc.setWrapStyleWord(true);
         desc.setForeground(Color.GRAY);
+        desc.setColumns(20);
         desc.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         JPanel descIconPanel = new JPanel(new BorderLayout());

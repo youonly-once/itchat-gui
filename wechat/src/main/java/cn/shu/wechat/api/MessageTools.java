@@ -17,6 +17,7 @@ import lombok.Builder;
 import lombok.extern.log4j.Log4j2;
 import me.xuxiaoxiao.xtools.common.XTools;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
@@ -789,17 +790,6 @@ public class MessageTools {
         //消息接收者
         private final String toUserName;
     }
-
-    /**
-     * 解析撤回消息的XML
-     * @param content
-     * @return
-     */
-    public static Map<String ,Object> parseUndoMsg(String content){
-        content = XmlStreamUtil.formatXml(content);
-       // content = "<root>" + content + "</root>";
-        Map<String, Object> map = XmlStreamUtil.toMap(content);
-        return map;
-    }
+    
 
 }

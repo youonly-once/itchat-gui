@@ -17,24 +17,22 @@ public class ChatUtil {
      * 打开或创建新聊天房
      */
     public static void openOrCreateDirectChat(String userId) {
+        //注意先后顺序，否则可能不能激活
         if (!Core.getRecentContacts().contains(userId)) {
-            // 房间bu存在，直接打开，否则发送请求创建房间
+            //创建一层聊天面板
+            RoomChatPanel.getContext().createAndShow(userId);
+            //房间不存在，创建左侧聊天房
             createDirectChat(userId);
-            RoomsPanel.getContext().activeItem(0);
         }else{
-            //房间列表激活
+            RoomChatPanel.getContext().createAndShow(userId);
+            //房间列表激活 //TODO有问题
             RoomsPanel.getContext().activeItem(userId);
         }
+
         //右侧面板显示聊天框
         RightPanel.getContext().show(RightPanel.CHAT_ROOM);
-        //创建一层Card
-        RoomChatPanel.getContext().addPanel(userId);
-        RoomChatPanel.getContext().show(userId);
-
         //控制选项卡切换
         TabOperationPanel.getContext().switchToChatLabel();
-        RoomsPanel.getContext().scrollPoint(1);
-        //ChatPanel.getContext().enterRoom(user.getUsername());
     }
 
     /**
@@ -43,9 +41,7 @@ public class ChatUtil {
      * @param userId
      */
     public static void createDirectChat(String userId) {
-        // JOptionPane.showMessageDialog(MainFrame.getContext(), "发起聊天", "发起聊天", JOptionPane.INFORMATION_MESSAGE);
-        RoomsPanel.getContext().addRoom(userId, "", 0);
+        RoomsPanel.getContext().addRoom(userId);
         Core.getRecentContacts().add(userId);
-
     }
 }

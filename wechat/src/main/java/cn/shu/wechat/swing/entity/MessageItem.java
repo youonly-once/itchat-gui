@@ -6,6 +6,7 @@ import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
 import cn.shu.wechat.swing.db.model.ImageAttachment;
+import cn.shu.wechat.utils.XmlStreamUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -96,7 +97,7 @@ public class MessageItem implements Comparable<MessageItem> {
                     case OTHER:
                         break;
                     case LINK:
-                        Map<String, Object> stringObjectMap = MessageTools.parseUndoMsg(message.getContent());
+                        Map<String, Object> stringObjectMap = XmlStreamUtil.toMap(message.getContent());
                         Object desc = stringObjectMap.get("msg.appmsg.des");
                         Object url = stringObjectMap.get("msg.appmsg.url");
                         Object title = stringObjectMap.get("msg.appmsg.title");
@@ -110,6 +111,7 @@ public class MessageItem implements Comparable<MessageItem> {
                                 .url(url == null?"":url.toString())
                                 .sourceName(sourceName == null?"":sourceName.toString())
                                 .build();
+                        break;
                     case PROGRAM:
                       break;
                     case FILE:

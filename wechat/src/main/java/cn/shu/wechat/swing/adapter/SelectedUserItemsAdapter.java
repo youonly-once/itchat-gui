@@ -34,15 +34,19 @@ public class SelectedUserItemsAdapter extends BaseAdapter<SelectedUserItemViewHo
     @Override
     public SelectedUserItemViewHolder onCreateViewHolder(int viewType, int position) {
         //避免重复创建
-        if (position< viewHolders.size()){
+        SelectedUserItemViewHolder selectedUserItemViewHolder;
+        if (viewHolders.size() > position){
             //存在
-            SelectedUserItemViewHolder selectedUserItemViewHolder = viewHolders.get(position);
-            if (selectedUserItemViewHolder != null){
-                return selectedUserItemViewHolder;
+            selectedUserItemViewHolder = viewHolders.get(position);
+            if (selectedUserItemViewHolder == null){
+                selectedUserItemViewHolder = new SelectedUserItemViewHolder();
+                viewHolders.set(position,selectedUserItemViewHolder);
             }
+        }else{
+            selectedUserItemViewHolder = new SelectedUserItemViewHolder();
+            viewHolders.add(position,selectedUserItemViewHolder);
         }
-        viewHolders.add(position,new SelectedUserItemViewHolder());
-        return viewHolders.get(position);
+        return selectedUserItemViewHolder;
 
     }
 
@@ -58,10 +62,6 @@ public class SelectedUserItemsAdapter extends BaseAdapter<SelectedUserItemViewHo
 
         // 名字
         viewHolder.username.setText(user.getName());
-
-        /*viewHolder.icon.setIcon(IconUtil.getIcon(this, "/image/remove.png", 18, 18));
-        viewHolder.icon.setToolTipText("移除");*/
-
         viewHolder.icon.addMouseListener(new AbstractMouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -75,7 +75,6 @@ public class SelectedUserItemsAdapter extends BaseAdapter<SelectedUserItemViewHo
 
 
     private void processData() {
-        //Collections.sort(userList);
         Collections.sort(userList, new Comparator<SelectUserData>() {
             @Override
             public int compare(SelectUserData o1, SelectUserData o2) {

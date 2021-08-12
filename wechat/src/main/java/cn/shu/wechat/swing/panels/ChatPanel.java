@@ -212,8 +212,8 @@ public class ChatPanel extends ParentAvailablePanel {
                         @Override
                         protected void done() {
                             try {
-                                if (!messageItems.isEmpty()) {
-                                    messagePanel.getMessageListView().notifyItemRangeInserted(0, messageItems.size());
+                                if (!messageList.isEmpty()) {
+                                    messagePanel.getMessageListView().notifyItemRangeInserted(0, messageList.size());
                                 }
                             } finally {
                                 isLoadHis = false;

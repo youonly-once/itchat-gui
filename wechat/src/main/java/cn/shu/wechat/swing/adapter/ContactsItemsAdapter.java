@@ -49,16 +49,19 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
     @Override
     public ContactsItemViewHolder onCreateViewHolder(int viewType, int position) {
         //避免重复创建
-        if (position< viewHolders.size()){
+        ContactsItemViewHolder contactsItemViewHolder;
+        if (viewHolders.size() > position){
             //存在
-            ContactsItemViewHolder contactsItemViewHolder = viewHolders.get(position);
-            if (contactsItemViewHolder != null){
-                return contactsItemViewHolder;
+            contactsItemViewHolder = viewHolders.get(position);
+            if (contactsItemViewHolder == null){
+                contactsItemViewHolder = new ContactsItemViewHolder();
+                viewHolders.set(position,contactsItemViewHolder);
             }
+        }else{
+            contactsItemViewHolder = new ContactsItemViewHolder();
+            viewHolders.add(position,contactsItemViewHolder);
         }
-        viewHolders.add(position,new ContactsItemViewHolder());
-        return viewHolders.get(position);
-
+        return contactsItemViewHolder;
     }
 
     @Override

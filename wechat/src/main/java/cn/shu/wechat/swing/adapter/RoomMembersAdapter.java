@@ -130,6 +130,17 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
                         }
 
                     }
+                    @Override
+                    public void mouseEntered(MouseEvent e) {
+                        viewHolder.setBackground(Colors.ITEM_SELECTED_LIGHT);
+                        super.mouseEntered(e);
+                    }
+
+                    @Override
+                    public void mouseExited(MouseEvent e) {
+                        viewHolder.setBackground(Colors.WINDOW_BACKGROUND_LIGHT);
+
+                    }
                 });
             }
         }
