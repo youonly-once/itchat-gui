@@ -194,7 +194,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 Status status = new Status();
                 status.setName(to);
                 status.setAutoStatus((short) 1);
-                statusMapper.insertOrUpdateSelective(status);
+                statusMapper.insertOrUpdateSelectiveForSqlite(status);
                 messages.add(MessageTools.Message.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                         .content("已开启【" + remarkNameByGroupUserName + "】自动回复功能")
                         .toUserName(toUserName).build());
@@ -206,7 +206,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 status = new Status();
                 status.setName(to);
                 status.setAutoStatus((short) 2);
-                statusMapper.insertOrUpdateSelective(status);
+                statusMapper.insertOrUpdateSelectiveForSqlite(status);
                 messages.add(MessageTools.Message.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                         .content("已关闭【" + remarkNameByGroupUserName + "】自动回复功能")
                         .toUserName(toUserName).build());
@@ -218,7 +218,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 status = new Status();
                 status.setName(to);
                 status.setUndoStatus((short) 1);
-                statusMapper.insertOrUpdateSelective(status);
+                statusMapper.insertOrUpdateSelectiveForSqlite(status);
                 messages.add(MessageTools.Message.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
                         .content("已开启【" + remarkNameByGroupUserName + "】防撤回功能")
                         .toUserName(toUserName).build());
@@ -229,7 +229,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 status = new Status();
                 status.setName(to);
                 status.setUndoStatus((short) 2);
-                statusMapper.insertOrUpdateSelective(status);
+                statusMapper.insertOrUpdateSelectiveForSqlite(status);
                 //群消息
                 nonPreventUndoMsgUserName.add(to);
                 messages.add(MessageTools.Message.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
@@ -403,7 +403,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         //======家人群不发送撤回消息====
         if (msg.getFromUserName().startsWith("@@")) {
             String to = ContactsTools.getContactDisplayNameByUserName(msg.getFromUserName());
-            if ("❤汪家人❤".equals(to)) {
+            if ("❤汪家人❤".equals(to) || to.startsWith("三盟")) {
                 log.error("重要群群，不发送撤回消息");
                 return null;
             }

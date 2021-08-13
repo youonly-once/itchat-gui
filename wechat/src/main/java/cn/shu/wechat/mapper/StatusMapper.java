@@ -24,6 +24,14 @@ public interface StatusMapper {
 
     int insertOrUpdateSelective(Status record);
 
+    /**
+     * SQLLite
+     *
+     * @param record
+     * @return
+     */
+    int insertOrUpdateSelectiveForSqlite(Status record);
+
     int insertSelective(Status record);
 
     List<Status> selectByExample(StatusExample example);

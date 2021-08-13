@@ -5,7 +5,6 @@ import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.components.*;
-import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.ChatUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
@@ -14,12 +13,10 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-import java.util.Map;
+import java.net.URL;
 
 /**
  * Created by 舒新胜 on 2017/6/15.
@@ -77,8 +74,9 @@ public class UserInfoPanel extends ParentAvailablePanel {
                 super.done();
             }
         }.execute();
-        if (contacts.getSex() == 1){
-            sexLabel.setIcon(new ImageIcon(getClass().getResource("/image/woman.png")));
+        if (contacts.getSex() == 1) {
+            URL resource = getClass().getResource("/image/woman.png");
+            sexLabel.setIcon(new ImageIcon());
         }else if (contacts.getSex() == 2){
             sexLabel.setIcon(new ImageIcon(getClass().getResource("/image/man.png")));
         }else {

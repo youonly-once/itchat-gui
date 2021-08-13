@@ -277,4 +277,30 @@
             </if>
         </trim>
     </insert>
+    <insert id="insertOrUpdateSelectiveForSqlite" parameterType="cn.shu.wechat.beans.pojo.Status">
+        INSERT OR REPLACE INTO status
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">
+                `name`,
+            </if>
+            <if test="undoStatus != null">
+                undo_status,
+            </if>
+            <if test="autoStatus != null">
+                auto_status,
+            </if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="undoStatus != null">
+                #{undoStatus,jdbcType=SMALLINT},
+            </if>
+            <if test="autoStatus != null">
+                #{autoStatus,jdbcType=SMALLINT},
+            </if>
+        </trim>
+    </insert>
 </mapper>
