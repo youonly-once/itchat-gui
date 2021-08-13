@@ -9,4 +9,4 @@ spring:
     driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
     username: root
     password: 123456
-    url: jdbc:log4jdbc:sqlite:D:/weixin/wechat.db
+    url: jdbc:log4jdbc:sqlite:wechat.db
