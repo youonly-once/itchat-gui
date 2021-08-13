@@ -16,6 +16,7 @@ public class ContactsItemViewHolder extends ViewHolder {
     public JLabel avatar = new JLabel();
     public JLabel roomName = new JLabel();
     public MouseListener mouseListener;
+    public static final int HEIGHT = 50;
     public ContactsItemViewHolder() {
         initComponents();
         initView();

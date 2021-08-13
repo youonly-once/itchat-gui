@@ -124,7 +124,7 @@ public class RCListView extends JScrollPane {
                             - getVerticalScrollBar().getModel().getExtent());
                 }
                 if (scrollListener != null){
-                    scrollListener.onScroll(evt.getValue()+evt.getAdjustable().getVisibleAmount()
+                    scrollListener.onScroll(evt.getValue()
                             ,evt.getAdjustable().getMaximum());
                 }
                 lastScrollValue = evt.getValue();
@@ -277,19 +277,38 @@ public class RCListView extends JScrollPane {
      * @param count
      */
     public void notifyItemRangeInserted(int startPosition, int count) {
-        /*for (int i = startPosition; i < count; i++)
-        {
-            int viewType = adapter.getItemViewType(i);
-            ViewHolder holder = adapter.onCreateViewHolder(viewType);
-            adapter.onBindViewHolder(holder, i);
-            contentPanel.add(holder, startPosition);
-        }*/
 
         for (int i = count - 1; i >= startPosition; i--) {
             int viewType = adapter.getItemViewType(i);
             ViewHolder holder = adapter.onCreateViewHolder(viewType, i);
             adapter.onBindViewHolder(holder, i);
             contentPanel.add(holder, startPosition);
+        }
+    }
+
+    /**
+     * 从元素集合start出开始取count个追加到UI末尾
+     * @param start 元素开始位置
+     * @param count 追加数量
+     */
+    public void notifyItemAppend(int start,int count){
+        for (int i = start; i <start+ count; i++)
+        {
+            Map positionMap = adapter.getPositionMap();
+            if (positionMap!=null && positionMap.containsKey(i)){
+                //添加标签
+                HeaderViewHolder holder = adapter.onCreateHeaderViewHolder(0,i);
+                adapter.onBindHeaderViewHolder((HeaderViewHolder) holder, i);
+                contentPanel.add(holder, -1);
+            }
+
+            int viewType = adapter.getItemViewType(i);
+            ViewHolder holder = adapter.onCreateViewHolder(viewType,i);
+            adapter.onBindViewHolder(holder, i);
+            contentPanel.add(holder, -1);
+
+
+
         }
     }
 

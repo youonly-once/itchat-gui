@@ -3,6 +3,7 @@ package cn.shu.wechat.swing.panels;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.swing.adapter.ContactsItemViewHolder;
 import cn.shu.wechat.swing.adapter.ContactsItemsAdapter;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by 舒新胜 on 17-5-30.
@@ -30,23 +32,23 @@ public class ContactsPanel extends ParentAvailablePanel {
 
     private RCListView contactsListView;
     private final List<ContactsItem> contactsItemList = new ArrayList<>();
-
+    /**
+     * 每次加载的联系人数量
+     */
+    public static final int initialCount = 10;
     /**
      * 已更新头像的联系人数量 从上往下
      */
-    private  int updatedCount ;
+    private final AtomicInteger loadedCount = new AtomicInteger(0);
     public ContactsPanel(JPanel parent) {
         super(parent);
         context = this;
 
         initComponents();
         initView();
-        initData();
         //绑定list到Adapter
         contactsListView.setAdapter(new ContactsItemsAdapter(contactsItemList));
-
-        // TODO: 从服务器获取通讯录后，调用下面方法更新UI
-        //notifyDataSetChanged();
+        loadedCount.set(contactsItemList.size());
     }
 
 
@@ -57,59 +59,24 @@ public class ContactsPanel extends ParentAvailablePanel {
     private void initView() {
         setLayout(new GridBagLayout());
         contactsListView.setContentPanelBackground(Colors.DARK);
+        contactsListView.getVerticalScrollBar().setUnitIncrement(ContactsItemViewHolder.HEIGHT);
+        //滑轮滚动逐步加载
         contactsListView.setScrollListener(new RCListView.ScrollListener() {
             @Override
-            public void onScroll(int curr,int max) {
-                int size = contactsListView.getContentPanel().getComponentCount();
-                ContactsItemsAdapter adapter = (ContactsItemsAdapter) contactsListView.getAdapter();
-                Map<Integer, String> c = adapter.getPositionMap();
-                //每个联系人大约占用的高度
-                double height = (max * 1.0) / size;
-                //当前应显示的联系人数量 多加载二个
-                int count = (int)Math.ceil(curr / height)+20;
-                boolean loadPre;
-                //启动程序的时候这个顺序还不对，先返回
-                Optional<Integer> max1 = adapter.getPositionMap().keySet().stream().max(Integer::compareTo);
-                if (max1.isPresent() && adapter.getPositionMap().size() == max1.get() + 1){
+            public void onScroll(int currValue,int maxValue) {
+                int visibleAmount = contactsListView.getVerticalScrollBar().getVisibleAmount();
+
+                int count = initialCount;
+                if (loadedCount.get()+count >= contactsItemList.size()){
+                    count = contactsItemList.size() - loadedCount.get();
+                }
+                if (count <= 0){
                     return;
                 }
-                int i = updatedCount;
-                updatedCount = count;
-                for (; i <count; i ++) {
-
-                    int fi = i;
-                    new SwingWorker<Object,Object>(){
-                        ImageIcon orLoadAvatar =null;
-                        int pos;
-                        @Override
-                        protected Object doInBackground() throws Exception {
-                            //i为视图holder的位置
-                            Map<Integer, String> positionMap = adapter.getPositionMap();
-                            int x =0;
-                            for (Integer integer : positionMap.keySet()) {
-                                if (integer <= fi){
-                                    x++;
-                                }
-                            }
-                            pos = fi - x;
-                            if (pos<0){
-                                return null;
-                            }
-                            ContactsItem contactsItem = contactsItemList.get(pos);
-                            orLoadAvatar = AvatarUtil.createOrLoadUserAvatar(contactsItem.getId());
-                            return null;
-                        }
-
-                        @Override
-                        protected void done() {
-                            //更新联系人头像
-                            if (orLoadAvatar == null){
-                                return;
-                            }
-                             updateAvatar(pos, orLoadAvatar);
-                        }
-                    }.execute();
-
+                //到底了
+                if (currValue + visibleAmount + contactsListView.getVerticalScrollBar().getUnitIncrement() >= maxValue){
+                    contactsListView.notifyItemAppend(loadedCount.getAndAdd(count),count);
+                    contactsListView.getVerticalScrollBar().setValue(currValue-50);
                 }
 
 
@@ -122,17 +89,19 @@ public class ContactsPanel extends ParentAvailablePanel {
      * 初始化数据，加载所有联系人到List中
      */
     private void initData() {
-        contactsItemList.clear();
 
+        contactsItemList.clear();
         for (Map.Entry<String, Contacts> entry : Core.getMemberMap().entrySet()) {
+            Contacts value = entry.getValue();
             ContactsItem item = ContactsItem.builder()
                     .id(entry.getKey())
                     .displayName(ContactsTools.getContactDisplayNameByUserName(entry.getKey()))
                     //.avatar()
-                    .type(entry.getValue().getType())
+                    .type(value.getType())
                     .build();
             contactsItemList.add(item);
         }
+
 
     }
 
@@ -141,11 +110,11 @@ public class ContactsPanel extends ParentAvailablePanel {
      */
     public void notifyDataSetChanged() {
         initData();
+        loadedCount.set(0);
         ((ContactsItemsAdapter) contactsListView.getAdapter()).processData();
-        contactsListView.notifyDataSetChanged(false);
+        int count = Math.min(initialCount,contactsItemList.size());
+        contactsListView.notifyItemAppend(loadedCount.getAndAdd(count),count);
 
-        // 通讯录更新后，获取头像
-      //  getContactsUserAvatar();
     }
 
 
@@ -179,101 +148,5 @@ public class ContactsPanel extends ParentAvailablePanel {
         return context;
     }
 
-    /**
-     * 获取通讯录中用户的头像
-     */
-    private void getContactsUserAvatar() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (ContactsItem user : contactsItemList) {
-                    if (!AvatarUtil.customAvatarExist(user.getDisplayName())) {
-                        final String username = user.getDisplayName();
-                        //logger.debug("获取头像:" + username);
-                        getUserAvatar(username, true);
-                    }
-                }
-
-                // 自己的头像每次启动都去获取
-                //  currentUsername = currentUserService.findAll().get(0).getUsername();
-                getUserAvatar(Core.getUserSelf().getUsername(), true);
-            }
-        }).start();
-
-    }
-
-    /**
-     * 更新指定用户头像
-     *
-     * @param username   用户名
-     * @param hotRefresh 是否热更新，hotRefresh = true， 将刷新该用户的头像缓存
-     */
-    public void getUserAvatar(String username, boolean hotRefresh) {
-
-        // TODO: 服务器获取头像，这里从资源文件夹中获取
-        try {
-            //  URL url = getClass().getResource("/avatar/" + username + ".png");
-            String head = Core.getContactHeadImgPath().get(username);
-            ImageIcon imageIcon ;
-            if (StringUtils.isNotEmpty(head)) {
-                BufferedImage image = ImageIO.read(new File(head));
-                imageIcon =new ImageIcon();
-                imageIcon.setImage(image);
-            } else {
-                imageIcon = AvatarUtil.createOrLoadUserAvatar(username);
-            }
-
-            processAvatarData( imageIcon, username);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (hotRefresh) {
-//            AvatarUtil.refreshUserAvatarCache(username);
-
-            if (username.equals(Core.getUserSelf().getUsername())) {
-                MyInfoPanel.getContext().reloadAvatar();
-            }
-        }
-    }
-
-    /**
-     * 更新指定用户头像
-     *
-     * @param username   用户名
-     * @param hotRefresh 是否热更新，hotRefresh = true， 将刷新该用户的头像缓存
-     */
-    public void getUserAvatar(String username, boolean hotRefresh, String headPath) {
-
-        // TODO: 服务器获取头像，这里从资源文件夹中获取
-        try {
-            BufferedImage image = ImageIO.read(new File(headPath));
-            processAvatarData(new ImageIcon(image), username);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (hotRefresh) {
-            AvatarUtil.refreshUserAvatarCache(username);
-
-            if (username.equals(Core.getUserSelf().getUsername())) {
-                MyInfoPanel.getContext().reloadAvatar();
-            }
-        }
-    }
-
-    /**
-     * 处理头像数据
-     *
-     * @param image
-     * @param username
-     */
-    private void processAvatarData(ImageIcon image, String username) {
-        if (image != null) {
-            AvatarUtil.saveAvatar(image, username);
-        } else {
-            AvatarUtil.deleteCustomAvatar(username);
-        }
-    }
 
 }

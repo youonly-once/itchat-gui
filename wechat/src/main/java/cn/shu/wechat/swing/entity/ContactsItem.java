@@ -1,5 +1,7 @@
 package cn.shu.wechat.swing.entity;
 
+import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.swing.utils.CharacterParser;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,13 +35,13 @@ public class ContactsItem implements Comparable<ContactsItem> {
     /**
      * 联系人类型
      */
-    private Byte type;
+    private Contacts.ContactsType type;
 
     @Override
 
     public int compareTo(ContactsItem o) {
-        String tc = CharacterParser.getSelling(this.getDisplayName()).toUpperCase();
-        String oc = CharacterParser.getSelling(o.getDisplayName()).toUpperCase();
-        return type.equals(o.type) ? 0 : tc.compareTo(oc);
+        String tc = ContactsTools.getContactDisplayNameInitialByUserName(this.id);
+        String oc = ContactsTools.getContactDisplayNameInitialByUserName(o.id);
+        return type.equals(o.type) ? tc.compareTo(oc) : type.code -o.type.code;
     }
 }

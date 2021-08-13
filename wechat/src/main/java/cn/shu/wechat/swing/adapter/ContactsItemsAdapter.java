@@ -1,5 +1,7 @@
 package cn.shu.wechat.swing.adapter;
 
+import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCBorder;
@@ -8,6 +10,7 @@ import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.panels.RightPanel;
 import cn.shu.wechat.swing.panels.RoomChatPanelCard;
 import cn.shu.wechat.swing.panels.UserInfoPanel;
+import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.CharacterParser;
 import org.apache.commons.lang.StringUtils;
 
@@ -23,10 +26,11 @@ import java.util.*;
 public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
 
     /**
-     * 所有联系人列表
+     * 当前显示的联系人列表
      */
     private final List<ContactsItem> contactsItems;
 
+    private  int count = 0;
     /**
      * 所有联系人Holders
      */
@@ -59,6 +63,7 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
 
     @Override
     public ContactsItemViewHolder onCreateViewHolder(int viewType, int position) {
+
         //避免重复创建
         ContactsItemViewHolder contactsItemViewHolder;
         if (viewHolders.size() > position){
@@ -77,14 +82,9 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
 
     @Override
     public HeaderViewHolder onCreateHeaderViewHolder(int viewType, int position) {
-        for (int pos : positionMap.keySet()) {
-            if (pos == position) {
-                String ch = positionMap.get(pos);
-
-                return new ContactsHeaderViewHolder(ch.toUpperCase());
-            }
+        if (positionMap.containsKey(position)){
+            return new ContactsHeaderViewHolder(positionMap.get(position));
         }
-
         return null;
     }
 
@@ -109,10 +109,21 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
 
         ContactsItem item = contactsItems.get(position);
 
-        if (item.getAvatar() != null){
-            ImageIcon icon = item.getAvatar();
-            viewHolder.avatar.setIcon(icon);
-        }
+        new SwingWorker<Object,Object>(){
+            ImageIcon orLoadAvatar = null;
+            @Override
+            protected Object doInBackground() throws Exception {
+                orLoadAvatar = AvatarUtil.createOrLoadUserAvatar(item.getId());
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                if (orLoadAvatar != null){
+                    viewHolder.avatar.setIcon(orLoadAvatar);
+                }
+            }
+        }.execute();
 
         viewHolder.roomName.setText(item.getDisplayName());
         if (viewHolder.mouseListener!=null){
@@ -156,20 +167,30 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
     }
 
     public void processData() {
-        Collections.sort(contactsItems);
 
+        positionMap.clear();
+        Collections.sort(contactsItems);
         int index = 0;
         String lastChara = "";
         for (ContactsItem item : contactsItems) {
-            String selling = CharacterParser.getSelling(item.getDisplayName());
-            if (StringUtils.isEmpty(selling)) {
-                selling = "NONE";
+
+            if (item.getType()!= Contacts.ContactsType.ORDINARY_USER){
+                if (!item.getType().desc.equals(lastChara)){
+                    lastChara = item.getType().desc;
+                    positionMap.put(index, item.getType().desc);
+                }
+            }else{
+                String selling = ContactsTools.getContactDisplayNameInitialByUserName(item.getId());
+                if (StringUtils.isEmpty(selling)) {
+                    selling = "#";
+                }
+                String ch = selling.substring(0, 1).toUpperCase();
+                if (!ch.equals(lastChara)) {
+                    lastChara = ch;
+                    positionMap.put(index, ch);
+                }
             }
-            String ch = selling.substring(0, 1).toUpperCase();
-            if (!ch.equals(lastChara)) {
-                lastChara = ch;
-                positionMap.put(index, ch);
-            }
+
 
             index++;
         }

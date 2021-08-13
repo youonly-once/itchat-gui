@@ -236,4 +236,25 @@ public class ContactsTools {
     }
 
 
+    /**
+     * 根据用户名获取用户显示名称对应的拼音
+     * 有备注显示备注，无备注显示昵称
+     * 群则直接显示昵称
+     *
+     * @param userName 用户UserName
+     * @return 备注
+     */
+    public static String getContactDisplayNameInitialByUserName(String userName) {
+        Contacts contacts = Core.getMemberMap().get(userName);
+
+        if (StringUtils.isNotEmpty(contacts.getRemarkpyinitial())) {
+            return contacts.getRemarkpyinitial();
+        }
+        if (StringUtils.isNotEmpty(contacts.getPyinitial() )) {
+            return contacts.getPyinitial();
+        }else{
+            return "#";
+        }
+    }
+
 }

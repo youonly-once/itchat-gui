@@ -259,7 +259,6 @@ public class LoginFrame extends JFrame {
                     loginService.startReceiving();
                     ContactsPanel.getContext().notifyDataSetChanged();
 
-
                     ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
                         log.info("9. 获取群好友及群好友列表");
                         loginService.WebWxBatchGetContact();

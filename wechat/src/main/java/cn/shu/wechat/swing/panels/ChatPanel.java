@@ -213,6 +213,7 @@ public class ChatPanel extends ParentAvailablePanel {
                         protected void done() {
                             try {
                                 if (!messageList.isEmpty()) {
+                                    //TODO 顺序有问题
                                     messagePanel.getMessageListView().notifyItemRangeInserted(0, messageList.size());
                                 }
                             } finally {

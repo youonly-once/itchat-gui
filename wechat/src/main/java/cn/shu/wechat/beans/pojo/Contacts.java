@@ -36,7 +36,7 @@ public class Contacts {
 
     private String displayname;
 
-    private Double verifyflag;
+    private Integer verifyflag;
 
     private Double unifriend;
 
@@ -83,14 +83,24 @@ public class Contacts {
     private String pyinitial;
 
 
+
     /**
      * 联系人类型
      */
-    public static final byte GROUP_USER = 1;
-    public static final byte PUBLIC_USER = 2;
-    public static final byte SPECIAL_USER = 3;
-    public static final byte ORDINARY_USER = 4;
-    private Byte type = ORDINARY_USER;
+    public enum ContactsType{
+        GROUP_USER((byte)1,"群组")
+        ,PUBLIC_USER((byte)2,"公众号")
+        ,SPECIAL_USER((byte)3,"特殊账号")
+        ,ORDINARY_USER((byte)4,"普通用户");
+        public final byte code;
+        public final String desc ;
+
+        ContactsType(byte code, String desc) {
+            this.code = code;
+            this.desc = desc;
+        }
+    }
+    private ContactsType type = ContactsType.ORDINARY_USER;
     /**
      * 是否为联系人(false则为群成员)
      */

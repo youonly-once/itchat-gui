@@ -234,17 +234,9 @@ public class LoginServiceImpl implements LoginService {
                         ;
                     }
                 });
-                Core.getMemberMap().put(contacts.getUsername(),contacts);
+                addContacts(contacts);
                 recentContacts.add(contacts.getUsername());
             }
-            String chatSet = obj.getString("ChatSet");
-            String[] chatSetArray = chatSet.split(",");
-     /*       for (String s : chatSetArray) {
-                if (s.startsWith("@@")) {
-                    // 更新GroupIdList
-                    Core.getGroupIdSet().add(s);
-                }
-            }*/
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -409,56 +401,62 @@ public class LoginServiceImpl implements LoginService {
                 // 累加好友列表
                 member.addAll(fullFriendsJsonList.getJSONArray(StorageLoginInfoEnum.MemberList.getKey()));
             }
-            ArrayList<Contacts> contactsList = new ArrayList<>();
-            long start = System.currentTimeMillis();
             for (Object value : member) {
                 JSONObject o = (JSONObject) value;
                 Contacts contacts = JSON.parseObject(JSON.toJSONString(o), Contacts.class);
-                contacts.setIscontacts(true);
-                contactsList.add(contacts);
-                String userName = contacts.getUsername();
-                String nickName = contacts.getNickname();
-                Core.getMemberMap().put(userName, contacts);
-                if ((o.getInteger("VerifyFlag") & 8) != 0) {
-                    // 公众号/服务号
-                    if (!Core.getPublicUsersMap().containsKey(userName)) {
-                        log.info("新增公众号/服务号：{}", nickName);
-                    }
-                    Core.getPublicUsersMap().put(userName, contacts);
-                    contacts.setType(Contacts.PUBLIC_USER);
-                } else if (Config.API_SPECIAL_USER.contains(userName)) {
-                    // 特殊账号
-                    if (!Core.getSpecialUsersMap().containsKey(userName)) {
-                        log.info("新增特殊账号：{}", nickName);
-                    }
-                    Core.getSpecialUsersMap().put(userName, contacts);
-                    contacts.setType(Contacts.SPECIAL_USER);
-                } else if (userName.startsWith("@@")) {
-                    // 群聊
-                    if (!Core.getGroupIdSet().contains(userName)) {
-                        log.info("新增群聊：{}", nickName);
-                        Core.getGroupIdSet().add(userName);
-                    }
-                    contacts.setType(Contacts.GROUP_USER);
-                } else {
-                    contacts.setType(Contacts.ORDINARY_USER);
-                    //比较上次差异
-                    Contacts old = Core.getContactMap().get(userName);
-                    compareOld(old, userName, contacts, "普通联系人");
-                    // 普通联系人
-                    Core.getContactMap().put(userName, contacts);
-                }
-
+                addContacts(contacts);
             }
             //System.out.println("System.currentTimeMillis()-start = " + (System.currentTimeMillis() - start));
             Core.getMemberMap().put("filehelper",
-                    Contacts.builder().username("filehelper").displayname("文件传输助手").build());
+                    Contacts.builder().username("filehelper").displayname("文件传输助手")
+                            .type(Contacts.ContactsType.ORDINARY_USER).build());
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
+    /**
+     * 添加联系人
+     * @param contacts
+     */
+    private void addContacts( Contacts contacts){
+
+        contacts.setIscontacts(true);
+        String userName = contacts.getUsername();
+        String nickName = contacts.getNickname();
+        Core.getMemberMap().put(userName, contacts);
+
+        if ((contacts.getVerifyflag() & 8) != 0) {
+            // 公众号/服务号
+            if (!Core.getPublicUsersMap().containsKey(userName)) {
+                log.info("新增公众号/服务号：{}", nickName);
+            }
+            Core.getPublicUsersMap().put(userName, contacts);
+            contacts.setType(Contacts.ContactsType.PUBLIC_USER);
+        } else if (Config.API_SPECIAL_USER.contains(userName)) {
+            // 特殊账号
+            if (!Core.getSpecialUsersMap().containsKey(userName)) {
+                log.info("新增特殊账号：{}", nickName);
+            }
+            Core.getSpecialUsersMap().put(userName, contacts);
+            contacts.setType(Contacts.ContactsType.SPECIAL_USER);
+        } else if (userName.startsWith("@@")) {
+            // 群聊
+            if (!Core.getGroupIdSet().contains(userName)) {
+                log.info("新增群聊：{}", nickName);
+                Core.getGroupIdSet().add(userName);
+            }
+            contacts.setType(Contacts.ContactsType.GROUP_USER);
+        } else {
+            contacts.setType(Contacts.ContactsType.ORDINARY_USER);
+            //比较上次差异
+            Contacts old = Core.getContactMap().get(userName);
+            compareOld(old, userName, contacts, "普通联系人");
+            // 普通联系人
+            Core.getContactMap().put(userName, contacts);
+        }
+    }
     @Override
     public  void WebWxBatchGetContact() {
         String url = String.format(URLEnum.WEB_WX_BATCH_GET_CONTACT.getUrl(),
@@ -530,6 +528,7 @@ public class LoginServiceImpl implements LoginService {
                     // 群好友
                     JSONObject groupObject = contactList.getJSONObject(i);
                     Contacts group = JSON.parseObject(JSON.toJSONString(groupObject), Contacts.class);
+                    group.setType(Contacts.ContactsType.GROUP_USER);
                     String userName = group.getUsername();
                     Core.getMemberMap().put(userName, group);
                     if (userName.startsWith("@@")) {
