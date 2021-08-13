@@ -129,6 +129,7 @@ public class ContactsPanel extends ParentAvailablePanel {
                     .id(entry.getKey())
                     .displayName(ContactsTools.getContactDisplayNameByUserName(entry.getKey()))
                     //.avatar()
+                    .type(entry.getValue().getType())
                     .build();
             contactsItemList.add(item);
         }

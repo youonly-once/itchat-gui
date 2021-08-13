@@ -3,17 +3,11 @@ package cn.shu.wechat.api;
 
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.service.LoginService;
-import cn.shu.wechat.swing.utils.EmojiUtil;
 import cn.shu.wechat.utils.CommonTools;
-import cn.shu.wechat.utils.SpringContextHolder;
-import com.alibaba.fastjson.JSONArray;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.StringUtils;
-import org.nlpcn.commons.lang.util.CollectionUtil;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -157,17 +151,6 @@ public class ContactsTools {
         }
         List<Contacts> memberList = group.getMemberlist();
         if (CollectionUtils.isEmpty(memberList)) {
-            /*//群成员为空 远程获取
-            synchronized (groupName.intern()) {
-                if (CollectionUtils.isEmpty(memberList)) {
-                    LoginService bean = SpringContextHolder.getBean(LoginService.class);
-                    memberList = bean.WebWxBatchGetContact(groupName);
-                }
-            }
-           if (CollectionUtils.isEmpty(memberList)){
-               log.warn("群成员为空：{}",groupName);
-               return null;
-           }*/
             return null;
         }
         Contacts contacts =null;
@@ -185,19 +168,6 @@ public class ContactsTools {
         //群成员中没有找到成员或者成员信息不完整 这里重新获取
         if (contacts == null ||
                 StringUtils.isEmpty(contacts.getHeadimgurl())){
-          /*  synchronized (userName.intern()) {
-                if (contacts == null ||
-                        StringUtils.isEmpty(contacts.getHeadimgurl())) {
-                    //头像为空，可以理解为该群成员信息未获取到 重新获取
-                    LoginService bean = SpringContextHolder.getBean(LoginService.class);
-                    memberList = bean.WebWxBatchGetContact(groupName);
-                }
-            }
-            for (Contacts contactsT : memberList) {
-                if (userName.equals(contactsT.getUsername())) {
-                    return contactsT;
-                }
-            }*/
             log.warn("查找群成员失败：{}({})",groupName,userName);
         }
 

@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.swing.*;
-import java.awt.*;
 
 /**
  * Created by 舒新胜 on 17-5-30.
@@ -31,10 +30,16 @@ public class ContactsItem implements Comparable<ContactsItem> {
      */
     private ImageIcon avatar;
 
+    /**
+     * 联系人类型
+     */
+    private Byte type;
+
     @Override
+
     public int compareTo(ContactsItem o) {
         String tc = CharacterParser.getSelling(this.getDisplayName()).toUpperCase();
         String oc = CharacterParser.getSelling(o.getDisplayName()).toUpperCase();
-        return tc.compareTo(oc);
+        return type.equals(o.type) ? 0 : tc.compareTo(oc);
     }
 }

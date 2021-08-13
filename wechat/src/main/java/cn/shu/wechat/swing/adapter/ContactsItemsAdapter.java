@@ -22,8 +22,15 @@ import java.util.*;
  */
 public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
 
-    private List<ContactsItem> contactsItems;
-    private List<ContactsItemViewHolder> viewHolders = new ArrayList<>();
+    /**
+     * 所有联系人列表
+     */
+    private final List<ContactsItem> contactsItems;
+
+    /**
+     * 所有联系人Holders
+     */
+    private final List<ContactsItemViewHolder> viewHolders = new ArrayList<>();
 
     @Override
     public Map<Integer, String> getPositionMap() {
@@ -31,6 +38,10 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
     }
 
     Map<Integer, String> positionMap = new TreeMap<>();
+
+    /**
+     * 当前被选中的联系人
+     */
     private ContactsItemViewHolder selectedViewHolder;
 
     public ContactsItemsAdapter(List<ContactsItem> contactsItems) {

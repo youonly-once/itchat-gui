@@ -38,7 +38,6 @@ import java.awt.image.BufferedImage;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.*;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.locks.Lock;
 import java.util.regex.Matcher;
@@ -231,7 +230,8 @@ public class LoginServiceImpl implements LoginService {
                 ExecutorServiceUtil.getHeadImageDownloadExecutorService().submit(new Runnable() {
                     @Override
                     public void run() {
-                        AvatarUtil.putUserAvatarCache(contacts.getUsername(),DownloadTools.downloadImgByRelativeUrl(contacts.getHeadimgurl()));;
+                        AvatarUtil.putUserAvatarCache(contacts.getUsername(), DownloadTools.downloadHeadImgByRelativeUrl(contacts.getHeadimgurl()));
+                        ;
                     }
                 });
                 Core.getMemberMap().put(contacts.getUsername(),contacts);
@@ -425,19 +425,23 @@ public class LoginServiceImpl implements LoginService {
                         log.info("新增公众号/服务号：{}", nickName);
                     }
                     Core.getPublicUsersMap().put(userName, contacts);
+                    contacts.setType(Contacts.PUBLIC_USER);
                 } else if (Config.API_SPECIAL_USER.contains(userName)) {
                     // 特殊账号
                     if (!Core.getSpecialUsersMap().containsKey(userName)) {
                         log.info("新增特殊账号：{}", nickName);
                     }
                     Core.getSpecialUsersMap().put(userName, contacts);
+                    contacts.setType(Contacts.SPECIAL_USER);
                 } else if (userName.startsWith("@@")) {
                     // 群聊
                     if (!Core.getGroupIdSet().contains(userName)) {
                         log.info("新增群聊：{}", nickName);
                         Core.getGroupIdSet().add(userName);
                     }
+                    contacts.setType(Contacts.GROUP_USER);
                 } else {
+                    contacts.setType(Contacts.ORDINARY_USER);
                     //比较上次差异
                     Contacts old = Core.getContactMap().get(userName);
                     compareOld(old, userName, contacts, "普通联系人");
@@ -911,7 +915,7 @@ public class LoginServiceImpl implements LoginService {
                         || stringMapEntry.getKey().equals("头像更换")
                         || stringMapEntry.getKey().equals("headimgurl")) {
                     String oldHeadPath = Core.getContactHeadImgPath().get(oldV.getUsername());
-                    String newHeadPath = DownloadTools.downloadHeadImgBig(stringStringEntry.getValue()
+                    String newHeadPath = DownloadTools.downloadBigHeadImg(stringStringEntry.getValue()
                             , oldV.getUsername());
                     Core.getContactHeadImgPath().put(oldV.getUsername(), newHeadPath);
                     //更换头像需要发送图片

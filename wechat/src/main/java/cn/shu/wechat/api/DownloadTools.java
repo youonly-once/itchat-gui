@@ -174,9 +174,6 @@ public class DownloadTools {
                 }
 
             }
-            if (entity == null) {
-                log.error("下载失败：response entity is null.");
-            }
             out = new FileOutputStream(file);
             byte[] bytes = EntityUtils.toByteArray(entity);
             out.write(bytes);
@@ -224,20 +221,22 @@ public class DownloadTools {
         }
         return null;
     }
+
     /**
-     * 下载头像
+     * 下载微信大头像
      *
      * @param relativeUrl 微信头像地址
      * @param userName    用户名
      * @return 下载成功头像保存路径
      * 下载失败 ""
      */
-    public static String downloadHeadImgBig(String relativeUrl, String userName) {
+    public static String downloadBigHeadImg(String relativeUrl, String userName) {
         //获取远端对象字节数组
         String url = String.format(URLEnum.WEB_WX_GET_HEAD_IMAGE_BIG.getUrl(), relativeUrl);
-        return downloadHeadImg(url,userName);
+        return downloadHeadImg(url, userName);
 
     }
+
     /**
      * 下载头像
      *
@@ -290,7 +289,7 @@ public class DownloadTools {
                 + File.separator + md5Str + ".jpg";
         Path path = Paths.get(savePath);
         OutputStream out = null;
-        boolean downloadStatus = true;
+        boolean downloadStatus = false;
         try {
             if (!Files.exists(path.getParent())) {
                 Files.createDirectories(path.getParent());
@@ -324,22 +323,25 @@ public class DownloadTools {
 
     /**
      * 下载头像缩略图
+     *
      * @param relativeUrl 微信头像地址
      * @return Image对象
      */
-    public static Image downloadImgByRelativeUrl(String relativeUrl){
+    public static Image downloadHeadImgByRelativeUrl(String relativeUrl) {
         String url = String.format(URLEnum.WEB_WX_GET_HEAD_IMAGE_THUM.getUrl(), relativeUrl);
-       return downloadImgByAbsoluteUrl(url);
+        return downloadImgByAbsoluteUrl(url);
 
     }
+
     /**
      * 下载图片
+     *
      * @param url 图片地址
      * @return Image对象
      */
-    public static BufferedImage downloadImgByAbsoluteUrl(String url){
+    public static BufferedImage downloadImgByAbsoluteUrl(String url) {
         HttpEntity entity = MyHttpClient.doGet(url, null, true, null);
-       return entity2Image(entity);
+        return entity2Image(entity);
     }
 
 

@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.List;
 import java.util.Objects;
 
@@ -83,6 +82,15 @@ public class Contacts {
 
     private String pyinitial;
 
+
+    /**
+     * 联系人类型
+     */
+    public static final byte GROUP_USER = 1;
+    public static final byte PUBLIC_USER = 2;
+    public static final byte SPECIAL_USER = 3;
+    public static final byte ORDINARY_USER = 4;
+    private Byte type = ORDINARY_USER;
     /**
      * 是否为联系人(false则为群成员)
      */
