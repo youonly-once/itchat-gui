@@ -1,7 +1,20 @@
 
-基于网页版微信完成的微信功能扩展。
 # Java swing实现微信增强版。
- 在此基础上做功能增强，例如聊天记录统计分析、防撤回、自动回复、定时消息等。
+ 基于网页版微信完成的微信功能扩展。在此基础上做功能增强，例如聊天记录统计分析、防撤回、自动回复、定时消息等。
+
+# 安装说明
+## 1、下载源代码，搭建开发环境
+## 2、安装jintellitype-1.3.9.jar依赖到本地仓库
+> 需要将resource/lib下面的二个JAR包安装到本地maven仓库，因为这个JAR经过特殊处理，中央仓库的JAR包文件不全会导致运行失败
+
+
+> mvn install:install-file -Dfile="你的JAR包位置" -DgroupId=com.melloware -DartifactId=jintellitype -Dversion=1.3.9 -Dpackaging=jar
+## 3、安装android.ninepatch.jar依赖到本地仓库
+> mvn install:install-file -Dfile="你的JAR包位置" -DgroupId=com.android -DartifactId=ninepatch -Dversion=1.0 -Dpackaging=jar
+
+
+
+ # 效果预览
 ## 首页效果如下：
  
  ![image](https://user-images.githubusercontent.com/67832925/127836900-2dc3dfd2-8e97-40e4-961c-e060a9b22a08.png)
@@ -131,7 +144,3 @@
 
 > 以上几个功能只是起到抛砖引玉的作用，请打开你的脑洞吧，朋友。
 借鉴了开源项目wechat_desktop
->
->源代码运行需要将lib下面的二个JAR包安装到maven仓库
->mvn install:install-file -Dfile=E:\JAVA\project_idea\AutoWeChat\wechat\src\main\resources\lib\jintellitype-1.3.9.jar -DgroupId=com.melloware -DartifactId=jintellitype -Dversion=1.3.9 -Dpackaging=jar
->mvn install:install-file -Dfile=E:\JAVA\project_idea\AutoWeChat\wechat\src\main\resources\lib\android.ninepatch.jar -DgroupId=com.android -DartifactId=ninepatch -Dversion=1.0 -Dpackaging=jar
