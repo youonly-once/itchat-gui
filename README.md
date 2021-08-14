@@ -131,3 +131,7 @@
 
 > 以上几个功能只是起到抛砖引玉的作用，请打开你的脑洞吧，朋友。
 借鉴了开源项目wechat_desktop
+>
+>源代码运行需要将lib下面的二个JAR包安装到maven仓库
+>mvn install:install-file -Dfile=E:\JAVA\project_idea\AutoWeChat\wechat\src\main\resources\lib\jintellitype-1.3.9.jar -DgroupId=com.melloware -DartifactId=jintellitype -Dversion=1.3.9 -Dpackaging=jar
+>mvn install:install-file -Dfile=E:\JAVA\project_idea\AutoWeChat\wechat\src\main\resources\lib\android.ninepatch.jar -DgroupId=com.android -DartifactId=ninepatch -Dversion=1.0 -Dpackaging=jar
