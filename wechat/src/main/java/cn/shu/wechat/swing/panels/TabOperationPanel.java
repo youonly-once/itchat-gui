@@ -3,6 +3,7 @@ package cn.shu.wechat.swing.panels;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCBorder;
+import cn.shu.wechat.swing.utils.IconUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -45,8 +46,8 @@ public class TabOperationPanel extends ParentAvailablePanel {
         RCBorder rcBorder = new RCBorder(RCBorder.RIGHT);
         rcBorder.setHeightScale(0.2F);
 
-        chatIconActive = new ImageIcon(getClass().getResource("/image/chat_active.png"));
-        chatIconNormal = new ImageIcon(getClass().getResource("/image/chat_normal.png"));
+        chatIconActive = IconUtil.getIcon(this,"/image/chat_active.png");
+        chatIconNormal = IconUtil.getIcon(this,"/image/chat_normal.png");
         chatLabel = new JLabel();
         chatLabel.setIcon(chatIconActive);
         chatLabel.setBorder(rcBorder);
@@ -54,8 +55,8 @@ public class TabOperationPanel extends ParentAvailablePanel {
         chatLabel.setCursor(handCursor);
         chatLabel.addMouseListener(clickListener);
 
-        contactIconNormal = new ImageIcon(getClass().getResource("/image/contacts_normal.png"));
-        contactIconActive = new ImageIcon(getClass().getResource("/image/contacts_active.png"));
+        contactIconNormal = IconUtil.getIcon(this,"/image/contacts_normal.png");
+        contactIconActive = IconUtil.getIcon(this,"/image/contacts_active.png");
         contactsLabel = new JLabel();
         contactsLabel.setIcon(contactIconNormal);
         contactsLabel.setBorder(rcBorder);
@@ -63,8 +64,8 @@ public class TabOperationPanel extends ParentAvailablePanel {
         contactsLabel.setCursor(handCursor);
         contactsLabel.addMouseListener(clickListener);
 
-        meIconNormal = new ImageIcon(getClass().getResource("/image/me_normal.png"));
-        meIconActive = new ImageIcon(getClass().getResource("/image/me_active.png"));
+        meIconNormal = IconUtil.getIcon(this,"/image/me_normal.png");
+        meIconActive = IconUtil.getIcon(this,"/image/me_active.png");
         meLable = new JLabel();
         meLable.setIcon(meIconNormal);
         meLable.setHorizontalAlignment(JLabel.CENTER);

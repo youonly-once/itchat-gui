@@ -106,7 +106,22 @@ public class ContactsTools {
         return CommonTools.emojiFormatter(contactByUserName.getRemarkname());
     }
 
-
+    /**
+     * 根据用户名获取用户备注
+     *
+     * @param contacts 用户UserName
+     * @return 备注
+     */
+    public static String getContactRemarkNameByUserName(Contacts contacts) {
+        if (contacts == null) {
+            return null;
+        }
+        //群只有备注 没有昵称
+        if (contacts.getUsername().startsWith("@@")) {
+            return getContactNickNameByUserName(contacts);
+        }
+        return CommonTools.emojiFormatter(contacts.getRemarkname());
+    }
     /**
      * 根据用户名获取普通用户昵称
      *
@@ -123,7 +138,18 @@ public class ContactsTools {
         }
         return CommonTools.emojiFormatter(contactByUserName.getNickname());
     }
-
+    /**
+     * 根据用户名获取普通用户昵称
+     *
+     * @param contacts 用户UserName
+     * @return 备注
+     */
+    public static String getContactNickNameByUserName(Contacts contacts) {
+        if (contacts == null){
+            return null;
+        }
+        return CommonTools.emojiFormatter(contacts.getNickname());
+    }
 
     /**
      * 获取群成员
@@ -227,6 +253,8 @@ public class ContactsTools {
             }
         return userName;
     }
+
+
     public static String getSignatureNameOfGroup(String userName) {
         Contacts contacts = Core.getMemberMap().get(userName);
         if (contacts == null){
@@ -235,6 +263,13 @@ public class ContactsTools {
         return CommonTools.emojiFormatter(contacts.getSignature());
     }
 
+
+    public static String getSignatureNameOfGroup(Contacts contacts) {
+        if (contacts == null){
+            return null;
+        }
+        return CommonTools.emojiFormatter(contacts.getSignature());
+    }
 
     /**
      * 根据用户名获取用户显示名称对应的拼音

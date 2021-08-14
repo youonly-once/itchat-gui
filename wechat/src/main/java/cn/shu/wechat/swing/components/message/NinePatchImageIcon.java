@@ -5,6 +5,7 @@ import com.android.ninepatch.NinePatch;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 
@@ -22,7 +23,9 @@ public class NinePatchImageIcon extends ImageIcon {
             return;
         }
     }
-
+    public NinePatchImageIcon(BufferedImage bufferedImage) {
+            mNinePatch = NinePatch.load(bufferedImage, true,true);
+    }
     @Override
     public synchronized void paintIcon(Component c, Graphics g, int x, int y) {
 

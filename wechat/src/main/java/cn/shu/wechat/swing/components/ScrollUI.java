@@ -40,7 +40,6 @@ public class ScrollUI extends BasicScrollBarUI {
      */
     @Override
     public Dimension getPreferredSize(JComponent c) {
-        // TODO Auto-generated method stub
         c.setPreferredSize(new Dimension(7, 0));
         return super.getPreferredSize(c);
     }

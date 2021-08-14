@@ -29,7 +29,7 @@ public class AttachmentIconHelper {
                     return unknownMimeIcon(width, height);
 
                 } else {
-                    //return new ImageIcon(getClass().getResource("/image/" + mime + ".png"));
+                    //return IconUtil.getIcon(this,"/image/" + mime + ".png"));
                     return IconUtil.getIcon(this, "/image/" + mime + ".png", width, height);
 
                 }

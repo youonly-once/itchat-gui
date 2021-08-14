@@ -77,10 +77,10 @@ public class TitlePanel extends ParentAvailablePanel {
                 {
                     RoomMembersPanel roomMemberPanel = ((RoomChatPanelCard) getParentPanel()).getRoomMembersPanel();
                     if (roomMemberPanel.isVisible()) {
-                        roomInfoButton.setIcon(new ImageIcon(getClass().getResource("/image/options.png")));
+                        roomInfoButton.setIcon(IconUtil.getIcon(this,"/image/options.png"));
                         roomMemberPanel.setVisibleAndUpdateUI(false);
                     } else {
-                        roomInfoButton.setIcon(new ImageIcon(getClass().getResource("/image/options_restore.png")));
+                        roomInfoButton.setIcon(IconUtil.getIcon(this,"/image/options_restore.png"));
                         roomMemberPanel.setVisibleAndUpdateUI(true);
                     }
                 }
@@ -103,6 +103,7 @@ public class TitlePanel extends ParentAvailablePanel {
                     super.mouseClicked(e);
                 }
 
+                @Override
                 public void mousePressed(MouseEvent e) {
                     // 当鼠标按下的时候获得窗口当前的位置
                     origin.x = e.getX();
@@ -111,6 +112,7 @@ public class TitlePanel extends ParentAvailablePanel {
             };
 
             MouseMotionListener mouseMotionListener = new MouseMotionAdapter() {
+                @Override
                 public void mouseDragged(MouseEvent e) {
                     // 当鼠标拖动时获取窗口当前位置
                     Point p = MainFrame.getContext().getLocation();
@@ -146,7 +148,7 @@ public class TitlePanel extends ParentAvailablePanel {
     public void hideRoomMembersPanel() {
         JPanel roomMemberPanel = ((RoomChatPanelCard) getParentPanel()).getRoomMembersPanel();
         if (roomMemberPanel.isVisible()) {
-            roomInfoButton.setIcon(new ImageIcon(getClass().getResource("/image/options.png")));
+            roomInfoButton.setIcon(IconUtil.getIcon(this,"/image/options.png"));
             roomMemberPanel.setVisible(false);
         }
     }
@@ -156,15 +158,15 @@ public class TitlePanel extends ParentAvailablePanel {
      */
     public void showRoomMembersPanel() {
         JPanel roomMemberPanel = ((RoomChatPanelCard) getParentPanel()).getRoomMembersPanel();
-        roomInfoButton.setIcon(new ImageIcon(getClass().getResource("/image/options_restore.png")));
+        roomInfoButton.setIcon(IconUtil.getIcon(this,"/image/options_restore.png"));
         roomMemberPanel.setVisible(true);
     }
 
 
     private void initComponents() {
         Cursor handCursor = new Cursor(Cursor.HAND_CURSOR);
-        maxIcon = new ImageIcon(getClass().getResource("/image/window_max.png"));
-        restoreIcon = new ImageIcon(getClass().getResource("/image/window_restore.png"));
+        maxIcon = IconUtil.getIcon(this,"/image/window_max.png");
+        restoreIcon = IconUtil.getIcon(this,"/image/window_restore.png");
 
         titlePanel = new JPanel();
         titlePanel.setLayout(new GridBagLayout());
@@ -179,7 +181,7 @@ public class TitlePanel extends ParentAvailablePanel {
 
 
         roomInfoButton = new JLabel();
-        roomInfoButton.setIcon(new ImageIcon(getClass().getResource("/image/options.png")));
+        roomInfoButton.setIcon(IconUtil.getIcon(this,"/image/options.png"));
         roomInfoButton.setHorizontalAlignment(JLabel.CENTER);
         roomInfoButton.setCursor(handCursor);
         roomInfoButton.setVisible(false);
@@ -198,7 +200,7 @@ public class TitlePanel extends ParentAvailablePanel {
         controlPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
 
         closeLabel = new JLabel();
-        closeLabel.setIcon(new ImageIcon(getClass().getResource("/image/close.png")));
+        closeLabel.setIcon(IconUtil.getIcon(this,"/image/close.png"));
         closeLabel.setHorizontalAlignment(JLabel.CENTER);
         closeLabel.setOpaque(true);
         closeLabel.addMouseListener(listener);
@@ -214,7 +216,7 @@ public class TitlePanel extends ParentAvailablePanel {
         maxLabel.setCursor(handCursor);
 
         minLabel = new JLabel();
-        minLabel.setIcon(new ImageIcon(getClass().getResource("/image/window_min.png")));
+        minLabel.setIcon(IconUtil.getIcon(this,"/image/window_min.png"));
         minLabel.setHorizontalAlignment(JLabel.CENTER);
         minLabel.setOpaque(true);
         minLabel.addMouseListener(listener);

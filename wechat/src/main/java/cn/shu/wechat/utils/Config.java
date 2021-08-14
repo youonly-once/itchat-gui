@@ -42,7 +42,6 @@ public class Config {
         try {
             localPath = new File("").getCanonicalPath();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return localPath;

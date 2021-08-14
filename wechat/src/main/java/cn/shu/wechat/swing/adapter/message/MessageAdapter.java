@@ -729,7 +729,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     private void processImage(MessageItem item, MessageImageLabel imageLabel) {
         final ImageAttachmentItem imageAttachment = item.getImageAttachment();
         //显示加载中
-        ImageIcon imageIcon = new ImageIcon(getClass().getResource("/image/image_loading.gif"));
+        ImageIcon imageIcon = IconUtil.getIcon(this,"/image/image_loading.gif");
         imageLabel.setIcon(imageIcon);
         String slavePath = imageAttachment.getSlavePath();
 

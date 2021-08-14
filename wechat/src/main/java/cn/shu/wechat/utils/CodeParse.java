@@ -66,7 +66,6 @@ public class CodeParse {
                     inputStream2.close();
                 }
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             image = null;

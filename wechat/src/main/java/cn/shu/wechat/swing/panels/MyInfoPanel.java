@@ -10,6 +10,7 @@ import cn.shu.wechat.swing.frames.SystemConfigDialog;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
+import cn.shu.wechat.swing.utils.IconUtil;
 import org.apache.commons.lang.StringUtils;
 
 import javax.imageio.ImageIO;
@@ -73,7 +74,7 @@ public class MyInfoPanel extends ParentAvailablePanel {
 
 
         menuIcon = new JLabel();
-        menuIcon.setIcon(new ImageIcon(getClass().getResource("/image/options.png")));
+        menuIcon.setIcon(IconUtil.getIcon(this,"/image/options.png"));
         menuIcon.setForeground(Colors.FONT_WHITE);
         menuIcon.setCursor(new Cursor(Cursor.HAND_CURSOR));
 

@@ -5,6 +5,7 @@ import cn.shu.wechat.swing.components.RCMainOperationMenuItemUI;
 import cn.shu.wechat.swing.frames.CreateGroupDialog;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.frames.SystemConfigDialog;
+import cn.shu.wechat.swing.utils.IconUtil;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -30,7 +31,7 @@ public class MainOperationPopupMenu extends JPopupMenu {
                 showCreateGroupDialog();
             }
         });
-        ImageIcon icon1 = new ImageIcon(getClass().getResource("/image/chat.png"));
+        ImageIcon icon1 = IconUtil.getIcon(this,"/image/chat.png");
         icon1.setImage(icon1.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
         item1.setIcon(icon1);
         item1.setIconTextGap(5);
@@ -45,7 +46,7 @@ public class MainOperationPopupMenu extends JPopupMenu {
                 dialog.setVisible(true);
             }
         });
-        ImageIcon icon2 = new ImageIcon(getClass().getResource("/image/setting.png"));
+        ImageIcon icon2 = IconUtil.getIcon(this,"/image/setting.png");
         icon2.setImage(icon2.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
         item2.setIcon(icon2);
         item2.setIconTextGap(5);

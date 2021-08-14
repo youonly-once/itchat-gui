@@ -8,9 +8,11 @@ import cn.shu.wechat.swing.components.*;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.ChatUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
+import cn.shu.wechat.swing.utils.IconUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -53,6 +55,7 @@ public class UserInfoPanel extends ParentAvailablePanel {
     }
     public void setContacts(Contacts contacts){
         currUserId = contacts.getUsername();
+        avatarLabel.setIcon(IconUtil.getIcon(this,"/image/image_loading.gif"));
         new SwingWorker<Object,Object>(){
             Image orLoadBigAvatar = null;
             private final String userId = contacts.getUsername();
@@ -74,20 +77,37 @@ public class UserInfoPanel extends ParentAvailablePanel {
                 super.done();
             }
         }.execute();
-        if (contacts.getSex() == 1) {
-            URL resource = getClass().getResource("/image/woman.png");
-            sexLabel.setIcon(new ImageIcon());
-        }else if (contacts.getSex() == 2){
-            sexLabel.setIcon(new ImageIcon(getClass().getResource("/image/man.png")));
-        }else {
+        if (contacts.getSex() == null){
             sexLabel.setIcon(null);
+        }else{
+            if (contacts.getSex() == 2) {
+                URL resource = getClass().getResource("/image/woman.png");
+                sexLabel.setIcon(new ImageIcon(resource));
+            }else if (contacts.getSex() == 1){
+                sexLabel.setIcon(IconUtil.getIcon(this,"/image/man.png"));
+            }else {
+                sexLabel.setIcon(null);
+            }
         }
 
-        username.setValue(contacts.getUsername());
-        nickname.setValue(ContactsTools.getContactNickNameByUserName(contacts.getUsername()));
-        remarkName.setValue(ContactsTools.getContactRemarkNameByUserName(contacts.getUsername()));
-        signature.setValue(ContactsTools.getSignatureNameOfGroup(contacts.getUsername()));
-        region.setValue(contacts.getProvince()+" "+contacts.getCity());
+
+        username.setValue(contacts.getUsername()==null?"":contacts.getUsername());
+
+        String contactNickNameByUserName = ContactsTools.getContactNickNameByUserName(contacts);
+        nickname.setValue(contactNickNameByUserName == null?"":contactNickNameByUserName);
+
+        String contactRemarkNameByUserName = ContactsTools.getContactRemarkNameByUserName(contacts);
+        if (contactRemarkNameByUserName == null){
+            contactRemarkNameByUserName = contacts.getDisplayname();
+        }
+        remarkName.setValue(contactRemarkNameByUserName == null?"":contactRemarkNameByUserName);
+
+
+        String signatureNameOfGroup = ContactsTools.getSignatureNameOfGroup(contacts);
+        signature.setValue(signatureNameOfGroup == null?"":signatureNameOfGroup);
+
+        region.setValue((contacts.getProvince()==null?"":contacts.getProvince())
+                +" "+(contacts.getCity()==null?"":contacts.getCity()));
     }
     private void initComponents() {
         contentPanel = new JPanel();
@@ -95,7 +115,9 @@ public class UserInfoPanel extends ParentAvailablePanel {
 
 
         username.setFont(FontUtil.getDefaultFont(20));
-
+        avatarLabel.setPreferredSize(new Dimension(200,200));
+        avatarLabel.setBackground(Color.GRAY);
+        avatarLabel.setHorizontalAlignment(JLabel.CENTER);
         button = new RCButton("发消息", Colors.MAIN_COLOR, Colors.MAIN_COLOR_DARKER, Colors.MAIN_COLOR_DARKER);
         button.setBackground(Colors.PROGRESS_BAR_START);
         button.setPreferredSize(new Dimension(200, 40));
@@ -118,7 +140,6 @@ public class UserInfoPanel extends ParentAvailablePanel {
         avatarInfoPanel.setLayout(new BorderLayout( 15, 0));
         avatarInfoPanel.add(avatarLabel,BorderLayout.WEST);
         avatarInfoPanel.add(infoPanel,BorderLayout.CENTER);
-        button.setHorizontalAlignment(SwingConstants.CENTER);
         contentPanel.add(avatarInfoPanel);
         contentPanel.add(button);
         add(titlePanel, new GBC(0, 0).setWeight(1, 1).setFill(GBC.BOTH).setAnchor(GBC.CENTER).setInsets(0, 0, 0, 0));

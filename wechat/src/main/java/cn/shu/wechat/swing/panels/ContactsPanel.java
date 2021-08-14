@@ -109,11 +109,22 @@ public class ContactsPanel extends ParentAvailablePanel {
      * 联系人数据刷新
      */
     public void notifyDataSetChanged() {
-        initData();
-        loadedCount.set(0);
-        ((ContactsItemsAdapter) contactsListView.getAdapter()).processData();
-        int count = Math.min(initialCount,contactsItemList.size());
-        contactsListView.notifyItemAppend(loadedCount.getAndAdd(count),count);
+        new SwingWorker<Object,Object>(){
+
+            @Override
+            protected Object doInBackground() throws Exception {
+                initData();
+                loadedCount.set(0);
+                ((ContactsItemsAdapter) contactsListView.getAdapter()).processData();
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                int count = Math.min(initialCount,contactsItemList.size());
+                contactsListView.notifyItemAppend(loadedCount.getAndAdd(count),count);
+            }
+        }.execute();
 
     }
 

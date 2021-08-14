@@ -6,6 +6,7 @@ import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.UserInfoPopup;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
+import cn.shu.wechat.swing.utils.IconUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -44,7 +45,7 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
             viewHolder.setCursor(new Cursor(Cursor.HAND_CURSOR));
             String name = contacts.getDisplayname();
             viewHolder.roomName.setText(name);
-            ImageIcon imageIcon = new ImageIcon(getClass().getResource("/image/add_member.png"));
+            ImageIcon imageIcon = IconUtil.getIcon(this,"/image/add_member.png");
             imageIcon.setImage(imageIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH));
             viewHolder.avatar.setIcon(imageIcon);
 
@@ -74,7 +75,7 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
             viewHolder.setCursor(new Cursor(Cursor.HAND_CURSOR));
             String name = contacts.getDisplayname();
             viewHolder.roomName.setText(name);
-            ImageIcon imageIcon = new ImageIcon(getClass().getResource("/image/delete_member.png"));
+            ImageIcon imageIcon = IconUtil.getIcon(this,"/image/delete_member.png");
             imageIcon.setImage(imageIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH));
             viewHolder.avatar.setIcon(imageIcon);
 

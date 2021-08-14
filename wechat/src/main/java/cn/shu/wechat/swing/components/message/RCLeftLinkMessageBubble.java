@@ -1,5 +1,7 @@
 package cn.shu.wechat.swing.components.message;
 
+import cn.shu.wechat.swing.utils.IconUtil;
+
 import java.awt.*;
 
 /**
@@ -7,8 +9,8 @@ import java.awt.*;
  */
 public class RCLeftLinkMessageBubble extends RCAttachmentMessageBubble {
     public RCLeftLinkMessageBubble() {
-        NinePatchImageIcon backgroundNormal = new NinePatchImageIcon(this.getClass().getResource("/image/left.9.png"));
-        NinePatchImageIcon backgroundActive = new NinePatchImageIcon(this.getClass().getResource("/image/left_active.9.png"));
+        NinePatchImageIcon backgroundNormal = new NinePatchImageIcon(IconUtil.getBufferedImage(this,"/image/left.9.png"));
+        NinePatchImageIcon backgroundActive = new NinePatchImageIcon(IconUtil.getBufferedImage(this,"/image/left_active.9.png"));
         setBackgroundNormalIcon(backgroundNormal);
         setBackgroundActiveIcon(backgroundActive);
         setBackgroundIcon(backgroundNormal);

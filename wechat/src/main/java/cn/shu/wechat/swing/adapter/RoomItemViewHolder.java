@@ -3,6 +3,7 @@ package cn.shu.wechat.swing.adapter;
 import cn.shu.wechat.swing.components.*;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.FontUtil;
+import cn.shu.wechat.swing.utils.IconUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -37,7 +38,7 @@ public class RoomItemViewHolder extends ViewHolder {
         setOpaque(true);
         setForeground(Colors.FONT_WHITE);
 
-//        ImageIcon imageIcon = new ImageIcon(getClass().getResource("/image/avatar.jpg"));
+//        ImageIcon imageIcon = IconUtil.getIcon(this,"/image/avatar.jpg"));
 //        imageIcon.setImage(imageIcon.getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH));
 //        avatar.setIcon(imageIcon);
 
@@ -56,7 +57,7 @@ public class RoomItemViewHolder extends ViewHolder {
         time.setForeground(Colors.FONT_GRAY);
         time.setFont(FontUtil.getDefaultFont(12));
 
-        unreadCount.setIcon(new ImageIcon(getClass().getResource("/image/count_bg.png")));
+        unreadCount.setIcon(IconUtil.getIcon(this,"/image/count_bg.png"));
         unreadCount.setFont(FontUtil.getDefaultFont(12));
         unreadCount.setPreferredSize(new Dimension(10, 10));
         unreadCount.setForeground(Colors.FONT_WHITE);

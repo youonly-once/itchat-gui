@@ -3,6 +3,7 @@ package cn.shu.wechat.swing.adapter.message;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.message.RCRightAttachmentMessageBubble;
+import cn.shu.wechat.swing.utils.IconUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,7 +29,7 @@ public class MessageRightAttachmentViewHolder extends MessageAttachmentViewHolde
         size.setForeground(Colors.FONT_GRAY);
         size.setFont(FontUtil.getDefaultFont(12));*/
 
-        ImageIcon resendIcon = new ImageIcon(getClass().getResource("/image/resend.png"));
+        ImageIcon resendIcon = IconUtil.getIcon(this,"/image/resend.png");
         resendIcon.setImage(resendIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
         resend.setIcon(resendIcon);
         resend.setToolTipText("文件发送失败，点击重新发送");

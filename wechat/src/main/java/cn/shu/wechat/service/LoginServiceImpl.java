@@ -406,10 +406,11 @@ public class LoginServiceImpl implements LoginService {
                 Contacts contacts = JSON.parseObject(JSON.toJSONString(o), Contacts.class);
                 addContacts(contacts);
             }
-            //System.out.println("System.currentTimeMillis()-start = " + (System.currentTimeMillis() - start));
-            Core.getMemberMap().put("filehelper",
-                    Contacts.builder().username("filehelper").displayname("文件传输助手")
-                            .type(Contacts.ContactsType.ORDINARY_USER).build());
+            if (!Core.getMemberMap().containsKey("filehelper")){
+                Core.getMemberMap().put("filehelper",
+                        Contacts.builder().username("filehelper").displayname("文件传输助手")
+                                .type(Contacts.ContactsType.ORDINARY_USER).build());
+            }
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);

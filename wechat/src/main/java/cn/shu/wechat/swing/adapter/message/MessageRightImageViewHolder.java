@@ -6,6 +6,7 @@ import cn.shu.wechat.swing.components.message.MessageImageLabel;
 import cn.shu.wechat.swing.components.message.MessagePopupMenu;
 import cn.shu.wechat.swing.components.message.RCRightImageMessageBubble;
 import cn.shu.wechat.swing.utils.FontUtil;
+import cn.shu.wechat.swing.utils.IconUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -39,14 +40,14 @@ public class MessageRightImageViewHolder extends BaseMessageViewHolder {
         time.setForeground(Colors.FONT_GRAY);
         time.setFont(FontUtil.getDefaultFont(12));
 
-        ImageIcon resendIcon = new ImageIcon(getClass().getResource("/image/resend.png"));
+        ImageIcon resendIcon = IconUtil.getIcon(this,"/image/resend.png");
         resendIcon.setImage(resendIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
         resend.setIcon(resendIcon);
         resend.setVisible(false);
         resend.setToolTipText("图片发送失败，点击重新发送");
         resend.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        ImageIcon sendingIcon = new ImageIcon(getClass().getResource("/image/sending.gif"));
+        ImageIcon sendingIcon = IconUtil.getIcon(this,"/image/sending.gif");
         sendingProgress.setIcon(sendingIcon);
         sendingProgress.setVisible(false);
     }

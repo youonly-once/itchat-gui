@@ -1,17 +1,47 @@
 package cn.shu.wechat.swing.utils;
 
+import cn.shu.wechat.beans.pojo.Contacts;
+import lombok.extern.log4j.Log4j2;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
- * Created by 舒新胜 on 2017/6/7.
+ * 图标缓存工具类
+ * @author 舒新胜
+ * @date 2021/8/7
  */
+@Log4j2
 public class IconUtil {
-    private static Map<String, ImageIcon> iconCache = new HashMap<>();
+    /**
+     * 图标缓存
+     * key：图标名
+     *
+     */
+    private static final Map<String, ImageIcon> ICON_CACHE = Collections.synchronizedMap(new WeakHashMap<>());
+    private static final Map<String, BufferedImage> BUFFERED_IMAGE_CACHE = Collections.synchronizedMap(new WeakHashMap<>());
+    static {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(true){
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    log.info("ICON_CACHE.size() = {} " , ICON_CACHE.size());
+                    log.info("BUFFERED_IMAGE_CACHE.size() = {} " , BUFFERED_IMAGE_CACHE.size());
+                }
 
+            }
+        },"test").start();
+    }
 
     public static ImageIcon getIcon(Object context, String path) {
         return getIcon(context, path, -1, -1);
@@ -22,7 +52,7 @@ public class IconUtil {
     }
 
     public static ImageIcon getIcon(Object context, String path, int width, int height) {
-        ImageIcon imageIcon = iconCache.get(path);
+        ImageIcon imageIcon = ICON_CACHE.get(path);
         if (imageIcon == null) {
             URL url = context.getClass().getResource(path);
             if (url == null) {
@@ -35,9 +65,26 @@ public class IconUtil {
                 imageIcon.setImage(imageIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
             }
 
-            iconCache.put(path, imageIcon);
+            ICON_CACHE.put(path, imageIcon);
         }
 
         return imageIcon;
+    }
+    public static BufferedImage getBufferedImage(Object context, String path) {
+        BufferedImage bufferedImage = BUFFERED_IMAGE_CACHE.get(path);
+        if (bufferedImage == null) {
+            URL url = context.getClass().getResource(path);
+            if (url == null) {
+                return null;
+            }
+            try {
+                bufferedImage = ImageIO.read(url);
+                BUFFERED_IMAGE_CACHE.put(path, bufferedImage);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+        return bufferedImage;
     }
 }
