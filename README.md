@@ -39,7 +39,7 @@
 
 ### 3、语音消息
 
-![image](https://user-images.githubusercontent.com/67832925/129480445-2887d8c3-b7b6-4b91-ac1d-f7dfedca3d2e.png)
+![image](https://user-images.githubusercontent.com/67832925/129480718-0e95f58f-36f9-4b77-9484-335eec759293.png)
 
 ### 4、视频消息
 ![image](https://user-images.githubusercontent.com/67832925/128544101-2de42c8a-b1be-4fad-a78b-3e936d5ccbe3.png)
@@ -64,7 +64,8 @@
   ![image](https://user-images.githubusercontent.com/67832925/127839361-a30ea916-9d34-476b-abeb-37459c3dba58.png)
   
 ### 9、用户信息  
-![image](https://user-images.githubusercontent.com/67832925/129480591-cbf90fcd-7f72-4bb4-9731-ede2e28327b4.png)
+![image](https://user-images.githubusercontent.com/67832925/129480735-2a3828a3-1f9c-4689-9180-24e4b54b9818.png)
+
   
 ## 四、设置
 ### 1、个人信息
