@@ -15,26 +15,56 @@
 
 
  # 效果预览
+ 
+## 一、登录
+
+ ![image](https://user-images.githubusercontent.com/67832925/127840593-ad8c9bd5-3499-4fde-bf67-46c0a349b125.png)
 ## 首页效果如下：
  
  ![image](https://user-images.githubusercontent.com/67832925/127836900-2dc3dfd2-8e97-40e4-961c-e060a9b22a08.png)
  
 ## 一、通讯录
- 
- ![image](https://user-images.githubusercontent.com/67832925/127837839-1187de15-e9c2-46b6-ab4c-047c97974c81.png)
- ### 1、搜索
- ![image](https://user-images.githubusercontent.com/67832925/127843476-8b84b150-be9b-43e0-90c1-ef7c7f627656.png)
+ ![image](https://user-images.githubusercontent.com/67832925/129480174-326b368a-47c3-4d74-8b5f-a8a390264c79.png)
 
- 
-## 二、收藏
- 
-  ![image](https://user-images.githubusercontent.com/67832925/127837864-e1a67f55-c585-4f68-be8e-ac7458580583.png)
+ ### 1、搜索、用户详细信息
+![image](https://user-images.githubusercontent.com/67832925/129480655-7c1ec9bb-af3b-47c5-bd33-ea1852d6cbe0.png)
 
+## 五、聊天
+### 1、分享、链接消息、动态表情、图片
+![image](https://user-images.githubusercontent.com/67832925/129480399-35d05f06-8ea6-4936-bcad-efd66f046d92.png)
 
-## 三、创建群聊
+### 2、上传附件
 
+![image](https://user-images.githubusercontent.com/67832925/127843050-fe5ed785-33e0-437a-b9c0-89b631322e1f.png)
+
+### 3、语音消息
+
+![image](https://user-images.githubusercontent.com/67832925/129480445-2887d8c3-b7b6-4b91-ac1d-f7dfedca3d2e.png)
+
+### 4、视频消息
+![image](https://user-images.githubusercontent.com/67832925/128544101-2de42c8a-b1be-4fad-a78b-3e936d5ccbe3.png)
 
   
+### 5、编辑消息，支持粘贴文字、文件及图片
+
+  ![image](https://user-images.githubusercontent.com/67832925/127838840-1e12153a-908d-48f5-a498-d9371a9a6a84.png)
+  
+### 6、截图
+
+  ![image](https://user-images.githubusercontent.com/67832925/127839092-1349b3b4-a7b3-4c06-b086-d3720cd1db47.png)
+  
+
+### 7、查看图片
+
+  ![image](https://user-images.githubusercontent.com/67832925/127839251-5a4049ff-4782-4fa9-8016-b124bc8f30d0.png)
+
+
+### 8、查看群成员
+
+  ![image](https://user-images.githubusercontent.com/67832925/127839361-a30ea916-9d34-476b-abeb-37459c3dba58.png)
+  
+### 9、用户信息  
+![image](https://user-images.githubusercontent.com/67832925/129480591-cbf90fcd-7f72-4bb4-9731-ede2e28327b4.png)
   
 ## 四、设置
 ### 1、个人信息
@@ -62,56 +92,8 @@
   ![image](https://user-images.githubusercontent.com/67832925/127837960-35d98651-6f78-4f67-8d06-f35d741e3a88.png)
   
   
-## 五、聊天
-
-### 1、选择聊天用户
-
-  
-  ![image](https://user-images.githubusercontent.com/67832925/127843170-2d360e69-7027-46d6-aa48-c48afc9e9111.png)
 
 
-### 2、上传附件
-
-![image](https://user-images.githubusercontent.com/67832925/127843050-fe5ed785-33e0-437a-b9c0-89b631322e1f.png)
-
-### 3、语音消息(播放进度条...)
-
-![image](https://user-images.githubusercontent.com/67832925/128543902-0f913d3c-53ff-4870-833e-d18ca0f59f4a.png)
-
-### 4、视频消息
-![image](https://user-images.githubusercontent.com/67832925/128544101-2de42c8a-b1be-4fad-a78b-3e936d5ccbe3.png)
-
-### 5、发送图片
-
- ![image](https://user-images.githubusercontent.com/67832925/127838492-c742209c-580c-47f3-af08-beaa83d51d89.png)
-
-  
-### 6、编辑消息，支持粘贴文字、文件及图片
-
-  ![image](https://user-images.githubusercontent.com/67832925/127838840-1e12153a-908d-48f5-a498-d9371a9a6a84.png)
-  
-  
-### 7、截图
-
-  ![image](https://user-images.githubusercontent.com/67832925/127839092-1349b3b4-a7b3-4c06-b086-d3720cd1db47.png)
-  
-
-### 8、查看图片
-
-  ![image](https://user-images.githubusercontent.com/67832925/127839251-5a4049ff-4782-4fa9-8016-b124bc8f30d0.png)
-
-
-### 9、查看群成员
-
-  ![image](https://user-images.githubusercontent.com/67832925/127839361-a30ea916-9d34-476b-abeb-37459c3dba58.png)
-  
-### 10、用户信息  
-![image](https://user-images.githubusercontent.com/67832925/127842065-c84ad1b6-2f34-48f0-a24d-b82ed9d44cd4.png)
-
-
-## 七、登录
-
- ![image](https://user-images.githubusercontent.com/67832925/127840593-ad8c9bd5-3499-4fde-bf67-46c0a349b125.png)
 
 
  
