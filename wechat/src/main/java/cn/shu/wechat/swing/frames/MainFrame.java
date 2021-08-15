@@ -169,6 +169,8 @@ public class MainFrame extends JFrame  {
      * 设置任务栏图标闪动
      */
     public void setTrayFlashing() {
+       //TODO 聊天界面打开了还在闪，关闭闪烁功能
+        trayFlashing = true;
         if(trayFlashing){
             return;
         }
