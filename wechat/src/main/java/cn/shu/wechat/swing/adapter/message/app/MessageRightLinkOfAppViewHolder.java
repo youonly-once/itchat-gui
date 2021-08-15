@@ -1,24 +1,17 @@
-package cn.shu.wechat.swing.adapter.message;
+package cn.shu.wechat.swing.adapter.message.app;
 
-import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.components.message.RCLeftImageMessageBubble;
-import cn.shu.wechat.swing.components.message.RCRightImageMessageBubble;
 import cn.shu.wechat.swing.components.message.RCRightLinkMessageBubble;
-import cn.shu.wechat.swing.utils.FontUtil;
 import lombok.Getter;
-
-import javax.swing.*;
-import java.awt.*;
 
 /**
  *
  * @author 舒新胜
  * @date 17-6-2
  */
-@Getter
-public class MessageRightLinkViewHolder extends MessageLinkViewHolder {
-    public MessageRightLinkViewHolder() {
+
+public class MessageRightLinkOfAppViewHolder extends MessageLinkOfAppViewHolder {
+    public MessageRightLinkOfAppViewHolder() {
         super(new RCRightLinkMessageBubble());
         initView();
     }

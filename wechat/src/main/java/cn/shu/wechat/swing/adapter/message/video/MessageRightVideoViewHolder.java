@@ -1,73 +1,57 @@
-package cn.shu.wechat.swing.adapter.message;
+package cn.shu.wechat.swing.adapter.message.video;
 
-import cn.shu.wechat.api.DownloadTools;
+import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
 import cn.shu.wechat.swing.components.VerticalFlowLayout;
-import cn.shu.wechat.swing.components.message.*;
-import cn.shu.wechat.swing.frames.MainFrame;
-import cn.shu.wechat.swing.panels.ChatPanel;
+import cn.shu.wechat.swing.components.message.RCLeftImageMessageBubble;
+import cn.shu.wechat.swing.components.message.RCRightVideoMessageBubble;
+import cn.shu.wechat.swing.components.message.TagJLayeredPane;
+import cn.shu.wechat.swing.components.message.TagPanel;
 import cn.shu.wechat.swing.utils.FontUtil;
-import cn.shu.wechat.swing.utils.ImageUtil;
-import cn.shu.wechat.utils.SleepUtils;
 import lombok.Getter;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 
 /**
  * Created by 舒新胜 on 17-6-2.
  */
-@Getter
-public class MessageLeftVideoViewHolder extends BaseMessageViewHolder {
 
-
-    /**
-     * 发送者
-     */
-    private final SizeAutoAdjustTextArea sender = new SizeAutoAdjustTextArea((int)(MainFrame.getContext().currentWindowWidth * 0.5));
+public class MessageRightVideoViewHolder extends BaseMessageViewHolder {
 
     /**
      * 视频层
      */
-    private TagJLayeredPane videoComponent = null;
-    private final TagPanel contentTagPanel = new TagPanel();
+    public TagJLayeredPane videoComponent = null;
 
-    private final RCLeftVideoMessageBubble imageBubble = new RCLeftVideoMessageBubble();
+    private final TagPanel contentTagPanel = new TagPanel();
+    public final RCRightVideoMessageBubble imageBubble = new RCRightVideoMessageBubble();
     private final JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
     private final JPanel messageAvatarPanel = new JPanel();
-    private boolean isGroup = true;
     private final int slaveImgWidth;
     private final int slaveImgHeight;
     /**
      * 缩略图label
      */
-    private final JLabel slaveImgLabel = new JLabel();
+    public final JLabel slaveImgLabel = new JLabel();
     /**
      * 播放按钮label
      */
-    private final JLabel playImgLabel = new JLabel();
+    public final JLabel playImgLabel = new JLabel();
     /**
      * 播放时长label
      */
-    private final JLabel timeLabel = new JLabel();
+    public final JLabel timeLabel = new JLabel();
 
     /**
      *
-     *  @param isGroup 是否为群消息
      * @param dimension 缩略图尺寸
      */
-    public MessageLeftVideoViewHolder(boolean isGroup,Dimension dimension) {
-        this.isGroup = isGroup;
+    public MessageRightVideoViewHolder(Dimension dimension) {
         this.slaveImgHeight = dimension.height;
         this.slaveImgWidth = dimension.width;
         initComponents();
@@ -84,8 +68,6 @@ public class MessageLeftVideoViewHolder extends BaseMessageViewHolder {
         time.setForeground(Colors.FONT_GRAY);
         time.setFont(FontUtil.getDefaultFont(12));
 
-        sender.setFont(FontUtil.getDefaultFont(12));
-        sender.setForeground(Colors.FONT_GRAY);
         try {
             playImgLabel.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("/image/image_loading.gif"))));
         } catch (IOException e) {
@@ -100,10 +82,6 @@ public class MessageLeftVideoViewHolder extends BaseMessageViewHolder {
 
         contentTagPanel.setBackground(Colors.WINDOW_BACKGROUND);
         contentTagPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
-        if (isGroup) {
-            sender.setBorder(new EmptyBorder(0,0,5,0));
-            contentTagPanel.add(sender);
-        }
         try {
             videoComponent = getLayerPanel();
             videoComponent.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -114,10 +92,10 @@ public class MessageLeftVideoViewHolder extends BaseMessageViewHolder {
 
 
         messageAvatarPanel.setLayout(new GridBagLayout());
-        messageAvatarPanel.add(avatar, new GBC(1, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 5, 0, 0));
-        messageAvatarPanel.add(contentTagPanel, new GBC(2, 0)
+        messageAvatarPanel.add(avatar, new GBC(2, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 5, 0, 5));
+        messageAvatarPanel.add(contentTagPanel, new GBC(1, 0)
                 .setWeight(1000, 1)
-                .setAnchor(GBC.WEST)
+                .setAnchor(GBC.EAST)
                 .setInsets(0, 5, 0, 0));
         add(timePanel, BorderLayout.NORTH);
         add(messageAvatarPanel, BorderLayout.CENTER);

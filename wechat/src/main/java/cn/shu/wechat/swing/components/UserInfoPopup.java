@@ -16,6 +16,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.image.BufferedImage;
 import java.util.Map;
 import java.util.Objects;
 
@@ -97,6 +98,7 @@ public class UserInfoPopup extends JPopupMenu {
         }.execute();
         remarkNameLabel.setText("备注："+contacts.getRemarkname());
         signatureLabel.setText("签名："+contacts.getSignature());
+        signatureLabel.setToolTipText(contacts.getSignature());
     }
     private void initComponents() {
         setBackground(Colors.WINDOW_BACKGROUND_LIGHT);
@@ -180,12 +182,13 @@ public class UserInfoPopup extends JPopupMenu {
             @Override
             public void mouseClicked(MouseEvent e) {
                 setVisible(false);
-
-                ImageIcon icon = new ImageIcon(Objects.requireNonNull(AvatarUtil.createOrLoadBigAvatar(contacts.getUsername(), contacts.getHeadimgurl())));
-                Image image = icon.getImage();
-                 ImageViewerFrame imageViewerFrame = new ImageViewerFrame(image);
-                 imageViewerFrame.setVisible(true);
-                 imageViewerFrame.toFront();
+                BufferedImage bufferedImage = AvatarUtil.createOrLoadBigAvatar(contacts.getUsername(), contacts.getHeadimgurl());
+                if (bufferedImage == null){
+                    return;
+                }
+                ImageViewerFrame viewerFrame = new ImageViewerFrame(bufferedImage);
+                viewerFrame.setVisible(true);
+                viewerFrame.toFront();
                 super.mouseClicked(e);
             }
         });

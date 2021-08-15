@@ -25,23 +25,6 @@ public class IconUtil {
      */
     private static final Map<String, ImageIcon> ICON_CACHE = Collections.synchronizedMap(new WeakHashMap<>());
     private static final Map<String, BufferedImage> BUFFERED_IMAGE_CACHE = Collections.synchronizedMap(new WeakHashMap<>());
-    static {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while(true){
-                    try {
-                        Thread.sleep(3000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    log.info("ICON_CACHE.size() = {} " , ICON_CACHE.size());
-                    log.info("BUFFERED_IMAGE_CACHE.size() = {} " , BUFFERED_IMAGE_CACHE.size());
-                }
-
-            }
-        },"test").start();
-    }
 
     public static ImageIcon getIcon(Object context, String path) {
         return getIcon(context, path, -1, -1);

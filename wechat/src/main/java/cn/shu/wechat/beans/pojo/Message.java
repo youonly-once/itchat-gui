@@ -1,6 +1,7 @@
 package cn.shu.wechat.beans.pojo;
 
 import java.util.Date;
+import java.util.Map;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -106,4 +107,9 @@ public class Message {
     private Long voiceLength;
     private String fileName;
     private Long fileSize;
+
+    /**
+     * content map
+     */
+    private Map<String, Object> contentMap;
 }

@@ -1,28 +1,25 @@
-package cn.shu.wechat.swing.adapter.message;
+package cn.shu.wechat.swing.adapter.message.app;
 
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
-import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.components.message.*;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.FontUtil;
 import lombok.Getter;
 
-import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
 
 /**
  *
  * @author 舒新胜
  * @date 17-6-2
  */
-@Getter
-public class MessageLeftLinkViewHolder extends MessageLinkViewHolder {
-    private final SizeAutoAdjustTextArea sender = new SizeAutoAdjustTextArea((int)(MainFrame.getContext().currentWindowWidth * 0.5));
+
+public class MessageLeftLinkOfAppViewHolder extends MessageLinkOfAppViewHolder {
+    public final SizeAutoAdjustTextArea sender = new SizeAutoAdjustTextArea((int)(MainFrame.getContext().currentWindowWidth * 0.5));
     private final boolean isGroup ;
-    public MessageLeftLinkViewHolder(boolean isGroup) {
+    public MessageLeftLinkOfAppViewHolder(boolean isGroup) {
         super(new RCLeftLinkMessageBubble());
         this.isGroup = isGroup;
         initView();

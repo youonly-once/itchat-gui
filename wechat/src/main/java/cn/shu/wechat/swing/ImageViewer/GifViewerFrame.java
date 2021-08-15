@@ -1,5 +1,7 @@
 package cn.shu.wechat.swing.ImageViewer;
 
+import cn.shu.wechat.swing.utils.IconUtil;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -86,7 +88,7 @@ public class GifViewerFrame extends JDialog {
 
             imageLabel = new ImageLabel();
 
-            setIconImage(new ImageIcon(Objects.requireNonNull(getClass().getResource("/image/ic_launcher.png"))).getImage());
+            setIconImage(IconUtil.getIcon(this,"/image/ic_launcher.png").getImage());
 
         }
 

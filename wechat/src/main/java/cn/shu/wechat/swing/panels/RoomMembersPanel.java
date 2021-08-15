@@ -167,11 +167,9 @@ public class RoomMembersPanel extends ParentAvailablePanel {
      */
     private void getRoomMembers() {
 
-        // 单独聊天，成员只显示两人
+        // 单独聊天，成员两人
         if (!roomId.startsWith("@@")) {
             members.clear();
-            //显示自己
-            members.add(Core.getUserSelf());
             //显示另外个人
             members.add(Core.getMemberMap().get(roomId));
         } else {

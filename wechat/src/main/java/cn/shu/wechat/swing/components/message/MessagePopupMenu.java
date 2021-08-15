@@ -8,8 +8,7 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCMenuItemUI;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
 import cn.shu.wechat.swing.entity.MessageItem;
-import cn.shu.wechat.swing.entity.VideoAttachmentItem;
-import cn.shu.wechat.swing.entity.VoiceAttachmentItem;
+
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 import cn.shu.wechat.swing.utils.FileCache;
@@ -90,7 +89,7 @@ public class MessagePopupMenu extends JPopupMenu {
                         TagJLayeredPane attachmentPanel = (TagJLayeredPane) getInvoker();
                         Object obj = attachmentPanel.getTag();
                         if (obj != null) {
-                            VideoAttachmentItem item = (VideoAttachmentItem)obj;
+                            MessageItem.VideoAttachmentItem item = (MessageItem.VideoAttachmentItem)obj;
                             String videoPath = item.getVideoPath();
                             if (videoPath != null && !videoPath.isEmpty()) {
                                 ClipboardUtil.copyFile(videoPath);
@@ -107,7 +106,7 @@ public class MessagePopupMenu extends JPopupMenu {
                         TagPanel attachmentPanel = (TagPanel) getInvoker();
                         Object obj = attachmentPanel.getTag();
                         if (obj != null) {
-                            VoiceAttachmentItem item = (VoiceAttachmentItem)obj;
+                            MessageItem.VoiceAttachmentItem item = (MessageItem.VoiceAttachmentItem)obj;
                             String voicePath = item.getVoicePath();
                             if (voicePath != null && !voicePath.isEmpty()) {
                                 ClipboardUtil.copyFile(voicePath);
@@ -245,7 +244,7 @@ public class MessagePopupMenu extends JPopupMenu {
                         TagJLayeredPane attachmentPanel = (TagJLayeredPane) getInvoker();
                         Object obj = attachmentPanel.getTag();
                         if (obj != null) {
-                            VideoAttachmentItem item = (VideoAttachmentItem)obj;
+                            MessageItem.VideoAttachmentItem item = (MessageItem.VideoAttachmentItem)obj;
                             messageId = item.getId();
                         }
                         break;
@@ -254,7 +253,7 @@ public class MessagePopupMenu extends JPopupMenu {
                     TagPanel attachmentPanel = (TagPanel) getInvoker();
                     Object obj = attachmentPanel.getTag();
                     if (obj != null) {
-                        VoiceAttachmentItem item = (VoiceAttachmentItem)obj;
+                        MessageItem.VoiceAttachmentItem item = (MessageItem.VoiceAttachmentItem)obj;
                         messageId = item.getId();
                     }
                     break;
@@ -298,7 +297,7 @@ public class MessagePopupMenu extends JPopupMenu {
                                 TagJLayeredPane attachmentPanel = (TagJLayeredPane) getInvoker();
                                 Object obj = attachmentPanel.getTag();
                                 if (obj != null) {
-                                    VideoAttachmentItem item = (VideoAttachmentItem) obj;
+                                    MessageItem.VideoAttachmentItem item = (MessageItem.VideoAttachmentItem) obj;
                                     path = item.getVideoPath();
                                 }
                                 break;
@@ -308,7 +307,7 @@ public class MessagePopupMenu extends JPopupMenu {
                                 TagPanel attachmentPanel = (TagPanel) getInvoker();
                                 Object obj = attachmentPanel.getTag();
                                 if (obj != null) {
-                                    VoiceAttachmentItem item = (VoiceAttachmentItem) obj;
+                                    MessageItem.VoiceAttachmentItem item = (MessageItem.VoiceAttachmentItem) obj;
                                     path = item.getVoicePath();
                                 }
                                 break;

@@ -14,7 +14,6 @@ import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.panels.RoomChatPanel;
-import cn.shu.wechat.swing.panels.RoomChatPanelCard;
 import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.utils.CommonTools;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
@@ -64,6 +63,7 @@ public class MsgCenter {
     public void handleNewMsg(AddMsgList msg) {
         //消息类型封装
         WXReceiveMsgCodeEnum msgType = WXReceiveMsgCodeEnum.getByCode(msg.getMsgType());
+        msg.setType(msgType);
         String s = LogUtil.printFromMeg(msg, msgType.getDesc());
         //如果是当前房间 发送已读通知
         if (RoomChatPanel.getContext().getCurrRoomId().equals(msg.getFromUserName())){
@@ -97,15 +97,37 @@ public class MsgCenter {
         loadUserInfo(msg);
         //下载资源文件
         download(msgType,msg);
+        //content xml转MAP
+        Map<String, Object> map = contentXml2Map(msg);
         //存储数据库
-        Message message = storeMsgToDB(msg,getPlainText(msgType,msg));
+        String plainText = getPlainText(msgType, msg,map);
+        Message message = storeMsgToDB(msg,plainText);
+        message.setContentMap(map);
         //聊天界面
-       updateUI(message, msg);
+        updateUI(message, msg);
         //处理自定义逻辑
         processMsg(msg,msgType);
 
 
     }
+
+    /**
+     * 消息中content字段xml转map
+     * @param msg
+     * @return
+     */
+    private  Map<String, Object> contentXml2Map(AddMsgList msg) {
+        switch (msg.getType()) {
+            case MSGTYPE_APP:
+            case MSGTYPE_RECALLED:
+                Map<String, Object> map = XmlStreamUtil.toMap(msg.getContent());
+                return map;
+            default:
+                break;
+        }
+        return null;
+    }
+
 
     /**
      *  第一次收到群消息 加载群成员详细细腻
@@ -295,9 +317,10 @@ public class MsgCenter {
     /**
      *
      * @param msgType 消息类型
+     * @param map
      * @return 明文
      */
-    private String getPlainText(WXReceiveMsgCodeEnum msgType,AddMsgList msg){
+    private String getPlainText(WXReceiveMsgCodeEnum msgType, AddMsgList msg, Map<String, Object> map){
         String plaintext = null;
         switch (msgType) {
             case MSGTYPE_MAP:
@@ -320,26 +343,24 @@ public class MsgCenter {
                 plaintext = "[表情]";
                 break;
             case MSGTYPE_APP:
+                Object title = map.get("msg.appmsg.title");
                 switch (WXReceiveMsgCodeOfAppEnum.getByCode(msg.getAppMsgType())) {
                     case LINK:
-                        Map<String, Object> stringObjectMap = XmlStreamUtil.toMap(msg.getContent());
-                        Object o = stringObjectMap.get("msg.appmsg.title");
-                        plaintext = "[链接]"+o.toString();
+
+                        plaintext = "[链接]"+title;
                         break;
                     case FILE:
                         plaintext = "[文件]";
                         break;
                     case PROGRAM:
-                        plaintext = "[程序]";
-                        break;
-                    case OTHER:
-                        plaintext = msg.getContent();
+                        plaintext = "[小程序]"+title;
+                       break;
+                    case PICTURE:
+                        plaintext = "[小程序]图片";
                         break;
                     default:
-                        stringObjectMap = XmlStreamUtil.toMap(msg.getContent());
-
-                        o = stringObjectMap.get("msg.appmsg.des");
-                        Object url = stringObjectMap.get("msg.appmsg.url");
+                        Object o = map.get("msg.appmsg.des");
+                        Object url = map.get("msg.appmsg.url");
                         if (o!=null){
                             plaintext ="["+o.toString() +"]:"+ (url==null?"":url.toString());
                         }else {
@@ -377,7 +398,6 @@ public class MsgCenter {
                 plaintext = "[名片消息，请在手机上查看]";
                 break;
             case MSGTYPE_RECALLED:
-                Map<String, Object> map = XmlStreamUtil.toMap(msg.getContent());
                 plaintext = map.get("sysmsg.revokemsg.replacemsg").toString();
                 break;
             case UNKNOWN:

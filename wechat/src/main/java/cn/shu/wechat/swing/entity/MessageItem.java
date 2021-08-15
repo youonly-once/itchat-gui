@@ -2,21 +2,17 @@ package cn.shu.wechat.swing.entity;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
-import cn.shu.wechat.api.MessageTools;
-import cn.shu.wechat.beans.msg.url.WXImgUrl;
 import cn.shu.wechat.beans.msg.url.WXMsgUrl;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
-import cn.shu.wechat.swing.db.model.ImageAttachment;
 import cn.shu.wechat.utils.XmlStreamUtil;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang.StringUtils;
 
 import java.awt.image.BufferedImage;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  *
@@ -34,6 +30,7 @@ public class MessageItem implements Comparable<MessageItem> {
     public static final int LEFT_VIDEO = 4;
     public static final int LEFT_VOICE = 5;
     public static final int LEFT_LINK = 6;
+    public static final int LEFT_PROGRAM_OF_APP = 7;
 
     public static final int RIGHT_TEXT = -1;
     public static final int RIGHT_IMAGE = -2;
@@ -41,6 +38,7 @@ public class MessageItem implements Comparable<MessageItem> {
     public static final int RIGHT_VIDEO = -4;
     public static final int RIGHT_VOICE = -5;
     public static final int RIGHT_LINK = -6;
+    public static final int RIGHT_PROGRAM_OF_APP = -7;
 
     private String id;
     private String roomId;
@@ -63,6 +61,7 @@ public class MessageItem implements Comparable<MessageItem> {
     private VideoAttachmentItem videoAttachmentItem;
     private VoiceAttachmentItem voiceAttachmentItem;
     private LinkAttachmentItem linkAttachmentItem;
+    private ProgramOfAppItem programOfAppItem;
     private boolean isSystemMsg;
 
     public MessageItem(cn.shu.wechat.beans.pojo.Message message, String roomId) {
@@ -98,11 +97,12 @@ public class MessageItem implements Comparable<MessageItem> {
                 break;
             case MSGTYPE_MICROVIDEO:
             case MSGTYPE_APP:
+                Map<String, Object> stringObjectMap = message.getContentMap();
                 switch (WXReceiveMsgCodeOfAppEnum.getByCode(message.getAppMsgType())) {
                     case OTHER:
                         break;
                     case LINK:
-                        Map<String, Object> stringObjectMap = XmlStreamUtil.toMap(message.getContent());
+
                         Object desc = stringObjectMap.get("msg.appmsg.des");
                         Object url = stringObjectMap.get("msg.appmsg.url");
                         Object title = stringObjectMap.get("msg.appmsg.title");
@@ -124,7 +124,43 @@ public class MessageItem implements Comparable<MessageItem> {
                                 .sourceName(sourceName == null?"":sourceName.toString())
                                 .build();
                         break;
+                    case PICTURE:
+                        Object height = stringObjectMap.get("msg.appmsg.appattach.cdnthumbheight");
+                        Object width = stringObjectMap.get("msg.appmsg.appattach.cdnthumbwidth");
+                        url = stringObjectMap.get("msg.appmsg.url");
+                        title = stringObjectMap.get("msg.appmsg.title");
+                        thumbUrl = stringObjectMap.get("msg.appmsg.thumburl");
+                        Object sourceIconUrl = stringObjectMap.get("msg.appmsg.weappinfo.weappiconurl");
+                        sourceName = stringObjectMap.get("msg.appinfo.appname");
+                        programOfAppItem = ProgramOfAppItem.builder()
+                                .imageUrl(thumbUrl==null?"":thumbUrl.toString())
+                                .id(message.getId())
+                                .title(title == null?"":"[小程序]"+title.toString())
+                                .url(url == null?"":url.toString())
+                                .sourceIconUrl(sourceIconUrl == null?"":sourceIconUrl.toString())
+                                .msgId(message.getMsgId())
+                                .imageHeight(height==null?0:Integer.parseInt(height.toString()))
+                                .imageWidth(width==null?0:Integer.parseInt(width.toString()))
+                                .sourceName(sourceName == null?"":sourceName.toString()).build();
+                        break;
                     case PROGRAM:
+                        height = stringObjectMap.get("msg.appmsg.appattach.cdnthumbheight");
+                        width = stringObjectMap.get("msg.appmsg.appattach.cdnthumbwidth");
+                       url = stringObjectMap.get("msg.appmsg.url");
+                        title = stringObjectMap.get("msg.appmsg.title");
+                        thumbUrl = stringObjectMap.get("msg.appmsg.thumburl");
+                        sourceIconUrl = stringObjectMap.get("msg.appmsg.weappinfo.weappiconurl");
+                        sourceName = stringObjectMap.get("msg.appmsg.sourcedisplayname");
+                        programOfAppItem = ProgramOfAppItem.builder()
+                                .imageUrl(thumbUrl==null?"":thumbUrl.toString())
+                                .id(message.getId())
+                                .title(title == null?"":"[小程序]"+title.toString())
+                                .url(url == null?"":url.toString())
+                                .sourceIconUrl(sourceIconUrl == null?"":sourceIconUrl.toString())
+                                .msgId(message.getMsgId())
+                                .imageHeight(height==null?0:Integer.parseInt(height.toString()))
+                                .imageWidth(width==null?0:Integer.parseInt(width.toString()))
+                                .sourceName(sourceName == null?"":sourceName.toString()).build();
                       break;
                     case FILE:
                         //文件类消息
@@ -215,6 +251,10 @@ public class MessageItem implements Comparable<MessageItem> {
             }else if(linkAttachmentItem!= null){
                 this.setMessageType(RIGHT_LINK);
             }
+            //小程序消息
+            else if (programOfAppItem != null){
+                this.setMessageType(RIGHT_PROGRAM_OF_APP);
+            }
             // 普通文本消息
             else {
                 this.setMessageType(RIGHT_TEXT);
@@ -233,7 +273,10 @@ public class MessageItem implements Comparable<MessageItem> {
             else if (videoAttachmentItem!=null){
                 this.setMessageType(LEFT_VIDEO);
             }
-
+            //小程序消息
+            else if (programOfAppItem != null){
+                this.setMessageType(LEFT_PROGRAM_OF_APP);
+            }
             else if (isSystemMsg){
                 this.setMessageType(SYSTEM_MESSAGE);
             }
@@ -251,6 +294,170 @@ public class MessageItem implements Comparable<MessageItem> {
     @Override
     public int compareTo(MessageItem o) {
         return (int) (this.getTimestamp() - o.getTimestamp());
+
+    }
+    @Data
+    @Builder
+    public static class FileAttachmentItem {
+        private String id;
+        private String fileName;
+        private String filePath;
+        private String description;
+        private String slavePath;
+        private Long fileSize;
+
+    }
+    @Data
+    @Builder
+    public static class ImageAttachmentItem {
+        private String id;
+        private String title;
+        private String description;
+        private String slavePath;
+        private String imagePath;
+        private int width;
+        private int height;
+    }
+    @Data
+    @Builder
+    public static class LinkAttachmentItem {
+        /**
+         * 消息ID
+         */
+        private String id;
+        /**
+         * 缩略图地址
+         */
+        private String thumbUrl;
+        /**
+         * 描述
+         */
+        private String desc;
+        /**
+         * 标题
+         */
+        private String title;
+
+        /**
+         * 链接地址
+         */
+        private String url;
+
+        /**
+         * 来源名词
+         */
+        private String sourceName;
+
+        /**
+         * 图标Image
+         */
+        private BufferedImage image;
+
+
+
+
+    }
+    @Data
+    @Builder
+    public static class ProgramOfAppItem {
+        /**
+         * 消息ID
+         */
+        private String id;
+
+        /**
+         * MsgId微信消息ID
+         */
+        private String msgId;
+
+        /**
+         * 标题
+         */
+        private String title;
+
+        /**
+         * 链接地址
+         */
+        private String url;
+
+        /**
+         * APP名称
+         */
+        private String sourceName;
+
+        /**
+         * APP图标地址
+         */
+        private String sourceIconUrl;
+
+        /**
+         * 图片地址
+         */
+        private String imageUrl;
+
+        /**
+         * 图片宽度
+         */
+        private int imageWidth;
+        /**
+         * 图片高度
+         */
+        private int imageHeight;
+    }
+    /**
+     *
+     * @author 舒新胜
+     * @date 17/05/2017
+     */
+    @Data
+    @Builder
+    public static class VideoAttachmentItem {
+        /**
+         * 消息ID
+         */
+        private String id;
+        /**
+         * 缩略图路径
+         */
+        private String slaveImgPath;
+        /**
+         * 缩略图宽度
+         */
+        private int salveImgWidth;
+        /**
+         * 缩略图高度
+         */
+        private int salveImgHeight;
+        /**
+         * 视频路径
+         */
+        private String videoPath;
+        /**
+         * 视频长度 单位s
+         */
+        private long videoLength;
+
+    }
+    /**
+     *
+     * @author 舒新胜
+     * @date 17/05/2017
+     */
+    @Data
+    @Builder
+    public  static class VoiceAttachmentItem {
+        /**
+         * 消息ID
+         */
+        private String id;
+        /**
+         * 视频路径
+         */
+        private String voicePath;
+        /**
+         * 视频长度 单位毫秒
+         */
+        private long voiceLength;
 
     }
 }

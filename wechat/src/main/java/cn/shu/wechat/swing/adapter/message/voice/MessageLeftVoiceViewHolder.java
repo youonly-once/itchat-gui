@@ -1,8 +1,7 @@
-package cn.shu.wechat.swing.adapter.message;
+package cn.shu.wechat.swing.adapter.message.voice;
 
 import cn.shu.wechat.swing.components.*;
 import cn.shu.wechat.swing.components.message.RCLeftVoiceMessageBubble;
-import cn.shu.wechat.swing.components.message.TagPanel;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.FontUtil;
 import lombok.Getter;
@@ -10,10 +9,7 @@ import lombok.Getter;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.IOException;
 
 /**
@@ -21,9 +17,9 @@ import java.io.IOException;
  * @author 舒新胜
  * @date 17-6-2
  */
-@Getter
+
 public class MessageLeftVoiceViewHolder extends MessageVoiceViewHolder {
-    private final SizeAutoAdjustTextArea sender = new SizeAutoAdjustTextArea((int)(MainFrame.getContext().currentWindowWidth * 0.5));
+    public final SizeAutoAdjustTextArea sender = new SizeAutoAdjustTextArea((int)(MainFrame.getContext().currentWindowWidth * 0.5));
     private JLabel unreadPoint;
     public MessageLeftVoiceViewHolder(boolean isGroup) {
        super(isGroup,new RCLeftVoiceMessageBubble());

@@ -1,7 +1,19 @@
 package cn.shu.wechat.swing.helper;
 
 import cn.shu.wechat.swing.adapter.message.*;
-import cn.shu.wechat.swing.panels.ChatPanel;
+import cn.shu.wechat.swing.adapter.message.app.MessageLeftAttachmentViewHolder;
+import cn.shu.wechat.swing.adapter.message.app.MessageLeftProgramOfAppViewHolder;
+import cn.shu.wechat.swing.adapter.message.app.MessageRightAttachmentViewHolder;
+import cn.shu.wechat.swing.adapter.message.app.MessageRightProgramOfAppViewHolder;
+import cn.shu.wechat.swing.adapter.message.image.MessageLeftImageViewHolder;
+import cn.shu.wechat.swing.adapter.message.image.MessageRightImageViewHolder;
+import cn.shu.wechat.swing.adapter.message.system.MessageSystemMessageViewHolder;
+import cn.shu.wechat.swing.adapter.message.text.MessageLeftTextViewHolder;
+import cn.shu.wechat.swing.adapter.message.text.MessageRightTextViewHolder;
+import cn.shu.wechat.swing.adapter.message.video.MessageLeftVideoViewHolder;
+import cn.shu.wechat.swing.adapter.message.video.MessageRightVideoViewHolder;
+import cn.shu.wechat.swing.adapter.message.voice.MessageLeftVoiceViewHolder;
+import cn.shu.wechat.swing.adapter.message.voice.MessageRightVoiceViewHolder;
 
 import javax.swing.*;
 import java.awt.event.MouseListener;
@@ -35,6 +47,9 @@ public class MessageViewHolderCacheHelper {
     private final List<MessageRightVideoViewHolder> rightVideoViewHolders = new ArrayList<>();
     private final List<MessageLeftVoiceViewHolder> leftVoiceViewHolders = new ArrayList<>();
     private final List<MessageRightVoiceViewHolder> rightVoiceViewHolders = new ArrayList<>();
+
+    private final List<MessageLeftProgramOfAppViewHolder> leftProgramOfAppViewHolders = new ArrayList<>();
+    private final List<MessageRightProgramOfAppViewHolder> rightProgramOfAppViewHolders = new ArrayList<>();
     private final List<MessageLeftAttachmentViewHolder> leftAttachmentViewHolders = new ArrayList<>();
 
     private List<MessageSystemMessageViewHolder> systemMessageViewHolders = new ArrayList<>();
@@ -48,6 +63,9 @@ public class MessageViewHolderCacheHelper {
     private int leftVoicePosition = 0;
     private int rightVideoPosition = 0;
     private int rightVoicePosition = 0;
+
+    private int leftProgramOfAppPosition = 0;
+    private int rightProgramOfAppPosition = 0;
     private int leftAttachmentPosition = 0;
     private int systemMessagePosition = 0;
 
@@ -198,6 +216,24 @@ public class MessageViewHolderCacheHelper {
         if (rightVoicePosition < CACHE_CAPACITY && rightVoiceViewHolders.size() > 0) {
             holder = rightVoiceViewHolders.get(rightVoicePosition);
             rightVoicePosition++;
+        }
+
+        return holder;
+    }
+    public synchronized MessageLeftProgramOfAppViewHolder tryGetLeftProgramOfAppViewHolder() {
+        MessageLeftProgramOfAppViewHolder holder = null;
+        if (leftProgramOfAppPosition < CACHE_CAPACITY && leftProgramOfAppViewHolders.size() > 0) {
+            holder = leftProgramOfAppViewHolders.get(leftProgramOfAppPosition);
+            leftProgramOfAppPosition++;
+        }
+
+        return holder;
+    }
+    public synchronized MessageRightProgramOfAppViewHolder tryGetRightProgramOfAppViewHolder() {
+        MessageRightProgramOfAppViewHolder holder = null;
+        if (rightProgramOfAppPosition < CACHE_CAPACITY && rightProgramOfAppViewHolders.size() > 0) {
+            holder = rightProgramOfAppViewHolders.get(rightProgramOfAppPosition);
+            rightProgramOfAppPosition++;
         }
 
         return holder;

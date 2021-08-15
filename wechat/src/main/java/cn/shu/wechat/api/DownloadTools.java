@@ -14,6 +14,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -221,7 +222,33 @@ public class DownloadTools {
         }
         return null;
     }
-
+    /**
+     * entity to ImageIcon
+     * @param entity entity
+     * @return
+     */
+    private static ImageIcon entity2ImageIcon(HttpEntity entity){
+        InputStream content = null;
+        try {
+            content = entity.getContent();
+            if (content == null){
+                return null;
+            }
+            byte[] bytes = EntityUtils.toByteArray(entity);
+           return new ImageIcon(bytes);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            if (content!=null){
+                try {
+                    content.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return null;
+    }
     /**
      * 下载微信大头像
      *
@@ -352,13 +379,48 @@ public class DownloadTools {
      * @return Image
      */
     public static BufferedImage downloadImgByMsgID(String msgId,String type){
-       String url = String.format(URLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String) Core.getLoginInfoMap().get("url"));
+        return entity2Image(downloadImgEntityByMsgID(msgId, type));
+    }
+
+    /**
+     * 下载图片根据消息id
+     * @param msgId 消息ID
+     * @param type 类型
+     * @return Image
+     */
+    public static ImageIcon downloadImgIconByMsgID(String msgId, String type){
+
+        return entity2ImageIcon(downloadImgEntityByMsgID(msgId, type));
+    }
+    /**
+     * 下载图片根据消息id
+     * @param msgId 消息ID
+     * @param type 类型
+     * @return Image
+     */
+    public static byte[] downloadImgByteByMsgID(String msgId, String type){
+        HttpEntity httpEntity = downloadImgEntityByMsgID(msgId, type);
+        try {
+            byte[] bytes = EntityUtils.toByteArray(httpEntity);
+            return bytes;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    /**
+     * 下载图片根据消息id
+     * @param msgId 消息ID
+     * @param type 类型
+     * @return Image
+     */
+    private static HttpEntity downloadImgEntityByMsgID(String msgId, String type){
+        String url = String.format(URLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String) Core.getLoginInfoMap().get("url"));
         HttpEntity entity = downloadEntityByMsgID(
                 url, String.valueOf(msgId), type
                 , null, true);
-        return entity2Image(entity);
+        return entity;
     }
-
     /**
      * 下载资源根据消息id
      * @param msgId 消息ID

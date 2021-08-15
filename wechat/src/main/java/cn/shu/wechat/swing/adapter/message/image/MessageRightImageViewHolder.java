@@ -1,5 +1,6 @@
-package cn.shu.wechat.swing.adapter.message;
+package cn.shu.wechat.swing.adapter.message.image;
 
+import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.message.MessageImageLabel;

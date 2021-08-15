@@ -2,17 +2,30 @@ package cn.shu.wechat.swing.adapter.message;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
+import cn.shu.wechat.beans.msg.url.WXMsgUrl;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.ImageViewer.ImageViewerFrame;
 import cn.shu.wechat.swing.adapter.BaseAdapter;
 import cn.shu.wechat.swing.adapter.ViewHolder;
+import cn.shu.wechat.swing.adapter.message.app.*;
+import cn.shu.wechat.swing.adapter.message.image.MessageLeftImageViewHolder;
+import cn.shu.wechat.swing.adapter.message.image.MessageRightImageViewHolder;
+import cn.shu.wechat.swing.adapter.message.system.MessageSystemMessageViewHolder;
+import cn.shu.wechat.swing.adapter.message.text.MessageLeftTextViewHolder;
+import cn.shu.wechat.swing.adapter.message.text.MessageRightTextViewHolder;
+import cn.shu.wechat.swing.adapter.message.video.MessageLeftVideoViewHolder;
+import cn.shu.wechat.swing.adapter.message.video.MessageRightVideoViewHolder;
+import cn.shu.wechat.swing.adapter.message.voice.MessageLeftVoiceViewHolder;
+import cn.shu.wechat.swing.adapter.message.voice.MessageRightVoiceViewHolder;
+import cn.shu.wechat.swing.adapter.message.voice.MessageVoiceViewHolder;
 import cn.shu.wechat.swing.components.RCListView;
 import cn.shu.wechat.swing.components.RCProgressBar;
 import cn.shu.wechat.swing.components.UserInfoPopup;
 import cn.shu.wechat.swing.components.message.*;
 import cn.shu.wechat.swing.db.model.Message;
 import cn.shu.wechat.swing.entity.*;
+import cn.shu.wechat.swing.entity.MessageItem.*;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.helper.AttachmentIconHelper;
 import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
@@ -22,6 +35,7 @@ import cn.shu.wechat.swing.utils.*;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.SleepUtils;
 import javazoom.jl.player.Player;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 
@@ -31,6 +45,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -41,6 +56,7 @@ import java.util.Map;
 /**
  * Created by 舒新胜 on 17-6-2.
  */
+@Log4j2
 public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     private final List<MessageItem> messageItems;
     private final RCListView listView;
@@ -138,10 +154,10 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 return holder;
             }
             case MessageItem.LEFT_LINK: {
-                return new MessageLeftLinkViewHolder(messageItem.isGroupable());
+                return new MessageLeftLinkOfAppViewHolder(messageItem.isGroupable());
             }
             case MessageItem.RIGHT_LINK: {
-                return new MessageRightLinkViewHolder();
+                return new MessageRightLinkOfAppViewHolder();
             }
             case MessageItem.LEFT_VOICE: {
                 MessageLeftVoiceViewHolder holder = messageViewHolderCacheHelper.tryGetLeftVoiceViewHolder();
@@ -155,6 +171,22 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 MessageRightVoiceViewHolder holder = messageViewHolderCacheHelper.tryGetRightVoiceViewHolder();
                 if (holder == null) {
                     holder = new MessageRightVoiceViewHolder();
+                }
+
+                return holder;
+            }
+            case MessageItem.LEFT_PROGRAM_OF_APP: {
+                MessageLeftProgramOfAppViewHolder holder = messageViewHolderCacheHelper.tryGetLeftProgramOfAppViewHolder();
+                if (holder == null) {
+                    holder = new MessageLeftProgramOfAppViewHolder(messageItem.isGroupable());
+                }
+
+                return holder;
+            }
+            case MessageItem.RIGHT_PROGRAM_OF_APP: {
+                MessageRightProgramOfAppViewHolder holder = messageViewHolderCacheHelper.tryGetRightProgramOfAppViewHolder();
+                if (holder == null) {
+                    holder = new MessageRightProgramOfAppViewHolder();
                 }
 
                 return holder;
@@ -214,10 +246,78 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             processRightAttachmentMessage(viewHolder, item);
         } else if (viewHolder instanceof MessageLeftAttachmentViewHolder) {
             processLeftAttachmentMessage(viewHolder, item);
-        } else if (viewHolder instanceof MessageRightLinkViewHolder) {
+        } else if (viewHolder instanceof MessageRightLinkOfAppViewHolder) {
             processRightLinkMessage(viewHolder, item);
-        } else if (viewHolder instanceof MessageLeftLinkViewHolder) {
+        } else if (viewHolder instanceof MessageLeftLinkOfAppViewHolder) {
             processLeftLinkMessage(viewHolder, item);
+        } else if (viewHolder instanceof MessageRightProgramOfAppViewHolder) {
+            processRightProgramOfAppMessage(viewHolder, item);
+        } else if (viewHolder instanceof MessageLeftProgramOfAppViewHolder) {
+            processLeftProgramOfAppMessage(viewHolder, item);
+        }
+    }
+
+    private void processLeftProgramOfAppMessage(BaseMessageViewHolder viewHolder, MessageItem item) {
+        MessageLeftProgramOfAppViewHolder appViewHolder = (MessageLeftProgramOfAppViewHolder) viewHolder;
+        appViewHolder.sender.setText(item.getSenderUsername());
+        processProgramOfAppMessage(viewHolder,item);
+    }
+
+    private void processRightProgramOfAppMessage(BaseMessageViewHolder viewHolder, MessageItem item) {
+
+        processProgramOfAppMessage(viewHolder,item);
+    }
+    private void processProgramOfAppMessage(BaseMessageViewHolder viewHolder, MessageItem item){
+        MessageProgramOfAppViewHolder appViewHolder = (MessageProgramOfAppViewHolder) viewHolder;
+        ProgramOfAppItem programOfAppItem = item.getProgramOfAppItem();
+        appViewHolder.title.setText(programOfAppItem.getTitle());
+        appViewHolder.sourceName.setText(programOfAppItem.getSourceName());
+        if (StringUtils.isNotEmpty(programOfAppItem.getSourceIconUrl())){
+            try {
+                ImageIcon imageIcon = new ImageIcon(new URL(programOfAppItem.getSourceIconUrl()));
+                ImageUtil.preferredImageSize(imageIcon, 16);
+                appViewHolder.sourceIcon.setIcon(imageIcon);
+
+            } catch (MalformedURLException e) {
+                log.error(e.getMessage());
+            }
+        }
+
+        if (StringUtils.isEmpty(programOfAppItem.getImageUrl())){
+            appViewHolder.imageLabel.setIcon(IconUtil.getIcon(this,"/image/image_loading.gif"));
+            new SwingWorker<Object,Object>(){
+                ImageIcon imageIcon = null;
+                @Override
+                protected Object doInBackground() throws Exception {
+                    byte[] bytes = DownloadTools.downloadImgByteByMsgID(programOfAppItem.getMsgId(), WXMsgUrl.BIG_TYPE);
+                    if (bytes == null || bytes.length<=0){
+                        bytes = DownloadTools.downloadImgByteByMsgID(programOfAppItem.getMsgId(), WXMsgUrl.SLAVE_TYPE);
+                    }
+                    if (bytes != null && bytes.length>0) {
+                        if (ImageUtil.isGIF(bytes)) {
+                            imageIcon = ImageUtil.preferredGifSize(bytes, programOfAppItem.getImageWidth(), programOfAppItem.getImageHeight());
+                        }else{
+                           imageIcon = new ImageIcon(bytes);
+                           ImageUtil.preferredImageSize(imageIcon, 200);
+                        }
+
+                    }
+                    return null;
+                }
+
+                @Override
+                protected void done() {
+                    if (imageIcon!=null){
+                        appViewHolder.imageLabel.setIcon(imageIcon);
+                    }
+                }
+            }.execute();
+        }else{
+            try {
+                appViewHolder.imageLabel.setIcon(new ImageIcon(new URL(programOfAppItem.getImageUrl())));
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -422,7 +522,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     private void processLeftVoiceMessage(ViewHolder viewHolder, MessageItem item) {
         MessageLeftVoiceViewHolder holder = (MessageLeftVoiceViewHolder) viewHolder;
         processVoice(item, holder);
-        holder.getSender().setText(item.getSenderUsername());
+        holder.sender.setText(item.getSenderUsername());
         attachPopupMenu(viewHolder, MessageItem.LEFT_VOICE);
 
     }
@@ -448,23 +548,23 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      */
     private void processVoice(MessageItem item, MessageVoiceViewHolder holder) {
 
-        holder.getContentTagPanel().setTag(item.getVoiceAttachmentItem());
+        holder.contentTagPanel.setTag(item.getVoiceAttachmentItem());
         double len = item.getVoiceAttachmentItem().getVoiceLength() * 1.0;
 
         len = len / 1000;
         long round = Math.round(len);
-        holder.getDurationText().setText(String.valueOf(round));
+        holder.durationText.setText(String.valueOf(round));
         StringBuilder t = new StringBuilder();
         for (long i = 0; i < round / 2; i++) {
             t.append(" ");
         }
-        holder.getGapText().setText(t.toString());
+        holder.gapText.setText(t.toString());
 
         //holder.getDurationText().setTag(item.getId());
 
 
         //播放语音
-        holder.getMessageBubble().addMouseListener(new MessageMouseListener() {
+        holder.messageBubble.addMouseListener(new MessageMouseListener() {
             private void closePlayer() {
                 if (player != null) {
                     player.close();
@@ -491,7 +591,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                         }
                     } else {
                         holder.removeUnreadPoint();
-                        RCProgressBar progressBar = holder.getProgressBar();
+                        RCProgressBar progressBar = holder.progressBar;
                         progressBar.setVisible(true);
                         progressBar.setMaximum((int) item.getVoiceAttachmentItem().getVoiceLength());
                         //刷新进度条
@@ -550,20 +650,20 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      */
     private void processLeftVideoMessage(ViewHolder viewHolder, MessageItem item) {
         MessageLeftVideoViewHolder holder = (MessageLeftVideoViewHolder) viewHolder;
-        holder.getSender().setText(item.getSenderUsername());
+        holder.sender.setText(item.getSenderUsername());
 
         try {
             processVideo(item
-                    , holder.getTimeLabel()
-                    , holder.getPlayImgLabel()
-                    , holder.getSlaveImgLabel()
-                    , holder.getVideoComponent());
+                    , holder.timeLabel
+                    , holder.playImgLabel
+                    , holder.slaveImgLabel
+                    , holder.videoComponent);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        holder.getVideoComponent().setTag(item.getVideoAttachmentItem());
-        listView.setScrollHiddenOnMouseLeave(holder.getVideoComponent());
-        listView.setScrollHiddenOnMouseLeave(holder.getImageBubble());
+        holder.videoComponent.setTag(item.getVideoAttachmentItem());
+        listView.setScrollHiddenOnMouseLeave(holder.videoComponent);
+        listView.setScrollHiddenOnMouseLeave(holder.imageBubble);
 
         // 绑定右键菜单
         attachPopupMenu(viewHolder, MessageItem.LEFT_VIDEO);
@@ -579,16 +679,16 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         MessageRightVideoViewHolder holder = (MessageRightVideoViewHolder) viewHolder;
         try {
             processVideo(item
-                    , holder.getTimeLabel()
-                    , holder.getPlayImgLabel()
-                    , holder.getSlaveImgLabel()
-                    , holder.getVideoComponent());
+                    , holder.timeLabel
+                    , holder.playImgLabel
+                    , holder.slaveImgLabel
+                    , holder.videoComponent);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        holder.getVideoComponent().setTag(item.getVideoAttachmentItem());
-        listView.setScrollHiddenOnMouseLeave(holder.getVideoComponent());
-        listView.setScrollHiddenOnMouseLeave(holder.getImageBubble());
+        holder.videoComponent.setTag(item.getVideoAttachmentItem());
+        listView.setScrollHiddenOnMouseLeave(holder.videoComponent);
+        listView.setScrollHiddenOnMouseLeave(holder.imageBubble);
 
         // 绑定右键菜单
         attachPopupMenu(viewHolder, MessageItem.RIGHT_VIDEO);
@@ -758,7 +858,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 File file = new File(finalPath);
                 if (file.length()>0){
                     if (ImageUtil.isGIF(finalPath)){
-                        imageIcon = ImageUtil.preferredImageSize(finalPath, imageAttachment.getWidth(), imageAttachment.getHeight());
+                        imageIcon = ImageUtil.preferredGifSize(finalPath, imageAttachment.getWidth(), imageAttachment.getHeight());
                     }else{
                         imageIcon = imageCache.tryGetThumbCache(file);
                         ImageUtil.preferredImageSize(imageIcon);
@@ -782,8 +882,8 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                                 super.mouseClicked(e);
                                 return;
                             }
-                            ImageViewerFrame frame = new ImageViewerFrame( new ImageIcon( getClass().getResource("/image/image_loading.gif")));
-                            frame.setVisible(true);
+                          /*  ImageViewerFrame frame = new ImageViewerFrame( new ImageIcon( getClass().getResource("/image/image_loading.gif")));
+                            frame.setVisible(true);*/
                             File file = new File(imageAttachment.getImagePath());
                             new SwingWorker<Object,ImageIcon>(){
                                 @Override
@@ -806,7 +906,8 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                                         JOptionPane.showMessageDialog(MainFrame.getContext(), "图片下载中...", "文件不存在", JOptionPane.WARNING_MESSAGE);
                                         return;
                                     }
-                                    frame.setImageIcon(imageIcon);
+                                    ImageViewerFrame viewerFrame = new ImageViewerFrame(imageIcon.getImage());
+                                    viewerFrame.setVisible(true);
                                 }
 
                             }.execute();
@@ -913,7 +1014,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
     private void processLeftLinkMessage(ViewHolder viewHolder, MessageItem item) {
         processLinkMessage(viewHolder, item);
-        ((MessageLeftLinkViewHolder) viewHolder).getSender().setText(item.getSenderUsername());
+        ((MessageLeftLinkOfAppViewHolder) viewHolder).sender.setText(item.getSenderUsername());
         attachPopupMenu(viewHolder, MessageItem.LEFT_LINK);
     }
 
@@ -924,8 +1025,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
     private void processLinkMessage(ViewHolder viewHolder, MessageItem item) {
         LinkAttachmentItem linkItem = item.getLinkAttachmentItem();
-        MessageLinkViewHolder linkViewHolder = (MessageLinkViewHolder) viewHolder;
-
+        MessageLinkOfAppViewHolder linkViewHolder = (MessageLinkOfAppViewHolder) viewHolder;
 
         linkViewHolder.desc.setText(StringEscapeUtils.unescapeHtml4(linkItem.getDesc()));
         linkViewHolder.title.setText(linkItem.getTitle());
@@ -943,7 +1043,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             }
         }
         if (image!=null){
-            linkViewHolder.icon.setIcon(new ImageIcon(ImageUtil.preferredImageSize(image, MessageLinkViewHolder.THUMB_WIDTH)));
+            linkViewHolder.icon.setIcon(new ImageIcon(ImageUtil.preferredImageSize(image, MessageLinkOfAppViewHolder.THUMB_WIDTH)));
             //有图片时缩短宽度，让其与无图的Panel尽量一致
             linkViewHolder.desc.setColumns(16);
         }
@@ -966,21 +1066,14 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         linkViewHolder.desc.addMouseListener(messageMouseListener);
         linkViewHolder.title.addMouseListener(messageMouseListener);
         linkViewHolder.icon.addMouseListener(messageMouseListener);
-        linkViewHolder.contentTagPanel.addMouseListener(messageMouseListener);
+        linkViewHolder.contentTitlePanel.addMouseListener(messageMouseListener);
         linkViewHolder.messageBubble.addMouseListener(messageMouseListener);
         listView.setScrollHiddenOnMouseLeave(linkViewHolder.desc);
         listView.setScrollHiddenOnMouseLeave(linkViewHolder.title);
         listView.setScrollHiddenOnMouseLeave(linkViewHolder.icon);
-        listView.setScrollHiddenOnMouseLeave(linkViewHolder.contentTagPanel);
+        listView.setScrollHiddenOnMouseLeave(linkViewHolder.contentTitlePanel);
         listView.setScrollHiddenOnMouseLeave(linkViewHolder.messageBubble);
-        Dimension preferredSize = linkViewHolder.contentTagPanel.getPreferredSize();
-        if (preferredSize.height < 120) {
-        //    preferredSize.height = 120;
-        }
-       // preferredSize.width = 250;
-        //固定宽度
-       // linkViewHolder.contentTagPanel.setPreferredSize(preferredSize);
-       // linkViewHolder.messageBubble.repaint();
+        Dimension preferredSize = linkViewHolder.contentTitlePanel.getPreferredSize();
     }
 
     /**
@@ -1112,36 +1205,36 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             }
             case MessageItem.LEFT_VIDEO: {
                 MessageLeftVideoViewHolder holder = (MessageLeftVideoViewHolder) viewHolder;
-                contentComponent = holder.getVideoComponent();
-                messageBubble = holder.getImageBubble();
+                contentComponent = holder.videoComponent;
+                messageBubble = holder.imageBubble;
                 break;
             }
             case MessageItem.RIGHT_VIDEO: {
                 MessageRightVideoViewHolder holder = (MessageRightVideoViewHolder) viewHolder;
-                contentComponent = holder.getVideoComponent();
-                messageBubble = holder.getImageBubble();
+                contentComponent = holder.videoComponent;
+                messageBubble = holder.imageBubble;
                 break;
             }
             case MessageItem.LEFT_VOICE: {
                 MessageLeftVoiceViewHolder holder = (MessageLeftVoiceViewHolder) viewHolder;
-                contentComponent = holder.getMessageBubble();
-                messageBubble = holder.getMessageBubble();
+                contentComponent = holder.messageBubble;
+                messageBubble = holder.messageBubble;
                 break;
             }
             case MessageItem.RIGHT_VOICE: {
                 MessageRightVoiceViewHolder holder = (MessageRightVoiceViewHolder) viewHolder;
-                contentComponent = holder.getMessageBubble();
-                messageBubble = holder.getMessageBubble();
+                contentComponent = holder.messageBubble;
+                messageBubble = holder.messageBubble;
                 break;
             }
             case MessageItem.LEFT_LINK: {
-                MessageLeftLinkViewHolder holder = (MessageLeftLinkViewHolder) viewHolder;
+                MessageLeftLinkOfAppViewHolder holder = (MessageLeftLinkOfAppViewHolder) viewHolder;
                 contentComponent = holder.title;
                 messageBubble = holder.messageBubble;
                 break;
             }
             case MessageItem.RIGHT_LINK: {
-                MessageRightLinkViewHolder holder = (MessageRightLinkViewHolder) viewHolder;
+                MessageRightLinkOfAppViewHolder holder = (MessageRightLinkOfAppViewHolder) viewHolder;
                 contentComponent = holder.title;
                 messageBubble = holder.messageBubble;
                 break;

@@ -1,5 +1,7 @@
 package cn.shu.wechat.swing.ImageViewer;
 
+import cn.shu.wechat.swing.utils.IconUtil;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -8,7 +10,9 @@ import java.io.*;
 import java.util.Objects;
 
 /**
- * Created by 舒新胜 on 2017/6/25.
+ * @作者 舒新胜
+ * @项目 AutoWechat
+ * @创建时间 8/11/2021 17:46
  */
 public class ImageViewerFrame extends JDialog {
     private int minWidth;
@@ -20,29 +24,10 @@ public class ImageViewerFrame extends JDialog {
     float maxScale = 3.0F;
     float minScale = 0.2F;
 
-    private JLabel imageLabel;
+    private ImageLabel imageLabel;
     private String imagePath;
     private Toolkit tooKit;
 
-    public void setImageIcon(ImageIcon imageIcon) {
-        this.imageIcon = imageIcon;
-        imageLabel.setIcon(imageIcon);
-        try {
-            initImageAndFrameBounds();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    public void setImageIcon(String iconPath) {
-        this.imageIcon = new ImageIcon(iconPath);
-        imageLabel.setIcon(imageIcon);
-        try {
-            initImageAndFrameBounds();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    private ImageIcon imageIcon;
 
     // 图片缩放比例
     private float scale = 1.0F;
@@ -62,13 +47,21 @@ public class ImageViewerFrame extends JDialog {
     public ImageViewerFrame(String imagePath) {
         this(imagePath, null);
     }
-    public ImageViewerFrame(ImageIcon icon) {
+
+    public ImageViewerFrame(Image image) {
+        this(null, image);
+    }
+
+    private ImageViewerFrame(String imagePath, Image image) {
         tooKit = Toolkit.getDefaultToolkit();
 
         initComponents();
         initView();
         initSize();
-        this.imageIcon = icon;
+
+        this.imagePath = imagePath;
+        this.image = image;
+
 
         try {
             initImageAndFrameBounds();
@@ -77,13 +70,6 @@ public class ImageViewerFrame extends JDialog {
         }
 
         setListeners();
-    }
-    public ImageViewerFrame(Image image) {
-        this(null, image);
-    }
-
-    private ImageViewerFrame(String imagePath, Image image) {
-        this(new ImageIcon(imagePath));
     }
 
     private void initComponents() {
@@ -100,10 +86,9 @@ public class ImageViewerFrame extends JDialog {
         popupMenu.add(narrowItem);
         popupMenu.add(saveAsItem);
 
-        imageLabel = new JLabel();
-        imageLabel.setVerticalTextPosition(SwingConstants.CENTER);
-        imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        setIconImage(new ImageIcon(Objects.requireNonNull(getClass().getResource("/image/ic_launcher.png"))).getImage());
+        imageLabel = new ImageLabel();
+
+        setIconImage(IconUtil.getIcon(this,"/image/ic_launcher.png").getImage());
 
     }
 
@@ -128,14 +113,8 @@ public class ImageViewerFrame extends JDialog {
 
 
     private void initImageAndFrameBounds() throws IOException {
-        if (imageIcon != null) {
-            image = imageIcon.getImage();
-            // image = ImageIO.read(new File(imagePath));
-        }
         if (imagePath != null) {
-             imageIcon = new ImageIcon(imagePath);
-            image = imageIcon.getImage();
-           // image = ImageIO.read(new File(imagePath));
+            image = ImageIO.read(new File(imagePath));
         } else {
             if (image == null) {
                 throw new RuntimeException("必须至少提供imagePath 或 image");
@@ -143,7 +122,7 @@ public class ImageViewerFrame extends JDialog {
         }
 
 
-      int imageWidth = image.getWidth(null);
+        int imageWidth = image.getWidth(null);
         int imageHeight = image.getHeight(null);
         float imageScale = imageWidth * 1.0F / imageHeight; // 图像宽高比
 
@@ -173,12 +152,12 @@ public class ImageViewerFrame extends JDialog {
         }
 
         if (needScale) {
-          image = image.getScaledInstance(actualWidth, actualHeight, Image.SCALE_SMOOTH);
-            imageIcon.setImage(image);
+            image = image.getScaledInstance(actualWidth, actualHeight, Image.SCALE_SMOOTH);
         }
 
-        imageLabel.setIcon(imageIcon);
-       // imageLabel.setImage(image);
+        //imageLabel.setIcon(imageIcon);
+        imageLabel.setImage(image);
+
         this.setSize(new Dimension(actualWidth, actualHeight + 22));
         this.setLocation((tooKit.getScreenSize().width - actualWidth) / 2, (tooKit.getScreenSize().height - actualHeight) / 2);
     }
@@ -187,7 +166,7 @@ public class ImageViewerFrame extends JDialog {
         int scaledWidth = (int) (image.getWidth(null) * scale);
         int scaledHeight = (int) (image.getHeight(null) * scale);
 
-        Image scaledimage = image.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH);
+        Image scaledimage = image.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_FAST);
         return image;
     }
 
@@ -224,7 +203,7 @@ public class ImageViewerFrame extends JDialog {
 
                     x = e.getX();
                     y = e.getY();
-                   // imageLabel.moveImage(xDistance, yDistance);
+                    imageLabel.moveImage(xDistance, yDistance);
                 }
 
                 super.mouseDragged(e);
@@ -325,7 +304,8 @@ public class ImageViewerFrame extends JDialog {
                 scale = 1.0F;
             }
             Image scaledImage = scaledImage(scale);
-          //  imageLabel.scaleImage(scaledImage);
+            imageLabel.scaleImage(scaledImage);
         }
     }
+
 }

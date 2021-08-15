@@ -12,6 +12,7 @@ public enum WXReceiveMsgCodeOfAppEnum {
     LINK(5, "链接消息"),
     PROGRAM(33, "小程序消息"),
     MUSIC(3, "分享的音乐"),
+    PICTURE(8, "搜狗输入法"),
     FILE(6, "文件消息");
     private int type;
     private String code;

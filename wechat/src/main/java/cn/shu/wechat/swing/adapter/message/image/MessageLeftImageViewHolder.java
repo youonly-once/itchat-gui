@@ -1,84 +1,63 @@
-package cn.shu.wechat.swing.adapter.message;
+package cn.shu.wechat.swing.adapter.message.image;
 
+import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.VerticalFlowLayout;
+import cn.shu.wechat.swing.components.message.MessageImageLabel;
 import cn.shu.wechat.swing.components.message.RCLeftImageMessageBubble;
 import cn.shu.wechat.swing.utils.FontUtil;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
  * Created by 舒新胜 on 17-6-2.
  */
-public class MessageLeftAttachmentViewHolder extends MessageAttachmentViewHolder {
+public class MessageLeftImageViewHolder extends BaseMessageViewHolder {
     public JLabel sender = new JLabel();
+    //public JLabel avatar = new JLabel();
+    //public JLabel size = new JLabel();
+    public MessageImageLabel image = new MessageImageLabel();
+    public RCLeftImageMessageBubble imageBubble = new RCLeftImageMessageBubble();
+    private JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+    private JPanel messageAvatarPanel = new JPanel();
     private boolean isGroup = true;
 
-    public MessageLeftAttachmentViewHolder(boolean isGroup) {
+    public MessageLeftImageViewHolder(boolean isGroup) {
         this.isGroup = isGroup;
         initComponents();
         initView();
     }
 
     private void initComponents() {
-        messageBubble = new RCLeftImageMessageBubble();
-
-        /*timePanel.setBackground(Colors.WINDOW_BACKGROUND);
+        timePanel.setBackground(Colors.WINDOW_BACKGROUND);
         messageAvatarPanel.setBackground(Colors.WINDOW_BACKGROUND);
 
-        size.setForeground(Colors.FONT_GRAY);
-        size.setFont(FontUtil.getDefaultFont(12));*/
 
+       // imageBubble.add(image);
+
+        time.setForeground(Colors.FONT_GRAY);
+        time.setFont(FontUtil.getDefaultFont(12));
 
         sender.setFont(FontUtil.getDefaultFont(12));
         sender.setForeground(Colors.FONT_GRAY);
         //sender.setVisible(false);
-
-        /*attachmentPanel.setOpaque(false);
-
-        progressBar.setMaximum(100);
-        progressBar.setMinimum(0);
-        progressBar.setValue(100);
-        progressBar.setUI(new GradientProgressBarUI());
-        progressBar.setVisible(false);
-
-        messageBubble.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        sizeLabel.setFont(FontUtil.getDefaultFont(12));
-        sizeLabel.setForeground(Colors.FONT_GRAY);*/
-
-        messageBubble.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-
     }
 
     private void initView() {
         setLayout(new BorderLayout());
-
         timePanel.add(time);
-
-        attachmentPanel.setLayout(new GridBagLayout());
-        attachmentPanel.add(attachmentIcon, new GBC(0, 0).setWeight(1, 1).setInsets(5, 5, 5, 0));
-        attachmentPanel.add(attachmentTitle, new GBC(1, 0).setWeight(100, 1).setAnchor(GBC.NORTH)
-                .setInsets(5, 8, 5, 5));
-        attachmentPanel.add(progressBar, new GBC(1, 1).setWeight(1, 1).setFill(GBC.HORIZONTAL)
-                .setAnchor(GBC.SOUTH).setInsets(0, 8, 5, 5));
-
-        attachmentPanel.add(sizeLabel, new GBC(1, 1).setWeight(1, 1).setFill(GBC.HORIZONTAL).setAnchor(GBC.SOUTH).setInsets(-20, 8, 3, 0));
-
-
-        messageBubble.add(attachmentPanel);
-
 
         JPanel senderMessagePanel = new JPanel();
         senderMessagePanel.setBackground(Colors.WINDOW_BACKGROUND);
         senderMessagePanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
         if (isGroup) {
+            sender.setBorder(new EmptyBorder(0,0,5,0));
             senderMessagePanel.add(sender);
         }
-        senderMessagePanel.add(messageBubble);
+        senderMessagePanel.add(image);
 
         messageAvatarPanel.setLayout(new GridBagLayout());
         messageAvatarPanel.add(avatar, new GBC(1, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 5, 0, 0));
@@ -86,7 +65,6 @@ public class MessageLeftAttachmentViewHolder extends MessageAttachmentViewHolder
                 .setWeight(1000, 1)
                 .setAnchor(GBC.WEST)
                 .setInsets(0, 5, 0, 0));
-
         add(timePanel, BorderLayout.NORTH);
         add(messageAvatarPanel, BorderLayout.CENTER);
     }

@@ -1,16 +1,15 @@
 package cn.shu.wechat.swing.utils;
 
 import cn.shu.wechat.utils.GifUtil;
+import org.apache.ibatis.reflection.ArrayUtil;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.util.Arrays;
 
 /**
  * 图像处理工具类
@@ -120,7 +119,7 @@ public class ImageUtil {
      * @param filePath
      * @return
      */
-    public static ImageIcon preferredImageSize(String filePath,int w,int h) {
+    public static ImageIcon preferredGifSize(String filePath,int w,int h) {
         if (filePath == null||filePath.isEmpty()){
             return null;
         }
@@ -128,20 +127,45 @@ public class ImageUtil {
         if (!file.exists()){
             return null;
         }
-        BufferedImage read = null;
         try {
             Dimension scaleDimen = getScaleDimen(w, h, 128);
             if (scaleDimen.width ==w && scaleDimen.height == h){
                 return new ImageIcon(filePath);
             }
-            GifUtil.zoomGifBySize(filePath,"gif",scaleDimen.width,scaleDimen.height,filePath+".slave");
+            GifUtil.zoomGifBySize(filePath,scaleDimen.width,scaleDimen.height,filePath+".slave");
             return new ImageIcon(filePath + ".slave");
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
     }
-
+    /**
+     * 根据图片尺寸大小调整图片显示的大小
+     * @param bytes
+     * @return
+     */
+    public static ImageIcon preferredGifSize(byte[] bytes, int w, int h) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try {
+            Dimension scaleDimen = getScaleDimen(w, h, 128);
+            if (scaleDimen.width ==w && scaleDimen.height == h){
+                return new ImageIcon(bytes);
+            }
+            try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes)) {
+                GifUtil.zoomGifBySize(byteArrayInputStream, scaleDimen.width, scaleDimen.height, byteArrayOutputStream);
+            }
+            return new ImageIcon(byteArrayOutputStream.toByteArray());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }finally {
+            try {
+                byteArrayOutputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
     /**
      * 判断是否为GIF
      * @param path
@@ -158,5 +182,33 @@ public class ImageUtil {
             e.printStackTrace();
         }
         return type.startsWith("GIF");
+    }
+    /**
+     * 判断是否为GIF
+     * @param bytes 图像字节流
+     * @return
+     */
+    public static  boolean isGIF(byte[] bytes ) {
+        if (bytes.length<3){
+            return false;
+        }
+        String type = String.valueOf(bytes[0]) + String.valueOf(bytes[1])
+                + String.valueOf(bytes[2]);
+        return type.equals(stringToAscii("GIF"));
+    }
+    public static String stringToAscii(String value)
+    {
+        StringBuffer sbu = new StringBuffer();
+        char[] chars = value.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            if(i != chars.length - 1)
+            {
+                sbu.append((int)chars[i]);
+            }
+            else {
+                sbu.append((int)chars[i]);
+            }
+        }
+        return sbu.toString();
     }
 }

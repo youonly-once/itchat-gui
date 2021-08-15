@@ -1,43 +1,54 @@
-package cn.shu.wechat.swing.adapter.message;
+package cn.shu.wechat.swing.adapter.message.app;
 
+import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
 import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.components.message.RCAttachmentMessageBubble;
-import cn.shu.wechat.swing.components.message.RCLeftImageMessageBubble;
 import cn.shu.wechat.swing.components.message.TagPanel;
 import cn.shu.wechat.swing.utils.FontUtil;
-import lombok.Getter;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 /**
- *
+ * App 消息
  * @author 舒新胜
- * @date 17-6-2
+ * @date 2021-8-2
  */
 
-public class MessageLinkViewHolder extends BaseMessageViewHolder {
+public abstract class MessageAppViewHolder extends BaseMessageViewHolder {
 
-    public static final int THUMB_WIDTH = 48;
     protected final JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
     protected final JPanel messageAvatarPanel = new JPanel();
-    protected final JTextArea title = new JTextArea();
-    protected final JTextArea desc = new JTextArea();
-    protected final JLabel icon = new JLabel();
+    /**
+     * APP消息标题
+     */
+    public final JTextArea title = new JTextArea();
+
     protected final JPanel senderMessagePanel = new JPanel();
-    protected final TagPanel contentTagPanel = new TagPanel();
-    protected final RCAttachmentMessageBubble messageBubble;
-    protected JLabel sourceName = new JLabel();
-    protected JLabel sourceIcon = new JLabel();
-    protected JPanel sourcePanel =  new JPanel((new FlowLayout(FlowLayout.LEFT,5,0)));
-    public MessageLinkViewHolder(RCAttachmentMessageBubble messageBubble) {
+    /**
+     * 消息内容面板 由APP消息各类子类型实现
+     */
+    protected final JPanel contentPanel = new JPanel(new BorderLayout());
+    public final TagPanel contentTitlePanel = new TagPanel();
+    public final RCAttachmentMessageBubble messageBubble;
+    /**
+     * APP名称
+     */
+    public final JLabel sourceName = new JLabel();
+    /**
+     * APP图标
+     */
+    public final JLabel sourceIcon = new JLabel();
+    /**
+     * APP信息面板
+     */
+    public final JPanel sourcePanel =  new JPanel((new FlowLayout(FlowLayout.LEFT,5,0)));
+
+    public MessageAppViewHolder(RCAttachmentMessageBubble messageBubble) {
         this.messageBubble = messageBubble;
         initComponents();
         initView();
@@ -50,17 +61,16 @@ public class MessageLinkViewHolder extends BaseMessageViewHolder {
         messageAvatarPanel.setLayout(new GridBagLayout());
         time.setForeground(Colors.FONT_GRAY);
         time.setFont(FontUtil.getDefaultFont(12));
-
+        contentPanel.setBorder(new EmptyBorder(5,5,5,5));
+        contentPanel.setOpaque(false);
         senderMessagePanel.setBackground(Colors.WINDOW_BACKGROUND);
         senderMessagePanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
 
     }
     private void setListeners() {
         MouseAdapter listener = messageBubble.getMouseListener();
-        contentTagPanel.addMouseListener(listener);
+        contentTitlePanel.addMouseListener(listener);
         title.addMouseListener(listener);
-        desc.addMouseListener(listener);
-        icon.addMouseListener(listener);
 
     }
     private void initView() {
@@ -76,19 +86,6 @@ public class MessageLinkViewHolder extends BaseMessageViewHolder {
         sourceName.setForeground(Color.GRAY);
 
 
-        desc.setLineWrap(true);
-        desc.setOpaque(false);
-        desc.setEditable(false);
-        desc.setWrapStyleWord(true);
-        desc.setForeground(Color.GRAY);
-        desc.setColumns(20);
-        desc.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        JPanel descIconPanel = new JPanel(new BorderLayout());
-        descIconPanel.setOpaque(false);
-        descIconPanel.add(desc,BorderLayout.CENTER);
-        descIconPanel.add(icon,BorderLayout.EAST);
-
         title.setFont(new Font("楷体",Font.BOLD,18));
         title.setEditable(false);
         title.setOpaque(false);
@@ -96,21 +93,21 @@ public class MessageLinkViewHolder extends BaseMessageViewHolder {
         title.setWrapStyleWord(true);
         title.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        contentTagPanel.setLayout(new GridBagLayout());
-        contentTagPanel.setOpaque(false);
-        contentTagPanel.add(title, new GBC(0, 0)
+        contentTitlePanel.setLayout(new GridBagLayout());
+        contentTitlePanel.setOpaque(false);
+        contentTitlePanel.add(title, new GBC(0, 0)
                 .setWeight(1, 30)
                 .setFill(GridBagConstraints.BOTH)
                 .setAnchor(GBC.NORTH)
                 .setInsets(5, 0, 0, 0));
-        contentTagPanel.add(descIconPanel, new GBC(0, 1)
+        contentTitlePanel.add(contentPanel, new GBC(0, 1)
                 .setWeight(1, 70)
                 .setAnchor(GBC.CENTER)
                 .setFill(GridBagConstraints.BOTH)
                 .setInsets(0, 0, 0, 0));
         messageBubble.setCursor(new Cursor(Cursor.HAND_CURSOR));
         messageBubble.setLayout(new VerticalFlowLayout(VerticalFlowLayout.BOTTOM,5,0,true,false));
-        messageBubble.add(contentTagPanel);
+        messageBubble.add(contentTitlePanel);
         messageBubble.add(sourcePanel);
         add(timePanel, BorderLayout.NORTH);
         add(messageAvatarPanel, BorderLayout.CENTER);

@@ -1,5 +1,6 @@
-package cn.shu.wechat.swing.adapter.message;
+package cn.shu.wechat.swing.adapter.message.app;
 
+import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GradientProgressBarUI;
 import cn.shu.wechat.swing.components.RCProgressBar;

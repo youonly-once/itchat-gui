@@ -1,5 +1,6 @@
-package cn.shu.wechat.swing.adapter.message;
+package cn.shu.wechat.swing.adapter.message.voice;
 
+import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.components.*;
 import cn.shu.wechat.swing.components.message.MessagePopupMenu;
 import cn.shu.wechat.swing.components.message.RCAttachmentMessageBubble;
@@ -19,23 +20,24 @@ import java.awt.event.MouseEvent;
  * @author 舒新胜
  * @date 16/06/2017
  */
-@Getter
-public class MessageVoiceViewHolder extends BaseMessageViewHolder {
-    protected final TagPanel contentTagPanel = new TagPanel();
-    protected CountDownJLabel durationText = new CountDownJLabel();;
-    protected JLabel gapText = new JLabel();
-    protected JLabel unitLabel = new JLabel("''");
+
+public abstract class MessageVoiceViewHolder extends BaseMessageViewHolder {
+    public final TagPanel contentTagPanel = new TagPanel();
+    public final CountDownJLabel durationText = new CountDownJLabel();;
+    public final JLabel gapText = new JLabel();
+    protected final JLabel unitLabel = new JLabel("''");
     protected final JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
     protected final JPanel messageAvatarPanel = new JPanel();
     protected final MessagePopupMenu popupMenu = new MessagePopupMenu();
-    protected boolean isGroup;
+    protected final boolean isGroup;
     protected final JLabel voiceImgLabel = new JLabel();
-    protected final RCAttachmentMessageBubble messageBubble;
+    public final RCAttachmentMessageBubble messageBubble;
     protected final JPanel voicePanel = new JPanel();
     /**
      *播放进度条
      */
-    protected final RCProgressBar progressBar = new RCProgressBar(4);
+    public final RCProgressBar progressBar = new RCProgressBar(4);
+
     public MessageVoiceViewHolder(boolean isGroup, RCAttachmentMessageBubble messageBubble) {
         this.messageBubble = messageBubble;
         this.isGroup = isGroup;

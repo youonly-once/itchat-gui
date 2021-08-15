@@ -17,24 +17,6 @@ import java.util.concurrent.*;
 
 public class GifUtil {
 
-    public static void main(String[] args)  {
-        String imgPath = "D:\\weixin\\MSGTYPE_EMOTICON\\test\\test1-2021-08-11-15-23-38-4509060530230197997.gif";
-        File source = new File(imgPath);
-        System.out.println(source.getAbsolutePath());
-        System.out.println(source.getName());
-        String newFilePath = "D:\\"+source.getName();
-//
-        try {
-            //zoomGifByQuality(imgPath,"gif",0.1F,newFilePath);
-            zoomGifBySize(imgPath,"gif",40,40,newFilePath);
-            //zoomGifBySize(imgPath,"gif",76,123,newFilePath);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-
     public static byte[] zoomImg(){
         String imgPath = "D:\\weixin\\MSGTYPE_EMOTICON\\。\\asdasd\uD83C\uDF08JLabel-2021-08-11-11-11-07-1937110368965816714.gif";
 
@@ -179,23 +161,33 @@ public class GifUtil {
     /**
      * GIF压缩尺寸大小
      * @param imagePath 原图片路径地址，如：F:\\a.png 注意路径的斜线 否则读取不了
-     * @param imgStyle 目标文件类型
      * @param width 目标文件宽
      * @param height 目标文件高
      * @param outputPath 输出文件路径（不带后缀），如：F:\\b，默认与原图片路径相同，为空时将会替代原文件
      * @throws IOException
      */
-    public static void zoomGifBySize(String imagePath, String imgStyle, int width, int height, String outputPath) throws IOException {
+    public static void zoomGifBySize(String imagePath,int width, int height, String outputPath) throws IOException {
+        zoomGifBySize(new FileInputStream(imagePath),width,height,new FileOutputStream(outputPath));
+    }
+    /**
+     * GIF压缩尺寸大小
+     * @param inputStream 原图片流，如：F:\\a.png 注意路径的斜线 否则读取不了
+     * @param width 目标文件宽
+     * @param height 目标文件高
+     * @param outputStream 输出文件流
+     * @throws IOException
+     */
+    public static void zoomGifBySize(InputStream inputStream,int width, int height, OutputStream outputStream) throws IOException {
         // 防止图片后缀与图片本身类型不一致的情况
         // GIF需要特殊处理
         GifDecoder decoder = new GifDecoder();
-        int status = decoder.read(new FileInputStream(imagePath));
+        int status = decoder.read(inputStream);
         if (status != GifDecoder.STATUS_OK) {
-            throw new IOException("read image " + imagePath + " error!");
+            throw new IOException("read image  error!");
         }
         // 拆分一帧一帧的压缩之后合成
         AnimatedGifEncoder encoder = new AnimatedGifEncoder();
-        encoder.start(outputPath);
+        encoder.start(outputStream);
         int frameCount = decoder.getFrameCount();
         encoder.setRepeat(decoder.getLoopCount());
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(frameCount , frameCount , 0, TimeUnit.SECONDS, new SynchronousQueue<>());
@@ -230,11 +222,10 @@ public class GifUtil {
             encoder.addFrame(bufferedImage);
         }
         encoder.finish();
-       // File outFile = new File(outputPath);
-       // BufferedImage image = ImageIO.read(outFile);
-       // ImageIO.write(image, outFile.getName(), outFile);
+        // File outFile = new File(outputPath);
+        // BufferedImage image = ImageIO.read(outFile);
+        // ImageIO.write(image, outFile.getName(), outFile);
     }
-
     /**
      * 将文件转换成byte数组
      * @param tradeFile
