@@ -504,7 +504,7 @@ public class DownloadTools {
             case MSGTYPE_MAP:
             case MSGTYPE_IMAGE:
             case MSGTYPE_EMOTICON:
-                ext = ".jpg";
+                ext = ".gif";
                 break;
             case MSGTYPE_VOICE:
                 ext = ".mp3";

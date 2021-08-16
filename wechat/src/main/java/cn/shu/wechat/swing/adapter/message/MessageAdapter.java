@@ -888,28 +888,33 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                                 return;
                             }
                             File file = new File(imageAttachment.getImagePath());
-                            new SwingWorker<Object, ImageIcon>() {
+                            new SwingWorker<Object, BufferedImage>() {
                                 @Override
                                 protected Object doInBackground() throws Exception {
                                     //阻塞
                                     DownloadTools.awaitDownload(imageAttachment.getImagePath());
-                                    if (file.exists() && file.length() <= 1024 * 1024) {
-                                        ImageIcon imageIcon = new ImageIcon(imageAttachment.getImagePath());
-                                        publish(imageIcon);
-                                    } else {
+                                    if (ImageUtil.isGIF(imageAttachment.getImagePath())){
                                         ChatPanel.openFile(imageAttachment.getImagePath());
+                                    }else{
+                                        if (file.exists() && file.length() <= 1024 * 1024) {
+                                            BufferedImage read = ImageIO.read(new File(imageAttachment.getImagePath()));
+                                            publish(read);
+                                        } else {
+                                            ChatPanel.openFile(imageAttachment.getImagePath());
+                                        }
                                     }
+
                                     return null;
                                 }
 
                                 @Override
-                                protected void process(List<ImageIcon> chunks) {
-                                    ImageIcon imageIcon = chunks.get(chunks.size() - 1);
-                                    if (imageIcon == null) {
+                                protected void process(List<BufferedImage> chunks) {
+                                    BufferedImage read = chunks.get(chunks.size() - 1);
+                                    if (read == null) {
                                         JOptionPane.showMessageDialog(MainFrame.getContext(), "图片下载中...", "文件不存在", JOptionPane.WARNING_MESSAGE);
                                         return;
                                     }
-                                    ImageViewerFrame instance = new ImageViewerFrame(imageIcon.getImage());
+                                    ImageViewerFrame instance = new ImageViewerFrame(read);
 
                                     instance.toFront();
                                     instance.setVisible(true);

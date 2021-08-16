@@ -13,6 +13,7 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.net.URL;
 
 import static cn.shu.wechat.swing.utils.ImageUtil.isGif;
 
@@ -61,7 +62,6 @@ public class ImageViewerFrame extends JFrame {
 
         tooKit = Toolkit.getDefaultToolkit();
         isGif = imagePath != null && isGif(imagePath);
-
         initComponents();
         initView();
         initSize();
