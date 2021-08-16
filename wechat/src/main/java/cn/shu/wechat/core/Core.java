@@ -5,7 +5,6 @@ import cn.shu.wechat.enums.parameters.BaseParaEnum;
 
 import java.awt.*;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,7 +24,7 @@ public class Core {
     /**
      * 在线状态
      */
-    static private boolean alive = false;
+    static private volatile boolean alive = false;
 
     public static boolean isCancelPreLogin() {
         return cancelPreLogin;

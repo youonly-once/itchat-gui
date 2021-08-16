@@ -2,7 +2,7 @@ package cn.shu.wechat.swing.panels;
 
 import cn.shu.wechat.swing.components.*;
 import cn.shu.wechat.swing.components.message.ChatEditorPopupMenu;
-import cn.shu.wechat.swing.frames.ScreenShot;
+import cn.shu.wechat.swing.frames.ScreenShotFrame;
 import cn.shu.wechat.swing.listener.ExpressionListener;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
@@ -201,12 +201,9 @@ public class MessageEditorPanel extends ParentAvailablePanel {
     }
 
     private void screenShot() {
-        try {
-            ScreenShot ssw = new ScreenShot(roomId);
-            ssw.setVisible(true);
-        } catch (AWTException e1) {
-            e1.printStackTrace();
-        }
+        ScreenShotFrame ssw = new ScreenShotFrame();
+        ssw.setRoomId(roomId);
+        ssw.setVisible(true);
     }
 
     public void setExpressionListener(ExpressionListener listener) {

@@ -3,8 +3,8 @@ package cn.shu.wechat.swing.components;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.swing.ImageViewer.ImageViewerFrame;
-import cn.shu.wechat.swing.panels.*;
+import cn.shu.wechat.swing.frames.ImageViewerFrame;
+import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.ChatUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
@@ -15,10 +15,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * Created by 舒新胜 on 07/06/2017.
@@ -183,12 +180,14 @@ public class UserInfoPopup extends JPopupMenu {
             public void mouseClicked(MouseEvent e) {
                 setVisible(false);
                 BufferedImage bufferedImage = AvatarUtil.createOrLoadBigAvatar(contacts.getUsername(), contacts.getHeadimgurl());
-                if (bufferedImage == null){
+                if (bufferedImage == null) {
+                    JOptionPane.showMessageDialog(MainFrame.getContext(), "图片下载中...", "文件不存在", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
-                ImageViewerFrame viewerFrame = new ImageViewerFrame(bufferedImage);
-                viewerFrame.setVisible(true);
-                viewerFrame.toFront();
+                ImageViewerFrame instance = new ImageViewerFrame(bufferedImage);
+            
+                instance.toFront();
+                instance.setVisible(true);
                 super.mouseClicked(e);
             }
         });

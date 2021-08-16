@@ -1,14 +1,14 @@
 package cn.shu.wechat.swing.adapter.message.voice;
 
-import cn.shu.wechat.swing.components.*;
+import cn.shu.wechat.swing.components.Colors;
+import cn.shu.wechat.swing.components.GBC;
+import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.components.message.RCRightVoiceMessageBubble;
-import lombok.Getter;
+import cn.shu.wechat.swing.utils.IconUtil;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.io.IOException;
 
 /**
  *
@@ -44,11 +44,7 @@ public class MessageRightVoiceViewHolder extends MessageVoiceViewHolder {
         voicePanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
         voicePanel.add(messageBubble);
         voicePanel.add(processBarPanel);
-        try {
-            voiceImgLabel.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("/image/right_voice.png"))));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        voiceImgLabel.setIcon(IconUtil.getIcon(this, "/image/right_voice.png"));
         contentTagPanel.add(voicePanel);
 
         messageAvatarPanel.setLayout(new GridBagLayout());

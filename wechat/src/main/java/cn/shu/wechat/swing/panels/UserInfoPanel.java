@@ -12,13 +12,11 @@ import cn.shu.wechat.swing.utils.IconUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.net.URL;
 
 /**
  * Created by 舒新胜 on 2017/6/15.
@@ -81,10 +79,11 @@ public class UserInfoPanel extends ParentAvailablePanel {
             sexLabel.setIcon(null);
         }else{
             if (contacts.getSex() == 2) {
-                URL resource = getClass().getResource("/image/woman.png");
-                sexLabel.setIcon(new ImageIcon(resource));
-            }else if (contacts.getSex() == 1){
-                sexLabel.setIcon(IconUtil.getIcon(this,"/image/man.png"));
+                ImageIcon icon = IconUtil.getIcon(this, "/image/woman.png");
+                sexLabel.setIcon(icon);
+            }else if (contacts.getSex() == 1) {
+                ImageIcon icon = IconUtil.getIcon(this, "/image/man.png");
+                sexLabel.setIcon(icon);
             }else {
                 sexLabel.setIcon(null);
             }

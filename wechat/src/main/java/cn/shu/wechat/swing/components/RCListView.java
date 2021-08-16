@@ -339,16 +339,11 @@ public class RCListView extends JScrollPane {
             //元素pos
             adapter.onBindViewHolder(holder, position);
         }
-
-        //contentPanel.revalidate();
         holder.repaint();
-        //contentPanel.revalidate();
-        /*contentPanel.getComponent(position).setBackground(Color.red);
-        contentPanel.getComponent(position).revalidate();*/
     }
 
     public Component getItem(int n) {
-        return contentPanel.getComponent(n);
+        return contentPanel.getComponent(Math.min(contentPanel.getComponentCount() - 1, n));
     }
 
     public JPanel getContentPanel() {
@@ -368,14 +363,12 @@ public class RCListView extends JScrollPane {
         ViewHolder holder = adapter.onCreateViewHolder(viewType, position);
         try {
             adapter.onBindViewHolder(holder, position);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         position = end ? -1 : position;
-        //如果之前的数据添加失败 数据项和panel组件数量对不上
-        if (position>contentPanel.getComponentCount()){
-            position = contentPanel.getComponentCount();
-        }
+        //如果之前的数据添加失败 数据项和panel组件数量对不上，这时添加到末尾
+        position = Math.min(contentPanel.getComponentCount(), position);
         contentPanel.add(holder, position);
         contentPanel.revalidate();
     }

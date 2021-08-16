@@ -3,6 +3,7 @@ import cn.shu.wechat.core.Core;
 import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.utils.ChartUtil;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
+import cn.shu.wechat.utils.SleepUtils;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -77,7 +78,8 @@ public class TimedTask {
                 log.error("微信已离线");
                 //重新开启 好像是线程循环出了问题
                 log.error("活跃线程数量：{}", ((ThreadPoolExecutor) ExecutorServiceUtil.getReceivingExecutorService()).getActiveCount());
-
+                Core.setAlive(false);
+                SleepUtils.sleep(60 * 1000);
                 loginService.startReceiving();
             }
         }

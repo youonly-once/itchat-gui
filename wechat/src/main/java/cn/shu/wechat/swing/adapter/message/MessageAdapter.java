@@ -5,7 +5,6 @@ import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.beans.msg.url.WXMsgUrl;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.swing.ImageViewer.ImageViewerFrame;
 import cn.shu.wechat.swing.adapter.BaseAdapter;
 import cn.shu.wechat.swing.adapter.ViewHolder;
 import cn.shu.wechat.swing.adapter.message.app.*;
@@ -22,10 +21,13 @@ import cn.shu.wechat.swing.adapter.message.voice.MessageVoiceViewHolder;
 import cn.shu.wechat.swing.components.RCListView;
 import cn.shu.wechat.swing.components.RCProgressBar;
 import cn.shu.wechat.swing.components.UserInfoPopup;
-import cn.shu.wechat.swing.components.message.*;
+import cn.shu.wechat.swing.components.message.MessageImageLabel;
+import cn.shu.wechat.swing.components.message.MessagePopupMenu;
+import cn.shu.wechat.swing.components.message.RCMessageBubble;
 import cn.shu.wechat.swing.db.model.Message;
-import cn.shu.wechat.swing.entity.*;
+import cn.shu.wechat.swing.entity.MessageItem;
 import cn.shu.wechat.swing.entity.MessageItem.*;
+import cn.shu.wechat.swing.frames.ImageViewerFrame;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.helper.AttachmentIconHelper;
 import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
@@ -44,7 +46,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -763,14 +768,14 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         timeLabel.setText(getSecString(videoItem.getVideoLength()));
         if (aBoolean == null) {
             //缩略图下载失败
-            //  holder.getSlaveImgLabel().setIcon(new ImageIcon(ImageIO.read(getClass().getResource("/image/image_error.png"))));
-            playImgLabel.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("/image/play48.png"))));
+            //  holder.getSlaveImgLabel().setIcon(IconUtil.getIcon(this,"/image/image_error.png"))));
+            playImgLabel.setIcon(IconUtil.getIcon(this, "/image/play48.png"));
         } else if (aBoolean) {
             File file = new File(slaveImgPath);
             slaveImgLabel.setIcon(ImageUtil.preferredImageSize(new ImageIcon(ImageIO.read(file))));
-            playImgLabel.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("/image/play48.png"))));
+            playImgLabel.setIcon(IconUtil.getIcon(this, "/image/play48.png"));
         } else {
-            // holder.getPlayImgLabel().setIcon(new ImageIcon(ImageIO.read(getClass().getResource("/image/image_loading.gif"))));
+            // holder.getPlayImgLabel().setIcon(IconUtil.getIcon(this,"/image/image_loading.gif"))));
             // holder.getPlayImgLabel().repaint();
 
             new SwingWorker<Object, Object>() {
@@ -794,7 +799,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     File file = new File(slaveImgPath);
                     imageIcon = new ImageIcon(ImageIO.read(file));
                     ImageUtil.preferredImageSize(imageIcon);
-                    playImg = new ImageIcon(ImageIO.read(getClass().getResource("/image/play48.png")));
+                    playImg = IconUtil.getIcon(this, "/image/play48.png");
                     return null;
                 }
 
@@ -882,19 +887,17 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                                 super.mouseClicked(e);
                                 return;
                             }
-                          /*  ImageViewerFrame frame = new ImageViewerFrame( new ImageIcon( getClass().getResource("/image/image_loading.gif")));
-                            frame.setVisible(true);*/
                             File file = new File(imageAttachment.getImagePath());
-                            new SwingWorker<Object,ImageIcon>(){
+                            new SwingWorker<Object, ImageIcon>() {
                                 @Override
                                 protected Object doInBackground() throws Exception {
                                     //阻塞
                                     DownloadTools.awaitDownload(imageAttachment.getImagePath());
-                                    if (file.exists() &&  file.length() <= 1024 * 1024) {
+                                    if (file.exists() && file.length() <= 1024 * 1024) {
                                         ImageIcon imageIcon = new ImageIcon(imageAttachment.getImagePath());
                                         publish(imageIcon);
-                                    }else {
-                                      ChatPanel.openFile(imageAttachment.getImagePath());
+                                    } else {
+                                        ChatPanel.openFile(imageAttachment.getImagePath());
                                     }
                                     return null;
                                 }
@@ -902,12 +905,14 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                                 @Override
                                 protected void process(List<ImageIcon> chunks) {
                                     ImageIcon imageIcon = chunks.get(chunks.size() - 1);
-                                    if (imageIcon == null ){
+                                    if (imageIcon == null) {
                                         JOptionPane.showMessageDialog(MainFrame.getContext(), "图片下载中...", "文件不存在", JOptionPane.WARNING_MESSAGE);
                                         return;
                                     }
-                                    ImageViewerFrame viewerFrame = new ImageViewerFrame(imageIcon.getImage());
-                                    viewerFrame.setVisible(true);
+                                    ImageViewerFrame instance = new ImageViewerFrame(imageIcon.getImage());
+
+                                    instance.toFront();
+                                    instance.setVisible(true);
                                 }
 
                             }.execute();

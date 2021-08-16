@@ -232,6 +232,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+  
     </dependencies>
     <build>
         <plugins>

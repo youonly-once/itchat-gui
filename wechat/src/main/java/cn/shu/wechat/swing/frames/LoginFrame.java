@@ -20,7 +20,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
@@ -28,7 +27,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
@@ -111,13 +109,9 @@ public class LoginFrame extends JFrame {
         editPanel = new JPanel();
         codePanel = new JPanel();
         codeLabel = new JLabel();
-        ImageIcon imageIcon = new ImageIcon();
-        try {
-            imageIcon.setImage(ImageIO.read(getClass().getResource("/image/image_loading.gif")));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        codeLabel.setIcon(imageIcon);
+        ImageIcon icon = IconUtil.getIcon(this, "/image/image_loading.gif");
+        codeLabel.setHorizontalAlignment(JLabel.CENTER);
+        codeLabel.setIcon(icon);
         codePanel.add(codeLabel);
         editPanel.add(codePanel);
         editPanel.add(statusLabel);

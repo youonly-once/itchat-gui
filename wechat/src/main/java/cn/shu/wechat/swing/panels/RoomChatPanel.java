@@ -82,11 +82,11 @@ public class RoomChatPanel extends ParentAvailablePanel {
 
     /**
      * 获取对应层
-     *
      */
-    public RoomChatPanelCard showCurr(){
+    public RoomChatPanelCard getCurr() {
         return cards.get(currRoomId);
     }
+
 
     /**
      * 房间是否存在

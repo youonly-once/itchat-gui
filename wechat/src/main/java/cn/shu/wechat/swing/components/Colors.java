@@ -14,7 +14,7 @@ public class Colors {
     //public static Color WINDOW_BACKGROUND = new Color(245, 245, 245);
     public static Color WINDOW_BACKGROUND = new Color(238, 238, 238);
     public static final Color WINDOW_BACKGROUND_LIGHT = new Color(250, 250, 250);
-
+    public static Color BG_GRAY = new Color(234, 232, 231);
     public static Color SCROLL_BAR_TRACK_LIGHT = new Color(214, 214, 214);
     public static Color FONT_WHITE = new Color(255, 255, 255);
     public static Color FONT_GRAY = new Color(152, 152, 152);

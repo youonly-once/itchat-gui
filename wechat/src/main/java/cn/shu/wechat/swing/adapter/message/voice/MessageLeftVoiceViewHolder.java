@@ -1,16 +1,17 @@
 package cn.shu.wechat.swing.adapter.message.voice;
 
-import cn.shu.wechat.swing.components.*;
+import cn.shu.wechat.swing.components.Colors;
+import cn.shu.wechat.swing.components.GBC;
+import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
+import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.components.message.RCLeftVoiceMessageBubble;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.FontUtil;
-import lombok.Getter;
+import cn.shu.wechat.swing.utils.IconUtil;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.io.IOException;
 
 /**
  *
@@ -50,29 +51,22 @@ public class MessageLeftVoiceViewHolder extends MessageVoiceViewHolder {
             sender.setBorder(new EmptyBorder(0,messageBubble.getSalientPointPixel(),100,0));
             senderMessagePanel.add(sender,BorderLayout.NORTH);
         }
-        try {
-            voiceImgLabel.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("/image/left_voice.png"))));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        voiceImgLabel.setIcon(IconUtil.getIcon(this, "/image/left_voice.png"));
         JPanel processBarPanel = new JPanel(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, true));
         processBarPanel.setOpaque(false);
         processBarPanel.add(progressBar);
-        processBarPanel.setBorder(new EmptyBorder(0,messageBubble.getSalientPointPixel(),0,0));
+        processBarPanel.setBorder(new EmptyBorder(0, messageBubble.getSalientPointPixel(), 0, 0));
         voicePanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, true));
         voicePanel.add(messageBubble);
         voicePanel.add(processBarPanel);
-        contentTagPanel.setLayout(new FlowLayout(FlowLayout.LEFT,0,0));
+        contentTagPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         contentTagPanel.add(voicePanel);
-        try {
-            unreadPoint = new JLabel(new ImageIcon(ImageIO.read(getClass().getResource("/image/voice_redpoint.png"))));
-            unreadPoint.setBorder(new EmptyBorder(0,5,0,0));
-            contentTagPanel.add(unreadPoint);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-        senderMessagePanel.add(contentTagPanel,BorderLayout.CENTER);
+        unreadPoint = new JLabel(IconUtil.getIcon(this, "/image/voice_redpoint.png"));
+        unreadPoint.setBorder(new EmptyBorder(0, 5, 0, 0));
+        contentTagPanel.add(unreadPoint);
+
+        senderMessagePanel.add(contentTagPanel, BorderLayout.CENTER);
         messageAvatarPanel.setLayout(new GridBagLayout());
         messageAvatarPanel.add(avatar, new GBC(1, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 5, 0, 0));
         messageAvatarPanel.add(senderMessagePanel, new GBC(2, 0)

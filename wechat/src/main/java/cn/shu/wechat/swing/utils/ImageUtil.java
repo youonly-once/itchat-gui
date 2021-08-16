@@ -1,15 +1,12 @@
 package cn.shu.wechat.swing.utils;
 
 import cn.shu.wechat.utils.GifUtil;
-import org.apache.ibatis.reflection.ArrayUtil;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.Arrays;
 
 /**
  * 图像处理工具类
@@ -188,24 +185,33 @@ public class ImageUtil {
      * @param bytes 图像字节流
      * @return
      */
-    public static  boolean isGIF(byte[] bytes ) {
-        if (bytes.length<3){
+    public static boolean isGIF(byte[] bytes) {
+        if (bytes.length < 3) {
             return false;
         }
         String type = String.valueOf(bytes[0]) + String.valueOf(bytes[1])
                 + String.valueOf(bytes[2]);
         return type.equals(stringToAscii("GIF"));
     }
-    public static String stringToAscii(String value)
-    {
+
+    public static boolean isGif(String imagePath) {
+
+        String suffix = "";
+        int pos = imagePath.lastIndexOf(".");
+        if (pos >= 0) {
+            suffix = imagePath.substring(pos + 1).toLowerCase();
+        }
+
+        return suffix.equals("gif");
+    }
+
+    public static String stringToAscii(String value) {
         StringBuffer sbu = new StringBuffer();
         char[] chars = value.toCharArray();
         for (int i = 0; i < chars.length; i++) {
-            if(i != chars.length - 1)
-            {
-                sbu.append((int)chars[i]);
-            }
-            else {
+            if (i != chars.length - 1) {
+                sbu.append((int) chars[i]);
+            } else {
                 sbu.append((int)chars[i]);
             }
         }

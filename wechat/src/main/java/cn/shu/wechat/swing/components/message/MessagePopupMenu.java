@@ -8,7 +8,6 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCMenuItemUI;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
 import cn.shu.wechat.swing.entity.MessageItem;
-
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 import cn.shu.wechat.swing.utils.FileCache;
@@ -31,8 +30,8 @@ import java.util.Map;
  */
 public class MessagePopupMenu extends JPopupMenu {
     private int messageType;
-    private ImageCache imageCache = new ImageCache();
-    private FileCache fileCache = new FileCache();
+    private final ImageCache imageCache = new ImageCache();
+    private final FileCache fileCache = new FileCache();
 
     public MessagePopupMenu() {
         initMenuItem();

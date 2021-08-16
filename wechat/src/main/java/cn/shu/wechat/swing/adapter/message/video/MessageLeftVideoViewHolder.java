@@ -1,28 +1,20 @@
 package cn.shu.wechat.swing.adapter.message.video;
 
-import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
 import cn.shu.wechat.swing.components.VerticalFlowLayout;
-import cn.shu.wechat.swing.components.message.*;
+import cn.shu.wechat.swing.components.message.RCLeftVideoMessageBubble;
+import cn.shu.wechat.swing.components.message.TagJLayeredPane;
+import cn.shu.wechat.swing.components.message.TagPanel;
 import cn.shu.wechat.swing.frames.MainFrame;
-import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.utils.FontUtil;
-import cn.shu.wechat.swing.utils.ImageUtil;
-import cn.shu.wechat.utils.SleepUtils;
-import lombok.Getter;
+import cn.shu.wechat.swing.utils.IconUtil;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 
 /**
@@ -80,19 +72,15 @@ public class MessageLeftVideoViewHolder extends BaseMessageViewHolder {
         messageAvatarPanel.setBackground(Colors.WINDOW_BACKGROUND);
 
 
-       // imageBubble.add(image);
+        // imageBubble.add(image);
 
         time.setForeground(Colors.FONT_GRAY);
         time.setFont(FontUtil.getDefaultFont(12));
 
         sender.setFont(FontUtil.getDefaultFont(12));
         sender.setForeground(Colors.FONT_GRAY);
-        try {
-            playImgLabel.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("/image/image_loading.gif"))));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //sender.setVisible(false);
+        playImgLabel.setIcon(IconUtil.getIcon(this, "/image/image_loading.gif"));
+
     }
 
     private void initView() {
@@ -139,11 +127,11 @@ public class MessageLeftVideoViewHolder extends BaseMessageViewHolder {
         layeredPane.add(imgPanel, 200, 1);
 
         //播放按钮
-        BufferedImage slaveBufferedImage = ImageIO.read(getClass().getResource("/image/play48.png"));
-        int playHeight = slaveBufferedImage.getHeight();
-        int playWidth = slaveBufferedImage.getWidth();
-        int x  = (slaveImgWidth-playWidth)/2;
-        int y  = (slaveImgHeight-playHeight)/2;
+        ImageIcon icon = IconUtil.getIcon(this, "/image/play48.png");
+        int playHeight = icon.getIconHeight();
+        int playWidth = icon.getIconWidth();
+        int x = (slaveImgWidth - playWidth) / 2;
+        int y = (slaveImgHeight - playHeight) / 2;
 
         JPanel playImgPanel = new JPanel(new GridLayout(1, 1));
         playImgPanel.setBounds(x, y, playWidth, playHeight);
@@ -153,7 +141,7 @@ public class MessageLeftVideoViewHolder extends BaseMessageViewHolder {
 
         //视频时长
         timeLabel.setForeground(Color.white);
-        timeLabel.setBounds(slaveImgWidth-40, slaveImgHeight-20, 40, 20);
+        timeLabel.setBounds(slaveImgWidth - 40, slaveImgHeight - 20, 40, 20);
         timeLabel.setOpaque(false);
         layeredPane.add(timeLabel,200,0);
 
