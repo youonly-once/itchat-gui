@@ -13,7 +13,6 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.net.URL;
 
 import static cn.shu.wechat.swing.utils.ImageUtil.isGif;
 
@@ -48,24 +47,22 @@ public class ImageViewerFrame extends JFrame {
     private int actualHeight;
     private boolean isGif;
 
-    public ImageViewerFrame(String imagePath) {
-        this(imagePath, null);
-    }
-
-    public ImageViewerFrame(Image image) {
-        this(null, image);
-    }
-
-    private ImageViewerFrame(String imagePath, Image image) {
-        this.imagePath = imagePath;
-        this.image = image;
-
+    private ImageViewerFrame() {
         tooKit = Toolkit.getDefaultToolkit();
         isGif = imagePath != null && isGif(imagePath);
         initComponents();
         initView();
         initSize();
 
+        setListeners();
+    }
+
+    public static ImageViewerFrame getInstance() {
+        return ImageViewerFrame.InstanceHolder.instance;
+    }
+
+    public void setImage(Image image) {
+        this.image = image;
 
         try {
             initImageAndFrameBounds();
@@ -75,7 +72,10 @@ public class ImageViewerFrame extends JFrame {
 
         initBounds();
 
-        setListeners();
+    }
+
+    private static final class InstanceHolder {
+        static final ImageViewerFrame instance = new ImageViewerFrame();
     }
 
     private void initComponents() {

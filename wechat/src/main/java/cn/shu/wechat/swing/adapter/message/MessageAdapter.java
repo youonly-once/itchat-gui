@@ -914,7 +914,8 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                                         JOptionPane.showMessageDialog(MainFrame.getContext(), "图片下载中...", "文件不存在", JOptionPane.WARNING_MESSAGE);
                                         return;
                                     }
-                                    ImageViewerFrame instance = new ImageViewerFrame(read);
+                                    ImageViewerFrame instance = ImageViewerFrame.getInstance();
+                                    instance.setImage(read);
 
                                     instance.toFront();
                                     instance.setVisible(true);

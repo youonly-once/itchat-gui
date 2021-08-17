@@ -85,11 +85,11 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
      * @return 回复消息
      */
     private List<MessageTools.Message> controlCommandHandler(AddMsgList msg) {
-        String text = msg.getText().toLowerCase();
+        String text = msg.getPlainText().toLowerCase();
         List<MessageTools.Message> messages = new ArrayList<>();
 
         //=========================手动发送消息=====================
-        String[] split = msg.getText().split("：");
+        String[] split = msg.getPlainText().split("：");
         if (split.length >= 2 && msg.getFromUserName().equals(Core.getUserName())) {
             try {
                 long sleep = 100;
@@ -119,7 +119,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             }
         }
         //============炸弹消息===================
-        if (msg.getText().equals("[Bomb]") || msg.getText().equals("[炸弹]")) {
+        if (msg.getPlainText().equals("[Bomb]") || msg.getPlainText().equals("[炸弹]")) {
             String userName = Core.getUserSelf().getUsername();
             if (!msg.getFromUserName().equals(userName)) {
                 for (int i = 0; i < 1; i++) {
@@ -303,7 +303,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         //延迟撤回消息，text:1  延迟一秒
         if (msg.getFromUserName().equals(Core.getUserName())) {
             try {
-                String replace = msg.getText();
+                String replace = msg.getPlainText();
                 int i = replace.indexOf("&amp;");
                 if (i != -1) {
                     long sleep = Long.parseLong(replace.substring(i + 5));
@@ -319,7 +319,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
 
         }
         if (text.startsWith("attr_rate") && msg.isGroupMsg()) {
-            String substring = msg.getText().substring(msg.getText().indexOf(":") + 1);
+            String substring = msg.getPlainText().substring(msg.getPlainText().indexOf(":") + 1);
             String imgPath = chartUtil.makeGroupMemberAttrPieChart(toUserName, remarkNameByGroupUserName, substring, 500, 400);
             //群消息
             messages.add(MessageTools.Message.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
@@ -333,7 +333,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     @Override
     public List<MessageTools.Message> textMsgHandle(AddMsgList msg) {
 
-        String text = msg.getText();
+        String text = msg.getPlainText();
 
         //处理控制命令
         List<MessageTools.Message> messages = controlCommandHandler(msg);

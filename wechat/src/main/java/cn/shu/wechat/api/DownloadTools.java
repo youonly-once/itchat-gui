@@ -5,11 +5,14 @@ import cn.shu.wechat.beans.msg.url.WXMsgUrl;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.URLEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
-import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
-import cn.shu.wechat.utils.*;
+import cn.shu.wechat.utils.Config;
+import cn.shu.wechat.utils.MD5Util;
+import cn.shu.wechat.utils.MyHttpClient;
+import cn.shu.wechat.utils.SleepUtils;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.client.utils.DateUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
@@ -21,7 +24,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.*;
 
@@ -54,7 +56,7 @@ public class DownloadTools {
      * @author SXS
      * @date 2017年4月21日 下午11:00:25
      */
-    public static boolean getDownloadFn(AddMsgList msg, String path) {
+    public static boolean getDownloadFn(AddMsgList msg) {
         Map<String, String> headerMap = new HashMap<String, String>();
         List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
 
@@ -103,9 +105,10 @@ public class DownloadTools {
             default:
                 break;
         }
-        entity2File(entity,path);
+        entity2File(entity, msg.getFilePath());
         return false;
     }
+
     /**
      * 下载缩略图
      *
@@ -116,33 +119,19 @@ public class DownloadTools {
      * @author SXS
      * @date 2017年4月21日 下午11:00:25
      */
-    public static void getDownloadSlave(AddMsgList msg, String path) {
+    public static void downloadFileByMsgId(long msgId, String path) {
         Map<String, String> headerMap = new HashMap<String, String>();
-        List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
-        WXReceiveMsgCodeEnum msgTypeEnum = WXReceiveMsgCodeEnum.getByCode(msg.getMsgType());
         String url = "";
         HttpEntity entity = null;
-        switch (msgTypeEnum) {
-            case MSGTYPE_IMAGE:
-            case MSGTYPE_VIDEO:
-                url = String.format(URLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String) Core.getLoginInfoMap().get("url"));
-                entity = downloadEntityByMsgID(
-                        url,String.valueOf(msg.getNewMsgId())
-                        ,WXMsgUrl.SLAVE_TYPE,headerMap,true);
-            case MSGTYPE_APP:
-
-                break;
-            case MSGTYPE_MAP:
-
-                break;
-            default:
-                break;
-        }
-        if (entity == null){
+        url = String.format(URLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String) Core.getLoginInfoMap().get("url"));
+        entity = downloadEntityByMsgID(
+                url, String.valueOf(msgId)
+                , WXMsgUrl.SLAVE_TYPE, headerMap, true);
+        if (entity == null) {
             DownloadTools.FILE_DOWNLOAD_STATUS.remove(path);
             log.error("下载失败：response entity is null.");
         }
-        entity2File(entity,path);
+        entity2File(entity, path);
 
     }
 
@@ -466,27 +455,21 @@ public class DownloadTools {
 
     }
 
+
     /**
-     * 下载消息记录中的图片、视频...
+     * 获取缩略图文件保存文章
      *
-     * @param msg      消息对象
-     * @param saveFile 保存路径
+     * @param msg 接收的消息对象
+     * @return {@code String} 消息资源文件保存路径
+     * {@code null} 获取失败或无需下载的资源
+     * @return 路径
      */
-    public static void downloadFile(AddMsgList msg, String saveFile,boolean slave) {
-        final String path = saveFile;
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                if (slave){
-                    DownloadTools.getDownloadSlave(msg, path);
-                }else{
-                    DownloadTools.getDownloadFn(msg, path);
+    public static String getDownloadThumImgPath(AddMsgList msg, String fileName, String ext) {
 
-                }
-            }
-        };
-        ExecutorServiceUtil.getGlobalExecutorService().execute(runnable);
+        String downloadFilePath = getDownloadFilePath(msg, fileName, ext);
+        downloadFilePath = downloadFilePath + "_slave.gif";
 
+        return downloadFilePath;
     }
 
     /**
@@ -495,51 +478,9 @@ public class DownloadTools {
      * @param msg 接收的消息对象
      * @return {@code String} 消息资源文件保存路径
      * {@code null} 获取失败或无需下载的资源
+     * @return 路径
      */
-    public static String getDownloadFilePath(AddMsgList msg,boolean slave) {
-        //下载文件的后缀名
-        WXReceiveMsgCodeEnum msgTypeEnum = WXReceiveMsgCodeEnum.getByCode(msg.getMsgType());
-        String ext = null;
-        switch (msgTypeEnum) {
-            case MSGTYPE_MAP:
-            case MSGTYPE_IMAGE:
-            case MSGTYPE_EMOTICON:
-                ext = ".gif";
-                break;
-            case MSGTYPE_VOICE:
-                ext = ".mp3";
-                break;
-            case MSGTYPE_VIDEO:
-            case MSGTYPE_MICROVIDEO:
-                ext = ".mp4";
-                break;
-            case MSGTYPE_APP:
-                switch (WXReceiveMsgCodeOfAppEnum.getByCode(msg.getAppMsgType())) {
-                    case OTHER:
-                        break;
-                    case LINK:
-                        break;
-                    case PROGRAM:
-                        break;
-                    case FILE:
-                        int i = msg.getFileName().lastIndexOf(".");
-                        if (i == -1) {
-                            ext = "";
-                        } else {
-                            ext = msg.getFileName().substring(i);
-                        }
-
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            default:
-                break;
-        }
-        if (ext == null) {
-            return null;
-        }
+    public static String getDownloadFilePath(AddMsgList msg, String fileName, String ext) {
         //发消息的用户或群名称
         String username = ContactsTools.getContactDisplayNameByUserName(msg.getFromUserName());
         //群成员名称
@@ -547,19 +488,16 @@ public class DownloadTools {
         if (msg.isGroupMsg() && msg.getMemberName() != null) {
             groupUsername = ContactsTools.getContactDisplayNameByUserName(msg.getMemberName());
         }
-        username = replace(username);
-        //username = "test";
-       // groupUsername = "test1";
-        String path = Config.PIC_DIR + File.separator + msgTypeEnum + File.separator + username + File.separator;
-        String fileName = groupUsername + "-"
-                + new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date()) + "-" + msg.getNewMsgId()
-                + (slave?"_slave":"")
+        groupUsername = groupUsername == null ? "" : groupUsername;
+        String path = Config.PIC_DIR + File.separator + msg.getType() + File.separator + username + File.separator + groupUsername + File.separator;
+        path = replace(path);
+        fileName = fileName
+                + "-" + DateUtils.formatDate(new Date(), "yyyy-MM-dd-HH-mm-ss")
                 + ext;
-        fileName = replace(fileName);
+
 
         return path + fileName;
     }
-
 
     /**
      * 等待下载完成

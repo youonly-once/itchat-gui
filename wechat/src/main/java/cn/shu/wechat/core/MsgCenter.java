@@ -63,71 +63,226 @@ public class MsgCenter {
     public void handleNewMsg(AddMsgList msg) {
         //消息类型封装
         WXReceiveMsgCodeEnum msgType = WXReceiveMsgCodeEnum.getByCode(msg.getMsgType());
+        //加载群成员
+        loadUserInfo(msg);
         msg.setType(msgType);
         String s = LogUtil.printFromMeg(msg, msgType.getDesc());
         //如果是当前房间 发送已读通知
-        if (RoomChatPanel.getContext().getCurrRoomId().equals(msg.getFromUserName())){
+        if (RoomChatPanel.getContext().getCurrRoomId().equals(msg.getFromUserName())) {
             ExecutorServiceUtil.getGlobalExecutorService().execute(() -> MessageTools.sendStatusNotify(msg.getFromUserName()));
         }
         //用户在其他平台消息已读的通知
-        if (msg.getMsgType() == WXReceiveMsgCodeEnum.MSGTYPE_STATUSNOTIFY.getCode()){
+        if (msg.getMsgType() == WXReceiveMsgCodeEnum.MSGTYPE_STATUSNOTIFY.getCode()) {
             log.debug(s);
             //更新聊天列表未读数量
 
-            RoomsPanel.getContext().updateUnreadCount(msg.getToUserName(),0);
+            RoomsPanel.getContext().updateUnreadCount(msg.getToUserName(), 0);
             return;
-        }else{
+        } else {
             log.info(s);
         }
-
-        /**
-         * 文本消息：content为文本内容
-         * 图片视频文件消息：content为资源ID，@开头，发送消息时指定Content字段可直接发送，不需mediaid
-         *  如果消息是自己发的，content为xml
-         */
-        //消息格式化
-        CommonTools.msgFormatter(msg);
         //地图消息，特殊处理
         if (msgType == MSGTYPE_TEXT && !StringUtils.isEmpty(msg.getUrl())) {
             //地图消息
             msg.setMsgType(WXReceiveMsgCodeEnum.MSGTYPE_MAP.getCode());
             msgType = WXReceiveMsgCodeEnum.MSGTYPE_MAP;
         }
-        //加载群成员
-        loadUserInfo(msg);
-        //下载资源文件
-        download(msgType,msg);
-        //content xml转MAP
-        Map<String, Object> map = contentXml2Map(msg);
-        //存储数据库
-        String plainText = getPlainText(msgType, msg,map);
-        Message message = storeMsgToDB(msg,plainText);
-        message.setContentMap(map);
+
+        String plaintext = "";
+        //下载资源后缀
+        String ext = null;
+        //下载资源文件名
+        String fileName = msg.getMsgId();
+        //存储的消息
+        Message message = null;
+        switch (msgType) {
+            case MSGTYPE_MAP:
+                msg.setPlainText("[地图，请在手机上查看]");
+                message = storeMsgToDB(msg);
+                ext = ".gif";
+                break;
+            case MSGTYPE_TEXT:
+                //消息格式化
+                CommonTools.msgFormatter(msg);
+                //文本消息
+                msg.setPlainText(msg.getContent());
+                message = storeMsgToDB(msg);
+                break;
+            case MSGTYPE_IMAGE:
+                msg.setPlainText("[图片]");
+                ext = ".gif";
+                //存储消息
+                message = storeMsgToDB(msg);
+                downloadFile(msg, fileName, ext);
+                break;
+            case MSGTYPE_VOICE:
+                ext = ".mp3";
+                msg.setPlainText("[语音]");
+                message = storeMsgToDB(msg);
+                downloadFile(msg, fileName, ext);
+                downloadThumImg(msg, fileName, ext);
+                break;
+            case MSGTYPE_VIDEO:
+            case MSGTYPE_MICROVIDEO:
+                ext = ".mp4";
+                msg.setPlainText("[视频]");
+                message = storeMsgToDB(msg);
+                downloadFile(msg, fileName, ext);
+                downloadThumImg(msg, fileName, ext);
+                break;
+            case MSGTYPE_EMOTICON:
+                msg.setPlainText("[表情]");
+                message = storeMsgToDB(msg);
+                ext = ".gif";
+                downloadFile(msg, fileName, ext);
+                break;
+            case MSGTYPE_APP:
+                Map<String, Object> map = XmlStreamUtil.toMap(msg.getContent());
+                Object title = map.get("msg.appmsg.title");
+                switch (WXReceiveMsgCodeOfAppEnum.getByCode(msg.getAppMsgType())) {
+                    case LINK:
+                        msg.setPlainText("[链接]" + title);
+                        break;
+                    case FILE:
+                        if (title != null) {
+                            fileName = title.toString();
+                        }
+                        int i = msg.getFileName().lastIndexOf(".");
+                        if (i != -1) {
+                            ext = msg.getFileName().substring(i);
+                        }
+                        msg.setPlainText("[文件]" + title);
+                        downloadFile(msg, fileName, ext);
+                        break;
+                    case PROGRAM:
+                        msg.setPlainText("[小程序]" + title);
+                        break;
+                    case PICTURE:
+                        ext = ".gif";
+                        downloadFile(msg, fileName, ext);
+                        msg.setPlainText("[小程序]图片");
+                        break;
+                    default:
+                        break;
+
+
+                }
+                message = storeMsgToDB(msg);
+                if (message != null) {
+                    message.setContentMap(map);
+                }
+                break;
+            case MSGTYPE_VOIPMSG:
+                break;
+            case MSGTYPE_VOIPNOTIFY:
+                break;
+            case MSGTYPE_VOIPINVITE:
+                break;
+            case MSGTYPE_LOCATION:
+                msg.setPlainText("[位置，请在手机上查看]");
+                message = storeMsgToDB(msg);
+                break;
+            case MSGTYPE_SYS:
+            case MSGTYPE_STATUSNOTIFY:
+                msg.setPlainText("[系统消息]");
+                message = storeMsgToDB(msg);
+                break;
+            case MSGTYPE_SYSNOTICE:
+                break;
+            case MSGTYPE_POSSIBLEFRIEND_MSG:
+                break;
+            case MSGTYPE_VERIFYMSG:
+                message = storeMsgToDB(msg);
+                break;
+            case MSGTYPE_SHARECARD:
+                msg.setPlainText("[名片消息，请在手机上查看]");
+                message = storeMsgToDB(msg);
+                break;
+            case MSGTYPE_RECALLED:
+                map = XmlStreamUtil.toMap(msg.getContent());
+                msg.setPlainText(map.get("sysmsg.revokemsg.replacemsg").toString());
+                message = storeMsgToDB(msg);
+                if (message != null) {
+                    message.setContentMap(map);
+                }
+                break;
+            case UNKNOWN:
+            default:
+                log.warn(LogUtil.printFromMeg(msg, msgType.getCode()));
+                break;
+        }
+
         //聊天界面
         updateUI(message, msg);
-        //处理自定义逻辑
-        processMsg(msg,msgType);
-
+        processExtra(msg);
 
     }
 
     /**
-     * 消息中content字段xml转map
+     * 处理额外消息
+     *
      * @param msg
-     * @return
      */
-    private  Map<String, Object> contentXml2Map(AddMsgList msg) {
+    private void processExtra(AddMsgList msg) {
+        //需要发送的消息
+        List<MessageTools.Message> messages = null;
         switch (msg.getType()) {
+            case MSGTYPE_MAP:
+                messages = msgHandler.mapMsgHandle(msg);
+                break;
+            case MSGTYPE_TEXT:
+                messages = msgHandler.textMsgHandle(msg);
+                break;
+            case MSGTYPE_IMAGE:
+                messages = msgHandler.picMsgHandle(msg);
+                break;
+            case MSGTYPE_VOICE:
+                messages = msgHandler.voiceMsgHandle(msg);
+                break;
+            case MSGTYPE_VIDEO:
+            case MSGTYPE_MICROVIDEO:
+                messages = msgHandler.videoMsgHandle(msg);
+                break;
+            case MSGTYPE_EMOTICON:
+                messages = msgHandler.emotionMsgHandle(msg);
+                break;
             case MSGTYPE_APP:
+                messages = msgHandler.appMsgHandle(msg);
+                break;
+            case MSGTYPE_VOIPMSG:
+                break;
+            case MSGTYPE_VOIPNOTIFY:
+                break;
+            case MSGTYPE_VOIPINVITE:
+                break;
+            case MSGTYPE_LOCATION:
+                break;
+            case MSGTYPE_SYS:
+            case MSGTYPE_STATUSNOTIFY:
+                messages = msgHandler.systemMsgHandle(msg);
+                break;
+            case MSGTYPE_SYSNOTICE:
+                break;
+            case MSGTYPE_POSSIBLEFRIEND_MSG:
+                break;
+            case MSGTYPE_VERIFYMSG:
+                messages = msgHandler.addFriendMsgHandle(msg);
+                break;
+            case MSGTYPE_SHARECARD:
+                msg.setPlainText("[名片消息，请在手机上查看]");
+                messages = msgHandler.nameCardMsgHandle(msg);
+                break;
             case MSGTYPE_RECALLED:
-                Map<String, Object> map = XmlStreamUtil.toMap(msg.getContent());
-                return map;
+                messages = msgHandler.undoMsgHandle(msg);
+                break;
+            case UNKNOWN:
             default:
+                log.warn(LogUtil.printFromMeg(msg, msg.getType().getCode()));
                 break;
         }
-        return null;
+        //发送消息
+        MessageTools.sendMsgByUserId(messages, msg.getFromUserName());
     }
-
 
     /**
      *  第一次收到群消息 加载群成员详细细腻
@@ -154,60 +309,59 @@ public class MsgCenter {
             }
         }
     }
+
     /**
      * 下载文件
-     * @param msgType
-     * @param msg
      */
-    private void download(WXReceiveMsgCodeEnum msgType,AddMsgList msg){
-        //下载资源文件
-        String path = DownloadTools.getDownloadFilePath(msg,false);
-        String pathSlave = DownloadTools.getDownloadFilePath(msg,true);
-        //false表示当前文件未下载完成，此时其它地方不能使用
+    private void downloadFile(AddMsgList msg, String filename, String ext) {
+
         Hashtable<String, Boolean> fileDownloadStatus = DownloadTools.FILE_DOWNLOAD_STATUS;
-        if (path != null) {
-            //缩略图
-            switch (msgType) {
-                case MSGTYPE_IMAGE:
-                case MSGTYPE_VIDEO:
-                    fileDownloadStatus.put(pathSlave, false);
-                    DownloadTools.downloadFile(msg, pathSlave,true);
-                    msg.setSlavePath(pathSlave);
-                    break;
-                default:break;
-            }
+        //下载资源文件
+        String path = DownloadTools.getDownloadFilePath(msg, filename, ext);
+        msg.setFilePath(path);
+
+        fileDownloadStatus.put(path, false);
+        ExecutorServiceUtil.getGlobalExecutorService().execute(() -> DownloadTools.getDownloadFn(msg));
 
 
-            fileDownloadStatus.put(path, false);
-            DownloadTools.downloadFile(msg, path,false);
-            msg.setFilePath(path);
-
-        }
     }
+
+    /**
+     * 下载消息缩略图
+     */
+    private void downloadThumImg(AddMsgList msg, String filename, String ext) {
+        String pathSlave = DownloadTools.getDownloadThumImgPath(msg, filename, ext);
+        Hashtable<String, Boolean> fileDownloadStatus = DownloadTools.FILE_DOWNLOAD_STATUS;
+        fileDownloadStatus.put(pathSlave, false);
+        msg.setSlavePath(pathSlave);
+        ExecutorServiceUtil.getGlobalExecutorService().execute(() -> DownloadTools.downloadFileByMsgId(msg.getNewMsgId(), pathSlave));
+    }
+
     /**
      * 更新UI
+     *
      * @param message
      * @param msg
      */
-    private void updateUI(Message message,AddMsgList msg){
+    private void updateUI(Message message, AddMsgList msg) {
         //################3聊天面板消息处理###########3333
         int msgUnReadCount = 1;
-        String lastMsgPrefix  = "";
+        String lastMsgPrefix = "";
         //新增消息列表
         String userName = msg.getFromUserName();
         if (userName.equals(Core.getUserName())) {
             //自己的消息，默认已读
             msgUnReadCount = 0;
             userName = msg.getToUserName();
-        }else if(userName.startsWith("@@")){
+        } else if (userName.startsWith("@@")) {
             //自己在群里发的消息
-            if ( Core.getUserName().equals(msg.getMemberName())){
-                lastMsgPrefix =Core.getNickName()+": ";
+            if (Core.getUserName().equals(msg.getMemberName())) {
+                lastMsgPrefix = Core.getNickName() + ": ";
                 msgUnReadCount = 0;
-            }else{
-                lastMsgPrefix =ContactsTools.getMemberDisplayNameOfGroup(userName,msg.getMemberName())+": ";
+            } else {
+                lastMsgPrefix = ContactsTools.getMemberDisplayNameOfGroup(userName, msg.getMemberName()) + ": ";
             }
-        }else{
+        } else {
             MainFrame.getContext().playMessageSound();
             MainFrame.getContext().setTrayFlashing();
         }
@@ -230,195 +384,24 @@ public class MsgCenter {
                 }
             }
             //新增或选择聊天列表
-            RoomsPanel.getContext().addRoomOrOpenRoomNotSwitch(roomId,lastMsg,count);
+            RoomsPanel.getContext().addRoomOrOpenRoomNotSwitch(roomId, lastMsg, count);
 
         });
     }
-    /**
-     * 处理自定义逻辑
-     * @param msg 消息
-     * @param msgType 消息类型
-     */
-    private void processMsg(AddMsgList msg,WXReceiveMsgCodeEnum msgType){
-        //需要发送的消息
-        List<MessageTools.Message> messages = null;
-        switch (msgType) {
-            case MSGTYPE_MAP:
-                messages = msgHandler.mapMsgHandle(msg);
-                break;
-            case MSGTYPE_TEXT:
-                //文本消息
-                msg.setText(msg.getContent());
-                messages = msgHandler.textMsgHandle(msg);
-                break;
-            case MSGTYPE_IMAGE:
-                //存储消息
-                messages = msgHandler.picMsgHandle(msg);
-                break;
-            case MSGTYPE_VOICE:
-                messages = msgHandler.voiceMsgHandle(msg);
-                break;
-            case MSGTYPE_VIDEO:
-            case MSGTYPE_MICROVIDEO:
-                messages = msgHandler.videoMsgHandle(msg);
-                break;
-            case MSGTYPE_EMOTICON:
-                messages = msgHandler.emotionMsgHandle(msg);
-                break;
-            case MSGTYPE_APP:
-                switch (WXReceiveMsgCodeOfAppEnum.getByCode(msg.getAppMsgType())) {
-                    case OTHER:
-                        break;
-                    case LINK:
-                        break;
-                    case FILE:
-                        break;
-                    case PROGRAM:
-                        break;
-                    default:
-                }
-                messages = msgHandler.appMsgHandle(msg);
-                break;
-            case MSGTYPE_VOIPMSG:
-                break;
-            case MSGTYPE_VOIPNOTIFY:
-                break;
-            case MSGTYPE_VOIPINVITE:
-                break;
-            case MSGTYPE_LOCATION:
-                break;
-            case MSGTYPE_SYS:
-            case MSGTYPE_STATUSNOTIFY:
-                //当打开聊天窗口时会像该联系人发送该类型的消息
-                //StatusNotifyCode = 1发送图片、视频消息完成  2进入聊天框  0发送文字完成
-                messages = msgHandler.systemMsgHandle(msg);
-                break;
-            case MSGTYPE_SYSNOTICE:
-                break;
-            case MSGTYPE_POSSIBLEFRIEND_MSG:
-                break;
-            case MSGTYPE_VERIFYMSG:
-                messages = msgHandler.addFriendMsgHandle(msg);
-                break;
-            case MSGTYPE_SHARECARD:
-                messages = msgHandler.nameCardMsgHandle(msg);
-                break;
-            case MSGTYPE_RECALLED:
-                messages = msgHandler.undoMsgHandle(msg);
-                break;
-            case UNKNOWN:
-            default:
-                log.warn(LogUtil.printFromMeg(msg, msgType.getCode()));
-                break;
-        }
-        //发送消息
-        MessageTools.sendMsgByUserId(messages, msg.getFromUserName());
-    }
-    /**
-     *
-     * @param msgType 消息类型
-     * @param map
-     * @return 明文
-     */
-    private String getPlainText(WXReceiveMsgCodeEnum msgType, AddMsgList msg, Map<String, Object> map){
-        String plaintext = null;
-        switch (msgType) {
-            case MSGTYPE_MAP:
-                plaintext = "[地图，请在手机上查看]";
-                break;
-            case MSGTYPE_TEXT:
-                //文本消息
-                break;
-            case MSGTYPE_IMAGE:
-                plaintext = "[图片]";
-                break;
-            case MSGTYPE_VOICE:
-                plaintext = "[语音]";
-                break;
-            case MSGTYPE_VIDEO:
-            case MSGTYPE_MICROVIDEO:
-                plaintext = "[视频]";
-                break;
-            case MSGTYPE_EMOTICON:
-                plaintext = "[表情]";
-                break;
-            case MSGTYPE_APP:
-                Object title = map.get("msg.appmsg.title");
-                switch (WXReceiveMsgCodeOfAppEnum.getByCode(msg.getAppMsgType())) {
-                    case LINK:
 
-                        plaintext = "[链接]"+title;
-                        break;
-                    case FILE:
-                        plaintext = "[文件]";
-                        break;
-                    case PROGRAM:
-                        plaintext = "[小程序]"+title;
-                       break;
-                    case PICTURE:
-                        plaintext = "[小程序]图片";
-                        break;
-                    default:
-                        Object o = map.get("msg.appmsg.des");
-                        Object url = map.get("msg.appmsg.url");
-                        if (o!=null){
-                            plaintext ="["+o.toString() +"]:"+ (url==null?"":url.toString());
-                        }else {
-                            plaintext ="[APP消息]";
-                        }
-
-
-                }
-
-                break;
-            case MSGTYPE_VOIPMSG:
-                break;
-            case MSGTYPE_VOIPNOTIFY:
-                break;
-            case MSGTYPE_VOIPINVITE:
-                break;
-            case MSGTYPE_LOCATION:
-                plaintext = "[位置，请在手机上查看]";
-                break;
-            case MSGTYPE_SYS:
-                plaintext = msg.getContent();
-                break;
-            case MSGTYPE_STATUSNOTIFY:
-                //当打开聊天窗口时会像该联系人发送该类型的消息
-                //StatusNotifyCode = 1发送图片、视频消息完成  2进入聊天框  0发送文字完成
-                plaintext = "[系统消息]";
-                break;
-            case MSGTYPE_SYSNOTICE:
-                break;
-            case MSGTYPE_POSSIBLEFRIEND_MSG:
-                break;
-            case MSGTYPE_VERIFYMSG:
-                break;
-            case MSGTYPE_SHARECARD:
-                plaintext = "[名片消息，请在手机上查看]";
-                break;
-            case MSGTYPE_RECALLED:
-                plaintext = map.get("sysmsg.revokemsg.replacemsg").toString();
-                break;
-            case UNKNOWN:
-            default:
-                break;
-        }
-        return plaintext;
-    }
     /**
      * 保存消息到数据库
      *
      * @param msg 消息
      */
-    private Message storeMsgToDB(AddMsgList msg,Object plaintext) {
+    private Message storeMsgToDB(AddMsgList msg) {
         try {
             boolean isFromSelf = msg.getFromUserName().endsWith(Core.getUserName());
             boolean isToSelf = msg.getToUserName().endsWith(Core.getUserName());
 
             Message build = Message
                     .builder()
-                    .plaintext(plaintext ==null?msg.getContent():plaintext.toString())
+                    .plaintext(msg.getPlainText() == null ? msg.getContent() : msg.getPlainText())
                     .content(msg.getContent())
                     .filePath(msg.getFilePath())
                     .createTime(new Date())
@@ -454,7 +437,6 @@ public class MsgCenter {
                     .fileSize(msg.getFileSize())
                     .build();
             int insert = messageMapper.insert(build);
-
             return build;
         } catch (Exception e) {
             e.printStackTrace();

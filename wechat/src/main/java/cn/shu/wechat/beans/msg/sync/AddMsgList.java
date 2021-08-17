@@ -7,6 +7,8 @@ package cn.shu.wechat.beans.msg.sync;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import lombok.Data;
 
+import java.util.Map;
+
 /**
  * Auto-generated: 2021-02-22 13:35:59
  *
@@ -55,7 +57,7 @@ public class AddMsgList {
     /**
      * 文本消息内容
      **/
-    private String text;
+    private String plainText;
     private WXReceiveMsgCodeEnum Type;
     private String memberName;
     /**
@@ -67,5 +69,10 @@ public class AddMsgList {
      * 缩略图地址
      */
     private String slavePath;
+
+    /**
+     * content map
+     */
+    private Map<String, Object> contentMap;
 
 }
