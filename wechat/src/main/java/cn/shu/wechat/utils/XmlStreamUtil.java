@@ -80,6 +80,7 @@ public class XmlStreamUtil {
         if (StringUtils.isEmpty(xml)){
             return new HashMap<>(0);
         }
+        xml =  xml.replace("<br/>", "\n");
         xml = StringEscapeUtils.unescapeXml(xml);
         Map<String, Object> map = new HashMap<String, Object>();
         Document doc = null;

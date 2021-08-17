@@ -845,7 +845,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         //标志
         Map<String, Object> map = new HashMap<>();
         map.put("attachmentId", imageAttachment.getId());
-        map.put("url", finalPath);
+        map.put("url", imageAttachment.getImagePath());
         map.put("messageId", item.getId());
         imageLabel.setTag(map);
 

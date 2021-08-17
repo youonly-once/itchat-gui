@@ -9,7 +9,7 @@
     <result column="msg_type" jdbcType="INTEGER" property="msgType" />
     <result column="app_msg_type" jdbcType="INTEGER" property="appMsgType" />
     <result column="msg_desc" jdbcType="VARCHAR" property="msgDesc" />
-    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="create_time" jdbcType="VARCHAR" property="createTime" />
     <result column="plaintext" jdbcType="LONGVARCHAR" property="plaintext" />
     <result column="content" jdbcType="LONGVARCHAR" property="content" />
     <result column="file_path" jdbcType="VARCHAR" property="filePath" />
@@ -145,7 +145,7 @@
       play_length, img_height, img_width, 
       voice_length)
     values (#{id,jdbcType=CHAR}, #{msgId,jdbcType=VARCHAR}, #{msgType,jdbcType=INTEGER}, 
-      #{appMsgType,jdbcType=INTEGER}, #{msgDesc,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{appMsgType,jdbcType=INTEGER}, #{msgDesc,jdbcType=VARCHAR}, #{createTime,jdbcType=VARCHAR},
       #{plaintext,jdbcType=LONGVARCHAR}, #{content,jdbcType=LONGVARCHAR}, #{filePath,jdbcType=VARCHAR}, 
       #{msgJson,jdbcType=LONGVARCHAR}, #{fromUsername,jdbcType=VARCHAR}, #{fromRemarkname,jdbcType=VARCHAR}, 
       #{fromNickname,jdbcType=VARCHAR}, #{fromMemberOfGroupUsername,jdbcType=VARCHAR}, 
@@ -255,7 +255,7 @@
         #{msgDesc,jdbcType=VARCHAR},
       </if>
       <if test="createTime != null">
-        #{createTime,jdbcType=TIMESTAMP},
+        #{createTime,jdbcType=VARCHAR},
       </if>
       <if test="plaintext != null">
         #{plaintext,jdbcType=LONGVARCHAR},
@@ -463,7 +463,7 @@
         msg_desc = #{msgDesc,jdbcType=VARCHAR},
       </if>
       <if test="createTime != null">
-        create_time = #{createTime,jdbcType=TIMESTAMP},
+        create_time = #{createTime,jdbcType=VARCHAR},
       </if>
       <if test="plaintext != null">
         plaintext = #{plaintext,jdbcType=LONGVARCHAR},
@@ -535,7 +535,7 @@
       msg_type = #{msgType,jdbcType=INTEGER},
       app_msg_type = #{appMsgType,jdbcType=INTEGER},
       msg_desc = #{msgDesc,jdbcType=VARCHAR},
-      create_time = #{createTime,jdbcType=TIMESTAMP},
+      create_time = #{createTime,jdbcType=VARCHAR},
       plaintext = #{plaintext,jdbcType=LONGVARCHAR},
       content = #{content,jdbcType=LONGVARCHAR},
       file_path = #{filePath,jdbcType=VARCHAR},
@@ -725,7 +725,7 @@
       voice_length)
     values
     (#{id,jdbcType=CHAR}, #{msgId,jdbcType=VARCHAR}, #{msgType,jdbcType=INTEGER}, #{appMsgType,jdbcType=INTEGER}, 
-      #{msgDesc,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{plaintext,jdbcType=LONGVARCHAR}, 
+      #{msgDesc,jdbcType=VARCHAR}, #{createTime,jdbcType=VARCHAR}, #{plaintext,jdbcType=LONGVARCHAR},
       #{content,jdbcType=LONGVARCHAR}, #{filePath,jdbcType=VARCHAR}, #{msgJson,jdbcType=LONGVARCHAR}, 
       #{fromUsername,jdbcType=VARCHAR}, #{fromRemarkname,jdbcType=VARCHAR}, #{fromNickname,jdbcType=VARCHAR}, 
       #{fromMemberOfGroupUsername,jdbcType=VARCHAR}, #{fromMemberOfGroupNickname,jdbcType=VARCHAR}, 
@@ -740,7 +740,7 @@
     msg_type = #{msgType,jdbcType=INTEGER}, 
     app_msg_type = #{appMsgType,jdbcType=INTEGER}, 
     msg_desc = #{msgDesc,jdbcType=VARCHAR}, 
-    create_time = #{createTime,jdbcType=TIMESTAMP}, 
+    create_time = #{createTime,jdbcType=VARCHAR},
     plaintext = #{plaintext,jdbcType=LONGVARCHAR}, 
     content = #{content,jdbcType=LONGVARCHAR}, 
     file_path = #{filePath,jdbcType=VARCHAR}, 
@@ -863,7 +863,7 @@
         #{msgDesc,jdbcType=VARCHAR},
       </if>
       <if test="createTime != null">
-        #{createTime,jdbcType=TIMESTAMP},
+        #{createTime,jdbcType=VARCHAR},
       </if>
       <if test="plaintext != null">
         #{plaintext,jdbcType=LONGVARCHAR},
@@ -944,7 +944,7 @@
         msg_desc = #{msgDesc,jdbcType=VARCHAR},
       </if>
       <if test="createTime != null">
-        create_time = #{createTime,jdbcType=TIMESTAMP},
+        create_time = #{createTime,jdbcType=VARCHAR},
       </if>
       <if test="plaintext != null">
         plaintext = #{plaintext,jdbcType=LONGVARCHAR},

@@ -336,7 +336,33 @@ public class DownloadTools {
         }
         return path.toString();
     }
+    /**
+     * 替换字符串中不能用于创建文件或文件夹的字符
+     *
+     * @param string 字符串
+     * @return 处理的字符串
+     */
+    public static String replace(String string) {
+        if (string == null) {
+            return null;
+        }
+        string = string.replace("/", "").
+                replace("|", "").
+                replace("\\", "").
+                replace("*", "").
+                replace(":", "").
+                replace("\"", "").
+                replace("?", "").
+                replace("<", "").
+                replace("<", "").
+                replace(" ", "").
+                replace("\n", "").
+                replace("\r", "").
+                replace("\t", "").
+                replace(">", "");
+        return string;
 
+    }
     /**
      * 下载头像缩略图
      *
@@ -427,77 +453,10 @@ public class DownloadTools {
         HttpEntity entity = MyHttpClient.doGet(url, params, redirect, headerMap);
         return entity;
     }
-    /**
-     * 替换字符串中不能用于创建文件或文件夹的字符
-     *
-     * @param string 字符串
-     * @return 处理的字符串
-     */
-    public static String replace(String string) {
-        if (string == null) {
-            return null;
-        }
-        string = string.replace("/", "").
-                replace("|", "").
-                replace("\\", "").
-                replace("*", "").
-                replace(":", "").
-                replace("\"", "").
-                replace("?", "").
-                replace("<", "").
-                replace("<", "").
-                replace(" ", "").
-                replace("\n", "").
-                replace("\r", "").
-                replace("\t", "").
-                replace(">", "");
-        return string;
-
-    }
 
 
-    /**
-     * 获取缩略图文件保存文章
-     *
-     * @param msg 接收的消息对象
-     * @return {@code String} 消息资源文件保存路径
-     * {@code null} 获取失败或无需下载的资源
-     * @return 路径
-     */
-    public static String getDownloadThumImgPath(AddMsgList msg, String fileName, String ext) {
-
-        String downloadFilePath = getDownloadFilePath(msg, fileName, ext);
-        downloadFilePath = downloadFilePath + "_slave.gif";
-
-        return downloadFilePath;
-    }
-
-    /**
-     * 获取消息资源文件保存路径
-     *
-     * @param msg 接收的消息对象
-     * @return {@code String} 消息资源文件保存路径
-     * {@code null} 获取失败或无需下载的资源
-     * @return 路径
-     */
-    public static String getDownloadFilePath(AddMsgList msg, String fileName, String ext) {
-        //发消息的用户或群名称
-        String username = ContactsTools.getContactDisplayNameByUserName(msg.getFromUserName());
-        //群成员名称
-        String groupUsername = "";
-        if (msg.isGroupMsg() && msg.getMemberName() != null) {
-            groupUsername = ContactsTools.getContactDisplayNameByUserName(msg.getMemberName());
-        }
-        groupUsername = groupUsername == null ? "" : groupUsername;
-        String path = Config.PIC_DIR + File.separator + msg.getType() + File.separator + username + File.separator + groupUsername + File.separator;
-        path = replace(path);
-        fileName = fileName
-                + "-" + DateUtils.formatDate(new Date(), "yyyy-MM-dd-HH-mm-ss")
-                + ext;
 
 
-        return path + fileName;
-    }
 
     /**
      * 等待下载完成

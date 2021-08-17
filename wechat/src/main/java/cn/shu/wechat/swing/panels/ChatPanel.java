@@ -34,6 +34,7 @@ import cn.shu.wechat.swing.utils.HttpUtil;
 import cn.shu.wechat.swing.utils.MimeTypeUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.extern.log4j.Log4j2;
+import org.apache.http.client.utils.DateUtils;
 import org.springframework.util.StringUtils;
 
 import javax.imageio.ImageIO;
@@ -195,30 +196,39 @@ public class ChatPanel extends ParentAvailablePanel {
                     new SwingWorker<Object, Object>() {
                         List<Message> messageList = null;
                         @Override
-                        protected Object doInBackground() throws Exception {
+                        protected Object doInBackground() {
                             MessageMapper mapper = SpringContextHolder.getBean(MessageMapper.class);
-                            messageList = mapper.selectByPage(messageItems.size(), messageItems.size() + PAGE_LENGTH, roomId);
-                            //TODO
-                            for (Message message : messageList) {
-                                try{
-                                    MessageItem item = new MessageItem(message, roomId);
-                                    messageItems.add(0, item);
-                                }catch (Exception e){
-                                    e.printStackTrace();
-                                }
+                            try {
+                                messageList = mapper.selectByPage(messageItems.size(), messageItems.size() + PAGE_LENGTH, roomId);
 
+                                for (Message message : messageList) {
+                                    try{
+                                        MessageItem item = new MessageItem(message, roomId);
+                                        messageItems.add(0, item);
+                                    }catch (Exception e){
+                                        e.printStackTrace();
+                                    }
+
+                                }
+                            }catch (Exception e){
+                                e.printStackTrace();
                             }
+
                             return null;
                         }
 
                         @Override
                         protected void done() {
                             try {
-                                if (!messageList.isEmpty()) {
+
+                                if (messageList!= null && !messageList.isEmpty()) {
                                     //TODO 顺序有问题
                                     messagePanel.getMessageListView().notifyItemRangeInserted(0, messageList.size());
                                 }
-                            } finally {
+                            } catch (Exception e){
+                                e.printStackTrace();
+                            }  finally
+                             {
                                 isLoadHis = false;
                                 ((RoomChatPanelCard) ChatPanel.this.getParentPanel()).getTitlePanel().hideStatusLabel();
                             }
@@ -602,7 +612,7 @@ public class ChatPanel extends ParentAvailablePanel {
                 .id(msgId)
                 .content(content)
                 .plaintext(content)
-                .createTime(new Date())
+                .createTime(DateUtils.formatDate(new Date()))
                 .fromUsername(Core.getUserName())
                 .toUsername(roomId)
                 .msgType(WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())

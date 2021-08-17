@@ -15,18 +15,17 @@ import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.panels.RoomChatPanel;
 import cn.shu.wechat.swing.panels.RoomsPanel;
-import cn.shu.wechat.utils.CommonTools;
-import cn.shu.wechat.utils.ExecutorServiceUtil;
-import cn.shu.wechat.utils.LogUtil;
-import cn.shu.wechat.utils.XmlStreamUtil;
+import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.log4j.Log4j2;
+import org.apache.http.client.utils.DateUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import javax.swing.*;
+import java.io.File;
 import java.util.*;
 
 import static cn.shu.wechat.enums.WXReceiveMsgCodeEnum.MSGTYPE_TEXT;
@@ -63,43 +62,47 @@ public class MsgCenter {
     public void handleNewMsg(AddMsgList msg) {
         //消息类型封装
         WXReceiveMsgCodeEnum msgType = WXReceiveMsgCodeEnum.getByCode(msg.getMsgType());
-        //加载群成员
-        loadUserInfo(msg);
-        msg.setType(msgType);
-        String s = LogUtil.printFromMeg(msg, msgType.getDesc());
-        //如果是当前房间 发送已读通知
-        if (RoomChatPanel.getContext().getCurrRoomId().equals(msg.getFromUserName())) {
-            ExecutorServiceUtil.getGlobalExecutorService().execute(() -> MessageTools.sendStatusNotify(msg.getFromUserName()));
-        }
-        //用户在其他平台消息已读的通知
-        if (msg.getMsgType() == WXReceiveMsgCodeEnum.MSGTYPE_STATUSNOTIFY.getCode()) {
-            log.debug(s);
-            //更新聊天列表未读数量
-
-            RoomsPanel.getContext().updateUnreadCount(msg.getToUserName(), 0);
-            return;
-        } else {
-            log.info(s);
-        }
-        //地图消息，特殊处理
+        //=============地图消息，特殊处理=============
         if (msgType == MSGTYPE_TEXT && !StringUtils.isEmpty(msg.getUrl())) {
             //地图消息
             msg.setMsgType(WXReceiveMsgCodeEnum.MSGTYPE_MAP.getCode());
             msgType = WXReceiveMsgCodeEnum.MSGTYPE_MAP;
         }
+        msg.setType(msgType);
+         //=============加载群成员==============
+        loadUserInfo(msg);
 
-        String plaintext = "";
+        //=============打印日志==============
+        String logStr = LogUtil.printFromMeg(msg, msgType.getDesc());
+        //=============如果是当前房间 发送已读通知==============
+        if (RoomChatPanel.getContext().getCurrRoomId().equals(msg.getFromUserName())) {
+            ExecutorServiceUtil.getGlobalExecutorService().execute(() -> MessageTools.sendStatusNotify(msg.getFromUserName()));
+        }
+
+        //=============用户在其他平台消息已读的通知=============
+        if (msg.getMsgType() == WXReceiveMsgCodeEnum.MSGTYPE_STATUSNOTIFY.getCode()) {
+            log.debug(logStr);
+            //更新聊天列表未读数量
+            RoomsPanel.getContext().updateUnreadCount(msg.getToUserName(), 0);
+            return;
+        } else {
+            log.info(logStr);
+        }
+
+
         //下载资源后缀
         String ext = null;
         //下载资源文件名
         String fileName = msg.getMsgId();
         //存储的消息
         Message message = null;
+
         switch (msgType) {
             case MSGTYPE_MAP:
                 msg.setPlainText("[地图，请在手机上查看]");
                 message = storeMsgToDB(msg);
                 ext = ".gif";
+                downloadFile(msg, fileName, ext);
                 break;
             case MSGTYPE_TEXT:
                 //消息格式化
@@ -112,29 +115,33 @@ public class MsgCenter {
                 msg.setPlainText("[图片]");
                 ext = ".gif";
                 //存储消息
-                message = storeMsgToDB(msg);
+                downloadThumImg(msg, fileName, ext);
                 downloadFile(msg, fileName, ext);
+                message = storeMsgToDB(msg);
                 break;
             case MSGTYPE_VOICE:
                 ext = ".mp3";
                 msg.setPlainText("[语音]");
-                message = storeMsgToDB(msg);
                 downloadFile(msg, fileName, ext);
                 downloadThumImg(msg, fileName, ext);
+                message = storeMsgToDB(msg);
+
                 break;
             case MSGTYPE_VIDEO:
             case MSGTYPE_MICROVIDEO:
                 ext = ".mp4";
                 msg.setPlainText("[视频]");
-                message = storeMsgToDB(msg);
                 downloadFile(msg, fileName, ext);
                 downloadThumImg(msg, fileName, ext);
+                message = storeMsgToDB(msg);
+
                 break;
             case MSGTYPE_EMOTICON:
                 msg.setPlainText("[表情]");
-                message = storeMsgToDB(msg);
                 ext = ".gif";
                 downloadFile(msg, fileName, ext);
+                message = storeMsgToDB(msg);
+
                 break;
             case MSGTYPE_APP:
                 Map<String, Object> map = XmlStreamUtil.toMap(msg.getContent());
@@ -317,7 +324,7 @@ public class MsgCenter {
 
         Hashtable<String, Boolean> fileDownloadStatus = DownloadTools.FILE_DOWNLOAD_STATUS;
         //下载资源文件
-        String path = DownloadTools.getDownloadFilePath(msg, filename, ext);
+        String path = this.getDownloadFilePath(msg, filename, ext);
         msg.setFilePath(path);
 
         fileDownloadStatus.put(path, false);
@@ -330,7 +337,7 @@ public class MsgCenter {
      * 下载消息缩略图
      */
     private void downloadThumImg(AddMsgList msg, String filename, String ext) {
-        String pathSlave = DownloadTools.getDownloadThumImgPath(msg, filename, ext);
+        String pathSlave = this.getDownloadThumImgPath(msg, filename, ext);
         Hashtable<String, Boolean> fileDownloadStatus = DownloadTools.FILE_DOWNLOAD_STATUS;
         fileDownloadStatus.put(pathSlave, false);
         msg.setSlavePath(pathSlave);
@@ -404,7 +411,7 @@ public class MsgCenter {
                     .plaintext(msg.getPlainText() == null ? msg.getContent() : msg.getPlainText())
                     .content(msg.getContent())
                     .filePath(msg.getFilePath())
-                    .createTime(new Date())
+                    .createTime(DateUtils.formatDate(new Date()))
                     .fromNickname(isFromSelf ? Core.getNickName() : ContactsTools.getContactNickNameByUserName(msg.getFromUserName()))
                     .fromRemarkname(isFromSelf ? Core.getNickName() : ContactsTools.getContactRemarkNameByUserName(msg.getFromUserName()))
                     .fromUsername(msg.getFromUserName())
@@ -443,7 +450,49 @@ public class MsgCenter {
         }
         return null;
     }
+    /**
+     * 获取缩略图文件保存文章
+     *
+     * @param msg 接收的消息对象
+     * @return {@code String} 消息资源文件保存路径
+     * {@code null} 获取失败或无需下载的资源
+     * @return 路径
+     */
+    private String getDownloadThumImgPath(AddMsgList msg, String fileName, String ext) {
 
+        String downloadFilePath = getDownloadFilePath(msg, fileName, ext);
+        downloadFilePath = downloadFilePath + "_slave.gif";
+
+        return downloadFilePath;
+    }
+
+    /**
+     * 获取消息资源文件保存路径
+     *
+     * @param msg 接收的消息对象
+     * @return {@code String} 消息资源文件保存路径
+     * {@code null} 获取失败或无需下载的资源
+     * @return 路径
+     */
+    private String getDownloadFilePath(AddMsgList msg, String fileName, String ext) {
+        //发消息的用户或群名称
+        String username = ContactsTools.getContactDisplayNameByUserName(msg.getFromUserName());
+        //群成员名称
+        String groupUsername = "";
+        if (msg.isGroupMsg() && msg.getMemberName() != null) {
+            groupUsername = ContactsTools.getContactDisplayNameByUserName(msg.getMemberName());
+        }
+        groupUsername = groupUsername == null ? "" : DownloadTools.replace(groupUsername);
+        username = DownloadTools.replace(username);
+        String path = Config.PIC_DIR + File.separator + msg.getType() + File.separator + username + File.separator + groupUsername + File.separator;
+        fileName = DownloadTools.replace(fileName);
+        fileName = fileName
+                + "-" + DateUtils.formatDate(new Date(), "yyyy-MM-dd-HH-mm-ss")
+                + ext;
+
+
+        return path + fileName;
+    }
 
     /**
      * 处理联系人修改消息

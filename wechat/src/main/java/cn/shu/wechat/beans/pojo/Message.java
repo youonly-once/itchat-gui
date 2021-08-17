@@ -28,7 +28,7 @@ public class Message {
 
     private String msgDesc;
 
-    private Date createTime;
+    private String createTime;
 
     private String plaintext;
 

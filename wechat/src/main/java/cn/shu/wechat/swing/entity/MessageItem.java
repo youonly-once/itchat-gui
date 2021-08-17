@@ -10,6 +10,7 @@ import cn.shu.wechat.utils.XmlStreamUtil;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.http.client.utils.DateUtils;
 
 import java.awt.image.BufferedImage;
 import java.util.Map;
@@ -78,7 +79,7 @@ public class MessageItem implements Comparable<MessageItem> {
             this.setSenderUsername(ContactsTools.getContactDisplayNameByUserName(message.getFromUsername()));
         }
 
-        this.setTimestamp(message.getCreateTime().getTime());
+        this.setTimestamp(DateUtils.parseDate(message.getCreateTime()).getTime());
         this.setNeedToResend(!message.getIsSend());
         this.setProgress(message.getProcess());
         this.setDeleted(message.isDeleted());
@@ -102,7 +103,6 @@ public class MessageItem implements Comparable<MessageItem> {
                     case OTHER:
                         break;
                     case LINK:
-
                         Object desc = stringObjectMap.get("msg.appmsg.des");
                         Object url = stringObjectMap.get("msg.appmsg.url");
                         Object title = stringObjectMap.get("msg.appmsg.title");

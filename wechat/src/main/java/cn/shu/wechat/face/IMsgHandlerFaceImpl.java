@@ -451,7 +451,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
 
         String realMsgContent = oldMessage.getContent();
         String filePath = oldMessage.getFilePath();
-        String createTime = DateFormatUtils.format(oldMessage.getCreateTime(), DateFormatConstant.HH_MM_SS);
+        String createTime = oldMessage.getCreateTime().substring(9);
         switch (WXReceiveMsgCodeEnum.getByCode(oldMessage.getMsgType())) {
             case MSGTYPE_TEXT:
                 message = MessageTools.Message.builder()

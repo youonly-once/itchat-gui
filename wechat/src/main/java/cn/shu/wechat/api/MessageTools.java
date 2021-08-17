@@ -20,6 +20,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
+import org.apache.http.client.utils.DateUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -213,7 +214,7 @@ public class MessageTools {
                     .builder()
                     .content(message.content)
                     .plaintext(message.plaintext==null?message.content:message.plaintext)
-                    .createTime(new Date())
+                    .createTime(DateUtils.formatDate(new Date()))
                     .fromNickname(Core.getNickName())
                     .fromRemarkname(Core.getNickName())
                     .fromUsername(Core.getUserName())
