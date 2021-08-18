@@ -21,7 +21,7 @@ public class TitlePanel extends ParentAvailablePanel {
     private static TitlePanel context;
 
     private JPanel titlePanel;
-    private JLabel titleLabel;
+    private JTextArea titleLabel;
     private JLabel statusLabel;
 
     private JPanel controlPanel;
@@ -187,10 +187,12 @@ public class TitlePanel extends ParentAvailablePanel {
         roomInfoButton.setVisible(false);
 
 
-        titleLabel = new JLabel();
+        titleLabel = new JTextArea();
+        titleLabel.setOpaque(false);
+
         titleLabel.setFont(FontUtil.getDefaultFont(16));
         titleLabel.setText("微信");
-        //titleLabel.setCursor(handCursor);
+
 
 
         ControlLabelMouseListener listener = new ControlLabelMouseListener();

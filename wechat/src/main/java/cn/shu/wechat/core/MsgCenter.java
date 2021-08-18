@@ -18,7 +18,6 @@ import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.log4j.Log4j2;
-import org.apache.http.client.utils.DateUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -26,6 +25,7 @@ import org.springframework.util.StringUtils;
 import javax.annotation.Resource;
 import javax.swing.*;
 import java.io.File;
+import java.text.ParseException;
 import java.util.*;
 import java.util.Date;
 import java.util.List;
@@ -293,7 +293,7 @@ public class MsgCenter {
                 break;
         }
         //发送消息
-        MessageTools.sendMsgByUserId(messages, msg.getFromUserName());
+        MessageTools.sendMsgByUserId(messages);
     }
 
     /**
@@ -390,7 +390,12 @@ public class MsgCenter {
                 //新消息来了后创建房间
                 //创建房间的时候会从数据库加载历史消息，由于这次的消息已经写入了数据库，所以不用再添加了
                 if (RoomChatPanel.getContext().exists(roomId)) {
-                    RoomChatPanel.getContext().get(roomId).addMessageItemToEnd(message);
+                    try {
+                        RoomChatPanel.getContext().get(roomId).addMessageItemToEnd(message);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                        return;
+                    }
                 }else{
                     RoomChatPanel.getContext().addPanel(roomId);
                 }
@@ -410,13 +415,12 @@ public class MsgCenter {
         try {
             boolean isFromSelf = msg.getFromUserName().endsWith(Core.getUserName());
             boolean isToSelf = msg.getToUserName().endsWith(Core.getUserName());
-
             Message build = Message
                     .builder()
                     .plaintext(msg.getPlainText() == null ? msg.getContent() : msg.getPlainText())
                     .content(msg.getContent())
                     .filePath(msg.getFilePath())
-                    .createTime(DateUtils.formatDate(new Date()))
+                    .createTime(DateUtils.getCurrDateString(DateUtils.yyyy_mm_dd_hh_mm_ss))
                     .fromNickname(isFromSelf ? Core.getNickName() : ContactsTools.getContactNickNameByUserName(msg.getFromUserName()))
                     .fromRemarkname(isFromSelf ? Core.getNickName() : ContactsTools.getContactRemarkNameByUserName(msg.getFromUserName()))
                     .fromUsername(msg.getFromUserName())
@@ -455,49 +459,8 @@ public class MsgCenter {
         }
         return null;
     }
-    /**
-     * 获取缩略图文件保存文章
-     *
-     * @param msg 接收的消息对象
-     * @return {@code String} 消息资源文件保存路径
-     * {@code null} 获取失败或无需下载的资源
-     * @return 路径
-     */
-    private String getDownloadThumImgPath(AddMsgList msg, String fileName, String ext) {
-
-        String downloadFilePath = getDownloadFilePath(msg, fileName, ext);
-        downloadFilePath = downloadFilePath + "_slave.gif";
-
-        return downloadFilePath;
-    }
-
-    /**
-     * 获取消息资源文件保存路径
-     *
-     * @param msg 接收的消息对象
-     * @return {@code String} 消息资源文件保存路径
-     * {@code null} 获取失败或无需下载的资源
-     * @return 路径
-     */
-    private String getDownloadFilePath(AddMsgList msg, String fileName, String ext) {
-        //发消息的用户或群名称
-        String username = ContactsTools.getContactDisplayNameByUserName(msg.getFromUserName());
-        //群成员名称
-        String groupUsername = "";
-        if (msg.isGroupMsg() && msg.getMemberName() != null) {
-            groupUsername = ContactsTools.getContactDisplayNameByUserName(msg.getMemberName());
-        }
-        groupUsername = groupUsername == null ? "" : DownloadTools.replace(groupUsername);
-        username = DownloadTools.replace(username);
-        String path = Config.PIC_DIR + File.separator + msg.getType() + File.separator + username + File.separator + groupUsername + File.separator;
-        fileName = DownloadTools.replace(fileName);
-        fileName = fileName
-                + "-" + DateUtils.formatDate(new Date(), "yyyy-MM-dd-HH-mm-ss")
-                + ext;
 
 
-        return path + fileName;
-    }
 
     /**
      * 处理联系人修改消息

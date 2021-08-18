@@ -30,6 +30,8 @@
     <result column="img_height" jdbcType="INTEGER" property="imgHeight" />
     <result column="img_width" jdbcType="INTEGER" property="imgWidth" />
     <result column="voice_length" jdbcType="BIGINT" property="voiceLength" />
+    <result column="file_size" jdbcType="BIGINT" property="fileSize" />
+    <result column="file_name" jdbcType="BIGINT" property="fileName" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <!--@mbg.generated-->
@@ -96,7 +98,8 @@
     id, msg_id, msg_type, app_msg_type, msg_desc, create_time, plaintext, content, file_path, 
     msg_json, from_username, from_remarkname, from_nickname, from_member_of_group_username, 
     from_member_of_group_nickname, from_member_of_group_displayname, to_username, to_remarkname, 
-    to_nickname, is_send, slave_path, response, play_length, img_height, img_width, voice_length
+    to_nickname, is_send, slave_path, response, play_length, img_height, img_width, voice_length,file_size,
+    file_name
   </sql>
   <select id="selectByExample" parameterType="cn.shu.wechat.beans.pojo.MessageExample" resultMap="BaseResultMap">
     <!--@mbg.generated-->
@@ -143,7 +146,7 @@
       to_username, to_remarkname, to_nickname, 
       is_send, slave_path, response, 
       play_length, img_height, img_width, 
-      voice_length)
+      voice_length,file_size,file_name)
     values (#{id,jdbcType=CHAR}, #{msgId,jdbcType=VARCHAR}, #{msgType,jdbcType=INTEGER}, 
       #{appMsgType,jdbcType=INTEGER}, #{msgDesc,jdbcType=VARCHAR}, #{createTime,jdbcType=VARCHAR},
       #{plaintext,jdbcType=LONGVARCHAR}, #{content,jdbcType=LONGVARCHAR}, #{filePath,jdbcType=VARCHAR}, 
@@ -153,7 +156,10 @@
       #{toUsername,jdbcType=VARCHAR}, #{toRemarkname,jdbcType=VARCHAR}, #{toNickname,jdbcType=VARCHAR}, 
       #{isSend,jdbcType=BOOLEAN}, #{slavePath,jdbcType=VARCHAR}, #{response,jdbcType=VARCHAR}, 
       #{playLength,jdbcType=BIGINT}, #{imgHeight,jdbcType=INTEGER}, #{imgWidth,jdbcType=INTEGER}, 
-      #{voiceLength,jdbcType=BIGINT})
+      #{voiceLength,jdbcType=BIGINT},
+      #{fileSize,jdbcType=BIGINT},
+      #{fileName,jdbcType=VARCHAR}
+      )
   </insert>
   <insert id="insertSelective" parameterType="cn.shu.wechat.beans.pojo.Message">
     <!--@mbg.generated-->
@@ -700,7 +706,7 @@
       msg_json, from_username, from_remarkname, from_nickname, from_member_of_group_username, 
       from_member_of_group_nickname, from_member_of_group_displayname, to_username, to_remarkname, 
       to_nickname, is_send, slave_path, response, play_length, img_height, img_width, 
-      voice_length)
+      voice_length,file_size,file_name)
     values
     <foreach collection="list" item="item" separator=",">
       (#{item.id,jdbcType=CHAR}, #{item.msgId,jdbcType=VARCHAR}, #{item.msgType,jdbcType=INTEGER}, 
@@ -712,7 +718,8 @@
         #{item.toUsername,jdbcType=VARCHAR}, #{item.toRemarkname,jdbcType=VARCHAR}, #{item.toNickname,jdbcType=VARCHAR}, 
         #{item.isSend,jdbcType=BOOLEAN}, #{item.slavePath,jdbcType=VARCHAR}, #{item.response,jdbcType=VARCHAR}, 
         #{item.playLength,jdbcType=BIGINT}, #{item.imgHeight,jdbcType=INTEGER}, #{item.imgWidth,jdbcType=INTEGER}, 
-        #{item.voiceLength,jdbcType=BIGINT})
+        #{item.voiceLength,jdbcType=BIGINT}, #{item.fileSize,jdbcType=BIGINT},
+          #{item.fileName,jdbcType=VARCHAR})
     </foreach>
   </insert>
   <insert id="insertOrUpdate" parameterType="cn.shu.wechat.beans.pojo.Message">
@@ -1022,14 +1029,14 @@
       from message
       where from_username = #{userName,jdbcType=VARCHAR}
       or to_username = #{userName,jdbcType=VARCHAR}
-      <if test="remarkName!=null and  remarkName!=''">
+ <!--     <if test="remarkName!=null and  remarkName!=''">
         or to_remarkname = #{remarkName,jdbcType=VARCHAR}
         or from_remarkname = #{remarkName,jdbcType=VARCHAR}
       </if>
       <if test="nickName!=null and  nickName!=''">
         or to_nickname = #{nickName,jdbcType=VARCHAR}
         or from_nickname = #{nickName,jdbcType=VARCHAR}
-      </if>
+      </if>-->
 
       order by create_time desc
       limit #{start},#{end}

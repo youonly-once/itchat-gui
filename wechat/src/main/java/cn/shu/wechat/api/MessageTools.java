@@ -20,7 +20,6 @@ import me.xuxiaoxiao.xtools.common.XTools;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
-import org.apache.http.client.utils.DateUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -45,17 +44,15 @@ import java.util.*;
 @Log4j2
 @Component
 public class MessageTools {
-    //微信上传最大文件大小
+    /**
+     * 微信上传最大文件大小
+     */
     public static final long maxFileSize = 1024 * 1024 * 20;
     /**
      * 本次登录以来上传文件的数量
      */
     private static int fileCount = 0;
-    /**
-     * 最近一次发送图片的时间
-     * 防止发送频繁
-     */
-    private static Date lastSendImgDate = new Date();
+
     /**
      * 消息Mapper
      */
@@ -65,22 +62,18 @@ public class MessageTools {
      * 根据指定类型发送消息
      *
      * @param messages    消息列表
-     * @param toUserName 接收方username
      * @param callback 文件上传进度回调
      */
-    public static WebWXSendMsgResponse sendMsgByUserId(List<Message> messages, String toUserName, UploadTaskCallback callback) {
-        if (messages == null || messages.isEmpty()) {
-            return WebWXSendMsgResponse.error("null");
+    public static WebWXSendMsgResponse sendMsgByUserId(List<Message> messages,UploadTaskCallback callback) {
+        if (messages == null){
+            return WebWXSendMsgResponse.error("is null");
         }
         WebWXSendMsgResponse sendMsgResponse = null;
         for (Message message : messages) {
-            //result若指定接收人
-            if (StringUtils.isNotEmpty(message.getToUsername())) {
-                toUserName = message.getToUsername();
-            }
-
+            String toUserName = message.getToUsername();
             if (StringUtils.isEmpty(toUserName)) {
                 log.error("消息接收者为空：{}", message);
+                continue;
             }
 
             try {
@@ -88,12 +81,6 @@ public class MessageTools {
                 WXReceiveMsgCodeEnum byCode = WXReceiveMsgCodeEnum.getByCode(message.getMsgType());
                 switch (byCode) {
                     case MSGTYPE_IMAGE:
-                        //至少间隔0.5秒发送
-                        long l = System.currentTimeMillis() - lastSendImgDate.getTime();
-                        lastSendImgDate = new Date();
-                        if (l > 0 && l < 500) {
-                            SleepUtils.sleep(500 - l);
-                        }
                         sendMsgResponse = sendPicMsgByUserId(toUserName, message.getFilePath(), content, callback);
                         break;
                     case MSGTYPE_TEXT:
@@ -108,7 +95,6 @@ public class MessageTools {
                     case MSGTYPE_SHARECARD:
                         sendMsgResponse = sendCardMsgByUserId(toUserName, content);
                         break;
-
                     default:
                         //其他消息发送文件
                         sendMsgResponse = sendAppMsgByUserId(toUserName, message.getFilePath(), content, callback);
@@ -119,17 +105,15 @@ public class MessageTools {
                     return WebWXSendMsgResponse.error("null");
                 } else if (sendMsgResponse.getBaseResponse().getRet() != 0) {
                     log.error("发送消息失败：{},{}", sendMsgResponse.getBaseResponse().getErrMsg(), message);
+                    return sendMsgResponse;
                 }
-
+                //存储数据库
+                List<Message> messageList = storeMsgToDB(messages, sendMsgResponse, toUserName);
             } catch (Exception e) {
                 e.printStackTrace();
                 log.error("发送消息失败：{}", e.getMessage());
+                continue;
             }
-            List<cn.shu.wechat.beans.pojo.Message> messageList = storeMsgToDB(messages, sendMsgResponse, toUserName);
-            if (sendMsgResponse == null){
-                return WebWXSendMsgResponse.error("null");
-            }
-
         }
         return sendMsgResponse;
     }
@@ -138,24 +122,24 @@ public class MessageTools {
      * 根据指定类型发送消息
      *
      * @param message    消息列表
-     * @param toUserName 接收方username
      */
-    public static WebWXSendMsgResponse sendMsgByUserId(Message message, String toUserName) {
+    public static WebWXSendMsgResponse sendMsgByUserId(Message message) {
         ArrayList<Message> messages = new ArrayList<>();
         messages.add(message);
-        return sendMsgByUserId(messages, toUserName);
+        return sendMsgByUserId(messages);
     }
+
 
     /**
      * 根据指定类型发送消息
-     *
-     * @param message    消息列表
-     * @param toUserName 接收方username
+     * @param message 消息列表
+     * @param callback 发送进度回调
+     * @return
      */
-    public static WebWXSendMsgResponse sendMsgByUserId(Message message, String toUserName, UploadTaskCallback callback) {
+    public static WebWXSendMsgResponse sendMsgByUserId(Message message, UploadTaskCallback callback) {
         ArrayList<Message> messages = new ArrayList<>();
         messages.add(message);
-        return sendMsgByUserId(messages, toUserName, callback);
+        return sendMsgByUserId(messages, callback);
     }
 
     /**
@@ -175,7 +159,7 @@ public class MessageTools {
             if (message.getMsgType() == null) {
                 message.setAppMsgType(0);
             }
-            message.setCreateTime(new Date());
+            message.setCreateTime(DateUtils.getCurrDateString(DateUtils.yyyy_mm_dd_hh_mm_ss));
             message.setFromNickname(Core.getNickName());
             message.setFromRemarkname(Core.getNickName());
             message.setFromUsername(Core.getUserName());
@@ -200,10 +184,9 @@ public class MessageTools {
      * 根据指定类型发送消息
      *
      * @param messages   消息列表
-     * @param toUserName 接收方username
      */
-    public static WebWXSendMsgResponse sendMsgByUserId(List<Message> messages, String toUserName) {
-        return sendMsgByUserId(messages, toUserName, null);
+    public static WebWXSendMsgResponse sendMsgByUserId(List<Message> messages) {
+        return sendMsgByUserId(messages,null);
     }
 
     /**
@@ -220,6 +203,9 @@ public class MessageTools {
         File file = new File(filePath);
         //等待另一线程的下载该资源完成
         DownloadTools.awaitDownload(filePath);
+        if (!file.exists()) {
+            throw new WebWXException("待上传文件不存在：" + filePath);
+        }
         long fileSize = file.length();
         if (fileSize <= 0) {
             throw new WebWXException("文件大小为：" + fileSize + "," + filePath);
@@ -255,6 +241,9 @@ public class MessageTools {
         }
         int fileId = fileCount++;
         String fileMime = MimeTypeUtil.getMimeByPath(file.getAbsolutePath());
+        if (fileMime ==null){
+            fileMime ="application";
+        }
         String lastModifyFileDate = new SimpleDateFormat("yyyy MM dd HH:mm:ss").format(file.lastModified());
         String passTicket = (String) Core.getLoginInfoMap().get("pass_ticket");
         if (StringUtils.isEmpty(passTicket)) {
@@ -325,7 +314,7 @@ public class MessageTools {
                     resultEntity.getContent().close();
                 }
                 if (callback != null) {
-                    callback.onTaskSuccess(i + 1, partFilePathList.size()+1);
+                    callback.onTaskSuccess(i + 1, partFilePathList.size() + 1);
                 }
             }
             //删除分片文件
@@ -338,7 +327,6 @@ public class MessageTools {
             throw new WebWXException("上传文件返回MediaId为空");
         }
         return webWXUploadMediaResponse;
-
     }
 
     /**
@@ -537,7 +525,7 @@ public class MessageTools {
      * @param userId   消息接收者UserName
      * @param filePath 待上传文件路径 content为空时使用上传
      * @param content  消息内容，content可能包含资源文件的id等信息，可直接使用
-     * @param callback
+     * @param callback 发送成功回调
      * @return {@link WebWXSendMsgResponse}
      * @author SXS
      * @date 2017年5月10日 上午12:21:28
@@ -718,6 +706,9 @@ public class MessageTools {
         String s = EntityUtils.toString(entity, Consts.UTF_8);
         return JSON.parseObject(s, WebWXSendMsgResponse.class);
     }
+
+
+
 
     public static Message toPicMessage(String filePath, String toUserName) {
 

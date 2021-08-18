@@ -13,6 +13,7 @@ import lombok.extern.log4j.Log4j2;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -184,7 +185,7 @@ public class RoomChatPanelCard extends JPanel {
      *
      * @param message 新消息
      */
-    public void addMessageItemToEnd(Message message) {
+    public void addMessageItemToEnd(Message message) throws ParseException {
         chatPanel.addMessageItemToEnd(message);
     }
 }

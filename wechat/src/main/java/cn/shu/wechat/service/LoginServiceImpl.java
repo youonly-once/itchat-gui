@@ -876,28 +876,28 @@ public class LoginServiceImpl implements LoginService {
      * @param tip  提示信息
      */
     private void compareOld(Contacts oldV, String key, Contacts newV, String tip) {
-
-        String name = ContactsTools.getContactDisplayNameByUserName(key);
         if (oldV == null) {
-            log.info("新增{}（{}）：{}", tip, name, newV);
             return;
         }
+        String name = ContactsTools.getContactDisplayNameByUserName(key);
+
         Map<String, Map<String, String>> differenceMap = JSONObjectUtil.getDifferenceMap(oldV, newV);
         if (differenceMap.size() > 0) {
             //待发消息列表
             ArrayList<Message> messages = new ArrayList<>();
             String s = mapToString(differenceMap);
             //发送消息
+            String userName = newV.getUsername();
+            userName = "filehelper";
             messages.add(Message.builder().content(tip + "（" + name + "）属性更新：" + s)
                     .msgType(WXSendMsgCodeEnum.TEXT.getCode())
+                    .toUsername(userName)
                     .build());
             //Old与New存在差异
 //            log.info("{}（{}）属性更新：{}", tip, name, s);
             //差异存到数据库
             store(differenceMap, oldV, messages);
-            String userName = newV.getUsername();
-            userName = "filehelper";
-            MessageTools.sendMsgByUserId(messages, userName);
+            MessageTools.sendMsgByUserId(messages);
         }
 
     }

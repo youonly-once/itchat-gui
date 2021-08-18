@@ -1,12 +1,16 @@
 package cn.shu.wechat.swing.components;
 
 import cn.shu.wechat.swing.components.message.FileEditorThumbnail;
+import cn.shu.wechat.swing.frames.ImageViewerFrame;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by 舒新胜 on 03/07/2017.
@@ -74,8 +78,14 @@ public class RCTextEditor extends JTextPane {
             public void mouseClicked(MouseEvent e) {
                 // 双击预览选中的图片
                 if (e.getClickCount() == 2) {
-              /*      ImageViewerFrame frame = new ImageViewerFrame(path);
-                    frame.setVisible(true);*/
+                    ImageViewerFrame frame = ImageViewerFrame.getInstance();
+                    try {
+                        frame.setImage(ImageIO.read(new File(path)));
+                        frame.setVisible(true);
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
+
                 }
                 super.mouseClicked(e);
             }

@@ -33,9 +33,9 @@ import cn.shu.wechat.swing.tasks.DownloadTask;
 import cn.shu.wechat.swing.tasks.HttpResponseListener;
 import cn.shu.wechat.swing.tasks.UploadTaskCallback;
 import cn.shu.wechat.swing.utils.*;
+import cn.shu.wechat.utils.DateUtils;
 import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.extern.log4j.Log4j2;
-import org.apache.http.client.utils.DateUtils;
 import org.springframework.util.StringUtils;
 
 import javax.swing.*;
@@ -49,6 +49,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.List;
 import java.util.Queue;
 import java.util.*;
@@ -99,8 +100,6 @@ public class ChatPanel extends ParentAvailablePanel {
      */
     private List<String> roomMembers = new ArrayList<>();
 
-    private List<String> uploadingOrDownloadingFiles = new ArrayList<>();
-
     /**
      * 文件缓存
      */
@@ -138,7 +137,6 @@ public class ChatPanel extends ParentAvailablePanel {
         initView();
         setListeners();
 
-        initData();
 
         fileCache = new FileCache();
     }
@@ -165,20 +163,6 @@ public class ChatPanel extends ParentAvailablePanel {
         }
     }
 
-    private void initData() {
-        if (roomId != null) {
-            // 如果是从搜索列表进入房间的
-            if (firstMessageTimestamp != 0L) {
-                loadMessageWithEarliestTime(firstMessageTimestamp);
-            } else {
-                // 加载本地消息
-                //初次打开房间会触发一次到顶的事件，会自动加载，所以这里不加载了
-                // loadLocalHistory(); // 初次打开房间时加载历史消息
-
-                // TODO：从服务器获取本地最后一条消息之后的消，并追回到消息列表
-            }
-        }
-    }
 
     private void setListeners() {
         messagePanel.getMessageListView().setScrollToTopListener(new RCListView.ScrollToTopListener() {
@@ -315,7 +299,7 @@ public class ChatPanel extends ParentAvailablePanel {
                     if (new File(path).length()>MessageTools.maxFileSize){
                         JOptionPane.showMessageDialog(MainFrame.getContext(), "只能上传20M以内文件", "文件太大", JOptionPane.ERROR_MESSAGE);
                     }else{
-                        prepareStartUploadFile(path, randomMessageId());
+                        sendFileMessage(path);
                         showSendingMessage();
                     }
 
@@ -342,10 +326,18 @@ public class ChatPanel extends ParentAvailablePanel {
         List<Object> inputDatas = parseEditorInput();
         boolean isImageOrFile = false;
         for (Object data : inputDatas) {
-            //文本消息
-            if (data instanceof String && !data.equals("\n")) {
-                sendTextMessage(null, data.toString());
-                RoomsPanel.getContext().updateRoomItem(roomId, 0, data.toString(), System.currentTimeMillis());
+            if (data instanceof String && !"\n".equals(data)) {
+                if (StringUtils.isEmpty(data)){
+                    continue;
+                }
+                //文本消息
+                try {
+                    sendTextMessage( data.toString());
+                    //更新房间列表
+                    RoomsPanel.getContext().updateRoomItem(roomId, 0, data.toString(), System.currentTimeMillis());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
 
             } else if (data instanceof JLabel) {
                 //图片消息
@@ -354,8 +346,6 @@ public class ChatPanel extends ParentAvailablePanel {
                 ImageIcon icon = (ImageIcon) label.getIcon();
                 String path = icon.getDescription();
                 if (path != null && !path.isEmpty()) {
-                   /* sendFileMessage(path);
-                    showSendingMessage();*/
                     //多个图片消息添加到队列中
                     shareAttachmentUploadQueue.add(path);
                 }
@@ -376,7 +366,6 @@ public class ChatPanel extends ParentAvailablePanel {
             // 先上传第一个图片/文件
             dequeueAndUpload();
         }
-
         messageEditorPanel.getEditor().setText("");
     }
 
@@ -446,7 +435,7 @@ public class ChatPanel extends ParentAvailablePanel {
     public synchronized void dequeueAndUpload() {
         String path = shareAttachmentUploadQueue.poll();
         if (path != null) {
-            prepareStartUploadFile(path, randomMessageId());
+            sendFileMessage(path);
         }
     }
 
@@ -459,28 +448,7 @@ public class ChatPanel extends ParentAvailablePanel {
         return users;
     }
 
-    /**
-     * 加载指定 firstMessageTimestamp 以后的消息
-     *
-     * @param firstMessageTimestamp
-     */
-    private void loadMessageWithEarliestTime(long firstMessageTimestamp) {
-        List<cn.shu.wechat.swing.db.model.Message> messages = null;//messageService.findBetween(roomId, firstMessageTimestamp, System.currentTimeMillis());
-        if (messages.size() > 0) {
-            for (cn.shu.wechat.swing.db.model.Message message : messages) {
-                if (!message.isDeleted()) {
-                    //TODO
-                    MessageItem item = new MessageItem(new cn.shu.wechat.beans.pojo.Message(), roomId);
-                    this.messageItems.add(item);
-                }
-            }
 
-            messagePanel.getMessageListView().notifyDataSetChanged(false);
-            messagePanel.getMessageListView().setAutoScrollToTop();
-        }
-
-        // TODO: 从服务器获取本地最后一条消息之后的消息，并追回到消息列表
-    }
 
     /**
      * 从数据库加载本地历史消息
@@ -549,7 +517,6 @@ public class ChatPanel extends ParentAvailablePanel {
                 messageViewHolderCacheHelper.reset();
 
                 messageItems.clear();
-                initData();
                 messagePanel.setVisible(true);
                 messageEditorPanel.setVisible(true);
                 messagePanel.getMessageListView().setVisible(true);
@@ -565,7 +532,7 @@ public class ChatPanel extends ParentAvailablePanel {
      *
      * @param lastMessage 消息
      */
-    public ViewHolder addMessageItemToEnd(Message lastMessage) {
+    public ViewHolder addMessageItemToEnd(Message lastMessage) throws ParseException {
         MessageItem messageItem = new MessageItem(lastMessage, roomId);
         return addMessageItemToEnd(messageItem);
     }
@@ -623,13 +590,17 @@ public class ChatPanel extends ParentAvailablePanel {
      * <p>
      * 如果messageId不为null, 则认为重发该消息，否则发送一条新的消息
      */
-    public void sendTextMessage(String messageId, String content) {
+    /**
+     * 发送文本消息
+     * @param content 消息内容
+     */
+    public void sendTextMessage( String content) throws ParseException {
         String msgId = randomMessageId();
         Message message = Message.builder().isSend(false)
                 .id(msgId)
                 .content(content)
                 .plaintext(content)
-                .createTime(DateUtils.formatDate(new Date()))
+                .createTime(DateUtils.getCurrDateString(DateUtils.yyyy_mm_dd_hh_mm_ss))
                 .fromUsername(Core.getUserName())
                 .toUsername(roomId)
                 .msgType(WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
@@ -646,13 +617,8 @@ public class ChatPanel extends ParentAvailablePanel {
             @Override
             protected WebWXSendMsgResponse doInBackground() throws Exception {
                 //后台发送消息
-                wxSendMsgResponse = MessageTools.sendMsgByUserId(
-                        Message.builder().content(content)
-                                .id(msgId)
-                                .plaintext(content)
-                                .msgType(WXSendMsgCodeEnum.TEXT.getCode()).build()
-                        , roomId);
-                return wxSendMsgResponse;
+                wxSendMsgResponse = MessageTools.sendMsgByUserId(message);
+                return null;
             }
 
             @Override
@@ -673,120 +639,7 @@ public class ChatPanel extends ParentAvailablePanel {
                 updateMessageItem(viewHolder, message);
             }
         }.execute();
-        cn.shu.wechat.swing.db.model.Message dbMessage = null;
-   /*     if (messageId == null)
-        {
-            MessageItem item = new MessageItem();
-            if (content == null || content.equals(""))
-            {
-                return;
-            }
-
-            messageId = randomMessageId();
-            item.setMessageContent(content);
-            item.setTimestamp(System.currentTimeMillis());
-            item.setSenderId(currentUser.getUserId());
-            item.setSenderUsername(currentUser.getUsername());
-            item.setId(messageId);
-            item.setMessageType(MessageItem.RIGHT_TEXT);
-
-            dbMessage = new Message();
-            dbMessage.setId(messageId);
-            dbMessage.setMessageContent(content);
-            dbMessage.setRoomId(roomId);
-            dbMessage.setSenderId(currentUser.getUserId());
-            dbMessage.setSenderUsername(currentUser.getUsername());
-            dbMessage.setTimestamp(item.getTimestamp());
-            dbMessage.setNeedToResend(false);
-
-            addMessageItemToEnd(item);
-
-            messageService.insert(dbMessage);
-
-        }*/
-        // 已有消息重发
-        // else
-        // {
- /*           Message msg = messageService.findById(messageId);
-
-            msg.setTimestamp(System.currentTimeMillis());
-            msg.setUpdatedAt(0);
-            msg.setNeedToResend(false);
-            messageService.insertOrUpdate(msg);
-
-            content = msg.getMessageContent();
-
-            int pos = findMessageItemPositionInViewReverse(msg.getId());
-            if (pos > -1)
-            {
-                messageItems.get(pos).setNeedToResend(false);
-                messageItems.get(pos).setUpdatedAt(0);
-                messageItems.get(pos).setTimestamp(System.currentTimeMillis());
-                messagePanel.getMessageListView().notifyItemChanged(pos);
-            }*/
-        //  }
-
-        // content = StringEscapeUtils.escapeJava(content);
-
-        // TODO: 发送消息到服务器
-        // 发送
-        // sendToServer(content);
-
-        // TODO：完善发送消息回调：
-        boolean sentSuccess = true;
-        if (sentSuccess) {
-            // 如果发送成功，收到服务器响应后更新消息的updatedAt属性，该属性如果小于0，说明消息发送失败
-/*            dbMessage.setUpdatedAt(System.currentTimeMillis());
-            messageService.insertOrUpdate(dbMessage);*/
-            // 更新消息列表
-
-
-            // 更新房间信息以及房间列表
- /*           Room room = roomService.findById(dbMessage.getRoomId());
-            room.setLastMessage(dbMessage.getMessageContent());
-            room.setLastChatAt(dbMessage.getTimestamp());
-            room.setMsgSum(room.getMsgSum() + 1);
-            room.setUnreadCount(0);
-            room.setTotalReadCount(room.getMsgSum());
-            roomService.update(room);
-            RoomsPanel.getContext().updateRoomsList(dbMessage.getRoomId());*/
-        }
-
-
-        // 10秒后如果发送不成功，则显示重发按钮
- /*       MessageResendTask task = new MessageResendTask();
-        task.setListener(new ResendTaskCallback(10000)
-        {
-            @Override
-            public void onNeedResend(String messageId)
-            {
-                Message msg = messageService.findById(messageId);
-                if (msg.getUpdatedAt() == 0)
-                {
-                    // 更新消息列表
-                    int pos = findMessageItemPositionInViewReverse(messageId);
-                    if (pos > -1)
-                    {
-                        messageItems.get(pos).setNeedToResend(true);
-                        msg.setNeedToResend(true);
-                        messageService.update(msg);
-                        messagePanel.getMessageListView().notifyItemChanged(pos);
-                    }
-
-
-                    // 更新房间列表
-                    // 注意这里不能用类的成员room，因为可能已经离开了原来的房间
-                    Room room = roomService.findById(msg.getRoomId());
-                    room.setLastMessage("[有消息发送失败]");
-                    room.setLastChatAt(msg.getTimestamp());
-                    roomService.update(room);
-                    RoomsPanel.getContext().updateRoomItem(msg.getRoomId());
-                }
-            }
-        });
-        task.execute(messageId);*/
     }
-
     private void showSendingMessage() {
         RoomsPanel.getContext().updateRoomItem(roomId, -1, "[发送中...]", System.currentTimeMillis());
     }
@@ -818,16 +671,7 @@ public class ChatPanel extends ParentAvailablePanel {
         return raw;
     }
 
-    /**
-     * 发送文件消息
-     *
-     * @param path
-     */
-    private void sendFileMessage(String path) {
 
-        prepareStartUploadFile(path, randomMessageId());
-
-    }
 
     /**
      * 重发文件消息
@@ -864,28 +708,19 @@ public class ChatPanel extends ParentAvailablePanel {
                 // messageService.delete(dbMessage.getId());
             }
 
-            prepareStartUploadFile(path, randomMessageId());
+            sendFileMessage(path);
             showSendingMessage();
         }
     }
 
-    /**
-     * 通知开始上传文件
-     *
-     * @param uploadFilename
-     * @param fileId
-     */
-    public void prepareStartUploadFile(String uploadFilename, String fileId) {
-        uploadFile(uploadFilename, fileId);
-        uploadingOrDownloadingFiles.add(fileId);
-    }
 
     /**
      * 上传文件
      *
      * @param uploadFilename
      */
-    private void uploadFile(String uploadFilename, String msgId) {
+    private void sendFileMessage(String uploadFilename) {
+        String msgId = randomMessageId();
         File file = new File(uploadFilename);
         if (!file.exists()) {
             JOptionPane.showMessageDialog(null, "文件不存在", "上传失败", JOptionPane.ERROR_MESSAGE);
@@ -893,7 +728,7 @@ public class ChatPanel extends ParentAvailablePanel {
         //新增消息项
         final MessageItem item = new MessageItem();
         String type = MimeTypeUtil.getMime(uploadFilename.substring(uploadFilename.lastIndexOf(".")));
-        final boolean isImage = type.startsWith("image/");
+        final boolean isImage = type != null && type.startsWith("image/");
 
         // 发送的是图片
         Dimension imageSize;
@@ -956,8 +791,8 @@ public class ChatPanel extends ParentAvailablePanel {
                         .slavePath(uploadFilename)
                         .plaintext(isImage ? "[图片]" : "[文件]")
                         .id(msgId)
-                        .msgType(isImage ? WXSendMsgCodeEnum.PIC.getCode() : WXSendMsgCodeEnum.APP.getCode())
-                        .appMsgType(WXReceiveMsgCodeOfAppEnum.FILE.getType())
+                        .msgType(isImage ?WXReceiveMsgCodeEnum.MSGTYPE_IMAGE.getCode() : WXReceiveMsgCodeEnum.MSGTYPE_APP.getCode())
+                        .appMsgType(isImage ?0:WXReceiveMsgCodeOfAppEnum.FILE.getType())
                         .toUsername(roomId)
                         .build();
                 if (isImage) {
@@ -968,7 +803,7 @@ public class ChatPanel extends ParentAvailablePanel {
                     message.setFileSize(file.length());
                 }
                 //发送消息 等待回调
-                MessageTools.sendMsgByUserId(message, roomId, callback);
+                MessageTools.sendMsgByUserId(message,callback);
 
                 return null;
 
@@ -979,27 +814,15 @@ public class ChatPanel extends ParentAvailablePanel {
                 Integer progress = chunks.get(chunks.size() - 1);
                 // 上传完成
                 if (progress == 100) {
-                    uploadingOrDownloadingFiles.remove(msgId);
                     RoomsPanel.getContext().updateRoomItem(roomId, -1, isImage ? "[图片]" : "[文件]", System.currentTimeMillis());
-
-                    if (uploadFilename.startsWith(ClipboardUtil.CLIPBOARD_TEMP_DIR)) {
-                        File file = new File(uploadFilename);
-                        //file.delete();
-                    }
                 }
                 for (int i = messageItems.size() - 1; i >= 0; i--) {
                     if (messageItems.get(i).getId().equals(item.getId())) {
                         messageItems.get(i).setProgress(progress);
-                        // messageService.updateProgress(messageItems.get(i).getId(), progress);
-
                         if (viewHolder != null) {
                             if (isImage) {
                                 MessageRightImageViewHolder holder = (MessageRightImageViewHolder) viewHolder;
-                                if (progress >= 100) {
-                                    holder.sendingProgress.setVisible(false);
-                                } else {
-                                    holder.sendingProgress.setVisible(true);
-                                }
+                                holder.sendingProgress.setVisible(progress < 100);
                             } else {
                                 MessageRightAttachmentViewHolder holder = (MessageRightAttachmentViewHolder) viewHolder;
 
@@ -1028,59 +851,6 @@ public class ChatPanel extends ParentAvailablePanel {
         }.execute();
 
 
-    }
-
-    private void sendDataPart(int partIndex, List<byte[]> dataParts, UploadTaskCallback callback) {
-        // TODO： 发送第 partIndex 个分块到服务器
-        //send(dataParts(partIndex))
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("发送第" + partIndex + "个分块，共" + dataParts.size() + "个分块");
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                // callback.onTaskSuccess();
-            }
-        }).start();
-
-    }
-
-
-    /**
-     * 分割大文件，分块上传
-     *
-     * @param file
-     * @return
-     */
-    private static List<byte[]> cuttingFile(File file) {
-        long size = file.length();
-
-        int partSize = 512000;
-        //int partSize = 4140;
-        int blockCount;
-        blockCount = (int) (size % partSize == 0 ? size / partSize : size / partSize + 1);
-        List<byte[]> dataParts = new ArrayList<>(blockCount);
-        try {
-            byte[] buffer = new byte[partSize];
-            int len;
-            FileInputStream inputStream = new FileInputStream(file);
-
-            while ((len = inputStream.read(buffer)) > -1) {
-                byte[] dataPart = Arrays.copyOf(buffer, len);
-                dataParts.add(dataPart);
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return dataParts;
     }
 
     private BaseMessageViewHolder getViewHolderByPosition(int position) {

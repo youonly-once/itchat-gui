@@ -1142,9 +1142,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
 
             //弹窗
-            if (item.getMessageType() == MessageItem.LEFT_ATTACHMENT
-                    || item.getMessageType() == MessageItem.LEFT_IMAGE
-                    || item.getMessageType() == MessageItem.LEFT_TEXT) {
+            if (item.getMessageType() >0) {
 
                 bindAvatarAction(holder.avatar, item);
             }

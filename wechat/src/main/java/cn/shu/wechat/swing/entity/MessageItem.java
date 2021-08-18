@@ -4,15 +4,17 @@ import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.beans.msg.url.WXMsgUrl;
 import cn.shu.wechat.beans.pojo.Contacts;
+import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
+import cn.shu.wechat.utils.DateUtils;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.http.client.utils.DateUtils;
 
 import java.awt.image.BufferedImage;
+import java.text.ParseException;
 import java.util.Map;
 
 /**
@@ -66,7 +68,7 @@ public class MessageItem implements Comparable<MessageItem> {
     private ProgramOfAppItem programOfAppItem;
     private boolean isSystemMsg;
 
-    public MessageItem(cn.shu.wechat.beans.pojo.Message message, String roomId) {
+    public MessageItem(Message message, String roomId) throws ParseException {
         this();
         this.setId(message.getId());
         this.setMessageContent(message.getPlaintext());
@@ -81,7 +83,7 @@ public class MessageItem implements Comparable<MessageItem> {
             this.setSenderUsername(ContactsTools.getContactDisplayNameByUserName(message.getFromUsername()));
         }
 
-        this.setTimestamp(DateUtils.parseDate(message.getCreateTime()).getTime());
+        this.setTimestamp(DateUtils.parse(message.getCreateTime(),DateUtils.yyyy_mm_dd_hh_mm_ss).getTime());
         this.setNeedToResend(!message.getIsSend());
         this.setProgress(message.getProcess());
         this.setDeleted(message.isDeleted());
@@ -235,6 +237,7 @@ public class MessageItem implements Comparable<MessageItem> {
         // 自己发的消息
         if (userSelf.getUsername().equals(this.getSenderId())
                 || userSelf.getNickname().equals(this.nickName)) {
+            this.setSenderId(userSelf.getUsername());
             // 文件附件
             if (fileAttachment != null) {
                 this.setMessageType(RIGHT_ATTACHMENT);
