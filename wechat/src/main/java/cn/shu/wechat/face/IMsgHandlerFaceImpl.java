@@ -471,8 +471,12 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                         .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .build();
                 results.add(message);
-                message = MessageTools.toPicMessage(filePath);
-                message.setContent(realMsgContent);
+                message = Message.builder()
+                        .filePath(filePath)
+                        .content(realMsgContent)
+                        .playLength(0l)
+                        .msgType(WXSendMsgCodeEnum.VOICE.getCode())
+                        .build();
                 results.add(message);
                 break;
             case MSGTYPE_VIDEO:

@@ -165,7 +165,6 @@ public class MessageTools {
      * @param sendMsgResponse 发送成功响应信息
      */
     private static List<Message> storeMsgToDB(List<Message> results, WebWXSendMsgResponse sendMsgResponse, String toUserName) {
-        ArrayList<Message> messages = new ArrayList<>();
         for (Message message : results) {
             boolean isToSelf = toUserName.endsWith(Core.getUserName());
             message.setIsSend(true);
@@ -188,8 +187,8 @@ public class MessageTools {
             }
         }
         try {
-            int insert = messageMapper.batchInsert(messages);
-            return messages;
+            int insert = messageMapper.batchInsert(results);
+            return results;
         } catch (Exception e) {
             e.printStackTrace();
         }
