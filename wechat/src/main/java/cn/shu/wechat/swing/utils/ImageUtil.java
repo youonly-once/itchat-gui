@@ -2,6 +2,7 @@ package cn.shu.wechat.swing.utils;
 
 import cn.shu.wechat.utils.GifUtil;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
@@ -212,9 +213,27 @@ public class ImageUtil {
             if (i != chars.length - 1) {
                 sbu.append((int) chars[i]);
             } else {
-                sbu.append((int)chars[i]);
+                sbu.append((int) chars[i]);
             }
         }
         return sbu.toString();
+    }
+
+    /**
+     * 获取图片的宽高
+     *
+     * @param file
+     * @return
+     */
+    public static Dimension getImageSize(String file) {
+        try {
+            BufferedImage image = ImageIO.read(new File(file));
+            Dimension dimension = new Dimension(image.getWidth(), image.getHeight());
+            return dimension;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return new Dimension(0, 0);
     }
 }

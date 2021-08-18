@@ -1017,11 +1017,21 @@
         limit 0,1
     </select>
     <select id="selectByPage" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List" />
-        from message
-        where from_username = #{roomId,jdbcType=VARCHAR} or to_username = #{roomId,jdbcType=VARCHAR}
-        order by create_time desc
-        limit #{start},#{end}
+      select
+      <include refid="Base_Column_List"/>
+      from message
+      where from_username = #{userName,jdbcType=VARCHAR}
+      or to_username = #{userName,jdbcType=VARCHAR}
+      <if test="remarkName!=null and  remarkName!=''">
+        or to_remarkname = #{remarkName,jdbcType=VARCHAR}
+        or from_remarkname = #{remarkName,jdbcType=VARCHAR}
+      </if>
+      <if test="nickName!=null and  nickName!=''">
+        or to_nickname = #{nickName,jdbcType=VARCHAR}
+        or from_nickname = #{nickName,jdbcType=VARCHAR}
+      </if>
+
+      order by create_time desc
+      limit #{start},#{end}
     </select>
 </mapper>

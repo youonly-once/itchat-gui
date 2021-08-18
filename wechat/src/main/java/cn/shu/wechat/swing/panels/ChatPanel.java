@@ -1,14 +1,18 @@
 package cn.shu.wechat.swing.panels;
 
+import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.beans.msg.send.WebWXSendMsgResponse;
+import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
 import cn.shu.wechat.enums.WXSendMsgCodeEnum;
 import cn.shu.wechat.mapper.MessageMapper;
-import cn.shu.wechat.swing.adapter.message.*;
+import cn.shu.wechat.swing.adapter.ViewHolder;
+import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
+import cn.shu.wechat.swing.adapter.message.MessageAdapter;
 import cn.shu.wechat.swing.adapter.message.app.MessageAttachmentViewHolder;
 import cn.shu.wechat.swing.adapter.message.app.MessageRightAttachmentViewHolder;
 import cn.shu.wechat.swing.adapter.message.image.MessageRightImageViewHolder;
@@ -19,25 +23,21 @@ import cn.shu.wechat.swing.components.RCListView;
 import cn.shu.wechat.swing.components.message.FileEditorThumbnail;
 import cn.shu.wechat.swing.components.message.RemindUserPopup;
 import cn.shu.wechat.swing.db.model.FileAttachment;
+import cn.shu.wechat.swing.entity.MessageItem;
 import cn.shu.wechat.swing.entity.MessageItem.FileAttachmentItem;
 import cn.shu.wechat.swing.entity.MessageItem.ImageAttachmentItem;
-import cn.shu.wechat.swing.entity.MessageItem;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
 import cn.shu.wechat.swing.listener.ExpressionListener;
 import cn.shu.wechat.swing.tasks.DownloadTask;
 import cn.shu.wechat.swing.tasks.HttpResponseListener;
 import cn.shu.wechat.swing.tasks.UploadTaskCallback;
-import cn.shu.wechat.swing.utils.ClipboardUtil;
-import cn.shu.wechat.swing.utils.FileCache;
-import cn.shu.wechat.swing.utils.HttpUtil;
-import cn.shu.wechat.swing.utils.MimeTypeUtil;
+import cn.shu.wechat.swing.utils.*;
 import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.extern.log4j.Log4j2;
 import org.apache.http.client.utils.DateUtils;
 import org.springframework.util.StringUtils;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
@@ -45,7 +45,6 @@ import javax.swing.text.Element;
 import javax.swing.text.StyleConstants;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -198,22 +197,20 @@ public class ChatPanel extends ParentAvailablePanel {
                         @Override
                         protected Object doInBackground() {
                             MessageMapper mapper = SpringContextHolder.getBean(MessageMapper.class);
-                            try {
-                                messageList = mapper.selectByPage(messageItems.size(), messageItems.size() + PAGE_LENGTH, roomId);
-
-                                for (Message message : messageList) {
-                                    try{
-                                        MessageItem item = new MessageItem(message, roomId);
-                                        messageItems.add(0, item);
-                                    }catch (Exception e){
-                                        e.printStackTrace();
-                                    }
-
+                            Contacts contacts = Core.getMemberMap().get(roomId);
+                            String remarkName = ContactsTools.getContactRemarkNameByUserName(contacts);
+                            String nickName = ContactsTools.getContactNickNameByUserName(contacts);
+                            messageList = mapper.selectByPage(messageItems.size(), messageItems.size() + PAGE_LENGTH, roomId, remarkName, nickName);
+                            //TODO
+                            for (Message message : messageList) {
+                                try {
+                                    MessageItem item = new MessageItem(message, roomId);
+                                    messageItems.add(0, item);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
                                 }
-                            }catch (Exception e){
-                                e.printStackTrace();
-                            }
 
+                            }
                             return null;
                         }
 
@@ -496,7 +493,10 @@ public class ChatPanel extends ParentAvailablePanel {
             @Override
             protected Object doInBackground() throws Exception {
                 MessageMapper mapper = SpringContextHolder.getBean(MessageMapper.class);
-                List<cn.shu.wechat.beans.pojo.Message> messageList = mapper.selectByPage(messageItems.size(), messageItems.size() + PAGE_LENGTH, roomId);
+                Contacts contacts = Core.getMemberMap().get(roomId);
+                String remarkName = ContactsTools.getContactRemarkNameByUserName(contacts);
+                String nickName = ContactsTools.getContactNickNameByUserName(contacts);
+                List<cn.shu.wechat.beans.pojo.Message> messageList = mapper.selectByPage(messageItems.size(), messageItems.size() + PAGE_LENGTH, roomId, remarkName, nickName);
 
                 for (int i = messageList.size() - 1; i >= 0; i--) {
                     Message message = messageList.get(i);
@@ -565,9 +565,9 @@ public class ChatPanel extends ParentAvailablePanel {
      *
      * @param lastMessage 消息
      */
-    public void addMessageItemToEnd(Message lastMessage) {
+    public ViewHolder addMessageItemToEnd(Message lastMessage) {
         MessageItem messageItem = new MessageItem(lastMessage, roomId);
-        addMessageItemToEnd(messageItem);
+        return addMessageItemToEnd(messageItem);
     }
 
     /**
@@ -575,14 +575,15 @@ public class ChatPanel extends ParentAvailablePanel {
      *
      * @param messageItem 消息
      */
-    public void addMessageItemToEnd(MessageItem messageItem) {
+    public ViewHolder addMessageItemToEnd(MessageItem messageItem) {
         this.messageItems.add(messageItem);
-        messagePanel.getMessageListView().notifyItemInserted(messageItems.size() - 1, true);
+        ViewHolder holder = messagePanel.getMessageListView().notifyItemInserted(messageItems.size() - 1, true);
         // 只有当滚动条在最底部最，新消到来后才自动滚动到底部
         JScrollBar scrollBar = messagePanel.getMessageListView().getVerticalScrollBar();
         if (scrollBar.getValue() == (scrollBar.getModel().getMaximum() - scrollBar.getModel().getExtent())) {
             messagePanel.getMessageListView().setAutoScrollToBottom();
         }
+        return holder;
     }
 
     /**
@@ -598,6 +599,22 @@ public class ChatPanel extends ParentAvailablePanel {
             messageItem.setNeedToResend(!lastMessage.getIsSend());
             messageItem.setProgress(lastMessage.getProcess());
             messagePanel.getMessageListView().notifyItemChanged(pos);
+        }
+    }
+
+    /**
+     * 更新已有消息
+     *
+     * @param lastMessage 消息
+     */
+    public void updateMessageItem(ViewHolder viewHolder, Message lastMessage) {
+        // 已有消息更新状态
+        int pos = findMessageItemPositionInViewReverse(lastMessage.getId());
+        if (pos > -1) {
+            MessageItem messageItem = messageItems.get(pos);
+            messageItem.setNeedToResend(!lastMessage.getIsSend());
+            messageItem.setProgress(lastMessage.getProcess());
+            messagePanel.getMessageListView().notifyItemChanged(viewHolder, pos);
         }
     }
 
@@ -622,7 +639,7 @@ public class ChatPanel extends ParentAvailablePanel {
                 .isSend(true)
                 .build();
         //消息列表添加消息块
-        addMessageItemToEnd(message);
+        ViewHolder viewHolder = addMessageItemToEnd(message);
         new SwingWorker<WebWXSendMsgResponse, WebWXSendMsgResponse>() {
             private WebWXSendMsgResponse wxSendMsgResponse;
 
@@ -630,10 +647,10 @@ public class ChatPanel extends ParentAvailablePanel {
             protected WebWXSendMsgResponse doInBackground() throws Exception {
                 //后台发送消息
                 wxSendMsgResponse = MessageTools.sendMsgByUserId(
-                        MessageTools.Message.builder().content(content)
-                                .messageId(msgId)
+                        Message.builder().content(content)
+                                .id(msgId)
                                 .plaintext(content)
-                                .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT).build()
+                                .msgType(WXSendMsgCodeEnum.TEXT.getCode()).build()
                         , roomId);
                 return wxSendMsgResponse;
             }
@@ -653,7 +670,7 @@ public class ChatPanel extends ParentAvailablePanel {
                     message.setIsSend(true);
                     message.setProcess(100);
                 }
-                updateMessageItem(message);
+                updateMessageItem(viewHolder, message);
             }
         }.execute();
         cn.shu.wechat.swing.db.model.Message dbMessage = null;
@@ -879,18 +896,18 @@ public class ChatPanel extends ParentAvailablePanel {
         final boolean isImage = type.startsWith("image/");
 
         // 发送的是图片
-        int[] bounds;
-        String name = uploadFilename.substring(uploadFilename.lastIndexOf(File.separator) + 1); // 文件名
+        Dimension imageSize;
+        String fileName = uploadFilename.substring(uploadFilename.lastIndexOf(File.separator) + 1); // 文件名
         if (isImage) {
-            bounds = getImageSize(uploadFilename);
+            imageSize = ImageUtil.getImageSize(uploadFilename);
             ImageAttachmentItem imageAttachmentItem = ImageAttachmentItem.builder()
-                    .description(name)
+                    .description(fileName)
                     .id(msgId)
                     .imagePath(uploadFilename)
                     .slavePath(uploadFilename)
-                    .title(name)
-                    .width(bounds[0])
-                    .height(bounds[1]).build();
+                    .title(fileName)
+                    .width(imageSize.width)
+                    .height(imageSize.height).build();
             item.setImageAttachment(imageAttachmentItem);
             item.setMessageType(MessageItem.RIGHT_IMAGE);
         } else {
@@ -899,14 +916,14 @@ public class ChatPanel extends ParentAvailablePanel {
                     .filePath(uploadFilename)
                     .fileSize(file.length())
                     .id(msgId)
-                    .description(name)
-                    .fileName(name).build();
+                    .description(fileName)
+                    .fileName(fileName).build();
             item.setFileAttachment(fileAttachmentItem);
             item.setMessageType(MessageItem.RIGHT_ATTACHMENT);
         }
 
 
-        item.setMessageContent(name);
+        item.setMessageContent(fileName);
         item.setTimestamp(System.currentTimeMillis());
         item.setSenderId(Core.getUserSelf().getUsername());
         item.setSenderUsername(Core.getUserSelf().getNickname());
@@ -914,7 +931,7 @@ public class ChatPanel extends ParentAvailablePanel {
         item.setProgress(0);
         item.setRoomId(roomId);
         //添加消息 到面板
-        addMessageItemToEnd(item);
+        ViewHolder viewHolder = addMessageItemToEnd(item);
 
         new SwingWorker<Void, Integer>() {
 
@@ -933,18 +950,25 @@ public class ChatPanel extends ParentAvailablePanel {
                     public void onTaskError() {
                     }
                 };
-
-                //发送消息 等待回调
-                MessageTools.sendMsgByUserId(MessageTools.Message
+                Message message = Message
                         .builder()
                         .filePath(uploadFilename)
                         .slavePath(uploadFilename)
                         .plaintext(isImage ? "[图片]" : "[文件]")
-                        .messageId(msgId)
-                        .replyMsgTypeEnum(isImage ? WXSendMsgCodeEnum.PIC : WXSendMsgCodeEnum.APP)
-                        .appType(WXReceiveMsgCodeOfAppEnum.FILE)
-                        .toUserName(roomId)
-                        .build(), roomId, callback);
+                        .id(msgId)
+                        .msgType(isImage ? WXSendMsgCodeEnum.PIC.getCode() : WXSendMsgCodeEnum.APP.getCode())
+                        .appMsgType(WXReceiveMsgCodeOfAppEnum.FILE.getType())
+                        .toUsername(roomId)
+                        .build();
+                if (isImage) {
+                    message.setImgHeight(item.getImageAttachment().getHeight());
+                    message.setImgWidth(item.getImageAttachment().getWidth());
+                } else {
+                    message.setFileName(fileName);
+                    message.setFileSize(file.length());
+                }
+                //发送消息 等待回调
+                MessageTools.sendMsgByUserId(message, roomId, callback);
 
                 return null;
 
@@ -968,8 +992,6 @@ public class ChatPanel extends ParentAvailablePanel {
                         messageItems.get(i).setProgress(progress);
                         // messageService.updateProgress(messageItems.get(i).getId(), progress);
 
-
-                        BaseMessageViewHolder viewHolder = getViewHolderByPosition(i);
                         if (viewHolder != null) {
                             if (isImage) {
                                 MessageRightImageViewHolder holder = (MessageRightImageViewHolder) viewHolder;
@@ -1028,24 +1050,6 @@ public class ChatPanel extends ParentAvailablePanel {
 
     }
 
-    /**
-     * 获取图片的宽高
-     *
-     * @param file
-     * @return
-     */
-    private int[] getImageSize(String file) {
-        try {
-            BufferedImage image = ImageIO.read(new File(file));
-            int width = image.getWidth();
-            int height = image.getHeight();
-            return new int[]{width, height};
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return new int[]{0, 0};
-    }
 
     /**
      * 分割大文件，分块上传

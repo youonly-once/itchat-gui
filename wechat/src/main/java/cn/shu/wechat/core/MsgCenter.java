@@ -27,6 +27,11 @@ import javax.annotation.Resource;
 import javax.swing.*;
 import java.io.File;
 import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static cn.shu.wechat.enums.WXReceiveMsgCodeEnum.MSGTYPE_TEXT;
 
@@ -232,7 +237,7 @@ public class MsgCenter {
      */
     private void processExtra(AddMsgList msg) {
         //需要发送的消息
-        List<MessageTools.Message> messages = null;
+        List<Message> messages = null;
         switch (msg.getType()) {
             case MSGTYPE_MAP:
                 messages = msgHandler.mapMsgHandle(msg);
@@ -322,9 +327,9 @@ public class MsgCenter {
      */
     private void downloadFile(AddMsgList msg, String filename, String ext) {
 
-        Hashtable<String, Boolean> fileDownloadStatus = DownloadTools.FILE_DOWNLOAD_STATUS;
+        ConcurrentHashMap<String, Boolean> fileDownloadStatus = DownloadTools.FILE_DOWNLOAD_STATUS;
         //下载资源文件
-        String path = this.getDownloadFilePath(msg, filename, ext);
+        String path = DownloadTools.getDownloadFilePath(msg, filename, ext);
         msg.setFilePath(path);
 
         fileDownloadStatus.put(path, false);
@@ -337,8 +342,8 @@ public class MsgCenter {
      * 下载消息缩略图
      */
     private void downloadThumImg(AddMsgList msg, String filename, String ext) {
-        String pathSlave = this.getDownloadThumImgPath(msg, filename, ext);
-        Hashtable<String, Boolean> fileDownloadStatus = DownloadTools.FILE_DOWNLOAD_STATUS;
+        String pathSlave = DownloadTools.getDownloadThumImgPath(msg, filename, ext);
+        ConcurrentHashMap<String, Boolean> fileDownloadStatus = DownloadTools.FILE_DOWNLOAD_STATUS;
         fileDownloadStatus.put(pathSlave, false);
         msg.setSlavePath(pathSlave);
         ExecutorServiceUtil.getGlobalExecutorService().execute(() -> DownloadTools.downloadFileByMsgId(msg.getNewMsgId(), pathSlave));

@@ -2,8 +2,9 @@ package cn.shu.wechat.mapper;
 
 import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.beans.pojo.MessageExample;
-import java.util.List;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * @作者 舒新胜
@@ -45,5 +46,9 @@ public interface MessageMapper {
 
     Message selectLastMessage(String roomId);
 
-    List<Message> selectByPage(@Param("start") int start, @Param("end") int end, @Param("roomId") String roomId);
+    List<Message> selectByPage(@Param("start") int start
+            , @Param("end") int end
+            , @Param("userName") String userName
+            , @Param("remarkName") String remarkName
+            , @Param("nickName") String nickName);
 }
