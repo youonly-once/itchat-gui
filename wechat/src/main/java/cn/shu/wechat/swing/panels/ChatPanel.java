@@ -8,7 +8,6 @@ import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
-import cn.shu.wechat.enums.WXSendMsgCodeEnum;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.swing.adapter.ViewHolder;
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
@@ -46,8 +45,6 @@ import javax.swing.text.StyleConstants;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
@@ -600,7 +597,7 @@ public class ChatPanel extends ParentAvailablePanel {
                 .id(msgId)
                 .content(content)
                 .plaintext(content)
-                .createTime(DateUtils.getCurrDateString(DateUtils.yyyy_mm_dd_hh_mm_ss))
+                .createTime(DateUtils.getCurrDateString(DateUtils.YYYY_MM_DD_HH_MM_SS))
                 .fromUsername(Core.getUserName())
                 .toUsername(roomId)
                 .msgType(WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())

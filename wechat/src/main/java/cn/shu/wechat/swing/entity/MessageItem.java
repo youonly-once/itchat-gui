@@ -82,8 +82,9 @@ public class MessageItem implements Comparable<MessageItem> {
         } else {
             this.setSenderUsername(ContactsTools.getContactDisplayNameByUserName(message.getFromUsername()));
         }
-
-        this.setTimestamp(DateUtils.parse(message.getCreateTime(),DateUtils.yyyy_mm_dd_hh_mm_ss).getTime());
+        this.setTimestamp(System.currentTimeMillis());
+        //TODO 时间格式不对
+       // this.setTimestamp(DateUtils.parse(message.getCreateTime(),DateUtils.YYYY_MM_DD_HH_MM_SS));
         this.setNeedToResend(!message.getIsSend());
         this.setProgress(message.getProcess());
         this.setDeleted(message.isDeleted());

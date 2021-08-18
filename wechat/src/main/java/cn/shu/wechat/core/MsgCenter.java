@@ -24,10 +24,7 @@ import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import javax.swing.*;
-import java.io.File;
 import java.text.ParseException;
-import java.util.*;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -420,7 +417,7 @@ public class MsgCenter {
                     .plaintext(msg.getPlainText() == null ? msg.getContent() : msg.getPlainText())
                     .content(msg.getContent())
                     .filePath(msg.getFilePath())
-                    .createTime(DateUtils.getCurrDateString(DateUtils.yyyy_mm_dd_hh_mm_ss))
+                    .createTime(DateUtils.getCurrDateString(DateUtils.YYYY_MM_DD_HH_MM_SS))
                     .fromNickname(isFromSelf ? Core.getNickName() : ContactsTools.getContactNickNameByUserName(msg.getFromUserName()))
                     .fromRemarkname(isFromSelf ? Core.getNickName() : ContactsTools.getContactRemarkNameByUserName(msg.getFromUserName()))
                     .fromUsername(msg.getFromUserName())
