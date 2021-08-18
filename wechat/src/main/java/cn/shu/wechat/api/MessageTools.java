@@ -6,13 +6,11 @@ import cn.shu.wechat.beans.msg.sync.AddMsgList;
 import cn.shu.wechat.beans.msg.sync.RecommendInfo;
 import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.enums.StorageLoginInfoEnum;
-import cn.shu.wechat.enums.URLEnum;
-import cn.shu.wechat.enums.VerifyFriendEnum;
-import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
+import cn.shu.wechat.enums.*;
 import cn.shu.wechat.exception.WebWXException;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.swing.tasks.UploadTaskCallback;
+import cn.shu.wechat.swing.utils.ImageUtil;
 import cn.shu.wechat.swing.utils.MimeTypeUtil;
 import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
@@ -29,9 +27,11 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.*;
 
 /**
@@ -719,4 +719,40 @@ public class MessageTools {
         return JSON.parseObject(s, WebWXSendMsgResponse.class);
     }
 
+    public static Message toPicMessage(String filePath, String toUserName) {
+
+        if (filePath != null) {
+            Dimension imageSize = ImageUtil.getImageSize(filePath);
+            return Message.builder().msgType(WXSendMsgCodeEnum.PIC.getCode())
+                    .filePath(filePath)
+                    .imgWidth(imageSize.width)
+                    .imgHeight(imageSize.height)
+                    .toUsername(toUserName).build();
+        }
+        return null;
+    }
+
+    public static Message toPicMessage(String filePath) {
+
+        return toPicMessage(filePath, "filehelper");
+    }
+
+    public static Message toVideoMessage(String filePath, String toUserName) {
+
+        if (filePath != null) {
+            File file = new File(filePath);
+            return Message.builder().msgType(WXSendMsgCodeEnum.VIDEO.getCode())
+                    .filePath(filePath)
+                    .playLength(0L)
+                    .fileSize(file.length())
+                    .slavePath(filePath)
+                    .toUsername(toUserName).build();
+        }
+        return null;
+    }
+
+    public static Message toVideoMessage(String filePath) {
+
+        return toPicMessage(filePath, "filehelper");
+    }
 }

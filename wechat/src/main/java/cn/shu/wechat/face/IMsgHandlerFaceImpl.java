@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -36,8 +37,10 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
 
     @Resource
     private MessageMapper messageMapper;
+
     @Resource
     private MsgCenter msgCenter;
+
     @Resource
     private StatusMapper statusMapper;
     /**
@@ -51,11 +54,6 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
      */
     private final Set<String> autoChatUserNameList = new HashSet<>();
 
-    /*//public static IMsgHandlerFaceImpl getiMsgHandlerFace() {
-        return iMsgHandlerFace;
-    }*/
-
-    //  private static IMsgHandlerFaceImpl iMsgHandlerFace =new IMsgHandlerFaceImpl();
     @Resource
     private ChartUtil chartUtil;
 
@@ -102,7 +100,6 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 String s = split[1];
                 int i = Integer.parseInt(s);
                 messages.add(Message.builder()
-                        .plaintext("开始发送：" + i + "个" + split[0])
                         .content("开始发送：" + i + "个" + split[0])
                         .toUsername(msg.getToUserName())
                         .msgType(WXSendMsgCodeEnum.TEXT.getCode())
@@ -241,11 +238,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 if (msg.isGroupMsg()) {
                     String imgPath = chartUtil.makeGroupMemberAttrPieChart(toUserName, remarkNameByGroupUserName, "Sex", 500, 400);
                     //群消息
-                    if (imgPath != null){
-                        messages.add(Message.builder().msgType(WXSendMsgCodeEnum.PIC.getCode())
-                                .filePath(imgPath)
-                                .toUsername(toUserName).build());
-                    }
+                    messages.add(MessageTools.toPicMessage(imgPath, toUserName));
                     log.info("计算群【" + remarkNameByGroupUserName + "】成员性别分布图");
                 }
 
@@ -254,9 +247,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 if (msg.isGroupMsg()) {
                     String imgPath = chartUtil.makeGroupMemberAttrPieChart(toUserName, remarkNameByGroupUserName, "Province", 500, 400);
                     //群消息
-                    messages.add(Message.builder().msgType(WXSendMsgCodeEnum.PIC.getCode())
-                            .filePath(imgPath)
-                            .toUsername(toUserName).build());
+                    messages.add(MessageTools.toPicMessage(imgPath, toUserName));
                     log.info("计算群【" + remarkNameByGroupUserName + "】成员省份分布图");
                 }
                 break;
@@ -267,11 +258,8 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             case "gma10":
                 //群成员活跃度排名
                 if (msg.isGroupMsg()) {
-                    String s1 = chartUtil.makeWXMemberOfGroupActivity(toUserName);
-                    messages.add(Message.builder().msgType(WXSendMsgCodeEnum.PIC.getCode())
-
-                            .filePath(s1)
-                            .toUsername(toUserName).build());
+                    String imgPath = chartUtil.makeWXMemberOfGroupActivity(toUserName);
+                    messages.add(MessageTools.toPicMessage(imgPath, toUserName));
                     log.info("计算【" + remarkNameByGroupUserName + "】成员活跃度");
                 }
                 break;
@@ -280,9 +268,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 List<String> imgs = chartUtil.makeWXUserMessageTop(toUserName);
                 for (String s : imgs) {
                     //群消息
-                    messages.add(Message.builder().msgType(WXSendMsgCodeEnum.PIC.getCode())
-                            .filePath(s)
-                            .toUsername(toUserName).build());
+                    messages.add(MessageTools.toPicMessage(s, toUserName));
                 }
 
                 log.info("计算【" + remarkNameByGroupUserName + "】聊天类型及关键词");
@@ -322,9 +308,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             String substring = msg.getPlainText().substring(msg.getPlainText().indexOf(":") + 1);
             String imgPath = chartUtil.makeGroupMemberAttrPieChart(toUserName, remarkNameByGroupUserName, substring, 500, 400);
             //群消息
-            messages.add(Message.builder().msgType(WXSendMsgCodeEnum.PIC.getCode())
-                    .filePath(imgPath)
-                    .toUsername(toUserName).build());
+            messages.add(MessageTools.toPicMessage(imgPath, toUserName));
             log.info("计算群【" + remarkNameByGroupUserName + "】成员" + substring + "比例");
         }
         return messages;
@@ -353,6 +337,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         }
         return messages;
     }
+
 
     /**
      * 图片消息(non-Javadoc)
@@ -466,11 +451,8 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                         .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .build();
                 results.add(message);
-                message = Message.builder()
-                        .filePath(filePath)
-                        .content(realMsgContent)
-                        .msgType(WXSendMsgCodeEnum.PIC.getCode())
-                        .build();
+                message = MessageTools.toPicMessage(filePath);
+                message.setContent(realMsgContent);
                 results.add(message);
                 break;
             case MSGTYPE_EMOTICON:
@@ -479,11 +461,8 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                         .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .build();
                 results.add(message);
-                message = Message.builder()
-                        .filePath(filePath)
-                        .content(realMsgContent)
-                        .msgType(WXSendMsgCodeEnum.EMOTION.getCode())
-                        .build();
+                message = MessageTools.toPicMessage(filePath);
+                message.setContent(realMsgContent);
                 results.add(message);
                 break;
             case MSGTYPE_VOICE:
@@ -492,11 +471,8 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                         .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .build();
                 results.add(message);
-                message = Message.builder()
-                        .filePath(filePath)
-                        .content(realMsgContent)
-                        .msgType(WXSendMsgCodeEnum.VOICE.getCode())
-                        .build();
+                message = MessageTools.toPicMessage(filePath);
+                message.setContent(realMsgContent);
                 results.add(message);
                 break;
             case MSGTYPE_VIDEO:
@@ -505,11 +481,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                         .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .build();
                 results.add(message);
-                message = Message.builder()
-                        .filePath(filePath)
-                        .content(realMsgContent)
-                        .msgType(WXSendMsgCodeEnum.VIDEO.getCode())
-                        .build();
+
+                message = MessageTools.toVideoMessage(filePath);
+                message.setContent(realMsgContent);
                 results.add(message);
                 break;
             case MSGTYPE_MAP:
@@ -574,10 +548,13 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                                 .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                                 .build();
                         results.add(message);
+                        File file = new File(filePath);
                         message = Message.builder()
                                 .filePath(filePath)
                                 .content(realMsgContent)
                                 .msgType(WXSendMsgCodeEnum.APP.getCode())
+                                .fileName(filePath)
+                                .fileSize(file.length())
                                 .build();
                         results.add(message);
                         break;

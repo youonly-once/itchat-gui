@@ -32,15 +32,11 @@ import cn.shu.wechat.swing.listener.ExpressionListener;
 import cn.shu.wechat.swing.tasks.DownloadTask;
 import cn.shu.wechat.swing.tasks.HttpResponseListener;
 import cn.shu.wechat.swing.tasks.UploadTaskCallback;
-import cn.shu.wechat.swing.utils.ClipboardUtil;
-import cn.shu.wechat.swing.utils.FileCache;
-import cn.shu.wechat.swing.utils.HttpUtil;
-import cn.shu.wechat.swing.utils.MimeTypeUtil;
+import cn.shu.wechat.swing.utils.*;
 import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.util.StringUtils;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
@@ -48,7 +44,6 @@ import javax.swing.text.Element;
 import javax.swing.text.StyleConstants;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -896,18 +891,18 @@ public class ChatPanel extends ParentAvailablePanel {
         final boolean isImage = type.startsWith("image/");
 
         // 发送的是图片
-        int[] bounds;
-        String name = uploadFilename.substring(uploadFilename.lastIndexOf(File.separator) + 1); // 文件名
+        Dimension imageSize;
+        String fileName = uploadFilename.substring(uploadFilename.lastIndexOf(File.separator) + 1); // 文件名
         if (isImage) {
-            bounds = getImageSize(uploadFilename);
+            imageSize = ImageUtil.getImageSize(uploadFilename);
             ImageAttachmentItem imageAttachmentItem = ImageAttachmentItem.builder()
-                    .description(name)
+                    .description(fileName)
                     .id(msgId)
                     .imagePath(uploadFilename)
                     .slavePath(uploadFilename)
-                    .title(name)
-                    .width(bounds[0])
-                    .height(bounds[1]).build();
+                    .title(fileName)
+                    .width(imageSize.width)
+                    .height(imageSize.height).build();
             item.setImageAttachment(imageAttachmentItem);
             item.setMessageType(MessageItem.RIGHT_IMAGE);
         } else {
@@ -916,14 +911,14 @@ public class ChatPanel extends ParentAvailablePanel {
                     .filePath(uploadFilename)
                     .fileSize(file.length())
                     .id(msgId)
-                    .description(name)
-                    .fileName(name).build();
+                    .description(fileName)
+                    .fileName(fileName).build();
             item.setFileAttachment(fileAttachmentItem);
             item.setMessageType(MessageItem.RIGHT_ATTACHMENT);
         }
 
 
-        item.setMessageContent(name);
+        item.setMessageContent(fileName);
         item.setTimestamp(System.currentTimeMillis());
         item.setSenderId(Core.getUserSelf().getUsername());
         item.setSenderUsername(Core.getUserSelf().getNickname());
@@ -950,9 +945,7 @@ public class ChatPanel extends ParentAvailablePanel {
                     public void onTaskError() {
                     }
                 };
-
-                //发送消息 等待回调
-                MessageTools.sendMsgByUserId(Message
+                Message message = Message
                         .builder()
                         .filePath(uploadFilename)
                         .slavePath(uploadFilename)
@@ -961,7 +954,16 @@ public class ChatPanel extends ParentAvailablePanel {
                         .msgType(isImage ? WXSendMsgCodeEnum.PIC.getCode() : WXSendMsgCodeEnum.APP.getCode())
                         .appMsgType(WXReceiveMsgCodeOfAppEnum.FILE.getType())
                         .toUsername(roomId)
-                        .build(), roomId, callback);
+                        .build();
+                if (isImage) {
+                    message.setImgHeight(item.getImageAttachment().getHeight());
+                    message.setImgWidth(item.getImageAttachment().getWidth());
+                } else {
+                    message.setFileName(fileName);
+                    message.setFileSize(file.length());
+                }
+                //发送消息 等待回调
+                MessageTools.sendMsgByUserId(message, roomId, callback);
 
                 return null;
 
@@ -1043,24 +1045,6 @@ public class ChatPanel extends ParentAvailablePanel {
 
     }
 
-    /**
-     * 获取图片的宽高
-     *
-     * @param file
-     * @return
-     */
-    private int[] getImageSize(String file) {
-        try {
-            BufferedImage image = ImageIO.read(new File(file));
-            int width = image.getWidth();
-            int height = image.getHeight();
-            return new int[]{width, height};
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return new int[]{0, 0};
-    }
 
     /**
      * 分割大文件，分块上传
