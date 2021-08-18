@@ -3,10 +3,10 @@ package cn.shu.wechat.swing.entity;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.beans.msg.url.WXMsgUrl;
+import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
-import cn.shu.wechat.utils.XmlStreamUtil;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -47,6 +47,7 @@ public class MessageItem implements Comparable<MessageItem> {
     private long timestamp;
     private String senderUsername;
     private String senderId;
+    private String nickName;
 
     private int unreadCount;
     private boolean needToResend;
@@ -70,7 +71,8 @@ public class MessageItem implements Comparable<MessageItem> {
         this.setMessageContent(message.getPlaintext());
         this.setGroupable(message.getFromUsername().startsWith("@@"));
         this.setRoomId(roomId);
-        this.setSenderId(this.isGroupable()?message.getFromMemberOfGroupUsername():message.getFromUsername());
+        this.setNickName(message.getFromNickname());
+        this.setSenderId(this.isGroupable() ? message.getFromMemberOfGroupUsername() : message.getFromUsername());
         if (this.groupable) {
             //如果是群则显示群成员名称
             this.setSenderUsername(message.getFromMemberOfGroupDisplayname());
@@ -228,20 +230,21 @@ public class MessageItem implements Comparable<MessageItem> {
     /**
      * 设置消息类型
      */
-    private void setMessageType(){
-
+    private void setMessageType() {
+        Contacts userSelf = Core.getUserSelf();
         // 自己发的消息
-        if (Core.getUserSelf().getUsername().equals(this.getSenderId())) {
+        if (userSelf.getUsername().equals(this.getSenderId())
+                || userSelf.getNickname().equals(this.nickName)) {
             // 文件附件
-            if (fileAttachment!=null) {
+            if (fileAttachment != null) {
                 this.setMessageType(RIGHT_ATTACHMENT);
             }
             // 图片消息
-            else if (imageAttachment!=null) {
+            else if (imageAttachment != null) {
                 this.setMessageType(RIGHT_IMAGE);
             }
             // 视频消息
-            else if (videoAttachmentItem!=null){
+            else if (videoAttachmentItem != null) {
                 this.setMessageType(RIGHT_VIDEO);
             }
             else if (isSystemMsg){

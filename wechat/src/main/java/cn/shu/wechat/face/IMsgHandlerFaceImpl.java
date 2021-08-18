@@ -3,6 +3,7 @@ package cn.shu.wechat.face;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.beans.msg.sync.AddMsgList;
+import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.beans.pojo.MessageExample;
 import cn.shu.wechat.beans.pojo.Status;
 import cn.shu.wechat.beans.pojo.StatusExample;
@@ -84,9 +85,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
      * @param msg 消息
      * @return 回复消息
      */
-    private List<MessageTools.Message> controlCommandHandler(AddMsgList msg) {
+    private List<Message> controlCommandHandler(AddMsgList msg) {
         String text = msg.getPlainText().toLowerCase();
-        List<MessageTools.Message> messages = new ArrayList<>();
+        List<Message> messages = new ArrayList<>();
 
         //=========================手动发送消息=====================
         String[] split = msg.getPlainText().split("：");
@@ -100,17 +101,17 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 }
                 String s = split[1];
                 int i = Integer.parseInt(s);
-                messages.add(MessageTools.Message.builder()
+                messages.add(Message.builder()
+                        .plaintext("开始发送：" + i + "个" + split[0])
                         .content("开始发送：" + i + "个" + split[0])
-                        .toUserName(msg.getToUserName())
-                        .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
+                        .toUsername(msg.getToUserName())
+                        .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .build());
                 for (int j = 0; j < i; j++) {
-                    messages.add(MessageTools.Message.builder()
+                    messages.add(Message.builder()
                             .content(split[0])
-                            .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
-                            .sleep(sleep)
-                            .toUserName(msg.getToUserName())
+                            .msgType(WXSendMsgCodeEnum.TEXT.getCode())
+                            .toUsername(msg.getToUserName())
                             .build());
                 }
                 return messages;
@@ -123,10 +124,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             String userName = Core.getUserSelf().getUsername();
             if (!msg.getFromUserName().equals(userName)) {
                 for (int i = 0; i < 1; i++) {
-                    messages.add(MessageTools.Message.builder()
+                    messages.add(Message.builder()
                             .content("[Bomb]")
-                            .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
-                            .sleep((long) (Math.random() * (10 - 1) + 1))
+                            .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                             .build());
                 }
                 return messages;
@@ -148,7 +148,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             case "/h":
                 if (msg.isGroupMsg()) {
                     //群消息
-                    messages.add(MessageTools.Message.builder()
+                    messages.add(Message.builder()
                             .content("1、【oauto/cauto】\n\t开启/关闭群消息自动回复\n"
                                     + "2、【opundo/cpundo】\n\t开启/关闭群消息防撤回\n"
                                     + "3、【ggr】\n\t群成员性别比例图\n"
@@ -158,34 +158,34 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                                     + "6、【gma10】\n\t群成员活跃度TOP10\n"
                                     + "7、【mf10】\n\t聊天消息关键词TOP10\n"
                             )
-                            .toUserName(toUserName)
-                            .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
+                            .toUsername(toUserName)
+                            .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                             .build());
 
                 } else {
                     //个人消息
-                    messages.add(MessageTools.Message.builder()
+                    messages.add(Message.builder()
                             .content("1、【oauto/cauto】\n\t开启/关闭当前联系人自动回复\n"
                                     + "2、【opundo/cpundo】\n\t开启/关闭当前联系人消息防撤回\n"
                                     + "3、【op/cp】\n\t开启/关闭全局个人用户消息自动回复\n"
                                     + "4、【mf10】\n\t聊天消息关键词TOP10\n")
-                            .toUserName(toUserName)
-                            .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
+                            .toUsername(toUserName)
+                            .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                             .build());
                 }
                 break;
             case "op":
                 autoChatWithPersonal = true;
-                messages.add(MessageTools.Message.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
+                messages.add(Message.builder().msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .content("已开启全局个人用户自动回复功能")
-                        .toUserName(toUserName).build());
+                        .toUsername(toUserName).build());
                 log.info("已开启全局个人用户自动回复功能");
                 break;
             case "cp":
                 autoChatWithPersonal = false;
-                messages.add(MessageTools.Message.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
+                messages.add(Message.builder().msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .content("已关闭全局个人用户自动回复功能")
-                        .toUserName(toUserName).build());
+                        .toUsername(toUserName).build());
                 log.info("已关闭全局个人用户自动回复功能");
                 break;
             case "oauto":
@@ -195,9 +195,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 status.setName(to);
                 status.setAutoStatus((short) 1);
                 statusMapper.insertOrUpdateSelectiveForSqlite(status);
-                messages.add(MessageTools.Message.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
+                messages.add(Message.builder().msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .content("已开启【" + remarkNameByGroupUserName + "】自动回复功能")
-                        .toUserName(toUserName).build());
+                        .toUsername(toUserName).build());
                 log.info("已开启【" + remarkNameByGroupUserName + "】自动回复功能");
                 break;
             case "cauto":
@@ -207,9 +207,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 status.setName(to);
                 status.setAutoStatus((short) 2);
                 statusMapper.insertOrUpdateSelectiveForSqlite(status);
-                messages.add(MessageTools.Message.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
+                messages.add(Message.builder().msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .content("已关闭【" + remarkNameByGroupUserName + "】自动回复功能")
-                        .toUserName(toUserName).build());
+                        .toUsername(toUserName).build());
                 log.info("已关闭【" + remarkNameByGroupUserName + "】自动回复功能");
                 break;
             case "opundo":
@@ -219,9 +219,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 status.setName(to);
                 status.setUndoStatus((short) 1);
                 statusMapper.insertOrUpdateSelectiveForSqlite(status);
-                messages.add(MessageTools.Message.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
+                messages.add(Message.builder().msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .content("已开启【" + remarkNameByGroupUserName + "】防撤回功能")
-                        .toUserName(toUserName).build());
+                        .toUsername(toUserName).build());
                 log.info("已开启【" + remarkNameByGroupUserName + "】防撤回功能");
                 break;
             case "cpundo":
@@ -232,9 +232,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 statusMapper.insertOrUpdateSelectiveForSqlite(status);
                 //群消息
                 nonPreventUndoMsgUserName.add(to);
-                messages.add(MessageTools.Message.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
+                messages.add(Message.builder().msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .content("已关闭【" + remarkNameByGroupUserName + "】防撤回功能")
-                        .toUserName(toUserName).build());
+                        .toUsername(toUserName).build());
                 log.info("已关闭【" + remarkNameByGroupUserName + "】防撤回功能");
                 break;
             case "ggr":
@@ -242,9 +242,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                     String imgPath = chartUtil.makeGroupMemberAttrPieChart(toUserName, remarkNameByGroupUserName, "Sex", 500, 400);
                     //群消息
                     if (imgPath != null){
-                        messages.add(MessageTools.Message.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
+                        messages.add(Message.builder().msgType(WXSendMsgCodeEnum.PIC.getCode())
                                 .filePath(imgPath)
-                                .toUserName(toUserName).build());
+                                .toUsername(toUserName).build());
                     }
                     log.info("计算群【" + remarkNameByGroupUserName + "】成员性别分布图");
                 }
@@ -254,9 +254,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 if (msg.isGroupMsg()) {
                     String imgPath = chartUtil.makeGroupMemberAttrPieChart(toUserName, remarkNameByGroupUserName, "Province", 500, 400);
                     //群消息
-                    messages.add(MessageTools.Message.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
+                    messages.add(Message.builder().msgType(WXSendMsgCodeEnum.PIC.getCode())
                             .filePath(imgPath)
-                            .toUserName(toUserName).build());
+                            .toUsername(toUserName).build());
                     log.info("计算群【" + remarkNameByGroupUserName + "】成员省份分布图");
                 }
                 break;
@@ -268,10 +268,10 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 //群成员活跃度排名
                 if (msg.isGroupMsg()) {
                     String s1 = chartUtil.makeWXMemberOfGroupActivity(toUserName);
-                    messages.add(MessageTools.Message.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
+                    messages.add(Message.builder().msgType(WXSendMsgCodeEnum.PIC.getCode())
 
                             .filePath(s1)
-                            .toUserName(toUserName).build());
+                            .toUsername(toUserName).build());
                     log.info("计算【" + remarkNameByGroupUserName + "】成员活跃度");
                 }
                 break;
@@ -280,9 +280,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 List<String> imgs = chartUtil.makeWXUserMessageTop(toUserName);
                 for (String s : imgs) {
                     //群消息
-                    messages.add(MessageTools.Message.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
+                    messages.add(Message.builder().msgType(WXSendMsgCodeEnum.PIC.getCode())
                             .filePath(s)
-                            .toUserName(toUserName).build());
+                            .toUsername(toUserName).build());
                 }
 
                 log.info("计算【" + remarkNameByGroupUserName + "】聊天类型及关键词");
@@ -290,9 +290,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             case "不要问了":
             case "不要问我":
                 if (msg.getFromUserName().equals(Core.getUserName())) {
-                    messages.add(MessageTools.Message.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.VOICE)
+                    messages.add(Message.builder().msgType(WXSendMsgCodeEnum.VOICE.getCode())
                             .filePath("D:/weixin/MSGTYPE_VOICE/dont_ask.mp3")
-                            .toUserName(toUserName).build());
+                            .toUsername(toUserName).build());
                 }
                 break;
             default:
@@ -322,21 +322,21 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             String substring = msg.getPlainText().substring(msg.getPlainText().indexOf(":") + 1);
             String imgPath = chartUtil.makeGroupMemberAttrPieChart(toUserName, remarkNameByGroupUserName, substring, 500, 400);
             //群消息
-            messages.add(MessageTools.Message.builder().replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
+            messages.add(Message.builder().msgType(WXSendMsgCodeEnum.PIC.getCode())
                     .filePath(imgPath)
-                    .toUserName(toUserName).build());
+                    .toUsername(toUserName).build());
             log.info("计算群【" + remarkNameByGroupUserName + "】成员" + substring + "比例");
         }
         return messages;
     }
 
     @Override
-    public List<MessageTools.Message> textMsgHandle(AddMsgList msg) {
+    public List<Message> textMsgHandle(AddMsgList msg) {
 
         String text = msg.getPlainText();
 
         //处理控制命令
-        List<MessageTools.Message> messages = controlCommandHandler(msg);
+        List<Message> messages = controlCommandHandler(msg);
         if (messages.size() > 0) {
             return messages;
         }
@@ -360,7 +360,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
      * @see
      */
     @Override
-    public List<MessageTools.Message> picMsgHandle(AddMsgList msg) {
+    public List<Message> picMsgHandle(AddMsgList msg) {
 
 
         return null;
@@ -372,20 +372,20 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
      * @see
      */
     @Override
-    public List<MessageTools.Message> voiceMsgHandle(AddMsgList msg) {
+    public List<Message> voiceMsgHandle(AddMsgList msg) {
 
         return null;
     }
 
 
     @Override
-    public List<MessageTools.Message> videoMsgHandle(AddMsgList msg) {
+    public List<Message> videoMsgHandle(AddMsgList msg) {
 
         return null;
     }
 
     @Override
-    public List<MessageTools.Message> undoMsgHandle(AddMsgList msg) {
+    public List<Message> undoMsgHandle(AddMsgList msg) {
 		/* 撤回消息格式
 		#1108768584572118898为被撤回消息ID
 		<sysmsg type="revokemsg">
@@ -439,8 +439,8 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             return null;
         }
         //===============
-        ArrayList<MessageTools.Message> results = new ArrayList<>();
-        MessageTools.Message message = null;
+        ArrayList<Message> results = new ArrayList<>();
+        Message message = null;
         //撤回消息的用户的昵称
         String fromNickName = "";
         if (msg.isGroupMsg()) {
@@ -454,61 +454,61 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         String createTime = DateFormatUtils.format(oldMessage.getCreateTime(), DateFormatConstant.HH_MM_SS);
         switch (WXReceiveMsgCodeEnum.getByCode(oldMessage.getMsgType())) {
             case MSGTYPE_TEXT:
-                message = MessageTools.Message.builder()
+                message = Message.builder()
                         .content("【" + fromNickName + " " + createTime + " " + "】撤回的消息：" + realMsgContent)
-                        .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
+                        .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .build();
                 results.add(message);
                 break;
             case MSGTYPE_IMAGE:
-                message = MessageTools.Message.builder()
+                message = Message.builder()
                         .content("【" + fromNickName + " " + createTime + " " + "】撤回的图片(发送中...)：")
-                        .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
+                        .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .build();
                 results.add(message);
-                message = MessageTools.Message.builder()
+                message = Message.builder()
                         .filePath(filePath)
                         .content(realMsgContent)
-                        .replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
+                        .msgType(WXSendMsgCodeEnum.PIC.getCode())
                         .build();
                 results.add(message);
                 break;
             case MSGTYPE_EMOTICON:
-                message = MessageTools.Message.builder()
+                message = Message.builder()
                         .content("【" + fromNickName + " " + createTime + " " + "】撤回的表情：")
-                        .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
+                        .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .build();
                 results.add(message);
-                message = MessageTools.Message.builder()
+                message = Message.builder()
                         .filePath(filePath)
                         .content(realMsgContent)
-                        .replyMsgTypeEnum(WXSendMsgCodeEnum.EMOTION)
+                        .msgType(WXSendMsgCodeEnum.EMOTION.getCode())
                         .build();
                 results.add(message);
                 break;
             case MSGTYPE_VOICE:
-                message = MessageTools.Message.builder()
+                message = Message.builder()
                         .content("【" + fromNickName + " " + createTime + " " + "】撤回的语音(发送中...)：")
-                        .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
+                        .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .build();
                 results.add(message);
-                message = MessageTools.Message.builder()
+                message = Message.builder()
                         .filePath(filePath)
                         .content(realMsgContent)
-                        .replyMsgTypeEnum(WXSendMsgCodeEnum.VOICE)
+                        .msgType(WXSendMsgCodeEnum.VOICE.getCode())
                         .build();
                 results.add(message);
                 break;
             case MSGTYPE_VIDEO:
-                message = MessageTools.Message.builder()
+                message = Message.builder()
                         .content("【" + fromNickName + " " + createTime + " " + "】撤回的视频(发送中...)：")
-                        .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
+                        .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .build();
                 results.add(message);
-                message = MessageTools.Message.builder()
+                message = Message.builder()
                         .filePath(filePath)
                         .content(realMsgContent)
-                        .replyMsgTypeEnum(WXSendMsgCodeEnum.VIDEO)
+                        .msgType(WXSendMsgCodeEnum.VIDEO.getCode())
                         .build();
                 results.add(message);
                 break;
@@ -519,27 +519,27 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 Map<String, Object> stringObjectMap = XmlStreamUtil.toMap(oriContent);
                 Object label = stringObjectMap.get("msg.location.attr.label");
                 Object poiname = stringObjectMap.get("msg.location.attr.poiname");
-                message = MessageTools.Message.builder()
+                message = Message.builder()
                         .content("【" + fromNickName + " " + createTime + " " + "】撤回的定位：" + label + "(" + poiname + ")")
-                        .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
+                        .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .build();
                 results.add(message);
-                message = MessageTools.Message.builder()
+                message = Message.builder()
                         .filePath(filePath)
-                        .replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
+                        .msgType(WXSendMsgCodeEnum.PIC.getCode())
                         .build();
                 results.add(message);
                 break;
             case MSGTYPE_SHARECARD:
-                message = MessageTools.Message.builder()
+                message = Message.builder()
                         .content("【" + fromNickName + " " + createTime + " " + "】撤回的联系人名片：")
-                        .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
+                        .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .build();
                 results.add(message);
-                message = MessageTools.Message.builder()
+                message = Message.builder()
                         /*"【" + fromNickName + "】撤回的联系人名片：" +*/
                         .content(realMsgContent)
-                        .replyMsgTypeEnum(WXSendMsgCodeEnum.CARD)
+                        .msgType(WXSendMsgCodeEnum.CARD.getCode())
                         .build();
                 results.add(message);
                 break;
@@ -551,33 +551,33 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                         Map<String, Object> mapA = XmlStreamUtil.toMap(XmlStreamUtil.formatXml(realMsgContent));
                         Object title = mapA.get("msg.appmsg.title");
                         Object url = mapA.get("msg.appmsg.url");
-                        message = MessageTools.Message.builder()
+                        message = Message.builder()
 
                                 .content("【" + fromNickName + " " + createTime + " " + "】撤回的收藏消息：" + title + "," + url)
-                                .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
+                                .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                                 .build();
                         results.add(message);
                         break;
 
                     case PROGRAM:
-                        message = MessageTools.Message.builder()
+                        message = Message.builder()
                                 .content("【" + fromNickName + " " + createTime + " " + "】撤回的小程序：" + realMsgContent)
-                                .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
+                                .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                                 .build();
                         results.add(message);
                         break;
                     case FILE:
                     default:
                         //目前是文件消息
-                        message = MessageTools.Message.builder()
+                        message = Message.builder()
                                 .content("【" + fromNickName + " " + createTime + " " + "】撤回的APP消息(发送中...)：")
-                                .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
+                                .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                                 .build();
                         results.add(message);
-                        message = MessageTools.Message.builder()
+                        message = Message.builder()
                                 .filePath(filePath)
                                 .content(realMsgContent)
-                                .replyMsgTypeEnum(WXSendMsgCodeEnum.APP)
+                                .msgType(WXSendMsgCodeEnum.APP.getCode())
                                 .build();
                         results.add(message);
                         break;
@@ -589,16 +589,16 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     }
 
     @Override
-    public List<MessageTools.Message> addFriendMsgHandle(AddMsgList msg) {
+    public List<Message> addFriendMsgHandle(AddMsgList msg) {
         log.info(LogUtil.printFromMeg(msg, WXReceiveMsgCodeEnum.MSGTYPE_VERIFYMSG.getCode()));
         //自动同意
         MessageTools.addFriend(msg, true);
         String content = msg.getContent();
         Map<String, Object> stringObjectMap = XmlStreamUtil.toMap(content);
         Object o = stringObjectMap.get("msg.attr.content");
-        if (o == null|| StringUtils.isEmpty(o.toString())){
+        if (o == null || StringUtils.isEmpty(o.toString())) {
             content = "添加你为好友";
-        }else{
+        } else {
             content = o.toString();
         }
         AddMsgList addMsgList = new AddMsgList();
@@ -613,19 +613,19 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     }
 
     @Override
-    public List<MessageTools.Message> systemMsgHandle(AddMsgList msg) {
+    public List<Message> systemMsgHandle(AddMsgList msg) {
 //       log.info(LogUtil.printFromMeg(msg, MsgTypeEnum.SYSTEM.getCode()));
         return null;
     }
 
     @Override
-    public List<MessageTools.Message> emotionMsgHandle(AddMsgList msg) {
+    public List<Message> emotionMsgHandle(AddMsgList msg) {
 
         return null;
     }
 
     @Override
-    public List<MessageTools.Message> appMsgHandle(AddMsgList msg) {
+    public List<Message> appMsgHandle(AddMsgList msg) {
         switch (WXReceiveMsgCodeOfAppEnum.getByCode(msg.getAppMsgType())) {
             case OTHER:
                 break;
@@ -640,19 +640,19 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     }
 
     @Override
-    public List<MessageTools.Message> verifyAddFriendMsgHandle(AddMsgList msg) {
+    public List<Message> verifyAddFriendMsgHandle(AddMsgList msg) {
         log.info(LogUtil.printFromMeg(msg, "VerifyAddFriendMsg"));
         return null;
     }
 
     @Override
-    public List<MessageTools.Message> mapMsgHandle(AddMsgList msg) {
+    public List<Message> mapMsgHandle(AddMsgList msg) {
         return null;
     }
 
 
     @Override
-    public List<MessageTools.Message> nameCardMsgHandle(AddMsgList msg) {
+    public List<Message> nameCardMsgHandle(AddMsgList msg) {
 
         return null;
     }
@@ -663,31 +663,31 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
      * @param tl
      * @return
      */
-    private List<MessageTools.Message> handleTuLingMsg(TuLingResponseBean tl, AddMsgList msg) {
-        ArrayList<MessageTools.Message> msgMessages = new ArrayList<>();
+    private List<Message> handleTuLingMsg(TuLingResponseBean tl, AddMsgList msg) {
+        ArrayList<Message> msgMessages = new ArrayList<>();
         List<Results> results = tl.getResults();
         for (Results result : results) {
             String msgStr = result.getValues().getText();
             if (msg.isGroupMsg() && msg.getMentionMeUserNickName() != null) {
                 msgStr = "@" + msg.getMentionMeUserNickName() + " " + msgStr;
             }
-            MessageTools.Message.MessageBuilder msgBuilder = MessageTools.Message.builder()
+            Message.MessageBuilder msgBuilder = Message.builder()
                     .content(msgStr);
             switch (ResultType.getByCode(result.getResultType())) {
                 case URL:
                 case NEWS:
                 case TEXT:
-                    msgBuilder.replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT);
+                    msgBuilder.msgType(WXSendMsgCodeEnum.TEXT.getCode());
                     msgBuilder.content(msgStr + "【自动回复】");
                     break;
                 case IMAGE:
-                    msgBuilder.replyMsgTypeEnum(WXSendMsgCodeEnum.PIC);
+                    msgBuilder.msgType(WXSendMsgCodeEnum.PIC.getCode());
                     break;
                 case VIDEO:
-                    msgBuilder.replyMsgTypeEnum(WXSendMsgCodeEnum.VIDEO);
+                    msgBuilder.msgType(WXSendMsgCodeEnum.VIDEO.getCode());
                     break;
                 case VOICE:
-                    msgBuilder.replyMsgTypeEnum(WXSendMsgCodeEnum.VOICE);
+                    msgBuilder.msgType(WXSendMsgCodeEnum.VOICE.getCode());
                     break;
                 case DEFAULT:
             }

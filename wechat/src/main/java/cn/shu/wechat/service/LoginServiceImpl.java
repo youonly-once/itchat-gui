@@ -7,6 +7,7 @@ import cn.shu.wechat.beans.msg.sync.AddMsgList;
 import cn.shu.wechat.beans.msg.sync.WebWxSyncMsg;
 import cn.shu.wechat.beans.pojo.AttrHistory;
 import cn.shu.wechat.beans.pojo.Contacts;
+import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.core.MsgCenter;
 import cn.shu.wechat.enums.*;
@@ -884,11 +885,11 @@ public class LoginServiceImpl implements LoginService {
         Map<String, Map<String, String>> differenceMap = JSONObjectUtil.getDifferenceMap(oldV, newV);
         if (differenceMap.size() > 0) {
             //待发消息列表
-            ArrayList<MessageTools.Message> messages = new ArrayList<>();
+            ArrayList<Message> messages = new ArrayList<>();
             String s = mapToString(differenceMap);
             //发送消息
-            messages.add(MessageTools.Message.builder().content(tip + "（" + name + "）属性更新：" + s)
-                    .replyMsgTypeEnum(WXSendMsgCodeEnum.TEXT)
+            messages.add(Message.builder().content(tip + "（" + name + "）属性更新：" + s)
+                    .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                     .build());
             //Old与New存在差异
 //            log.info("{}（{}）属性更新：{}", tip, name, s);
@@ -907,7 +908,7 @@ public class LoginServiceImpl implements LoginService {
      * @param differenceMap
      * @param oldV
      */
-    private void store(Map<String, Map<String, String>> differenceMap, Contacts oldV, ArrayList<MessageTools.Message> messages) {
+    private void store(Map<String, Map<String, String>> differenceMap, Contacts oldV, ArrayList<Message> messages) {
         ArrayList<AttrHistory> attrHistories = new ArrayList<>();
         for (Entry<String, Map<String, String>> stringMapEntry : differenceMap.entrySet()) {
             for (Entry<String, String> stringStringEntry : stringMapEntry.getValue().entrySet()) {
@@ -920,15 +921,15 @@ public class LoginServiceImpl implements LoginService {
                     Core.getContactHeadImgPath().put(oldV.getUsername(), newHeadPath);
                     //更换头像需要发送图片
                     //更换前
-                    messages.add(MessageTools.Message.builder()
-                            .replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
+                    messages.add(Message.builder()
+                            .msgType(WXSendMsgCodeEnum.PIC.getCode())
                             .filePath(oldHeadPath).build());
                     //更换后
-                    messages.add(MessageTools.Message.builder()
-                            .replyMsgTypeEnum(WXSendMsgCodeEnum.PIC)
+                    messages.add(Message.builder()
+                            .msgType(WXSendMsgCodeEnum.PIC.getCode())
                             .filePath(newHeadPath).build());
                     //刷新头像
-                    AvatarUtil.putUserAvatarCache(oldV.getUsername(),newHeadPath);
+                    AvatarUtil.putUserAvatarCache(oldV.getUsername(), newHeadPath);
                     AttrHistory build = AttrHistory.builder()
                             .attr(stringMapEntry.getKey())
                             .oldval(oldHeadPath)

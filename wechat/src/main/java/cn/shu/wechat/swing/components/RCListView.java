@@ -322,28 +322,53 @@ public class RCListView extends JScrollPane {
         //int viewType = adapter.getItemViewType(position);
         //ViewHolder holder = adapter.onCreateViewHolder(viewType);
         //加入 0位置有个map，0对应也有一个元素，此时元素在view中的位置应是1
-        Map<Integer,String> positionMap = adapter.getPositionMap();
-        int i =0;
-        if (positionMap!=null){
+        Map<Integer, String> positionMap = adapter.getPositionMap();
+        int i = 0;
+        if (positionMap != null) {
             for (Integer integer : positionMap.keySet()) {
-                if (integer <= position){
+                if (integer <= position) {
                     i++;
                 }
             }
         }
 
-        ViewHolder holder = (ViewHolder) getItem(position+i);
-        if (holder instanceof HeaderViewHolder){
+        ViewHolder holder = (ViewHolder) getItem(position + i);
+        if (holder instanceof HeaderViewHolder) {
             adapter.onBindHeaderViewHolder((HeaderViewHolder) holder, position);
-        }else{
+        } else {
             //元素pos
             adapter.onBindViewHolder(holder, position);
         }
         holder.repaint();
     }
 
+    /**
+     * 重绘指定位置的元素
+     *
+     * @param position 元素位置  不包括map的位置
+     */
+    public void notifyItemChanged(ViewHolder viewHolder, int position) {
+
+        Map<Integer, String> positionMap = adapter.getPositionMap();
+        int i = 0;
+        if (positionMap != null) {
+            for (Integer integer : positionMap.keySet()) {
+                if (integer <= position) {
+                    i++;
+                }
+            }
+        }
+        if (viewHolder instanceof HeaderViewHolder) {
+            adapter.onBindHeaderViewHolder((HeaderViewHolder) viewHolder, position);
+        } else {
+            //元素pos
+            adapter.onBindViewHolder(viewHolder, position);
+        }
+        viewHolder.repaint();
+    }
+
     public Component getItem(int n) {
-        return contentPanel.getComponent(Math.min(contentPanel.getComponentCount() - 1, n));
+        return contentPanel.getComponent(n);
     }
 
     public JPanel getContentPanel() {
@@ -358,7 +383,8 @@ public class RCListView extends JScrollPane {
     public void setScrollListener(ScrollListener listener) {
         this.scrollListener = listener;
     }
-    public void notifyItemInserted(int position, boolean end) {
+
+    public ViewHolder notifyItemInserted(int position, boolean end) {
         int viewType = adapter.getItemViewType(position);
         ViewHolder holder = adapter.onCreateViewHolder(viewType, position);
         try {
@@ -371,6 +397,7 @@ public class RCListView extends JScrollPane {
         position = Math.min(contentPanel.getComponentCount(), position);
         contentPanel.add(holder, position);
         contentPanel.revalidate();
+        return holder;
     }
 
     public void notifyItemRemoved(int position) {

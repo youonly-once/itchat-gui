@@ -27,7 +27,11 @@ import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import javax.swing.*;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static cn.shu.wechat.enums.WXReceiveMsgCodeEnum.MSGTYPE_TEXT;
 
@@ -63,9 +67,9 @@ public class MsgCenter {
     public void handleNewMsg(AddMsgList msg) {
         //消息类型封装
         WXReceiveMsgCodeEnum msgType = WXReceiveMsgCodeEnum.getByCode(msg.getMsgType());
+        msg.setType(msgType);
         //加载群成员
         loadUserInfo(msg);
-        msg.setType(msgType);
         String s = LogUtil.printFromMeg(msg, msgType.getDesc());
         //如果是当前房间 发送已读通知
         if (RoomChatPanel.getContext().getCurrRoomId().equals(msg.getFromUserName())) {
@@ -88,7 +92,6 @@ public class MsgCenter {
             msgType = WXReceiveMsgCodeEnum.MSGTYPE_MAP;
         }
 
-        String plaintext = "";
         //下载资源后缀
         String ext = null;
         //下载资源文件名
@@ -111,32 +114,35 @@ public class MsgCenter {
             case MSGTYPE_IMAGE:
                 msg.setPlainText("[图片]");
                 ext = ".gif";
+                downloadFile(msg, fileName, ext);
+                downloadThumImg(msg, fileName, ext);
                 //存储消息
                 message = storeMsgToDB(msg);
-                downloadFile(msg, fileName, ext);
+
                 break;
             case MSGTYPE_VOICE:
                 ext = ".mp3";
                 msg.setPlainText("[语音]");
-                message = storeMsgToDB(msg);
                 downloadFile(msg, fileName, ext);
-                downloadThumImg(msg, fileName, ext);
+                message = storeMsgToDB(msg);
                 break;
             case MSGTYPE_VIDEO:
-            case MSGTYPE_MICROVIDEO:
+            case MSGTYPE_MICROVIDEO: {
                 ext = ".mp4";
                 msg.setPlainText("[视频]");
-                message = storeMsgToDB(msg);
                 downloadFile(msg, fileName, ext);
                 downloadThumImg(msg, fileName, ext);
-                break;
-            case MSGTYPE_EMOTICON:
-                msg.setPlainText("[表情]");
                 message = storeMsgToDB(msg);
+                break;
+            }
+            case MSGTYPE_EMOTICON: {
+                msg.setPlainText("[表情]");
                 ext = ".gif";
                 downloadFile(msg, fileName, ext);
+                message = storeMsgToDB(msg);
                 break;
-            case MSGTYPE_APP:
+            }
+            case MSGTYPE_APP: {
                 Map<String, Object> map = XmlStreamUtil.toMap(msg.getContent());
                 Object title = map.get("msg.appmsg.title");
                 switch (WXReceiveMsgCodeOfAppEnum.getByCode(msg.getAppMsgType())) {
@@ -172,6 +178,7 @@ public class MsgCenter {
                     message.setContentMap(map);
                 }
                 break;
+            }
             case MSGTYPE_VOIPMSG:
                 break;
             case MSGTYPE_VOIPNOTIFY:
@@ -199,7 +206,7 @@ public class MsgCenter {
                 message = storeMsgToDB(msg);
                 break;
             case MSGTYPE_RECALLED:
-                map = XmlStreamUtil.toMap(msg.getContent());
+                Map<String, Object> map = XmlStreamUtil.toMap(msg.getContent());
                 msg.setPlainText(map.get("sysmsg.revokemsg.replacemsg").toString());
                 message = storeMsgToDB(msg);
                 if (message != null) {
@@ -225,7 +232,7 @@ public class MsgCenter {
      */
     private void processExtra(AddMsgList msg) {
         //需要发送的消息
-        List<MessageTools.Message> messages = null;
+        List<Message> messages = null;
         switch (msg.getType()) {
             case MSGTYPE_MAP:
                 messages = msgHandler.mapMsgHandle(msg);
@@ -315,7 +322,7 @@ public class MsgCenter {
      */
     private void downloadFile(AddMsgList msg, String filename, String ext) {
 
-        Hashtable<String, Boolean> fileDownloadStatus = DownloadTools.FILE_DOWNLOAD_STATUS;
+        ConcurrentHashMap<String, Boolean> fileDownloadStatus = DownloadTools.FILE_DOWNLOAD_STATUS;
         //下载资源文件
         String path = DownloadTools.getDownloadFilePath(msg, filename, ext);
         msg.setFilePath(path);
@@ -331,7 +338,7 @@ public class MsgCenter {
      */
     private void downloadThumImg(AddMsgList msg, String filename, String ext) {
         String pathSlave = DownloadTools.getDownloadThumImgPath(msg, filename, ext);
-        Hashtable<String, Boolean> fileDownloadStatus = DownloadTools.FILE_DOWNLOAD_STATUS;
+        ConcurrentHashMap<String, Boolean> fileDownloadStatus = DownloadTools.FILE_DOWNLOAD_STATUS;
         fileDownloadStatus.put(pathSlave, false);
         msg.setSlavePath(pathSlave);
         ExecutorServiceUtil.getGlobalExecutorService().execute(() -> DownloadTools.downloadFileByMsgId(msg.getNewMsgId(), pathSlave));

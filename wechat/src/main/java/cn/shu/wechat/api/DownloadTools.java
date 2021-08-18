@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 下载工具类
@@ -41,22 +42,19 @@ public class DownloadTools {
      * 文件路径为KEY、状态为VALUE
      * true： 下载成功
      * false：下载中
-     * null 下载失败
+     * null 下载失败 或者未下载
      */
-    public final static Hashtable<String, Boolean> FILE_DOWNLOAD_STATUS = new Hashtable<>();
+    public final static ConcurrentHashMap<String, Boolean> FILE_DOWNLOAD_STATUS = new ConcurrentHashMap<>();
 
 
     /**
      * 处理下载任务
      *
-     * @param msg  消息对象
-     * @param path 保存路径
-     * @return {@code true} 下载成功
-     * {@code false} 下载失败
+     * @param msg 消息对象
      * @author SXS
      * @date 2017年4月21日 下午11:00:25
      */
-    public static boolean getDownloadFn(AddMsgList msg) {
+    public static void getDownloadFn(AddMsgList msg) {
         Map<String, String> headerMap = new HashMap<String, String>();
         List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
 
@@ -106,14 +104,13 @@ public class DownloadTools {
                 break;
         }
         entity2File(entity, msg.getFilePath());
-        return false;
     }
 
     /**
      * 下载缩略图
      *
-     * @param msg  消息对象
-     * @param path 保存路径
+     * @param msgId 消息id
+     * @param path  保存路径
      * @return {@code true} 下载成功
      * {@code false} 下载失败
      * @author SXS
@@ -137,16 +134,19 @@ public class DownloadTools {
 
     /**
      * entity 2 file
+     *
      * @param entity
      * @param path
      */
-    private static void entity2File(HttpEntity entity,String path){
-        if (entity == null){
+    private static void entity2File(HttpEntity entity, String path) {
+        if (entity == null) {
             DownloadTools.FILE_DOWNLOAD_STATUS.remove(path);
             log.error("下载失败：response entity is null.");
             return;
         }
-        boolean downloadStatus = false;
+        if (!DownloadTools.FILE_DOWNLOAD_STATUS.containsKey(path)) {
+            DownloadTools.FILE_DOWNLOAD_STATUS.put(path, false);
+        }
         OutputStream out = null;
         try {
             File file = new File(path);
@@ -169,11 +169,17 @@ public class DownloadTools {
             out.write(bytes);
             out.flush();
             log.info("资源下载完成：{}", path);
-            downloadStatus = true;
+            DownloadTools.FILE_DOWNLOAD_STATUS.put(path, true);
         } catch (Exception e) {
+            DownloadTools.FILE_DOWNLOAD_STATUS.remove(path);
             log.info(e.getMessage());
+            e.printStackTrace();
         } finally {
-            DownloadTools.FILE_DOWNLOAD_STATUS.put(path, downloadStatus);
+            try {
+                entity.getContent().close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             if (out != null) {
                 try {
                     out.close();
@@ -483,14 +489,15 @@ public class DownloadTools {
     public static String getDownloadFilePath(AddMsgList msg, String fileName, String ext) {
         //发消息的用户或群名称
         String username = ContactsTools.getContactDisplayNameByUserName(msg.getFromUserName());
+        username = replace(username);
         //群成员名称
         String groupUsername = "";
         if (msg.isGroupMsg() && msg.getMemberName() != null) {
             groupUsername = ContactsTools.getContactDisplayNameByUserName(msg.getMemberName());
         }
-        groupUsername = groupUsername == null ? "" : groupUsername;
+        groupUsername = groupUsername == null ? "" : replace(groupUsername);
         String path = Config.PIC_DIR + File.separator + msg.getType() + File.separator + username + File.separator + groupUsername + File.separator;
-        path = replace(path);
+
         fileName = fileName
                 + "-" + DateUtils.formatDate(new Date(), "yyyy-MM-dd-HH-mm-ss")
                 + ext;
@@ -509,8 +516,6 @@ public class DownloadTools {
             SleepUtils.sleep(100);
             aBoolean = DownloadTools.FILE_DOWNLOAD_STATUS.get(path);
         }
-        if (DownloadTools.FILE_DOWNLOAD_STATUS.contains(path)) {
-            DownloadTools.FILE_DOWNLOAD_STATUS.remove(path);
-        }
+        DownloadTools.FILE_DOWNLOAD_STATUS.remove(path);
     }
 }
