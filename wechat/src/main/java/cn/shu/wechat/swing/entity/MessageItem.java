@@ -106,7 +106,7 @@ public class MessageItem implements Comparable<MessageItem> {
                 Map<String, Object> stringObjectMap = message.getContentMap();
                 switch (WXReceiveMsgCodeOfAppEnum.getByCode(message.getAppMsgType())) {
                     case OTHER:
-                        break;
+                    default:
                     case LINK:
                         Object desc = stringObjectMap.get("msg.appmsg.des");
                         Object url = stringObjectMap.get("msg.appmsg.url");
@@ -179,7 +179,7 @@ public class MessageItem implements Comparable<MessageItem> {
                                 .build();
                         this.setMessageContent(message.getFilePath());
                         break;
-                    default:
+
                 }
                 break;
             case MSGTYPE_VIDEO:
