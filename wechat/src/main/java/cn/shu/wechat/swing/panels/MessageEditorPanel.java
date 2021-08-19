@@ -1,5 +1,9 @@
 package cn.shu.wechat.swing.panels;
 
+import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.beans.pojo.Status;
+import cn.shu.wechat.face.IMsgHandlerFaceImpl;
+import cn.shu.wechat.mapper.StatusMapper;
 import cn.shu.wechat.swing.components.*;
 import cn.shu.wechat.swing.components.message.ChatEditorPopupMenu;
 import cn.shu.wechat.swing.frames.ScreenShotFrame;
@@ -7,6 +11,7 @@ import cn.shu.wechat.swing.listener.ExpressionListener;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.OSUtil;
+import cn.shu.wechat.utils.SpringContextHolder;
 import com.melloware.jintellitype.HotkeyListener;
 import com.melloware.jintellitype.JIntellitype;
 
@@ -23,6 +28,9 @@ public class MessageEditorPanel extends ParentAvailablePanel {
     private JLabel fileLabel;
     private JLabel expressionLabel;
     private JLabel cutLabel;
+    private JLabel preventUndoLabel;
+    private JLabel autoReplyLabel;
+    private JLabel bombMsgLabel;
     private JScrollPane textScrollPane;
     private RCTextEditor textEditor;
     private JPanel sendPanel;
@@ -37,6 +45,15 @@ public class MessageEditorPanel extends ParentAvailablePanel {
 
     private ImageIcon cutNormalIcon;
     private ImageIcon cutActiveIcon;
+
+    private ImageIcon preventUndoNormalIcon;
+    private ImageIcon preventUndoActiveIcon;
+
+    private ImageIcon autoReplyNormalIcon;
+    private ImageIcon autoReplyActiveIcon;
+
+    private ImageIcon bombMsgNormalIcon;
+    private ImageIcon bombMsgActiveIcon;
 
     private ExpressionPopup expressionPopup;
     private final String roomId;
@@ -97,6 +114,25 @@ public class MessageEditorPanel extends ParentAvailablePanel {
         }
 
 
+        preventUndoLabel = new JLabel();
+         preventUndoNormalIcon = IconUtil.getIcon(this, "/image/prevent.png");
+         preventUndoActiveIcon = IconUtil.getIcon(this, "/image/prevent_active.png");
+        preventUndoLabel.setIcon(preventUndoNormalIcon);
+        setUndoLabel();
+
+        autoReplyLabel = new JLabel();
+       autoReplyNormalIcon = IconUtil.getIcon(this, "/image/robot.png");
+        autoReplyActiveIcon = IconUtil.getIcon(this, "/image/robot_active.png");
+        autoReplyLabel.setIcon(autoReplyNormalIcon);
+        setAutoLabel();
+
+        bombMsgLabel = new JLabel();
+        bombMsgNormalIcon = IconUtil.getIcon(this, "/image/bomb.png");
+        bombMsgActiveIcon = IconUtil.getIcon(this, "/image/bomb_active.png");
+        bombMsgLabel.setIcon(bombMsgNormalIcon);
+
+
+
         textEditor = new RCTextEditor();
         textEditor.setBackground(Colors.WINDOW_BACKGROUND);
         textEditor.setFont(FontUtil.getDefaultFont(14));
@@ -126,8 +162,14 @@ public class MessageEditorPanel extends ParentAvailablePanel {
         this.setLayout(new GridBagLayout());
 
         controlLabel.add(expressionLabel);
+        controlLabel.add(preventUndoLabel);
+
         controlLabel.add(fileLabel);
         controlLabel.add(cutLabel);
+        controlLabel.add(bombMsgLabel);
+        controlLabel.add(autoReplyLabel);
+
+
 
         add(controlLabel, new GBC(0, 0).setFill(GBC.HORIZONTAL).setWeight(1, 1));
         add(textScrollPane, new GBC(0, 1).setFill(GBC.BOTH).setWeight(1, 15));
@@ -195,6 +237,42 @@ public class MessageEditorPanel extends ParentAvailablePanel {
                 if (e.getButton() == MouseEvent.BUTTON3) {
                     chatEditorPopupMenu.show((Component) e.getSource(), e.getX(), e.getY());
                 }
+                super.mouseReleased(e);
+            }
+        });
+
+        autoReplyLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                    changeAutoStatus();
+
+                super.mouseClicked(e);
+            }
+        });
+
+        bombMsgLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                bombMsgLabel.setIcon(bombMsgActiveIcon);
+                super.mouseEntered(e);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                bombMsgLabel.setIcon(bombMsgNormalIcon);
+                super.mouseExited(e);
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+            }
+        });
+
+        preventUndoLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                changeUndoStatus();
                 super.mouseClicked(e);
             }
         });
@@ -222,5 +300,161 @@ public class MessageEditorPanel extends ParentAvailablePanel {
         return fileLabel;
     }
 
+    /**
+     * 修改联系人的自动回复状态
+     */
+    private void changeAutoStatus(){
+        new SwingWorker<Object,Object>(){
+            Short autoStatus = 0;
+            int i = 0;
+            @Override
+            protected Object doInBackground() throws Exception {
+                String to = ContactsTools.getContactDisplayNameByUserName(roomId);
+                IMsgHandlerFaceImpl face = SpringContextHolder.getBean(IMsgHandlerFaceImpl.class);
+                StatusMapper statusMapper = SpringContextHolder.getBean(StatusMapper.class);
+                Status status = statusMapper.selectByPrimaryKey(to);
+                if (status == null ){
+                    //开启自动回复
+                    status = new Status();
+                    autoStatus = 1;
+                }else{
+                    autoStatus = status.getAutoStatus();
+                    if (autoStatus == null){
+                        //开启自动回复
+                        autoStatus = 1;
+                    }else if (autoStatus == 1){
+                        //关闭自动回复
+                        autoStatus = 2;
 
+                    }else if (autoStatus == 2){
+                        //开启自动回复
+                        autoStatus = 1;
+                    }
+                }
+                if (autoStatus == 1){
+                    face.autoChatUserNameList.add(to);
+                }else if (autoStatus == 2){
+                    face.autoChatUserNameList.remove(to);
+                }
+                status.setAutoStatus(autoStatus);
+                status.setName(to);
+                i = statusMapper.insertOrUpdateSelectiveForSqlite(status);
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                if (i == 0)return;
+                if (autoStatus == 1){
+                    autoReplyLabel.setIcon(autoReplyActiveIcon);
+                }else if (autoStatus == 2){
+                    autoReplyLabel.setIcon(autoReplyNormalIcon);
+                }
+            }
+        }.execute();
+    }
+    /**
+     * 修改联系人的防撤回状态
+     */
+    private void changeUndoStatus(){
+        new SwingWorker<Object,Object>(){
+            Short preventStatus = 0;
+            int i = 0;
+            @Override
+            protected Object doInBackground() throws Exception {
+                String to = ContactsTools.getContactDisplayNameByUserName(roomId);
+                IMsgHandlerFaceImpl face = SpringContextHolder.getBean(IMsgHandlerFaceImpl.class);
+                StatusMapper statusMapper = SpringContextHolder.getBean(StatusMapper.class);
+                Status status = statusMapper.selectByPrimaryKey(to);
+                if (status == null ){
+                    //关闭防撤回
+                    status = new Status();
+                    preventStatus = 2;
+                }else{
+                    preventStatus = status.getUndoStatus();
+                    if (preventStatus == null){
+                        //关闭防撤回
+                        preventStatus = 2;
+                    }else if (preventStatus == 2){
+                        //开启防撤回
+                        preventStatus = 1;
+                    }else if (preventStatus == 1){
+                        //关闭防撤回
+                        preventStatus = 2;
+                    }
+                }
+                if (preventStatus == 2){
+                    face.nonPreventUndoMsgUserName.add(to);
+                }else if (preventStatus == 1){
+                    face.nonPreventUndoMsgUserName.remove(to);
+                }
+                status.setUndoStatus(preventStatus);
+                status.setName(to);
+                i = statusMapper.insertOrUpdateSelectiveForSqlite(status);
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                if (i == 0)return;
+                if (preventStatus == 2){
+                    preventUndoLabel.setIcon(preventUndoNormalIcon);
+                }else if (preventStatus == 1){
+                    preventUndoLabel.setIcon(preventUndoActiveIcon);
+                }
+            }
+        }.execute();
+    }
+
+    /**
+     * 获取当前用户的撤回状态
+     */
+    private void setUndoLabel(){
+        new SwingWorker<Object,Object>(){
+            Status status  = null;
+            @Override
+            protected Object doInBackground() throws Exception {
+                String to = ContactsTools.getContactDisplayNameByUserName(roomId);
+                StatusMapper statusMapper = SpringContextHolder.getBean(StatusMapper.class);
+                status = statusMapper.selectByPrimaryKey(to);
+
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                if (status == null || status.getUndoStatus() == null||status .getUndoStatus()== 1){
+                    preventUndoLabel.setIcon(preventUndoActiveIcon);
+                }else{
+                    preventUndoLabel.setIcon(preventUndoNormalIcon);
+                }
+            }
+        }.execute();
+
+    }
+
+    /**
+     * 获取当前用户的自动回复状态
+     */
+    private void setAutoLabel(){
+        new SwingWorker<Object,Object>(){
+            Status status  = null;
+            @Override
+            protected Object doInBackground() throws Exception {
+                String to = ContactsTools.getContactDisplayNameByUserName(roomId);
+                StatusMapper statusMapper = SpringContextHolder.getBean(StatusMapper.class);
+                status = statusMapper.selectByPrimaryKey(to);
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                if (status == null || status.getAutoStatus() == null||status .getAutoStatus()== 2){
+                    autoReplyLabel.setIcon(autoReplyNormalIcon);
+                }else{
+                    autoReplyLabel.setIcon(autoReplyActiveIcon);
+                }
+            }
+        }.execute();
+    }
 }

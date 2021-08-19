@@ -52,7 +52,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     /**
      * 自动聊天联系人列表，包括个人、群...
      */
-    private final Set<String> autoChatUserNameList = new HashSet<>();
+    public final Set<String> autoChatUserNameList = new HashSet<>();
 
     @Resource
     private ChartUtil chartUtil;
@@ -61,7 +61,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     /**
      * 已关闭防撤回联系人列表
      */
-    private final Set<String> nonPreventUndoMsgUserName = new HashSet<>();
+    public final Set<String> nonPreventUndoMsgUserName = new HashSet<>();
 
     @PostConstruct
     private void initSet() {
