@@ -923,9 +923,11 @@ public class LoginServiceImpl implements LoginService {
                     //更换前
                     messages.add(Message.builder()
                             .msgType(WXSendMsgCodeEnum.PIC.getCode())
+                            .toUsername("filehelper")
                             .filePath(oldHeadPath).build());
                     //更换后
                     messages.add(Message.builder()
+                            .toUsername("filehelper")
                             .msgType(WXSendMsgCodeEnum.PIC.getCode())
                             .filePath(newHeadPath).build());
                     //刷新头像
