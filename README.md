@@ -12,7 +12,11 @@
 ## 3、安装android.ninepatch.jar依赖到本地仓库
 > mvn install:install-file -Dfile="你的JAR包位置" -DgroupId=com.android -DartifactId=ninepatch -Dversion=1.0 -Dpackaging=jar
 
+## 4、安装jna-4.4.0.jar依赖到本地仓库
+> mvn install:install-file -Dfile="你的JAR包位置" -DgroupId=com.sun -DartifactId=jna -Dversion=4.4.0 -Dpackaging=jar
 
+## 5、安装jna-platform-4.4.0.jar依赖到本地仓库
+> mvn install:install-file -Dfile="你的JAR包位置" -DgroupId=com.sun -DartifactId=jna.platform -Dversion=4.4.0 -Dpackaging=jar
 
  # 效果预览
  

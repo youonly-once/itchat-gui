@@ -189,6 +189,7 @@ public class ChatPanel extends ParentAvailablePanel {
                                     messageItems.add(0, item);
                                 } catch (Exception e) {
                                     e.printStackTrace();
+                                    messageItems.remove(0);
                                 }
 
                             }

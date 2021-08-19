@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 
 import java.awt.image.BufferedImage;
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -104,6 +105,9 @@ public class MessageItem implements Comparable<MessageItem> {
             case MSGTYPE_MICROVIDEO:
             case MSGTYPE_APP:
                 Map<String, Object> stringObjectMap = message.getContentMap();
+                if (stringObjectMap == null) {
+                    stringObjectMap = new HashMap<>();
+                }
                 switch (WXReceiveMsgCodeOfAppEnum.getByCode(message.getAppMsgType())) {
                     case OTHER:
                     default:

@@ -70,6 +70,8 @@ public class MsgCenter {
             msg.setMsgType(WXReceiveMsgCodeEnum.MSGTYPE_MAP.getCode());
             msgType = WXReceiveMsgCodeEnum.MSGTYPE_MAP;
         }
+        //=============群消息处理=============
+        groupMsgFormat(msg);
         msg.setType(msgType);
          //=============加载群成员==============
         loadUserInfo(msg);
@@ -102,13 +104,14 @@ public class MsgCenter {
         switch (msgType) {
             case MSGTYPE_MAP:
                 msg.setPlainText("[地图，请在手机上查看]");
-                message = storeMsgToDB(msg);
                 ext = ".gif";
                 downloadFile(msg, fileName, ext);
+                message = storeMsgToDB(msg);
                 break;
             case MSGTYPE_TEXT:
                 //消息格式化
-                CommonTools.msgFormatter(msg);
+                CommonTools.emojiFormatter(msg);
+                textMsgFormat(msg);
                 //文本消息
                 msg.setPlainText(msg.getContent());
                 message = storeMsgToDB(msg);
@@ -147,6 +150,7 @@ public class MsgCenter {
                 break;
             case MSGTYPE_APP:
                 Map<String, Object> map = XmlStreamUtil.toMap(msg.getContent());
+                msg.setContentMap(map);
                 Object title = map.get("msg.appmsg.title");
                 switch (WXReceiveMsgCodeOfAppEnum.getByCode(msg.getAppMsgType())) {
                     case LINK:
@@ -177,9 +181,6 @@ public class MsgCenter {
 
                 }
                 message = storeMsgToDB(msg);
-                if (message != null) {
-                    message.setContentMap(map);
-                }
                 break;
             case MSGTYPE_VOIPMSG:
                 break;
@@ -209,11 +210,9 @@ public class MsgCenter {
                 break;
             case MSGTYPE_RECALLED:
                 map = XmlStreamUtil.toMap(msg.getContent());
+                msg.setContentMap(map);
                 msg.setPlainText(map.get("sysmsg.revokemsg.replacemsg").toString());
                 message = storeMsgToDB(msg);
-                if (message != null) {
-                    message.setContentMap(map);
-                }
                 break;
             case UNKNOWN:
             default:
@@ -448,6 +447,7 @@ public class MsgCenter {
                     .voiceLength(msg.getVoiceLength())
                     .fileName(msg.getFileName())
                     .fileSize(msg.getFileSize())
+                    .contentMap(msg.getContentMap())
                     .build();
             int insert = messageMapper.insert(build);
             return build;
@@ -484,5 +484,47 @@ public class MsgCenter {
         }
 
     }
+    /**
+     * 群消息处理
+     *
+     * @param msg 消息
+     */
+    public static void groupMsgFormat(AddMsgList msg) {
+        // 群消息与普通消息不同的是在其消息体（Content）中会包含发送者id及":<br/>"消息，
+        // 这里需要处理一下，去掉多余信息，只保留消息内容
+        //"群成员UserName:<br/>消息内容"
+        if (!msg.getFromUserName().startsWith("@@") && !msg.getToUserName().startsWith("@@")){
+            return;
+        }
+        String content = msg.getContent();
+        int index =  content.indexOf(":<br/>");
+        if (index != -1) {
+            msg.setContent( content.substring(index + ":<br/>".length()));
+            //发送消息的人
+            msg.setMemberName( content.substring(0, index));
+        }
+        msg.setGroupMsg(Boolean.TRUE);
 
+    }
+
+    /**
+     * 文本消息格式化
+     * @param msg 消息
+     */
+    private void textMsgFormat(AddMsgList msg){
+        String content = msg.getContent();
+        //获取自己在群里的备注
+        String groupMyUserNickNameOfGroup = ContactsTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), Core.getUserName());
+        //判断是否@自己
+        if ( groupMyUserNickNameOfGroup!= null
+                && content.contains("@" + groupMyUserNickNameOfGroup + " ")) {
+            msg.setMentionMe(true);
+            //消息发送成员昵称
+            String groupOtherUserNickNameOfGroup =
+                    ContactsTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), msg.getMemberName());
+            msg.setMentionMeUserNickName(groupOtherUserNickNameOfGroup);
+        }
+        //@用户后面的空白符 JLabel不支持显示  需要替换
+        msg.setContent(content.replace(" "," "));
+    }
 }

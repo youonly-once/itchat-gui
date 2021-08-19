@@ -206,21 +206,7 @@ public class CommonTools {
         return r;
     }
 
-    /**
-     * 处理emoji表情
-     *
-     * @author SXS
-     * @date 2017年4月23日 下午2:39:04
-     */
-    public static void msgFormatter(AddMsgList msg) {
-        // 群聊消息
-        if (msg.getFromUserName().contains("@@") || msg.getToUserName().contains("@@")) {
-            groupMsgFormatter(msg);
-        } else {
-            emojiFormatter(msg);
-        }
 
-    }
 
     /**
      * 消息格式化
@@ -272,39 +258,4 @@ public class CommonTools {
         // StringEscapeUtils.unescapeHtml4(d.getString(k)));
 
     }
-
-    /**
-     * 群消息处理
-     *
-     * @param msg
-     */
-    public static void groupMsgFormatter(AddMsgList msg) {
-        // 群消息与普通消息不同的是在其消息体（Content）中会包含发送者id及":<br/>"消息，
-        // 这里需要处理一下，去掉多余信息，只保留消息内容
-        //"群成员UserName:<br/>消息内容"
-        String content = msg.getContent();
-        int index =  content.indexOf(":<br/>");
-        if (index != -1) {
-            msg.setContent( content.substring(index + ":<br/>".length()));
-            //发送消息的人
-            msg.setMemberName( content.substring(0, index));
-        }
-        content = msg.getContent();
-        msg.setGroupMsg(Boolean.TRUE);
-        //获取自己在群里的备注
-        String groupMyUserNickNameOfGroup = ContactsTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), Core.getUserName());
-        //判断是否@自己
-        if ( groupMyUserNickNameOfGroup!= null
-        && content.contains("@" + groupMyUserNickNameOfGroup + " ")) {
-            msg.setMentionMe(true);
-            //消息发送成员昵称
-            String groupOtherUserNickNameOfGroup =
-                    ContactsTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), msg.getMemberName());
-           msg.setMentionMeUserNickName(groupOtherUserNickNameOfGroup);
-        }
-        //@用户后面的空白符 JLabel不支持显示  需要替换
-        msg.setContent(content.replace(" "," "));
-        msg.setContent(emojiFormatter(content));
-    }
-
 }

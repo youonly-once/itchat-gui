@@ -43,6 +43,7 @@ import java.util.*;
  */
 @Log4j2
 @Component
+
 public class MessageTools {
     /**
      * 微信上传最大文件大小
@@ -108,7 +109,7 @@ public class MessageTools {
                     return sendMsgResponse;
                 }
                 //存储数据库
-                List<Message> messageList = storeMsgToDB(messages, sendMsgResponse, toUserName);
+                 storeMsgToDB(messages, sendMsgResponse, toUserName);
             } catch (Exception e) {
                 e.printStackTrace();
                 log.error("发送消息失败：{}", e.getMessage());
