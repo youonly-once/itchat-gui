@@ -24,7 +24,7 @@ public class MessageRightVideoViewHolder extends BaseMessageViewHolder {
      * 视频层
      */
     public TagJLayeredPane videoComponent = null;
-
+    public JLabel sendingProgress = new JLabel();
     private final TagPanel contentTagPanel = new TagPanel();
     public final RCRightVideoMessageBubble imageBubble = new RCRightVideoMessageBubble();
     private final JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
@@ -64,7 +64,9 @@ public class MessageRightVideoViewHolder extends BaseMessageViewHolder {
         time.setFont(FontUtil.getDefaultFont(12));
 
         playImgLabel.setIcon(IconUtil.getIcon(this, "/image/image_loading.gif"));
-
+        ImageIcon sendingIcon = IconUtil.getIcon(this,"/image/sending.gif");
+        sendingProgress.setIcon(sendingIcon);
+        sendingProgress.setVisible(false);
     }
 
     private void initView() {
@@ -76,7 +78,11 @@ public class MessageRightVideoViewHolder extends BaseMessageViewHolder {
         try {
             videoComponent = getLayerPanel();
             videoComponent.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            contentTagPanel.add(videoComponent);
+            JPanel resendImagePanel = new JPanel(new BorderLayout());
+            resendImagePanel.setOpaque(false);
+            resendImagePanel.add(videoComponent,BorderLayout.CENTER);
+            resendImagePanel.add(sendingProgress,BorderLayout.WEST);
+            contentTagPanel.add(resendImagePanel);
         } catch (IOException e) {
             e.printStackTrace();
         }

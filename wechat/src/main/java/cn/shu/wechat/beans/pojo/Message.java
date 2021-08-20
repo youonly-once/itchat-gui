@@ -1,5 +1,6 @@
 package cn.shu.wechat.beans.pojo;
 
+import java.awt.image.BufferedImage;
 import java.util.Map;
 
 import lombok.AllArgsConstructor;
@@ -75,6 +76,10 @@ public class Message implements Comparable<Message>{
      * 缩略图路径
      */
     private String slavePath;
+    /**
+     * 视频缩略图
+     */
+    private BufferedImage videoPic;
 
     /**
      * 消息发送结果

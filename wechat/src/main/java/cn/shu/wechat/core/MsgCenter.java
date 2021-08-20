@@ -25,6 +25,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -79,7 +80,7 @@ public class MsgCenter {
         //=============打印日志==============
         String logStr = LogUtil.printFromMeg(msg, msgType.getDesc());
         //=============如果是当前房间 发送已读通知==============
-        if (RoomChatContainer.getContext().getCurrRoomId().equals(msg.getFromUserName())) {
+        if (msg.getFromUserName().equals(RoomChatContainer.getCurrRoomId())) {
             ExecutorServiceUtil.getGlobalExecutorService().execute(() -> MessageTools.sendStatusNotify(msg.getFromUserName()));
         }
 
@@ -146,7 +147,12 @@ public class MsgCenter {
                 message = newMsgToDBMessage(msg);
                 break;
             case MSGTYPE_APP:
-                Map<String, Object> map = XmlStreamUtil.toMap(msg.getContent());
+                Map<String, Object> map = new HashMap<>();
+                try{
+                    map = XmlStreamUtil.toMap(msg.getContent());
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
                 msg.setContentMap(map);
                 Object desc = map.get("msg.appmsg.des");
                 Object url = map.get("msg.appmsg.url");
@@ -156,6 +162,7 @@ public class MsgCenter {
                 Object sourceName = map.get("msg.appmsg.sourcedisplayname");
                 Object height = map.get("msg.appmsg.appattach.cdnthumbheight");
                 Object width = map.get("msg.appmsg.appattach.cdnthumbwidth");
+
                 switch (WXReceiveMsgCodeOfAppEnum.getByCode(msg.getAppMsgType())) {
                     case LINK:
                         msg.setPlainText("[链接]" + title);
@@ -183,6 +190,8 @@ public class MsgCenter {
                         msg.setPlainText("[小程序]图片");
                         break;
                     default:
+                        msg.setMsgType(MSGTYPE_TEXT.getCode());
+                        msg.setPlainText(msg.getContent());
                         break;
 
 

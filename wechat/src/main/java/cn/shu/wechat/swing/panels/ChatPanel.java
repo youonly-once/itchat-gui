@@ -15,6 +15,7 @@ import cn.shu.wechat.swing.adapter.message.MessageAdapter;
 import cn.shu.wechat.swing.adapter.message.app.MessageAttachmentViewHolder;
 import cn.shu.wechat.swing.adapter.message.app.MessageRightAttachmentViewHolder;
 import cn.shu.wechat.swing.adapter.message.image.MessageRightImageViewHolder;
+import cn.shu.wechat.swing.adapter.message.video.MessageRightVideoViewHolder;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCBorder;
@@ -30,6 +31,7 @@ import cn.shu.wechat.swing.tasks.HttpResponseListener;
 import cn.shu.wechat.swing.tasks.UploadTaskCallback;
 import cn.shu.wechat.swing.utils.*;
 import cn.shu.wechat.utils.DateUtils;
+import cn.shu.wechat.utils.MediaUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.util.StringUtils;
@@ -41,6 +43,7 @@ import javax.swing.text.Element;
 import javax.swing.text.StyleConstants;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
@@ -126,7 +129,7 @@ public class ChatPanel extends ParentAvailablePanel {
 
         super(parent);
         this.roomId = roomId;
-        if (StringUtils.isEmpty(roomId)){
+        if (StringUtils.isEmpty(roomId)) {
             throw new NullPointerException("roomid can not be null.");
         }
         messageViewHolderCacheHelper = new MessageViewHolderCacheHelper();
@@ -176,6 +179,7 @@ public class ChatPanel extends ParentAvailablePanel {
 
                     new SwingWorker<Object, Object>() {
                         List<Message> messageList = null;
+
                         @Override
                         protected Object doInBackground() {
                             MessageMapper mapper = SpringContextHolder.getBean(MessageMapper.class);
@@ -191,14 +195,13 @@ public class ChatPanel extends ParentAvailablePanel {
                         protected void done() {
                             try {
 
-                                if (messageList!= null && !messageList.isEmpty()) {
+                                if (messageList != null && !messageList.isEmpty()) {
                                     //TODO 顺序有问题
                                     messagePanel.getMessageListView().notifyItemRangeInserted(0, messageList.size());
                                 }
-                            } catch (Exception e){
+                            } catch (Exception e) {
                                 e.printStackTrace();
-                            }  finally
-                             {
+                            } finally {
                                 isLoadHis = false;
                                 ((RoomChatPanelCard) ChatPanel.this.getParentPanel()).getTitlePanel().hideStatusLabel();
                             }
@@ -285,9 +288,9 @@ public class ChatPanel extends ParentAvailablePanel {
                 File selectedFile = fileChooser.getSelectedFile();
                 if (selectedFile != null) {
                     String path = selectedFile.getAbsolutePath();
-                    if (new File(path).length()>MessageTools.maxFileSize){
+                    if (new File(path).length() > MessageTools.maxFileSize) {
                         JOptionPane.showMessageDialog(MainFrame.getContext(), "只能上传20M以内文件", "文件太大", JOptionPane.ERROR_MESSAGE);
-                    }else{
+                    } else {
                         sendFileMessage(path);
                         showSendingMessage();
                     }
@@ -316,12 +319,12 @@ public class ChatPanel extends ParentAvailablePanel {
         boolean isImageOrFile = false;
         for (Object data : inputDatas) {
             if (data instanceof String && !"\n".equals(data)) {
-                if (StringUtils.isEmpty(data)){
+                if (StringUtils.isEmpty(data)) {
                     continue;
                 }
                 //文本消息
                 try {
-                    sendTextMessage( data.toString());
+                    sendTextMessage(data.toString());
                     //更新房间列表
                     RoomsPanel.getContext().updateRoomItem(roomId, 0, data.toString(), System.currentTimeMillis());
                 } catch (ParseException e) {
@@ -438,7 +441,6 @@ public class ChatPanel extends ParentAvailablePanel {
     }
 
 
-
     /**
      * 从数据库加载本地历史消息
      */
@@ -510,8 +512,6 @@ public class ChatPanel extends ParentAvailablePanel {
     }
 
 
-
-
     /**
      * 添加一条消息到消息列表最后
      *
@@ -552,9 +552,10 @@ public class ChatPanel extends ParentAvailablePanel {
      */
     /**
      * 发送文本消息
+     *
      * @param content 消息内容
      */
-    public void sendTextMessage( String content) throws ParseException {
+    public void sendTextMessage(String content) throws ParseException {
         String msgId = randomMessageId();
         Message message = Message.builder().isSend(false)
                 .id(msgId)
@@ -566,6 +567,7 @@ public class ChatPanel extends ParentAvailablePanel {
                 .msgType(WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
                 .fromNickname(Core.getNickName())
                 .progress(50)
+                .timestamp(System.currentTimeMillis())
                 .deleted(false)
                 .isSend(true)
                 .build();
@@ -600,6 +602,7 @@ public class ChatPanel extends ParentAvailablePanel {
             }
         }.execute();
     }
+
     private void showSendingMessage() {
         RoomsPanel.getContext().updateRoomItem(roomId, -1, "[发送中...]", System.currentTimeMillis());
     }
@@ -630,7 +633,6 @@ public class ChatPanel extends ParentAvailablePanel {
         String raw = UUID.randomUUID().toString().replace("-", "");
         return raw;
     }
-
 
 
     /**
@@ -689,9 +691,12 @@ public class ChatPanel extends ParentAvailablePanel {
         String mime = MimeTypeUtil.getMime(uploadFilename.substring(uploadFilename.lastIndexOf(".")));
         WXReceiveMsgCodeEnum msgType = WXReceiveMsgCodeEnum.MSGTYPE_APP;
         WXReceiveMsgCodeOfAppEnum fileOfAppType = WXReceiveMsgCodeOfAppEnum.FILE;
-        if (mime.startsWith("image/")){
+        if (mime == null) {
+            msgType = WXReceiveMsgCodeEnum.MSGTYPE_APP;
+            mime = "app";
+        } else if (mime.startsWith("image/")) {
             msgType = WXReceiveMsgCodeEnum.MSGTYPE_IMAGE;
-        }else  if (mime.startsWith("video/")){
+        } else if (mime.startsWith("video/")) {
             msgType = WXReceiveMsgCodeEnum.MSGTYPE_VIDEO;
         }
         //新增消息项
@@ -700,7 +705,7 @@ public class ChatPanel extends ParentAvailablePanel {
         Dimension imageSize;
         String fileName = uploadFilename.substring(uploadFilename.lastIndexOf(File.separator) + 1); // 文件名
 
-        switch (msgType){
+        switch (msgType) {
             case MSGTYPE_IMAGE:
                 imageSize = ImageUtil.getImageSize(uploadFilename);
                 message = Message.builder()
@@ -715,6 +720,21 @@ public class ChatPanel extends ParentAvailablePanel {
                         .imgHeight(imageSize.height).build();
                 break;
             case MSGTYPE_VIDEO:
+                BufferedImage videoPic = MediaUtil.getVideoPic(file);
+                message = Message.builder()
+                        .slavePath(uploadFilename)
+                        .filePath(uploadFilename)
+                        .fileSize(file.length())
+                        .id(msgId)
+                        .imgWidth(videoPic.getWidth())
+                        .imgHeight(videoPic.getHeight())
+                        .playLength(MediaUtil.getVideoDuration(file)/1000)
+                        .videoPic(videoPic)
+                        .msgType(msgType.getCode())
+                        .appMsgType(fileOfAppType.getType())
+                        .desc(fileName)
+                        .fileName(fileName).build();
+                break;
             case MSGTYPE_APP:
                 message = Message.builder()
                         .slavePath(uploadFilename)
@@ -725,20 +745,26 @@ public class ChatPanel extends ParentAvailablePanel {
                         .appMsgType(fileOfAppType.getType())
                         .desc(fileName)
                         .fileName(fileName).build();
+                break;
+            default:
+                log.error("不支持的消息类型");
+                return;
         }
 
 
-        message.setPlaintext(fileName);
+        message.setPlaintext("[文件]"+fileName);
         message.setPlainName(Core.getUserSelf().getNickname());
         message.setId(msgId);
         message.setProgress(0);
         message.setToUsername(roomId);
+        message.setFromUsername(Core.getUserName());
+        message.setTimestamp(System.currentTimeMillis());
         //添加消息 到面板
         ViewHolder viewHolder = addMessageToEnd(message);
 
         Message finalMessage = message;
+        WXReceiveMsgCodeEnum finalMsgType = msgType;
         new SwingWorker<Void, Integer>() {
-
             @Override
             protected Void doInBackground() throws Exception {
 
@@ -755,7 +781,7 @@ public class ChatPanel extends ParentAvailablePanel {
                     }
                 };
                 //发送消息 等待回调
-                MessageTools.sendMsgByUserId(finalMessage,callback);
+                MessageTools.sendMsgByUserId(finalMessage, callback);
 
                 return null;
 
@@ -768,37 +794,40 @@ public class ChatPanel extends ParentAvailablePanel {
                 if (progress == 100) {
                     RoomsPanel.getContext().updateRoomItem(roomId, -1, finalMessage.getPlaintext(), System.currentTimeMillis());
                 }
-                for (int i = messageItems.size() - 1; i >= 0; i--) {
-                    if (messageItems.get(i).getId().equals(finalMessage.getId())) {
-                        messageItems.get(i).setProgress(progress);
-                        if (viewHolder != null) {
-                            if (finalMessage.getMsgType() == WXReceiveMsgCodeEnum.MSGTYPE_IMAGE.getCode()) {
-                                MessageRightImageViewHolder holder = (MessageRightImageViewHolder) viewHolder;
-                                holder.sendingProgress.setVisible(progress < 100);
-                            } else {
-                                MessageRightAttachmentViewHolder holder = (MessageRightAttachmentViewHolder) viewHolder;
+                if (viewHolder != null) {
+                    finalMessage.setProgress(progress);
+                    switch (finalMsgType) {
+                        case MSGTYPE_VIDEO: {
+                            MessageRightVideoViewHolder holder = (MessageRightVideoViewHolder) viewHolder;
+                            holder.sendingProgress.setVisible(progress < 100);
+                            break;
+                        }
+                        default:
+                        case MSGTYPE_APP: {
+                            MessageRightAttachmentViewHolder holder = (MessageRightAttachmentViewHolder) viewHolder;
 
-                                // 隐藏"等待上传"，并显示进度条
-                                holder.sizeLabel.setVisible(false);
-                                holder.progressBar.setVisible(true);
-                                holder.progressBar.setValue(progress);
+                            // 隐藏"等待上传"，并显示进度条
+                            holder.sizeLabel.setVisible(false);
+                            holder.progressBar.setVisible(true);
+                            holder.progressBar.setValue(progress);
 
-                                if (progress >= 100) {
-                                    holder.progressBar.setVisible(false);
-                                    holder.sizeLabel.setVisible(true);
-                                    holder.sizeLabel.setText(fileCache.fileSizeString(uploadFilename));
-                                }
+                            if (progress >= 100) {
+                                holder.progressBar.setVisible(false);
+                                holder.sizeLabel.setVisible(true);
+                                holder.sizeLabel.setText(fileCache.fileSizeString(uploadFilename));
                             }
-
                         }
                         break;
-                    }
-                }
-            }
+                        case MSGTYPE_IMAGE: {
+                            MessageRightImageViewHolder holder = (MessageRightImageViewHolder) viewHolder;
+                            holder.sendingProgress.setVisible(progress < 100);
+                            break;
+                        }
 
-            @Override
-            protected void done() {
-                super.done();
+                    }
+
+                }
+
             }
         }.execute();
 
@@ -833,33 +862,8 @@ public class ChatPanel extends ParentAvailablePanel {
     public static void downloadOrOpenFile(String messageId) {
         MessageMapper messageMapper = SpringContextHolder.getBean(MessageMapper.class);
         Message message = messageMapper.selectByPrimaryKey(messageId);
-        FileAttachment fileAttachment;
-/*        if (message == null) {
-            // 如果没有messageId对应的message, 尝试寻找messageId对应的file attachment，因为在自己上传文件时，此时是以fileId作为临时的messageId
-            fileAttachment = fileAttachmentService.findById(messageId);
-        } else {
-            fileAttachment = fileAttachmentService.findById(message.getFileAttachmentId());
-        }*/
-
-  /*      if (fileAttachment == null) {
-            JOptionPane.showMessageDialog(null, "无效的附件消息", "消息无效", JOptionPane.ERROR_MESSAGE);
-            return;
-        }*/
 
         openFile(message.getFilePath());
-   /*     String filepath = fileCache.tryGetFileCache(fileAttachment.getId(), fileAttachment.getTitle());
-        if (filepath == null) {
-            // 服务器上的文件
-            if (fileAttachment.getLink().startsWith("/file-upload")) {
-                downloadFile(fileAttachment, messageId);
-            }
-            // 本地的文件
-            else {
-                openFileWithDefaultApplication(fileAttachment.getLink());
-            }
-        } else {
-            openFileWithDefaultApplication(filepath);
-        }*/
     }
 
     /**
@@ -959,7 +963,6 @@ public class ChatPanel extends ParentAvailablePanel {
         if (pos > -1) {
             messageItems.remove(pos);
             messagePanel.getMessageListView().notifyItemRemoved(pos);
-            //messageService.markDeleted(messageId);
         }
     }
 

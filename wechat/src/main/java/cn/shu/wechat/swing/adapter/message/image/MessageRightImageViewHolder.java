@@ -13,19 +13,19 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Created by 舒新胜 on 17-6-3.
+ *
+ * @author 舒新胜
+ * @date 17-6-3
  */
 public class MessageRightImageViewHolder extends BaseMessageViewHolder {
     public MessageImageLabel image = new MessageImageLabel();
-    //public JLabel avatar = new JLabel();
-    //public JLabel size = new JLabel();
-    public JLabel resend = new JLabel(); // 重发按钮
-    public JLabel sendingProgress = new JLabel(); // 正在发送
+
+    public JLabel resend = new JLabel();
+    public JLabel sendingProgress = new JLabel();
 
     public RCRightImageMessageBubble imageBubble = new RCRightImageMessageBubble();
-    private JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER,5,0));
-    private JPanel messageAvatarPanel = new JPanel();
-    private MessagePopupMenu popupMenu = new MessagePopupMenu();
+    private final JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER,5,0));
+    private final JPanel messageAvatarPanel = new JPanel();
 
     public MessageRightImageViewHolder() {
         initComponents();

@@ -28,7 +28,6 @@ public abstract class MessageVoiceViewHolder extends BaseMessageViewHolder {
     protected final JLabel unitLabel = new JLabel("''");
     protected final JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
     protected final JPanel messageAvatarPanel = new JPanel();
-    protected final MessagePopupMenu popupMenu = new MessagePopupMenu();
     protected final boolean isGroup;
     protected final JLabel voiceImgLabel = new JLabel();
     public final RCAttachmentMessageBubble messageBubble;

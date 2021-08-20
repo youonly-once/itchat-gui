@@ -14,11 +14,11 @@ public class RoomChatContainer extends ParentAvailablePanel {
     private CardLayout cardLayout;
 
     private final static LinkedHashMap<String, RoomChatPanelCard> cards = new LinkedHashMap<>(5);
-    public String  getCurrRoomId() {
+    public static String  getCurrRoomId() {
         return currRoomId;
     }
 
-    private String currRoomId;
+    private static String currRoomId;
     public static RoomChatContainer getContext() {
         return context;
     }
@@ -77,13 +77,13 @@ public class RoomChatContainer extends ParentAvailablePanel {
      * @param roomId roomId
      */
     public static RoomChatPanelCard get(String roomId){
-        return context.cards.get(roomId);
+        return cards.get(roomId);
     }
 
     /**
      * 获取对应层
      */
-    public RoomChatPanelCard getCurr() {
+    public static RoomChatPanelCard getCurrRoom() {
         return cards.get(currRoomId);
     }
 

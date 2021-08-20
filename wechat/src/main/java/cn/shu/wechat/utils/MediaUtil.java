@@ -1,7 +1,11 @@
 package cn.shu.wechat.utils;
 
 import net.coobird.thumbnailator.Thumbnails;
+import org.bytedeco.javacv.FFmpegFrameGrabber;
+import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.Java2DFrameConverter;
 import ws.schild.jave.Encoder;
+import ws.schild.jave.EncoderException;
 import ws.schild.jave.MultimediaObject;
 import ws.schild.jave.encode.AudioAttributes;
 import ws.schild.jave.encode.EncodingAttributes;
@@ -10,6 +14,8 @@ import ws.schild.jave.info.AudioInfo;
 import ws.schild.jave.info.VideoInfo;
 import ws.schild.jave.info.VideoSize;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -25,6 +31,22 @@ import java.util.UUID;
  * @创建时间 2/2/2021 5:02 PM
  */
 public class MediaUtil {
+
+    /**
+     * 获取视频时长
+     * @param source
+     * @return
+     */
+    public static  long getVideoDuration(File source){
+        MultimediaObject object = new MultimediaObject(source);
+        long duration = 0;
+        try {
+            duration = object.getInfo().getDuration();
+        } catch (EncoderException e) {
+            e.printStackTrace();
+        }
+        return duration;
+    }
     /**
      * 传视频File对象，返回压缩后File对象信息
      *
@@ -42,6 +64,7 @@ public class MediaUtil {
         File target = new File(newPath);
         try {
             MultimediaObject object = new MultimediaObject(source);
+
             AudioInfo audioInfo = object.getInfo().getAudio();
             // 根据视频大小来判断是否需要进行压缩,
             int maxSize = 1;
@@ -144,8 +167,6 @@ public class MediaUtil {
             fc = fis.getChannel();
             BigDecimal fileSize = new BigDecimal(fc.size());
             return fileSize.divide(new BigDecimal(1048576), 2, RoundingMode.HALF_UP);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -161,15 +182,50 @@ public class MediaUtil {
     }
 
     /**
+     * 获取 视频预览图
+     * @param video 视频文件
+     * @return
+     */
+    public static BufferedImage getVideoPic(File video) {
+        FFmpegFrameGrabber ff = new FFmpegFrameGrabber(video);
+        try {
+            ff.start();
+            int length = ff.getLengthInFrames();
+            int i = 0;
+            Frame f = null;
+            while (i < length) {
+                f = ff.grabFrame();
+                //过滤前5帧，避免出现全黑的图片，依自己情况而定f = ff.grabFrame();
+                if ((i > 5) && (f.image != null)) {
+                    break;
+                }
+                i++;
+            }
+            //截取的帧图片
+            Java2DFrameConverter converter = new Java2DFrameConverter();
+            BufferedImage srcImage = converter.getBufferedImage(f);
+            int srcImageWidth = srcImage.getWidth();
+            int srcImageHeight = srcImage.getHeight();
+            //对截图进行等比例宿放(宿略图)
+            int width = 200;
+            int height = (int) (((double) width / srcImageWidth) * srcImageHeight);
+            BufferedImage thumbnailImage = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
+            thumbnailImage.getGraphics().drawImage(srcImage.getScaledInstance(width, height, Image.SCALE_SMOOTH), 0, 0,
+                    null);
+            ff.stop();
+            return thumbnailImage;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new BufferedImage(200, 200, BufferedImage.TYPE_3BYTE_BGR);
+    }
+    /**
      * 压缩视频
      *
      * @param source 待转换的文件
      */
     public static File toCompressFile(String source) {
-/*        int i = source.getAbsolutePath().lastIndexOf("/");
-        if (i == -1){
-            i = source.getAbsolutePath().lastIndexOf("\\");
-        }*/
+
         String targetFile = UUID.randomUUID() + ".mp4";
         try {
             Runtime runtime = Runtime.getRuntime();
@@ -180,14 +236,7 @@ public class MediaUtil {
             System.out.println("文件：" + source + " 正在转换中。。。");
             //等待结束
             exec.waitFor();
-           /* while (!exec.isAlive()){
-                try{
-                    Thread.sleep(500);
-                }catch (Exception e){
 
-                }
-
-            }*/
             System.out.println("文件：" + source + " 转换完成。");
 
         } catch (Exception e) {
@@ -231,8 +280,5 @@ public class MediaUtil {
         return newFile;
     }
 
-    public static void main(String[] ars) {
-
-    }
 
 }

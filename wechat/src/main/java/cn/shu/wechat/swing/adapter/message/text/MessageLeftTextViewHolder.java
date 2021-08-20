@@ -16,21 +16,19 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 
 /**
- * Created by 舒新胜 on 17-6-2.
+ *
+ * @author 舒新胜
+ * @date 17-6-2
  */
 public class MessageLeftTextViewHolder extends BaseMessageViewHolder {
     public SizeAutoAdjustTextArea sender ;
-    //public JLabel avatar = new JLabel();
-    //public JLabel size = new JLabel();
-    //public RCLeftTextMessageBubble text = new RCLeftTextMessageBubble();
 
     public SizeAutoAdjustTextArea text;
     public RCLeftImageMessageBubble messageBubble = new RCLeftImageMessageBubble();
 
-    private JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-    private JPanel messageAvatarPanel = new JPanel();
-    private MessagePopupMenu popupMenu = new MessagePopupMenu();
-    private boolean isGroup = true;
+    private final JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+    private final JPanel messageAvatarPanel = new JPanel();
+    private final boolean isGroup;
 
     public MessageLeftTextViewHolder(boolean isGroup) {
         this.isGroup = isGroup;

@@ -187,7 +187,7 @@ public class RoomChatPanelCard extends JPanel {
      *
      * @param message 新消息
      */
-    public void addMessageToEnd(Message message) throws ParseException {
+    public void addMessageToEnd(Message message) {
         chatPanel.addMessageToEnd(message);
     }
 

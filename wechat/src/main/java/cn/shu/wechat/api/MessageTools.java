@@ -171,6 +171,7 @@ public class MessageTools {
             if (message.getPlaintext() == null) {
                 message.setPlaintext(message.getContent());
             }
+            message.setTimestamp(System.currentTimeMillis());
         }
         try {
             int insert = messageMapper.batchInsert(results);

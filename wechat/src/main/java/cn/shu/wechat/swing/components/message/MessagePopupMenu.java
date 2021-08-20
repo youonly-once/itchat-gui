@@ -3,12 +3,15 @@ package cn.shu.wechat.swing.components.message;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.beans.msg.send.WebWXSendMsgResponse;
 import cn.shu.wechat.beans.pojo.Message;
+import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCMenuItemUI;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
 import cn.shu.wechat.swing.frames.MainFrame;
+import cn.shu.wechat.swing.panels.ChatPanel;
+import cn.shu.wechat.swing.panels.RoomChatContainer;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 import cn.shu.wechat.swing.utils.FileCache;
 import cn.shu.wechat.swing.utils.ImageCache;
@@ -30,8 +33,7 @@ import java.util.Map;
  */
 public class MessagePopupMenu extends JPopupMenu {
     private WXReceiveMsgCodeEnum messageType;
-    private final ImageCache imageCache = new ImageCache();
-    private final FileCache fileCache = new FileCache();
+    JMenuItem showPathItem = new JMenuItem("文件夹");
 
     public MessagePopupMenu() {
         initMenuItem();
@@ -42,7 +44,7 @@ public class MessagePopupMenu extends JPopupMenu {
         JMenuItem delItem = new JMenuItem("删除");
         JMenuItem forwardItem = new JMenuItem("转发");
         JMenuItem revokeItem = new JMenuItem("撤回");
-        JMenuItem showPathItem = new JMenuItem("文件夹");
+
         copy.setUI(new RCMenuItemUI());
         copy.addActionListener(new AbstractAction() {
             @Override
@@ -57,98 +59,25 @@ public class MessagePopupMenu extends JPopupMenu {
                         break;
                     }
                     case MSGTYPE_IMAGE:
-                    case MSGTYPE_EMOTICON: {
+                    case MSGTYPE_EMOTICON:
+                    case MSGTYPE_VIDEO:
+                    case MSGTYPE_VOICE:
+                    case MSGTYPE_APP: {
                         MessageImageLabel imageLabel = (MessageImageLabel) getInvoker();
                         Object obj = imageLabel.getTag();
                         if (obj != null) {
-                            Map map = (Map) obj;
-                            String id = (String) map.get("attachmentId");
-                            String url = (String) map.get("url");
-                            imageCache.requestOriginalAsynchronously(id, url, new ImageCache.ImageCacheRequestListener() {
+                            ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
                                 @Override
-                                public void onSuccess(ImageIcon icon, String path) {
-                                    if (path != null && !path.isEmpty()) {
-                                        ClipboardUtil.copyImage(path);
-                                    } else {
-                                        System.out.println("图片不存在，复制失败");
-                                    }
-                                }
-
-                                @Override
-                                public void onFailed(String why) {
-                                    System.out.println("图片不存在，复制失败");
+                                public void run() {
+                                    Message msg = (Message) obj;
+                                    String filePath = msg.getFilePath();
+                                    ClipboardUtil.copyFile(filePath);
                                 }
                             });
-                        }
-                        break;
-                    }
-                    case MSGTYPE_VIDEO: {
-                        TagJLayeredPane attachmentPanel = (TagJLayeredPane) getInvoker();
-                        Object obj = attachmentPanel.getTag();
-                        if (obj != null) {
-                            Message item = (Message)obj;
-                            String videoPath = item.getFilePath();
-                            if (videoPath != null && !videoPath.isEmpty()) {
-                                ClipboardUtil.copyFile(videoPath);
-                            }else{
-                                JOptionPane.showMessageDialog(MainFrame.getContext(), "文件不存在", "文件不存在", JOptionPane.WARNING_MESSAGE);
-                                return;
-                            }
+
 
                         }
                         break;
-                    }
-                    case MSGTYPE_VOICE:{
-                        TagPanel attachmentPanel = (TagPanel) getInvoker();
-                        Object obj = attachmentPanel.getTag();
-                        if (obj != null) {
-                            Message item = (Message)obj;
-                            String voicePath = item.getFilePath();
-                            if (voicePath != null && !voicePath.isEmpty()) {
-                                ClipboardUtil.copyFile(voicePath);
-                            }else{
-                                JOptionPane.showMessageDialog(MainFrame.getContext(), "文件不存在", "文件不存在", JOptionPane.WARNING_MESSAGE);
-                                return;
-                            }
-
-                        }
-                        break;
-                    }
-                    case MSGTYPE_APP: {
-                        TagPanel attachmentPanel = (TagPanel) getInvoker();
-                        Object obj = attachmentPanel.getTag();
-                        if (obj != null) {
-                            Map map = (Map) obj;
-                            String id = (String) map.get("attachmentId");
-                            String name = (String) map.get("name");
-
-                            String path = fileCache.tryGetFileCache(id, name);
-                            if (path != null && !path.isEmpty()) {
-                                ClipboardUtil.copyFile(path);
-                            } else {
-                                Object filepath = map.get("filepath");
-
-                                if (filepath == null) {
-                                    JOptionPane.showMessageDialog(MainFrame.getContext(), "文件不存在", "文件不存在", JOptionPane.WARNING_MESSAGE);
-                                    return;
-                                }
-
-                                String link = filepath.toString();
-                                if (link.startsWith("/file-upload")) {
-                                    JOptionPane.showMessageDialog(MainFrame.getContext(), "请先下载文件", "请先下载文件", JOptionPane.WARNING_MESSAGE);
-                                    return;
-                                } else {
-                                    File file = new File(link);
-                                    if (!file.exists()) {
-                                        JOptionPane.showMessageDialog(MainFrame.getContext(), "文件不存在，可能已被删除", "文件不存在", JOptionPane.WARNING_MESSAGE);
-                                        return;
-                                    }
-                                    ClipboardUtil.copyFile(link);
-                                }
-                            }
-                        }
-                        break;
-
                     }
                     default:
                         break;
@@ -162,36 +91,31 @@ public class MessagePopupMenu extends JPopupMenu {
         delItem.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String messageId = null;
+                Object obj = null;
                 switch (messageType) {
                     case MSGTYPE_TEXT: {
                         SizeAutoAdjustTextArea textArea = (SizeAutoAdjustTextArea) getInvoker();
-                        messageId = textArea.getTag().toString();
+                        obj = textArea.getTag();
                         break;
                     }
+                    case MSGTYPE_EMOTICON:
                     case MSGTYPE_IMAGE: {
                         MessageImageLabel imageLabel = (MessageImageLabel) getInvoker();
-                        Object obj = imageLabel.getTag();
-                        if (obj != null) {
-                            Map map = (Map) obj;
-                            messageId = (String) map.get("messageId");
-                        }
+                        obj = imageLabel.getTag();
                         break;
                     }
-                    case MSGTYPE_APP:{
+                    case MSGTYPE_APP: {
                         TagPanel attachmentPanel = (TagPanel) getInvoker();
-                        Object obj = attachmentPanel.getTag();
-                        if (obj != null) {
-                            Map map = (Map) obj;
-                            messageId = (String) map.get("messageId");
-                        }
+                        obj = attachmentPanel.getTag();
                         break;
                     }
                     default:
                 }
-
+                Message item = (Message) obj;
+                String messageId = item.getId();
                 if (messageId != null && !messageId.isEmpty()) {
-                    //ChatPanel.getContext().deleteMessage(messageId);
+                    String roomId = item.getFromUsername().equals(Core.getUserName()) ? item.getToUsername() : item.getFromUsername();
+                    RoomChatContainer.get(roomId).getChatPanel().deleteMessage(messageId);
                 }
             }
         });
@@ -207,60 +131,46 @@ public class MessagePopupMenu extends JPopupMenu {
         revokeItem.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String messageId = null;
+                Object obj = null;
                 switch (messageType) {
-                    case MSGTYPE_TEXT:{
+                    case MSGTYPE_TEXT: {
                         SizeAutoAdjustTextArea textArea = (SizeAutoAdjustTextArea) getInvoker();
-                        messageId = textArea.getTag().toString();
+                        obj = textArea.getTag();
                         break;
                     }
-                    case MSGTYPE_IMAGE:{
+                    case MSGTYPE_EMOTICON:
+                    case MSGTYPE_IMAGE: {
                         MessageImageLabel imageLabel = (MessageImageLabel) getInvoker();
-                        Object obj = imageLabel.getTag();
-                        if (obj != null) {
-                            Map map = (Map) obj;
-                            messageId = (String) map.get("messageId");
-                        }
+                        obj = imageLabel.getTag();
                         break;
                     }
-                    case MSGTYPE_APP:{
+                    case MSGTYPE_APP:
+                    case MSGTYPE_VOICE: {
                         TagPanel attachmentPanel = (TagPanel) getInvoker();
-                        Object obj = attachmentPanel.getTag();
-                        if (obj != null) {
-                            Map map = (Map) obj;
-                            messageId = (String) map.get("messageId");
-                        }
+                        obj = attachmentPanel.getTag();
                         break;
                     }
-                    case MSGTYPE_VIDEO:{
+                    case MSGTYPE_VIDEO: {
                         TagJLayeredPane attachmentPanel = (TagJLayeredPane) getInvoker();
-                        Object obj = attachmentPanel.getTag();
-                        if (obj != null) {
-                            Message item = (Message)obj;
-                            messageId = item.getId();
-                        }
+                        obj = attachmentPanel.getTag();
                         break;
                     }
-                    case MSGTYPE_VOICE:{
-                    TagPanel attachmentPanel = (TagPanel) getInvoker();
-                    Object obj = attachmentPanel.getTag();
-                    if (obj != null) {
-                        Message item = (Message)obj;
-                        messageId = item.getId();
-                    }
-                    break;
-                }
                     default:
                 }
-                final String id = messageId;
+                if (obj == null) {
+                    return;
+
+                }
+                Message item = (Message) obj;
+                final String messageId = item.getId();
                 if (!StringUtils.isEmpty(messageId)) {
                     ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
                         MessageMapper bean = SpringContextHolder.getBean(MessageMapper.class);
-                        Message message = bean.selectByPrimaryKey(id);
+                        Message message = bean.selectByPrimaryKey(messageId);
                         String response = message.getResponse();
-                        WebWXSendMsgResponse webWXSendMsgResponse = JSON.parseObject(response, WebWXSendMsgResponse.class);
-                        if (webWXSendMsgResponse != null && webWXSendMsgResponse.getBaseResponse().getRet() == 0){
-                            boolean b = MessageTools.sendRevokeMsgByUserId(message.getToUsername(), webWXSendMsgResponse.getLocalID(), webWXSendMsgResponse.getMsgID());
+                        WebWXSendMsgResponse wxSendMsgResponse = JSON.parseObject(response, WebWXSendMsgResponse.class);
+                        if (wxSendMsgResponse != null && wxSendMsgResponse.getBaseResponse().getRet() == 0) {
+                            boolean b = MessageTools.sendRevokeMsgByUserId(message.getToUsername(), wxSendMsgResponse.getLocalID(), wxSendMsgResponse.getMsgID());
                         }
                     });
 
@@ -272,74 +182,56 @@ public class MessagePopupMenu extends JPopupMenu {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                        String path = null;
-                        switch (messageType) {
-                            case MSGTYPE_IMAGE: {
-                                MessageImageLabel imageLabel = (MessageImageLabel) getInvoker();
-                                Object obj = imageLabel.getTag();
-                                if (obj != null) {
-                                    Map map = (Map) obj;
-                                    path = (String) map.get("url");
-                                }
-                                break;
-                            }
-                            case MSGTYPE_VIDEO: {
-                                TagJLayeredPane attachmentPanel = (TagJLayeredPane) getInvoker();
-                                Object obj = attachmentPanel.getTag();
-                                if (obj != null) {
-                                    Message item = (Message) obj;
-                                    path = item.getFilePath();
-                                }
-                                break;
-                            }
-                            case MSGTYPE_VOICE: {
-                                TagPanel attachmentPanel = (TagPanel) getInvoker();
-                                Object obj = attachmentPanel.getTag();
-                                if (obj != null) {
-                                    Message item = (Message) obj;
-                                    path = item.getFilePath();
-                                }
-                                break;
-                            }
-                            case MSGTYPE_APP: {
-                                TagPanel attachmentPanel = (TagPanel) getInvoker();
-                                Object obj = attachmentPanel.getTag();
-                                if (obj != null) {
-                                    Map map = (Map) obj;
-                                    String id = (String) map.get("attachmentId");
-                                    String name = (String) map.get("name");
-                                    path = fileCache.tryGetFileCache(id, name);
-                                    if (path != null && !path.isEmpty()) {
-                                        ClipboardUtil.copyFile(path);
-                                    } else {
-                                        path = map.get("filepath").toString();
-                                    }
-                                }
-                                break;
-                            }
-                            default:
-                                break;
-                        }
-                        if (StringUtils.isNotEmpty(path)) {
-                            String finalPath = path;
-                            ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
-                                @Override
-                                public void run() {
+                Object obj = null;
+                switch (messageType) {
+                    case MSGTYPE_EMOTICON:
+                    case MSGTYPE_IMAGE: {
+                        MessageImageLabel imageLabel = (MessageImageLabel) getInvoker();
+                        obj = imageLabel.getTag();
+                        break;
+                    }
+                    case MSGTYPE_VIDEO: {
+                        TagJLayeredPane attachmentPanel = (TagJLayeredPane) getInvoker();
+                        obj = attachmentPanel.getTag();
+                        break;
+                    }
+                    case MSGTYPE_VOICE:
+                    case MSGTYPE_APP: {
+                        TagPanel attachmentPanel = (TagPanel) getInvoker();
+                        obj = attachmentPanel.getTag();
+                        break;
+                    }
+                    default:
+                        break;
+                }
+                if (obj == null) {
+                    return;
+                }
+                Message item = (Message) obj;
+                if (StringUtils.isNotEmpty(item.getFilePath())) {
+                    ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
+                        @Override
+                        public void run() {
 
-                            File file = new File(finalPath);
+                            File file = new File(item.getFilePath());
                             if (file.exists()) {
                                 try {
-                                    Desktop.getDesktop().open(file.getParentFile());
+                                    Runtime.getRuntime().exec(
+                                            "rundll32 SHELL32.DLL,ShellExec_RunDLL "
+                                                    + "Explorer.exe /select," + file.getAbsolutePath());
+                                   // Desktop.getDesktop().open(file.getParentFile());
                                 } catch (IOException ioException) {
                                     ioException.printStackTrace();
                                 }
                             }
-                           }});
                         }
+                    });
+                }
 
 
             }
         });
+
         this.add(copy);
         this.add(delItem);
         this.add(revokeItem);
@@ -357,6 +249,14 @@ public class MessagePopupMenu extends JPopupMenu {
 
     public void show(Component invoker, int x, int y, int messageType) {
         this.messageType = WXReceiveMsgCodeEnum.getByCode(messageType);
+        switch (this.messageType) {
+            case MSGTYPE_TEXT:
+                remove(showPathItem);
+                break;
+            default:
+                add(showPathItem);
+
+        }
         super.show(invoker, x, y);
     }
 }
