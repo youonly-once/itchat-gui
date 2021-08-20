@@ -12,7 +12,6 @@ import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.swing.adapter.ViewHolder;
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.adapter.message.MessageAdapter;
-import cn.shu.wechat.swing.adapter.message.app.MessageAttachmentViewHolder;
 import cn.shu.wechat.swing.adapter.message.app.MessageRightAttachmentViewHolder;
 import cn.shu.wechat.swing.adapter.message.image.MessageRightImageViewHolder;
 import cn.shu.wechat.swing.adapter.message.video.MessageRightVideoViewHolder;
@@ -22,14 +21,13 @@ import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.swing.components.RCListView;
 import cn.shu.wechat.swing.components.message.FileEditorThumbnail;
 import cn.shu.wechat.swing.components.message.RemindUserPopup;
-import cn.shu.wechat.swing.db.model.FileAttachment;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
 import cn.shu.wechat.swing.listener.ExpressionListener;
-import cn.shu.wechat.swing.tasks.DownloadTask;
-import cn.shu.wechat.swing.tasks.HttpResponseListener;
 import cn.shu.wechat.swing.tasks.UploadTaskCallback;
-import cn.shu.wechat.swing.utils.*;
+import cn.shu.wechat.swing.utils.FileCache;
+import cn.shu.wechat.swing.utils.ImageUtil;
+import cn.shu.wechat.swing.utils.MimeTypeUtil;
 import cn.shu.wechat.utils.DateUtils;
 import cn.shu.wechat.utils.MediaUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
@@ -866,12 +864,12 @@ public class ChatPanel extends ParentAvailablePanel {
         openFile(message.getFilePath());
     }
 
-    /**
+    /*  *//**
      * 下载文件
      *
      * @param fileAttachment
      * @param messageId
-     */
+     *//*
     private void downloadFile(FileAttachment fileAttachment, String messageId) {
         final DownloadTask task = new DownloadTask(new HttpUtil.ProgressListener() {
             @Override
@@ -934,7 +932,7 @@ public class ChatPanel extends ParentAvailablePanel {
 
         //String url = Launcher.HOSTNAME + fileAttachment.getLink() + "?rc_uid=" + Core.getUserSelf().getUsername() + "&rc_token=" + currentUser.getAuthToken();
         // task.execute(url);
-    }
+    }*/
 
     /**
      * 使用默认程序打开文件

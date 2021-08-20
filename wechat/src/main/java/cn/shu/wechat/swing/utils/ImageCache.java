@@ -2,7 +2,6 @@ package cn.shu.wechat.swing.utils;
 
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.app.Launcher;
-
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 
 import javax.imageio.ImageIO;
@@ -143,7 +142,7 @@ public class ImageCache {
                 listener.onSuccess(icon, cacheFile.getAbsolutePath());
             } else {
                 try {
-                    byte[] data;
+                    byte[] data = new byte[0];
 
                     String reqUrl = buildRemoteImageUrl(url);
 
@@ -157,7 +156,7 @@ public class ImageCache {
                     // 接收的图像，从服务器获取并缓存
                     else {
                         System.out.println("服务器获取图片：" + reqUrl);
-                        data = HttpUtil.download(reqUrl);
+                        // data = HttpUtil.download(reqUrl);
                     }
 
 

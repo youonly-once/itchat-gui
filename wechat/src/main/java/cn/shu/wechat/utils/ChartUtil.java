@@ -38,7 +38,6 @@ import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.general.DatasetUtils;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
-import org.junit.Test;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -160,7 +159,7 @@ public class ChartUtil {
     /**
      * 生成折线图
      */
-    @Test
+
     public void makeLineAndShapeChart() {
         double[][] data = new double[][]{{672, 766, 223, 540, 126},
                 {325, 521, 210, 340, 106}, {332, 256, 523, 240, 526}};
@@ -187,7 +186,7 @@ public class ChartUtil {
     /**
      * 生成柱状图
      */
-    @Test
+
     public void makeBarChart() {
         double[][] data = new double[][]{{672, 766, 223, 540, 126}};
         String[] rowKeys = {"苹果"};
@@ -201,7 +200,7 @@ public class ChartUtil {
     /**
      * 生成柱状图
      */
-    @Test
+
     public void makeBarChart2() {
         double[][] data = new double[][]{{672, 766, 223, 540, 126}};
         String[] rowKeys = {"苹果"};
@@ -213,7 +212,7 @@ public class ChartUtil {
     /**
      * 生成堆栈柱状图
      */
-    @Test
+
     public void makeStackedBarChart() {
         double[][] data = new double[][]{{0.21, 0.66, 0.23, 0.40, 0.26},
                 {0.25, 0.21, 0.10, 0.40, 0.16}};

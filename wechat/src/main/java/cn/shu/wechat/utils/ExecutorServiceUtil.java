@@ -1,11 +1,7 @@
 package cn.shu.wechat.utils;
 
-import org.apache.tomcat.util.threads.TaskThreadFactory;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 线程池工具类
@@ -25,7 +21,8 @@ public class ExecutorServiceUtil {
             , 0
             , TimeUnit.MICROSECONDS
             , new SynchronousQueue<>()
-            , new TaskThreadFactory("HeadImgDownloadPool-Thread-", false, Thread.NORM_PRIORITY));
+            , new MyThreadFactory("HeadImgDownloadPool-Thread-", false, Thread.NORM_PRIORITY)
+    );
 
     /**
      * 全局线程池
@@ -36,7 +33,7 @@ public class ExecutorServiceUtil {
             , 0L
             , TimeUnit.SECONDS
             , new SynchronousQueue<>()
-            , new TaskThreadFactory("GlobalPool-Thread-", false, 6)
+            , new MyThreadFactory("GlobalPool-Thread-", false, 6)
     );
 
     public static ExecutorService getReceivingExecutorService() {
@@ -52,10 +49,30 @@ public class ExecutorServiceUtil {
             , 0L
             , TimeUnit.SECONDS
             , new SynchronousQueue<>()
-            , new TaskThreadFactory("Receiving-Thread-", false, 6)
+            , new MyThreadFactory("Receiving-Thread-", false, 6)
     );
 
+    static class MyThreadFactory implements ThreadFactory {
+        private final AtomicInteger integer = new AtomicInteger();
+        private final String prefix;
+        private final boolean daemon;
+        private final int priority;
 
+        public MyThreadFactory(String prefix, boolean daemon, int priority) {
+            this.prefix = prefix;
+            this.daemon = daemon;
+            this.priority = priority;
+        }
+
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread thread = new Thread(r);
+            thread.setDaemon(daemon);
+            thread.setPriority(priority);
+            thread.setName(prefix + integer.getAndIncrement());
+            return thread;
+        }
+    }
     public static ExecutorService getGlobalExecutorService() {
         return globalExecutorService;
     }
