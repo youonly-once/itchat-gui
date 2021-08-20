@@ -33,7 +33,7 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
     }
 
     @Override
-    public RoomMembersItemViewHolder onCreateViewHolder(int viewType, int position) {
+    public RoomMembersItemViewHolder onCreateViewHolder(int viewType,int subViewType, int position) {
         return new RoomMembersItemViewHolder();
     }
 

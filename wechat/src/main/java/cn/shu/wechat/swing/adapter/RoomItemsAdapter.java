@@ -5,11 +5,10 @@ import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
-import cn.shu.wechat.swing.panels.RoomChatPanel;
+import cn.shu.wechat.swing.panels.RoomChatContainer;
 import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.TimeUtil;
-import cn.shu.wechat.utils.CommonTools;
 import com.alibaba.fastjson.JSONObject;
 
 import javax.swing.*;
@@ -49,7 +48,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
     }
 
     @Override
-    public RoomItemViewHolder onCreateViewHolder(int viewType, int position) {
+    public RoomItemViewHolder onCreateViewHolder(int viewType,int subViewType,  int position) {
         //避免重复创建
         RoomItemViewHolder roomItemViewHolder;
         if (viewHolders.size() > position){
@@ -105,7 +104,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             viewHolder.unreadCount.setVisible(false);
         }
         // 设置是否激活
-        if (roomItem.getRoomId().equals(RoomChatPanel.getContext().getCurrRoomId())) {
+        if (roomItem.getRoomId().equals(RoomChatContainer.getContext().getCurrRoomId())) {
             setBackground(viewHolder, Colors.ITEM_SELECTED);
             selectedViewHolder = viewHolder;
         }else{

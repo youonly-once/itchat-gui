@@ -1,9 +1,7 @@
 package cn.shu.wechat.swing.adapter.search;
 
-import cn.shu.wechat.beans.tuling.request.UserInfo;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.adapter.BaseAdapter;
-import cn.shu.wechat.swing.adapter.RoomItemViewHolder;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.constant.SearchResultType;
 import cn.shu.wechat.swing.db.model.FileAttachment;
@@ -16,16 +14,13 @@ import cn.shu.wechat.swing.panels.*;
 import cn.shu.wechat.swing.tasks.DownloadTask;
 import cn.shu.wechat.swing.tasks.HttpResponseListener;
 import cn.shu.wechat.swing.utils.*;
-import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
-import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -80,7 +75,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
 
 
     @Override
-    public SearchResultItemViewHolder onCreateViewHolder(int viewType, int position) {
+    public SearchResultItemViewHolder onCreateViewHolder(int viewType,int subViewType,  int position) {
         switch (viewType) {
             case VIEW_TYPE_CONTACTS_ROOM: {
                 //避免重复创建
@@ -98,7 +93,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
                 return holder;
             }
             case VIEW_TYPE_MESSAGE: {
-                return new SearchResultMessageItemViewHolder();
+                return new SearchResultMessageViewHolder();
             }
             case VIEW_TYPE_FILE: {
                 return new SearchResultFileItemViewHolder();
@@ -115,7 +110,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
 
         if (viewHolder instanceof SearchResultUserItemViewHolder) {
             processContactsOrRoomsResult(viewHolder, item);
-        } else if (viewHolder instanceof SearchResultMessageItemViewHolder) {
+        } else if (viewHolder instanceof SearchResultMessageViewHolder) {
             processMessageResult(viewHolder, item);
         } else if (viewHolder instanceof SearchResultFileItemViewHolder) {
             processFileResult(viewHolder, item);
@@ -193,7 +188,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
      * @param item
      */
     private void processMessageResult(SearchResultItemViewHolder viewHolder, SearchResultItem item) {
-        SearchResultMessageItemViewHolder holder = (SearchResultMessageItemViewHolder) viewHolder;
+        SearchResultMessageViewHolder holder = (SearchResultMessageViewHolder) viewHolder;
         Room room = null;
 
         Message message = null;
@@ -402,8 +397,8 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
         holder.setBackground(color);
         if (holder instanceof SearchResultUserItemViewHolder) {
             ((SearchResultUserItemViewHolder) holder).name.setBackground(color);
-        } else if (holder instanceof SearchResultMessageItemViewHolder) {
-            ((SearchResultMessageItemViewHolder) holder).nameBrief.setBackground(color);
+        } else if (holder instanceof SearchResultMessageViewHolder) {
+            ((SearchResultMessageViewHolder) holder).nameBrief.setBackground(color);
         } else if (holder instanceof SearchResultFileItemViewHolder) {
             ((SearchResultFileItemViewHolder) holder).nameProgressPanel.setBackground(color);
         }
@@ -417,7 +412,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
         //添加房间
         RoomsPanel.getContext().addRoomOrOpenRoom(roomId,"",0);
         //添加聊天房
-         RoomChatPanel.getContext().createAndShow(roomId);
+         RoomChatContainer.getContext().createAndShow(roomId);
 
     }
 

@@ -4,7 +4,10 @@ import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.beans.msg.url.WXMsgUrl;
 import cn.shu.wechat.beans.pojo.Contacts;
+import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
+import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
 import cn.shu.wechat.swing.adapter.BaseAdapter;
 import cn.shu.wechat.swing.adapter.ViewHolder;
 import cn.shu.wechat.swing.adapter.message.app.*;
@@ -24,16 +27,14 @@ import cn.shu.wechat.swing.components.UserInfoPopup;
 import cn.shu.wechat.swing.components.message.MessageImageLabel;
 import cn.shu.wechat.swing.components.message.MessagePopupMenu;
 import cn.shu.wechat.swing.components.message.RCMessageBubble;
-import cn.shu.wechat.swing.db.model.Message;
-import cn.shu.wechat.swing.entity.MessageItem;
-import cn.shu.wechat.swing.entity.MessageItem.*;
 import cn.shu.wechat.swing.frames.ImageViewerFrame;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.helper.AttachmentIconHelper;
 import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
 import cn.shu.wechat.swing.panels.ChatPanel;
-import cn.shu.wechat.swing.panels.RoomChatPanel;
+import cn.shu.wechat.swing.panels.RoomChatContainer;
 import cn.shu.wechat.swing.utils.*;
+import cn.shu.wechat.utils.DateUtils;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.SleepUtils;
 import javazoom.jl.player.Player;
@@ -54,6 +55,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +65,7 @@ import java.util.Map;
  */
 @Log4j2
 public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
-    private final List<MessageItem> messageItems;
+    private final List<Message> messageItems;
     private final RCListView listView;
     private final AttachmentIconHelper attachmentIconHelper = new AttachmentIconHelper();
     private final ImageCache imageCache;
@@ -74,7 +76,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
     MessageViewHolderCacheHelper messageViewHolderCacheHelper;
 
-    public MessageAdapter(List<MessageItem> messageItems, RCListView listView, MessageViewHolderCacheHelper messageViewHolderCacheHelper) {
+    public MessageAdapter(List<Message> messageItems, RCListView listView, MessageViewHolderCacheHelper messageViewHolderCacheHelper) {
         this.messageItems = messageItems;
         this.listView = listView;
 
@@ -86,132 +88,158 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        return messageItems.get(position).getMessageType();
+        return messageItems.get(position).getMsgType();
+    }
+
+    @Override
+    public int getItemSubViewType(int position) {
+        Integer appMsgType = messageItems.get(position).getAppMsgType();
+        return appMsgType == null?0:appMsgType;
     }
 
     @Override
     public boolean isGroup(int position) {
-        return messageItems.get(position).getSenderId().startsWith("@@");
+        return messageItems.get(position).getFromUsername().startsWith("@@");
     }
 
     @Override
-    public BaseMessageViewHolder onCreateViewHolder(int viewType, int position) {
-        MessageItem messageItem = messageItems.get(position);
-        switch (viewType) {
-            case MessageItem.SYSTEM_MESSAGE: {
+    public BaseMessageViewHolder onCreateViewHolder(int viewType,int subViewType, int position) {
+        Message messageItem = messageItems.get(position);
+        boolean isSelf = Core.getUserName().equals(messageItem.getFromUsername());
+        switch (WXReceiveMsgCodeEnum.getByCode(viewType)) {
+            case MSGTYPE_SYS:
+            case MSGTYPE_STATUSNOTIFY: {
                 MessageSystemMessageViewHolder holder = messageViewHolderCacheHelper.tryGetSystemMessageViewHolder();
                 if (holder == null) {
                     holder = new MessageSystemMessageViewHolder();
                 }
-
                 return holder;
             }
-            case MessageItem.RIGHT_TEXT: {
-                MessageRightTextViewHolder holder = messageViewHolderCacheHelper.tryGetRightTextViewHolder();
-                if (holder == null) {
-                    holder = new MessageRightTextViewHolder();
+            case MSGTYPE_TEXT: {
+                if (isSelf) {
+                    MessageRightTextViewHolder holder = messageViewHolderCacheHelper.tryGetRightTextViewHolder();
+                    if (holder == null) {
+                        holder = new MessageRightTextViewHolder();
+                    }
+
+                    return holder;
+                } else {
+                    MessageLeftTextViewHolder holder = messageViewHolderCacheHelper.tryGetLeftTextViewHolder();
+                    if (holder == null) {
+                        holder = new MessageLeftTextViewHolder(messageItem.isGroup());
+                    }
+
+                    return holder;
                 }
-
-                return holder;
             }
-            case MessageItem.LEFT_TEXT: {
-                MessageLeftTextViewHolder holder = messageViewHolderCacheHelper.tryGetLeftTextViewHolder();
-                if (holder == null) {
-                    holder = new MessageLeftTextViewHolder(messageItem.isGroupable());
+            case MSGTYPE_IMAGE:
+            case MSGTYPE_EMOTICON: {
+                if (isSelf) {
+                    MessageRightImageViewHolder holder = messageViewHolderCacheHelper.tryGetRightImageViewHolder();
+                    if (holder == null) {
+                        holder = new MessageRightImageViewHolder();
+                    }
+
+                    return holder;
+                } else {
+                    MessageLeftImageViewHolder holder = messageViewHolderCacheHelper.tryGetLeftImageViewHolder();
+                    if (holder == null) {
+                        holder = new MessageLeftImageViewHolder(messageItem.isGroup());
+                    }
+
+                    return holder;
                 }
-
-                return holder;
             }
-            case MessageItem.RIGHT_IMAGE: {
-                MessageRightImageViewHolder holder = messageViewHolderCacheHelper.tryGetRightImageViewHolder();
-                if (holder == null) {
-                    holder = new MessageRightImageViewHolder();
+            case MSGTYPE_VIDEO:{
+                if (isSelf) {
+                    MessageRightVideoViewHolder holder = messageViewHolderCacheHelper.tryGetRightVideoViewHolder();
+                    if (holder == null) {
+                        holder = new MessageRightVideoViewHolder(
+                                ImageUtil.getScaleDimen(messageItem.getImgWidth()
+                                        , messageItem.getImgHeight()));
+                    }
+
+                    return holder;
+                } else {
+                    MessageLeftVideoViewHolder holder = messageViewHolderCacheHelper.tryGetLeftVideoViewHolder();
+                    if (holder == null) {
+                        holder = new MessageLeftVideoViewHolder(messageItem.isGroup(),
+                                ImageUtil.getScaleDimen(messageItem.getImgWidth()
+                                        , messageItem.getImgHeight()));
+                    }
+
+                    return holder;
                 }
-
-                return holder;
             }
-            case MessageItem.LEFT_IMAGE: {
-                MessageLeftImageViewHolder holder = messageViewHolderCacheHelper.tryGetLeftImageViewHolder();
-                if (holder == null) {
-                    holder = new MessageLeftImageViewHolder(messageItem.isGroupable());
+            case MSGTYPE_APP:{
+               switch (WXReceiveMsgCodeOfAppEnum.getByCode(subViewType)){
+                   case FILE:{
+                       if (isSelf){
+                           MessageRightAttachmentViewHolder holder = messageViewHolderCacheHelper.tryGetRightAttachmentViewHolder();
+                           if (holder == null) {
+                               holder = new MessageRightAttachmentViewHolder();
+                           }
+
+                           return holder;
+                       }else {
+                           MessageLeftAttachmentViewHolder holder = messageViewHolderCacheHelper.tryGetLeftAttachmentViewHolder();
+                           if (holder == null) {
+                               holder = new MessageLeftAttachmentViewHolder(messageItem.isGroup());
+                           }
+
+                           return holder;
+                       }
+                   }
+                   default:
+                   case LINK:{
+                       if (isSelf){
+                           return new MessageRightLinkOfAppViewHolder();
+
+                       }else {
+                           return new MessageLeftLinkOfAppViewHolder(messageItem.isGroup());
+                       }
+                   }
+                   case PICTURE:
+                   case PROGRAM:{
+                      if (isSelf){
+                           MessageLeftProgramOfAppViewHolder holder = messageViewHolderCacheHelper.tryGetLeftProgramOfAppViewHolder();
+                           if (holder == null) {
+                               holder = new MessageLeftProgramOfAppViewHolder(messageItem.isGroup());
+                           }
+
+                           return holder;
+                       }
+                       else {
+                           MessageRightProgramOfAppViewHolder holder = messageViewHolderCacheHelper.tryGetRightProgramOfAppViewHolder();
+                           if (holder == null) {
+                               holder = new MessageRightProgramOfAppViewHolder();
+                           }
+
+                           return holder;
+                       }
+                   }
+
+               }
+            }
+
+            case MSGTYPE_VOICE: {
+                if (isSelf) {
+                    MessageLeftVoiceViewHolder holder = messageViewHolderCacheHelper.tryGetLeftVoiceViewHolder();
+                    if (holder == null) {
+                        holder = new MessageLeftVoiceViewHolder(messageItem.isGroup());
+                    }
+
+                    return holder;
+                } else {
+                    MessageRightVoiceViewHolder holder = messageViewHolderCacheHelper.tryGetRightVoiceViewHolder();
+                    if (holder == null) {
+                        holder = new MessageRightVoiceViewHolder();
+                    }
+
+                    return holder;
                 }
+            }
 
-                return holder;
-            }
-            case MessageItem.LEFT_VIDEO: {
-                MessageLeftVideoViewHolder holder = messageViewHolderCacheHelper.tryGetLeftVideoViewHolder();
-                if (holder == null) {
-                    holder = new MessageLeftVideoViewHolder(messageItem.isGroupable(),
-                            ImageUtil.getScaleDimen(messageItem.getVideoAttachmentItem().getSalveImgWidth()
-                                    , messageItem.getVideoAttachmentItem().getSalveImgHeight()));
-                }
-
-                return holder;
-            }
-            case MessageItem.RIGHT_VIDEO: {
-                MessageRightVideoViewHolder holder = messageViewHolderCacheHelper.tryGetRightVideoViewHolder();
-                if (holder == null) {
-                    holder = new MessageRightVideoViewHolder(
-                            ImageUtil.getScaleDimen(messageItem.getVideoAttachmentItem().getSalveImgWidth()
-                                    , messageItem.getVideoAttachmentItem().getSalveImgHeight()));
-                }
-
-                return holder;
-            }
-            case MessageItem.LEFT_LINK: {
-                return new MessageLeftLinkOfAppViewHolder(messageItem.isGroupable());
-            }
-            case MessageItem.RIGHT_LINK: {
-                return new MessageRightLinkOfAppViewHolder();
-            }
-            case MessageItem.LEFT_VOICE: {
-                MessageLeftVoiceViewHolder holder = messageViewHolderCacheHelper.tryGetLeftVoiceViewHolder();
-                if (holder == null) {
-                    holder = new MessageLeftVoiceViewHolder(messageItem.isGroupable());
-                }
-
-                return holder;
-            }
-            case MessageItem.RIGHT_VOICE: {
-                MessageRightVoiceViewHolder holder = messageViewHolderCacheHelper.tryGetRightVoiceViewHolder();
-                if (holder == null) {
-                    holder = new MessageRightVoiceViewHolder();
-                }
-
-                return holder;
-            }
-            case MessageItem.LEFT_PROGRAM_OF_APP: {
-                MessageLeftProgramOfAppViewHolder holder = messageViewHolderCacheHelper.tryGetLeftProgramOfAppViewHolder();
-                if (holder == null) {
-                    holder = new MessageLeftProgramOfAppViewHolder(messageItem.isGroupable());
-                }
-
-                return holder;
-            }
-            case MessageItem.RIGHT_PROGRAM_OF_APP: {
-                MessageRightProgramOfAppViewHolder holder = messageViewHolderCacheHelper.tryGetRightProgramOfAppViewHolder();
-                if (holder == null) {
-                    holder = new MessageRightProgramOfAppViewHolder();
-                }
-
-                return holder;
-            }
-            case MessageItem.RIGHT_ATTACHMENT: {
-                MessageRightAttachmentViewHolder holder = messageViewHolderCacheHelper.tryGetRightAttachmentViewHolder();
-                if (holder == null) {
-                    holder = new MessageRightAttachmentViewHolder();
-                }
-
-                return holder;
-            }
-            case MessageItem.LEFT_ATTACHMENT: {
-                MessageLeftAttachmentViewHolder holder = messageViewHolderCacheHelper.tryGetLeftAttachmentViewHolder();
-                if (holder == null) {
-                    holder = new MessageLeftAttachmentViewHolder(messageItem.isGroupable());
-                }
-
-                return holder;
-            }
             default:
         }
 
@@ -224,11 +252,14 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             return;
         }
 
-        final MessageItem item = messageItems.get(position);
-        MessageItem preItem = position == 0 ? null : messageItems.get(position - 1);
+        final Message item = messageItems.get(position);
+        Message preItem = position == 0 ? null : messageItems.get(position - 1);
 
-        processTimeAndAvatar(item, preItem, viewHolder);
-
+        try {
+            processTimeAndAvatar(item, preItem, viewHolder);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         if (viewHolder instanceof MessageSystemMessageViewHolder) {
             processSystemMessage(viewHolder, item);
         } else if (viewHolder instanceof MessageRightTextViewHolder) {
@@ -262,24 +293,23 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         }
     }
 
-    private void processLeftProgramOfAppMessage(BaseMessageViewHolder viewHolder, MessageItem item) {
+    private void processLeftProgramOfAppMessage(BaseMessageViewHolder viewHolder, Message item) {
         MessageLeftProgramOfAppViewHolder appViewHolder = (MessageLeftProgramOfAppViewHolder) viewHolder;
-        appViewHolder.sender.setText(item.getSenderUsername());
+        appViewHolder.sender.setText(item.getPlainName());
         processProgramOfAppMessage(viewHolder,item);
     }
 
-    private void processRightProgramOfAppMessage(BaseMessageViewHolder viewHolder, MessageItem item) {
+    private void processRightProgramOfAppMessage(BaseMessageViewHolder viewHolder, Message item) {
 
         processProgramOfAppMessage(viewHolder,item);
     }
-    private void processProgramOfAppMessage(BaseMessageViewHolder viewHolder, MessageItem item){
+    private void processProgramOfAppMessage(BaseMessageViewHolder viewHolder, Message item){
         MessageProgramOfAppViewHolder appViewHolder = (MessageProgramOfAppViewHolder) viewHolder;
-        ProgramOfAppItem programOfAppItem = item.getProgramOfAppItem();
-        appViewHolder.title.setText(programOfAppItem.getTitle());
-        appViewHolder.sourceName.setText(programOfAppItem.getSourceName());
-        if (StringUtils.isNotEmpty(programOfAppItem.getSourceIconUrl())){
+        appViewHolder.title.setText(item.getTitle());
+        appViewHolder.sourceName.setText(item.getSourceName());
+        if (StringUtils.isNotEmpty(item.getSourceIconUrl())){
             try {
-                ImageIcon imageIcon = new ImageIcon(new URL(programOfAppItem.getSourceIconUrl()));
+                ImageIcon imageIcon = new ImageIcon(new URL(item.getSourceIconUrl()));
                 ImageUtil.preferredImageSize(imageIcon, 16);
                 appViewHolder.sourceIcon.setIcon(imageIcon);
 
@@ -288,19 +318,19 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             }
         }
 
-        if (StringUtils.isEmpty(programOfAppItem.getImageUrl())){
+        if (StringUtils.isEmpty(item.getThumbUrl())){
             appViewHolder.imageLabel.setIcon(IconUtil.getIcon(this,"/image/image_loading.gif"));
             new SwingWorker<Object,Object>(){
                 ImageIcon imageIcon = null;
                 @Override
                 protected Object doInBackground() throws Exception {
-                    byte[] bytes = DownloadTools.downloadImgByteByMsgID(programOfAppItem.getMsgId(), WXMsgUrl.BIG_TYPE);
+                    byte[] bytes = DownloadTools.downloadImgByteByMsgID(item.getMsgId(), WXMsgUrl.BIG_TYPE);
                     if (bytes == null || bytes.length<=0){
-                        bytes = DownloadTools.downloadImgByteByMsgID(programOfAppItem.getMsgId(), WXMsgUrl.SLAVE_TYPE);
+                        bytes = DownloadTools.downloadImgByteByMsgID(item.getMsgId(), WXMsgUrl.SLAVE_TYPE);
                     }
                     if (bytes != null && bytes.length>0) {
                         if (ImageUtil.isGIF(bytes)) {
-                            imageIcon = ImageUtil.preferredGifSize(bytes, programOfAppItem.getImageWidth(), programOfAppItem.getImageHeight());
+                            imageIcon = ImageUtil.preferredGifSize(bytes, item.getImgWidth(), item.getImgHeight());
                         }else{
                            imageIcon = new ImageIcon(bytes);
                            ImageUtil.preferredImageSize(imageIcon, 200);
@@ -319,7 +349,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             }.execute();
         }else{
             try {
-                appViewHolder.imageLabel.setIcon(new ImageIcon(new URL(programOfAppItem.getImageUrl())));
+                appViewHolder.imageLabel.setIcon(new ImageIcon(new URL(item.getThumbUrl())));
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
@@ -332,9 +362,9 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      * @param viewHolder
      * @param item
      */
-    private void processSystemMessage(ViewHolder viewHolder, MessageItem item) {
+    private void processSystemMessage(ViewHolder viewHolder, Message item) {
         MessageSystemMessageViewHolder holder = (MessageSystemMessageViewHolder) viewHolder;
-        holder.text.setText(item.getMessageContent());
+        holder.text.setText(item.getPlaintext());
     }
 
     /**
@@ -343,24 +373,23 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      * @param viewHolder
      * @param item
      */
-    private void processLeftAttachmentMessage(ViewHolder viewHolder, MessageItem item) {
+    private void processLeftAttachmentMessage(ViewHolder viewHolder, Message item) {
         MessageLeftAttachmentViewHolder holder = (MessageLeftAttachmentViewHolder) viewHolder;
-        FileAttachmentItem fileAttachment = item.getFileAttachment();
 
-        String filePath = fileAttachment.getFilePath();
+        String filePath = item.getFilePath();
 
         Map<String, Object> map = new HashMap<>();
-        map.put("attachmentId", fileAttachment.getId());
+        map.put("attachmentId", item.getId());
         map.put("name", filePath);
         map.put("messageId", item.getId());
-        map.put("filepath", fileAttachment.getFilePath());
+        map.put("filepath", item.getFilePath());
         holder.attachmentPanel.setTag(map);
 
         ImageIcon attachmentTypeIcon = attachmentIconHelper.getImageIcon(filePath);
         holder.attachmentIcon.setIcon(attachmentTypeIcon);
-        holder.attachmentTitle.setText(fileAttachment.getFileName());
-        holder.sender.setText(item.getSenderUsername());
-        holder.sizeLabel.setText(fileCache.fileSizeString(fileAttachment.getFileSize()));
+        holder.attachmentTitle.setText(item.getFileName());
+        holder.sender.setText(item.getPlainName());
+        holder.sizeLabel.setText(fileCache.fileSizeString(item.getFileSize()));
 
         setAttachmentClickListener(holder, item);
 
@@ -369,7 +398,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         listView.setScrollHiddenOnMouseLeave(holder.attachmentTitle);
 
         // 绑定右键菜单
-        attachPopupMenu(viewHolder, MessageItem.LEFT_ATTACHMENT);
+        attachPopupMenu(viewHolder,item);
     }
 
     /**
@@ -378,20 +407,19 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      * @param viewHolder
      * @param item
      */
-    private void processRightAttachmentMessage(ViewHolder viewHolder, MessageItem item) {
+    private void processRightAttachmentMessage(ViewHolder viewHolder, Message item) {
         MessageRightAttachmentViewHolder holder = (MessageRightAttachmentViewHolder) viewHolder;
-        FileAttachmentItem fileAttachment = item.getFileAttachment();
 
         Map<String, Object> map = new HashMap<>();
-        map.put("attachmentId", fileAttachment.getId());
-        String filename = fileAttachment.getFileName();
+        map.put("attachmentId", item.getId());
+        String filename = item.getFileName();
         map.put("name", filename);
         map.put("messageId", item.getId());
-        map.put("filepath", fileAttachment.getFilePath());
+        map.put("filepath", item.getFilePath());
         holder.attachmentPanel.setTag(map);
         ImageIcon attachmentTypeIcon = attachmentIconHelper.getImageIcon(filename);
         holder.attachmentIcon.setIcon(attachmentTypeIcon);
-        holder.attachmentTitle.setText(fileAttachment.getFileName());
+        holder.attachmentTitle.setText(item.getFileName());
 
         if (item.getProgress() != 0 && item.getProgress() != 100) {
             Message msg = null;//= messageService.findById(item.getId());
@@ -441,13 +469,13 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         setAttachmentClickListener(holder, item);
 
         if (item.getProgress() > 0) {
-            holder.sizeLabel.setText(fileCache.fileSizeString(fileAttachment.getFileSize()));
+            holder.sizeLabel.setText(fileCache.fileSizeString(item.getFileSize()));
         } else {
             holder.sizeLabel.setText("等待上传...");
         }
 
         // 绑定右键菜单
-        attachPopupMenu(viewHolder, MessageItem.RIGHT_ATTACHMENT);
+        attachPopupMenu(viewHolder, item);
 
         listView.setScrollHiddenOnMouseLeave(holder.attachmentPanel);
         listView.setScrollHiddenOnMouseLeave(holder.messageBubble);
@@ -460,7 +488,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      * @param viewHolder
      * @param item
      */
-    private void setAttachmentClickListener(MessageAttachmentViewHolder viewHolder, MessageItem item) {
+    private void setAttachmentClickListener(MessageAttachmentViewHolder viewHolder, Message item) {
         MessageMouseListener listener = new MessageMouseListener() {
             @Override
             public void mouseReleased(MouseEvent e) {
@@ -475,29 +503,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         viewHolder.attachmentTitle.addMouseListener(listener);
     }
 
-    /**
-     * 附件大小
-     *
-     * @param viewHolder
-     * @param item
-     */
-    private void processAttachmentSize(MessageAttachmentViewHolder viewHolder, MessageItem item) {
-        FileAttachmentItem attachment = item.getFileAttachment();
-        String path;
-        // 远程服务器文件
-        if (attachment.getFilePath().startsWith("/file-upload")) {
-            path = fileCache.tryGetFileCache(item.getFileAttachment().getId(), item.getFileAttachment().getFileName());
-        }
-        // 我自己上传的文件
-        else {
-            path = attachment.getFilePath();
-        }
-
-        if (path != null) {
-            viewHolder.sizeLabel.setVisible(true);
-            viewHolder.sizeLabel.setText(fileCache.fileSizeString(path));
-        }
-    }
 
     /**
      * 对方发送的图片
@@ -505,9 +510,9 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      * @param viewHolder
      * @param item
      */
-    private void processLeftImageMessage(ViewHolder viewHolder, MessageItem item) {
+    private void processLeftImageMessage(ViewHolder viewHolder, Message item) {
         MessageLeftImageViewHolder holder = (MessageLeftImageViewHolder) viewHolder;
-        holder.sender.setText(item.getSenderUsername());
+        holder.sender.setText(item.getPlainName());
 
         processImage(item, holder.image);
 
@@ -515,7 +520,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         listView.setScrollHiddenOnMouseLeave(holder.imageBubble);
 
         // 绑定右键菜单
-        attachPopupMenu(viewHolder, MessageItem.LEFT_IMAGE);
+        attachPopupMenu(viewHolder, item);
     }
 
     /**
@@ -524,11 +529,11 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      * @param viewHolder
      * @param item
      */
-    private void processLeftVoiceMessage(ViewHolder viewHolder, MessageItem item) {
+    private void processLeftVoiceMessage(ViewHolder viewHolder, Message item) {
         MessageLeftVoiceViewHolder holder = (MessageLeftVoiceViewHolder) viewHolder;
         processVoice(item, holder);
-        holder.sender.setText(item.getSenderUsername());
-        attachPopupMenu(viewHolder, MessageItem.LEFT_VOICE);
+        holder.sender.setText(item.getPlainName());
+        attachPopupMenu(viewHolder, item);
 
     }
 
@@ -538,10 +543,10 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      * @param viewHolder
      * @param item
      */
-    private void processRightVoiceMessage(ViewHolder viewHolder, MessageItem item) {
+    private void processRightVoiceMessage(ViewHolder viewHolder, Message item) {
         MessageRightVoiceViewHolder holder = (MessageRightVoiceViewHolder) viewHolder;
         processVoice(item, holder);
-        attachPopupMenu(viewHolder, MessageItem.RIGHT_VOICE);
+        attachPopupMenu(viewHolder, item);
 
     }
 
@@ -551,10 +556,10 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      * @param item
      * @param holder
      */
-    private void processVoice(MessageItem item, MessageVoiceViewHolder holder) {
+    private void processVoice(Message item, MessageVoiceViewHolder holder) {
 
-        holder.contentTagPanel.setTag(item.getVoiceAttachmentItem());
-        double len = item.getVoiceAttachmentItem().getVoiceLength() * 1.0;
+        holder.contentTagPanel.setTag("");
+        double len = item.getVoiceLength() * 1.0;
 
         len = len / 1000;
         long round = Math.round(len);
@@ -585,7 +590,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     closePlayer();
-                    String voicePath = item.getVoiceAttachmentItem().getVoicePath();
+                    String voicePath = item.getFilePath();
                     File file = new File(voicePath);
                     if (!file.exists()) {
                         Boolean aBoolean = DownloadTools.FILE_DOWNLOAD_STATUS.get(voicePath);
@@ -598,7 +603,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                         holder.removeUnreadPoint();
                         RCProgressBar progressBar = holder.progressBar;
                         progressBar.setVisible(true);
-                        progressBar.setMaximum((int) item.getVoiceAttachmentItem().getVoiceLength());
+                        progressBar.setMaximum(Integer.parseInt( String.valueOf(item.getVoiceLength())));
                         //刷新进度条
                         new SwingWorker<Object, Integer>() {
                             @Override
@@ -610,7 +615,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                                     public void run() {
                                         while (player != null) {
                                             if (player.isComplete()) {
-                                                publish((int) item.getVoiceAttachmentItem().getVoiceLength());
+                                                publish(Integer.parseInt( String.valueOf(item.getVoiceLength())));
                                                 break;
                                             } else {
                                                 publish(player.getPosition());
@@ -653,9 +658,9 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      * @param viewHolder
      * @param item
      */
-    private void processLeftVideoMessage(ViewHolder viewHolder, MessageItem item) {
+    private void processLeftVideoMessage(ViewHolder viewHolder, Message item) {
         MessageLeftVideoViewHolder holder = (MessageLeftVideoViewHolder) viewHolder;
-        holder.sender.setText(item.getSenderUsername());
+        holder.sender.setText(item.getPlainName());
 
         try {
             processVideo(item
@@ -666,12 +671,12 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        holder.videoComponent.setTag(item.getVideoAttachmentItem());
+        holder.videoComponent.setTag("");
         listView.setScrollHiddenOnMouseLeave(holder.videoComponent);
         listView.setScrollHiddenOnMouseLeave(holder.imageBubble);
 
         // 绑定右键菜单
-        attachPopupMenu(viewHolder, MessageItem.LEFT_VIDEO);
+        attachPopupMenu(viewHolder, item);
     }
 
     /**
@@ -680,7 +685,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      * @param viewHolder
      * @param item
      */
-    private void processRightVideoMessage(ViewHolder viewHolder, MessageItem item) {
+    private void processRightVideoMessage(ViewHolder viewHolder, Message item) {
         MessageRightVideoViewHolder holder = (MessageRightVideoViewHolder) viewHolder;
         try {
             processVideo(item
@@ -691,12 +696,12 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        holder.videoComponent.setTag(item.getVideoAttachmentItem());
+        holder.videoComponent.setTag("");
         listView.setScrollHiddenOnMouseLeave(holder.videoComponent);
         listView.setScrollHiddenOnMouseLeave(holder.imageBubble);
 
         // 绑定右键菜单
-        attachPopupMenu(viewHolder, MessageItem.RIGHT_VIDEO);
+        attachPopupMenu(viewHolder, item);
     }
 
     /**
@@ -705,7 +710,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      * @param viewHolder
      * @param item
      */
-    private void processRightImageMessage(ViewHolder viewHolder, MessageItem item) {
+    private void processRightImageMessage(ViewHolder viewHolder, Message item) {
         MessageRightImageViewHolder holder = (MessageRightImageViewHolder) viewHolder;
 
         processImage(item, holder.image);
@@ -732,7 +737,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         });
 
         // 绑定右键菜单
-        attachPopupMenu(viewHolder, MessageItem.RIGHT_IMAGE);
+        attachPopupMenu(viewHolder, item);
 
         listView.setScrollHiddenOnMouseLeave(holder.image);
         listView.setScrollHiddenOnMouseLeave(holder.imageBubble);
@@ -760,12 +765,11 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      * @param item 消息项
      * @throws IOException 视频缩略图读取异常
      */
-    private void processVideo(MessageItem item, JLabel timeLabel, JLabel playImgLabel, JLabel slaveImgLabel, JComponent videoComponent) throws IOException {
-        VideoAttachmentItem videoItem = item.getVideoAttachmentItem();
+    private void processVideo(Message item, JLabel timeLabel, JLabel playImgLabel, JLabel slaveImgLabel, JComponent videoComponent) throws IOException {
         //#############判断缩略图是否下载完成#########################
-        String slaveImgPath = videoItem.getSlaveImgPath();
+        String slaveImgPath = item.getSlavePath();
         Boolean aBoolean = DownloadTools.FILE_DOWNLOAD_STATUS.get(slaveImgPath);
-        timeLabel.setText(getSecString(videoItem.getVideoLength()));
+        timeLabel.setText(getSecString(item.getPlayLength()));
         if (aBoolean == null) {
             //缩略图下载失败
             //  holder.getSlaveImgLabel().setIcon(IconUtil.getIcon(this,"/image/image_error.png"))));
@@ -818,7 +822,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    ChatPanel.openFile(videoItem.getVideoPath());
+                    ChatPanel.openFile(item.getFilePath());
                 }
                 super.mouseReleased(e);
             }
@@ -831,21 +835,19 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      * @param item
      * @param imageLabel
      */
-    private void processImage(MessageItem item, MessageImageLabel imageLabel) {
-        final ImageAttachmentItem imageAttachment = item.getImageAttachment();
+    private void processImage(Message item, MessageImageLabel imageLabel) {
         //显示加载中
         ImageIcon imageIcon = IconUtil.getIcon(this,"/image/image_loading.gif");
         imageLabel.setIcon(imageIcon);
-        String slavePath = imageAttachment.getSlavePath();
-
-        if (StringUtils.isEmpty(slavePath)) {
-            slavePath = imageAttachment.getImagePath();
+        String filePath = item.getSlavePath();
+        if (StringUtils.isEmpty(filePath)) {
+            filePath = item.getFilePath();
         }
-        final String finalPath = slavePath;
+        final String finalPath = filePath;
         //标志
         Map<String, Object> map = new HashMap<>();
-        map.put("attachmentId", imageAttachment.getId());
-        map.put("url", imageAttachment.getImagePath());
+        map.put("attachmentId", item.getId());
+        map.put("url", item.getFilePath());
         map.put("messageId", item.getId());
         imageLabel.setTag(map);
 
@@ -863,7 +865,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 File file = new File(finalPath);
                 if (file.length()>0){
                     if (ImageUtil.isGIF(finalPath)){
-                        imageIcon = ImageUtil.preferredGifSize(finalPath, imageAttachment.getWidth(), imageAttachment.getHeight());
+                        imageIcon = ImageUtil.preferredGifSize(finalPath, item.getImgWidth(), item.getImgHeight());
                     }else{
                         imageIcon = imageCache.tryGetThumbCache(file);
                         ImageUtil.preferredImageSize(imageIcon);
@@ -887,20 +889,20 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                                 super.mouseClicked(e);
                                 return;
                             }
-                            File file = new File(imageAttachment.getImagePath());
+                            File file = new File(item.getFilePath());
                             new SwingWorker<Object, BufferedImage>() {
                                 @Override
                                 protected Object doInBackground() throws Exception {
                                     //阻塞
-                                    DownloadTools.awaitDownload(imageAttachment.getImagePath());
-                                    if (ImageUtil.isGIF(imageAttachment.getImagePath())){
-                                        ChatPanel.openFile(imageAttachment.getImagePath());
+                                    DownloadTools.awaitDownload(item.getFilePath());
+                                    if (ImageUtil.isGIF(item.getFilePath())){
+                                        ChatPanel.openFile(item.getFilePath());
                                     }else{
                                         if (file.exists() && file.length() <= 1024 * 1024) {
-                                            BufferedImage read = ImageIO.read(new File(imageAttachment.getImagePath()));
+                                            BufferedImage read = ImageIO.read(new File(item.getFilePath()));
                                             publish(read);
                                         } else {
-                                            ChatPanel.openFile(imageAttachment.getImagePath());
+                                            ChatPanel.openFile(item.getFilePath());
                                         }
                                     }
 
@@ -942,10 +944,10 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      * @param viewHolder
      * @param item
      */
-    private void processRightTextMessage(ViewHolder viewHolder, final MessageItem item) {
+    private void processRightTextMessage(ViewHolder viewHolder, final Message item) {
         MessageRightTextViewHolder holder = (MessageRightTextViewHolder) viewHolder;
 
-        holder.text.setText(item.getMessageContent());
+        holder.text.setText(item.getPlaintext());
 
         holder.text.setTag(item.getId());
 
@@ -956,7 +958,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         //registerMessageTextListener(holder.messageText, item);
 
         // 判断是否显示重发按钮
-        boolean needToUpdateResendStatus = !item.isNeedToResend() && System.currentTimeMillis() - item.getTimestamp() > 10 * 1000;
+        boolean needToUpdateResendStatus = false;/*!item.isNeedToResend() && System.currentTimeMillis() - item.getTimestamp() > 10 * 1000;*/
 
         if (item.isNeedToResend()) {
             if (needToUpdateResendStatus) {
@@ -985,11 +987,11 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     return;
                 }*/
 
-                System.out.println("重发消消息：" + item.getMessageContent());
+                System.out.println("重发消消息：" + item.getPlaintext());
 
                 // TODO: 向服务器重新发送消息
                 Message message = null;//= messageService.findById(item.getId());
-                message.setUpdatedAt(System.currentTimeMillis());
+                //message.setUpdatedAt(System.currentTimeMillis());
                 message.setNeedToResend(false);
                 //messageService.update(message);
 
@@ -998,7 +1000,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         });
 
         // 绑定右键菜单
-        attachPopupMenu(viewHolder, MessageItem.RIGHT_TEXT);
+        attachPopupMenu(viewHolder, item);
 
         listView.setScrollHiddenOnMouseLeave(holder.messageBubble);
         listView.setScrollHiddenOnMouseLeave(holder.text);
@@ -1010,63 +1012,71 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      * @param viewHolder
      * @param item
      */
-    private void processLeftTextMessage(ViewHolder viewHolder, final MessageItem item) {
+    private void processLeftTextMessage(ViewHolder viewHolder, final Message item) {
         MessageLeftTextViewHolder holder = (MessageLeftTextViewHolder) viewHolder;
 
-        holder.text.setText(item.getMessageContent() == null ? "[空消息]" : item.getMessageContent());
+        holder.text.setText(item.getPlaintext() == null ? "[空消息]" : item.getPlaintext());
         holder.text.setTag(item.getId());
 
-        holder.sender.setText(item.getSenderUsername());
+        holder.sender.setText(item.getPlainName());
 
         listView.setScrollHiddenOnMouseLeave(holder.messageBubble);
         listView.setScrollHiddenOnMouseLeave(holder.text);
-        attachPopupMenu(viewHolder, MessageItem.LEFT_TEXT);
+        attachPopupMenu(viewHolder, item);
     }
 
-    private void processLeftLinkMessage(ViewHolder viewHolder, MessageItem item) {
+    private void processLeftLinkMessage(ViewHolder viewHolder, Message item) {
         processLinkMessage(viewHolder, item);
-        ((MessageLeftLinkOfAppViewHolder) viewHolder).sender.setText(item.getSenderUsername());
-        attachPopupMenu(viewHolder, MessageItem.LEFT_LINK);
+        ((MessageLeftLinkOfAppViewHolder) viewHolder).sender.setText(item.getPlainName());
+        attachPopupMenu(viewHolder, item);
     }
 
-    private void processRightLinkMessage(ViewHolder viewHolder, MessageItem item) {
+    private void processRightLinkMessage(ViewHolder viewHolder, Message item) {
         processLinkMessage(viewHolder, item);
-        attachPopupMenu(viewHolder, MessageItem.RIGHT_LINK);
+        attachPopupMenu(viewHolder, item);
     }
 
-    private void processLinkMessage(ViewHolder viewHolder, MessageItem item) {
-        LinkAttachmentItem linkItem = item.getLinkAttachmentItem();
+    private void processLinkMessage(ViewHolder viewHolder, Message item) {
         MessageLinkOfAppViewHolder linkViewHolder = (MessageLinkOfAppViewHolder) viewHolder;
 
-        linkViewHolder.desc.setText(StringEscapeUtils.unescapeHtml4(linkItem.getDesc()));
-        linkViewHolder.title.setText(linkItem.getTitle());
-        if (StringUtils.isEmpty(linkItem.getSourceName())) {
+        linkViewHolder.desc.setText(StringEscapeUtils.unescapeHtml4(item.getDesc()));
+        linkViewHolder.title.setText(item.getTitle());
+        if (StringUtils.isEmpty(item.getSourceName())) {
             linkViewHolder.sourcePanel.setVisible(false);
         } else {
-            linkViewHolder.sourceName.setText(linkItem.getSourceName());
+            linkViewHolder.sourceName.setText(item.getSourceName());
         }
-        BufferedImage image = linkItem.getImage();
-        if (image == null && StringUtils.isNotEmpty(linkItem.getThumbUrl())) {
-            try {
-                image = ImageIO.read(new URL(linkItem.getThumbUrl()));
-            } catch (IOException e) {
-                e.printStackTrace();
+        new SwingWorker<Object,Object>(){
+            BufferedImage image = null;
+            @Override
+            protected Object doInBackground() throws Exception {
+                if (StringUtils.isNotEmpty(item.getThumbUrl())) {
+                    image = ImageIO.read(new URL(item.getThumbUrl()));
+                }else{
+                    image = DownloadTools.downloadImgByMsgID(item.getMsgId(),WXMsgUrl.SLAVE_TYPE);
+                }
+                return null;
             }
-        }
-        if (image!=null){
-            linkViewHolder.icon.setIcon(new ImageIcon(ImageUtil.preferredImageSize(image, MessageLinkOfAppViewHolder.THUMB_WIDTH)));
-            //有图片时缩短宽度，让其与无图的Panel尽量一致
-            linkViewHolder.desc.setColumns(16);
-        }
+
+            @Override
+            protected void done() {
+                if (image!=null){
+                    linkViewHolder.icon.setIcon(new ImageIcon(ImageUtil.preferredImageSize(image, MessageLinkOfAppViewHolder.THUMB_WIDTH)));
+                    //有图片时缩短宽度，让其与无图的Panel尽量一致
+                    linkViewHolder.desc.setColumns(16);
+                }
+            }
+        }.execute();
+
 
         //点击打开链接
         MessageMouseListener messageMouseListener = new MessageMouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    if (StringUtils.isNotEmpty(linkItem.getUrl())) {
+                    if (StringUtils.isNotEmpty(item.getUrl())) {
                         try {
-                            Desktop.getDesktop().browse(new URI(linkItem.getUrl()));
+                            Desktop.getDesktop().browse(new URI(item.getUrl()));
                         } catch (IOException | URISyntaxException ioException) {
                             ioException.printStackTrace();
                         }
@@ -1094,42 +1104,53 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      * @param preItem
      * @param holder
      */
-    private void processTimeAndAvatar(MessageItem item, MessageItem preItem, BaseMessageViewHolder holder) {
+    private void processTimeAndAvatar(Message item, Message preItem, BaseMessageViewHolder holder) throws ParseException {
+        long parse = item.getTimestamp();//DateUtils.parse(item.getCreateTime(), DateUtils.YYYY_MM_DD_HH_MM_SS);
         // 如果当前消息的时间与上条消息时间相差大于1分钟，则显示当前消息的时间
         if (preItem != null) {
-            if (TimeUtil.inTheSameMinute(item.getTimestamp(), preItem.getTimestamp())) {
+            if (TimeUtil.inTheSameMinute(parse
+                    , preItem.getTimestamp())) {
                 holder.time.setVisible(false);
             } else {
                 holder.time.setVisible(true);
-                holder.time.setText(TimeUtil.diff(item.getTimestamp(), true));
+                holder.time.setText(TimeUtil.diff(parse, true));
             }
         } else {
             holder.time.setVisible(true);
-            holder.time.setText(TimeUtil.diff(item.getTimestamp(), true));
+            holder.time.setText(TimeUtil.diff(parse, true));
+        }
+
+        String senderId = item.isGroup()&&! item.getFromUsername().equals(Core.getUserName())? item.getFromMemberOfGroupUsername()
+                : item.getFromUsername();
+
+        String roomId = item.getFromUsername();
+        if (roomId.equals(Core.getUserName())) {
+            roomId = item.getToUsername();
         }
 
         if (holder.avatar != null) {
             ImageIcon icon = null;
-            if (AvatarUtil.avatarExists(item.getSenderId())){
+            if (AvatarUtil.avatarExists(senderId)){
                 //已存在图片缓存
-                if (item.getRoomId().startsWith("@@")){
-                    icon = AvatarUtil.createOrLoadMemberAvatar(item.getRoomId(),item.getSenderId());
+                if (roomId.startsWith("@@")){
+                    icon = AvatarUtil.createOrLoadMemberAvatar(roomId,senderId);
 
                 }else {
-                    icon = AvatarUtil.createOrLoadUserAvatar(item.getSenderId());
+                    icon = AvatarUtil.createOrLoadUserAvatar(senderId);
                 }
                 holder.avatar.setIcon(icon);
             }else {
                 //异步从网络加载
+                String finalRoomId = roomId;
                 new SwingWorker<Object,Object>(){
                     ImageIcon icon = null;
                     @Override
                     protected Object doInBackground() throws Exception {
-                        if (item.getRoomId().startsWith("@@")){
-                            icon = AvatarUtil.createOrLoadMemberAvatar(item.getRoomId(),item.getSenderId());
+                        if (finalRoomId.startsWith("@@")){
+                            icon = AvatarUtil.createOrLoadMemberAvatar(finalRoomId,senderId);
 
                         }else {
-                            icon = AvatarUtil.createOrLoadUserAvatar(item.getRoomId());
+                            icon = AvatarUtil.createOrLoadUserAvatar(senderId);
                         }
                         return null;
                     }
@@ -1140,34 +1161,29 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 }.execute();
             }
 
-
-            //弹窗
-            if (item.getMessageType() >0) {
-
-                bindAvatarAction(holder.avatar, item);
-            }
+            bindAvatarAction(holder.avatar, item,senderId,roomId);
         }
 
     }
 
 
-    private void bindAvatarAction(JLabel avatarLabel, MessageItem item) {
+    private void bindAvatarAction(JLabel avatarLabel, Message item,String senderId,String roomId) {
 
         avatarLabel.addMouseListener(new MessageMouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 Contacts contacts = null;
-                if (item.isGroupable()) {
-                    contacts = ContactsTools.getMemberOfGroup(item.getRoomId(), item.getSenderId());
+                if (item.isGroup()) {
+                    contacts = ContactsTools.getMemberOfGroup(roomId, senderId);
                 } else {
-                    contacts = Core.getMemberMap().get(item.getSenderId());
+                    contacts = Core.getMemberMap().get(senderId);
                 }
                 if (contacts == null) {
-                    RoomChatPanel.getContext().get(RoomChatPanel.getContext().getCurrRoomId())
+                    RoomChatContainer.get(RoomChatContainer.getContext().getCurrRoomId())
                             .getTipPanel().setText("成员信息加载中...");
                     return;
                 }
-                contacts.setGroupName(item.getRoomId());
+                contacts.setGroupName(roomId);
                 UserInfoPopup instance = UserInfoPopup.getInstance();
                 instance.setContacts(contacts);
                 instance.show(e.getComponent(), e.getX(), e.getY());
@@ -1182,102 +1198,116 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         return messageItems.size();
     }
 
-    private void attachPopupMenu(ViewHolder viewHolder, int messageType) {
+    private void attachPopupMenu(ViewHolder viewHolder, Message item) {
         JComponent contentComponent = null;
         RCMessageBubble messageBubble = null;
+        WXReceiveMsgCodeEnum typeEnum = WXReceiveMsgCodeEnum.getByCode(item.getMsgType());
+        boolean isSelf = Core.getUserName().equals(item.getFromUsername());
+        switch (typeEnum) {
+            case MSGTYPE_TEXT: {
+                if (isSelf) {
+                    MessageRightTextViewHolder holder = (MessageRightTextViewHolder) viewHolder;
+                    contentComponent = holder.text;
+                    messageBubble = holder.messageBubble;
 
-        switch (messageType) {
-            case MessageItem.RIGHT_TEXT: {
-                MessageRightTextViewHolder holder = (MessageRightTextViewHolder) viewHolder;
-                contentComponent = holder.text;
-                messageBubble = holder.messageBubble;
+                } else {
+                    MessageLeftTextViewHolder holder = (MessageLeftTextViewHolder) viewHolder;
+                    contentComponent = holder.text;
+                    messageBubble = holder.messageBubble;
 
+                }
                 break;
             }
-            case MessageItem.LEFT_TEXT: {
-                MessageLeftTextViewHolder holder = (MessageLeftTextViewHolder) viewHolder;
-                contentComponent = holder.text;
-                messageBubble = holder.messageBubble;
-                break;
-            }
-            case MessageItem.RIGHT_IMAGE: {
-                MessageRightImageViewHolder holder = (MessageRightImageViewHolder) viewHolder;
-                contentComponent = holder.image;
-                messageBubble = holder.imageBubble;
-                break;
-            }
-            case MessageItem.LEFT_IMAGE: {
-                MessageLeftImageViewHolder holder = (MessageLeftImageViewHolder) viewHolder;
-                contentComponent = holder.image;
-                messageBubble = holder.imageBubble;
-                break;
-            }
-            case MessageItem.LEFT_VIDEO: {
-                MessageLeftVideoViewHolder holder = (MessageLeftVideoViewHolder) viewHolder;
-                contentComponent = holder.videoComponent;
-                messageBubble = holder.imageBubble;
-                break;
-            }
-            case MessageItem.RIGHT_VIDEO: {
-                MessageRightVideoViewHolder holder = (MessageRightVideoViewHolder) viewHolder;
-                contentComponent = holder.videoComponent;
-                messageBubble = holder.imageBubble;
-                break;
-            }
-            case MessageItem.LEFT_VOICE: {
-                MessageLeftVoiceViewHolder holder = (MessageLeftVoiceViewHolder) viewHolder;
-                contentComponent = holder.messageBubble;
-                messageBubble = holder.messageBubble;
-                break;
-            }
-            case MessageItem.RIGHT_VOICE: {
-                MessageRightVoiceViewHolder holder = (MessageRightVoiceViewHolder) viewHolder;
-                contentComponent = holder.messageBubble;
-                messageBubble = holder.messageBubble;
-                break;
-            }
-            case MessageItem.LEFT_LINK: {
-                MessageLeftLinkOfAppViewHolder holder = (MessageLeftLinkOfAppViewHolder) viewHolder;
-                contentComponent = holder.title;
-                messageBubble = holder.messageBubble;
-                break;
-            }
-            case MessageItem.RIGHT_LINK: {
-                MessageRightLinkOfAppViewHolder holder = (MessageRightLinkOfAppViewHolder) viewHolder;
-                contentComponent = holder.title;
-                messageBubble = holder.messageBubble;
-                break;
-            }
-            case MessageItem.RIGHT_ATTACHMENT: {
-                MessageRightAttachmentViewHolder holder = (MessageRightAttachmentViewHolder) viewHolder;
-                contentComponent = holder.attachmentPanel;
-                messageBubble = holder.messageBubble;
+            case MSGTYPE_IMAGE:
+            case MSGTYPE_EMOTICON:{
+                if (isSelf){
+                    MessageRightImageViewHolder holder = (MessageRightImageViewHolder) viewHolder;
+                    contentComponent = holder.image;
+                    messageBubble = holder.imageBubble;
+                }else{
+                    MessageLeftImageViewHolder holder = (MessageLeftImageViewHolder) viewHolder;
+                    contentComponent = holder.image;
+                    messageBubble = holder.imageBubble;
 
-                holder.attachmentTitle.addMouseListener(new MessageMouseListener() {
-                    @Override
-                    public void mouseReleased(MouseEvent e) {
-                        if (e.getButton() == MouseEvent.BUTTON3) {
-                            // 通过holder.attachmentPane.getTag()可以获取文件附件信息
-                            popupMenu.show(holder.attachmentPanel, e.getX(), e.getY(), MessageItem.RIGHT_ATTACHMENT);
+                }
+                break;
+            }
+            case MSGTYPE_VIDEO:{
+                if (isSelf){
+                    MessageRightVideoViewHolder holder = (MessageRightVideoViewHolder) viewHolder;
+                    contentComponent = holder.videoComponent;
+                    messageBubble = holder.imageBubble;
+                }else {
+                    MessageLeftVideoViewHolder holder = (MessageLeftVideoViewHolder) viewHolder;
+                    contentComponent = holder.videoComponent;
+                    messageBubble = holder.imageBubble;
+
+
+                }
+                break;
+            }
+            case MSGTYPE_VOICE:{
+               if (isSelf){
+                   MessageRightVoiceViewHolder holder = (MessageRightVoiceViewHolder) viewHolder;
+                   contentComponent = holder.messageBubble;
+                   messageBubble = holder.messageBubble;
+                }else {
+                   MessageLeftVoiceViewHolder holder = (MessageLeftVoiceViewHolder) viewHolder;
+                   contentComponent = holder.messageBubble;
+                   messageBubble = holder.messageBubble;
+
+                }
+                break;
+            }
+            case MSGTYPE_APP:{
+                switch (WXReceiveMsgCodeOfAppEnum.getByCode(item.getAppMsgType())){
+                    case FILE:{
+                        if (isSelf){
+                            MessageRightAttachmentViewHolder holder = (MessageRightAttachmentViewHolder) viewHolder;
+                            contentComponent = holder.attachmentPanel;
+                            messageBubble = holder.messageBubble;
+
+                            holder.attachmentTitle.addMouseListener(new MessageMouseListener() {
+                                @Override
+                                public void mouseReleased(MouseEvent e) {
+                                    if (e.getButton() == MouseEvent.BUTTON3) {
+                                        // 通过holder.attachmentPane.getTag()可以获取文件附件信息
+                                        popupMenu.show(holder.attachmentPanel, e.getX(), e.getY(), item.getMsgType());
+                                    }
+                                }
+                            });
+                        }else {
+                            MessageLeftAttachmentViewHolder holder = (MessageLeftAttachmentViewHolder) viewHolder;
+                            contentComponent = holder.attachmentPanel;
+                            messageBubble = holder.messageBubble;
+
+                            holder.attachmentTitle.addMouseListener(new MessageMouseListener() {
+                                @Override
+                                public void mouseReleased(MouseEvent e) {
+                                    if (e.getButton() == MouseEvent.BUTTON3) {
+                                        popupMenu.show(holder.attachmentPanel, e.getX(), e.getY(), item.getMsgType());
+                                    }
+                                }
+                            });
+
                         }
+                        break;
                     }
-                });
-                break;
-            }
-            case MessageItem.LEFT_ATTACHMENT: {
-                MessageLeftAttachmentViewHolder holder = (MessageLeftAttachmentViewHolder) viewHolder;
-                contentComponent = holder.attachmentPanel;
-                messageBubble = holder.messageBubble;
-
-                holder.attachmentTitle.addMouseListener(new MessageMouseListener() {
-                    @Override
-                    public void mouseReleased(MouseEvent e) {
-                        if (e.getButton() == MouseEvent.BUTTON3) {
-                            popupMenu.show(holder.attachmentPanel, e.getX(), e.getY(), MessageItem.LEFT_ATTACHMENT);
+                    default:
+                    case LINK:{
+                        if (isSelf){
+                            MessageRightLinkOfAppViewHolder holder = (MessageRightLinkOfAppViewHolder) viewHolder;
+                            contentComponent = holder.title;
+                            messageBubble = holder.messageBubble;
+                        }else {
+                            MessageLeftLinkOfAppViewHolder holder = (MessageLeftLinkOfAppViewHolder) viewHolder;
+                            contentComponent = holder.title;
+                            messageBubble = holder.messageBubble;
                         }
+                        break;
                     }
-                });
-                break;
+
+                }
             }
         }
 
@@ -1302,7 +1332,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON3) {
-                    popupMenu.show((Component) e.getSource(), e.getX(), e.getY(), messageType);
+                    popupMenu.show((Component) e.getSource(), e.getX(), e.getY(), item.getMsgType());
                 }
 
                 super.mouseReleased(e);
@@ -1313,7 +1343,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON3) {
-                    popupMenu.show(finalContentComponent, e.getX(), e.getY(), messageType);
+                    popupMenu.show(finalContentComponent, e.getX(), e.getY(), item.getMsgType());
                 }
             }
         });

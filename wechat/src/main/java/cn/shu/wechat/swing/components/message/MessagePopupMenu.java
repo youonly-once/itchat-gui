@@ -3,11 +3,11 @@ package cn.shu.wechat.swing.components.message;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.beans.msg.send.WebWXSendMsgResponse;
 import cn.shu.wechat.beans.pojo.Message;
+import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCMenuItemUI;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
-import cn.shu.wechat.swing.entity.MessageItem;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 import cn.shu.wechat.swing.utils.FileCache;
@@ -29,7 +29,7 @@ import java.util.Map;
  * Created by 舒新胜 on 2017/6/5.
  */
 public class MessagePopupMenu extends JPopupMenu {
-    private int messageType;
+    private WXReceiveMsgCodeEnum messageType;
     private final ImageCache imageCache = new ImageCache();
     private final FileCache fileCache = new FileCache();
 
@@ -48,8 +48,7 @@ public class MessagePopupMenu extends JPopupMenu {
             @Override
             public void actionPerformed(ActionEvent e) {
                 switch (messageType) {
-                    case MessageItem.RIGHT_TEXT:
-                    case MessageItem.LEFT_TEXT: {
+                    case MSGTYPE_TEXT: {
                         SizeAutoAdjustTextArea textArea = (SizeAutoAdjustTextArea) getInvoker();
                         String text = textArea.getSelectedText() == null ? textArea.getText() : textArea.getSelectedText();
                         if (text != null) {
@@ -57,8 +56,8 @@ public class MessagePopupMenu extends JPopupMenu {
                         }
                         break;
                     }
-                    case (MessageItem.RIGHT_IMAGE):
-                    case (MessageItem.LEFT_IMAGE): {
+                    case MSGTYPE_IMAGE:
+                    case MSGTYPE_EMOTICON: {
                         MessageImageLabel imageLabel = (MessageImageLabel) getInvoker();
                         Object obj = imageLabel.getTag();
                         if (obj != null) {
@@ -83,13 +82,12 @@ public class MessagePopupMenu extends JPopupMenu {
                         }
                         break;
                     }
-                    case (MessageItem.LEFT_VIDEO):
-                    case (MessageItem.RIGHT_VIDEO): {
+                    case MSGTYPE_VIDEO: {
                         TagJLayeredPane attachmentPanel = (TagJLayeredPane) getInvoker();
                         Object obj = attachmentPanel.getTag();
                         if (obj != null) {
-                            MessageItem.VideoAttachmentItem item = (MessageItem.VideoAttachmentItem)obj;
-                            String videoPath = item.getVideoPath();
+                            Message item = (Message)obj;
+                            String videoPath = item.getFilePath();
                             if (videoPath != null && !videoPath.isEmpty()) {
                                 ClipboardUtil.copyFile(videoPath);
                             }else{
@@ -100,13 +98,12 @@ public class MessagePopupMenu extends JPopupMenu {
                         }
                         break;
                     }
-                    case (MessageItem.LEFT_VOICE):
-                    case (MessageItem.RIGHT_VOICE): {
+                    case MSGTYPE_VOICE:{
                         TagPanel attachmentPanel = (TagPanel) getInvoker();
                         Object obj = attachmentPanel.getTag();
                         if (obj != null) {
-                            MessageItem.VoiceAttachmentItem item = (MessageItem.VoiceAttachmentItem)obj;
-                            String voicePath = item.getVoicePath();
+                            Message item = (Message)obj;
+                            String voicePath = item.getFilePath();
                             if (voicePath != null && !voicePath.isEmpty()) {
                                 ClipboardUtil.copyFile(voicePath);
                             }else{
@@ -117,8 +114,7 @@ public class MessagePopupMenu extends JPopupMenu {
                         }
                         break;
                     }
-                    case (MessageItem.RIGHT_ATTACHMENT):
-                    case (MessageItem.LEFT_ATTACHMENT): {
+                    case MSGTYPE_APP: {
                         TagPanel attachmentPanel = (TagPanel) getInvoker();
                         Object obj = attachmentPanel.getTag();
                         if (obj != null) {
@@ -168,14 +164,12 @@ public class MessagePopupMenu extends JPopupMenu {
             public void actionPerformed(ActionEvent e) {
                 String messageId = null;
                 switch (messageType) {
-                    case MessageItem.RIGHT_TEXT:
-                    case MessageItem.LEFT_TEXT: {
+                    case MSGTYPE_TEXT: {
                         SizeAutoAdjustTextArea textArea = (SizeAutoAdjustTextArea) getInvoker();
                         messageId = textArea.getTag().toString();
                         break;
                     }
-                    case (MessageItem.RIGHT_IMAGE):
-                    case (MessageItem.LEFT_IMAGE): {
+                    case MSGTYPE_IMAGE: {
                         MessageImageLabel imageLabel = (MessageImageLabel) getInvoker();
                         Object obj = imageLabel.getTag();
                         if (obj != null) {
@@ -184,8 +178,7 @@ public class MessagePopupMenu extends JPopupMenu {
                         }
                         break;
                     }
-                    case (MessageItem.RIGHT_ATTACHMENT):
-                    case (MessageItem.LEFT_ATTACHMENT): {
+                    case MSGTYPE_APP:{
                         TagPanel attachmentPanel = (TagPanel) getInvoker();
                         Object obj = attachmentPanel.getTag();
                         if (obj != null) {
@@ -216,12 +209,12 @@ public class MessagePopupMenu extends JPopupMenu {
             public void actionPerformed(ActionEvent e) {
                 String messageId = null;
                 switch (messageType) {
-                    case MessageItem.RIGHT_TEXT:{
+                    case MSGTYPE_TEXT:{
                         SizeAutoAdjustTextArea textArea = (SizeAutoAdjustTextArea) getInvoker();
                         messageId = textArea.getTag().toString();
                         break;
                     }
-                    case (MessageItem.RIGHT_IMAGE):{
+                    case MSGTYPE_IMAGE:{
                         MessageImageLabel imageLabel = (MessageImageLabel) getInvoker();
                         Object obj = imageLabel.getTag();
                         if (obj != null) {
@@ -230,7 +223,7 @@ public class MessagePopupMenu extends JPopupMenu {
                         }
                         break;
                     }
-                    case (MessageItem.RIGHT_ATTACHMENT):{
+                    case MSGTYPE_APP:{
                         TagPanel attachmentPanel = (TagPanel) getInvoker();
                         Object obj = attachmentPanel.getTag();
                         if (obj != null) {
@@ -239,20 +232,20 @@ public class MessagePopupMenu extends JPopupMenu {
                         }
                         break;
                     }
-                    case (MessageItem.RIGHT_VIDEO):{
+                    case MSGTYPE_VIDEO:{
                         TagJLayeredPane attachmentPanel = (TagJLayeredPane) getInvoker();
                         Object obj = attachmentPanel.getTag();
                         if (obj != null) {
-                            MessageItem.VideoAttachmentItem item = (MessageItem.VideoAttachmentItem)obj;
+                            Message item = (Message)obj;
                             messageId = item.getId();
                         }
                         break;
                     }
-                case (MessageItem.RIGHT_VOICE):{
+                    case MSGTYPE_VOICE:{
                     TagPanel attachmentPanel = (TagPanel) getInvoker();
                     Object obj = attachmentPanel.getTag();
                     if (obj != null) {
-                        MessageItem.VoiceAttachmentItem item = (MessageItem.VoiceAttachmentItem)obj;
+                        Message item = (Message)obj;
                         messageId = item.getId();
                     }
                     break;
@@ -281,8 +274,7 @@ public class MessagePopupMenu extends JPopupMenu {
 
                         String path = null;
                         switch (messageType) {
-                            case (MessageItem.RIGHT_IMAGE):
-                            case (MessageItem.LEFT_IMAGE): {
+                            case MSGTYPE_IMAGE: {
                                 MessageImageLabel imageLabel = (MessageImageLabel) getInvoker();
                                 Object obj = imageLabel.getTag();
                                 if (obj != null) {
@@ -291,28 +283,25 @@ public class MessagePopupMenu extends JPopupMenu {
                                 }
                                 break;
                             }
-                            case (MessageItem.LEFT_VIDEO):
-                            case (MessageItem.RIGHT_VIDEO): {
+                            case MSGTYPE_VIDEO: {
                                 TagJLayeredPane attachmentPanel = (TagJLayeredPane) getInvoker();
                                 Object obj = attachmentPanel.getTag();
                                 if (obj != null) {
-                                    MessageItem.VideoAttachmentItem item = (MessageItem.VideoAttachmentItem) obj;
-                                    path = item.getVideoPath();
+                                    Message item = (Message) obj;
+                                    path = item.getFilePath();
                                 }
                                 break;
                             }
-                            case (MessageItem.LEFT_VOICE):
-                            case (MessageItem.RIGHT_VOICE): {
+                            case MSGTYPE_VOICE: {
                                 TagPanel attachmentPanel = (TagPanel) getInvoker();
                                 Object obj = attachmentPanel.getTag();
                                 if (obj != null) {
-                                    MessageItem.VoiceAttachmentItem item = (MessageItem.VoiceAttachmentItem) obj;
-                                    path = item.getVoicePath();
+                                    Message item = (Message) obj;
+                                    path = item.getFilePath();
                                 }
                                 break;
                             }
-                            case (MessageItem.RIGHT_ATTACHMENT):
-                            case (MessageItem.LEFT_ATTACHMENT): {
+                            case MSGTYPE_APP: {
                                 TagPanel attachmentPanel = (TagPanel) getInvoker();
                                 Object obj = attachmentPanel.getTag();
                                 if (obj != null) {
@@ -367,7 +356,7 @@ public class MessagePopupMenu extends JPopupMenu {
     }
 
     public void show(Component invoker, int x, int y, int messageType) {
-        this.messageType = messageType;
+        this.messageType = WXReceiveMsgCodeEnum.getByCode(messageType);
         super.show(invoker, x, y);
     }
 }

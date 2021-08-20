@@ -118,8 +118,8 @@ public class XmlStreamUtil {
     }
 
     public static String formatXml(String content) {
-        if (content == null) {
-            return "";
+        if (content == null || content.isEmpty()) {
+            return content;
         }
         return content.replace("&lt;", "<")
                 .replace("&gt;", ">")

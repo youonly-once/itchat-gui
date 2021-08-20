@@ -16,7 +16,7 @@ public class RightPanel extends JPanel {
     /**
      * 显示聊天房的panel
      */
-    private final RoomChatPanel roomChatPanel;
+    private final RoomChatContainer roomChatContainer;
     /**
      * 显示用户信息的panel
      */
@@ -37,11 +37,11 @@ public class RightPanel extends JPanel {
     public RightPanel() {
         context =this;
         userInfoPanel = new UserInfoPanel(this);
-        roomChatPanel = new RoomChatPanel(this);
+        roomChatContainer = new RoomChatContainer(this);
         cardLayout = new CardLayout();
         setLayout(cardLayout);
         add(userInfoPanel, USER_INFO);
-        add(roomChatPanel, CHAT_ROOM);
+        add(roomChatContainer, CHAT_ROOM);
         show(CHAT_ROOM);
     }
 

@@ -1,6 +1,5 @@
 package cn.shu.wechat.beans.pojo;
 
-import java.util.Date;
 import java.util.Map;
 
 import lombok.AllArgsConstructor;
@@ -17,11 +16,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Message {
+public class Message implements Comparable<Message>{
     private String id;
 
     private String msgId;
-
+    private boolean isGroup;
     private Integer msgType;
 
     private Integer appMsgType;
@@ -32,10 +31,6 @@ public class Message {
 
     private String plaintext;
 
-    /**
-     * 消息发送进度
-     */
-    private int process = 100;
 
     /**
      * 是否删除
@@ -107,9 +102,24 @@ public class Message {
     private Long voiceLength;
     private String fileName;
     private Long fileSize;
-
+    private long timestamp;
+    private String desc ;
+    private String url ;
+    private String title;
+    private String thumbUrl ;
+    private String sourceIconUrl ;
+    private  String sourceName ;
     /**
      * content map
      */
     private Map<String, Object> contentMap;
+
+    private String plainName;
+    private int progress = 100;
+    private boolean isNeedToResend;
+    @Override
+    public int compareTo(Message o) {
+        return (int) (this.getTimestamp() - o.getTimestamp());
+
+    }
 }

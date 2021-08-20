@@ -32,7 +32,7 @@ public class SelectedUserItemsAdapter extends BaseAdapter<SelectedUserItemViewHo
     }
 
     @Override
-    public SelectedUserItemViewHolder onCreateViewHolder(int viewType, int position) {
+    public SelectedUserItemViewHolder onCreateViewHolder(int viewType, int subViewType, int position) {
         //避免重复创建
         SelectedUserItemViewHolder selectedUserItemViewHolder;
         if (viewHolders.size() > position){

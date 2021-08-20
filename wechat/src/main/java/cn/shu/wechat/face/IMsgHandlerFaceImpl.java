@@ -17,16 +17,15 @@ import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
 import cn.shu.wechat.enums.WXSendMsgCodeEnum;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.mapper.StatusMapper;
+import cn.shu.wechat.swing.panels.RoomChatContainer;
 import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -188,10 +187,11 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             case "oauto":
                 String to = ContactsTools.getContactDisplayNameByUserName(toUserName);
                 autoChatUserNameList.add(to);
-                Status status = new Status();
-                status.setName(to);
-                status.setAutoStatus((short) 1);
-                statusMapper.insertOrUpdateSelectiveForSqlite(status);
+                Status build = Status.builder().name(to)
+                        .autoStatus((short) 1).build();
+                statusMapper.insertOrUpdateSelectiveForSqlite(build);
+                RoomChatContainer.get(toUserName).getChatPanel().getMessageEditorPanel().setAutoLabel();
+
                 messages.add(Message.builder().msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .content("已开启【" + remarkNameByGroupUserName + "】自动回复功能")
                         .toUsername(toUserName).build());
@@ -200,10 +200,10 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             case "cauto":
                 to = ContactsTools.getContactDisplayNameByUserName(toUserName);
                 autoChatUserNameList.remove(to);
-                status = new Status();
-                status.setName(to);
-                status.setAutoStatus((short) 2);
-                statusMapper.insertOrUpdateSelectiveForSqlite(status);
+               build = Status.builder().name(to)
+                        .autoStatus((short) 2).build();
+                statusMapper.insertOrUpdateSelectiveForSqlite(build);
+                RoomChatContainer.get(toUserName).getChatPanel().getMessageEditorPanel().setAutoLabel();
                 messages.add(Message.builder().msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .content("已关闭【" + remarkNameByGroupUserName + "】自动回复功能")
                         .toUsername(toUserName).build());
@@ -212,10 +212,11 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             case "opundo":
                 to = ContactsTools.getContactDisplayNameByUserName(toUserName);
                 nonPreventUndoMsgUserName.remove(to);
-                status = new Status();
-                status.setName(to);
-                status.setUndoStatus((short) 1);
-                statusMapper.insertOrUpdateSelectiveForSqlite(status);
+                build = Status.builder().name(to)
+                        .undoStatus((short) 1).build();
+                statusMapper.insertOrUpdateSelectiveForSqlite(build);
+                RoomChatContainer.get(toUserName).getChatPanel().getMessageEditorPanel().setUndoLabel();
+
                 messages.add(Message.builder().msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .content("已开启【" + remarkNameByGroupUserName + "】防撤回功能")
                         .toUsername(toUserName).build());
@@ -223,12 +224,13 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 break;
             case "cpundo":
                 to = ContactsTools.getContactDisplayNameByUserName(toUserName);
-                status = new Status();
-                status.setName(to);
-                status.setUndoStatus((short) 2);
-                statusMapper.insertOrUpdateSelectiveForSqlite(status);
+                build = Status.builder().name(to)
+                        .undoStatus((short) 2).build();
+                statusMapper.insertOrUpdateSelectiveForSqlite(build);
                 //群消息
                 nonPreventUndoMsgUserName.add(to);
+                RoomChatContainer.get(toUserName).getChatPanel().getMessageEditorPanel().setUndoLabel();
+
                 messages.add(Message.builder().msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .content("已关闭【" + remarkNameByGroupUserName + "】防撤回功能")
                         .toUsername(toUserName).build());
@@ -370,17 +372,17 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
 
     @Override
     public List<Message> undoMsgHandle(AddMsgList msg) {
+        String to = ContactsTools.getContactDisplayNameByUserName(msg.getFromUserName());
         //======家人群不发送撤回消息====
         if (msg.getFromUserName().startsWith("@@")) {
-            String to = ContactsTools.getContactDisplayNameByUserName(msg.getFromUserName());
             if ("❤汪家人❤".equals(to) || to.startsWith("三盟")) {
                 log.error("重要群群，不发送撤回消息");
                 return null;
             }
-            //不处理撤回消息的群
-            if (nonPreventUndoMsgUserName.contains(to)) {
-                return null;
-            }
+        }
+        //不处理撤回消息的群
+        if (nonPreventUndoMsgUserName.contains(to)) {
+            return null;
         }
         /*============获取被撤回的消息id============*/
         Map<String, Object> map = msg.getContentMap();
@@ -418,12 +420,12 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
 
         String realMsgContent = oldMessage.getContent();
         String filePath = oldMessage.getFilePath();
-        String createTime = oldMessage.getCreateTime().substring(9);
+        String createTime = oldMessage.getCreateTime().substring(10);
         switch (WXReceiveMsgCodeEnum.getByCode(oldMessage.getMsgType())) {
             case MSGTYPE_TEXT:
                 message = Message.builder()
                         .content("【" + fromNickName + " " + createTime + " " + "】撤回的消息：" + realMsgContent)
-                        .msgType(WXSendMsgCodeEnum.TEXT.getCode())
+                        .msgType(WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
                         .toUsername(msg.getFromUserName())
                         .build();
                 results.add(message);
@@ -431,52 +433,51 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             case MSGTYPE_IMAGE:
                 message = Message.builder()
                         .content("【" + fromNickName + " " + createTime + " " + "】撤回的图片(发送中...)：")
-                        .msgType(WXSendMsgCodeEnum.TEXT.getCode())
+                        .msgType(WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
                         .toUsername(msg.getFromUserName())
                         .build();
                 results.add(message);
-                message = MessageTools.toPicMessage(filePath);
-                message.setContent(realMsgContent);
-                results.add(message);
+                oldMessage.setId(UUID.randomUUID().toString().replace("-",""));
+                oldMessage.setFromUsername(Core.getUserName());
+                oldMessage.setToUsername(msg.getFromUserName());
+                results.add(oldMessage);
                 break;
             case MSGTYPE_EMOTICON:
                 message = Message.builder()
                         .content("【" + fromNickName + " " + createTime + " " + "】撤回的表情：")
-                        .msgType(WXSendMsgCodeEnum.TEXT.getCode())
+                        .msgType(WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
                         .toUsername(msg.getFromUserName())
                         .build();
                 results.add(message);
-                message = MessageTools.toPicMessage(filePath,msg.getFromUserName());
-                message.setContent(realMsgContent);
-                results.add(message);
+                oldMessage.setId(UUID.randomUUID().toString().replace("-",""));
+                oldMessage.setFromUsername(Core.getUserName());
+                oldMessage.setToUsername(msg.getFromUserName());
+                results.add(oldMessage);
                 break;
             case MSGTYPE_VOICE:
                 message = Message.builder()
                         .content("【" + fromNickName + " " + createTime + " " + "】撤回的语音(发送中...)：")
-                        .msgType(WXSendMsgCodeEnum.TEXT.getCode())
+                        .msgType(WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
                         .toUsername(msg.getFromUserName())
                         .build();
                 results.add(message);
-                message = Message.builder()
-                        .filePath(filePath)
-                        .content(realMsgContent)
-                        .playLength(0l)
-                        .toUsername(msg.getFromUserName())
-                        .msgType(WXSendMsgCodeEnum.VOICE.getCode())
-                        .build();
-                results.add(message);
+                oldMessage.setId(UUID.randomUUID().toString().replace("-",""));
+                oldMessage.setFromUsername(Core.getUserName());
+                oldMessage.setContent("");
+                oldMessage.setToUsername(msg.getFromUserName());
+                results.add(oldMessage);
                 break;
             case MSGTYPE_VIDEO:
                 message = Message.builder()
                         .content("【" + fromNickName + " " + createTime + " " + "】撤回的视频(发送中...)：")
-                        .msgType(WXSendMsgCodeEnum.TEXT.getCode())
+                        .msgType(WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
                         .toUsername(msg.getFromUserName())
                         .build();
                 results.add(message);
-
-                message = MessageTools.toVideoMessage(filePath,msg.getFromUserName());
-                message.setContent(realMsgContent);
-                results.add(message);
+                oldMessage.setId(UUID.randomUUID().toString().replace("-",""));
+                oldMessage.setFromUsername(Core.getUserName());
+                oldMessage.setToUsername(msg.getFromUserName());
+                results.add(oldMessage);
                 break;
             case MSGTYPE_MAP:
                 String msgJson = oldMessage.getMsgJson();
@@ -487,27 +488,27 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 Object poiname = stringObjectMap.get("msg.location.attr.poiname");
                 message = Message.builder()
                         .content("【" + fromNickName + " " + createTime + " " + "】撤回的定位：" + label + "(" + poiname + ")")
-                        .msgType(WXSendMsgCodeEnum.TEXT.getCode())
+                        .msgType(WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
                         .toUsername(msg.getFromUserName())
                         .build();
                 results.add(message);
                 message = Message.builder()
                         .filePath(filePath)
                         .toUsername(msg.getFromUserName())
-                        .msgType(WXSendMsgCodeEnum.PIC.getCode())
+                        .msgType(WXReceiveMsgCodeEnum.MSGTYPE_IMAGE.getCode())
                         .build();
                 results.add(message);
                 break;
             case MSGTYPE_SHARECARD:
                 message = Message.builder()
                         .content("【" + fromNickName + " " + createTime + " " + "】撤回的联系人名片：")
-                        .msgType(WXSendMsgCodeEnum.TEXT.getCode())
+                        .msgType(WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
                         .toUsername(msg.getFromUserName())
                         .build();
                 results.add(message);
                 message = Message.builder()
-                        .content(realMsgContent)
-                        .msgType(WXSendMsgCodeEnum.CARD.getCode())
+                        .content(oldMessage.getContent())
+                        .msgType(WXReceiveMsgCodeEnum.MSGTYPE_SHARECARD.getCode())
                         .toUsername(msg.getFromUserName())
                         .build();
                 results.add(message);
@@ -523,7 +524,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                         message = Message.builder()
 
                                 .content("【" + fromNickName + " " + createTime + " " + "】撤回的收藏消息：" + title + "," + url)
-                                .msgType(WXSendMsgCodeEnum.TEXT.getCode())
+                                .msgType(WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
                                 .toUsername(msg.getFromUserName())
                                 .build();
                         results.add(message);
@@ -532,7 +533,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                     case PROGRAM:
                         message = Message.builder()
                                 .content("【" + fromNickName + " " + createTime + " " + "】撤回的小程序：" + realMsgContent)
-                                .msgType(WXSendMsgCodeEnum.TEXT.getCode())
+                                .msgType(WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
                                 .toUsername(msg.getFromUserName())
                                 .build();
                         results.add(message);
@@ -542,20 +543,14 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                         //目前是文件消息
                         message = Message.builder()
                                 .content("【" + fromNickName + " " + createTime + " " + "】撤回的APP消息(发送中...)：")
-                                .msgType(WXSendMsgCodeEnum.TEXT.getCode())
+                                .msgType(WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
                                 .toUsername(msg.getFromUserName())
                                 .build();
                         results.add(message);
-                        File file = new File(filePath);
-                        message = Message.builder()
-                                .filePath(filePath)
-                                .content(realMsgContent)
-                                .msgType(WXSendMsgCodeEnum.APP.getCode())
-                                .fileName(filePath)
-                                .toUsername(msg.getFromUserName())
-                                .fileSize(file.length())
-                                .build();
-                        results.add(message);
+                        oldMessage.setId(UUID.randomUUID().toString().replace("-",""));
+                        oldMessage.setFromUsername(Core.getUserName());
+                        oldMessage.setToUsername(msg.getFromUserName());
+                        results.add(oldMessage);
                         break;
                 }
                 break;

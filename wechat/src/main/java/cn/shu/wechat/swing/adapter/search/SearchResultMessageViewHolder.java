@@ -13,14 +13,14 @@ import java.awt.*;
  * 搜索结果中的每一个消息项目
  * Created by 舒新胜 on 17-6-22.
  */
-public class SearchResultMessageItemViewHolder extends SearchResultItemViewHolder {
+public class SearchResultMessageViewHolder extends SearchResultItemViewHolder {
     public JLabel avatar = new JLabel();
     public JLabel roomName = new JLabel();
     public HighLightLabel brief = new HighLightLabel();
     public JPanel nameBrief = new JPanel();
     public JLabel time = new JLabel();
 
-    public SearchResultMessageItemViewHolder() {
+    public SearchResultMessageViewHolder() {
         initComponents();
         initView();
 

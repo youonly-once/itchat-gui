@@ -1,7 +1,7 @@
 package cn.shu.wechat.swing.frames;
 
 import cn.shu.wechat.swing.components.Colors;
-import cn.shu.wechat.swing.panels.RoomChatPanel;
+import cn.shu.wechat.swing.panels.RoomChatContainer;
 import cn.shu.wechat.swing.utils.*;
 
 import javax.imageio.ImageIO;
@@ -271,7 +271,7 @@ public class ScreenShotFrame extends JFrame {
                 } else if (e.getClickCount() >= 2) {
                     close();
                     ClipboardUtil.copyImage(saveImage);
-                    RoomChatPanel.getContext().get(roomId).getChatPanel().paste();
+                    RoomChatContainer.getContext().get(roomId).getChatPanel().paste();
                 }
 
                 super.mouseClicked(e);
@@ -487,7 +487,7 @@ public class ScreenShotFrame extends JFrame {
                 } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     close();
                     ClipboardUtil.copyImage(saveImage);
-                    RoomChatPanel.getContext().get(roomId).getChatPanel().paste();
+                    RoomChatContainer.getContext().get(roomId).getChatPanel().paste();
                 }
             }
         };
@@ -829,7 +829,7 @@ public class ScreenShotFrame extends JFrame {
             public void mouseClicked(MouseEvent e) {
                 close();
                 ClipboardUtil.copyImage(saveImage);
-                RoomChatPanel.getContext().get(roomId).getChatPanel().paste();
+                RoomChatContainer.getContext().get(roomId).getChatPanel().paste();
                 super.mouseClicked(e);
             }
 

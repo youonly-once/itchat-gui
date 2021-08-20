@@ -86,8 +86,8 @@ public class RoomsPanel extends ParentAvailablePanel {
      */
     public void enterRoom(String roomId) {
         //切换显示层
-        RoomChatPanelCard roomChatPanelCard = RoomChatPanel.getContext().createAndShow(roomId);
-        RoomChatPanel.getContext().show(roomId);
+        RoomChatPanelCard roomChatPanelCard = RoomChatContainer.getContext().createAndShow(roomId);
+        RoomChatContainer.getContext().show(roomId);
         //显示聊天界面
         roomChatPanelCard.showPanel(RoomChatPanelCard.MESSAGE);
         //更新聊天列表未读数量
@@ -260,7 +260,7 @@ public class RoomsPanel extends ParentAvailablePanel {
                 if (time != null) {
                     item.setTimestamp(time);
                 }
-                if (roomId.equals(RoomChatPanel.getContext().getCurrRoomId())) {
+                if (roomId.equals(RoomChatContainer.getContext().getCurrRoomId())) {
                     //当前显示的房间和新消息房间一样，则不需要在房间条目上显示未读消息数量
                     item.setUnreadCount(0);
                 } else if (unReadCount != -1) {

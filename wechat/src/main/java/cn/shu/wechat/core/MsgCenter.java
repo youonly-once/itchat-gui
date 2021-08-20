@@ -12,9 +12,11 @@ import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
 import cn.shu.wechat.face.IMsgHandlerFace;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.service.LoginService;
+import cn.shu.wechat.swing.constant.MessageType;
 import cn.shu.wechat.swing.frames.MainFrame;
-import cn.shu.wechat.swing.panels.RoomChatPanel;
+import cn.shu.wechat.swing.panels.RoomChatContainer;
 import cn.shu.wechat.swing.panels.RoomsPanel;
+import cn.shu.wechat.swing.utils.ChatUtil;
 import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.log4j.Log4j2;
@@ -23,8 +25,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
-import javax.swing.*;
-import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -79,7 +79,7 @@ public class MsgCenter {
         //=============打印日志==============
         String logStr = LogUtil.printFromMeg(msg, msgType.getDesc());
         //=============如果是当前房间 发送已读通知==============
-        if (RoomChatPanel.getContext().getCurrRoomId().equals(msg.getFromUserName())) {
+        if (RoomChatContainer.getContext().getCurrRoomId().equals(msg.getFromUserName())) {
             ExecutorServiceUtil.getGlobalExecutorService().execute(() -> MessageTools.sendStatusNotify(msg.getFromUserName()));
         }
 
@@ -106,7 +106,7 @@ public class MsgCenter {
                 msg.setPlainText("[地图，请在手机上查看]");
                 ext = ".gif";
                 downloadFile(msg, fileName, ext);
-                message = storeMsgToDB(msg);
+                message = newMsgToDBMessage(msg);
                 break;
             case MSGTYPE_TEXT:
                 //消息格式化
@@ -114,7 +114,7 @@ public class MsgCenter {
                 textMsgFormat(msg);
                 //文本消息
                 msg.setPlainText(msg.getContent());
-                message = storeMsgToDB(msg);
+                message = newMsgToDBMessage(msg);
                 break;
             case MSGTYPE_IMAGE:
                 msg.setPlainText("[图片]");
@@ -122,15 +122,14 @@ public class MsgCenter {
                 //存储消息
                 downloadThumImg(msg, fileName, ext);
                 downloadFile(msg, fileName, ext);
-                message = storeMsgToDB(msg);
+                message = newMsgToDBMessage(msg);
                 break;
             case MSGTYPE_VOICE:
                 ext = ".mp3";
                 msg.setPlainText("[语音]");
                 downloadFile(msg, fileName, ext);
                 downloadThumImg(msg, fileName, ext);
-                message = storeMsgToDB(msg);
-
+                message = newMsgToDBMessage(msg);
                 break;
             case MSGTYPE_VIDEO:
             case MSGTYPE_MICROVIDEO:
@@ -138,20 +137,25 @@ public class MsgCenter {
                 msg.setPlainText("[视频]");
                 downloadFile(msg, fileName, ext);
                 downloadThumImg(msg, fileName, ext);
-                message = storeMsgToDB(msg);
-
+                message = newMsgToDBMessage(msg);
                 break;
             case MSGTYPE_EMOTICON:
                 msg.setPlainText("[表情]");
                 ext = ".gif";
                 downloadFile(msg, fileName, ext);
-                message = storeMsgToDB(msg);
-
+                message = newMsgToDBMessage(msg);
                 break;
             case MSGTYPE_APP:
                 Map<String, Object> map = XmlStreamUtil.toMap(msg.getContent());
                 msg.setContentMap(map);
+                Object desc = map.get("msg.appmsg.des");
+                Object url = map.get("msg.appmsg.url");
                 Object title = map.get("msg.appmsg.title");
+                Object thumbUrl = map.get("msg.appmsg.thumburl");
+                Object sourceIconUrl = map.get("msg.appmsg.weappinfo.weappiconurl");
+                Object sourceName = map.get("msg.appmsg.sourcedisplayname");
+                Object height = map.get("msg.appmsg.appattach.cdnthumbheight");
+                Object width = map.get("msg.appmsg.appattach.cdnthumbwidth");
                 switch (WXReceiveMsgCodeOfAppEnum.getByCode(msg.getAppMsgType())) {
                     case LINK:
                         msg.setPlainText("[链接]" + title);
@@ -170,7 +174,10 @@ public class MsgCenter {
                     case PROGRAM:
                         msg.setPlainText("[小程序]" + title);
                         break;
+                    case MUSIC:
+                        msg.setPlainText("[音乐]" + title);
                     case PICTURE:
+                        sourceName = map.get("msg.appinfo.appname");
                         ext = ".gif";
                         downloadFile(msg, fileName, ext);
                         msg.setPlainText("[小程序]图片");
@@ -180,7 +187,15 @@ public class MsgCenter {
 
 
                 }
-                message = storeMsgToDB(msg);
+                message = newMsgToDBMessage(msg);
+                    message.setTitle(title == null ? null : title.toString());
+                    message.setDesc(desc == null ? null : desc.toString());
+                    message.setImgWidth(width == null ? null : Integer.parseInt(width.toString()));
+                    message.setImgHeight(height == null ? null : Integer.parseInt(height.toString()));
+                    message.setThumbUrl(thumbUrl == null ? null : thumbUrl.toString());
+                    message.setUrl(url == null ? null : url.toString());
+                    message.setSourceIconUrl(sourceIconUrl == null ? null : sourceIconUrl.toString());
+                    message.setSourceName(sourceName == null ? null : sourceName.toString());
                 break;
             case MSGTYPE_VOIPMSG:
                 break;
@@ -190,38 +205,53 @@ public class MsgCenter {
                 break;
             case MSGTYPE_LOCATION:
                 msg.setPlainText("[位置，请在手机上查看]");
-                message = storeMsgToDB(msg);
+                message = newMsgToDBMessage(msg);
                 break;
             case MSGTYPE_SYS:
             case MSGTYPE_STATUSNOTIFY:
                 msg.setPlainText("[系统消息]");
-                message = storeMsgToDB(msg);
+                message = newMsgToDBMessage(msg);
                 break;
             case MSGTYPE_SYSNOTICE:
                 break;
             case MSGTYPE_POSSIBLEFRIEND_MSG:
                 break;
             case MSGTYPE_VERIFYMSG:
-                message = storeMsgToDB(msg);
+                message = newMsgToDBMessage(msg);
                 break;
             case MSGTYPE_SHARECARD:
                 msg.setPlainText("[名片消息，请在手机上查看]");
-                message = storeMsgToDB(msg);
+                message = newMsgToDBMessage(msg);
                 break;
             case MSGTYPE_RECALLED:
                 map = XmlStreamUtil.toMap(msg.getContent());
                 msg.setContentMap(map);
                 msg.setPlainText(map.get("sysmsg.revokemsg.replacemsg").toString());
-                message = storeMsgToDB(msg);
+                message = newMsgToDBMessage(msg);
                 break;
             case UNKNOWN:
             default:
                 log.warn(LogUtil.printFromMeg(msg, msgType.getCode()));
                 break;
         }
+        if (message != null) {
+            if (message.getFromUsername().startsWith("@@") || message.getToUsername().startsWith("@@")) {
+                message.setGroup(true);
+            }else{
+                message.setGroup(false);
+            }
+            //显示的名称
+            if (message.isGroup()) {
+                //如果是群则显示群成员名称
+                message.setPlainName(message.getFromMemberOfGroupDisplayname());
+            } else {
+                message.setPlainName(ContactsTools.getContactDisplayNameByUserName(message.getFromUsername()));
+            }
 
-        //聊天界面
-        updateUI(message, msg);
+            //聊天界面
+            updateUI(message, msg);
+            messageMapper.insert(message);
+        }
         processExtra(msg);
 
     }
@@ -289,7 +319,9 @@ public class MsgCenter {
                 break;
         }
         //发送消息
-        MessageTools.sendMsgByUserId(messages);
+            MessageTools.sendMsgByUserId(messages);
+            ChatUtil.addMineNewMsg(messages);
+
     }
 
     /**
@@ -299,6 +331,9 @@ public class MsgCenter {
     private void loadUserInfo(AddMsgList msg){
 
         String userName = msg.getFromUserName();
+        if (userName.equals(Core.getUserName())){
+            userName = msg.getToUserName();
+        }
         Contacts contacts = Core.getMemberMap().get(userName);
         if (contacts==null){
             loginService.WebWxBatchGetContact(userName);
@@ -352,6 +387,7 @@ public class MsgCenter {
      * @param msg
      */
     private void updateUI(Message message, AddMsgList msg) {
+
         //################3聊天面板消息处理###########3333
         int msgUnReadCount = 1;
         String lastMsgPrefix = "";
@@ -377,29 +413,9 @@ public class MsgCenter {
         String lastMsg = lastMsgPrefix+(message==null?msg.getContent():message.getPlaintext());
         String roomId = userName;
         int count = msgUnReadCount;
-        SwingUtilities.invokeLater(() -> {
+        //添加一条新消息
+        ChatUtil.addNewMsg(message,roomId,lastMsg,count);
 
-            //刷新消息
-            if (message!=null){
-                message.setProcess(100);
-                message.setIsSend(true);
-                //新消息来了后创建房间
-                //创建房间的时候会从数据库加载历史消息，由于这次的消息已经写入了数据库，所以不用再添加了
-                if (RoomChatPanel.getContext().exists(roomId)) {
-                    try {
-                        RoomChatPanel.getContext().get(roomId).addMessageItemToEnd(message);
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                        return;
-                    }
-                }else{
-                    RoomChatPanel.getContext().addPanel(roomId);
-                }
-            }
-            //新增或选择聊天列表
-            RoomsPanel.getContext().addRoomOrOpenRoomNotSwitch(roomId, lastMsg, count);
-
-        });
     }
 
     /**
@@ -407,57 +423,50 @@ public class MsgCenter {
      *
      * @param msg 消息
      */
-    private Message storeMsgToDB(AddMsgList msg) {
-        try {
+    private Message newMsgToDBMessage(AddMsgList msg) {
             boolean isFromSelf = msg.getFromUserName().endsWith(Core.getUserName());
             boolean isToSelf = msg.getToUserName().endsWith(Core.getUserName());
-            Message build = Message
-                    .builder()
-                    .plaintext(msg.getPlainText() == null ? msg.getContent() : msg.getPlainText())
-                    .content(msg.getContent())
-                    .filePath(msg.getFilePath())
-                    .createTime(DateUtils.getCurrDateString(DateUtils.YYYY_MM_DD_HH_MM_SS))
-                    .fromNickname(isFromSelf ? Core.getNickName() : ContactsTools.getContactNickNameByUserName(msg.getFromUserName()))
-                    .fromRemarkname(isFromSelf ? Core.getNickName() : ContactsTools.getContactRemarkNameByUserName(msg.getFromUserName()))
-                    .fromUsername(msg.getFromUserName())
-                    .id(UUID.randomUUID().toString().replace("-", ""))
-                    .toNickname(isToSelf ? Core.getNickName() : ContactsTools.getContactNickNameByUserName(msg.getToUserName()))
-                    .toRemarkname(isToSelf ? Core.getNickName() : ContactsTools.getContactRemarkNameByUserName(msg.getToUserName()))
-                    .toUsername(msg.getToUserName())
-                    .msgId(msg.getMsgId())
-                    .msgType(msg.getMsgType())
-                    .isSend(isFromSelf)
-                    .appMsgType(msg.getAppMsgType())
-                    .msgJson(JSON.toJSONString(msg))
-                    .msgDesc(WXReceiveMsgCodeEnum.getByCode(msg.getMsgType()).getDesc())
-                    .fromMemberOfGroupDisplayname(msg.isGroupMsg()&&!msg.getFromUserName().equals(Core.getUserName())
-                            ? ContactsTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), msg.getMemberName()) : null)
-                    .fromMemberOfGroupNickname(msg.isGroupMsg()&&!msg.getFromUserName().equals(Core.getUserName())
-                            ? ContactsTools.getMemberNickNameOfGroup(msg.getFromUserName(), msg.getMemberName()) : null)
-                    .fromMemberOfGroupUsername(msg.isGroupMsg() &&!msg.getFromUserName().equals(Core.getUserName())
-                            ? msg.getMemberName() : null)
-                    .slavePath(msg.getSlavePath())
-                    .response(JSON.toJSONString(WebWXSendMsgResponse.builder()
-                            .BaseResponse(WebWXSendMsgResponse.BaseResponse.builder().Ret(0).build())
-                    .LocalID(msg.getMsgId())
-                    .MsgID(msg.getNewMsgId()+"").build()))
-                    .playLength(msg.getPlayLength())
-                    .imgHeight(msg.getImgHeight())
-                    .imgWidth(msg.getImgWidth())
-                    .voiceLength(msg.getVoiceLength())
-                    .fileName(msg.getFileName())
-                    .fileSize(msg.getFileSize())
-                    .contentMap(msg.getContentMap())
-                    .build();
-            int insert = messageMapper.insert(build);
-            return build;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        return Message
+                .builder()
+                .plaintext(msg.getPlainText() == null ? msg.getContent() : msg.getPlainText())
+                .content(msg.getContent())
+                .filePath(msg.getFilePath())
+                .createTime(DateUtils.getCurrDateString(DateUtils.YYYY_MM_DD_HH_MM_SS))
+                .fromNickname(isFromSelf ? Core.getNickName() : ContactsTools.getContactNickNameByUserName(msg.getFromUserName()))
+                .fromRemarkname(isFromSelf ? Core.getNickName() : ContactsTools.getContactRemarkNameByUserName(msg.getFromUserName()))
+                .fromUsername(msg.getFromUserName())
+                .id(UUID.randomUUID().toString().replace("-", ""))
+                .toNickname(isToSelf ? Core.getNickName() : ContactsTools.getContactNickNameByUserName(msg.getToUserName()))
+                .toRemarkname(isToSelf ? Core.getNickName() : ContactsTools.getContactRemarkNameByUserName(msg.getToUserName()))
+                .toUsername(msg.getToUserName())
+                .msgId(msg.getMsgId())
+                .msgType(msg.getMsgType())
+                .isSend(isFromSelf)
+                .appMsgType(msg.getAppMsgType())
+                .msgJson(JSON.toJSONString(msg))
+                .msgDesc(WXReceiveMsgCodeEnum.getByCode(msg.getMsgType()).getDesc())
+                .fromMemberOfGroupDisplayname(msg.isGroupMsg()&&!msg.getFromUserName().equals(Core.getUserName())
+                        ? ContactsTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), msg.getMemberName()) : null)
+                .fromMemberOfGroupNickname(msg.isGroupMsg()&&!msg.getFromUserName().equals(Core.getUserName())
+                        ? ContactsTools.getMemberNickNameOfGroup(msg.getFromUserName(), msg.getMemberName()) : null)
+                .fromMemberOfGroupUsername(msg.isGroupMsg() &&!msg.getFromUserName().equals(Core.getUserName())
+                        ? msg.getMemberName() : null)
+                .slavePath(msg.getSlavePath())
+                .response(JSON.toJSONString(WebWXSendMsgResponse.builder()
+                        .BaseResponse(WebWXSendMsgResponse.BaseResponse.builder().Ret(0).build())
+                .LocalID(msg.getMsgId())
+                .MsgID(msg.getNewMsgId()+"").build()))
+                .playLength(msg.getPlayLength())
+                .imgHeight(msg.getImgHeight())
+                .imgWidth(msg.getImgWidth())
+                .voiceLength(msg.getVoiceLength())
+                .fileName(msg.getFileName())
+                .fileSize(msg.getFileSize())
+                .contentMap(msg.getContentMap())
+                .timestamp(System.currentTimeMillis())
+
+                .build();
     }
-
-
 
     /**
      * 处理联系人修改消息

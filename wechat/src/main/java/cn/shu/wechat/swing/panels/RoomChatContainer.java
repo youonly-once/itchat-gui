@@ -5,26 +5,26 @@ import java.awt.*;
 import java.util.LinkedHashMap;
 
 /**
- * 切换聊天房
+ * 聊天房容器
  * @作者 舒新胜
  * @项目 AutoWechat
  * @创建时间 7/18/2021 11:40
  */
-public class RoomChatPanel extends ParentAvailablePanel {
+public class RoomChatContainer extends ParentAvailablePanel {
     private CardLayout cardLayout;
 
-    private final LinkedHashMap<String, RoomChatPanelCard> cards = new LinkedHashMap<>(5);
+    private final static LinkedHashMap<String, RoomChatPanelCard> cards = new LinkedHashMap<>(5);
     public String  getCurrRoomId() {
         return currRoomId;
     }
 
     private String currRoomId;
-    public static RoomChatPanel getContext() {
+    public static RoomChatContainer getContext() {
         return context;
     }
 
-    private static RoomChatPanel context;
-    public RoomChatPanel(JPanel parent) {
+    private static RoomChatContainer context;
+    public RoomChatContainer(JPanel parent) {
         super(parent);
         context = this;
         init();
@@ -76,8 +76,8 @@ public class RoomChatPanel extends ParentAvailablePanel {
      * 获取对应层
      * @param roomId roomId
      */
-    public RoomChatPanelCard get(String roomId){
-        return cards.get(roomId);
+    public static RoomChatPanelCard get(String roomId){
+        return context.cards.get(roomId);
     }
 
     /**

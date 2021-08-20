@@ -1,11 +1,15 @@
 package cn.shu.wechat.swing.utils;
 
-import cn.shu.wechat.beans.pojo.Contacts;
+import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.panels.RightPanel;
-import cn.shu.wechat.swing.panels.RoomChatPanel;
+import cn.shu.wechat.swing.panels.RoomChatContainer;
 import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.swing.panels.TabOperationPanel;
+
+import javax.swing.*;
+import java.text.ParseException;
+import java.util.List;
 
 /**
  * @作者 舒新胜
@@ -20,11 +24,11 @@ public class ChatUtil {
         //注意先后顺序，否则可能不能激活
         if (!Core.getRecentContacts().contains(userId)) {
             //创建一层聊天面板
-            RoomChatPanel.getContext().createAndShow(userId);
+            RoomChatContainer.getContext().createAndShow(userId);
             //房间不存在，创建左侧聊天房
             createDirectChat(userId);
-        }else{
-            RoomChatPanel.getContext().createAndShow(userId);
+        } else {
+            RoomChatContainer.getContext().createAndShow(userId);
             //房间列表激活 //TODO有问题
             RoomsPanel.getContext().activeItem(userId);
         }
@@ -43,5 +47,65 @@ public class ChatUtil {
     public static void createDirectChat(String userId) {
         RoomsPanel.getContext().addRoom(userId);
         Core.getRecentContacts().add(userId);
+    }
+
+
+    /**
+     * 新消息处理
+     *
+     * @param message 消息
+     * @param roomId  房间ID
+     * @param lastMsg 最新消息
+     * @param count   消息数
+     */
+    public static void addNewMsg(Message message, String roomId, String lastMsg, int count) {
+        SwingUtilities.invokeLater(() -> {
+
+            //刷新消息
+            if (message != null) {
+                message.setProgress(100);
+                message.setIsSend(true);
+                //新消息来了后创建房间
+                //创建房间的时候会从数据库加载历史消息，由于这次的消息已经写入了数据库，所以不用再添加了
+                if (RoomChatContainer.getContext().exists(roomId)) {
+                    try {
+                        RoomChatContainer.get(roomId).addMessageToEnd(message);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                        return;
+                    }
+                } else {
+                    RoomChatContainer.getContext().addPanel(roomId);
+                }
+            }
+            //新增或选择聊天列表
+            RoomsPanel.getContext().addRoomOrOpenRoomNotSwitch(roomId, lastMsg, count);
+
+
+        });
+    }
+
+    /**
+     * 新消息处理
+     *
+     * @param message 消息
+     * @param roomId  房间ID
+     */
+    public static void addNewMsg(Message message, String roomId) {
+        addNewMsg(message, roomId, message.getPlaintext(), 0);
+    }
+
+    /**
+     * 自己发送的新消息
+     *
+     * @param messages 消息
+     */
+    public static void addMineNewMsg(List<Message> messages) {
+        if (messages == null){
+            return;
+        }
+        for (Message message : messages) {
+            addNewMsg(message, message.getToUsername(), message.getPlaintext(), 0);
+        }
     }
 }

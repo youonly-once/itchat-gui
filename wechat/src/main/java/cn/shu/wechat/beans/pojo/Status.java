@@ -1,6 +1,9 @@
 package cn.shu.wechat.beans.pojo;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @作者 舒新胜
@@ -8,6 +11,9 @@ import lombok.Data;
  * @创建时间 7/1/2021 6:24 PM
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Status {
     private String name;
 

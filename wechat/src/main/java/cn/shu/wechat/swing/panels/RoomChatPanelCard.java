@@ -3,7 +3,9 @@ package cn.shu.wechat.swing.panels;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.beans.pojo.Message;
+import cn.shu.wechat.beans.pojo.Status;
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.mapper.StatusMapper;
 import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.utils.SpringContextHolder;
@@ -185,7 +187,8 @@ public class RoomChatPanelCard extends JPanel {
      *
      * @param message 新消息
      */
-    public void addMessageItemToEnd(Message message) throws ParseException {
-        chatPanel.addMessageItemToEnd(message);
+    public void addMessageToEnd(Message message) throws ParseException {
+        chatPanel.addMessageToEnd(message);
     }
+
 }

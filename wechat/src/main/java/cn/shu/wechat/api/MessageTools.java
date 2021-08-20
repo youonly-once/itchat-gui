@@ -109,7 +109,7 @@ public class MessageTools {
                     return sendMsgResponse;
                 }
                 //存储数据库
-                 storeMsgToDB(messages, sendMsgResponse, toUserName);
+                 storeMsgToDB(message, sendMsgResponse, toUserName);
             } catch (Exception e) {
                 e.printStackTrace();
                 log.error("发送消息失败：{}", e.getMessage());
@@ -154,7 +154,7 @@ public class MessageTools {
         for (Message message : results) {
             boolean isToSelf = toUserName.endsWith(Core.getUserName());
             message.setIsSend(true);
-            message.setProcess(100);
+            message.setProgress(100);
             message.setMsgJson(JSON.toJSONString(message));
             message.setResponse(JSON.toJSONString(sendMsgResponse));
             if (message.getMsgType() == null) {
@@ -180,7 +180,18 @@ public class MessageTools {
         }
         return new ArrayList<>();
     }
-
+    /**
+     * 保存发送的消息到数据库
+     *
+     * @param toUserName      消息接收者
+     * @param message         发送的消息
+     * @param sendMsgResponse 发送成功响应信息
+     */
+    private static List<Message> storeMsgToDB(Message message, WebWXSendMsgResponse sendMsgResponse, String toUserName) {
+        ArrayList<Message> messages = new ArrayList<>();
+        messages.add(message);
+        return storeMsgToDB(messages,sendMsgResponse,toUserName);
+    }
     /**
      * 根据指定类型发送消息
      *
@@ -570,7 +581,9 @@ public class MessageTools {
         textMsg.Content = content;
         msgRequest.Msg = textMsg;
         WebWXSendMsgResponse webWXSendMsgResponse = sendMsg(msgRequest, url);
-        callback.onTaskSuccess(100,100);
+        if (callback!=null){
+            callback.onTaskSuccess(100,100);
+        }
         return webWXSendMsgResponse;
     }
     /**
@@ -709,8 +722,6 @@ public class MessageTools {
     }
 
 
-
-
     public static Message toPicMessage(String filePath, String toUserName) {
 
         if (filePath != null) {
@@ -724,27 +735,4 @@ public class MessageTools {
         return null;
     }
 
-    public static Message toPicMessage(String filePath) {
-
-        return toPicMessage(filePath, "filehelper");
-    }
-
-    public static Message toVideoMessage(String filePath, String toUserName) {
-
-        if (filePath != null) {
-            File file = new File(filePath);
-            return Message.builder().msgType(WXSendMsgCodeEnum.VIDEO.getCode())
-                    .filePath(filePath)
-                    .playLength(0L)
-                    .fileSize(file.length())
-                    .slavePath(filePath)
-                    .toUsername(toUserName).build();
-        }
-        return null;
-    }
-
-    public static Message toVideoMessage(String filePath) {
-
-        return toPicMessage(filePath, "filehelper");
-    }
 }

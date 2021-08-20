@@ -204,7 +204,7 @@ public class RCListView extends JScrollPane {
                 contentPanel.add(headerViewHolder);
                 rectangleList.add(headerViewHolder.getBounds());
             }
-            ViewHolder holder = adapter.onCreateViewHolder(viewType, i);
+            ViewHolder holder = adapter.onCreateViewHolder(viewType, 0,i);
             adapter.onBindViewHolder(holder, i);
             contentPanel.add(holder);
         }
@@ -280,7 +280,7 @@ public class RCListView extends JScrollPane {
 
         for (int i = count - 1; i >= startPosition; i--) {
             int viewType = adapter.getItemViewType(i);
-            ViewHolder holder = adapter.onCreateViewHolder(viewType, i);
+            ViewHolder holder = adapter.onCreateViewHolder(viewType, 0,i);
             adapter.onBindViewHolder(holder, i);
             contentPanel.add(holder, startPosition);
         }
@@ -303,7 +303,7 @@ public class RCListView extends JScrollPane {
             }
 
             int viewType = adapter.getItemViewType(i);
-            ViewHolder holder = adapter.onCreateViewHolder(viewType,i);
+            ViewHolder holder = adapter.onCreateViewHolder(viewType,0,i);
             adapter.onBindViewHolder(holder, i);
             contentPanel.add(holder, -1);
 
@@ -386,7 +386,8 @@ public class RCListView extends JScrollPane {
 
     public ViewHolder notifyItemInserted(int position, boolean end) {
         int viewType = adapter.getItemViewType(position);
-        ViewHolder holder = adapter.onCreateViewHolder(viewType, position);
+        int subViewType = adapter.getItemSubViewType(position);
+        ViewHolder holder = adapter.onCreateViewHolder(viewType,subViewType, position);
         try {
             adapter.onBindViewHolder(holder, position);
         } catch (Exception e) {

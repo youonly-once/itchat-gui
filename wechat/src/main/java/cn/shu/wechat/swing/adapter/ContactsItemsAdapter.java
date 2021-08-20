@@ -62,7 +62,7 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
     }
 
     @Override
-    public ContactsItemViewHolder onCreateViewHolder(int viewType, int position) {
+    public ContactsItemViewHolder onCreateViewHolder(int viewType, int subViewType, int position) {
 
         //避免重复创建
         ContactsItemViewHolder contactsItemViewHolder;

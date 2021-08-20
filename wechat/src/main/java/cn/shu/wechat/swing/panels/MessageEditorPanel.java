@@ -406,10 +406,12 @@ public class MessageEditorPanel extends ParentAvailablePanel {
         }.execute();
     }
 
+
+
     /**
      * 获取当前用户的撤回状态
      */
-    private void setUndoLabel(){
+    public void setUndoLabel(){
         new SwingWorker<Object,Object>(){
             Status status  = null;
             @Override
@@ -436,7 +438,7 @@ public class MessageEditorPanel extends ParentAvailablePanel {
     /**
      * 获取当前用户的自动回复状态
      */
-    private void setAutoLabel(){
+    public void setAutoLabel(){
         new SwingWorker<Object,Object>(){
             Status status  = null;
             @Override

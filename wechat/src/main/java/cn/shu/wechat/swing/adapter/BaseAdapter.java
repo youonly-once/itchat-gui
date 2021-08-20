@@ -11,7 +11,7 @@ public abstract class BaseAdapter<T extends ViewHolder> {
     }
 
 
-    public abstract T onCreateViewHolder(int viewType, int position);
+    public abstract T onCreateViewHolder(int viewType,int subViewType, int position);
 
     public HeaderViewHolder onCreateHeaderViewHolder(int viewType, int position) {
         return null;
@@ -35,4 +35,7 @@ public abstract class BaseAdapter<T extends ViewHolder> {
     }
 
 
+    public int getItemSubViewType(int position){
+        return 0;
+    };
 }
