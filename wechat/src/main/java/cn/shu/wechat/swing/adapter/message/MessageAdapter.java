@@ -34,9 +34,7 @@ import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
 import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.panels.RoomChatContainer;
 import cn.shu.wechat.swing.utils.*;
-import cn.shu.wechat.utils.DateUtils;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
-import cn.shu.wechat.utils.SleepUtils;
 import javazoom.jl.player.Player;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.StringUtils;
@@ -55,10 +53,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.text.ParseException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by 舒新胜 on 17-6-2.
@@ -339,20 +334,57 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
                 @Override
                 protected void done() {
-                    if (imageIcon!=null){
+                    if (imageIcon != null) {
                         appViewHolder.imageLabel.setIcon(imageIcon);
                     }
                 }
             }.execute();
-        }else{
+        } else if (StringUtils.isEmpty(item.getFilePath())) {
             try {
                 appViewHolder.imageLabel.setIcon(new ImageIcon(new URL(item.getThumbUrl())));
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
+        } else {
+            new SwingWorker<Object, Object>() {
+                ImageIcon imageIcon = null;
+
+                @Override
+                protected Object doInBackground() throws Exception {
+                    DownloadTools.awaitDownload(item.getFilePath());
+                    imageIcon = new ImageIcon(item.getFilePath());
+                    ImageUtil.preferredImageSize(imageIcon, 200);
+                    return null;
+                }
+
+                @Override
+                protected void done() {
+                    if (imageIcon != null) {
+                        appViewHolder.imageLabel.setIcon(imageIcon);
+                    }
+                }
+            }.execute();
+        }
+        if (StringUtils.isNotEmpty(item.getUrl())) {
+            //点击打开链接
+            MessageMouseListener messageMouseListener = new MessageMouseListener() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (e.getButton() == MouseEvent.BUTTON1) {
+                        if (StringUtils.isNotEmpty(item.getUrl())) {
+                            try {
+                                Desktop.getDesktop().browse(new URI(item.getUrl()));
+                            } catch (IOException | URISyntaxException ioException) {
+                                ioException.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            };
+            appViewHolder.contentTitlePanel.addMouseListener(messageMouseListener);
         }
         // 绑定右键菜单
-        attachPopupMenu(viewHolder,item);
+        attachPopupMenu(viewHolder, item);
     }
 
     /**

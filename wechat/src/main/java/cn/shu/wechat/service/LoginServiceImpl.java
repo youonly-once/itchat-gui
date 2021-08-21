@@ -235,7 +235,7 @@ public class LoginServiceImpl implements LoginService {
                         ;
                     }
                 });
-                addContacts(contacts);
+                addContacts(contacts, false);
                 recentContacts.add(contacts.getUsername());
             }
 
@@ -405,7 +405,7 @@ public class LoginServiceImpl implements LoginService {
             for (Object value : member) {
                 JSONObject o = (JSONObject) value;
                 Contacts contacts = JSON.parseObject(JSON.toJSONString(o), Contacts.class);
-                addContacts(contacts);
+                addContacts(contacts, true);
             }
             if (!Core.getMemberMap().containsKey("filehelper")){
                 Core.getMemberMap().put("filehelper",
@@ -420,9 +420,10 @@ public class LoginServiceImpl implements LoginService {
 
     /**
      * 添加联系人
+     *
      * @param contacts
      */
-    private void addContacts( Contacts contacts){
+    private void addContacts(Contacts contacts, boolean compare) {
 
         contacts.setIscontacts(true);
         String userName = contacts.getUsername();
@@ -453,8 +454,11 @@ public class LoginServiceImpl implements LoginService {
         } else {
             contacts.setType(Contacts.ContactsType.ORDINARY_USER);
             //比较上次差异
-            Contacts old = Core.getContactMap().get(userName);
-            compareOld(old, userName, contacts, "普通联系人");
+            if (compare) {
+                Contacts old = Core.getContactMap().get(userName);
+                compareOld(old, userName, contacts, "普通联系人");
+            }
+
             // 普通联系人
             Core.getContactMap().put(userName, contacts);
         }
