@@ -101,7 +101,7 @@ public class MessageLeftVideoViewHolder extends BaseMessageViewHolder {
             e.printStackTrace();
         }
 
-
+        contentTagPanel.add(revoke);
         messageAvatarPanel.setLayout(new GridBagLayout());
         messageAvatarPanel.add(avatar, new GBC(1, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 5, 0, 0));
         messageAvatarPanel.add(contentTagPanel, new GBC(2, 0)

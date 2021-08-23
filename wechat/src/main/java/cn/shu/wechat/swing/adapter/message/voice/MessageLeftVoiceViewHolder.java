@@ -67,6 +67,7 @@ public class MessageLeftVoiceViewHolder extends MessageVoiceViewHolder {
         contentTagPanel.add(unreadPoint);
 
         senderMessagePanel.add(contentTagPanel, BorderLayout.CENTER);
+        senderMessagePanel.add(revoke,BorderLayout.WEST);
         messageAvatarPanel.setLayout(new GridBagLayout());
         messageAvatarPanel.add(avatar, new GBC(1, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 5, 0, 0));
         messageAvatarPanel.add(senderMessagePanel, new GBC(2, 0)

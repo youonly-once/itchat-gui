@@ -34,6 +34,7 @@ public class MessageLeftLinkOfAppViewHolder extends MessageLinkOfAppViewHolder {
             senderMessagePanel.add(sender,0);
         }
         senderMessagePanel.add(messageBubble,-1);
+        senderMessagePanel.add(revoke,-1);
         messageAvatarPanel.add(avatar, new GBC(1, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 5, 0, 0));
         messageAvatarPanel.add(senderMessagePanel, new GBC(2, 0)
                 .setWeight(1000, 1)

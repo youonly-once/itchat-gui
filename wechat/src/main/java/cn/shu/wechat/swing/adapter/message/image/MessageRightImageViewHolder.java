@@ -62,7 +62,7 @@ public class MessageRightImageViewHolder extends BaseMessageViewHolder {
         resendImagePanel.add(resend, BorderLayout.WEST);
         resendImagePanel.add(sendingProgress, BorderLayout.WEST);
         resendImagePanel.add(image, BorderLayout.CENTER);
-
+        resendImagePanel.add(revoke,BorderLayout.NORTH);
         messageAvatarPanel.setLayout(new GridBagLayout());
         messageAvatarPanel.add(resendImagePanel, new GBC(1, 0).setWeight(1000, 1).setAnchor(GBC.EAST).setInsets(0, 0, 0, 5));
         messageAvatarPanel.add(avatar, new GBC(2, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 0, 0, 5));

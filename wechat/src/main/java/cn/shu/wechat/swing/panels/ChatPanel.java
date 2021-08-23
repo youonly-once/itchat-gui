@@ -9,6 +9,7 @@ import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
 import cn.shu.wechat.mapper.MessageMapper;
+import cn.shu.wechat.swing.adapter.RoomItemViewHolder;
 import cn.shu.wechat.swing.adapter.ViewHolder;
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.adapter.message.MessageAdapter;
@@ -357,6 +358,7 @@ public class ChatPanel extends ParentAvailablePanel {
             dequeueAndUpload();
         }
         messageEditorPanel.getEditor().setText("");
+        RoomsPanel.getContext().scrollToPosition(0);
     }
 
     /**
@@ -540,6 +542,14 @@ public class ChatPanel extends ParentAvailablePanel {
             messageItem.setNeedToResend(!lastMessage.getIsSend());
             messageItem.setProgress(lastMessage.get);*/
             messagePanel.getMessageListView().notifyItemChanged(viewHolder, pos);
+        }
+    }
+
+    public void setRevokeStatus(String id){
+        int pos = findMessagePositionInViewReverse(id);
+        if (pos > -1) {
+            messageItems.get(pos).setRevoke(true);
+            messagePanel.getMessageListView().notifyItemChanged(pos);
         }
     }
 

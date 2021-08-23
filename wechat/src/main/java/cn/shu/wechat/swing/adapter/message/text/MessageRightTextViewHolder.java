@@ -74,6 +74,7 @@ public class MessageRightTextViewHolder extends BaseMessageViewHolder {
         resendTextPanel.setLayout(new BorderLayout());
         resendTextPanel.add(resend, BorderLayout.WEST);
         resendTextPanel.add(sendingProgress, BorderLayout.WEST);
+        resendTextPanel.add(revoke, BorderLayout.NORTH);
         resendTextPanel.add(messageBubble, BorderLayout.CENTER);
 
         messageAvatarPanel.setLayout(new GridBagLayout());

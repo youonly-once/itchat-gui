@@ -402,6 +402,14 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             return null;
         }
         Message oldMessage = messages.get(0);
+        //设置撤回状态
+        String roomId = msg.getFromUserName();
+        if (roomId.equals(Core.getUserName())) {
+            roomId = msg.getToUserName();
+        }
+        RoomChatContainer.get(roomId).getChatPanel().setRevokeStatus(oldMessage.getId());
+
+
         //==============是否为自己的消息
         String oldMsgFromUserName = oldMessage.getFromUsername();
         //自己的撤回消息不处理

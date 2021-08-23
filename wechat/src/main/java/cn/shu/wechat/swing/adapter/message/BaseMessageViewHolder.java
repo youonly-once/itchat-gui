@@ -3,6 +3,7 @@ package cn.shu.wechat.swing.adapter.message;
 import cn.shu.wechat.swing.adapter.ViewHolder;
 
 import javax.swing.*;
+import java.awt.*;
 
 /**
  * @author 舒新胜
@@ -11,4 +12,10 @@ import javax.swing.*;
 public abstract class BaseMessageViewHolder extends ViewHolder {
     public JLabel avatar = new JLabel();
     public JLabel time = new JLabel();
+    public JLabel revoke = new JLabel("已撤回");
+
+    public BaseMessageViewHolder() {
+        revoke.setForeground(Color.GRAY);
+        revoke.setVisible(false);
+    }
 }

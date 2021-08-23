@@ -19,6 +19,7 @@ public class MessageRightLinkOfAppViewHolder extends MessageLinkOfAppViewHolder 
     private void initView() {
         //群消息显示发送者名称
         senderMessagePanel.add(messageBubble);
+        senderMessagePanel.add(revoke);
         messageAvatarPanel.add(avatar, new GBC(2, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 5, 0, 5));
         messageAvatarPanel.add(senderMessagePanel, new GBC(1, 0)
                 .setWeight(1000, 1)

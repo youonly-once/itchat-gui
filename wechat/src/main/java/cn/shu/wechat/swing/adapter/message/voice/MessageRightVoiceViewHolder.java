@@ -46,7 +46,7 @@ public class MessageRightVoiceViewHolder extends MessageVoiceViewHolder {
         voicePanel.add(processBarPanel);
         voiceImgLabel.setIcon(IconUtil.getIcon(this, "/image/right_voice.png"));
         contentTagPanel.add(voicePanel);
-
+        contentTagPanel.add(revoke);
         messageAvatarPanel.setLayout(new GridBagLayout());
         messageAvatarPanel.add(contentTagPanel, new GBC(1, 0).setWeight(1000, 1).setAnchor(GBC.EAST).setInsets(0, 5, 0, 0));
         messageAvatarPanel.add(avatar, new GBC(2, 0)

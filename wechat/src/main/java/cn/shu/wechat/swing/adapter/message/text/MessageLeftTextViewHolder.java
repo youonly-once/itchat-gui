@@ -66,8 +66,10 @@ public class MessageLeftTextViewHolder extends BaseMessageViewHolder {
             sender.setBorder(new EmptyBorder(0,messageBubble.getSalientPointPixel(),100,0));
         }
         JPanel contentPanel = new JPanel();
-        contentPanel.add(messageBubble);
         contentPanel.setLayout(new FlowLayout(FlowLayout.LEFT,0,0));
+        contentPanel.add(messageBubble);
+        contentPanel.add(revoke);
+
         senderMessagePanel.add(contentPanel);
         messageAvatarPanel.setLayout(new GridBagLayout());
         messageAvatarPanel.add(avatar, new GBC(1, 0).setWeight(1, 1)

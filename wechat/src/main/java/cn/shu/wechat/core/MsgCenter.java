@@ -246,7 +246,6 @@ public class MsgCenter {
         }
 
         String lastMsg = lastMsgPrefix + (message == null ? msg.getContent() : message.getPlaintext());
-        String roomId = userName;
         int count = msgUnReadCount;
 
 
@@ -259,7 +258,7 @@ public class MsgCenter {
 
 
         //添加一条新消息
-        ChatUtil.addNewMsg(message, roomId, lastMsg, count);
+        ChatUtil.addNewMsg(message, userName, lastMsg, count);
 
     }
 

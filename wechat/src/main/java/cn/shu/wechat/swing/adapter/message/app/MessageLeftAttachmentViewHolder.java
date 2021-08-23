@@ -68,18 +68,18 @@ public class MessageLeftAttachmentViewHolder extends MessageAttachmentViewHolder
 
         attachmentPanel.add(sizeLabel, new GBC(1, 1).setWeight(1, 1).setFill(GBC.HORIZONTAL).setAnchor(GBC.SOUTH).setInsets(-20, 8, 3, 0));
 
-
         messageBubble.add(attachmentPanel);
 
 
         JPanel senderMessagePanel = new JPanel();
         senderMessagePanel.setBackground(Colors.WINDOW_BACKGROUND);
         senderMessagePanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
+
         if (isGroup) {
             senderMessagePanel.add(sender);
         }
         senderMessagePanel.add(messageBubble);
-
+        senderMessagePanel.add(revoke);
         messageAvatarPanel.setLayout(new GridBagLayout());
         messageAvatarPanel.add(avatar, new GBC(1, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 5, 0, 0));
         messageAvatarPanel.add(senderMessagePanel, new GBC(2, 0)

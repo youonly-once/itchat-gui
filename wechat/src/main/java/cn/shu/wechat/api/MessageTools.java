@@ -160,6 +160,7 @@ public class MessageTools {
             if (message.getMsgType() == null) {
                 message.setAppMsgType(0);
             }
+            message.setMsgId(sendMsgResponse.getMsgID());
             message.setCreateTime(DateUtils.getCurrDateString(DateUtils.YYYY_MM_DD_HH_MM_SS));
             message.setFromNickname(Core.getNickName());
             message.setFromRemarkname(Core.getNickName());

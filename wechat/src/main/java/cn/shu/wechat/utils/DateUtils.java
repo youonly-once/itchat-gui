@@ -12,7 +12,7 @@ import java.util.TimeZone;
  * @创建时间 8/18/2021 21:31
  */
 public class DateUtils {
-    public static final String YYYY_MM_DD_HH_MM_SS = "YYYY-MM-dd hh:mm:ss";
+    public static final String YYYY_MM_DD_HH_MM_SS = "YYYY-MM-dd HH:mm:ss";
     /**
      * 日期格式化
      * @param date 日期

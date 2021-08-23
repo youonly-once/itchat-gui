@@ -250,7 +250,9 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         Message preItem = position == 0 ? null : messageItems.get(position - 1);
 
        processTimeAndAvatar(item, preItem, viewHolder);
-
+        if (item.isRevoke()){
+            viewHolder.revoke.setVisible(true);
+        }
         if (viewHolder instanceof MessageSystemMessageViewHolder) {
             processSystemMessage(viewHolder, item);
         } else if (viewHolder instanceof MessageRightTextViewHolder) {

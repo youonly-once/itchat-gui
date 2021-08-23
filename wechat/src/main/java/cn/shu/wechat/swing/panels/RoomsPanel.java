@@ -317,7 +317,7 @@ public class RoomsPanel extends ParentAvailablePanel {
             holder = (RoomItemViewHolder) roomItemsListView.getItem(i);
             setItemBackground(holder, Colors.DARK);
         }
-        roomItemsListView.scrollToPosition(position*RoomItemViewHolder.HEIGHT);
+        scrollToPosition(position*RoomItemViewHolder.HEIGHT);
     }
 
     /**
@@ -351,6 +351,10 @@ public class RoomsPanel extends ParentAvailablePanel {
 
     public void scrollPoint(int point){
         roomItemsListView.getVerticalScrollBar().setValue(point);
+    }
+
+    public void scrollToPosition(int point){
+        roomItemsListView.scrollToPosition(point);
     }
 
     public static RoomsPanel getContext() {

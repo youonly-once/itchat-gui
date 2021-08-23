@@ -82,6 +82,7 @@ public class MessageRightVideoViewHolder extends BaseMessageViewHolder {
             resendImagePanel.setOpaque(false);
             resendImagePanel.add(videoComponent,BorderLayout.CENTER);
             resendImagePanel.add(sendingProgress,BorderLayout.WEST);
+            resendImagePanel.add(revoke,BorderLayout.NORTH);
             contentTagPanel.add(resendImagePanel);
         } catch (IOException e) {
             e.printStackTrace();

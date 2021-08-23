@@ -118,7 +118,7 @@ public class Message implements Comparable<Message>{
      * content map
      */
     private Map<String, Object> contentMap;
-
+    private boolean isRevoke;
     private String plainName;
     private int progress = 100;
     private boolean isNeedToResend;
