@@ -95,7 +95,7 @@ public class MediaUtil {
                 // 设置最大值：比特率越高，清晰度/音质越好
                 // 设置音频比特率,单位:b (比特率越高，清晰度/音质越好，当然文件也就越大 128000 = 182kb)
                 if (audioInfo.getBitRate() > maxBitRate) {
-                    audio.setBitRate(new Integer(maxBitRate));
+                    audio.setBitRate(maxBitRate);
                 }
 
                 // 设置重新编码的音频流中使用的声道数（1 =单声道，2 = 双声道（立体声））。如果未设置任何声道值，则编码器将选择默认值 0。

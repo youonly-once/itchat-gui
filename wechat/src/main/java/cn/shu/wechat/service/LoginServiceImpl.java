@@ -16,8 +16,6 @@ import cn.shu.wechat.enums.parameters.LoginParaEnum;
 import cn.shu.wechat.enums.parameters.StatusNotifyParaEnum;
 import cn.shu.wechat.enums.parameters.UUIDParaEnum;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
-import cn.shu.wechat.mapper.ContactsMapper;
-import cn.shu.wechat.mapper.MemberGroupRMapper;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.AvatarUtil;
@@ -40,7 +38,6 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.locks.Lock;
 import java.util.regex.Matcher;
 
 /**
@@ -61,16 +58,7 @@ public class LoginServiceImpl implements LoginService {
     private MsgCenter msgCenter;
 
     @Resource
-    private ContactsMapper contactsMapper;
-
-    @Resource
-    private MemberGroupRMapper memberGroupRMapper;
-
-    @Resource
     private Launcher launcher;
-
-
-    private final Map<String, Lock> getBatchContactLock = new HashMap<>();
 
     @Override
     public boolean login() throws Exception {
@@ -339,6 +327,7 @@ public class LoginServiceImpl implements LoginService {
                                 // TODO 删除新增
                                 log.info("联系人修改：{}", webWxSyncMsg);
                                 msgCenter.handleModContact(webWxSyncMsg.getModContactList());
+                                break;
                             case A:
                                 log.info("未知消息：{}", webWxSyncMsg);
                                 break;
@@ -864,7 +853,7 @@ public class LoginServiceImpl implements LoginService {
     public String getLoginMessage(String result) {
         String[] strArr = result.split("<message>");
         String[] rs = strArr[1].split("</message>");
-        if (rs != null && rs.length > 1) {
+        if (rs.length > 1) {
             return rs[0];
         }
         return "";
@@ -883,7 +872,6 @@ public class LoginServiceImpl implements LoginService {
         if (oldV == null) {
             return;
         }
-        String name = ContactsTools.getContactDisplayNameByUserName(key);
 
         Map<String, Map<String, String>> differenceMap = JSONObjectUtil.getDifferenceMap(oldV, newV);
         if (differenceMap.size() > 0) {
@@ -893,12 +881,13 @@ public class LoginServiceImpl implements LoginService {
             //发送消息
             String userName = newV.getUsername();
             userName = "filehelper";
+            String name = ContactsTools.getContactDisplayNameByUserName(key);
             messages.add(Message.builder().content(tip + "（" + name + "）属性更新：" + s)
                     .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                     .toUsername(userName)
                     .build());
             //Old与New存在差异
-//            log.info("{}（{}）属性更新：{}", tip, name, s);
+              log.info("{}（{}）属性更新：{}", tip, name, s);
             //差异存到数据库
             store(differenceMap, oldV, messages);
             MessageTools.sendMsgByUserId(messages);

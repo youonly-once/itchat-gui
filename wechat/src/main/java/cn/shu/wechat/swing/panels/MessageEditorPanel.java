@@ -118,13 +118,12 @@ public class MessageEditorPanel extends ParentAvailablePanel {
          preventUndoNormalIcon = IconUtil.getIcon(this, "/image/prevent.png");
          preventUndoActiveIcon = IconUtil.getIcon(this, "/image/prevent_active.png");
         preventUndoLabel.setIcon(preventUndoNormalIcon);
-        setUndoLabel();
 
         autoReplyLabel = new JLabel();
        autoReplyNormalIcon = IconUtil.getIcon(this, "/image/robot.png");
         autoReplyActiveIcon = IconUtil.getIcon(this, "/image/robot_active.png");
         autoReplyLabel.setIcon(autoReplyNormalIcon);
-        setAutoLabel();
+        setUndoAndAutoLabel();
 
         bombMsgLabel = new JLabel();
         bombMsgNormalIcon = IconUtil.getIcon(this, "/image/bomb.png");
@@ -409,9 +408,9 @@ public class MessageEditorPanel extends ParentAvailablePanel {
 
 
     /**
-     * 获取当前用户的撤回状态
+     * 获取当前用户的撤回状态、自动回复状态
      */
-    public void setUndoLabel(){
+    public void setUndoAndAutoLabel(){
         new SwingWorker<Object,Object>(){
             Status status  = null;
             @Override
@@ -430,27 +429,7 @@ public class MessageEditorPanel extends ParentAvailablePanel {
                 }else{
                     preventUndoLabel.setIcon(preventUndoNormalIcon);
                 }
-            }
-        }.execute();
 
-    }
-
-    /**
-     * 获取当前用户的自动回复状态
-     */
-    public void setAutoLabel(){
-        new SwingWorker<Object,Object>(){
-            Status status  = null;
-            @Override
-            protected Object doInBackground() throws Exception {
-                String to = ContactsTools.getContactDisplayNameByUserName(roomId);
-                StatusMapper statusMapper = SpringContextHolder.getBean(StatusMapper.class);
-                status = statusMapper.selectByPrimaryKey(to);
-                return null;
-            }
-
-            @Override
-            protected void done() {
                 if (status == null || status.getAutoStatus() == null||status .getAutoStatus()== 2){
                     autoReplyLabel.setIcon(autoReplyNormalIcon);
                 }else{
@@ -458,5 +437,7 @@ public class MessageEditorPanel extends ParentAvailablePanel {
                 }
             }
         }.execute();
+
     }
+
 }

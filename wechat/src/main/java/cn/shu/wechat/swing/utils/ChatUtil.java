@@ -2,6 +2,7 @@ package cn.shu.wechat.swing.utils;
 
 import cn.shu.wechat.beans.pojo.Message;
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.panels.RightPanel;
 import cn.shu.wechat.swing.panels.RoomChatContainer;
 import cn.shu.wechat.swing.panels.RoomsPanel;
@@ -73,7 +74,6 @@ public class ChatUtil {
                 }
             //新增或选择聊天列表
             RoomsPanel.getContext().addRoomOrOpenRoomNotSwitch(roomId, lastMsg, count);
-
 
         });
     }

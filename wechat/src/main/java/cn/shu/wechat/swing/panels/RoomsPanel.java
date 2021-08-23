@@ -10,6 +10,7 @@ import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCListView;
 import cn.shu.wechat.swing.db.model.Room;
 import cn.shu.wechat.swing.entity.RoomItem;
+import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 
 import javax.swing.*;
@@ -17,6 +18,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 左侧聊天列表
@@ -25,10 +27,11 @@ import java.util.Set;
 public class RoomsPanel extends ParentAvailablePanel {
     private static RoomsPanel context;
 
-    public RCListView getRoomItemsListView() {
-        return roomItemsListView;
-    }
 
+    /**
+     * 未读消息总数
+     */
+    private static final AtomicInteger UNREAD_TOTAL_COUNT = new AtomicInteger(0);
     /**
      * 聊天列表视图数据
      */
@@ -48,6 +51,21 @@ public class RoomsPanel extends ParentAvailablePanel {
         initView();
         initData();
         roomItemsListView.setAdapter(new RoomItemsAdapter(roomItemList));
+    }
+
+
+    /**
+     * 消息已读数量
+     * @param count 本次已读
+     */
+    public static void updateUnreadTotalCount(int count){
+        if (count != 0){
+            int i = UNREAD_TOTAL_COUNT.addAndGet(count);
+        }
+        if (UNREAD_TOTAL_COUNT.get() == 0){
+            MainFrame.getContext().setTrayFlashing(false);
+        }
+        System.out.println("UNREAD_TOTAL_COUNT.get() = " + UNREAD_TOTAL_COUNT.get());
     }
 
     private void initComponents() {
@@ -91,7 +109,7 @@ public class RoomsPanel extends ParentAvailablePanel {
         //显示聊天界面
         roomChatPanelCard.showPanel(RoomChatPanelCard.MESSAGE);
         //更新聊天列表未读数量
-        updateUnreadCount(roomId,0);
+         updateUnreadCount(roomId,0);
         //发送消息已读通知
         ExecutorServiceUtil.getGlobalExecutorService().execute(() -> MessageTools.sendStatusNotify(roomId));
     }
@@ -101,7 +119,7 @@ public class RoomsPanel extends ParentAvailablePanel {
      * @param roomId 联系人
      * @param latestMsg     最新消息
      */
-    public void addRoom(String roomId, String latestMsg, int msgCount) {
+    private void addRoom(String roomId, String latestMsg, int msgCount) {
         Contacts contacts = Core.getMemberMap().get(roomId);
         addRoom(new RoomItem(contacts, latestMsg, msgCount));
     }
@@ -117,7 +135,7 @@ public class RoomsPanel extends ParentAvailablePanel {
      * 添加房间
      * @param item
      */
-    public void addRoom(RoomItem item) {
+    private void addRoom(RoomItem item) {
         roomItemList.add(0, item);
         roomItemsListView.notifyDataSetChanged(false);
         roomItemsListView.scrollToPosition(0);
@@ -152,7 +170,6 @@ public class RoomsPanel extends ParentAvailablePanel {
      * @param latestMsg  最新消息
      */
     public void addRoomOrOpenRoom(String roomId, String latestMsg, int msgCount) {
-        Contacts contacts = Core.getMemberMap().get(roomId);
         addRoomOrOpenRoomNotSwitch(roomId,latestMsg,msgCount);
         TabOperationPanel.getContext().switchToChatLabel();
     }
@@ -222,10 +239,10 @@ public class RoomsPanel extends ParentAvailablePanel {
             if (item.getRoomId().equals(roomId)) {
                 //找到对应房间
                 if (unReadCount == 0) {
+                    updateUnreadTotalCount(-item.getUnreadCount());
                     item.setUnreadCount(0);
                 } else if (unReadCount != -1) {
                     item.setUnreadCount(item.getUnreadCount() + unReadCount);
-
                 }
                 roomItemsListView.notifyItemChanged(i);
                 break;
@@ -260,7 +277,7 @@ public class RoomsPanel extends ParentAvailablePanel {
                 if (time != null) {
                     item.setTimestamp(time);
                 }
-                if (roomId.equals(RoomChatContainer.getContext().getCurrRoomId())) {
+                if (roomId.equals(RoomChatContainer.getCurrRoomId())) {
                     //当前显示的房间和新消息房间一样，则不需要在房间条目上显示未读消息数量
                     item.setUnreadCount(0);
                 } else if (unReadCount != -1) {

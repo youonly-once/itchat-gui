@@ -215,7 +215,9 @@ public class MsgCenter {
      * @param msg
      */
     private void updateUI(Message message, AddMsgList msg) {
-
+        if (message == null){
+            return;
+        }
         //################3聊天面板消息处理###########3333
         int msgUnReadCount = 1;
         String lastMsgPrefix = "";
@@ -231,21 +233,45 @@ public class MsgCenter {
                 lastMsgPrefix = Core.getNickName() + ": ";
                 msgUnReadCount = 0;
             } else {
+                if (!isCurrRoom(message)){
+                    MainFrame.getContext().setTrayFlashing(true);
+                }
                 lastMsgPrefix = ContactsTools.getMemberDisplayNameOfGroup(userName, msg.getMemberName()) + ": ";
             }
         } else {
             MainFrame.getContext().playMessageSound();
-            MainFrame.getContext().setTrayFlashing();
+            if (!isCurrRoom(message)){
+                MainFrame.getContext().setTrayFlashing(true);
+            }
         }
 
         String lastMsg = lastMsgPrefix + (message == null ? msg.getContent() : message.getPlaintext());
         String roomId = userName;
         int count = msgUnReadCount;
+
+
+        //消息总数
+        MainFrame.getContext().setTrayFlashing(false);
+        if (!isCurrRoom(message)){
+            RoomsPanel.updateUnreadTotalCount(count);
+            MainFrame.getContext().setTrayFlashing(true);
+        }
+
+
         //添加一条新消息
         ChatUtil.addNewMsg(message, roomId, lastMsg, count);
 
     }
 
+    /**
+     * 判断是否为当前房间
+     * @param message
+     * @return
+     */
+    private boolean isCurrRoom(Message message){
+        return RoomChatContainer.getCurrRoomId().equals(message.getFromUsername())
+                || RoomChatContainer.getCurrRoomId().equals(message.getToUsername());
+    }
     /**
      * 保存消息到数据库
      *

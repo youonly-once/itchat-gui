@@ -17,6 +17,7 @@ import sun.audio.AudioStream;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -62,6 +63,11 @@ public class MainFrame extends JFrame  {
      */
     private boolean trayFlashing = false;
 
+    /**
+     * 消息提示音
+     */
+    private AudioStream messageSound ;
+
 
     public MainFrame() {
         super("微信-舒专用版");
@@ -72,25 +78,37 @@ public class MainFrame extends JFrame  {
     }
 
     private void initResource() {
-        ExecutorServiceUtil.getGlobalExecutorService().submit(this::initTray);
+        ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
+            @Override
+            public void run() {
+                initTray();
+                initMessageSound();
+            }
+        });
 
     }
+    /**
+     * 消息到来的时候提示音
+     */
+    private void initMessageSound(){
 
+        try {
+            InputStream inputStream = getClass().getResourceAsStream("/wav/msg.wav");
 
+            if (inputStream != null) {
+                messageSound = new AudioStream(inputStream);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     /**
      * 播放消息提示间
      */
     public void playMessageSound() {
-        try {
-            InputStream inputStream = getClass().getResourceAsStream("/wav/msg.wav");
-            /**
-             * 消息到来的时候提示音
-             */
-            AudioStream messageSound = new AudioStream(inputStream);
-            AudioPlayer.player.start(messageSound);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            if (messageSound!=null){
+                AudioPlayer.player.start(messageSound);
+            }
     }
 
 
@@ -168,12 +186,13 @@ public class MainFrame extends JFrame  {
     /**
      * 设置任务栏图标闪动
      */
-    public void setTrayFlashing() {
-       //TODO 聊天界面打开了还在闪，关闭闪烁功能
-        if(trayFlashing){
-            return;
+    public void setTrayFlashing(boolean flashing) {
+        if (flashing){
+            if(trayFlashing){
+                return;
+            }
         }
-        trayFlashing = true;
+        trayFlashing = flashing;
         ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
             @Override
             public void run() {
@@ -272,6 +291,7 @@ public class MainFrame extends JFrame  {
 
     @Override
     public void dispose() {
+
         // 移除托盘图标
         SystemTray.getSystemTray().remove(trayIcon);
         super.dispose();
