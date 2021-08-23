@@ -65,7 +65,6 @@ public class RoomsPanel extends ParentAvailablePanel {
         if (UNREAD_TOTAL_COUNT.get() == 0){
             MainFrame.getContext().setTrayFlashing(false);
         }
-        System.out.println("UNREAD_TOTAL_COUNT.get() = " + UNREAD_TOTAL_COUNT.get());
     }
 
     private void initComponents() {

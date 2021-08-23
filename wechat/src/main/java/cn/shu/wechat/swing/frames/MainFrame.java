@@ -63,10 +63,6 @@ public class MainFrame extends JFrame  {
      */
     private boolean trayFlashing = false;
 
-    /**
-     * 消息提示音
-     */
-    private AudioStream messageSound ;
 
 
     public MainFrame() {
@@ -92,23 +88,25 @@ public class MainFrame extends JFrame  {
      */
     private void initMessageSound(){
 
-        try {
-            InputStream inputStream = getClass().getResourceAsStream("/wav/msg.wav");
 
-            if (inputStream != null) {
-                messageSound = new AudioStream(inputStream);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
     /**
      * 播放消息提示间
      */
     public void playMessageSound() {
-            if (messageSound!=null){
+
+        try {
+            InputStream inputStream = getClass().getResourceAsStream("/wav/msg.wav");
+
+            if (inputStream != null) {
+                AudioStream messageSound = new AudioStream(inputStream);
                 AudioPlayer.player.start(messageSound);
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
 
