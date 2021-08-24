@@ -30,6 +30,7 @@ import cn.shu.wechat.swing.utils.FileCache;
 import cn.shu.wechat.swing.utils.ImageUtil;
 import cn.shu.wechat.swing.utils.MimeTypeUtil;
 import cn.shu.wechat.utils.DateUtils;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.MediaUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.extern.log4j.Log4j2;
@@ -950,14 +951,20 @@ public class ChatPanel extends ParentAvailablePanel {
      * @param path
      */
     public static void openFileWithDefaultApplication(String path) {
-        try {
-            Desktop.getDesktop().open(new File(path));
-        } catch (IOException e1) {
-            JOptionPane.showMessageDialog(null, "文件打开失败，没有找到关联的应用程序", "打开失败", JOptionPane.ERROR_MESSAGE);
-            e1.printStackTrace();
-        } catch (IllegalArgumentException e2) {
-            JOptionPane.showMessageDialog(null, "文件不存在，可能已被删除", "打开失败", JOptionPane.ERROR_MESSAGE);
-        }
+        ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Desktop.getDesktop().open(new File(path));
+                } catch (IOException e1) {
+                    JOptionPane.showMessageDialog(null, "文件打开失败，没有找到关联的应用程序", "打开失败", JOptionPane.ERROR_MESSAGE);
+                    e1.printStackTrace();
+                } catch (IllegalArgumentException e2) {
+                    JOptionPane.showMessageDialog(null, "文件不存在，可能已被删除", "打开失败", JOptionPane.ERROR_MESSAGE);
+                }
+
+            }
+        });
     }
 
 

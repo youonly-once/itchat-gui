@@ -71,9 +71,11 @@ public class MessageRightAttachmentViewHolder extends MessageAttachmentViewHolde
 
         JPanel resendAttachmentPanel = new JPanel(new BorderLayout());
         resendAttachmentPanel.setBackground(Colors.WINDOW_BACKGROUND);
-        resendAttachmentPanel.add(resend, BorderLayout.WEST);
+        JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT,0,0));
+        controlPanel.add(resend);
+        controlPanel.add(revoke);
+        resendAttachmentPanel.add(controlPanel, BorderLayout.WEST);
         resendAttachmentPanel.add(messageBubble, BorderLayout.CENTER);
-        resendAttachmentPanel.add(revoke,BorderLayout.NORTH);
         messageAvatarPanel.setLayout(new GridBagLayout());
         messageAvatarPanel.add(resendAttachmentPanel, new GBC(1, 0).setWeight(1000, 1)
                 .setAnchor(GBC.EAST).setInsets(0, 0, 0, 5));

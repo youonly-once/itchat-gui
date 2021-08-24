@@ -44,9 +44,13 @@ public class MessageRightVoiceViewHolder extends MessageVoiceViewHolder {
         voicePanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
         voicePanel.add(messageBubble);
         voicePanel.add(processBarPanel);
+        JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT,0,0));
+        controlPanel.add(revoke);
+        controlPanel.add(voicePanel);
+
         voiceImgLabel.setIcon(IconUtil.getIcon(this, "/image/right_voice.png"));
-        contentTagPanel.add(voicePanel);
-        contentTagPanel.add(revoke);
+        contentTagPanel.add(controlPanel);
+
         messageAvatarPanel.setLayout(new GridBagLayout());
         messageAvatarPanel.add(contentTagPanel, new GBC(1, 0).setWeight(1000, 1).setAnchor(GBC.EAST).setInsets(0, 5, 0, 0));
         messageAvatarPanel.add(avatar, new GBC(2, 0)

@@ -57,8 +57,10 @@ public class MessageLeftImageViewHolder extends BaseMessageViewHolder {
             sender.setBorder(new EmptyBorder(0,0,5,0));
             senderMessagePanel.add(sender);
         }
-        senderMessagePanel.add(image);
-        senderMessagePanel.add(revoke);
+        JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT,0,0));
+        controlPanel.add(image);
+        controlPanel.add(revoke);
+        senderMessagePanel.add(controlPanel);
         messageAvatarPanel.setLayout(new GridBagLayout());
         messageAvatarPanel.add(avatar, new GBC(1, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 5, 0, 0));
         messageAvatarPanel.add(senderMessagePanel, new GBC(2, 0)

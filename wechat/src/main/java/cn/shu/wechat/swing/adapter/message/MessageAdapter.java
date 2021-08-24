@@ -1240,11 +1240,11 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             case MSGTYPE_VOICE:{
                if (isSelf){
                    MessageRightVoiceViewHolder holder = (MessageRightVoiceViewHolder) viewHolder;
-                   contentComponent = holder.messageBubble;
+                   contentComponent = holder.contentTagPanel;
                    messageBubble = holder.messageBubble;
                 }else {
                    MessageLeftVoiceViewHolder holder = (MessageLeftVoiceViewHolder) viewHolder;
-                   contentComponent = holder.messageBubble;
+                   contentComponent = holder.contentTagPanel;
                    messageBubble = holder.messageBubble;
 
                 }

@@ -33,7 +33,8 @@ import java.util.Map;
  */
 public class MessagePopupMenu extends JPopupMenu {
     private WXReceiveMsgCodeEnum messageType;
-    JMenuItem showPathItem = new JMenuItem("文件夹");
+    private final JMenuItem showPathItem = new JMenuItem("文件夹");
+    private final JMenuItem revokeItem = new JMenuItem("撤回");
 
     public MessagePopupMenu() {
         initMenuItem();
@@ -43,7 +44,6 @@ public class MessagePopupMenu extends JPopupMenu {
         JMenuItem copy = new JMenuItem("复制");
         JMenuItem delItem = new JMenuItem("删除");
         JMenuItem forwardItem = new JMenuItem("转发");
-        JMenuItem revokeItem = new JMenuItem("撤回");
 
         copy.setUI(new RCMenuItemUI());
         copy.addActionListener(new AbstractAction() {
@@ -256,6 +256,11 @@ public class MessagePopupMenu extends JPopupMenu {
             default:
                 add(showPathItem);
 
+        }
+        if (messageType<0){
+            remove(revokeItem);
+        }else{
+            add(revokeItem);
         }
         super.show(invoker, x, y);
     }

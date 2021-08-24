@@ -61,7 +61,7 @@ public class MainFrame extends JFrame  {
     /**
      * 任务栏图标是否闪动
      */
-    private boolean trayFlashing = false;
+    private volatile boolean trayFlashing = false;
 
 
 
