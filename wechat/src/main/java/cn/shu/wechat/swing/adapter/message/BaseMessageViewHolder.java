@@ -3,6 +3,7 @@ package cn.shu.wechat.swing.adapter.message;
 import cn.shu.wechat.swing.adapter.ViewHolder;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
@@ -17,5 +18,6 @@ public abstract class BaseMessageViewHolder extends ViewHolder {
     public BaseMessageViewHolder() {
         revoke.setForeground(Color.GRAY);
         revoke.setVisible(false);
+        revoke.setBorder(new EmptyBorder(0,5,0,5));
     }
 }
