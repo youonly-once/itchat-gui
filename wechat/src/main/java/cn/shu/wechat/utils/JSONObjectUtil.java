@@ -3,7 +3,6 @@ package cn.shu.wechat.utils;
 import cn.shu.wechat.beans.pojo.Contacts;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import org.nlpcn.commons.lang.util.StringUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,11 +10,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * @author user
  * @作者 舒新胜
  * @项目 weixin
  * @创建时间 2/3/2021 12:11 PM
  */
 public class JSONObjectUtil {
+    private static Pattern pattern = Pattern.compile(".+\\?seq=(\\d+).+");
     /**
      * 返回二个JSONObject的差异
      *
@@ -27,11 +28,10 @@ public class JSONObjectUtil {
         Map<String, Map<String, String>> difference = new HashMap<>(1);
         for (Map.Entry<String, Object> entry : oldO.entrySet()) {
             String newV = newO.getString(entry.getKey());
-            String oldV = StringUtil.toString(entry.getValue());
+            String oldV = entry.getValue() == null ? "" : entry.getValue().toString();
             //是否相同
             boolean equals = oldV.equals(newV);
             if ("HeadImgUrl".equals(entry.getKey()) || "headimgurl".equals(entry.getKey())) {
-                Pattern pattern = Pattern.compile(".+\\?seq=(\\d+).+");
                 Matcher matcherNew = pattern.matcher(newV);
                 Matcher matcherOld = pattern.matcher(oldV);
                 if (matcherNew.find() && matcherOld.find()) {
@@ -43,7 +43,7 @@ public class JSONObjectUtil {
             }
             if (!equals) {
                 HashMap<String, String> temp = new HashMap<>(1);
-                temp.put(CommonTools.emojiFormatter(StringUtil.toString(oldV)), CommonTools.emojiFormatter(newV));
+                temp.put(CommonTools.emojiFormatter(oldV), CommonTools.emojiFormatter(newV));
                 difference.put(entry.getKey(), temp);
             }
         }

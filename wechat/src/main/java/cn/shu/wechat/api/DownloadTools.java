@@ -10,7 +10,7 @@ import cn.shu.wechat.utils.MD5Util;
 import cn.shu.wechat.utils.MyHttpClient;
 import cn.shu.wechat.utils.SleepUtils;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.utils.DateUtils;
 import org.apache.http.message.BasicNameValuePair;

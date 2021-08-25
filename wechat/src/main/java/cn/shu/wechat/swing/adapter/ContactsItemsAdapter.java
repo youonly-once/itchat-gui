@@ -11,8 +11,7 @@ import cn.shu.wechat.swing.panels.RightPanel;
 import cn.shu.wechat.swing.panels.RoomChatPanelCard;
 import cn.shu.wechat.swing.panels.UserInfoPanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
-import cn.shu.wechat.swing.utils.CharacterParser;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;

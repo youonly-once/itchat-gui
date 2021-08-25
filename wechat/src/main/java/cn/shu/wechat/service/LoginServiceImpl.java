@@ -143,9 +143,6 @@ public class LoginServiceImpl implements LoginService {
             out.close();
             //二维码地址
             String qrUrl2 = URLEnum.cAPI_qrcode.getUrl() + Core.getUuid();
-            //控制台打印二维码
-            String qrString = QRterminal.getQr(qrUrl2);
-            //System.out.println("\n" + qrString);
         } catch (Exception e) {
             log.error(e.getMessage());
             return false;

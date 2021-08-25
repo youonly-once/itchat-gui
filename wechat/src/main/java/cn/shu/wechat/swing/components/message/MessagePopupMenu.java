@@ -9,16 +9,12 @@ import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCMenuItemUI;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
-import cn.shu.wechat.swing.frames.MainFrame;
-import cn.shu.wechat.swing.panels.ChatPanel;
 import cn.shu.wechat.swing.panels.RoomChatContainer;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
-import cn.shu.wechat.swing.utils.FileCache;
-import cn.shu.wechat.swing.utils.ImageCache;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import com.alibaba.fastjson.JSON;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -26,7 +22,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * Created by 舒新胜 on 2017/6/5.

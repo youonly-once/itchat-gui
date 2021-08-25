@@ -4,7 +4,6 @@ import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.pojo.Contacts;
 import cn.shu.wechat.beans.pojo.MessageExample;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.mapper.ContactsMapper;
 import cn.shu.wechat.mapper.MessageMapper;
@@ -12,10 +11,7 @@ import cn.shu.wechat.service.LoginService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.ansj.domain.Result;
-import org.ansj.domain.Term;
-import org.ansj.splitWord.analysis.ToAnalysis;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfree.chart.*;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.CategoryLabelPositions;
@@ -433,7 +429,7 @@ public class ChartUtil {
 
         Map<String, AtomicInteger> msgType = new HashMap<>();
         Map<String, AtomicInteger> msgTerm = new HashMap<>();
-        for (cn.shu.wechat.beans.pojo.Message message : messages) {
+      /*  for (cn.shu.wechat.beans.pojo.Message message : messages) {
             String msg = message.getContent();
             String type = message.getMsgDesc();
             msgType.computeIfAbsent(type, v -> new AtomicInteger()).getAndIncrement();
@@ -464,7 +460,7 @@ public class ChartUtil {
 
                 }
             }
-        }
+        }*/
 
 
         ArrayList<String> imgs = new ArrayList<>();
@@ -538,7 +534,7 @@ public class ChartUtil {
             if (file.isFile() && file.getName().endsWith(".property")) {
                 try {
                     properties.load(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
-                    for (Object value : properties.values()) {
+                   /* for (Object value : properties.values()) {
 
                         String type = value.toString().substring(0, value.toString().indexOf(":"));
                         String msg = value.toString().substring(value.toString().indexOf("-") + 1);
@@ -570,7 +566,7 @@ public class ChartUtil {
 
                             }
                         }
-                    }
+                    }*/
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

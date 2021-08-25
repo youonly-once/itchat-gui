@@ -16,8 +16,7 @@ import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.log4j.Log4j2;
-import me.xuxiaoxiao.xtools.common.XTools;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
@@ -275,7 +274,7 @@ public class MessageTools {
         paramMap.put("MediaType", 4);
         paramMap.put("FromUserName", fromUserName);
         paramMap.put("ToUserName", toUserName);
-        paramMap.put("FileMd5", XTools.md5(file));
+        paramMap.put("FileMd5", MD5Util.getMD5(file));
         String result = null;
         String url = String.format(URLEnum.WEB_WX_UPLOAD_MEDIA.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.fileUrl.getKey()));
         if (file.length() <= singleFileMaxSize) {

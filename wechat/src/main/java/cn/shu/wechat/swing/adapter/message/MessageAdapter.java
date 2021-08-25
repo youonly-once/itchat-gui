@@ -37,7 +37,7 @@ import cn.shu.wechat.swing.utils.*;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import javazoom.jl.player.Player;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 
 import javax.imageio.ImageIO;

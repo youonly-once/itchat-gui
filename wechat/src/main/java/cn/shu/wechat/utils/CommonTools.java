@@ -1,15 +1,13 @@
 package cn.shu.wechat.utils;
 
-import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.beans.msg.sync.AddMsgList;
-import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.OsNameEnum;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
