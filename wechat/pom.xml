@@ -181,6 +181,7 @@
             <artifactId>javacv</artifactId>
             <version>1.4.4</version>
             <exclusions>
+                <!--jar包很大-->
                 <exclusion>
                     <groupId>org.bytedeco</groupId>
                     <artifactId>javacpp</artifactId>

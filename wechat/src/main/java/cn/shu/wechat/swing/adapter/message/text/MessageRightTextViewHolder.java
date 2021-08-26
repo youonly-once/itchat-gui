@@ -11,7 +11,6 @@ import cn.shu.wechat.swing.utils.IconUtil;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 
 /**
  * Created by 舒新胜 on 17-6-2.
@@ -72,13 +71,13 @@ public class MessageRightTextViewHolder extends BaseMessageViewHolder {
         JPanel resendTextPanel = new JPanel();
         resendTextPanel.setBackground(Colors.WINDOW_BACKGROUND);
         resendTextPanel.setLayout(new BorderLayout());
-        JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT,0,0));
-        controlPanel.add(resend);
-        controlPanel.add(sendingProgress);
-        controlPanel.add(revoke);
+        JPanel controlPanel = new JPanel(new BorderLayout(0, 0));
+        controlPanel.add(resend, BorderLayout.WEST);
+        controlPanel.add(sendingProgress, BorderLayout.CENTER);
+        controlPanel.add(revoke, BorderLayout.EAST);
+        sendingProgress.setHorizontalAlignment(SwingConstants.CENTER);
         resendTextPanel.add(controlPanel, BorderLayout.WEST);
         resendTextPanel.add(messageBubble, BorderLayout.CENTER);
-
         messageAvatarPanel.setLayout(new GridBagLayout());
         messageAvatarPanel.add(resendTextPanel, new GBC(1, 0).setWeight(1000, 1).setAnchor(GBC.EAST).setInsets(0, 0, 0, 5));
         messageAvatarPanel.add(avatar, new GBC(2, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 0, 0, 5));

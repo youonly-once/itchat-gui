@@ -184,11 +184,9 @@ public class MainFrame extends JFrame  {
     /**
      * 设置任务栏图标闪动
      */
-    public void setTrayFlashing(boolean flashing) {
-        if (flashing){
-            if(trayFlashing){
-                return;
-            }
+    public synchronized void setTrayFlashing(boolean flashing) {
+        if (flashing == trayFlashing) {
+            return;
         }
         trayFlashing = flashing;
         ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {

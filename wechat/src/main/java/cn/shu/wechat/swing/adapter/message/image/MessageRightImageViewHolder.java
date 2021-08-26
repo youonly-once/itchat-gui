@@ -4,7 +4,6 @@ import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.message.MessageImageLabel;
-import cn.shu.wechat.swing.components.message.MessagePopupMenu;
 import cn.shu.wechat.swing.components.message.RCRightImageMessageBubble;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
@@ -59,10 +58,10 @@ public class MessageRightImageViewHolder extends BaseMessageViewHolder {
 
         JPanel resendImagePanel = new JPanel(new BorderLayout());
         resendImagePanel.setBackground(Colors.WINDOW_BACKGROUND);
-        JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT,0,0));
-        controlPanel.add(resend);
-        controlPanel.add(sendingProgress);
-        controlPanel.add(revoke);
+        JPanel controlPanel = new JPanel(new BorderLayout(0, 0));
+        controlPanel.add(resend, BorderLayout.WEST);
+        controlPanel.add(sendingProgress, BorderLayout.CENTER);
+        controlPanel.add(revoke, BorderLayout.EAST);
         resendImagePanel.add(controlPanel, BorderLayout.WEST);
         resendImagePanel.add(image, BorderLayout.CENTER);
         messageAvatarPanel.setLayout(new GridBagLayout());

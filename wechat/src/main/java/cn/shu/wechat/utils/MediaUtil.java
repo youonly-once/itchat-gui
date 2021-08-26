@@ -1,5 +1,6 @@
 package cn.shu.wechat.utils;
 
+import cn.shu.wechat.swing.utils.IconUtil;
 import lombok.extern.log4j.Log4j2;
 import net.coobird.thumbnailator.Thumbnails;
 import org.bytedeco.javacpp.avcodec;
@@ -7,7 +8,6 @@ import org.bytedeco.javacpp.avutil;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.Java2DFrameConverter;
 import ws.schild.jave.Encoder;
 import ws.schild.jave.EncoderException;
 import ws.schild.jave.MultimediaObject;
@@ -18,7 +18,6 @@ import ws.schild.jave.info.AudioInfo;
 import ws.schild.jave.info.VideoInfo;
 import ws.schild.jave.info.VideoSize;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -187,11 +186,12 @@ public class MediaUtil {
 
     /**
      * 获取 视频预览图
+     *
      * @param video 视频文件
      * @return
      */
-    public static BufferedImage getVideoPic(File video) {
-        FFmpegFrameGrabber ff = new FFmpegFrameGrabber(video);
+    public static BufferedImage getVideoPic(Object context, File video) {
+   /*     FFmpegFrameGrabber ff = new FFmpegFrameGrabber(video);
         try {
             ff.start();
             int length = ff.getLengthInFrames();
@@ -220,8 +220,8 @@ public class MediaUtil {
             return thumbnailImage;
         } catch (IOException e) {
             e.printStackTrace();
-        }
-        return new BufferedImage(200, 200, BufferedImage.TYPE_3BYTE_BGR);
+        }*/
+        return IconUtil.getBufferedImage(context, "/image/video.png");
     }
     /**
      * 压缩视频

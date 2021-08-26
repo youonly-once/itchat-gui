@@ -9,7 +9,6 @@ import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
 import cn.shu.wechat.mapper.MessageMapper;
-import cn.shu.wechat.swing.adapter.RoomItemViewHolder;
 import cn.shu.wechat.swing.adapter.ViewHolder;
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.adapter.message.MessageAdapter;
@@ -729,7 +728,7 @@ public class ChatPanel extends ParentAvailablePanel {
                         .imgHeight(imageSize.height).build();
                 break;
             case MSGTYPE_VIDEO:
-                BufferedImage videoPic = MediaUtil.getVideoPic(file);
+                BufferedImage videoPic = MediaUtil.getVideoPic(this, file);
                 message = Message.builder()
                         .slavePath(uploadFilename)
                         .filePath(uploadFilename)

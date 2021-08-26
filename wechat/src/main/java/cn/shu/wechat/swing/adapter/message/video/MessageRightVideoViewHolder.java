@@ -78,13 +78,13 @@ public class MessageRightVideoViewHolder extends BaseMessageViewHolder {
         try {
             videoComponent = getLayerPanel();
             videoComponent.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT,0,0));
-            controlPanel.add(sendingProgress);
-            controlPanel.add(revoke);
+            JPanel controlPanel = new JPanel(new BorderLayout(0, 0));
+            controlPanel.add(sendingProgress, BorderLayout.CENTER);
+            controlPanel.add(revoke, BorderLayout.EAST);
             JPanel resendImagePanel = new JPanel(new BorderLayout());
             resendImagePanel.setOpaque(false);
-            resendImagePanel.add(videoComponent,BorderLayout.CENTER);
-            resendImagePanel.add(controlPanel,BorderLayout.WEST);
+            resendImagePanel.add(videoComponent, BorderLayout.CENTER);
+            resendImagePanel.add(controlPanel, BorderLayout.WEST);
             contentTagPanel.add(resendImagePanel);
         } catch (IOException e) {
             e.printStackTrace();
