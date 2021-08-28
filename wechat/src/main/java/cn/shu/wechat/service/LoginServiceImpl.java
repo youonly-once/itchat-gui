@@ -60,6 +60,8 @@ public class LoginServiceImpl implements LoginService {
     @Resource
     private Launcher launcher;
 
+    private final Set<String> msgIds = new HashSet<>();
+
     @Override
     public boolean login() throws Exception {
 
@@ -304,12 +306,22 @@ public class LoginServiceImpl implements LoginService {
                                         //新消息
                                         List<AddMsgList> addMsgLists = webWxSyncMsg.getAddMsgList();
                                         for (AddMsgList msg : addMsgLists) {
+                                            if (msgIds.contains(msg.getMsgId())) {
+                                                log.warn("消息重复：{}", msg);
+                                                continue;
+                                            }
+                                            msgIds.add(msg.getMsgId());
                                             ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
                                                 msgCenter.handleNewMsg(msg);
                                             });
                                         }
                                         List<Contacts> modContactList = webWxSyncMsg.getModContactList();
-                                        msgCenter.handleModContact(modContactList);
+                                        for (Contacts contacts : modContactList) {
+                                            ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
+                                                msgCenter.handleModContact(contacts);
+                                            });
+                                        }
+
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                         log.info(e.getMessage());

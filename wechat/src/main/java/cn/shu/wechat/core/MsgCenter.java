@@ -456,11 +456,11 @@ public class MsgCenter {
                 downloadFile(msg, fileName, ext);
                 message = newMsgToDBMessage(msg);
                 break;
-            case MSGTYPE_APP:
+            case MSGTYPE_APP: {
                 Map<String, Object> map = new HashMap<>();
-                try{
+                try {
                     map = XmlStreamUtil.toMap(msg.getContent());
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 msg.setContentMap(map);
@@ -499,6 +499,10 @@ public class MsgCenter {
                         downloadFile(msg, fileName, ext);
                         msg.setPlainText("[小程序]图片");
                         break;
+                    case TRANSFER:
+                        msg.setPlainText(desc == null ? "[微信转账]" : desc.toString());
+                        msg.setAppMsgType(WXReceiveMsgCodeOfAppEnum.LINK.getType());
+                        break;
                     default:
                         msg.setMsgType(MSGTYPE_TEXT.getCode());
                         msg.setPlainText(msg.getContent());
@@ -507,14 +511,15 @@ public class MsgCenter {
 
                 }
                 message = newMsgToDBMessage(msg);
-                    message.setTitle(title == null ? null : title.toString());
-                    message.setDesc(desc == null ? null : desc.toString());
-                    message.setImgWidth(width == null ? null : Integer.parseInt(width.toString()));
-                    message.setImgHeight(height == null ? null : Integer.parseInt(height.toString()));
-                    message.setThumbUrl(thumbUrl == null ? null : thumbUrl.toString());
-                    message.setUrl(url == null ? null : url.toString());
-                    message.setSourceIconUrl(sourceIconUrl == null ? null : sourceIconUrl.toString());
-                    message.setSourceName(sourceName == null ? null : sourceName.toString());
+                message.setTitle(title == null ? null : title.toString());
+                message.setDesc(desc == null ? null : desc.toString());
+                message.setImgWidth(width == null ? null : Integer.parseInt(width.toString()));
+                message.setImgHeight(height == null ? null : Integer.parseInt(height.toString()));
+                message.setThumbUrl(thumbUrl == null ? null : thumbUrl.toString());
+                message.setUrl(url == null ? null : url.toString());
+                message.setSourceIconUrl(sourceIconUrl == null ? null : sourceIconUrl.toString());
+                message.setSourceName(sourceName == null ? null : sourceName.toString());
+            }
                 break;
             case MSGTYPE_VOIPMSG:
                 break;
@@ -528,7 +533,7 @@ public class MsgCenter {
                 break;
             case MSGTYPE_SYS:
             case MSGTYPE_STATUSNOTIFY:
-                msg.setPlainText("[系统消息]");
+                msg.setPlainText(msg.getContent());
                 message = newMsgToDBMessage(msg);
                 break;
             case MSGTYPE_SYSNOTICE:
@@ -538,16 +543,25 @@ public class MsgCenter {
             case MSGTYPE_VERIFYMSG:
                 message = newMsgToDBMessage(msg);
                 break;
-            case MSGTYPE_SHARECARD:
+            case MSGTYPE_SHARECARD: {
                 msg.setPlainText("[名片消息，请在手机上查看]");
+                Map<String, Object> map = new HashMap<>();
+                try {
+                    map = XmlStreamUtil.toMap(msg.getContent());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                //TODO
                 message = newMsgToDBMessage(msg);
-                break;
-            case MSGTYPE_RECALLED:
-                map = XmlStreamUtil.toMap(msg.getContent());
+            }
+            break;
+            case MSGTYPE_RECALLED: {
+                Map<String, Object> map = XmlStreamUtil.toMap(msg.getContent());
                 msg.setContentMap(map);
                 msg.setPlainText(map.get("sysmsg.revokemsg.replacemsg").toString());
                 message = newMsgToDBMessage(msg);
-                break;
+            }
+            break;
             case UNKNOWN:
             default:
                 log.warn(LogUtil.printFromMeg(msg, msgType.getCode()));

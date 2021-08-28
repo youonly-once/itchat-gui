@@ -189,23 +189,26 @@ public class MainFrame extends JFrame  {
             return;
         }
         trayFlashing = flashing;
-        ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
-            @Override
-            public void run() {
-                while (trayFlashing) {
-                    try {
-                        trayIcon.setImage(emptyTrayIcon);
-                        Thread.sleep(500);
+        if (trayFlashing) {
+            ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
+                @Override
+                public void run() {
+                    while (trayFlashing) {
+                        try {
+                            trayIcon.setImage(emptyTrayIcon);
+                            Thread.sleep(500);
 
-                        trayIcon.setImage(normalTrayIcon);
-                        Thread.sleep(500);
+                            trayIcon.setImage(normalTrayIcon);
+                            Thread.sleep(500);
 
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
+
     }
 
     public boolean isTrayFlashing() {
