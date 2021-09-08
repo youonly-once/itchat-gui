@@ -51,6 +51,7 @@ import java.util.regex.Matcher;
 @Component
 public class LoginServiceImpl implements LoginService {
 
+
     @Resource
     private AttrHistoryMapper attrHistoryMapper;
 
@@ -81,7 +82,7 @@ public class LoginServiceImpl implements LoginService {
             long millis = System.currentTimeMillis();
             params.add(new BasicNameValuePair(LoginParaEnum.R.para(), String.valueOf(millis / 1579L)));
             params.add(new BasicNameValuePair(LoginParaEnum._.para(), String.valueOf(millis)));
-            HttpEntity entity = MyHttpClient.doGet(URLEnum.LOGIN_URL.getUrl(), params, true, null);
+            HttpEntity entity = HttpUtil.doGet(URLEnum.LOGIN_URL.getUrl(), params, true, null);
 
             try {
                 String result = EntityUtils.toString(entity);
@@ -113,7 +114,7 @@ public class LoginServiceImpl implements LoginService {
         params.add(new BasicNameValuePair(UUIDParaEnum.LANG.para(), UUIDParaEnum.LANG.value()));
         params.add(new BasicNameValuePair(UUIDParaEnum._.para(), String.valueOf(System.currentTimeMillis())));
 
-        HttpEntity entity = MyHttpClient.doGet(URLEnum.UUID_URL.getUrl(), params, true, null);
+        HttpEntity entity = HttpUtil.doGet(URLEnum.UUID_URL.getUrl(), params, true, null);
 
         try {
             String result = EntityUtils.toString(entity);
@@ -135,7 +136,7 @@ public class LoginServiceImpl implements LoginService {
     public boolean getQR(String qrPath) {
 
         String qrUrl = URLEnum.QRCODE_URL.getUrl() + Core.getUuid();
-        HttpEntity entity = MyHttpClient.doGet(qrUrl, null, true, null);
+        HttpEntity entity = HttpUtil.doGet(qrUrl, null, true, null);
         try {
             //下载二维码图片
             OutputStream out = new FileOutputStream(qrPath);
@@ -156,7 +157,7 @@ public class LoginServiceImpl implements LoginService {
     @Override
     public BufferedImage getQR() {
         String qrUrl = URLEnum.QRCODE_URL.getUrl() + Core.getUuid();
-        HttpEntity entity = MyHttpClient.doGet(qrUrl, null, true, null);
+        HttpEntity entity = HttpUtil.doGet(qrUrl, null, true, null);
         try {
             BufferedImage image = ImageIO.read(entity.getContent());
             return image;
@@ -179,7 +180,7 @@ public class LoginServiceImpl implements LoginService {
         Map<String, Object> paramMap = Core.getParamMap();
 
         // 请求初始化接口
-        HttpEntity entity = MyHttpClient.doPost(url, JSON.toJSONString(paramMap));
+        HttpEntity entity = HttpUtil.doPost(url, JSON.toJSONString(paramMap));
         try {
             String result = EntityUtils.toString(entity, Consts.UTF_8);
             JSONObject obj = JSON.parseObject(result);
@@ -247,7 +248,7 @@ public class LoginServiceImpl implements LoginService {
         String paramStr = JSON.toJSONString(paramMap);
 
         try {
-            HttpEntity entity = MyHttpClient.doPost(url, paramStr);
+            HttpEntity entity = HttpUtil.doPost(url, paramStr);
             EntityUtils.toString(entity, Consts.UTF_8);
         } catch (Exception e) {
             log.error("微信状态通知接口失败！", e);
@@ -361,7 +362,7 @@ public class LoginServiceImpl implements LoginService {
         String url = String.format(URLEnum.WEB_WX_GET_CONTACT.getUrl(),
                 Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()));
         Map<String, Object> paramMap = Core.getParamMap();
-        HttpEntity entity = MyHttpClient.doPost(url, JSON.toJSONString(paramMap));
+        HttpEntity entity = HttpUtil.doPost(url, JSON.toJSONString(paramMap));
         if (entity == null) {
             return;
         }
@@ -384,7 +385,7 @@ public class LoginServiceImpl implements LoginService {
                 // 设置seq传参
                 params.add(new BasicNameValuePair("r", String.valueOf(currentTime)));
                 params.add(new BasicNameValuePair("seq", String.valueOf(seq)));
-                entity = MyHttpClient.doGet(url, params, false, null);
+                entity = HttpUtil.doGet(url, params, false, null);
 
                 params.remove(new BasicNameValuePair("r", String.valueOf(currentTime)));
                 params.remove(new BasicNameValuePair("seq", String.valueOf(seq)));
@@ -476,7 +477,7 @@ public class LoginServiceImpl implements LoginService {
             list.add(map);
         }
         paramMap.put("List", list);
-        HttpEntity entity = MyHttpClient.doPost(url, JSON.toJSONString(paramMap));
+        HttpEntity entity = HttpUtil.doPost(url, JSON.toJSONString(paramMap));
         try {
             String text = EntityUtils.toString(entity, Consts.UTF_8);
             JSONObject obj = JSON.parseObject(text);
@@ -521,7 +522,7 @@ public class LoginServiceImpl implements LoginService {
             paramMap.put("List", list);
             HttpEntity entity = null;
             synchronized ((groupName+"WebWxBatchGetContact").intern()) {
-                entity = MyHttpClient.doPost(url, JSON.toJSONString(paramMap));
+                entity = HttpUtil.doPost(url, JSON.toJSONString(paramMap));
             }
             try {
                 String text = EntityUtils.toString(entity, Consts.UTF_8);
@@ -600,7 +601,7 @@ public class LoginServiceImpl implements LoginService {
             paramMap.put("List", subList);
             HttpEntity entity =null;
             synchronized ((group.getUsername()+"WebWxBatchGetContact").intern()) {
-                entity = MyHttpClient.doPost(url, JSON.toJSONString(paramMap));
+                entity = HttpUtil.doPost(url, JSON.toJSONString(paramMap));
             }
             try {
                 String text = EntityUtils.toString(entity, Consts.UTF_8);
@@ -670,7 +671,7 @@ public class LoginServiceImpl implements LoginService {
             String text = "";
 
             try {
-                HttpEntity entity = MyHttpClient.doGet(originalUrl, null, false, null);
+                HttpEntity entity = HttpUtil.doGet(originalUrl, null, false, null);
                 text = EntityUtils.toString(entity);
             } catch (Exception e) {
                 log.info(e.getMessage());
@@ -783,7 +784,7 @@ public class LoginServiceImpl implements LoginService {
         paramMap.put("rr", -System.currentTimeMillis() / 1000);
         String paramStr = JSON.toJSONString(paramMap);
         try {
-            HttpEntity entity = MyHttpClient.doPost(url, paramStr);
+            HttpEntity entity = HttpUtil.doPost(url, paramStr);
             String text = EntityUtils.toString(entity, Consts.UTF_8);
             WebWxSyncMsg webWxSyncMsg = JSON.parseObject(text, WebWxSyncMsg.class);
             if (webWxSyncMsg.getBaseResponse().getRet()!=0) {
@@ -829,7 +830,7 @@ public class LoginServiceImpl implements LoginService {
         try {
             Long start = System.currentTimeMillis();
             //log.info("开始syncCheck-params：{}",params.toString());
-            HttpEntity entity = MyHttpClient.doGet(url, params, true, null);
+            HttpEntity entity = HttpUtil.doGetOfReceive(url, params, true, null);
             if (entity == null) {
                 resultMap.put("retcode", "9999");
                 resultMap.put("selector", "9999");

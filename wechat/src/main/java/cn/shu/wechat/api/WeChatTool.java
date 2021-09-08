@@ -8,7 +8,7 @@ package cn.shu.wechat.api;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.StorageLoginInfoEnum;
 import cn.shu.wechat.enums.URLEnum;
-import cn.shu.wechat.utils.MyHttpClient;
+import cn.shu.wechat.utils.HttpUtil;
 import lombok.extern.log4j.Log4j2;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
@@ -200,7 +200,7 @@ public final class WeChatTool {
         params.add(
                 new BasicNameValuePair("skey", (String) Core.getLoginInfoMap().get(StorageLoginInfoEnum.skey.getKey())));
         try {
-            HttpEntity entity = MyHttpClient.doGet(url, params, false, null);
+            HttpEntity entity = HttpUtil.doGet(url, params, false, null);
             String text = EntityUtils.toString(entity, Consts.UTF_8);
         } catch (Exception e) {
             log.debug(e.getMessage());

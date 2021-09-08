@@ -9,11 +9,13 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.config.SocketConfig;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
@@ -22,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * HTTP访问类，对Apache HttpClient进行简单封装，适配器模式
@@ -31,17 +34,28 @@ import java.util.Set;
  * @date 创建时间：2017年4月9日 下午7:05:04
  */
 @Log4j2
-public class MyHttpClient {
+public class HttpUtil {
 
     private static final CloseableHttpClient myHttpClient;
 
+    private static final CloseableHttpClient receiveHttpClient;
 
     public static final CookieStore cookieStore;
 
     static {
         cookieStore = new BasicCookieStore();
+
         // 将CookieStore设置到MyHttpClient中
-        myHttpClient = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
+        myHttpClient = HttpClients.custom().setDefaultCookieStore(cookieStore)
+                .build();
+        //循环接收消息 设置超时时间
+        BasicHttpClientConnectionManager connManager = new BasicHttpClientConnectionManager();
+        connManager.setSocketConfig(SocketConfig.custom().setSoTimeout(30000).build());
+
+        receiveHttpClient = HttpClients.custom().setDefaultCookieStore(cookieStore)
+                .setConnectionManager(connManager)
+                .setConnectionTimeToLive(30000L, TimeUnit.MILLISECONDS)
+                .build();
     }
 
     public static String getCookie(String name) {
@@ -55,7 +69,7 @@ public class MyHttpClient {
 
     }
 
-    private MyHttpClient() {
+    private HttpUtil() {
 
     }
 
@@ -76,6 +90,46 @@ public class MyHttpClient {
 		}
 		return instance;
 	}*/
+
+    /**
+     * 处理GET请求
+     *
+     * @param url
+     * @param params
+     * @return
+     * @author SXS
+     * @date 2017年4月9日 下午7:06:19
+     */
+    public static HttpEntity doGetOfReceive(String url, List<BasicNameValuePair> params, boolean redirect,
+                                            Map<String, String> headerMap) {
+        HttpEntity entity = null;
+        HttpGet httpGet;
+
+        try {
+            if (params != null) {
+                String paramStr = EntityUtils.toString(new UrlEncodedFormEntity(params, Consts.UTF_8));
+                httpGet = new HttpGet(url + "?" + paramStr);
+            } else {
+                httpGet = new HttpGet(url);
+            }
+            if (!redirect) {
+                httpGet.setConfig(RequestConfig.custom().setRedirectsEnabled(false).build()); // 禁止重定向
+            }
+            httpGet.setHeader("User-Agent", Config.USER_AGENT);
+            if (headerMap != null) {
+                Set<Entry<String, String>> entries = headerMap.entrySet();
+                for (Entry<String, String> entry : entries) {
+                    httpGet.setHeader(entry.getKey(), entry.getValue());
+                }
+            }
+            CloseableHttpResponse response = receiveHttpClient.execute(httpGet);
+            entity = response.getEntity();
+        } catch (IOException e) {
+            // log.error(e.getMessage());
+        }
+
+        return entity;
+    }
 
     /**
      * 处理GET请求
@@ -116,7 +170,6 @@ public class MyHttpClient {
 
         return entity;
     }
-
     /**
      * 处理POST请求
      *

@@ -67,6 +67,7 @@ public class MsgCenter {
         if (!msg.getFromUserName().startsWith("@@") && !msg.getToUserName().startsWith("@@")) {
             return;
         }
+        msg.setGroupMsg(Boolean.TRUE);
         if (msg.getFromUserName().equals(Core.getUserName())) {
             msg.setMemberName(Core.getUserName());
         } else {
@@ -77,7 +78,6 @@ public class MsgCenter {
                 //发送消息的人
                 msg.setMemberName(content.substring(0, index));
             }
-            msg.setGroupMsg(Boolean.TRUE);
         }
 
 

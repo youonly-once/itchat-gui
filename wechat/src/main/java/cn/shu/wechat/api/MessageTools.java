@@ -263,7 +263,7 @@ public class MessageTools {
             passTicket = "undefined";
         }
         String clientMediaId = System.currentTimeMillis() + String.valueOf(new Random().nextLong()).substring(0, 4);
-        String webWXDataTicket = MyHttpClient.getCookie("webwx_data_ticket");
+        String webWXDataTicket = HttpUtil.getCookie("webwx_data_ticket");
         Map<String, Object> paramMap = Core.getParamMap();
         paramMap.put("UploadType", 2);
         paramMap.put("BaseRequest", Core.getParamMap().get("BaseRequest"));
@@ -292,7 +292,7 @@ public class MessageTools {
             builder.addTextBody("pass_ticket", passTicket, ContentType.TEXT_PLAIN);
             builder.addBinaryBody("filename", file, ContentType.create(fileMime), filePath);
             HttpEntity reqEntity = builder.build();
-            HttpEntity resultEntity = MyHttpClient.doPostFile(url, reqEntity);
+            HttpEntity resultEntity = HttpUtil.doPostFile(url, reqEntity);
             result = EntityUtils.toString(resultEntity, Consts.UTF_8);
             if (callback != null) {
                 callback.onTaskSuccess(99, 100);
@@ -318,7 +318,7 @@ public class MessageTools {
                 builder.addTextBody("chunk", i + "", ContentType.TEXT_PLAIN);
                 builder.addBinaryBody("filename", new File(partFilePathList.get(i)), ContentType.create(fileMime), filePath);
                 HttpEntity reqEntity = builder.build();
-                HttpEntity resultEntity = MyHttpClient.doPostFile(url, reqEntity);
+                HttpEntity resultEntity = HttpUtil.doPostFile(url, reqEntity);
                 if (i == partFilePathList.size() - 1) {
                     result = EntityUtils.toString(resultEntity, Consts.UTF_8);
 
@@ -484,7 +484,7 @@ public class MessageTools {
         webWXSendingRevokeMsg.SvrMsgId = svrMsgId;
         webWXSendingRevokeMsg.ToUserName = userId;
         String paramStr = JSON.toJSONString(webWXSendingRevokeMsg);
-        HttpEntity entity = MyHttpClient.doPost(url, paramStr);
+        HttpEntity entity = HttpUtil.doPost(url, paramStr);
         if (entity != null) {
             try {
                 String result = EntityUtils.toString(entity, Consts.UTF_8);
@@ -635,7 +635,7 @@ public class MessageTools {
         webWXSendingNotifyMsg.FromUserName = Core.getUserName();
         webWXSendingNotifyMsg.ToUserName =toUserName;
         String paramStr = JSON.toJSONString(webWXSendingNotifyMsg);
-        HttpEntity entity = MyHttpClient.doPost(url, paramStr);
+        HttpEntity entity = HttpUtil.doPost(url, paramStr);
         if (entity != null) {
             try {
                 String result = EntityUtils.toString(entity, Consts.UTF_8);
@@ -692,7 +692,7 @@ public class MessageTools {
         String result = null;
         try {
             String paramStr = JSON.toJSONString(body);
-            HttpEntity entity = MyHttpClient.doPost(url, paramStr);
+            HttpEntity entity = HttpUtil.doPost(url, paramStr);
             result = EntityUtils.toString(entity, Consts.UTF_8);
             log.info("自动添加好友：" + result);
         } catch (Exception e) {
@@ -717,7 +717,7 @@ public class MessageTools {
      */
     private static WebWXSendMsgResponse sendMsg(WebWXSendMsgRequest webWXSendMsgRequest, String url) throws IOException {
         String paramStr = JSON.toJSONString(webWXSendMsgRequest);
-        HttpEntity entity = MyHttpClient.doPost(url, paramStr);
+        HttpEntity entity = HttpUtil.doPost(url, paramStr);
         String s = EntityUtils.toString(entity, Consts.UTF_8);
         return JSON.parseObject(s, WebWXSendMsgResponse.class);
     }

@@ -51,7 +51,7 @@ public class TuLingUtil {
                         .userId("324129").build()).build();
         String data = JSON.toJSONString(tuLingRequestBean);
         // HttpEntity httpEntity = ;
-        String result = EntityUtils.toString(MyHttpClient.doPost(requestUrl, data));
+        String result = EntityUtils.toString(HttpUtil.doPost(requestUrl, data));
         // String result = HttpUtil.sendPost(requestUrl, data);
         result = result.replaceAll("\"values\":\\{\"(url|image|video|new|voice)\":", "\"values\":{\"text\":");
         return JSON.parseObject(result, TuLingResponseBean.class);
@@ -69,7 +69,7 @@ public class TuLingUtil {
      */
     public static String robotMsgQYK(String msg) throws IOException, NullPointerException, JSONException {
         String url = "http://api.qingyunke.com/api.php?key=free&appid=0&msg=" + msg;
-        String result = EntityUtils.toString(MyHttpClient.doPost(requestUrl, ""));
+        String result = EntityUtils.toString(HttpUtil.doPost(requestUrl, ""));
         JSONObject jsonObject = JSON.parseObject(result);
         return jsonObject.getString("content");
 

@@ -6,8 +6,8 @@ import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.URLEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.utils.Config;
+import cn.shu.wechat.utils.HttpUtil;
 import cn.shu.wechat.utils.MD5Util;
-import cn.shu.wechat.utils.MyHttpClient;
 import cn.shu.wechat.utils.SleepUtils;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -93,12 +93,12 @@ public class DownloadTools {
                 params.add(new BasicNameValuePair("filename", msg.getFileName()));
                 params.add(new BasicNameValuePair("msgid", String.valueOf(msg.getNewMsgId())));
                 params.add(new BasicNameValuePair("skey", (String) Core.getLoginInfoMap().get("skey")));
-                entity = MyHttpClient.doGet(url, params, true, headerMap);
+                entity = HttpUtil.doGet(url, params, true, headerMap);
                 break;
             case MSGTYPE_MAP:
                 url = msg.getContent().substring(msg.getContent().indexOf(":<br/>") + ":<br/>".length());
                 url = URLEnum.BASE_URL.getUrl() + url;
-                entity = MyHttpClient.doGet(url, null, false, null);
+                entity = HttpUtil.doGet(url, null, false, null);
                 break;
             default:
                 break;
@@ -283,7 +283,7 @@ public class DownloadTools {
      * 下载失败 ""
      */
     public static String downloadHeadImg(String url, String userName) {
-        HttpEntity entity = MyHttpClient.doGet(url, null, false, null);
+        HttpEntity entity = HttpUtil.doGet(url, null, false, null);
         byte[] bytes;
         try {
             bytes = EntityUtils.toByteArray(entity);
@@ -362,7 +362,7 @@ public class DownloadTools {
      * @return Image对象
      */
     public static BufferedImage downloadImgByAbsoluteUrl(String url) {
-        HttpEntity entity = MyHttpClient.doGet(url, null, true, null);
+        HttpEntity entity = HttpUtil.doGet(url, null, true, null);
         return entity2Image(entity);
     }
 
@@ -430,7 +430,7 @@ public class DownloadTools {
             params.add(new BasicNameValuePair("type", type));
         }
         params.add(new BasicNameValuePair("skey", (String) Core.getLoginInfoMap().get("skey")));
-        HttpEntity entity = MyHttpClient.doGet(url, params, redirect, headerMap);
+        HttpEntity entity = HttpUtil.doGet(url, params, redirect, headerMap);
         return entity;
     }
     /**
