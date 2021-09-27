@@ -132,7 +132,7 @@ public class MainFrame extends JFrame  {
                 public void mousePressed(MouseEvent e) {
                     // 显示主窗口
                     setVisible(true);
-
+                    setState(0);
                     // 任务栏图标停止闪动
                     if (trayFlashing) {
                         trayFlashing = false;

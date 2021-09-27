@@ -13,6 +13,7 @@ public enum WXSendMsgCodeEnum {
     EMOTION(47, "表情消息"),
     APP(6, "APP消息"),
     CARD(42, "APP消息"),
+    MAP(48, "地图消息"),
     VIDEO(43, "视频消息");
     private final Integer code;
     private final String msg;

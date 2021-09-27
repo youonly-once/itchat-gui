@@ -42,6 +42,7 @@ public class Message implements Comparable<Message>{
      */
     private String content;
 
+    private String oriContent;
     /**
      * 资源文件保存路径
      */

@@ -222,6 +222,9 @@ public class LoginFrame extends JFrame {
                 showMessage(" 微信初始化异常");
                 System.exit(0);
             }
+            log.info("开启微信状态通知");
+            loginService.wxStatusNotify();
+
             //打开窗体
             openFrame();
 
@@ -247,8 +250,7 @@ public class LoginFrame extends JFrame {
 
                 @Override
                 protected void done() {
-                    log.info("开启微信状态通知");
-                    loginService.wxStatusNotify();
+
                     log.info(" 开始接收消息");
                     loginService.startReceiving();
                     ContactsPanel.getContext().notifyDataSetChanged();

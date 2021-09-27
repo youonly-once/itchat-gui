@@ -6,6 +6,7 @@ import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.enums.URLEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
+import cn.shu.wechat.enums.WXReceiveMsgStatusNotifyCodeEnum;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.pojo.dto.msg.send.WebWXSendMsgResponse;
 import cn.shu.wechat.pojo.dto.msg.sync.AddMsgList;
@@ -13,6 +14,7 @@ import cn.shu.wechat.pojo.entity.Contacts;
 import cn.shu.wechat.pojo.entity.Message;
 import cn.shu.wechat.service.IMsgHandlerFace;
 import cn.shu.wechat.service.LoginService;
+import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.panels.RoomChatContainer;
 import cn.shu.wechat.swing.panels.RoomsPanel;
@@ -25,10 +27,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import javax.swing.*;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static cn.shu.wechat.enums.WXReceiveMsgCodeEnum.MSGTYPE_TEXT;
@@ -330,7 +330,7 @@ public class MsgCenter {
                 .fileSize(msg.getFileSize())
                 .contentMap(msg.getContentMap())
                 .timestamp(System.currentTimeMillis())
-
+                .oriContent(msg.getOriContent())
                 .build();
     }
 
@@ -393,16 +393,7 @@ public class MsgCenter {
         if (msg.getFromUserName().equals(RoomChatContainer.getCurrRoomId())) {
             ExecutorServiceUtil.getGlobalExecutorService().execute(() -> MessageTools.sendStatusNotify(msg.getFromUserName()));
         }
-
-        //=============用户在其他平台消息已读的通知=============
-        if (msg.getMsgType() == WXReceiveMsgCodeEnum.MSGTYPE_STATUSNOTIFY.getCode()) {
-            log.debug(logStr);
-            //更新聊天列表未读数量
-            RoomsPanel.getContext().updateUnreadCount(msg.getToUserName(), 0);
-            return;
-        } else {
-            log.info(logStr);
-        }
+        log.info(logStr);
 
 
         //下载资源后缀
@@ -544,11 +535,49 @@ public class MsgCenter {
                 msg.setPlainText("[位置，请在手机上查看]");
                 message = newMsgToDBMessage(msg);
                 break;
-            case MSGTYPE_SYS:
-            case MSGTYPE_STATUSNOTIFY:
+            case MSGTYPE_SYS:{
                 msg.setPlainText(msg.getContent());
                 message = newMsgToDBMessage(msg);
                 break;
+            }
+            case MSGTYPE_STATUSNOTIFY: {
+                switch ( WXReceiveMsgStatusNotifyCodeEnum.getByCode(msg.getStatusNotifyCode())){
+                    case NOTIFY_USER_NAME: {
+                        new SwingWorker<Object, Object>() {
+                            ArrayList<RoomItem> rooms = new ArrayList<>();
+
+                            @Override
+                            protected Object doInBackground() {
+
+                                for (String userId : msg.getStatusNotifyUserName().split(",")) {
+                                    rooms.add(new RoomItem(Core.getMemberMap().get(userId), "", 0));
+                                }
+                                return null;
+                            }
+
+                            @Override
+                            protected void done() {
+                                RoomsPanel.getContext().addRoom(rooms);
+                            }
+                        }.execute();
+                        break;
+                    }
+                    case READ:
+                        //=============用户在其他平台消息已读的通知=============
+                        //更新聊天列表未读数量
+                        RoomsPanel.getContext().updateUnreadCount(msg.getToUserName(), 0);
+                        return;
+                    case DEFAULT:
+
+                    default:
+                           /* msg.setPlainText(msg.getContent());
+                            message = newMsgToDBMessage(msg);*/
+                            break;
+
+                }
+
+                break;
+            }
             case MSGTYPE_SYSNOTICE:
                 break;
             case MSGTYPE_POSSIBLEFRIEND_MSG:

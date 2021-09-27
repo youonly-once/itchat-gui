@@ -489,6 +489,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 results.add(oldMessage);
                 break;
             case MSGTYPE_MAP:
+                //TODO 地图消息可直接发送
                 String msgJson = oldMessage.getMsgJson();
                 AddMsgList addMsgList = JSON.parseObject(msgJson, AddMsgList.class);
                 String oriContent = addMsgList.getOriContent();
@@ -502,9 +503,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                         .build();
                 results.add(message);
                 message = Message.builder()
-                        .filePath(filePath)
+                        .content(oldMessage.getOriContent())
                         .toUsername(msg.getFromUserName())
-                        .msgType(WXReceiveMsgCodeEnum.MSGTYPE_IMAGE.getCode())
+                        .msgType(WXReceiveMsgCodeEnum.MSGTYPE_MAP.getCode())
                         .build();
                 results.add(message);
                 break;
@@ -563,6 +564,8 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                         break;
                 }
                 break;
+                default:
+                    break;
 
         }
         return results;

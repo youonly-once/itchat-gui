@@ -181,6 +181,7 @@ public class RoomsPanel extends ParentAvailablePanel {
         roomItemsListView.notifyDataSetChanged(false);
     }
 
+
     /**
      * 重绘整个列表
      */

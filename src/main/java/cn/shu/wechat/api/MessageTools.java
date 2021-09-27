@@ -89,6 +89,9 @@ public class MessageTools {
                     case MSGTYPE_VIDEO:
                         sendMsgResponse = sendVideoMsgByUserId(toUserName, message.getFilePath(), content, callback);
                         break;
+                    case MSGTYPE_MAP:
+                        sendMsgResponse = sendMapMsgByUserId(toUserName, content);
+                        break;
                     case MSGTYPE_EMOTICON:
                         sendMsgResponse = sendEmotionMsgByUserId(toUserName, message.getFilePath(), content);
                         break;
@@ -360,7 +363,24 @@ public class MessageTools {
         msgRequest.Msg = textMsg;
         return sendMsg(msgRequest, url);
     }
-
+    /**
+     * 根据UserName发送地图消息
+     *
+     * @param toUserName 消息接收者UserName
+     * @param content    消息内容，
+     * @return {@link WebWXSendMsgResponse}
+     * @author SXS
+     * @date 2021年9月26日 下午14:18:38
+     */
+    private static WebWXSendMsgResponse sendMapMsgByUserId(String toUserName,String content) throws IOException {
+        String url = String.format(URLEnum.WEB_WX_SEND_MSG.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()));
+        WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
+        WebWXSendingMsg textMsg = new WebWXSendingMapMsg();
+        textMsg.Content = content;
+        textMsg.ToUserName = toUserName;
+        msgRequest.Msg = textMsg;
+        return sendMsg(msgRequest, url);
+    }
     /**
      * 根据UserName发送名片消息
      *
