@@ -66,57 +66,62 @@ public class MessageTools {
      */
     public static WebWXSendMsgResponse sendMsgByUserId(List<Message> messages,UploadTaskCallback callback) {
         if (messages == null){
-            return WebWXSendMsgResponse.error("is null");
+            log.error("messages");
+            return WebWXSendMsgResponse.error("messages is null");
         }
         WebWXSendMsgResponse sendMsgResponse = null;
-        for (Message message : messages) {
-            String toUserName = message.getToUsername();
-            if (StringUtils.isEmpty(toUserName)) {
-                log.error("消息接收者为空：{}", message);
-                continue;
-            }
 
-            try {
-                String content = XmlStreamUtil.formatXml(message.getContent());
-                WXReceiveMsgCodeEnum byCode = WXReceiveMsgCodeEnum.getByCode(message.getMsgType());
-                switch (byCode) {
-                    case MSGTYPE_IMAGE:
-                        sendMsgResponse = sendPicMsgByUserId(toUserName, message.getFilePath(), content, callback);
-                        break;
-                    case MSGTYPE_TEXT:
-                        sendMsgResponse = sendTextMsgByUserId(content, toUserName);
-                        break;
-                    case MSGTYPE_VIDEO:
-                        sendMsgResponse = sendVideoMsgByUserId(toUserName, message.getFilePath(), content, callback);
-                        break;
-                    case MSGTYPE_MAP:
-                        sendMsgResponse = sendMapMsgByUserId(toUserName, content);
-                        break;
-                    case MSGTYPE_EMOTICON:
-                        sendMsgResponse = sendEmotionMsgByUserId(toUserName, message.getFilePath(), content);
-                        break;
-                    case MSGTYPE_SHARECARD:
-                        sendMsgResponse = sendCardMsgByUserId(toUserName, content);
-                        break;
-                    default:
-                        //其他消息发送文件
-                        sendMsgResponse = sendAppMsgByUserId(toUserName, message.getFilePath(), content, callback);
+        try {
+            for (Message message : messages) {
+                String toUserName = message.getToUsername();
+                if (StringUtils.isEmpty(toUserName)) {
+                    log.error("消息接收者为空：{}", message);
+                    return WebWXSendMsgResponse.error("toUserName is null");
+
                 }
-                log.info(LogUtil.printToMeg(byCode.getDesc(), toUserName, StringUtils.isEmpty(message.getFilePath()) ? content : message.getFilePath()));
-                if (sendMsgResponse == null) {
-                    log.error("发送消息失败：{}", message);
-                    return WebWXSendMsgResponse.error("null");
-                } else if (sendMsgResponse.getBaseResponse().getRet() != 0) {
-                    log.error("发送消息失败：{},{}", sendMsgResponse.getBaseResponse().getErrMsg(), message);
-                    return sendMsgResponse;
-                }
-                //存储数据库
-                 storeMsgToDB(message, sendMsgResponse, toUserName);
-            } catch (Exception e) {
-                e.printStackTrace();
-                log.error("发送消息失败：{}", e.getMessage());
-                continue;
+
+                    String content = XmlStreamUtil.formatXml(message.getContent());
+                    WXReceiveMsgCodeEnum byCode = WXReceiveMsgCodeEnum.getByCode(message.getMsgType());
+                    switch (byCode) {
+                        case MSGTYPE_IMAGE:
+                            sendMsgResponse = sendPicMsgByUserId(toUserName, message.getFilePath(), content, callback);
+                            break;
+                        case MSGTYPE_TEXT:
+                            sendMsgResponse = sendTextMsgByUserId(content, toUserName);
+                            break;
+                        case MSGTYPE_VIDEO:
+                            sendMsgResponse = sendVideoMsgByUserId(toUserName, message.getFilePath(), content, callback);
+                            break;
+                        case MSGTYPE_MAP:
+                            sendMsgResponse = sendMapMsgByUserId(toUserName, content);
+                            break;
+                        case MSGTYPE_EMOTICON:
+                            sendMsgResponse = sendEmotionMsgByUserId(toUserName, message.getFilePath(), content);
+                            break;
+                        case MSGTYPE_SHARECARD:
+                            sendMsgResponse = sendCardMsgByUserId(toUserName, content);
+                            break;
+                        default:
+                            //其他消息发送文件
+                            sendMsgResponse = sendAppMsgByUserId(toUserName, message.getFilePath(), content, callback);
+                    }
+                    log.info(LogUtil.printToMeg(byCode.getDesc(), toUserName, StringUtils.isEmpty(message.getFilePath()) ? content : message.getFilePath()));
+                    if (sendMsgResponse == null) {
+                        log.error("发送消息失败：{}", message);
+                        return WebWXSendMsgResponse.error("null");
+                    } else if (sendMsgResponse.getBaseResponse().getRet() != 0) {
+                        log.error("发送消息失败：{},{}", sendMsgResponse.getBaseResponse().getErrMsg(), message);
+                        return sendMsgResponse;
+                    }
+                    //存储数据库
+                     storeMsgToDB(message, sendMsgResponse, toUserName);
+
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("发送消息失败：{}", e.getMessage());
+            return WebWXSendMsgResponse.error("messages is null");
+
         }
         return sendMsgResponse;
     }
@@ -322,6 +327,11 @@ public class MessageTools {
                 builder.addBinaryBody("filename", new File(partFilePathList.get(i)), ContentType.create(fileMime), filePath);
                 HttpEntity reqEntity = builder.build();
                 HttpEntity resultEntity = HttpUtil.doPostFile(url, reqEntity);
+                if (resultEntity == null){
+                    //删除分片文件
+                    FileSplitAndMergeUtil.deletePartFile(partFilePathList);
+                    throw new WebWXException("上传失败：response is null.");
+                }
                 if (i == partFilePathList.size() - 1) {
                     result = EntityUtils.toString(resultEntity, Consts.UTF_8);
 
@@ -738,6 +748,9 @@ public class MessageTools {
     private static WebWXSendMsgResponse sendMsg(WebWXSendMsgRequest webWXSendMsgRequest, String url) throws IOException {
         String paramStr = JSON.toJSONString(webWXSendMsgRequest);
         HttpEntity entity = HttpUtil.doPost(url, paramStr);
+        if (entity == null){
+            return  WebWXSendMsgResponse.error("response is null.");
+        }
         String s = EntityUtils.toString(entity, Consts.UTF_8);
         return JSON.parseObject(s, WebWXSendMsgResponse.class);
     }

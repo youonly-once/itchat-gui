@@ -144,7 +144,7 @@ public class ChatPanel extends ParentAvailablePanel {
     private void initComponents() {
         messagePanel = new MessagePanel(this);
         messagePanel.setBorder(new RCBorder(RCBorder.BOTTOM, Colors.LIGHT_GRAY));
-        adapter = new MessageAdapter(messageItems, messagePanel.getMessageListView(), messageViewHolderCacheHelper);
+        adapter = new MessageAdapter(this,messageItems, messagePanel.getMessageListView(), messageViewHolderCacheHelper);
         messagePanel.getMessageListView().setAdapter(adapter);
 
         messageEditorPanel = new MessageEditorPanel(this, roomId);
@@ -321,14 +321,8 @@ public class ChatPanel extends ParentAvailablePanel {
                 if (StringUtils.isEmpty(data)) {
                     continue;
                 }
-                //文本消息
-                try {
+                    //文本消息
                     sendTextMessage(data.toString());
-                    //更新房间列表
-                    RoomsPanel.getContext().updateRoomItem(roomId, 0, data.toString(), System.currentTimeMillis());
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
 
             } else if (data instanceof JLabel) {
                 //图片消息
@@ -340,14 +334,14 @@ public class ChatPanel extends ParentAvailablePanel {
                     //多个图片消息添加到队列中
                     shareAttachmentUploadQueue.add(path);
                 }
-                RoomsPanel.getContext().updateRoomItem(roomId, 0, "[图片]", System.currentTimeMillis());
+                RoomsPanel.getContext().updateRoomItem(roomId, 0, "[图片]发送中...", System.currentTimeMillis());
             } else if (data instanceof FileEditorThumbnail) {
                 //文件消息
                 isImageOrFile = true;
                 FileEditorThumbnail component = (FileEditorThumbnail) data;
                 //多个文件消息添加到队列中
                 shareAttachmentUploadQueue.add(component.getPath());
-                RoomsPanel.getContext().updateRoomItem(roomId, 0, "[文件]", System.currentTimeMillis());
+                RoomsPanel.getContext().updateRoomItem(roomId, 0, "[文件]发送中...", System.currentTimeMillis());
 
             }
 
@@ -555,15 +549,12 @@ public class ChatPanel extends ParentAvailablePanel {
 
     /**
      * 发送文本消息
-     * <p>
-     * 如果messageId不为null, 则认为重发该消息，否则发送一条新的消息
-     */
-    /**
-     * 发送文本消息
      *
      * @param content 消息内容
      */
-    public void sendTextMessage(String content) throws ParseException {
+    public void sendTextMessage(String content)  {
+        //更新房间列表
+        RoomsPanel.getContext().updateRoomItem(roomId, 0, content+"[发送中...]", System.currentTimeMillis());
         String msgId = randomMessageId();
         Message message = Message.builder().isSend(false)
                 .id(msgId)
@@ -578,8 +569,9 @@ public class ChatPanel extends ParentAvailablePanel {
                 .timestamp(System.currentTimeMillis())
                 .deleted(false)
                 .isSend(true)
+                .isNeedToResend(false)
                 .build();
-        //消息列表添加消息块
+        //绘制消息项
         ViewHolder viewHolder = addMessageToEnd(message);
         new SwingWorker<WebWXSendMsgResponse, WebWXSendMsgResponse>() {
             private WebWXSendMsgResponse wxSendMsgResponse;
@@ -598,13 +590,16 @@ public class ChatPanel extends ParentAvailablePanel {
 
             @Override
             protected void done() {
+                message.setProgress(100);
                 if (wxSendMsgResponse == null
                         || wxSendMsgResponse.getBaseResponse().getRet() != 0) {
-                    message.setIsSend(false);
-                    message.setProgress(100);
+                    message.setNeedToResend(true);
+                    RoomsPanel.getContext().updateRoomItem(roomId, 0, content+"[发送失败]", System.currentTimeMillis());
+
                 } else {
-                    message.setIsSend(true);
-                    message.setProgress(100);
+                    message.setNeedToResend(false);
+                    RoomsPanel.getContext().updateRoomItem(roomId, 0, content, System.currentTimeMillis());
+
                 }
                 updateMessage(viewHolder, message);
             }
@@ -689,7 +684,7 @@ public class ChatPanel extends ParentAvailablePanel {
      *
      * @param uploadFilename
      */
-    private void sendFileMessage(String uploadFilename) {
+    public void sendFileMessage(String uploadFilename) {
         String msgId = randomMessageId();
         File file = new File(uploadFilename);
         if (!file.exists()) {
@@ -773,6 +768,7 @@ public class ChatPanel extends ParentAvailablePanel {
         Message finalMessage = message;
         WXReceiveMsgCodeEnum finalMsgType = msgType;
         new SwingWorker<Void, Integer>() {
+            private WebWXSendMsgResponse wxSendMsgResponse;
             @Override
             protected Void doInBackground() throws Exception {
 
@@ -789,7 +785,7 @@ public class ChatPanel extends ParentAvailablePanel {
                     }
                 };
                 //发送消息 等待回调
-                MessageTools.sendMsgByUserId(finalMessage, callback);
+                wxSendMsgResponse = MessageTools.sendMsgByUserId(finalMessage, callback);
 
                 return null;
 
@@ -836,6 +832,18 @@ public class ChatPanel extends ParentAvailablePanel {
 
                 }
 
+            }
+
+            @Override
+            protected void done() {
+                finalMessage.setProgress(100);
+                if (wxSendMsgResponse == null
+                        || wxSendMsgResponse.getBaseResponse().getRet() != 0) {
+                    finalMessage.setNeedToResend(true);
+                } else {
+                    finalMessage.setNeedToResend(false);
+                }
+                updateMessage(viewHolder, finalMessage);
             }
         }.execute();
 

@@ -99,4 +99,16 @@ public class ChatUtil {
             addNewMsg(message, message.getToUsername(), message.getPlaintext(), 0);
         }
     }
+
+    /**
+     * 删除消息
+     * @param item 消息
+     */
+    public static void deleteMessage(Message item){
+        String messageId = item.getId();
+        if (messageId != null && !messageId.isEmpty()) {
+            String roomId = item.getFromUsername().equals(Core.getUserName()) ? item.getToUsername() : item.getFromUsername();
+            RoomChatContainer.get(roomId).getChatPanel().deleteMessage(messageId);
+        }
+    }
 }

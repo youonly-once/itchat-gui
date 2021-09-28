@@ -10,6 +10,7 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCMenuItemUI;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
 import cn.shu.wechat.swing.panels.RoomChatContainer;
+import cn.shu.wechat.swing.utils.ChatUtil;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
@@ -107,11 +108,7 @@ public class MessagePopupMenu extends JPopupMenu {
                     default:
                 }
                 Message item = (Message) obj;
-                String messageId = item.getId();
-                if (messageId != null && !messageId.isEmpty()) {
-                    String roomId = item.getFromUsername().equals(Core.getUserName()) ? item.getToUsername() : item.getFromUsername();
-                    RoomChatContainer.get(roomId).getChatPanel().deleteMessage(messageId);
-                }
+                ChatUtil.deleteMessage(item);
             }
         });
 

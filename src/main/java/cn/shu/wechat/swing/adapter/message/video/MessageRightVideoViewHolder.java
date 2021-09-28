@@ -24,6 +24,7 @@ public class MessageRightVideoViewHolder extends BaseMessageViewHolder {
      * 视频层
      */
     public TagJLayeredPane videoComponent = null;
+    public JLabel resend = new JLabel();
     public JLabel sendingProgress = new JLabel();
     private final TagPanel contentTagPanel = new TagPanel();
     public final RCRightVideoMessageBubble imageBubble = new RCRightVideoMessageBubble();
@@ -63,6 +64,13 @@ public class MessageRightVideoViewHolder extends BaseMessageViewHolder {
         time.setForeground(Colors.FONT_GRAY);
         time.setFont(FontUtil.getDefaultFont(12));
 
+        ImageIcon resendIcon = IconUtil.getIcon(this,"/image/resend.png");
+        resendIcon.setImage(resendIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+        resend.setIcon(resendIcon);
+        resend.setVisible(false);
+        resend.setToolTipText("图片发送失败，点击重新发送");
+        resend.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
         playImgLabel.setIcon(IconUtil.getIcon(this, "/image/image_loading.gif"));
         ImageIcon sendingIcon = IconUtil.getIcon(this,"/image/sending.gif");
         sendingProgress.setIcon(sendingIcon);
@@ -79,6 +87,7 @@ public class MessageRightVideoViewHolder extends BaseMessageViewHolder {
             videoComponent = getLayerPanel();
             videoComponent.setCursor(new Cursor(Cursor.HAND_CURSOR));
             JPanel controlPanel = new JPanel(new BorderLayout(0, 0));
+            controlPanel.add(resend, BorderLayout.WEST);
             controlPanel.add(sendingProgress, BorderLayout.CENTER);
             controlPanel.add(revoke, BorderLayout.EAST);
             JPanel resendImagePanel = new JPanel(new BorderLayout());

@@ -2,6 +2,7 @@ package cn.shu.wechat.swing.adapter.message;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
+import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
@@ -44,6 +45,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -67,14 +69,14 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
     private final FileCache fileCache;
     private final MessagePopupMenu popupMenu = new MessagePopupMenu();
-
+    private ChatPanel parent;
 
     MessageViewHolderCacheHelper messageViewHolderCacheHelper;
 
-    public MessageAdapter(List<Message> messageItems, RCListView listView, MessageViewHolderCacheHelper messageViewHolderCacheHelper) {
+    public MessageAdapter(ChatPanel parent,List<Message> messageItems, RCListView listView, MessageViewHolderCacheHelper messageViewHolderCacheHelper) {
         this.messageItems = messageItems;
         this.listView = listView;
-
+        this.parent = parent;
         // currentUser = currentUserService.findAll().get(0);
         imageCache = new ImageCache();
         fileCache = new FileCache();
@@ -455,20 +457,17 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             holder.resend.setVisible(false);
         }
 
-        holder.resend.addMouseListener(new MessageMouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-               /* if (item.getUpdatedAt() > 0) {
-                    holder.resend.setVisible(false);
-                    System.out.println("这条消息其实已经发送出去了");
-                    return;
-                }*/
+        if (holder.resend.getMouseListeners().length<=1) {
+            holder.resend.addMouseListener(new MessageMouseListener() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    ChatUtil.deleteMessage(item);
+                    parent.sendFileMessage(item.getFilePath());
 
-                //ChatPanel.getContext().resendFileMessage(item.getId(), "file");
-
-                super.mouseClicked(e);
-            }
-        });
+                    super.mouseClicked(e);
+                }
+            });
+        }
 
         setAttachmentClickListener(holder, item);
 
@@ -701,7 +700,21 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         holder.videoComponent.setTag(item);
         listView.setScrollHiddenOnMouseLeave(holder.videoComponent);
         listView.setScrollHiddenOnMouseLeave(holder.imageBubble);
+        // 判断是否显示重发按钮
+        holder.resend.setVisible(item.isNeedToResend());
 
+
+        if (holder.resend.getMouseListeners().length<=1) {
+            holder.resend.addMouseListener(new MessageMouseListener() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    ChatUtil.deleteMessage(item);
+                    parent.sendFileMessage(item.getFilePath());
+
+                    super.mouseClicked(e);
+                }
+            });
+        }
         // 绑定右键菜单
         attachPopupMenu(viewHolder, item);
     }
@@ -721,22 +734,17 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
         // 判断是否显示重发按钮
         holder.resend.setVisible(item.isNeedToResend());
+        if (holder.resend.getMouseListeners().length<=1) {
+            holder.resend.addMouseListener(new MessageMouseListener() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    ChatUtil.deleteMessage(item);
+                    parent.sendFileMessage(item.getFilePath());
 
-        //TODO 重发消息
-        holder.resend.addMouseListener(new MessageMouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-             /*   if (item.getUpdatedAt() > 0) {
-                    holder.resend.setVisible(false);
-                    System.out.println("这条消息其实已经发送出去了");
-                    return;
-                }*/
-
-                //ChatPanel.getContext().resendFileMessage(item.getId(), "image");
-
-                super.mouseClicked(e);
-            }
-        });
+                    super.mouseClicked(e);
+                }
+            });
+        }
 
         // 绑定右键菜单
         attachPopupMenu(viewHolder, item);
@@ -948,15 +956,8 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         //processMessageContent(holder.messageText, item);
         //registerMessageTextListener(holder.messageText, item);
 
-        // 判断是否显示重发按钮
-        boolean needToUpdateResendStatus = false;/*!item.isNeedToResend() && System.currentTimeMillis() - item.getTimestamp() > 10 * 1000;*/
 
         if (item.isNeedToResend()) {
-            if (needToUpdateResendStatus) {
-                //messageService.updateNeedToResend(item.getId(), true);
-            }
-
-
             holder.sendingProgress.setVisible(false);
             holder.resend.setVisible(true);
         } else {
@@ -968,27 +969,19 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 holder.sendingProgress.setVisible(false);
             }
         }
+        //TODO 通过数量来看后期可能会有BUG
+        //TODO 例如其它地方多增加了一个mouseListener
+        if (holder.resend.getMouseListeners().length<=1){
+            holder.resend.addMouseListener(new MessageMouseListener() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    ChatUtil.deleteMessage(item);
+                    parent.sendTextMessage(item.getContent());
+                    super.mouseClicked(e);
+                }
+            });
+        }
 
-
-        holder.resend.addMouseListener(new MessageMouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-            /*    if (item.getUpdatedAt() > 0) {
-                    holder.resend.setVisible(false);
-                    return;
-                }*/
-
-                System.out.println("重发消消息：" + item.getPlaintext());
-
-                // TODO: 向服务器重新发送消息
-                Message message = null;//= messageService.findById(item.getId());
-                //message.setUpdatedAt(System.currentTimeMillis());
-                message.setNeedToResend(false);
-                //messageService.update(message);
-
-                super.mouseClicked(e);
-            }
-        });
 
         // 绑定右键菜单
         attachPopupMenu(viewHolder, item);
