@@ -123,6 +123,16 @@ public class Message implements Comparable<Message>{
     private String plainName;
     private int progress = 100;
     private boolean isNeedToResend;
+
+    //联系人卡片消息
+    private String contactsUserName;
+    private String contactsNickName;
+    private String contactsId;
+    private Byte contactsSex;
+    private String contactsProvince;
+    private String contactsCity;
+    private String contactsHeadImgUrl;
+    private String contactsTicket;
     @Override
     public int compareTo(Message o) {
         return (int) (this.getTimestamp() - o.getTimestamp());

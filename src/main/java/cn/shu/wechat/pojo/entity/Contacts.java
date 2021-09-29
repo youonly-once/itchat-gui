@@ -24,7 +24,7 @@ public class Contacts {
 
     private Double chatroomid;
 
-    private Double sex;
+    private Byte sex;
 
     private Double attrstatus;
 
@@ -82,6 +82,7 @@ public class Contacts {
 
     private String pyinitial;
 
+    private String ticket;
 
 
     /**

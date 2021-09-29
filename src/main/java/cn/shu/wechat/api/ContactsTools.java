@@ -2,10 +2,18 @@ package cn.shu.wechat.api;
 
 
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.enums.StorageLoginInfoEnum;
+import cn.shu.wechat.enums.URLEnum;
+import cn.shu.wechat.pojo.dto.msg.send.*;
 import cn.shu.wechat.pojo.entity.Contacts;
 import cn.shu.wechat.utils.CommonTools;
+import cn.shu.wechat.utils.HttpUtil;
+import com.alibaba.fastjson.JSON;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Consts;
+import org.apache.http.HttpEntity;
+import org.apache.http.util.EntityUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;

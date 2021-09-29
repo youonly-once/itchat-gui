@@ -104,6 +104,16 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         Message messageItem = messageItems.get(position);
         boolean isSelf = Core.getUserName().equals(messageItem.getFromUsername());
         switch (WXReceiveMsgCodeEnum.getByCode(viewType)) {
+            case MSGTYPE_VERIFYMSG:
+            case MSGTYPE_SHARECARD:{
+                if (isSelf) {
+                    return new MessageRightContactsCardOfAppViewHolder();
+                } else {
+                    return new MessageLeftContactsCardOfAppViewHolder(messageItem.isGroup());
+                }
+            }
+
+
             case MSGTYPE_RECALLED:
             case MSGTYPE_SYS:
             case MSGTYPE_STATUSNOTIFY: {
@@ -285,6 +295,10 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             processRightProgramOfAppMessage(viewHolder, item);
         } else if (viewHolder instanceof MessageLeftProgramOfAppViewHolder) {
             processLeftProgramOfAppMessage(viewHolder, item);
+        } else if (viewHolder instanceof MessageRightContactsCardOfAppViewHolder) {
+            processRightContactsCardOfAppMessage(viewHolder, item);
+        } else if (viewHolder instanceof MessageLeftContactsCardOfAppViewHolder) {
+            processLeftContactsCardOfAppMessage(viewHolder, item);
         }
     }
 
@@ -1020,6 +1034,79 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         attachPopupMenu(viewHolder, item);
     }
 
+    private void processLeftContactsCardOfAppMessage(ViewHolder viewHolder, Message item) {
+        processContactsCardMessage(viewHolder, item);
+       ((MessageLeftContactsCardOfAppViewHolder) viewHolder).sender.setText(item.getPlainName());
+        attachPopupMenu(viewHolder, item);
+    }
+
+    private void processRightContactsCardOfAppMessage(ViewHolder viewHolder, Message item) {
+        processContactsCardMessage(viewHolder, item);
+        attachPopupMenu(viewHolder, item);
+    }
+
+    private void processContactsCardMessage(ViewHolder viewHolder, Message item) {
+        MessageContactsCardOfAppViewHolder cardOfAppViewHolder = (MessageContactsCardOfAppViewHolder) viewHolder;
+        cardOfAppViewHolder.contentTitlePanel.setTag(item);
+        cardOfAppViewHolder.desc.setText("WechatId："+item.getContactsId()
+                +"\n地区："+item.getContactsProvince()
+        +" "+item.getContactsCity());
+        cardOfAppViewHolder.title.setText(item.getContactsNickName());
+        cardOfAppViewHolder.sourcePanel.setVisible(true);
+        cardOfAppViewHolder.sourceName.setText("联系人卡片");
+        new SwingWorker<Object,Object>(){
+            BufferedImage image = null;
+            @Override
+            protected Object doInBackground() throws Exception {
+                if (StringUtils.isNotEmpty(item.getThumbUrl())) {
+                    image = ImageIO.read(new URL(item.getThumbUrl()));
+                }else{
+                    image = DownloadTools.downloadImgByMsgID(item.getMsgId(),WXMsgUrl.SLAVE_TYPE);
+                }
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                if (image!=null){
+                    cardOfAppViewHolder.icon.setIcon(new ImageIcon(ImageUtil.preferredImageSize(image, MessageLinkOfAppViewHolder.THUMB_WIDTH)));
+                    //有图片时缩短宽度，让其与无图的Panel尽量一致
+                   // cardOfAppViewHolder.desc.setColumns(16);
+                }
+            }
+        }.execute();
+       final Contacts contacts = Contacts.builder()
+                .sex(item.getContactsSex())
+                .province(item.getContactsProvince())
+                .city(item.getContactsCity())
+                .signature("")
+                .remarkname("")
+                .username(item.getContactsUserName())
+                .headimgurl(item.getContactsHeadImgUrl())
+               .ticket(item.getContactsTicket())
+                .nickname(item.getContactsNickName()).build();
+        //点击打开链接
+        MessageMouseListener messageMouseListener = new MessageMouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+
+                UserInfoPopup instance = UserInfoPopup.getInstance();
+                instance.setContacts(contacts);
+                instance.show(e.getComponent(), e.getX(), e.getY());
+                super.mouseClicked(e);
+            }
+        };
+        cardOfAppViewHolder.desc.addMouseListener(messageMouseListener);
+        cardOfAppViewHolder.title.addMouseListener(messageMouseListener);
+        cardOfAppViewHolder.icon.addMouseListener(messageMouseListener);
+        cardOfAppViewHolder.contentTitlePanel.addMouseListener(messageMouseListener);
+        cardOfAppViewHolder.messageBubble.addMouseListener(messageMouseListener);
+        listView.setScrollHiddenOnMouseLeave(cardOfAppViewHolder.desc);
+        listView.setScrollHiddenOnMouseLeave(cardOfAppViewHolder.title);
+        listView.setScrollHiddenOnMouseLeave(cardOfAppViewHolder.icon);
+        listView.setScrollHiddenOnMouseLeave(cardOfAppViewHolder.contentTitlePanel);
+        listView.setScrollHiddenOnMouseLeave(cardOfAppViewHolder.messageBubble);
+    }
     private void processLinkMessage(ViewHolder viewHolder, Message item) {
         MessageLinkOfAppViewHolder linkViewHolder = (MessageLinkOfAppViewHolder) viewHolder;
         linkViewHolder.contentTitlePanel.setTag(item);
@@ -1289,6 +1376,14 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     }
 
                 }
+
+            }
+            case MSGTYPE_VERIFYMSG:
+            case MSGTYPE_SHARECARD:{
+                MessageAppViewHolder holder = (MessageAppViewHolder) viewHolder;
+                contentComponent = holder.contentTitlePanel;
+                messageBubble = holder.messageBubble;
+                break;
             }
         }
 

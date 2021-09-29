@@ -27,7 +27,7 @@ import java.io.InputStream;
 public class MainFrame extends JFrame  {
     public final static int DEFAULT_WIDTH = 900;
     public final static int DEFAULT_HEIGHT = 650;
-    public final static int LEFT_PANEL_WIDTH = 260;
+    public final static int LEFT_PANEL_WIDTH = 300;
     public int currentWindowWidth = DEFAULT_WIDTH;
     public int currentWindowHeight = DEFAULT_HEIGHT;
     /**

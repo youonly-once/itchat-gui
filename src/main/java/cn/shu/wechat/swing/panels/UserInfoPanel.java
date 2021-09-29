@@ -15,6 +15,8 @@ import lombok.NoArgsConstructor;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -175,6 +177,23 @@ public class UserInfoPanel extends ParentAvailablePanel {
             setLayout(new FlowLayout(FlowLayout.LEFT,20,0));
             nameLabel.setForeground(Color.GRAY);
             valueLabel.setForeground(Color.BLACK);
+            valueLabel.setEditable(true);
+            valueLabel.addKeyListener(new KeyListener() {
+                @Override
+                public void keyTyped(KeyEvent e) {
+                    System.out.println("keyTyped");
+                }
+
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    System.out.println("keyPressed");
+                }
+
+                @Override
+                public void keyReleased(KeyEvent e) {
+                    System.out.println("keyReleased");
+                }
+            });
             add(nameLabel);
             add(valueLabel);
         }

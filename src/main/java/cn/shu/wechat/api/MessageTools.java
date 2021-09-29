@@ -66,7 +66,6 @@ public class MessageTools {
      */
     public static WebWXSendMsgResponse sendMsgByUserId(List<Message> messages,UploadTaskCallback callback) {
         if (messages == null){
-            log.error("messages");
             return WebWXSendMsgResponse.error("messages is null");
         }
         WebWXSendMsgResponse sendMsgResponse = null;
@@ -679,26 +678,18 @@ public class MessageTools {
     /**
      * 被动添加好友
      *
-     * @param msg    消息实体
-     * @param accept {@code true} 接受 {@code false} 拒绝
+     * @param userName 用户名
+     * @param ticket  ticket
      * @date 2017年6月29日 下午10:08:43
      */
-    public static void addFriend(AddMsgList msg, boolean accept) {
-        if (!accept) {
-            // 不添加
-            return;
-        }
+    public static WebWXSendMsgResponse addFriend(String userName,String ticket) {
+
         // 接受好友请求
         int status = VerifyFriendEnum.ACCEPT.getCode();
-        RecommendInfo recommendInfo = msg.getRecommendInfo();
-        String userName = recommendInfo.getUserName();
-        String ticket = recommendInfo.getTicket();
-        // 更新好友列表
-        // TODO 此处需要更新好友列表
-        // Core.getContactList().add(msg.getJSONObject("RecommendInfo"));
+
 
         String url = String.format(URLEnum.WEB_WX_VERIFYUSER.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()),
-                String.valueOf(System.currentTimeMillis() / 3158L), Core.getLoginInfoMap().get(StorageLoginInfoEnum.pass_ticket.getKey()));
+                System.currentTimeMillis() / 3158L, Core.getLoginInfoMap().get(StorageLoginInfoEnum.pass_ticket.getKey()));
 
         List<Map<String, Object>> verifyUserList = new ArrayList<Map<String, Object>>();
         Map<String, Object> verifyUser = new HashMap<String, Object>();
@@ -718,25 +709,37 @@ public class MessageTools {
         body.put("SceneListCount", 1);
         body.put("SceneList", sceneList);
         body.put("skey", Core.getLoginInfoMap().get(StorageLoginInfoEnum.skey.getKey()));
-
         String result = null;
         try {
             String paramStr = JSON.toJSONString(body);
             HttpEntity entity = HttpUtil.doPost(url, paramStr);
             result = EntityUtils.toString(entity, Consts.UTF_8);
             log.info("自动添加好友：" + result);
+            return  JSON.parseObject(result,WebWXSendMsgResponse.class);
+
         } catch (Exception e) {
             log.error("webWxSendMsg", e);
+            return WebWXSendMsgResponse.error(e.getMessage());
         }
 
-        if (StringUtils.isBlank(result)) {
-            log.error("被动添加好友失败");
-        }
-
-        log.debug(result);
 
     }
-
+    /**
+     * 修改联系人备注
+     * @param userName 用户id
+     * @param remarkName 备注名称
+     * @return 参数
+     */
+    public static WebWXSendMsgResponse modifyRemarkName(String userName ,String remarkName) throws IOException {
+        String url = String.format(URLEnum.WEB_WX_REMARKNAME.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()));
+        WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
+        WebWXModifyRemarkNameMsg msg = new WebWXModifyRemarkNameMsg();
+        msg.CmdId = 2;
+        msg.RemarkName = remarkName;
+        msg.UserName = userName;
+        msgRequest.Msg = msg;
+        return sendMsg(msgRequest, url);
+    }
     /**
      * 发送消息
      *

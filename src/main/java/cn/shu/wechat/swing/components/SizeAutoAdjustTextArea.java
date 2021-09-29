@@ -52,7 +52,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
         //setLineWrap(true);
         //setWrapStyleWord(false);
         this.setFont(FontUtil.getDefaultFont(14));
-        setEditable(false);
+        //setEditable(false);
 
         emojiRegx = ":.+?:";
         emojiPattern = Pattern.compile(emojiRegx);// 懒惰匹配，最小匹配

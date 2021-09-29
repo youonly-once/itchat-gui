@@ -16,6 +16,7 @@ import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -180,19 +181,28 @@ public class AvatarUtil {
      */
     public static BufferedImage createOrLoadBigAvatar(String userName, String url) {
         String filePath = Core.getContactHeadImgPath().get(userName);
-        if (filePath == null) {
-            filePath = DownloadTools.downloadBigHeadImg(url, userName);
-        }
-        if (filePath != null) {
-            Core.getContactHeadImgPath().put(userName, filePath);
+        if (url.startsWith("http")){
             try {
-                BufferedImage read = ImageIO.read(new File(filePath));
-                return read;
+                return  ImageIO.read(new URL(url));
             } catch (IOException e) {
+                e.printStackTrace();
                 return null;
             }
+        }else{
+
+            if (filePath == null) {
+
+                filePath = DownloadTools.downloadBigHeadImg(url, userName);
+            }
+
         }
-        return null;
+        Core.getContactHeadImgPath().put(userName, filePath);
+        try {
+            BufferedImage read = ImageIO.read(new File(filePath));
+            return read;
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     /**

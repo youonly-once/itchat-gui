@@ -1,7 +1,9 @@
 package cn.shu.wechat.swing.components;
 
 import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.pojo.dto.msg.send.WebWXSendMsgResponse;
 import cn.shu.wechat.pojo.entity.Contacts;
 import cn.shu.wechat.swing.frames.ImageViewerFrame;
 import cn.shu.wechat.swing.frames.MainFrame;
@@ -9,6 +11,7 @@ import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.ChatUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -16,6 +19,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Created by 舒新胜 on 07/06/2017.
@@ -55,12 +59,12 @@ public class UserInfoPopup extends JPopupMenu {
      */
     public void setContacts(Contacts contacts){
         this.contacts =contacts;
-        areaLabel.setText("地区："+contacts.getProvince()+" "+contacts.getCity()+" "+contacts.getAlias());
+        areaLabel.setText("地区："+contacts.getProvince()+" "+contacts.getCity());
         if (contacts.getSex() !=null){
             if (contacts.getSex() == 1){
-                IconUtil.getIcon(this,"/image/man.png");
+                genderLabel.setIcon( IconUtil.getIcon(this,"/image/man.png"));
             }else if (contacts.getSex() == 2){
-                IconUtil.getIcon(this,"/image/woman.png");
+                genderLabel.setIcon( IconUtil.getIcon(this,"/image/woman.png"));
             }else{
                 genderLabel.setIcon(null);
             }
@@ -69,11 +73,22 @@ public class UserInfoPopup extends JPopupMenu {
             genderLabel.setIcon(null);
         }
         if (contacts.getGroupName()!=null&&contacts.getGroupName().startsWith("@@")){
-            usernameLabel.setText(ContactsTools.getMemberNickNameOfGroup(contacts.getGroupName(),contacts.getUsername()));
+            String memberNickNameOfGroup = ContactsTools.getMemberNickNameOfGroup(contacts.getGroupName(), contacts.getUsername());
+            usernameLabel.setText(memberNickNameOfGroup == null ?contacts.getNickname():memberNickNameOfGroup);
         }else{
-            usernameLabel.setText(ContactsTools.getContactNickNameByUserName(contacts.getUsername()));
+            String memberNickNameOfGroup = ContactsTools.getContactNickNameByUserName(contacts.getUsername());
+            usernameLabel.setText(memberNickNameOfGroup == null ?contacts.getNickname():memberNickNameOfGroup);
         }
-        chat.setVisible(Core.getMemberMap().containsKey(contacts.getUsername()));
+        if (Core.getMemberMap().containsKey(contacts.getUsername()) && contacts.getTicket()==null) {
+            chat.setIcon(IconUtil.getIcon(this, "/image/chat.png", 20, 20));
+            chat.setToolTipText("开始聊天");
+            chat.setVisible(true);
+        }else{
+            chat.setIcon(IconUtil.getIcon(this,"/image/add.png"));
+            chat.setToolTipText("添加好友");
+            chat.setVisible(true);
+        }
+
 
         avatarLabel.setIcon(IconUtil.getIcon(this,"/image/image_loading.gif"));
         //异步加载头像
@@ -121,6 +136,7 @@ public class UserInfoPopup extends JPopupMenu {
         signatureLabel.setFont(FontUtil.getDefaultFont(12));
 
         chat = new JLabel();
+        chat.setVisible(true);
     }
 
     private void initView() {
@@ -142,8 +158,7 @@ public class UserInfoPopup extends JPopupMenu {
         nickNameArea.add(genderLabel,BorderLayout.CENTER);
 
 
-        ImageIcon icon = IconUtil.getIcon(this, "/image/chat.png", 20, 20);
-        chat.setIcon(icon);
+
         nickNameArea.add(chat,BorderLayout.EAST);
         usernameLabel.setFont(FontUtil.getDefaultFont(16));
         infoPanel.add(nickNameArea);
@@ -166,9 +181,25 @@ public class UserInfoPopup extends JPopupMenu {
         chat.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (Core.getMemberMap().containsKey(contacts.getUsername())) {
+                if (Core.getMemberMap().containsKey(contacts.getUsername())
+                        && contacts.getTicket()==null) {
                     ChatUtil.openOrCreateDirectChat(contacts.getUsername());
-                    setVisible(false);;
+                    setVisible(false);
+                }else{
+                    setVisible(false);
+                    ExecutorServiceUtil.getGlobalExecutorService().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            WebWXSendMsgResponse webWXSendMsgResponse = MessageTools.addFriend(contacts.getUsername(), contacts.getTicket());
+
+                            if (webWXSendMsgResponse.getBaseResponse().getRet() == 0) {
+                                Core.getMemberMap().put(contacts.getUsername(),contacts);
+                                ChatUtil.openOrCreateDirectChat(contacts.getUsername());
+                                contacts.setTicket(null);
+                            }
+                        }
+                    });
+
                 }
 
                 super.mouseClicked(e);

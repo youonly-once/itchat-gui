@@ -22,7 +22,7 @@ public class RecommendInfo {
     private int Scene;
     private int VerifyFlag;
     private int AttrStatus;
-    private int Sex;
+    private Byte Sex;
     private String Ticket;
     private int OpCode;
 
@@ -114,11 +114,11 @@ public class RecommendInfo {
         return AttrStatus;
     }
 
-    public void setSex(int Sex) {
+    public void setSex(Byte Sex) {
         this.Sex = Sex;
     }
 
-    public int getSex() {
+    public Byte getSex() {
         return Sex;
     }
 

@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -213,6 +214,8 @@ public class CommonTools {
      * @date 2017年4月23日 下午4:19:08
      */
     public static void emojiFormatter(AddMsgList msg) {
+
+        msg.setContent(StringEscapeUtils.unescapeXml(msg.getContent()));
         msg.setContent(emojiFormatter(msg.getContent()));
 
     }

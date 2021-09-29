@@ -25,7 +25,7 @@ public enum URLEnum {
     WEB_WX_PUSH_LOGIN("%s/webwxpushloginurl", "不扫码登陆"),
     WEB_WX_LOGOUT("%s/webwxlogout", "退出微信"),
     WEB_WX_BATCH_GET_CONTACT("%s/webwxbatchgetcontact?type=ex&r=%s&lang=zh_CN&pass_ticket=%s", "查询群信息"),
-    WEB_WX_REMARKNAME("%s/webwxoplog?lang=zh_CN&pass_ticket=%s", "修改好友备注"),
+    WEB_WX_REMARKNAME("%s/webwxoplog", "修改好友备注"),
     WEB_WX_VERIFYUSER("%s/webwxverifyuser?r=%s&lang=zh_CN&pass_ticket=%s", "被动添加好友"),
     WEB_WX_GET_MEDIA("%s/webwxgetmedia", "下载文件"),
     WEB_WX_GET_HEAD_IMAGE_THUM("https://wx2.qq.com/%s", "下载头像"),

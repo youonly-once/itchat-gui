@@ -575,7 +575,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     public List<Message> addFriendMsgHandle(AddMsgList msg) {
         log.info(LogUtil.printFromMeg(msg, WXReceiveMsgCodeEnum.MSGTYPE_VERIFYMSG.getCode()));
         //自动同意
-        MessageTools.addFriend(msg, true);
+  /*      MessageTools.addFriend(msg, true);
         String content = msg.getContent();
         Map<String, Object> stringObjectMap = XmlStreamUtil.toMap(content);
         Object o = stringObjectMap.get("msg.attr.content");
@@ -590,7 +590,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         addMsgList.setToUserName(Core.getUserName());
         addMsgList.setContent(content);
         addMsgList.setMsgType(WXReceiveMsgCodeEnum.MSGTYPE_SYS.getCode());
-        msgCenter.handleNewMsg(addMsgList);
+        msgCenter.handleNewMsg(addMsgList);*/
 
         return null;
     }

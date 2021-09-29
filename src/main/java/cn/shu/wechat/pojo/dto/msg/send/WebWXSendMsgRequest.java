@@ -26,8 +26,4 @@ public class WebWXSendMsgRequest {
 
     public int Scene;
 
-    public static void main(String[] args) {
-        WebWXSendingMsg webWXSendingMsg = new WebWXSendingTextMsg();
-        System.out.println(webWXSendingMsg.Type);
-    }
 }

@@ -10,6 +10,7 @@ import cn.shu.wechat.enums.WXReceiveMsgStatusNotifyCodeEnum;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.pojo.dto.msg.send.WebWXSendMsgResponse;
 import cn.shu.wechat.pojo.dto.msg.sync.AddMsgList;
+import cn.shu.wechat.pojo.dto.msg.sync.RecommendInfo;
 import cn.shu.wechat.pojo.entity.Contacts;
 import cn.shu.wechat.pojo.entity.Message;
 import cn.shu.wechat.service.IMsgHandlerFace;
@@ -134,7 +135,6 @@ public class MsgCenter {
                 messages = msgHandler.addFriendMsgHandle(msg);
                 break;
             case MSGTYPE_SHARECARD:
-                msg.setPlainText("[名片消息，请在手机上查看]");
                 messages = msgHandler.nameCardMsgHandle(msg);
                 break;
             case MSGTYPE_RECALLED:
@@ -582,19 +582,63 @@ public class MsgCenter {
                 break;
             case MSGTYPE_POSSIBLEFRIEND_MSG:
                 break;
-            case MSGTYPE_VERIFYMSG:
+            case MSGTYPE_VERIFYMSG:{
+                msg.setPlainText("[好友申请]");
                 message = newMsgToDBMessage(msg);
-                break;
-            case MSGTYPE_SHARECARD: {
-                msg.setPlainText("[名片消息，请在手机上查看]");
+
                 Map<String, Object> map = new HashMap<>();
                 try {
                     map = XmlStreamUtil.toMap(msg.getContent());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                //TODO
+                Object thumbUrl = map.get("msg.attr.smallheadimgurl");
+                Object headImgUrl = map.get("msg.attr.bigheadimgurl");
+                Object id = map.get("msg.attr.alias");
+                RecommendInfo recommendInfo = msg.getRecommendInfo();
+                message.setContactsNickName(recommendInfo.getNickName());
+                message.setContactsId(id == null ? null : id.toString());
+                message.setContactsProvince(recommendInfo.getProvince());
+                message.setContactsCity(recommendInfo.getCity());
+                message.setContactsSex(recommendInfo.getSex());
+                message.setThumbUrl(thumbUrl == null ? null : thumbUrl.toString());
+                message.setContactsUserName(recommendInfo.getUserName());
+                message.setContactsTicket(recommendInfo.getTicket());
+                message.setContactsHeadImgUrl(headImgUrl == null ? null : headImgUrl.toString());
+                break;
+            }
+            case MSGTYPE_SHARECARD: {
+
+                Map<String, Object> map = new HashMap<>();
+                try {
+                    map = XmlStreamUtil.toMap(msg.getContent());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+
+                msg.setPlainText("[名片消息]");
                 message = newMsgToDBMessage(msg);
+
+                Object title = map.get("msg.attr.nickname");
+                Object thumbUrl = map.get("msg.attr.smallheadimgurl");
+                Object headImgUrl = map.get("msg.attr.bigheadimgurl");
+                Object id = map.get("msg.attr.alias");
+                Object province = map.get("msg.attr.province");
+                Object city = map.get("msg.attr.city");
+                Object sex = map.get("msg.attr.sex");
+                Object userName = map.get("msg.attr.username");
+
+                message.setContactsNickName(title == null ? null : title.toString());
+                message.setContactsId(id == null ? null : id.toString());
+                message.setContactsProvince(province == null ? null : province.toString());
+                message.setContactsCity(city == null ? null : city.toString());
+                message.setContactsSex(sex == null ? null : Byte.valueOf(sex.toString()));
+                message.setThumbUrl(thumbUrl == null ? null : thumbUrl.toString());
+                message.setContactsUserName(userName == null ? null : userName.toString());
+                message.setContactsHeadImgUrl(headImgUrl == null ? null : headImgUrl.toString());
+
+               //
             }
             break;
             case MSGTYPE_RECALLED: {
