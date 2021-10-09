@@ -86,10 +86,7 @@ public class ChatPanel extends ParentAvailablePanel {
      * 当前房间id
      */
     private final String roomId;
-    /**
-     * 如果是从消息搜索列表中进入房间的，这个属性不为0
-     */
-    private long firstMessageTimestamp = 0L;
+
 
     public void setRoomMembers(List<String> roomMembers) {
         this.roomMembers = roomMembers;
@@ -99,11 +96,6 @@ public class ChatPanel extends ParentAvailablePanel {
      * 房间的用户 username列表
      */
     private List<String> roomMembers = new ArrayList<>();
-
-    /**
-     * 文件缓存
-     */
-    private final FileCache fileCache;
 
 
     /**
@@ -136,12 +128,10 @@ public class ChatPanel extends ParentAvailablePanel {
         initComponents();
         initView();
         setListeners();
-
-
-        fileCache = new FileCache();
     }
 
     private void initComponents() {
+
         messagePanel = new MessagePanel(this);
         messagePanel.setBorder(new RCBorder(RCBorder.BOTTOM, Colors.LIGHT_GRAY));
         adapter = new MessageAdapter(this,messageItems, messagePanel.getMessageListView(), messageViewHolderCacheHelper);
@@ -157,10 +147,6 @@ public class ChatPanel extends ParentAvailablePanel {
         add(messagePanel, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 4));
         add(messageEditorPanel, new GBC(0, 1).setFill(GBC.BOTH).setWeight(1, 1));
 
-        if (roomId == null) {
-            messagePanel.setVisible(false);
-            messageEditorPanel.setVisible(false);
-        }
     }
 
 
@@ -555,7 +541,7 @@ public class ChatPanel extends ParentAvailablePanel {
     public void sendTextMessage(String content)  {
         //更新房间列表
         RoomsPanel.getContext().updateRoomItem(roomId, 0, content+"[发送中...]", System.currentTimeMillis());
-        String msgId = randomMessageId();
+        String msgId = MessageTools.randomMessageId();
         Message message = Message.builder().isSend(false)
                 .id(msgId)
                 .content(content)
@@ -627,15 +613,7 @@ public class ChatPanel extends ParentAvailablePanel {
         return -1;
     }
 
-    /**
-     * 随机生成MessageId
-     *
-     * @return
-     */
-    private String randomMessageId() {
-        String raw = UUID.randomUUID().toString().replace("-", "");
-        return raw;
-    }
+
 
 
     /**
@@ -685,7 +663,7 @@ public class ChatPanel extends ParentAvailablePanel {
      * @param uploadFilename
      */
     public void sendFileMessage(String uploadFilename) {
-        String msgId = randomMessageId();
+        String msgId =  MessageTools.randomMessageId();
         File file = new File(uploadFilename);
         if (!file.exists()) {
             JOptionPane.showMessageDialog(null, "文件不存在", "上传失败", JOptionPane.ERROR_MESSAGE);
@@ -818,7 +796,7 @@ public class ChatPanel extends ParentAvailablePanel {
                             if (progress >= 100) {
                                 holder.progressBar.setVisible(false);
                                 holder.sizeLabel.setVisible(true);
-                                holder.sizeLabel.setText(fileCache.fileSizeString(uploadFilename));
+                                holder.sizeLabel.setText(FileCache.fileSizeString(uploadFilename));
                             }
                         }
                         break;

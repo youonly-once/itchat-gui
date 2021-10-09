@@ -1,5 +1,6 @@
 package cn.shu.wechat.utils;
 
+import cn.shu.wechat.configuration.WechatConfiguration;
 import lombok.extern.log4j.Log4j2;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
@@ -41,7 +42,7 @@ public class HttpUtil {
     private static final CloseableHttpClient receiveHttpClient;
 
     public static final CookieStore cookieStore;
-
+    private final static WechatConfiguration config = SpringContextHolder.getBean(WechatConfiguration.class);
     static {
         cookieStore = new BasicCookieStore();
 
@@ -115,7 +116,7 @@ public class HttpUtil {
             if (!redirect) {
                 httpGet.setConfig(RequestConfig.custom().setRedirectsEnabled(false).build()); // 禁止重定向
             }
-            httpGet.setHeader("User-Agent", Config.USER_AGENT);
+            httpGet.setHeader("User-Agent", config.getUserAgent());
             if (headerMap != null) {
                 Set<Entry<String, String>> entries = headerMap.entrySet();
                 for (Entry<String, String> entry : entries) {
@@ -155,7 +156,7 @@ public class HttpUtil {
             if (!redirect) {
                 httpGet.setConfig(RequestConfig.custom().setRedirectsEnabled(false).build()); // 禁止重定向
             }
-            httpGet.setHeader("User-Agent", Config.USER_AGENT);
+            httpGet.setHeader("User-Agent", config.getUserAgent());
             if (headerMap != null) {
                 Set<Entry<String, String>> entries = headerMap.entrySet();
                 for (Entry<String, String> entry : entries) {
@@ -187,7 +188,7 @@ public class HttpUtil {
             httpPost = new HttpPost(url);
             httpPost.setEntity(params);
             httpPost.setHeader("Content-type", "application/json; charset=utf-8");
-            httpPost.setHeader("User-Agent", Config.USER_AGENT);
+            httpPost.setHeader("User-Agent", config.getUserAgent());
             CloseableHttpResponse response = myHttpClient.execute(httpPost);
             entity = response.getEntity();
 
@@ -210,7 +211,7 @@ public class HttpUtil {
     public static HttpEntity doPostFile(String url, HttpEntity reqEntity) {
         HttpEntity entity = null;
         HttpPost httpPost = new HttpPost(url);
-        httpPost.setHeader("User-Agent", Config.USER_AGENT);
+        httpPost.setHeader("User-Agent", config.getUserAgent());
         httpPost.setEntity(reqEntity);
         try {
             CloseableHttpResponse response = myHttpClient.execute(httpPost);

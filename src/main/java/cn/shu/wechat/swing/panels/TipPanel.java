@@ -21,6 +21,7 @@ public class TipPanel extends ParentAvailablePanel {
 
     private void initComponents() {
         imageLabel = new JLabel();
+        imageLabel.setForeground(Color.GRAY);
         imageLabel.setIcon(IconUtil.getIcon(this, "/image/bg.png", 140, 140));
     }
 

@@ -21,7 +21,7 @@ public class ClipboardUtil {
     public static final String CLIPBOARD_TEMP_DIR;
 
     static {
-        CLIPBOARD_TEMP_DIR = Launcher.appFilesBasePath + System.getProperty("file.separator") + "clipboard_temp";
+        CLIPBOARD_TEMP_DIR = Launcher.wechatConfiguration.getBasePath() + System.getProperty("file.separator") + "clipboard_temp";
         File file = new File(CLIPBOARD_TEMP_DIR);
         if (!file.exists()) {
             System.out.println("创建剪切板临时文件缓存目录：" + file.getAbsolutePath());

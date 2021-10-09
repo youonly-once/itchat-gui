@@ -136,6 +136,16 @@ public class ChartUtil {
                 }
                 if (value == null) {
                     value = "未设置";
+                }else if (value.equals("")){
+                    value = "未设置属性";
+                }else if (key.equals("sex")) {
+                    if (Byte.parseByte(value.toString()) == 2){
+                        value = "女";
+                    }else if (Byte.parseByte(value.toString()) == 1){
+                        value = "男";
+                    }else{
+                        value = "未设置";
+                    }
                 }
                 //统计次数
                 testMap.computeIfAbsent(value.toString(), v -> new AtomicInteger()).getAndIncrement();

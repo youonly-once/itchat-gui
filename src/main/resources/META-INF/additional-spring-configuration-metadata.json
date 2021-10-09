@@ -1,0 +1,23 @@
+{
+  "properties": [
+    {
+      "name": "wechat.app-version",
+      "type": "java.lang.String",
+      "description": "app版本."
+    },
+    {
+      "name": "wechat.base-path",
+      "type": "java.lang.String",
+      "description": "文件存放路径."
+    },
+    {
+      "name": "wechat.user-agent",
+      "type": "java.lang.String",
+      "description": "用户代理."
+    },
+    {
+      "name": "wechat.special-user",
+      "type": "java.lang.String",
+      "description": "特殊账号，逗号分割."
+    }
+  ] }

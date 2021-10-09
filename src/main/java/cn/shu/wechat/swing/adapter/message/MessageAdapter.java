@@ -67,9 +67,8 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     private final AttachmentIconHelper attachmentIconHelper = new AttachmentIconHelper();
     private final ImageCache imageCache;
 
-    private final FileCache fileCache;
     private final MessagePopupMenu popupMenu = new MessagePopupMenu();
-    private ChatPanel parent;
+    private final ChatPanel parent;
 
     MessageViewHolderCacheHelper messageViewHolderCacheHelper;
 
@@ -77,9 +76,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         this.messageItems = messageItems;
         this.listView = listView;
         this.parent = parent;
-        // currentUser = currentUserService.findAll().get(0);
         imageCache = new ImageCache();
-        fileCache = new FileCache();
         this.messageViewHolderCacheHelper = messageViewHolderCacheHelper;
     }
 
@@ -432,7 +429,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         holder.attachmentIcon.setIcon(attachmentTypeIcon);
         holder.attachmentTitle.setText(item.getFileName());
         holder.sender.setText(item.getPlainName());
-        holder.sizeLabel.setText(fileCache.fileSizeString(item.getFileSize()));
+        holder.sizeLabel.setText(FileCache.fileSizeString(item.getFileSize()));
 
         setAttachmentClickListener(holder, item);
 
@@ -486,7 +483,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         setAttachmentClickListener(holder, item);
 
         if (item.getProgress() > 0) {
-            holder.sizeLabel.setText(fileCache.fileSizeString(item.getFileSize()));
+            holder.sizeLabel.setText(FileCache.fileSizeString(item.getFileSize()));
         } else {
             holder.sizeLabel.setText("等待上传...");
         }
@@ -1250,8 +1247,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     contacts = Core.getMemberMap().get(senderId);
                 }
                 if (contacts == null) {
-                    RoomChatContainer.get(RoomChatContainer.getCurrRoomId())
-                            .getTipPanel().setText("成员信息加载中...");
                     return;
                 }
                 contacts.setGroupName(roomId);
@@ -1376,7 +1371,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     }
 
                 }
-
+                break;
             }
             case MSGTYPE_VERIFYMSG:
             case MSGTYPE_SHARECARD:{

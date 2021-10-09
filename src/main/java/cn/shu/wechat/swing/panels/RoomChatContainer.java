@@ -28,7 +28,10 @@ public class RoomChatContainer extends ParentAvailablePanel {
         super(parent);
         context = this;
         init();
-        createAndShow("filehelper");
+        TipPanel tipPanel = new TipPanel(this);
+        tipPanel.setText("未选择聊天");
+        this.add(tipPanel,"TIP");
+        cardLayout.show(this,"TIP");
 
     }
     private void init(){

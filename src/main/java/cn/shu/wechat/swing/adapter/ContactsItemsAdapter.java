@@ -132,7 +132,7 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
             @Override
             public void mouseClicked(MouseEvent e) {
                 UserInfoPanel.getContext().setContacts(Core.getMemberMap().get(item.getId()));
-                RightPanel.getContext().show(RoomChatPanelCard.USER_INFO);
+                RightPanel.getContext().show(RightPanel.USER_INFO);
 
                 setBackground(viewHolder, Colors.ITEM_SELECTED);
                 selectedViewHolder = viewHolder;

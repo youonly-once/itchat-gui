@@ -76,7 +76,7 @@ public class ClearCachePanel extends JPanel {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                fileCachePath = new FileCache().FILE_CACHE_ROOT_PATH;
+                fileCachePath = FileCache.FILE_CACHE_ROOT_PATH;
                 imageCachePath = new ImageCache().IMAGE_CACHE_ROOT_PATH;
 
                 long size = getDirectorySize(fileCachePath);

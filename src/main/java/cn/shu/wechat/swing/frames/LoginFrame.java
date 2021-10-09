@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.frames;
 
 import cn.shu.wechat.api.DownloadTools;
+import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.pojo.entity.Contacts;
 import cn.shu.wechat.service.LoginService;
@@ -12,7 +13,6 @@ import cn.shu.wechat.swing.panels.ContactsPanel;
 import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.OSUtil;
-import cn.shu.wechat.utils.Config;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.HeadImageUtil;
 import cn.shu.wechat.utils.SleepUtils;
@@ -43,6 +43,8 @@ public class LoginFrame extends JFrame {
     @Resource
     private LoginService loginService;
 
+    @Resource
+    private WechatConfiguration wechatConfiguration;
 
     private static final int WINDOW_WIDTH = 300;
     private static final int WINDOW_HEIGHT = 400;
@@ -226,6 +228,7 @@ public class LoginFrame extends JFrame {
             loginService.wxStatusNotify();
 
             //打开窗体
+            log.info("登录成功");
             openFrame();
 
             //初始化聊天列表
@@ -291,7 +294,7 @@ public class LoginFrame extends JFrame {
      * 下载头像
      */
     private void downloadHeadImage() {
-        ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(() -> HeadImageUtil.deleteLoseEfficacyHeadImg(Config.PIC_DIR + "/headimg/"));
+        ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(() -> HeadImageUtil.deleteLoseEfficacyHeadImg(wechatConfiguration.getBasePath() + "/headimg/"));
         statusLabel.setText("11. 下载联系人头像");
         log.info("11. 下载联系人头像");
         for (Map.Entry<String, Contacts> entry : Core.getMemberMap().entrySet()) {

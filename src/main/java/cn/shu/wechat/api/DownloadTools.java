@@ -1,14 +1,15 @@
 package cn.shu.wechat.api;
 
+import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.URLEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.pojo.dto.msg.sync.AddMsgList;
 import cn.shu.wechat.pojo.dto.msg.url.WXMsgUrl;
-import cn.shu.wechat.utils.Config;
 import cn.shu.wechat.utils.HttpUtil;
 import cn.shu.wechat.utils.MD5Util;
 import cn.shu.wechat.utils.SleepUtils;
+import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -45,6 +46,7 @@ public class DownloadTools {
      * null 下载失败 或者未下载
      */
     public final static ConcurrentHashMap<String, Boolean> FILE_DOWNLOAD_STATUS = new ConcurrentHashMap<>();
+    private final static WechatConfiguration WECHAT_CONFIGURATION = SpringContextHolder.getBean(WechatConfiguration.class);
 
 
     /**
@@ -306,7 +308,7 @@ public class DownloadTools {
         }
         remarkNameByUserName = DownloadTools.replace(remarkNameByUserName);
         //创建目录
-        String savePath = Config.PIC_DIR + "/headimg/"
+        String savePath = WECHAT_CONFIGURATION.getBasePath() + "/headimg/"
                 + File.separator + remarkNameByUserName
                 + File.separator + md5Str + ".jpg";
         Path path = Paths.get(savePath);
@@ -496,7 +498,7 @@ public class DownloadTools {
             groupUsername = ContactsTools.getContactDisplayNameByUserName(msg.getMemberName());
         }
         groupUsername = groupUsername == null ? "" : replace(groupUsername);
-        String path = Config.PIC_DIR + File.separator + msg.getType() + File.separator + username + File.separator + groupUsername + File.separator;
+        String path = WECHAT_CONFIGURATION.getBasePath() + File.separator + msg.getType() + File.separator + username + File.separator + groupUsername + File.separator;
 
         fileName = fileName
                 + "-" + DateUtils.formatDate(new Date(), "yyyy-MM-dd-HH-mm-ss")

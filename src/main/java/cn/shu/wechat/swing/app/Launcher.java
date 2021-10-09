@@ -1,9 +1,11 @@
 package cn.shu.wechat.swing.app;
 
+import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.swing.frames.LoginFrame;
 import cn.shu.wechat.utils.SpringContextHolder;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
@@ -17,12 +19,15 @@ import java.nio.channels.FileLock;
 
 @Component
 public class Launcher {
-    public static final String APP_VERSION = "1.0.0";
-    public static String appFilesBasePath;
 
+    @Resource
+    public void setConfig(WechatConfiguration wechatConfiguration) {
+        Launcher.wechatConfiguration = wechatConfiguration;
+    }
+
+    public static WechatConfiguration wechatConfiguration;
 
     public void launch() {
-        config();
 
         if (!isApplicationRunning()) {
             openFrame();
@@ -39,11 +44,6 @@ public class Launcher {
         loginFrame.login(true);
     }
 
-    private void config() {
-        String userHome = System.getProperty("user.home");
-
-        appFilesBasePath = userHome + System.getProperty("file.separator") + "wechat";
-    }
 
 
     /**
@@ -54,7 +54,7 @@ public class Launcher {
     private static boolean isApplicationRunning() {
         boolean rv = false;
         try {
-            String path = appFilesBasePath + System.getProperty("file.separator") + "appLock";
+            String path = wechatConfiguration.getBasePath() + System.getProperty("file.separator") + "appLock";
             File dir = new File(path);
             if (!dir.exists()) {
                 dir.mkdirs();

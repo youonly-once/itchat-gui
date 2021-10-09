@@ -2,23 +2,34 @@ package cn.shu.wechat.swing.panels;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.mapper.StatusMapper;
+import cn.shu.wechat.pojo.entity.Contacts;
 import cn.shu.wechat.pojo.entity.Status;
 import cn.shu.wechat.service.impl.IMsgHandlerFaceImpl;
 import cn.shu.wechat.swing.components.*;
 import cn.shu.wechat.swing.components.message.ChatEditorPopupMenu;
+import cn.shu.wechat.swing.frames.BombFrame;
+import cn.shu.wechat.swing.frames.ImageViewerFrame;
 import cn.shu.wechat.swing.frames.ScreenShotFrame;
 import cn.shu.wechat.swing.listener.ExpressionListener;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.OSUtil;
+import cn.shu.wechat.utils.ChartUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import com.melloware.jintellitype.HotkeyListener;
 import com.melloware.jintellitype.JIntellitype;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Field;
 
 /**
  * Created by 舒新胜 on 17-5-30.
@@ -31,6 +42,7 @@ public class MessageEditorPanel extends ParentAvailablePanel {
     private JLabel preventUndoLabel;
     private JLabel autoReplyLabel;
     private JLabel bombMsgLabel;
+    private JLabel chartMsgLabel;
     private JScrollPane textScrollPane;
     private RCTextEditor textEditor;
     private JPanel sendPanel;
@@ -54,6 +66,9 @@ public class MessageEditorPanel extends ParentAvailablePanel {
 
     private ImageIcon bombMsgNormalIcon;
     private ImageIcon bombMsgActiveIcon;
+
+    private ImageIcon chartNormalIcon;
+    private ImageIcon chartActiveIcon;
 
     private ExpressionPopup expressionPopup;
     private final String roomId;
@@ -131,6 +146,10 @@ public class MessageEditorPanel extends ParentAvailablePanel {
         bombMsgLabel.setIcon(bombMsgNormalIcon);
 
 
+        chartMsgLabel = new JLabel();
+        chartNormalIcon = IconUtil.getIcon(this, "/image/chart.png");
+        chartActiveIcon = IconUtil.getIcon(this, "/image/chart_active.png");
+        chartMsgLabel.setIcon(chartNormalIcon);
 
         textEditor = new RCTextEditor();
         textEditor.setBackground(Colors.WINDOW_BACKGROUND);
@@ -167,7 +186,7 @@ public class MessageEditorPanel extends ParentAvailablePanel {
         controlLabel.add(cutLabel);
         controlLabel.add(bombMsgLabel);
         controlLabel.add(autoReplyLabel);
-
+        controlLabel.add(chartMsgLabel);
 
 
         add(controlLabel, new GBC(0, 0).setFill(GBC.HORIZONTAL).setWeight(1, 1));
@@ -249,6 +268,27 @@ public class MessageEditorPanel extends ParentAvailablePanel {
             }
         });
 
+        JPopupMenu jPopupMenu = createChartPopup();
+        chartMsgLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                chartMsgLabel.setIcon(chartActiveIcon);
+                super.mouseEntered(e);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                chartMsgLabel.setIcon(chartNormalIcon);
+                super.mouseExited(e);
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                jPopupMenu.show((Component) e.getSource(), e.getX() - jPopupMenu.getWidth(), e.getY() - jPopupMenu.getHeight());
+                super.mouseClicked(e);
+            }
+        });
+        BombFrame bombFrame = new BombFrame(roomId);
         bombMsgLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -264,6 +304,7 @@ public class MessageEditorPanel extends ParentAvailablePanel {
 
             @Override
             public void mouseClicked(MouseEvent e) {
+                bombFrame.setVisible(true);
                 super.mouseClicked(e);
             }
         });
@@ -277,6 +318,47 @@ public class MessageEditorPanel extends ParentAvailablePanel {
         });
     }
 
+    /**
+     * 创建图表菜单
+     * @return 菜单
+     */
+    private JPopupMenu createChartPopup() {
+        JPopupMenu jPopupMenu = new JPopupMenu();
+        jPopupMenu.setLayout(new GridLayout(12,3));
+        for (Field declaredField : Contacts.class.getDeclaredFields()) {
+            declaredField.setAccessible(true);
+            JMenuItem jMenuItem = new JMenuItem(declaredField.getName() + "图表");
+            jMenuItem.addActionListener(e -> createAndShowChart(declaredField.getName().toLowerCase()));
+            jPopupMenu.add(jMenuItem);
+        }
+
+        return jPopupMenu;
+    }
+
+    /**
+     * 创建属性分布图并展示
+     * @param attr 属性
+     */
+    private void createAndShowChart(String attr) {
+        String remarkNameByGroupUserName = ContactsTools.getContactDisplayNameByUserName(roomId);
+        ChartUtil chartUtil = SpringContextHolder.getBean(ChartUtil.class);
+        String path = chartUtil.makeGroupMemberAttrPieChart(roomId, remarkNameByGroupUserName, attr, 400, 300);
+        if (path == null){
+            JOptionPane.showMessageDialog(this,"创建失败。");
+            return;
+        }
+        BufferedImage read = null;
+        try {
+            read = ImageIO.read(new File(path));
+            ImageViewerFrame instance = ImageViewerFrame.getInstance();
+            instance.setImage(read);
+
+            instance.toFront();
+            instance.setVisible(true);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
     private void screenShot() {
         ScreenShotFrame ssw = new ScreenShotFrame();
         ssw.setRoomId(roomId);

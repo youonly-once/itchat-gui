@@ -1,9 +1,9 @@
 package cn.shu.wechat.swing.utils;
 
 import cn.shu.wechat.swing.app.Launcher;
+import lombok.extern.log4j.Log4j2;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -11,27 +11,30 @@ import java.text.DecimalFormat;
 /**
  * Created by 舒新胜 on 2017/6/11.
  */
+@Log4j2
 public class FileCache {
 
-    public String FILE_CACHE_ROOT_PATH;
-    private DecimalFormat decimalFormat = new DecimalFormat("#.0");
+    public static String FILE_CACHE_ROOT_PATH;
+    private static DecimalFormat decimalFormat = new DecimalFormat("#.0");
 
+    private FileCache(){
+    }
 
-    public FileCache() {
+    static  {
         try {
             //FILE_CACHE_ROOT_PATH = getClass().getResource("/cache").getPath() + "/file";
-            FILE_CACHE_ROOT_PATH = Launcher.appFilesBasePath + "/cache/file";
+            FILE_CACHE_ROOT_PATH = Launcher.wechatConfiguration.getBasePath() + "/cache/file";
             File file = new File(FILE_CACHE_ROOT_PATH);
             if (!file.exists()) {
                 file.mkdirs();
-                System.out.println("创建文件缓存目录：" + file.getAbsolutePath());
+                log.info("创建文件缓存目录：{}",file.getAbsolutePath() );
             }
         } catch (Exception e) {
             FILE_CACHE_ROOT_PATH = "./";
         }
     }
 
-    public String tryGetFileCache(String identify, String name) {
+    public static String tryGetFileCache(String identify, String name) {
         File cacheFile = new File(FILE_CACHE_ROOT_PATH + "/" + identify + "_" + name);
         if (cacheFile.exists()) {
             return cacheFile.getAbsolutePath();
@@ -46,13 +49,9 @@ public class FileCache {
         }
 
         File cacheFile = new File(FILE_CACHE_ROOT_PATH + "/" + identify + "_" + name);
-        try {
-            FileOutputStream outputStream = new FileOutputStream(cacheFile);
+        try ( FileOutputStream outputStream = new FileOutputStream(cacheFile)){
             outputStream.write(data);
-            outputStream.close();
             return cacheFile.getAbsolutePath();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -60,7 +59,7 @@ public class FileCache {
         return null;
     }
 
-    public String fileSizeString(String path) {
+    public static String fileSizeString(String path) {
         File file = new File(path);
 
         long size = file.length();
@@ -73,16 +72,13 @@ public class FileCache {
      * @param size 字节
      * @return 字符串表示
      */
-    public String fileSizeString(Long size){
-        String retString = "";
+    public static String fileSizeString(Long size){
         if (size < 1024) {
-            retString = size + " 字节";
+            return  size + " 字节";
         } else if (size < 1024 * 1024) {
-            retString = decimalFormat.format(size * 1.0F / 1024) + " KB";
+            return  decimalFormat.format(size * 1.0F / 1024) + " KB";
         } else {
-            retString = decimalFormat.format(size * 1.0F / 1024 / 1024) + " MB";
+            return  decimalFormat.format(size * 1.0F / 1024 / 1024) + " MB";
         }
-
-        return retString;
     }
 }

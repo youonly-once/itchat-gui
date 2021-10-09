@@ -37,22 +37,6 @@ public class RoomChatPanelCard extends JPanel {
     private ChatPanel chatPanel;
 
     /**
-     * 提示面板
-     */
-    private TipPanel tipPanel;
-
-
-    /**
-     *
-     */
-    private JPanel contentPanel;
-
-    private CardLayout cardLayout;
-
-    public static final String MESSAGE = "MESSAGE";
-    public static final String TIP = "TIP";
-    public static final String USER_INFO = "USER_INFO";
-    /**
      * 房间成员
      */
     private final String roomId;
@@ -71,7 +55,7 @@ public class RoomChatPanelCard extends JPanel {
 
     private void initData() {
         //消息发送者信息
-        contacts = Core.getMemberMap().get(roomId);
+        contacts = ContactsTools.getContactByUserName(roomId);
         if (contacts == null) {
             log.error("未知联系人：{}", roomId);
         }
@@ -144,37 +128,21 @@ public class RoomChatPanelCard extends JPanel {
     }
 
     private void initComponents() {
-        cardLayout = new CardLayout();
-        contentPanel = new JPanel();
-        contentPanel.setLayout(cardLayout);
 
         titlePanel = new TitlePanel(this);
         chatPanel = new ChatPanel(this, roomId);
         roomMembersPanel = new RoomMembersPanel(this, roomId);
-        tipPanel = new TipPanel(this);
-
 
         setBorder(new LineBorder(Colors.SCROLL_BAR_TRACK_LIGHT));
     }
 
     private void initView() {
-        contentPanel.add(tipPanel, TIP);
-        contentPanel.add(chatPanel, MESSAGE);
 
         this.setBackground(Colors.FONT_WHITE);
         this.setLayout(new BorderLayout());
         add(titlePanel, BorderLayout.NORTH);
         add(roomMembersPanel, BorderLayout.EAST);
-        add(contentPanel, BorderLayout.CENTER);
-        showPanel(MESSAGE);
-    }
-
-    /**
-     * 显示提示或者是消息
-     * @param who
-     */
-    public void showPanel(String who) {
-        cardLayout.show(contentPanel, who);
+        add(chatPanel, BorderLayout.CENTER);
     }
 
 

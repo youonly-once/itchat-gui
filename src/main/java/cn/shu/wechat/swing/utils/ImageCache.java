@@ -3,6 +3,7 @@ package cn.shu.wechat.swing.utils;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.app.Launcher;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
+import lombok.extern.log4j.Log4j2;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -13,6 +14,7 @@ import java.io.*;
 /**
  * Created by 舒新胜 on 2017/6/11.
  */
+@Log4j2
 public class ImageCache {
     public static final int THUMB = 0;
     public static final int ORIGINAL = 1;
@@ -25,12 +27,12 @@ public class ImageCache {
     public ImageCache() {
         try {
             //IMAGE_CACHE_ROOT_PATH = getClass().getResource("/cache").getPath() + "/image";
-            IMAGE_CACHE_ROOT_PATH = Launcher.appFilesBasePath + "/cache/image";
+            IMAGE_CACHE_ROOT_PATH = Launcher.wechatConfiguration.getBasePath() + "/cache/image";
 
             File file = new File(IMAGE_CACHE_ROOT_PATH);
             if (!file.exists()) {
                 file.mkdirs();
-                System.out.println("创建图片缓存目录：" + file.getAbsolutePath());
+                log.info("创建图片缓存目录：{}" , file.getAbsolutePath());
             }
         } catch (Exception e) {
             IMAGE_CACHE_ROOT_PATH = "./";

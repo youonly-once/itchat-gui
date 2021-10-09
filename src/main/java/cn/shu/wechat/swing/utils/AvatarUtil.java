@@ -68,7 +68,7 @@ public class AvatarUtil {
     private static final Map<String, Image> avatarCacheBig = new ConcurrentHashMap<>();
 
     static {
-        AVATAR_CACHE_ROOT = Launcher.appFilesBasePath + "/cache/avatar";
+        AVATAR_CACHE_ROOT = Launcher.wechatConfiguration.getBasePath() + "/cache/avatar";
 
         File file = new File(AVATAR_CACHE_ROOT);
         if (!file.exists()) {

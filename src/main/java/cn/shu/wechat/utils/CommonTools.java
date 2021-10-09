@@ -1,5 +1,6 @@
 package cn.shu.wechat.utils;
 
+import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.enums.OsNameEnum;
 import cn.shu.wechat.pojo.dto.msg.sync.AddMsgList;
 import com.alibaba.fastjson.JSON;
@@ -31,9 +32,9 @@ public class CommonTools {
 
     public static Process printQr(String qrPath) {
         Process exec = null;
-        switch (Config.getOsNameEnum()) {
+        switch (WechatConfiguration.getOsNameEnum()) {
             case WINDOWS:
-                if (Config.getOsNameEnum().equals(OsNameEnum.WINDOWS)) {
+                if (WechatConfiguration.getOsNameEnum().equals(OsNameEnum.WINDOWS)) {
                     Runtime runtime = Runtime.getRuntime();
                     try {
                         exec = runtime.exec("cmd /c start " + qrPath);
@@ -51,7 +52,7 @@ public class CommonTools {
                 }
                 break;
             case MAC:
-                if (Config.getOsNameEnum().equals(OsNameEnum.MAC)) {
+                if (WechatConfiguration.getOsNameEnum().equals(OsNameEnum.MAC)) {
                     Runtime runtime = Runtime.getRuntime();
                     try {
                         exec = runtime.exec("open " + qrPath);
@@ -82,9 +83,9 @@ public class CommonTools {
     }
 
     public static boolean clearScreen() {
-        switch (Config.getOsNameEnum()) {
+        switch (WechatConfiguration.getOsNameEnum()) {
             case WINDOWS:
-                if (Config.getOsNameEnum().equals(OsNameEnum.WINDOWS)) {
+                if (WechatConfiguration.getOsNameEnum().equals(OsNameEnum.WINDOWS)) {
                     Runtime runtime = Runtime.getRuntime();
                     try {
                         runtime.exec("cmd /c " + "cls");

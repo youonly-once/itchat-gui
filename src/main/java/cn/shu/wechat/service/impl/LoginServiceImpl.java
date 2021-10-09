@@ -3,6 +3,7 @@ package cn.shu.wechat.service.impl;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.api.MessageTools;
+import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.core.MsgCenter;
 import cn.shu.wechat.enums.*;
@@ -52,6 +53,8 @@ import java.util.regex.Matcher;
 @Component
 public class LoginServiceImpl implements LoginService {
 
+    @Resource
+    private WechatConfiguration config;
 
     @Resource
     private AttrHistoryMapper attrHistoryMapper;
@@ -335,7 +338,7 @@ public class LoginServiceImpl implements LoginService {
                                 break;
                             case MOD_CONTACT:
                             case ADD_OR_DEL_CONTACT:
-                                // TODO 删除新增
+
                                 log.info("联系人修改：{}", webWxSyncMsg);
                                 msgCenter.handleModContact(webWxSyncMsg.getModContactList());
                                 break;
@@ -437,7 +440,7 @@ public class LoginServiceImpl implements LoginService {
             }
             Core.getPublicUsersMap().put(userName, contacts);
             contacts.setType(Contacts.ContactsType.PUBLIC_USER);
-        } else if (Config.API_SPECIAL_USER.contains(userName)) {
+        } else if (config.getSpecialUser().contains(userName)) {
             // 特殊账号
             if (!Core.getSpecialUsersMap().containsKey(userName)) {
                 log.info("新增特殊账号：{}", nickName);

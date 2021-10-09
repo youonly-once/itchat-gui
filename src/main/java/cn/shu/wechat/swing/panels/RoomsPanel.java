@@ -105,8 +105,6 @@ public class RoomsPanel extends ParentAvailablePanel {
         //切换显示层
         RoomChatPanelCard roomChatPanelCard = RoomChatContainer.getContext().createAndShow(roomId);
         RoomChatContainer.getContext().show(roomId);
-        //显示聊天界面
-        roomChatPanelCard.showPanel(RoomChatPanelCard.MESSAGE);
         //更新聊天列表未读数量
          updateUnreadCount(roomId,0);
         //发送消息已读通知

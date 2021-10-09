@@ -168,6 +168,10 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
     };
 
     private void setBackground(RoomItemViewHolder holder, Color color) {
+        if (holder == null){
+            //首次启动时 holder为null
+            return;
+        }
         holder.setBackground(color);
         holder.nameBrief.setBackground(color);
         holder.timeUnread.setBackground(color);

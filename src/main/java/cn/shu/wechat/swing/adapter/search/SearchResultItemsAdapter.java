@@ -41,7 +41,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
     public static final int VIEW_TYPE_MESSAGE = 1;
     public static final int VIEW_TYPE_FILE = 2;
     private final AttachmentIconHelper attachmentIconHelper = new AttachmentIconHelper();
-    private final FileCache fileCache = new FileCache();
+
     private final List<String> downloadingFiles = new ArrayList<>();
 
     private final Map<String, SearchResultFileItemViewHolder> fileItemViewHolders = new HashMap<>();
@@ -152,9 +152,9 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
 
         holder.name.setText(filename);
 
-        String filePath = fileCache.tryGetFileCache(item.getId(), item.getName());
+        String filePath = FileCache.tryGetFileCache(item.getId(), item.getName());
         if (filePath != null) {
-            holder.size.setText(fileCache.fileSizeString(filePath));
+            holder.size.setText(FileCache.fileSizeString(filePath));
         } else {
             holder.size.setText("未下载");
         }
@@ -258,7 +258,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
                     case CONTACTS:
                     case ROOM:
                         UserInfoPanel.getContext().setContacts(Core.getMemberMap().get(id));
-                        RightPanel.getContext().show(RoomChatPanelCard.USER_INFO);
+                        RightPanel.getContext().show(RightPanel.USER_INFO);
                         //enterRoom(item.getId(), 0L);
                         //clearSearchText();
                         break;
@@ -435,7 +435,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
             return;
         }
 
-        String filepath = fileCache.tryGetFileCache(fileAttachment.getId(), fileAttachment.getTitle());
+        String filepath = FileCache.tryGetFileCache(fileAttachment.getId(), fileAttachment.getTitle());
         if (filepath == null) {
             // 服务器上的文件
             if (fileAttachment.getLink().startsWith("/file-upload")) {

@@ -771,5 +771,13 @@ public class MessageTools {
         }
         return null;
     }
-
+    /**
+     * 随机生成MessageId
+     *
+     * @return
+     */
+    public static String randomMessageId() {
+        String raw = UUID.randomUUID().toString().replace("-", "");
+        return raw;
+    }
 }

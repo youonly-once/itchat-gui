@@ -36,7 +36,7 @@ public class ContactsTools {
      * @param userName 用户UserName
      * @return 用户信息
      */
-    private static Contacts getContactByUserName(String userName) {
+    public static Contacts getContactByUserName(String userName) {
         Map<String, Contacts> contactMap = Core.getMemberMap();
         return contactMap.getOrDefault(userName, null);
 
