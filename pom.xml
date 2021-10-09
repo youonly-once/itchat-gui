@@ -139,11 +139,12 @@
             <artifactId>dom4j</artifactId>
             <version>2.1.1</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+
+        <!--TODO 这个不能打包到lib why？-->
         <dependency>
             <scope>system</scope>
             <systemPath>${project.basedir}/src/main/resources/lib/android.ninepatch.jar</systemPath>
-            <groupId>com.github.adedayo.intellij.sdk</groupId>
+            <groupId>com.android</groupId>
             <artifactId>ninepatch</artifactId>
             <version>142.1</version>
 
@@ -351,7 +352,11 @@
                         </manifest>
                         <manifestEntries>
                             <!-- 在Class-Path下添加配置文件的路径 -->
-                            <Class-Path>conf/</Class-Path>
+                            <!--maven依赖为system的包需手动添加到manifest.MF文件中-->
+                            <Class-Path>conf/ lib/jintellitype-1.3.9.jar lib/jna-4.4.0.jar lib/android.ninepatch.jar
+                                lib/jna-platform-4.4.0.jar
+                            </Class-Path>
+
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -369,7 +374,6 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-
                             <outputDirectory>${output-directory}/conf</outputDirectory>
                             <resources>
                                 <resource>

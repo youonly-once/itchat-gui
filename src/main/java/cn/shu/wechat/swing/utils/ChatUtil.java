@@ -16,6 +16,10 @@ import java.util.List;
  * @创建时间 7/23/2021 20:01
  */
 public class ChatUtil {
+    private ChatUtil() {
+
+    }
+
     /**
      * 打开或创建新聊天房
      */
