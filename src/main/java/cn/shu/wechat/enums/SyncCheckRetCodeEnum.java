@@ -1,8 +1,11 @@
 package cn.shu.wechat.enums;
 
+import lombok.extern.log4j.Log4j2;
+
 /**
  * 消息检测接口返回Code码
  */
+@Log4j2
 public enum SyncCheckRetCodeEnum {
 
     SUCCESS("0", "成功"),
@@ -30,7 +33,8 @@ public enum SyncCheckRetCodeEnum {
                 return value;
             }
         }
-        throw new RuntimeException("未知类型");
+        log.error("未知类型：{}",code);
+        return UNKOWN;
     }
     public String getCode() {
         return code;
