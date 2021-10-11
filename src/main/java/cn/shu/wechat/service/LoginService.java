@@ -53,8 +53,11 @@ public interface LoginService {
      * @author SXS
      * @date 2017年5月13日 上午12:14:07
      */
-    boolean login() throws Exception;
-
+    boolean login(LoginCallBack loginCallBack) throws Exception;
+    interface LoginCallBack{
+        void CallBack(String loginInfo);
+        void avatar(String avatarBase64);
+    }
 
     /**
      * web初始化

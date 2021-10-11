@@ -1,6 +1,8 @@
 package cn.shu;
 
 import cn.shu.wechat.swing.app.Launcher;
+import cn.shu.wechat.swing.frames.LoginFrame;
+import cn.shu.wechat.swing.frames.MainFrame;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -22,16 +24,16 @@ import java.util.concurrent.CountDownLatch;
 @EnableAsync
 
 public class WeChatStater {
-
+    private static ConfigurableApplicationContext context;
     public static void main(String[] args) {
         CountDownLatch countDownLatch = new CountDownLatch(1);
         new SwingWorker() {
 
             @Override
             protected Object doInBackground() throws Exception {
-                ConfigurableApplicationContext context = new SpringApplicationBuilder(WeChatStater.class)
+                context = new SpringApplicationBuilder(WeChatStater.class)
                         .headless(false)
-                        .run(args);
+                        .run();
                 Launcher bean = context.getBean(Launcher.class);
                 bean.launch();
                 countDownLatch.countDown();
@@ -45,5 +47,26 @@ public class WeChatStater {
         }
     }
 
+    /**
+     * 关闭
+     */
+    public static void close(){
+       try {
+           LoginFrame bean = context.getBean(LoginFrame.class);
+           bean.dispose();
+           MainFrame.getContext().dispose();
+       }catch (Exception e){
+           e.printStackTrace();
+       }
+        context.close();
+    }
 
+    /**
+     * restart
+     */
+    public static void restart(){
+        //TODO 有问题
+        close();
+        main(new String[1]);
+    }
 }

@@ -14,7 +14,24 @@ public class WechatConfiguration {
     private List<String> specialUser ;
     private String appVersion;
     private String basePath;
+    private static WechatConfiguration instance;
 
+    public WechatConfiguration() {
+        instance = this;
+    }
+
+    public static WechatConfiguration getInstance(){
+        return instance;
+    }
+    public String getLoginTitle() {
+        return loginTitle;
+    }
+
+    public void setLoginTitle(String loginTitle) {
+        this.loginTitle = loginTitle;
+    }
+
+    private String loginTitle;
     public String getAppVersion() {
         return appVersion;
     }

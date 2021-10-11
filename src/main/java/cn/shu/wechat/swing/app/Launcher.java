@@ -76,7 +76,8 @@ public class Launcher {
         } catch (IOException e1) {
             e1.printStackTrace();
         }
-        return rv;
+        //关闭校验
+        return false;
     }
 
 

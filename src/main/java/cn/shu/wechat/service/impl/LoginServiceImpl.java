@@ -1,5 +1,6 @@
 package cn.shu.wechat.service.impl;
 
+import cn.shu.WeChatStater;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.api.MessageTools;
@@ -19,6 +20,7 @@ import cn.shu.wechat.pojo.entity.Contacts;
 import cn.shu.wechat.pojo.entity.Message;
 import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.app.Launcher;
+import cn.shu.wechat.swing.frames.LoginFrame;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.utils.*;
@@ -30,6 +32,8 @@ import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 
@@ -62,13 +66,11 @@ public class LoginServiceImpl implements LoginService {
     @Resource
     private MsgCenter msgCenter;
 
-    @Resource
-    private Launcher launcher;
 
     private final Set<String> msgIds = new HashSet<>();
 
     @Override
-    public boolean login() throws Exception {
+    public boolean login(LoginCallBack callBack) throws Exception {
 
         boolean isLogin = false;
         // 组装参数和URL
@@ -77,12 +79,8 @@ public class LoginServiceImpl implements LoginService {
         params.add(new BasicNameValuePair(LoginParaEnum.UUID.para(), Core.getUuid()));
         params.add(new BasicNameValuePair(LoginParaEnum.TIP.para(), LoginParaEnum.TIP.value()));
 
-        // long time = 4000;
-        while (!isLogin) {
-            if (Core.isCancelPreLogin()) {
-                throw new Exception("取消登录！");
-            }
-            // SleepUtils.sleep(time += 1000);
+       while1:while (!isLogin) {
+
             long millis = System.currentTimeMillis();
             params.add(new BasicNameValuePair(LoginParaEnum.R.para(), String.valueOf(millis / 1579L)));
             params.add(new BasicNameValuePair(LoginParaEnum._.para(), String.valueOf(millis)));
@@ -91,23 +89,50 @@ public class LoginServiceImpl implements LoginService {
             try {
                 String result = EntityUtils.toString(entity);
                 String status = checklogin(result);
-
-                if (CheckLoginResultEnum.SUCCESS.getCode().equals(status)) {
-                    processLoginInfo(result); // 处理结果
-                    isLogin = true;
-                    Core.setAlive(isLogin);
-                    break;
+                if (status == null){
+                    continue ;
                 }
-                if (CheckLoginResultEnum.WAIT_CONFIRM.getCode().equals(status)) {
-                    log.info("请点击微信确认按钮，进行登陆");
+                CheckLoginResultEnum byCode = CheckLoginResultEnum.getByCode(status);
+
+                switch (byCode) {
+
+                    case SUCCESS:{
+                        String loginInfo = processLoginInfo(result);
+                        if (loginInfo == null){
+                            isLogin = true;
+                            Core.setAlive(true);
+                            callBack.CallBack(byCode.getMsg());
+                        }else{
+                            callBack.CallBack(loginInfo);
+                        }
+                        break while1;
+                    }
+                    case WAIT_CONFIRM:
+                        log.info(byCode.getMsg());
+                        String avatar = getUserAvatar(result);
+                        callBack.avatar(avatar);
+                        callBack.CallBack(byCode.getMsg());
+                        break;
+                    case WAIT_SCAN:{
+                        log.info(byCode.getMsg());
+                        callBack.CallBack(byCode.getMsg());
+                        break;
+                    }
+                    case NONE:{
+                        log.info(byCode.getMsg());
+                        break;
+                    }
+
                 }
 
             } catch (Exception e) {
-                log.error("微信登陆异常！", e);
+                e.printStackTrace();
+                log.error("微信登陆异常：{}", e.getMessage());
             }
         }
         return isLogin;
     }
+
 
     @Override
     public String getUuid() {
@@ -199,8 +224,7 @@ public class LoginServiceImpl implements LoginService {
             JSONArray syncArray = syncKey.getJSONArray("List");
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < syncArray.size(); i++) {
-                sb.append(syncArray.getJSONObject(i).getString("Key") + "_"
-                        + syncArray.getJSONObject(i).getString("Val") + "|");
+                sb.append(syncArray.getJSONObject(i).getString("Key")).append("_").append(syncArray.getJSONObject(i).getString("Val")).append("|");
             }
             // 1_661706053|2_661706420|3_661706415|1000_1494151022|
             String synckey = sb.toString();
@@ -212,7 +236,7 @@ public class LoginServiceImpl implements LoginService {
             Core.setNickName(user.getString("NickName"));
             Contacts me = JSON.parseObject(JSON.toJSONString(obj.getJSONObject("User")), Contacts.class);
             Core.setUserSelf(me);
-            Core.getMemberMap().put(user.getString("UserName"),me);
+            Core.getMemberMap().put(user.getString("UserName"), me);
             //初始化列表的联系人
             //最近聊天的联系人
             JSONArray contactList = obj.getJSONArray("ContactList");
@@ -260,94 +284,98 @@ public class LoginServiceImpl implements LoginService {
 
     }
 
+    /**
+     * 处理成功消息
+     *
+     * @param selector 类型
+     */
+    private void processSuccessMsg(String selector) {
+        // 最后收到正常报文时间
+        Core.setLastNormalRetCodeTime(System.currentTimeMillis());
+        //消息同步
+        //JSONObject msgObj = webWxSync();
+        WebWxSyncMsg webWxSyncMsg = webWxSync();
+        if (webWxSyncMsg == null) {
+            return;
+        }
+        switch (SyncCheckSelectorEnum.getByCode(selector)) {
+            case NORMAL:
+                break;
+            case NEW_MSG:
+
+                //新消息
+                List<AddMsgList> addMsgLists = webWxSyncMsg.getAddMsgList();
+                for (AddMsgList msg : addMsgLists) {
+                    if (msgIds.contains(msg.getMsgId())) {
+                        log.warn("消息重复：{}", msg);
+                        continue;
+                    }
+                    msgIds.add(msg.getMsgId());
+                    ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
+                        msgCenter.handleNewMsg(msg);
+                    });
+                }
+                List<Contacts> modContactList = webWxSyncMsg.getModContactList();
+                for (Contacts contacts : modContactList) {
+                    ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
+                        msgCenter.handleModContact(contacts);
+                    });
+                }
+
+                break;
+
+            case ENTER_OR_LEAVE_CHAT:
+                webWxSync();
+                break;
+            case MOD_CONTACT:
+            case ADD_OR_DEL_CONTACT:
+
+                log.info("联系人修改：{}", webWxSyncMsg);
+                msgCenter.handleModContact(webWxSyncMsg.getModContactList());
+                break;
+            case A:
+                log.info("未知消息：{}", webWxSyncMsg);
+                break;
+            default:
+                break;
+
+        }
+    }
+
     @Override
     public void startReceiving() {
         Core.setAlive(true);
         Runnable runnable = () -> {
             while (Core.isAlive()) {
                 try {
+
                     //检测是否有新消息
                     Map<String, String> resultMap = syncCheck();
                     String retcode = resultMap.get("retcode");
-                    String selector = resultMap.get("selector");
-                    if (retcode.equals(SyncCheckRetCodeEnum.UNKOWN.getCode())) {
-                        //log.info(SyncCheckRetCodeEnum.UNKOWN.getType());
-                        continue;
-                    } else if (retcode.equals(SyncCheckRetCodeEnum.LOGIN_OUT.getCode())) {
-                        // 退出
-                        log.info(SyncCheckRetCodeEnum.LOGIN_OUT.getType());
-                        MainFrame.getContext().dispose();
-                        Core.setAlive(false);
-                        launcher.openFrame();
-                        break;
-                    } else if (retcode.equals(SyncCheckRetCodeEnum.LOGIN_OTHERWHERE.getCode())) {
-                        // 其它地方登陆
-                        log.info(SyncCheckRetCodeEnum.LOGIN_OTHERWHERE.getType());
-                        MainFrame.getContext().dispose();
-                        Core.setAlive(false);
-                        launcher.openFrame();
-                        break;
-                    } else if (retcode.equals(SyncCheckRetCodeEnum.MOBILE_LOGIN_OUT.getCode())) {
-                        // 移动端退出
-                        log.info(SyncCheckRetCodeEnum.MOBILE_LOGIN_OUT.getType());
-                        MainFrame.getContext().dispose();
-                        Core.setAlive(false);
-                        launcher.openFrame();
-                        break;
-                    } else if (retcode.equals(SyncCheckRetCodeEnum.SUCCESS.getCode())) {
-                        // 最后收到正常报文时间
-                        Core.setLastNormalRetCodeTime(System.currentTimeMillis());
-                        //消息同步
-                        //JSONObject msgObj = webWxSync();
-                        WebWxSyncMsg webWxSyncMsg = webWxSync();
-                        if (webWxSyncMsg == null){
-                            continue;
+                    SyncCheckRetCodeEnum syncCheckRetCodeEnum = SyncCheckRetCodeEnum.getByCode(retcode);
+                    switch (syncCheckRetCodeEnum) {
+
+                        case SUCCESS: {
+                            processSuccessMsg(resultMap.get("selector"));
+                            break;
                         }
-                        switch (SyncCheckSelectorEnum.getByCode(selector)) {
-                            case NORMAL:
-                                break;
-                            case NEW_MSG:
-                                    try {
-                                        //新消息
-                                        List<AddMsgList> addMsgLists = webWxSyncMsg.getAddMsgList();
-                                        for (AddMsgList msg : addMsgLists) {
-                                            if (msgIds.contains(msg.getMsgId())) {
-                                                log.warn("消息重复：{}", msg);
-                                                continue;
-                                            }
-                                            msgIds.add(msg.getMsgId());
-                                            ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
-                                                msgCenter.handleNewMsg(msg);
-                                            });
-                                        }
-                                        List<Contacts> modContactList = webWxSyncMsg.getModContactList();
-                                        for (Contacts contacts : modContactList) {
-                                            ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
-                                                msgCenter.handleModContact(contacts);
-                                            });
-                                        }
-
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                        log.info(e.getMessage());
-                                    }
-                                break;
-
-                            case ENTER_OR_LEAVE_CHAT:
-                                webWxSync();
-                                break;
-                            case MOD_CONTACT:
-                            case ADD_OR_DEL_CONTACT:
-
-                                log.info("联系人修改：{}", webWxSyncMsg);
-                                msgCenter.handleModContact(webWxSyncMsg.getModContactList());
-                                break;
-                            case A:
-                                log.info("未知消息：{}", webWxSyncMsg);
-                                break;
-                            default:
-                                break;
-
+                        case LOGIN_OUT:
+                        case UNKOWN:
+                        case LOGIN_OTHERWHERE:
+                        case MOBILE_LOGIN_OUT: {
+                            log.info(syncCheckRetCodeEnum.getType());
+                            //重启客户端
+                            WeChatStater.restart();
+                            break;
+                        }
+                        case TICKET_ERROR:
+                        case PARAM_ERROR:
+                        case NOT_LOGIN_WARN:
+                        case LOGIN_ENV_ERROR:
+                        case TOO_OFEN: {
+                            log.info(syncCheckRetCodeEnum.getType());
+                            Core.setAlive(false);
+                            break;
                         }
                     }
                 } catch (Exception e) {
@@ -362,7 +390,7 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public  void webWxGetContact() {
+    public void webWxGetContact() {
         String url = String.format(URLEnum.WEB_WX_GET_CONTACT.getUrl(),
                 Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()));
         Map<String, Object> paramMap = Core.getParamMap();
@@ -410,7 +438,7 @@ public class LoginServiceImpl implements LoginService {
                 Contacts contacts = JSON.parseObject(JSON.toJSONString(o), Contacts.class);
                 addContacts(contacts, true);
             }
-            if (!Core.getMemberMap().containsKey("filehelper")){
+            if (!Core.getMemberMap().containsKey("filehelper")) {
                 Core.getMemberMap().put("filehelper",
                         Contacts.builder().username("filehelper").displayname("文件传输助手")
                                 .type(Contacts.ContactsType.ORDINARY_USER).build());
@@ -466,8 +494,9 @@ public class LoginServiceImpl implements LoginService {
             Core.getContactMap().put(userName, contacts);
         }
     }
+
     @Override
-    public  void WebWxBatchGetContact() {
+    public void WebWxBatchGetContact() {
         String url = String.format(URLEnum.WEB_WX_BATCH_GET_CONTACT.getUrl(),
                 Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()), new Date().getTime(),
                 Core.getLoginInfoMap().get(StorageLoginInfoEnum.pass_ticket.getKey()));
@@ -510,58 +539,59 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public  List<Contacts> WebWxBatchGetContact(String groupName) {
+    public List<Contacts> WebWxBatchGetContact(String groupName) {
 
-            log.info("加载群成员开始：" + groupName);
-            String url = String.format(URLEnum.WEB_WX_BATCH_GET_CONTACT.getUrl(),
-                    Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()), new Date().getTime(),
-                    Core.getLoginInfoMap().get(StorageLoginInfoEnum.pass_ticket.getKey()));
-            Map<String, Object> paramMap = Core.getParamMap();
-            paramMap.put("Count", 1);
-            List<Map<String, String>> list = new ArrayList<Map<String, String>>(1);
-            HashMap<String, String> map = new HashMap<String, String>(2);
-            map.put("UserName", groupName);
-            map.put("EncryChatRoomId", "");
-            list.add(map);
-            paramMap.put("List", list);
-            HttpEntity entity = null;
-            synchronized ((groupName+"WebWxBatchGetContact").intern()) {
-                entity = HttpUtil.doPost(url, JSON.toJSONString(paramMap));
-            }
-            try {
-                String text = EntityUtils.toString(entity, Consts.UTF_8);
-                JSONObject obj = JSON.parseObject(text);
-                //群列表
-                JSONArray contactList = obj.getJSONArray("ContactList");
-                for (int i = 0; i < contactList.size(); i++) {
-                    // 群好友
-                    JSONObject groupObject = contactList.getJSONObject(i);
-                    Contacts group = JSON.parseObject(JSON.toJSONString(groupObject), Contacts.class);
-                    group.setType(Contacts.ContactsType.GROUP_USER);
-                    String userName = group.getUsername();
+        log.info("加载群成员开始：" + groupName);
+        String url = String.format(URLEnum.WEB_WX_BATCH_GET_CONTACT.getUrl(),
+                Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()), new Date().getTime(),
+                Core.getLoginInfoMap().get(StorageLoginInfoEnum.pass_ticket.getKey()));
+        Map<String, Object> paramMap = Core.getParamMap();
+        paramMap.put("Count", 1);
+        List<Map<String, String>> list = new ArrayList<Map<String, String>>(1);
+        HashMap<String, String> map = new HashMap<String, String>(2);
+        map.put("UserName", groupName);
+        map.put("EncryChatRoomId", "");
+        list.add(map);
+        paramMap.put("List", list);
+        HttpEntity entity = null;
+        synchronized ((groupName + "WebWxBatchGetContact").intern()) {
+            entity = HttpUtil.doPost(url, JSON.toJSONString(paramMap));
+        }
+        try {
+            String text = EntityUtils.toString(entity, Consts.UTF_8);
+            JSONObject obj = JSON.parseObject(text);
+            //群列表
+            JSONArray contactList = obj.getJSONArray("ContactList");
+            for (int i = 0; i < contactList.size(); i++) {
+                // 群好友
+                JSONObject groupObject = contactList.getJSONObject(i);
+                Contacts group = JSON.parseObject(JSON.toJSONString(groupObject), Contacts.class);
+                group.setType(Contacts.ContactsType.GROUP_USER);
+                String userName = group.getUsername();
+                Core.getMemberMap().put(userName, group);
+                if (userName.startsWith("@@")) {
+                    //以上接口返回的成员属性不全，以下的接口获取群成员详细属性
+                    JSONArray memberArray = WebWxBatchGetContactDetail(group);
+                    List<Contacts> memberList = JSON.parseArray(JSON.toJSONString(memberArray), Contacts.class);
+                    group.setMemberlist(memberList);
+                    Core.getGroupMap().put(userName, group);
                     Core.getMemberMap().put(userName, group);
-                    if (userName.startsWith("@@")) {
-                        //以上接口返回的成员属性不全，以下的接口获取群成员详细属性
-                        JSONArray memberArray = WebWxBatchGetContactDetail(group);
-                        List<Contacts> memberList = JSON.parseArray(JSON.toJSONString(memberArray), Contacts.class);
-                        group.setMemberlist(memberList);
-                        Core.getGroupMap().put(userName, group);
-                        Core.getMemberMap().put(userName, group);
-                        log.info("加载群成员结束：" + Core.getMemberMap().get(groupName).getMemberlist().size());
-                        return memberList;
-                    }
+                    log.info("加载群成员结束：" + Core.getMemberMap().get(groupName).getMemberlist().size());
+                    return memberList;
                 }
-
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                log.error(e.getMessage());
             }
-            log.info("加载群成员结束：0");
-            return new ArrayList<>();
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error(e.getMessage());
+        }
+        log.info("加载群成员结束：0");
+        return new ArrayList<>();
     }
+
     @Override
-    public  JSONArray WebWxBatchGetContactDetail(Contacts group) {
+    public JSONArray WebWxBatchGetContactDetail(Contacts group) {
         String url = String.format(URLEnum.WEB_WX_BATCH_GET_CONTACT.getUrl(),
                 Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()), System.currentTimeMillis(),
                 Core.getLoginInfoMap().get(StorageLoginInfoEnum.pass_ticket.getKey()));
@@ -579,7 +609,7 @@ public class LoginServiceImpl implements LoginService {
                 memberArray.add(Core.getContactMap().get(userName));
                 continue;
             }
-            if (userName.equals(Core.getUserName())){
+            if (userName.equals(Core.getUserName())) {
                 memberArray.add(Core.getUserSelf());
                 continue;
             }
@@ -603,8 +633,8 @@ public class LoginServiceImpl implements LoginService {
             }
             paramMap.put("Count", subList.size());
             paramMap.put("List", subList);
-            HttpEntity entity =null;
-            synchronized ((group.getUsername()+"WebWxBatchGetContact").intern()) {
+            HttpEntity entity = null;
+            synchronized ((group.getUsername() + "WebWxBatchGetContact").intern()) {
                 entity = HttpUtil.doPost(url, JSON.toJSONString(paramMap));
             }
             try {
@@ -634,7 +664,28 @@ public class LoginServiceImpl implements LoginService {
         }
         return null;
     }
-
+    public static void main(String[] args) {
+        String str = "window.code=201;window.userAvatar = 'data:img/jpg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAoHBwgHBgoICAgLCgoLDhgQDg0NDh0VFhEYIx8lJCIfIiEmKzcvJik0KSEiMEExNDk7Pj4+JS5ESUM8SDc9Pjv/2wBDAQoLCw4NDhwQEBw7KCIoOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozv/wAARCACEAIQDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAEH/8QAGhABAAIDAQAAAAAAAAAAAAAAAAFBEVGBAv/EABUBAQEAAAAAAAAAAAAAAAAAAAAB/8QAFhEBAQEAAAAAAAAAAAAAAAAAACEB/9oADAMBAAIRAxEAPwDJQAAAzACIAIiIAMwAiIgAiAAAiAAAAAAAAAAAAAAAAAAAAAAAAAAAAWgQAAFoEAAAAAAAAAAAAWuItdBAAFpFpRAEAAAAAAAAAABa6i5mPPV0QXM7Mzsgi0ZnRmdkEFzO0QAAAAAAAAAAFrqAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP/2Q==';";
+        String regEx = "window.userAvatar\\s*=\\s*'(.+)'";
+        Matcher matcher = CommonTools.getMatcher(regEx, str);
+        if (matcher.find()) {
+            System.out.println(matcher.group(1));
+        }
+    }
+    /**
+     * 检查登录人的头像
+     *
+     * @param result
+     * @return
+     */
+    public String getUserAvatar(String result) {
+        String regEx = "window.userAvatar\\s*=\\s*'data:img/jpg;base64,(.+)'";
+        Matcher matcher = CommonTools.getMatcher(regEx, result);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
+    }
     /**
      * 处理登陆信息
      *
@@ -642,7 +693,7 @@ public class LoginServiceImpl implements LoginService {
      * @author SXS
      * @date 2017年4月9日 下午12:16:26
      */
-    private void processLoginInfo(String loginContent) {
+    private String processLoginInfo(String loginContent) {
         String regEx = "window.redirect_uri=\"(\\S+)\";";
         Matcher matcher = CommonTools.getMatcher(regEx, loginContent);
         if (matcher.find()) {
@@ -678,15 +729,15 @@ public class LoginServiceImpl implements LoginService {
                 HttpEntity entity = HttpUtil.doGet(originalUrl, null, false, null);
                 text = EntityUtils.toString(entity);
             } catch (Exception e) {
-                log.info(e.getMessage());
-                return;
+                log.error(e.getMessage());
+                return e.getMessage();
             }
             //add by 默非默 2017-08-01 22:28:09
             //如果登录被禁止时，则登录返回的message内容不为空，下面代码则判断登录内容是否为空，不为空则退出程序
             String msg = getLoginMessage(text);
             if (!"".equals(msg)) {
-                log.info(msg);
-                System.exit(0);
+                log.error(msg);
+                return msg;
             }
             Document doc = CommonTools.xmlParser(text);
             if (doc != null) {
@@ -705,6 +756,7 @@ public class LoginServiceImpl implements LoginService {
             }
 
         }
+        return null;
     }
 
     private Map<String, List<String>> getPossibleUrlMap() {
@@ -791,7 +843,7 @@ public class LoginServiceImpl implements LoginService {
             HttpEntity entity = HttpUtil.doPost(url, paramStr);
             String text = EntityUtils.toString(entity, Consts.UTF_8);
             WebWxSyncMsg webWxSyncMsg = JSON.parseObject(text, WebWxSyncMsg.class);
-            if (webWxSyncMsg.getBaseResponse().getRet()!=0) {
+            if (webWxSyncMsg.getBaseResponse().getRet() != 0) {
                 return null;
             } else {
                 Core.getLoginInfoMap().put(StorageLoginInfoEnum.SyncKey.getKey(), webWxSyncMsg.getSyncCheckKey());
@@ -808,7 +860,7 @@ public class LoginServiceImpl implements LoginService {
             log.error(e.getMessage());
         }
 
- return null;
+        return null;
     }
 
     /**
@@ -901,7 +953,7 @@ public class LoginServiceImpl implements LoginService {
                     .toUsername(userName)
                     .build());
             //Old与New存在差异
-              log.info("{}（{}）属性更新：{}", tip, name, s);
+            log.info("{}（{}）属性更新：{}", tip, name, s);
             //差异存到数据库
             store(differenceMap, oldV, messages);
             MessageTools.sendMsgByUserId(messages);

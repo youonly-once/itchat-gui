@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.frames;
 
+import cn.shu.WeChatStater;
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.core.Core;
@@ -7,6 +8,8 @@ import cn.shu.wechat.pojo.entity.Contacts;
 import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
+import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
+import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.panels.ContactsPanel;
@@ -20,16 +23,26 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+
+import java.util.Base64;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Created by 舒新胜 on 08/06/2017.
@@ -51,13 +64,14 @@ public class LoginFrame extends JFrame {
 
     private JPanel controlPanel;
     private JLabel closeLabel;
-    private JPanel editPanel;
     private JPanel codePanel;
     private JLabel codeLabel;
-    private JLabel statusLabel;
+    private JLabel refreshCodeBt;
+    private SizeAutoAdjustTextArea statusLabel;
 
     private static final Point origin = new Point();
 
+    public static volatile boolean cancelLogin;
 
     public LoginFrame() {
         super("微信-舒专用版");
@@ -85,10 +99,15 @@ public class LoginFrame extends JFrame {
         closeLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
 
-        statusLabel = new JLabel();
+        statusLabel = new SizeAutoAdjustTextArea(280);
         statusLabel.setForeground(Colors.FONT_GRAY);
         statusLabel.setText("正在加载二维码...");
+        statusLabel.setEditable(false);
         statusLabel.setVisible(true);
+        StyledDocument doc = statusLabel.getStyledDocument();
+        SimpleAttributeSet center = new SimpleAttributeSet();
+        StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
+        doc.setParagraphAttributes(0, doc.getLength(), center, false);
     }
 
     private void initView() {
@@ -98,7 +117,7 @@ public class LoginFrame extends JFrame {
 
         controlPanel.add(closeLabel);
         JPanel titleJPanel = new JPanel();
-        JLabel titleJLabel = new JLabel("微信-舒专用版");
+        JLabel titleJLabel = new JLabel(WechatConfiguration.getInstance().getLoginTitle());
         titleJPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5));
         titleJPanel.add(titleJLabel);
         if (OSUtil.getOsType() != OSUtil.Mac_OS) {
@@ -108,19 +127,58 @@ public class LoginFrame extends JFrame {
         }
 
 
-        editPanel = new JPanel();
-        codePanel = new JPanel();
+        JPanel centerPanel = new JPanel(new BorderLayout(0,0));
+        centerPanel.setBorder(new EmptyBorder(0,0,0,0));
+
         codeLabel = new JLabel();
         ImageIcon icon = IconUtil.getIcon(this, "/image/image_loading.gif");
         codeLabel.setHorizontalAlignment(JLabel.CENTER);
         codeLabel.setIcon(icon);
-        codePanel.add(codeLabel);
-        editPanel.add(codePanel);
-        editPanel.add(statusLabel);
+        centerPanel.add(codeLabel,BorderLayout.CENTER);
 
+        JPanel bottomPanel = new JPanel(new VerticalFlowLayout(true,false));
+
+        //重新扫描按钮
+        refreshCodeBt = new JLabel("重新扫描");
+        refreshCodeBt.setHorizontalAlignment(JLabel.CENTER);
+        refreshCodeBt.setVisible(false);
+        refreshCodeBt.setBorder(new LineBorder(Color.GRAY));
+        refreshCodeBt.setPreferredSize(new Dimension(150,40));
+        refreshCodeBt.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        refreshCodeBt.setForeground(Colors.FONT_GRAY);
+        JPanel refreshCodeBtPanel = new JPanel();
+        refreshCodeBtPanel.add(refreshCodeBt);
+        bottomPanel.add(refreshCodeBtPanel);
+        refreshCodeBt.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                //TODO 重新登录功能
+
+                new SwingWorker<Object,Object>(){
+                   private  BufferedImage qr;
+                    @Override
+                    protected Object doInBackground() throws Exception {
+                        qr = loginService.getQR();
+                        return null;
+                    }
+
+                    @Override
+                    protected void done() {
+                        refreshCodeBt.setVisible(false);
+                        codeLabel.setIcon(new ImageIcon(qr.getScaledInstance(250, 250, Image.SCALE_SMOOTH)));
+                        showMessage("请扫描二维码以登录");
+                    }
+                }.execute();
+                super.mouseReleased(e);
+            }
+        });
+
+        bottomPanel.add(statusLabel);
+        bottomPanel.setBorder(new EmptyBorder(0,0,50,0));
+        centerPanel.add(bottomPanel,BorderLayout.SOUTH);
 
         add(contentPanel);
-        contentPanel.add(editPanel, new GBC(0, 2).setFill(GBC.BOTH).setWeight(1, 10).setInsets(10, 10, 0, 10));
+        contentPanel.add(centerPanel, new GBC(0, 2).setFill(GBC.BOTH).setWeight(1, 10).setInsets(10, 10, 0, 10));
     }
 
     /**
@@ -181,7 +239,7 @@ public class LoginFrame extends JFrame {
     /**
      * 打开窗体
      */
-    private void openFrame() {
+    private void openMainFrame() {
         MainFrame frame = new MainFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
@@ -198,6 +256,7 @@ public class LoginFrame extends JFrame {
         }
 
         statusLabel.setText(message);
+        statusLabel.setToolTipText(message);
     }
 
     /**
@@ -216,8 +275,36 @@ public class LoginFrame extends JFrame {
             codeLabel.setIcon(new ImageIcon(qr.getScaledInstance(250, 250, Image.SCALE_SMOOTH)));
 
             showMessage("请使用微信扫一扫以登录");
-            loginService.login();
-            Core.setAlive(true);
+
+            loginService.login(new LoginService.LoginCallBack() {
+                @Override
+                public void CallBack(String loginInfo) {
+                    showMessage(loginInfo);
+                }
+
+                @Override
+                public void avatar(String avatarBase64) {
+                    if (avatarBase64 == null){
+                        return;
+                    }
+                    try {
+                        byte[] decode = Base64.getDecoder().decode(avatarBase64);
+                        ByteArrayInputStream bais = new ByteArrayInputStream(decode);
+                        BufferedImage read = ImageIO.read(bais);
+                        codeLabel.setIcon(new ImageIcon(read));
+                        refreshCodeBt.setVisible(true);
+                    } catch (IOException e) {
+                        log.error(e.getMessage());
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+            refreshCodeBt.setVisible(false);
+            //登录失败
+            if (!Core.isAlive()){
+                return;
+            }
 
             showMessage("登陆成功，微信初始化...");
             if (!loginService.webWxInit()) {
@@ -229,7 +316,7 @@ public class LoginFrame extends JFrame {
 
             //打开窗体
             log.info("登录成功");
-            openFrame();
+            openMainFrame();
 
             //初始化聊天列表
             Set<String> recentContacts = Core.getRecentContacts();

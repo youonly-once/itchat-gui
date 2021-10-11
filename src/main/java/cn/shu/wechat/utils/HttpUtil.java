@@ -37,8 +37,13 @@ import java.util.concurrent.TimeUnit;
 @Log4j2
 public class HttpUtil {
 
+    /**
+     * 用于接收文件或者其它类型的client 无超时时间（例如下载大文件）
+     */
     private static final CloseableHttpClient myHttpClient;
-
+    /**
+     * 循环接收消息的client 有超时时间，避免卡住
+     */
     private static final CloseableHttpClient receiveHttpClient;
 
     public static final CookieStore cookieStore;
@@ -49,10 +54,11 @@ public class HttpUtil {
         // 将CookieStore设置到MyHttpClient中
         myHttpClient = HttpClients.custom().setDefaultCookieStore(cookieStore)
                 .build();
-        //循环接收消息 设置超时时间
+
+
+        //循环接收消息，需要设置超时时间，否则可能卡住
         BasicHttpClientConnectionManager connManager = new BasicHttpClientConnectionManager();
         connManager.setSocketConfig(SocketConfig.custom().setSoTimeout(30000).build());
-
         receiveHttpClient = HttpClients.custom().setDefaultCookieStore(cookieStore)
                 .setConnectionManager(connManager)
                 .setConnectionTimeToLive(30000L, TimeUnit.MILLISECONDS)

@@ -12,6 +12,7 @@ spring:
     url: jdbc:log4jdbc:sqlite:D:/weixin/wechat.db?date_string_format=yyyy-MM-dd HH:mm:ss
 wechat:
   app-version: 1.0
+  login-title: 微信登录
   base-path: D:/weixin
   user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.183 Safari/537.36
   special-user: filehelper, weibo,qqmail, fmessage, tmessage, qmessage, qqsync, floatbottle, lbsapp, shakeapp, medianote,qqfriend, readerapp, blogapp, facebookapp, masssendapp, meishiapp, feedsapp, voip,blogappweixin, brandsessionholder, weixinreminder, officialaccounts, wxitil,notification_messages, wxid_novlwrv3lqwv11, gh_22b87fa7cb3c, userexperience_alarm

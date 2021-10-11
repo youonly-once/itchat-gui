@@ -24,7 +24,14 @@ public enum SyncCheckRetCodeEnum {
         this.code = code;
         this.type = type;
     }
-
+    public static SyncCheckRetCodeEnum getByCode(String code){
+        for (SyncCheckRetCodeEnum value : SyncCheckRetCodeEnum.values()) {
+            if (value.code.equals(code)){
+                return value;
+            }
+        }
+        throw new RuntimeException("未知类型");
+    }
     public String getCode() {
         return code;
     }
