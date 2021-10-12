@@ -288,7 +288,8 @@ public class MessageEditorPanel extends ParentAvailablePanel {
                 super.mouseClicked(e);
             }
         });
-        BombFrame bombFrame = new BombFrame(roomId);
+        final BombFrame[] bombFrame = {null};
+
         bombMsgLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -304,7 +305,13 @@ public class MessageEditorPanel extends ParentAvailablePanel {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                bombFrame.setVisible(true);
+                if (bombFrame[0] == null){
+                    bombFrame[0] = new BombFrame(roomId);
+                    bombFrame[0].setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+                }else{
+                    bombFrame[0].setVisible(true);
+                }
+
                 super.mouseClicked(e);
             }
         });
@@ -342,7 +349,7 @@ public class MessageEditorPanel extends ParentAvailablePanel {
     private void createAndShowChart(String attr) {
         String remarkNameByGroupUserName = ContactsTools.getContactDisplayNameByUserName(roomId);
         ChartUtil chartUtil = SpringContextHolder.getBean(ChartUtil.class);
-        String path = chartUtil.makeGroupMemberAttrPieChart(roomId, remarkNameByGroupUserName, attr, 400, 300);
+        String path = chartUtil.makeGroupMemberAttrPieChart(roomId, remarkNameByGroupUserName, attr, java.awt.Toolkit.getDefaultToolkit().getScreenSize().width,  Toolkit.getDefaultToolkit().getScreenSize().height);
         if (path == null){
             JOptionPane.showMessageDialog(this,"创建失败。");
             return;

@@ -8,6 +8,7 @@ import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.pojo.entity.Contacts;
 import cn.shu.wechat.pojo.entity.MessageExample;
 import cn.shu.wechat.service.LoginService;
+import cn.shu.wechat.swing.utils.EmojiUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -147,8 +148,9 @@ public class ChartUtil {
                         value = "未设置";
                     }
                 }
+
                 //统计次数
-                testMap.computeIfAbsent(value.toString(), v -> new AtomicInteger()).getAndIncrement();
+                testMap.computeIfAbsent(value.toString().trim(), v -> new AtomicInteger()).getAndIncrement();
             }
             //排序
             Map<String, AtomicInteger> sortMap = sortMapByValue(testMap);
@@ -375,12 +377,12 @@ public class ChartUtil {
 
         Map<String, AtomicInteger> msgCount = new HashMap<>();
         for (cn.shu.wechat.pojo.entity.Message message : messages) {
-            String fromMemberOfGroupDisplayname = message.getFromMemberOfGroupDisplayname();
-            if (StringUtils.isEmpty(fromMemberOfGroupDisplayname)) {
-                fromMemberOfGroupDisplayname = message.getFromNickname();
+            String fromMemberOfGroupNickname = message.getFromMemberOfGroupNickname();
+            if (StringUtils.isEmpty(fromMemberOfGroupNickname)) {
+                fromMemberOfGroupNickname = message.getFromNickname();
             }
             if (message.getMsgType() >= 1 && message.getMsgType() <= 48) {
-                msgCount.computeIfAbsent(fromMemberOfGroupDisplayname, v -> new AtomicInteger()).getAndIncrement();
+                msgCount.computeIfAbsent(fromMemberOfGroupNickname, v -> new AtomicInteger()).getAndIncrement();
             }
         }
 
@@ -1010,14 +1012,14 @@ public class ChartUtil {
         plot.setLegendLabelGenerator(new StandardPieSectionLabelGenerator(
                 "{0}-{1}人  ({2})"));
 
-        plot.setLabelFont(new Font("宋体", Font.BOLD, 12));
+        plot.setLabelFont(new Font("宋体", Font.BOLD, 24));
 
         // 指定图片的透明度(0.0-1.0)
         plot.setForegroundAlpha(1);
         // 指定显示的饼图上圆形(false)还椭圆形(true)
         plot.setCircular(false, true);
         LegendTitle legend = chart.getLegend();
-        legend.setItemFont(new Font("宋体", Font.PLAIN, 12));
+        legend.setItemFont(new Font("宋体", Font.PLAIN, 24));
         // 设置第一个 饼块section 的开始位置，默认是12点钟方向
         plot.setStartAngle(90);
         plot.setBackgroundPaint(new Color(39, 43, 88));

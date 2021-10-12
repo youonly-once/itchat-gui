@@ -359,11 +359,14 @@ public class LoginServiceImpl implements LoginService {
                             processSuccessMsg(resultMap.get("selector"));
                             break;
                         }
+                        case UNKOWN: {
+                            log.info(syncCheckRetCodeEnum.getType());
+                            continue;
+                        }
                         case LOGIN_OUT:
-                        case UNKOWN:
                         case LOGIN_OTHERWHERE:
                         case MOBILE_LOGIN_OUT: {
-                            log.info(syncCheckRetCodeEnum.getType());
+                            log.warn(syncCheckRetCodeEnum.getType());
                             //重启客户端
                             WeChatStater.restart();
                             break;
@@ -373,7 +376,7 @@ public class LoginServiceImpl implements LoginService {
                         case NOT_LOGIN_WARN:
                         case LOGIN_ENV_ERROR:
                         case TOO_OFEN: {
-                            log.info(syncCheckRetCodeEnum.getType());
+                            log.error(syncCheckRetCodeEnum.getType());
                             Core.setAlive(false);
                             break;
                         }
@@ -938,7 +941,7 @@ public class LoginServiceImpl implements LoginService {
         if (oldV == null) {
             return;
         }
-
+        //TODO 更改一次头像  有二次seq都不一样，导致重发
         Map<String, Map<String, String>> differenceMap = JSONObjectUtil.getDifferenceMap(oldV, newV);
         if (differenceMap.size() > 0) {
             //待发消息列表

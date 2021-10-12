@@ -492,6 +492,7 @@ public class MsgCenter {
                         msg.setPlainText("[文件]" + title);
                         downloadFile(msg, fileName, ext);
                         break;
+                    default:
                     case PROGRAM:
                         msg.setPlainText("[小程序]" + title);
                         break;
@@ -507,10 +508,10 @@ public class MsgCenter {
                         msg.setPlainText(desc == null ? "[微信转账]" : desc.toString());
                         msg.setAppMsgType(WXReceiveMsgCodeOfAppEnum.LINK.getType());
                         break;
-                    default:
+                  /*  default:
                         msg.setMsgType(MSGTYPE_TEXT.getCode());
                         msg.setPlainText(msg.getContent());
-                        break;
+                        break;*/
 
 
                 }

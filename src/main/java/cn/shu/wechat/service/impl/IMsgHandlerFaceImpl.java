@@ -239,7 +239,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 break;
             case "ggr":
                 if (msg.isGroupMsg()) {
-                    String imgPath = chartUtil.makeGroupMemberAttrPieChart(toUserName, remarkNameByGroupUserName, "Sex", 500, 400);
+                    String imgPath = chartUtil.makeGroupMemberAttrPieChart(toUserName, remarkNameByGroupUserName, "Sex", 1920, 1080);
                     //群消息
                     messages.add(MessageTools.toPicMessage(imgPath, toUserName));
                     log.info("计算群【" + remarkNameByGroupUserName + "】成员性别分布图");
@@ -248,7 +248,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 break;
             case "gpr":
                 if (msg.isGroupMsg()) {
-                    String imgPath = chartUtil.makeGroupMemberAttrPieChart(toUserName, remarkNameByGroupUserName, "Province", 500, 400);
+                    String imgPath = chartUtil.makeGroupMemberAttrPieChart(toUserName, remarkNameByGroupUserName, "Province", 1920, 1080);
                     //群消息
                     messages.add(MessageTools.toPicMessage(imgPath, toUserName));
                     log.info("计算群【" + remarkNameByGroupUserName + "】成员省份分布图");
@@ -309,7 +309,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         }
         if (text.startsWith("attr_rate") && msg.isGroupMsg()) {
             String substring = msg.getPlainText().substring(msg.getPlainText().indexOf(":") + 1);
-            String imgPath = chartUtil.makeGroupMemberAttrPieChart(toUserName, remarkNameByGroupUserName, substring, 500, 400);
+            String imgPath = chartUtil.makeGroupMemberAttrPieChart(toUserName, remarkNameByGroupUserName, substring, 1920, 1080);
             //群消息
             messages.add(MessageTools.toPicMessage(imgPath, toUserName));
             log.info("计算群【" + remarkNameByGroupUserName + "】成员" + substring + "比例");

@@ -64,7 +64,6 @@ public class BombFrame extends JFrame {
                         public void run() {
                             BombFrame.this.setVisible(false);
                             Message message = Message.builder().isSend(false)
-                                    .id(MessageTools.randomMessageId())
                                     .content(content.getText())
                                     .plaintext(content.getText())
                                     .createTime(DateUtils.getCurrDateString(DateUtils.YYYY_MM_DD_HH_MM_SS))
@@ -80,7 +79,7 @@ public class BombFrame extends JFrame {
                                     .build();
                             for (int i = 0; i < Integer.parseInt(count.getText()); i++) {
                                 SleepUtils.sleep(Long.parseLong(interval.getText()));
-
+                                message.setId(MessageTools.randomMessageId());
                                 MessageTools.sendMsgByUserId(message);
                                 /*new SwingWorker<Object,Object>(){
 

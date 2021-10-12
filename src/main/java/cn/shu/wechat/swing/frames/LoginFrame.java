@@ -139,9 +139,8 @@ public class LoginFrame extends JFrame {
         JPanel bottomPanel = new JPanel(new VerticalFlowLayout(true,false));
 
         //重新扫描按钮
-        refreshCodeBt = new JLabel("重新扫描");
+        refreshCodeBt = new JLabel("刷新");
         refreshCodeBt.setHorizontalAlignment(JLabel.CENTER);
-        refreshCodeBt.setVisible(false);
         refreshCodeBt.setBorder(new LineBorder(Color.GRAY));
         refreshCodeBt.setPreferredSize(new Dimension(150,40));
         refreshCodeBt.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -164,7 +163,6 @@ public class LoginFrame extends JFrame {
 
                     @Override
                     protected void done() {
-                        refreshCodeBt.setVisible(false);
                         codeLabel.setIcon(new ImageIcon(qr.getScaledInstance(250, 250, Image.SCALE_SMOOTH)));
                         showMessage("请扫描二维码以登录");
                     }
@@ -292,7 +290,7 @@ public class LoginFrame extends JFrame {
                         ByteArrayInputStream bais = new ByteArrayInputStream(decode);
                         BufferedImage read = ImageIO.read(bais);
                         codeLabel.setIcon(new ImageIcon(read));
-                        refreshCodeBt.setVisible(true);
+
                     } catch (IOException e) {
                         log.error(e.getMessage());
                         e.printStackTrace();

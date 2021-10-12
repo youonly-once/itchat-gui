@@ -196,7 +196,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                            return holder;
                        }
                    }
-                   default:
+
                    case MUSIC:
                    case LINK:{
                        if (isSelf){
@@ -206,6 +206,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                            return new MessageLeftLinkOfAppViewHolder(messageItem.isGroup());
                        }
                    }
+                   default:
                    case PICTURE:
                    case PROGRAM:{
                       if (isSelf){
