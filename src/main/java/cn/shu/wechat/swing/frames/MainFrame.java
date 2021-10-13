@@ -5,10 +5,7 @@ import cn.shu.wechat.api.WeChatTool;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.panels.LeftPanel;
 import cn.shu.wechat.swing.panels.RightPanel;
-import cn.shu.wechat.swing.utils.ClipboardUtil;
-import cn.shu.wechat.swing.utils.FontUtil;
-import cn.shu.wechat.swing.utils.IconUtil;
-import cn.shu.wechat.swing.utils.OSUtil;
+import cn.shu.wechat.swing.utils.*;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import lombok.Getter;
 import sun.audio.AudioPlayer;
@@ -265,18 +262,11 @@ public class MainFrame extends JFrame  {
         add(leftPanel, BorderLayout.WEST);
         //add(rightPanel, BorderLayout.CENTER);
         add(rightPanel, BorderLayout.CENTER);
-        centerScreen();
+        setLocationRelativeTo(null);
     }
 
 
-    /**
-     * 使窗口在屏幕中央显示
-     */
-    private void centerScreen() {
-        Toolkit tk = Toolkit.getDefaultToolkit();
-        this.setLocation((tk.getScreenSize().width - currentWindowWidth) / 2,
-                (tk.getScreenSize().height - currentWindowHeight) / 2);
-    }
+
 
     private void setListeners() {
         addComponentListener(new ComponentAdapter() {

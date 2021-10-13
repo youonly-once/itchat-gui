@@ -16,6 +16,7 @@ import cn.shu.wechat.swing.panels.ContactsPanel;
 import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.OSUtil;
+import cn.shu.wechat.swing.utils.WindowUtil;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.HeadImageUtil;
 import cn.shu.wechat.utils.SleepUtils;
@@ -77,7 +78,7 @@ public class LoginFrame extends JFrame {
         super("微信-舒专用版");
         initComponents();
         initView();
-        centerScreen();
+       setLocationRelativeTo(null);
         setListeners();
     }
 
@@ -182,11 +183,6 @@ public class LoginFrame extends JFrame {
     /**
      * 使窗口在屏幕中央显示
      */
-    private void centerScreen() {
-        Toolkit tk = Toolkit.getDefaultToolkit();
-        this.setLocation((tk.getScreenSize().width - WINDOW_WIDTH) / 2,
-                (tk.getScreenSize().height - WINDOW_HEIGHT) / 2);
-    }
 
     private void setListeners() {
         closeLabel.addMouseListener(new AbstractMouseListener() {

@@ -39,9 +39,6 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     private MessageMapper messageMapper;
 
     @Resource
-    private MsgCenter msgCenter;
-
-    @Resource
     private StatusMapper statusMapper;
     /**
      * autoChatUserNameList 包含 发送者：自动回复

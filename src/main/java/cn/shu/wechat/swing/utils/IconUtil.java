@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.utils;
 
+import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 
 import javax.imageio.ImageIO;
@@ -11,6 +12,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * 图标缓存工具类

@@ -4,6 +4,8 @@ import com.sun.jna.Native;
 import com.sun.jna.Structure;
 import com.sun.jna.win32.StdCallLibrary;
 
+import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -161,6 +163,18 @@ public class WindowUtil {
         public String getTitle() {
             return title;
         }
+    }
+
+    /**
+     * 窗口 居中
+     * @param window 窗口
+     * @param width 宽
+     * @param height 高
+     */
+    public static void centerScreen(Window window,int width,int height) {
+        Toolkit tk = Toolkit.getDefaultToolkit();
+        window.setLocation((tk.getScreenSize().width - width) / 2,
+                (tk.getScreenSize().height - height) / 2);
     }
 }
 

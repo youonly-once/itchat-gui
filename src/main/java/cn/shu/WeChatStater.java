@@ -1,8 +1,12 @@
 package cn.shu;
 
 import cn.shu.wechat.swing.app.Launcher;
+import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.frames.LoginFrame;
 import cn.shu.wechat.swing.frames.MainFrame;
+import cn.shu.wechat.swing.utils.FontUtil;
+import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.swing.utils.WindowUtil;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -10,7 +14,12 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.LineBorder;
+import java.awt.*;
+import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -25,9 +34,11 @@ import java.util.concurrent.CountDownLatch;
 
 public class WeChatStater {
     private static ConfigurableApplicationContext context;
+    private static final CountDownLatch countDownLatch = new CountDownLatch(1);
     public static void main(String[] args) {
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        new SwingWorker() {
+        boot();
+
+        new SwingWorker<Object,Object>() {
 
             @Override
             protected Object doInBackground() throws Exception {
@@ -35,8 +46,8 @@ public class WeChatStater {
                         .headless(false)
                         .run();
                 Launcher bean = context.getBean(Launcher.class);
-                bean.launch();
                 countDownLatch.countDown();
+                bean.launch();
                 return null;
             }
         }.execute();
@@ -47,6 +58,48 @@ public class WeChatStater {
         }
     }
 
+    /**
+     * 启动画面
+     */
+    private static void boot(){
+        JWindow jWindow = new JWindow();
+        jWindow.setSize(400,300);
+        JLabel label = new JLabel();
+        label.setIcon(IconUtil.getIcon(jWindow,"/image/ic_launcher.png",128,128));
+        label.setHorizontalAlignment(JLabel.CENTER);
+        JLabel labelText = new JLabel("微信启动中...");
+        labelText.setHorizontalAlignment(JLabel.CENTER);
+        labelText.setFont(FontUtil.getDefaultFont(16));
+
+        JPanel jPanel = new JPanel(new VerticalFlowLayout(VerticalFlowLayout.MIDDLE));
+        jPanel.add(label);
+        jPanel.add(labelText);
+        jPanel.setOpaque(false);
+
+        JPanel contentPanel = new JPanel();
+        contentPanel.add(jPanel);
+        contentPanel.setOpaque(false);
+
+        jWindow.add(contentPanel);
+        jWindow.setAlwaysOnTop(true);
+        jWindow.setBackground(new Color(0,0,0,0));
+        jWindow.setVisible(true);
+        jWindow.pack();
+        jWindow.setLocationRelativeTo(null);
+
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    countDownLatch.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                jWindow.dispose();
+            }
+        }).start();
+    }
     /**
      * 关闭
      */
