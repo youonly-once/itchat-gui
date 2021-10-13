@@ -269,8 +269,8 @@ public class MsgCenter {
      * @return
      */
     private boolean isCurrRoom(Message message) {
-        return RoomChatContainer.getCurrRoomId().equals(message.getFromUsername())
-                || RoomChatContainer.getCurrRoomId().equals(message.getToUsername());
+        return message.getFromUsername().equals(RoomChatContainer.getCurrRoomId())
+                || message.getToUsername().equals(RoomChatContainer.getCurrRoomId());
     }
 
     /**
