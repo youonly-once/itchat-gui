@@ -233,14 +233,14 @@ public class MsgCenter {
                 lastMsgPrefix = Core.getNickName() + ": ";
                 msgUnReadCount = 0;
             } else {
-                if (!isCurrRoom(message)){
+                if (isCurrRoom(message)) {
                     MainFrame.getContext().setTrayFlashing(true);
                 }
                 lastMsgPrefix = ContactsTools.getMemberDisplayNameOfGroup(userName, msg.getMemberName()) + ": ";
             }
         } else {
             MainFrame.getContext().playMessageSound();
-            if (!isCurrRoom(message)){
+            if (isCurrRoom(message)) {
                 MainFrame.getContext().setTrayFlashing(true);
             }
         }
@@ -251,7 +251,7 @@ public class MsgCenter {
 
         //消息总数
         MainFrame.getContext().setTrayFlashing(false);
-        if (!isCurrRoom(message) && !isSelfMessage(message)) {
+        if (isCurrRoom(message) && !isSelfMessage(message)) {
             RoomsPanel.updateUnreadTotalCount(count);
             MainFrame.getContext().setTrayFlashing(true);
         }
@@ -269,8 +269,8 @@ public class MsgCenter {
      * @return
      */
     private boolean isCurrRoom(Message message) {
-        return message.getFromUsername().equals(RoomChatContainer.getCurrRoomId())
-                || message.getToUsername().equals(RoomChatContainer.getCurrRoomId());
+        return !message.getFromUsername().equals(RoomChatContainer.getCurrRoomId())
+                && !message.getToUsername().equals(RoomChatContainer.getCurrRoomId());
     }
 
     /**

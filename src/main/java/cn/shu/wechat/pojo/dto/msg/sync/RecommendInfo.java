@@ -21,7 +21,7 @@ public class RecommendInfo {
     private String Alias;
     private int Scene;
     private int VerifyFlag;
-    private int AttrStatus;
+    private Long AttrStatus;
     private Byte Sex;
     private String Ticket;
     private int OpCode;
@@ -106,12 +106,12 @@ public class RecommendInfo {
         return VerifyFlag;
     }
 
-    public void setAttrStatus(int AttrStatus) {
-        this.AttrStatus = AttrStatus;
+    public long getAttrStatus() {
+        return AttrStatus;
     }
 
-    public int getAttrStatus() {
-        return AttrStatus;
+    public void setAttrStatus(long AttrStatus) {
+        this.AttrStatus = AttrStatus;
     }
 
     public void setSex(Byte Sex) {
