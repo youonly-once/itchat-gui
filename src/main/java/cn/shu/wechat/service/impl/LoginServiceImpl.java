@@ -19,9 +19,6 @@ import cn.shu.wechat.pojo.entity.AttrHistory;
 import cn.shu.wechat.pojo.entity.Contacts;
 import cn.shu.wechat.pojo.entity.Message;
 import cn.shu.wechat.service.LoginService;
-import cn.shu.wechat.swing.app.Launcher;
-import cn.shu.wechat.swing.frames.LoginFrame;
-import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
@@ -32,8 +29,6 @@ import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 
@@ -301,11 +296,12 @@ public class LoginServiceImpl implements LoginService {
         switch (SyncCheckSelectorEnum.getByCode(selector)) {
             case NORMAL:
                 break;
+            case MOD_CONTACT:
+            case ADD_OR_DEL_CONTACT:
             case NEW_MSG:
 
                 //新消息
-                List<AddMsgList> addMsgLists = webWxSyncMsg.getAddMsgList();
-                for (AddMsgList msg : addMsgLists) {
+                for (AddMsgList msg : webWxSyncMsg.getAddMsgList()) {
                     if (msgIds.contains(msg.getMsgId())) {
                         log.warn("消息重复：{}", msg);
                         continue;
@@ -315,11 +311,10 @@ public class LoginServiceImpl implements LoginService {
                         msgCenter.handleNewMsg(msg);
                     });
                 }
-                List<Contacts> modContactList = webWxSyncMsg.getModContactList();
-                for (Contacts contacts : modContactList) {
-                    ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
-                        msgCenter.handleModContact(contacts);
-                    });
+                //联系人修改
+                msgCenter.handleModContact(webWxSyncMsg.getModContactList());
+                for (Contacts contacts : webWxSyncMsg.getDelContactList()) {
+                    log.info("联系人删除：{}", contacts);
                 }
 
                 break;
@@ -327,12 +322,7 @@ public class LoginServiceImpl implements LoginService {
             case ENTER_OR_LEAVE_CHAT:
                 webWxSync();
                 break;
-            case MOD_CONTACT:
-            case ADD_OR_DEL_CONTACT:
 
-                log.info("联系人修改：{}", webWxSyncMsg);
-                msgCenter.handleModContact(webWxSyncMsg.getModContactList());
-                break;
             case A:
                 log.info("未知消息：{}", webWxSyncMsg);
                 break;

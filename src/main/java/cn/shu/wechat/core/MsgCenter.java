@@ -337,10 +337,10 @@ public class MsgCenter {
     /**
      * 处理联系人修改消息
      *
-     * @param contacts
+     * @param contacts 联系人
      */
     public void handleModContact(Contacts contacts) {
-
+        log.info("联系人修改");
         if (contacts != null) {
             Core.getMemberMap().put(contacts.getUsername(), contacts);
         }
@@ -356,7 +356,7 @@ public class MsgCenter {
 
         if (modContactList != null && !modContactList.isEmpty()) {
             for (Contacts contacts : modContactList) {
-                Core.getMemberMap().put(contacts.getUsername(), contacts);
+                handleModContact(contacts);
             }
 
         }
