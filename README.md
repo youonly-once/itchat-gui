@@ -26,6 +26,9 @@
 ## 首页效果如下：
  
  ![image](https://user-images.githubusercontent.com/67832925/127836900-2dc3dfd2-8e97-40e4-961c-e060a9b22a08.png)
+## 部分扩展功能
+ ![image](https://user-images.githubusercontent.com/67832925/138419834-cbc525a5-fe1d-4747-ad47-891cf74891cf.png)
+
  
 ## 一、通讯录
  ![image](https://user-images.githubusercontent.com/67832925/129480174-326b368a-47c3-4d74-8b5f-a8a390264c79.png)
