@@ -11,6 +11,7 @@ import cn.shu.wechat.swing.frames.BombFrame;
 import cn.shu.wechat.swing.frames.ImageViewerFrame;
 import cn.shu.wechat.swing.frames.ScreenShotFrame;
 import cn.shu.wechat.swing.listener.ExpressionListener;
+import cn.shu.wechat.swing.utils.ClipboardUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.OSUtil;
@@ -21,7 +22,16 @@ import com.melloware.jintellitype.JIntellitype;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -72,7 +82,8 @@ public class MessageEditorPanel extends ParentAvailablePanel {
 
     private ExpressionPopup expressionPopup;
     private final String roomId;
-    public MessageEditorPanel(JPanel parent,String roomId) {
+
+    public MessageEditorPanel(JPanel parent, String roomId) {
         super(parent);
         this.roomId = roomId;
         initComponents();
@@ -130,12 +141,12 @@ public class MessageEditorPanel extends ParentAvailablePanel {
 
 
         preventUndoLabel = new JLabel();
-         preventUndoNormalIcon = IconUtil.getIcon(this, "/image/prevent.png");
-         preventUndoActiveIcon = IconUtil.getIcon(this, "/image/prevent_active.png");
+        preventUndoNormalIcon = IconUtil.getIcon(this, "/image/prevent.png");
+        preventUndoActiveIcon = IconUtil.getIcon(this, "/image/prevent_active.png");
         preventUndoLabel.setIcon(preventUndoNormalIcon);
 
         autoReplyLabel = new JLabel();
-       autoReplyNormalIcon = IconUtil.getIcon(this, "/image/robot.png");
+        autoReplyNormalIcon = IconUtil.getIcon(this, "/image/robot.png");
         autoReplyActiveIcon = IconUtil.getIcon(this, "/image/robot_active.png");
         autoReplyLabel.setIcon(autoReplyNormalIcon);
         setUndoAndAutoLabel();
@@ -152,6 +163,8 @@ public class MessageEditorPanel extends ParentAvailablePanel {
         chartMsgLabel.setIcon(chartNormalIcon);
 
         textEditor = new RCTextEditor();
+        new DropTarget(textEditor, textEditor);
+        textEditor.setDragEnabled(true);
         textEditor.setBackground(Colors.WINDOW_BACKGROUND);
         textEditor.setFont(FontUtil.getDefaultFont(14));
         textEditor.setMargin(new Insets(0, 15, 0, 0));
@@ -262,7 +275,7 @@ public class MessageEditorPanel extends ParentAvailablePanel {
         autoReplyLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                    changeAutoStatus();
+                changeAutoStatus();
 
                 super.mouseClicked(e);
             }
@@ -305,10 +318,10 @@ public class MessageEditorPanel extends ParentAvailablePanel {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (bombFrame[0] == null){
+                if (bombFrame[0] == null) {
                     bombFrame[0] = new BombFrame(roomId);
                     bombFrame[0].setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-                }else{
+                } else {
                     bombFrame[0].setVisible(true);
                 }
 
@@ -327,11 +340,12 @@ public class MessageEditorPanel extends ParentAvailablePanel {
 
     /**
      * 创建图表菜单
+     *
      * @return 菜单
      */
     private JPopupMenu createChartPopup() {
         JPopupMenu jPopupMenu = new JPopupMenu();
-        jPopupMenu.setLayout(new GridLayout(12,3));
+        jPopupMenu.setLayout(new GridLayout(12, 3));
         for (Field declaredField : Contacts.class.getDeclaredFields()) {
             declaredField.setAccessible(true);
             JMenuItem jMenuItem = new JMenuItem(declaredField.getName() + "图表");
@@ -344,14 +358,15 @@ public class MessageEditorPanel extends ParentAvailablePanel {
 
     /**
      * 创建属性分布图并展示
+     *
      * @param attr 属性
      */
     private void createAndShowChart(String attr) {
         String remarkNameByGroupUserName = ContactsTools.getContactDisplayNameByUserName(roomId);
         ChartUtil chartUtil = SpringContextHolder.getBean(ChartUtil.class);
-        String path = chartUtil.makeGroupMemberAttrPieChart(roomId, remarkNameByGroupUserName, attr, java.awt.Toolkit.getDefaultToolkit().getScreenSize().width,  Toolkit.getDefaultToolkit().getScreenSize().height);
-        if (path == null){
-            JOptionPane.showMessageDialog(this,"创建失败。");
+        String path = chartUtil.makeGroupMemberAttrPieChart(roomId, remarkNameByGroupUserName, attr, java.awt.Toolkit.getDefaultToolkit().getScreenSize().width, Toolkit.getDefaultToolkit().getScreenSize().height);
+        if (path == null) {
+            JOptionPane.showMessageDialog(this, "创建失败。");
             return;
         }
         BufferedImage read = null;
@@ -366,6 +381,7 @@ public class MessageEditorPanel extends ParentAvailablePanel {
             ex.printStackTrace();
         }
     }
+
     private void screenShot() {
         ScreenShotFrame ssw = new ScreenShotFrame();
         ssw.setRoomId(roomId);
@@ -391,37 +407,38 @@ public class MessageEditorPanel extends ParentAvailablePanel {
     /**
      * 修改联系人的自动回复状态
      */
-    private void changeAutoStatus(){
-        new SwingWorker<Object,Object>(){
+    private void changeAutoStatus() {
+        new SwingWorker<Object, Object>() {
             Short autoStatus = 0;
             int i = 0;
+
             @Override
             protected Object doInBackground() throws Exception {
                 String to = ContactsTools.getContactDisplayNameByUserName(roomId);
                 IMsgHandlerFaceImpl face = SpringContextHolder.getBean(IMsgHandlerFaceImpl.class);
                 StatusMapper statusMapper = SpringContextHolder.getBean(StatusMapper.class);
                 Status status = statusMapper.selectByPrimaryKey(to);
-                if (status == null ){
+                if (status == null) {
                     //开启自动回复
                     status = new Status();
                     autoStatus = 1;
-                }else{
+                } else {
                     autoStatus = status.getAutoStatus();
-                    if (autoStatus == null){
+                    if (autoStatus == null) {
                         //开启自动回复
                         autoStatus = 1;
-                    }else if (autoStatus == 1){
+                    } else if (autoStatus == 1) {
                         //关闭自动回复
                         autoStatus = 2;
 
-                    }else if (autoStatus == 2){
+                    } else if (autoStatus == 2) {
                         //开启自动回复
                         autoStatus = 1;
                     }
                 }
-                if (autoStatus == 1){
+                if (autoStatus == 1) {
                     face.autoChatUserNameList.add(to);
-                }else if (autoStatus == 2){
+                } else if (autoStatus == 2) {
                     face.autoChatUserNameList.remove(to);
                 }
                 status.setAutoStatus(autoStatus);
@@ -432,48 +449,50 @@ public class MessageEditorPanel extends ParentAvailablePanel {
 
             @Override
             protected void done() {
-                if (i == 0)return;
-                if (autoStatus == 1){
+                if (i == 0) return;
+                if (autoStatus == 1) {
                     autoReplyLabel.setIcon(autoReplyActiveIcon);
-                }else if (autoStatus == 2){
+                } else if (autoStatus == 2) {
                     autoReplyLabel.setIcon(autoReplyNormalIcon);
                 }
             }
         }.execute();
     }
+
     /**
      * 修改联系人的防撤回状态
      */
-    private void changeUndoStatus(){
-        new SwingWorker<Object,Object>(){
+    private void changeUndoStatus() {
+        new SwingWorker<Object, Object>() {
             Short preventStatus = 0;
             int i = 0;
+
             @Override
             protected Object doInBackground() throws Exception {
                 String to = ContactsTools.getContactDisplayNameByUserName(roomId);
                 IMsgHandlerFaceImpl face = SpringContextHolder.getBean(IMsgHandlerFaceImpl.class);
                 StatusMapper statusMapper = SpringContextHolder.getBean(StatusMapper.class);
                 Status status = statusMapper.selectByPrimaryKey(to);
-                if (status == null ){
+                if (status == null) {
                     //关闭防撤回
                     status = new Status();
                     preventStatus = 2;
-                }else{
+                } else {
                     preventStatus = status.getUndoStatus();
-                    if (preventStatus == null){
+                    if (preventStatus == null) {
                         //关闭防撤回
                         preventStatus = 2;
-                    }else if (preventStatus == 2){
+                    } else if (preventStatus == 2) {
                         //开启防撤回
                         preventStatus = 1;
-                    }else if (preventStatus == 1){
+                    } else if (preventStatus == 1) {
                         //关闭防撤回
                         preventStatus = 2;
                     }
                 }
-                if (preventStatus == 2){
+                if (preventStatus == 2) {
                     face.nonPreventUndoMsgUserName.add(to);
-                }else if (preventStatus == 1){
+                } else if (preventStatus == 1) {
                     face.nonPreventUndoMsgUserName.remove(to);
                 }
                 status.setUndoStatus(preventStatus);
@@ -484,10 +503,10 @@ public class MessageEditorPanel extends ParentAvailablePanel {
 
             @Override
             protected void done() {
-                if (i == 0)return;
-                if (preventStatus == 2){
+                if (i == 0) return;
+                if (preventStatus == 2) {
                     preventUndoLabel.setIcon(preventUndoNormalIcon);
-                }else if (preventStatus == 1){
+                } else if (preventStatus == 1) {
                     preventUndoLabel.setIcon(preventUndoActiveIcon);
                 }
             }
@@ -495,13 +514,13 @@ public class MessageEditorPanel extends ParentAvailablePanel {
     }
 
 
-
     /**
      * 获取当前用户的撤回状态、自动回复状态
      */
-    public void setUndoAndAutoLabel(){
-        new SwingWorker<Object,Object>(){
-            Status status  = null;
+    public void setUndoAndAutoLabel() {
+        new SwingWorker<Object, Object>() {
+            Status status = null;
+
             @Override
             protected Object doInBackground() throws Exception {
                 String to = ContactsTools.getContactDisplayNameByUserName(roomId);
@@ -513,15 +532,15 @@ public class MessageEditorPanel extends ParentAvailablePanel {
 
             @Override
             protected void done() {
-                if (status == null || status.getUndoStatus() == null||status .getUndoStatus()== 1){
+                if (status == null || status.getUndoStatus() == null || status.getUndoStatus() == 1) {
                     preventUndoLabel.setIcon(preventUndoActiveIcon);
-                }else{
+                } else {
                     preventUndoLabel.setIcon(preventUndoNormalIcon);
                 }
 
-                if (status == null || status.getAutoStatus() == null||status .getAutoStatus()== 2){
+                if (status == null || status.getAutoStatus() == null || status.getAutoStatus() == 2) {
                     autoReplyLabel.setIcon(autoReplyNormalIcon);
-                }else{
+                } else {
                     autoReplyLabel.setIcon(autoReplyActiveIcon);
                 }
             }

@@ -8,6 +8,7 @@ import cn.shu.wechat.swing.panels.RightPanel;
 import cn.shu.wechat.swing.utils.*;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import sun.audio.AudioPlayer;
 import sun.audio.AudioStream;
 
@@ -68,13 +69,18 @@ public class MainFrame extends JFrame  {
         initComponents();
         initView();
         initResource();
+        initTrayFlashingThread();
     }
 
     private void initResource() {
         ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
             @Override
             public void run() {
-                initTray();
+                try {
+                    initTray();
+                } catch (AWTException e) {
+                    e.printStackTrace();
+                }
                 initMessageSound();
             }
         });
@@ -110,9 +116,9 @@ public class MainFrame extends JFrame  {
     /**
      * 初始化系统托盘图标
      */
-    private void initTray() {
+    private void initTray() throws AWTException {
         SystemTray systemTray = SystemTray.getSystemTray();//获取系统托盘
-        try {
+
             if (OSUtil.getOsType() == OSUtil.Mac_OS) {
                 normalTrayIcon = IconUtil.getIcon(this, "/image/ic_launcher_dark.png", 20, 20).getImage();
             } else {
@@ -161,16 +167,20 @@ public class MainFrame extends JFrame  {
             });
             menu.add(showItem);
             menu.add(exitItem);
-
             trayIcon.setPopupMenu(menu);
-
             systemTray.add(trayIcon);
 
-        } catch (AWTException e) {
-            e.printStackTrace();
-        }
     }
 
+    /**
+     *  显示通知
+     * @param caption       说明文字
+     * @param text          提醒消息
+     * @param messageType   消息类型
+     */
+    private void displayMessage(String caption, String text, TrayIcon.MessageType messageType){
+        trayIcon.displayMessage(caption,text,messageType);
+    }
     /**
      * 清除剪切板缓存文件
      */
@@ -178,34 +188,33 @@ public class MainFrame extends JFrame  {
         ClipboardUtil.clearCache();
     }
 
+
+    /**
+     * 初始化任务栏图标闪烁 线程
+     */
+    private void initTrayFlashingThread(){
+        ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
+            @SneakyThrows
+            @Override
+            public void run() {
+                while (true) {
+                    if (trayFlashing) {
+                        trayIcon.setImage(emptyTrayIcon);
+                        Thread.sleep(500);
+
+                        trayIcon.setImage(normalTrayIcon);
+                        Thread.sleep(500);
+                    }
+                }
+            }
+        });
+    }
+
     /**
      * 设置任务栏图标闪动
      */
     public synchronized void setTrayFlashing(boolean flashing) {
-        if (flashing == trayFlashing) {
-            return;
-        }
         trayFlashing = flashing;
-        if (trayFlashing) {
-            ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
-                @Override
-                public void run() {
-                    while (trayFlashing) {
-                        try {
-                            trayIcon.setImage(emptyTrayIcon);
-                            Thread.sleep(500);
-
-                            trayIcon.setImage(normalTrayIcon);
-                            Thread.sleep(500);
-
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            });
-        }
-
     }
 
     public boolean isTrayFlashing() {

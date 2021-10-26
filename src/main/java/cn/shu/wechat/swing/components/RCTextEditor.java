@@ -7,6 +7,8 @@ import cn.shu.wechat.swing.utils.ClipboardUtil;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.Transferable;
+import java.awt.dnd.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -15,10 +17,8 @@ import java.io.IOException;
 /**
  * Created by 舒新胜 on 03/07/2017.
  */
-public class RCTextEditor extends JTextPane {
-    @Override
-    public void paste() {
-        Object data = ClipboardUtil.paste();
+public class RCTextEditor extends JTextPane implements DropTargetListener {
+    public void paste(Object data) {
         if (data instanceof String) {
             this.replaceSelection((String) data);
         } else if (data instanceof ImageIcon) {
@@ -39,7 +39,11 @@ public class RCTextEditor extends JTextPane {
             }
         }
     }
-
+    @Override
+    public void paste() {
+        Object paste = ClipboardUtil.paste();
+        paste(paste);
+    }
     /**
      * 插入图片到编辑框，并自动调整图片大小
      *
@@ -93,5 +97,45 @@ public class RCTextEditor extends JTextPane {
 
         insertComponent(label);
 
+    }
+
+    @Override
+    public void dragEnter(DropTargetDragEvent dtde) {
+
+    }
+
+    @Override
+    public void dragOver(DropTargetDragEvent dtde) {
+
+    }
+
+    @Override
+    public void dropActionChanged(DropTargetDragEvent dtde) {
+
+    }
+
+    @Override
+    public void dragExit(DropTargetEvent dte) {
+
+    }
+
+    @Override
+    public void drop(DropTargetDropEvent dtde) {
+        if (dropListener != null){
+            dropListener.drop(dtde);
+        }else{
+            dtde.acceptDrop(DnDConstants.ACTION_COPY);
+            Transferable transferable = dtde.getTransferable();
+            Object data = ClipboardUtil.paste(transferable);
+            paste(data);
+        }
+    }
+    public interface DropListener{
+        void drop(DropTargetDropEvent dtde);
+    }
+    private DropListener dropListener;
+    public void addDropListener(DropListener dropListener){
+        this.dropListener = dropListener;
+        this.setDragEnabled(true);
     }
 }

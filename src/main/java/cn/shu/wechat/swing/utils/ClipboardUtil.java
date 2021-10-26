@@ -17,7 +17,7 @@ import java.util.UUID;
  * Created by 舒新胜 on 20/06/2017.
  */
 public class ClipboardUtil {
-    private static Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+    private static final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
     public static final String CLIPBOARD_TEMP_DIR;
 
     static {
@@ -88,9 +88,13 @@ public class ClipboardUtil {
         }
     }
 
-
     public static Object paste() {
         Transferable transferable = clipboard.getContents(null);
+        return paste(transferable);
+    }
+
+    public static Object paste(Transferable transferable) {
+
         if (transferable != null) {
             try {
                 if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
@@ -100,9 +104,7 @@ public class ClipboardUtil {
                         // 复制的是图片
                         if (isImage(file)) {
                             datas.add(transferImageFileToImageIcon(file));
-                        }
-                        // 复制的是非图片文件
-                        else {
+                        }else if (file.isFile()){
                             datas.add(file.getAbsolutePath());
                         }
 
