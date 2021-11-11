@@ -281,7 +281,7 @@ public class MessageEditorPanel extends ParentAvailablePanel {
             }
         });
 
-        JPopupMenu jPopupMenu = createChartPopup();
+
         chartMsgLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -297,7 +297,8 @@ public class MessageEditorPanel extends ParentAvailablePanel {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                jPopupMenu.show((Component) e.getSource(), e.getX() - jPopupMenu.getWidth(), e.getY() - jPopupMenu.getHeight());
+                ChartPopupMenu instance = ChartPopupMenu.getInstance(roomId);
+                instance.show((Component) e.getSource(), e.getX() - instance.getWidth(), e.getY() - instance.getHeight());
                 super.mouseClicked(e);
             }
         });
@@ -338,49 +339,8 @@ public class MessageEditorPanel extends ParentAvailablePanel {
         });
     }
 
-    /**
-     * 创建图表菜单
-     *
-     * @return 菜单
-     */
-    private JPopupMenu createChartPopup() {
-        JPopupMenu jPopupMenu = new JPopupMenu();
-        jPopupMenu.setLayout(new GridLayout(12, 3));
-        for (Field declaredField : Contacts.class.getDeclaredFields()) {
-            declaredField.setAccessible(true);
-            JMenuItem jMenuItem = new JMenuItem(declaredField.getName() + "图表");
-            jMenuItem.addActionListener(e -> createAndShowChart(declaredField.getName().toLowerCase()));
-            jPopupMenu.add(jMenuItem);
-        }
 
-        return jPopupMenu;
-    }
 
-    /**
-     * 创建属性分布图并展示
-     *
-     * @param attr 属性
-     */
-    private void createAndShowChart(String attr) {
-        String remarkNameByGroupUserName = ContactsTools.getContactDisplayNameByUserName(roomId);
-        ChartUtil chartUtil = SpringContextHolder.getBean(ChartUtil.class);
-        String path = chartUtil.makeGroupMemberAttrPieChart(roomId, remarkNameByGroupUserName, attr, java.awt.Toolkit.getDefaultToolkit().getScreenSize().width, Toolkit.getDefaultToolkit().getScreenSize().height);
-        if (path == null) {
-            JOptionPane.showMessageDialog(this, "创建失败。");
-            return;
-        }
-        BufferedImage read = null;
-        try {
-            read = ImageIO.read(new File(path));
-            ImageViewerFrame instance = ImageViewerFrame.getInstance();
-            instance.setImage(read);
-
-            instance.toFront();
-            instance.setVisible(true);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-    }
 
     private void screenShot() {
         ScreenShotFrame ssw = new ScreenShotFrame();
@@ -449,7 +409,9 @@ public class MessageEditorPanel extends ParentAvailablePanel {
 
             @Override
             protected void done() {
-                if (i == 0) return;
+                if (i == 0) {
+                    return;
+                }
                 if (autoStatus == 1) {
                     autoReplyLabel.setIcon(autoReplyActiveIcon);
                 } else if (autoStatus == 2) {
@@ -503,7 +465,9 @@ public class MessageEditorPanel extends ParentAvailablePanel {
 
             @Override
             protected void done() {
-                if (i == 0) return;
+                if (i == 0) {
+                    return;
+                }
                 if (preventStatus == 2) {
                     preventUndoLabel.setIcon(preventUndoNormalIcon);
                 } else if (preventStatus == 1) {

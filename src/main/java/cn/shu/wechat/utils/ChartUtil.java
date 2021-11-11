@@ -1,6 +1,7 @@
 package cn.shu.wechat.utils;
 
 import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.mapper.ContactsMapper;
@@ -31,6 +32,7 @@ import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.chart.ui.RectangleEdge;
+import org.jfree.chart.util.SortOrder;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.general.DatasetUtils;
 import org.jfree.data.general.DefaultPieDataset;
@@ -39,6 +41,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
@@ -63,8 +66,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 @Slf4j
 public class ChartUtil {
-    private static final String CHART_PATH = "C:/chat/";
 
+    @Resource
+    private WechatConfiguration wechatConfiguration;
     @Resource
     private AttrHistoryMapper attrHistoryMapper;
 
@@ -92,74 +96,143 @@ public class ChartUtil {
 
         // 生成饼状图
         makeWXContactUpdateAttrBarChart();
-        makeWXContactInfoPieChart();
         makeWXContactMessageTop();
 
     }
 
     /**
+     * 创建群成员属性饼图，或者创建所有好友的属性饼图
      *
-     * @param groupName 群id
-     * @param groupRemarkName 群备注
-     * @param attrName 属性名
-     * @param width 图片宽度
-     * @param height 图片高度
+     * @param userName 用户昵称
+     * @param attrName 属性名称
+     * @param width    图片宽度
+     * @param height   图片高度
      * @return 图片路径
      */
-    public String makeGroupMemberAttrPieChart(String groupName, String groupRemarkName, String attrName, int width, int height) {
+    public String makeContactsAttrPieChartAsPng(String userName, String attrName, int width, int height) {
+        String chartName = UUID.randomUUID().toString().replace("-", "") + "_" + attrName + ".png";
+        if (userName.startsWith("@@")) {
+            String remarkNameByGroupUserName = ContactsTools.getContactDisplayNameByUserName(userName);
+
+            return saveChartAsPng(chartName, makeGroupMemberAttrPieChart(userName, remarkNameByGroupUserName, attrName, width, height), width, height);
+        } else if (userName.equals(Core.getUserName())) {
+            return saveChartAsPng(chartName, makeMineContactsAttrPieChart(attrName, width, height), width, height);
+        }
+        return null;
+    }
+
+    /**
+     * 创建群成员属性饼图，或者创建所有好友的属性饼图
+     *
+     * @param userName 用户昵称
+     * @param attrName 属性名称
+     * @param width    图片宽度
+     * @param height   图片高度
+     * @return BufferedImage
+     */
+    public BufferedImage makeContactsAttrPieChartAsBufferedImage(String userName, String attrName, int width, int height) {
+        if (userName.startsWith("@@")) {
+            String remarkNameByGroupUserName = ContactsTools.getContactDisplayNameByUserName(userName);
+
+            JFreeChart jFreeChart = makeGroupMemberAttrPieChart(userName, remarkNameByGroupUserName, attrName, width, height);
+            return jFreeChart.createBufferedImage(width, height);
+        } else if (userName.equals(Core.getUserName())) {
+            JFreeChart jFreeChart = makeMineContactsAttrPieChart(attrName, width, height);
+            return jFreeChart.createBufferedImage(width, height);
+        }
+        return null;
+    }
+
+    /**
+     * 群成员属性分布图
+     *
+     * @param groupName       群id
+     * @param groupRemarkName 群备注
+     * @param attrName        属性名
+     * @param width           图片宽度
+     * @param height          图片高度
+     * @return 图表对象
+     */
+    public JFreeChart makeGroupMemberAttrPieChart(String groupName, String groupRemarkName, String attrName, int width, int height) {
         log.info("makeGroupMemberAttrPieChart：" + attrName);
         Contacts group = Core.getMemberMap().get(groupName);
         List<Contacts> memberlist = null;
         if (group == null
-                || group.getMemberlist()== null
-                || group.getMemberlist().isEmpty()){
+                || group.getMemberlist() == null
+                || group.getMemberlist().isEmpty()) {
             memberlist = loginService.WebWxBatchGetContact(groupName);
-        }else{
+        } else {
             memberlist = group.getMemberlist();
         }
         if (memberlist == null || memberlist.isEmpty()) {
             return null;
         }
-        for (Field field : Contacts.class.getDeclaredFields()) {
-            field.setAccessible(true);
-            String key = field.getName();
-            if (!key.equalsIgnoreCase(attrName)) {
-                continue;
-            }
-            String title = "【" + groupRemarkName + "】群成员"+key+"比例";
-            Map<String, AtomicInteger> testMap = new HashMap<>(10);
-            for (Contacts o : memberlist) {
-                Object value = null;
-                try {
-                    value = field.get(o);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-                if (value == null) {
-                    value = "未设置";
-                }else if (value.equals("")){
-                    value = "未设置属性";
-                }else if (key.equals("sex")) {
-                    if (Byte.parseByte(value.toString()) == 2){
+        String title = "【" + groupRemarkName + "】群成员" + attrName + "比例";
+        DefaultPieDataset<String> dataPieSet = getPieChatDatasetByWXContactsAttr(memberlist, attrName);
+        if (dataPieSet == null) {
+            return null;
+        }
+        return createValidityComparePimChar(dataPieSet, title);
+
+    }
+
+    /**
+     * 我的好友属性饼图
+     *
+     * @param attrName 属性名
+     * @param width    图片宽度
+     * @param height   图片高度
+     * @return 图表对象
+     */
+    public JFreeChart makeMineContactsAttrPieChart(String attrName, int width, int height) {
+        String title = attrName + "分布图";
+        DefaultPieDataset<String> dataPieSet = getPieChatDatasetByWXContactsAttr(Core.getContactMap().values(), attrName);
+        if (dataPieSet == null) {
+            return null;
+        }
+        return createValidityComparePimChar(dataPieSet, title);
+
+    }
+
+    /**
+     * 根据属性创建饼图数据集
+     *
+     * @param sourceList 数据源
+     * @param attr       属性名
+     * @return 饼图数据集
+     */
+    public DefaultPieDataset<String> getPieChatDatasetByWXContactsAttr(Collection<Contacts> sourceList, String attr) {
+        try {
+            DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
+            for (Contacts contacts : sourceList) {
+                Field declaredField = contacts.getClass().getDeclaredField(attr);
+                declaredField.setAccessible(true);
+                Object value = declaredField.get(contacts);
+                if (value == null || "".equals(value.toString())) {
+                    value = "未设置" + attr;
+                } else if (attr.equals("sex")) {
+                    if (Byte.parseByte(value.toString()) == 2) {
                         value = "女";
-                    }else if (Byte.parseByte(value.toString()) == 1){
+                    } else if (Byte.parseByte(value.toString()) == 1) {
                         value = "男";
-                    }else{
+                    } else {
                         value = "未设置";
                     }
                 }
 
-                //统计次数
-                testMap.computeIfAbsent(value.toString().trim(), v -> new AtomicInteger()).getAndIncrement();
-            }
-            //排序
-            Map<String, AtomicInteger> sortMap = sortMapByValue(testMap);
-            //创建数据
-            PieDataset dataPieSet = getDataPieSetByUtil(sortMap);
-            String imgPath = createValidityComparePimChar(dataPieSet, title,
-                    UUID.randomUUID().toString().replace("-", "") + "_" + key + ".png",  width, height);
-            return imgPath;
+                String vStr = value.toString();
+                if (dataset.getIndex(vStr) == -1) {
+                    dataset.setValue(vStr, 1);
+                } else {
+                    dataset.setValue(vStr, dataset.getValue(vStr).longValue() + 1);
+                }
 
+            }
+            dataset.sortByValues(SortOrder.DESCENDING);
+            return dataset;
+
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
         }
         return null;
     }
@@ -230,69 +303,6 @@ public class ChartUtil {
         createStackedBarChart(dataset, "x坐标", "y坐标", "柱状图", "stsckedBar.png");
     }
 
-    /**
-     * 生成微信好友属性饼状图
-     */
-    public void makeWXContactInfoPieChart() {
-        System.out.println("create pie-chart.");
-        Map<String, Contacts> contactMap = Core.getContactMap();
-
-        Set<String> keys = new HashSet<>();
-        for (Contacts value : contactMap.values()) {
-            Class<Contacts> contactsClass = Contacts.class;
-            for (Field declaredField : contactsClass.getDeclaredFields()) {
-                declaredField.setAccessible(true);
-                keys.add(declaredField.getName());
-            }
-            break;
-        }
-        if (keys.isEmpty()) {
-            return;
-        }
-        HashMap<String, HashMap<String, String>> stringHashMapHashMap = new HashMap<>();
-        HashMap<String, String> stringStringHashMap = new HashMap<String, String>();
-        stringStringHashMap.put("0", "未设置");
-        stringStringHashMap.put("1", "男");
-        stringStringHashMap.put("2", "女");
-        stringHashMapHashMap.put("Sex", stringStringHashMap);
-        stringStringHashMap.put("", "未设置");
-        stringHashMapHashMap.put("Province", stringStringHashMap);
-        for (String key : keys) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    String title = key;
-                    switch (key) {
-                        case "Sex":
-                            title = "微信好友性别分布";
-                            break;
-                        case "Province":
-                            title = "微信好友省份分布";
-                            break;
-                    }
-
-                    Map<String, AtomicInteger> testMap = new HashMap<>(10);
-                    for (Contacts value : contactMap.values()) {
-                        JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(value));
-                        String s = null;
-                        if (stringHashMapHashMap.get(key) != null) {
-                            s = stringHashMapHashMap.get(key).get(jsonObject.getString(key));
-                        }
-                        if (s == null) {
-                            s = jsonObject.getString(key);
-                        }
-
-                        testMap.computeIfAbsent(s, v -> new AtomicInteger()).getAndIncrement();
-                    }
-                    createValidityComparePimChar(getDataPieSetByUtil(sortMapByValue(testMap)), title,
-                            key + ".png",  1920, 1080);
-                }
-            }).start();
-
-        }
-
-
-    }
 
     /**
      * 聊天双方用户活跃度(消息发送次数)
@@ -855,8 +865,8 @@ public class ChartUtil {
 
         FileOutputStream fos_jpg = null;
         try {
-            isChartPathExist(CHART_PATH);
-            String chartName = CHART_PATH + charName;
+            isChartPathExist(wechatConfiguration.getBasePath());
+            String chartName = wechatConfiguration.getBasePath() + charName;
             fos_jpg = new FileOutputStream(chartName);
             ChartUtils.writeChartAsPNG(fos_jpg, chart, width, height, true, 10);
             return chartName;
@@ -947,8 +957,8 @@ public class ChartUtil {
 
         FileOutputStream fos_jpg = null;
         try {
-            isChartPathExist(CHART_PATH);
-            String chartName = CHART_PATH + charName;
+            isChartPathExist(wechatConfiguration.getBasePath());
+            String chartName = wechatConfiguration.getBasePath() + charName;
             fos_jpg = new FileOutputStream(chartName);
             ChartUtils.writeChartAsPNG(fos_jpg, chart, 500, 500, true, 10);
             return chartName;
@@ -969,12 +979,11 @@ public class ChartUtil {
      *
      * @param dataset    数据集
      * @param chartTitle 图标题
-     * @param charName   生成图的名字
-     * @return
+     * @return 图表对象
      */
-    public String createValidityComparePimChar(PieDataset dataset,
-                                               String chartTitle, String charName, int width, int height) {
-        JFreeChart chart = ChartFactory.createPieChart3D(chartTitle, // chart
+    public JFreeChart createValidityComparePimChar(PieDataset<String> dataset, String chartTitle) {
+
+        JFreeChart chart = ChartFactory.createPieChart3D(chartTitle,
                 // title
                 dataset,// data
                 true,// include legend
@@ -1028,32 +1037,43 @@ public class ChartUtil {
         plot.setSectionPaint(pieKeys[0], new Color(65, 105, 225));
         plot.setSectionPaint(pieKeys[1], new Color(30, 144, 255));
         plot.setLabelLinkMargin(0.2);
-        FileOutputStream fos_jpg = null;
+        return chart;
+    }
+
+    /**
+     * 将图表保存为文件
+     *
+     * @param chartName 图表名称
+     * @param chart     图表
+     * @param width     宽度
+     * @param height    高度
+     * @return 文件路径
+     */
+    public String saveChartAsPng(String chartName, JFreeChart chart, int width, int height) {
+        FileOutputStream fosJpg = null;
         try {
             // 文件夹不存在则创建
-            isChartPathExist(CHART_PATH);
-            String chartName = CHART_PATH + charName;
+            isChartPathExist(wechatConfiguration.getBasePath());
+            chartName = wechatConfiguration.getBasePath() + chartName;
 
-            fos_jpg = new FileOutputStream(chartName);
-            // 高宽的设置影响椭圆饼图的形状
-            ChartUtils.writeChartAsPNG(fos_jpg, chart, width, height);
-            //发送消息
-            fos_jpg.close();//先关流才能使用文件发送
+            fosJpg = new FileOutputStream(chartName);
+            //高宽的设置影响椭圆饼图的形状
+            ChartUtils.writeChartAsPNG(fosJpg, chart, width, height);
+            fosJpg.close();
             return chartName;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         } finally {
             try {
-                if (fos_jpg != null) {
-                    fos_jpg.close();
+                if (fosJpg != null) {
+                    fosJpg.close();
                 }
 
             } catch (Exception e1) {
                 e1.printStackTrace();
             }
         }
-
     }
 
     /**
@@ -1142,8 +1162,8 @@ public class ChartUtil {
 
         FileOutputStream fos_jpg = null;
         try {
-            isChartPathExist(CHART_PATH);
-            String chartName = CHART_PATH + charName;
+            isChartPathExist(wechatConfiguration.getBasePath());
+            String chartName = wechatConfiguration.getBasePath() + charName;
             fos_jpg = new FileOutputStream(chartName);
 
             // 将报表保存为png文件
@@ -1270,8 +1290,8 @@ public class ChartUtil {
 
         FileOutputStream fos_jpg = null;
         try {
-            isChartPathExist(CHART_PATH);
-            String chartName = CHART_PATH + charName;
+            isChartPathExist(wechatConfiguration.getBasePath());
+            String chartName = wechatConfiguration.getBasePath() + charName;
             fos_jpg = new FileOutputStream(chartName);
             ChartUtils.writeChartAsPNG(fos_jpg, chart, 500, 500, true, 10);
             return chartName;

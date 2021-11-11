@@ -61,7 +61,7 @@ public class LoginFrame extends JFrame {
     private WechatConfiguration wechatConfiguration;
 
     private static final int WINDOW_WIDTH = 300;
-    private static final int WINDOW_HEIGHT = 400;
+    private static final int WINDOW_HEIGHT = 450;
 
     private JPanel controlPanel;
     private JLabel closeLabel;
