@@ -1,6 +1,27 @@
 
 # Java Swing实现微信桌面端增强版。
  在微信原有功能基础上做功能增强，例如聊天记录统计分析、防撤回、自动回复、定时消息等。
+# 扩展功能
+
+
+## 1、防撤回功能（语音、文字、图片、视频、...）
+ >![image](https://user-images.githubusercontent.com/67832925/125043492-90f7ab80-e0cd-11eb-861b-9852e3d9483b.png)![image](https://user-images.githubusercontent.com/67832925/125046970-1597f900-e0d1-11eb-9d57-b51bd689133a.png)
+![image](https://user-images.githubusercontent.com/67832925/141230214-0101e829-97ac-4d6e-93f3-d0b841b56a90.png)
+
+
+## 2、自动回复功能（智能聊天、酒店查询、小游戏、讲笑话、...）
+ >![image](https://user-images.githubusercontent.com/67832925/125043653-bc7a9600-e0cd-11eb-8ab5-6bc64bc13c15.png)
+## 3、用户属性监测（头像、昵称、签名、朋友圈动态、对方打开与你的聊天框、...）
+   想象一下你的女神改个签名、打开你的聊天框你马上就能知道，那岂不是手到擒来。
+ > ![image](https://user-images.githubusercontent.com/67832925/125041412-51c85b00-e0cb-11eb-9251-fc038bab3c2e.png)![image](https://user-images.githubusercontent.com/67832925/125045236-58f16800-e0cf-11eb-9de8-a8d261464e38.png)
+
+
+## 4、消息轰炸(不能太频繁，否则会被禁言)
+>![image](https://user-images.githubusercontent.com/67832925/125042196-272ad200-e0cc-11eb-93a7-d112e89a599b.png)
+## 5、群成员统计功能(性别、城市、活跃度、...)
+![image](https://user-images.githubusercontent.com/67832925/125046255-6ce99980-e0d0-11eb-938e-256e70d458c3.png)![image](https://user-images.githubusercontent.com/67832925/125046015-2eec7580-e0d0-11eb-849d-e5350bf79504.png)![image](https://user-images.githubusercontent.com/67832925/125046044-390e7400-e0d0-11eb-971d-bec954ea1424.png)![image](https://user-images.githubusercontent.com/67832925/125046064-3e6bbe80-e0d0-11eb-8860-9a9e8c3a3630.png)
+## 6、共同好友的聊天记录截获
+## 7、定时消息、消息定时撤回
 
 # 安装说明(普通人员)
 ## 1、下载JAVA JDK安装
@@ -111,29 +132,9 @@
 
   
 
-# 八、扩展功能
-
-
-## 1、防撤回功能（语音、文字、图片、视频、...）
- >![image](https://user-images.githubusercontent.com/67832925/125043492-90f7ab80-e0cd-11eb-861b-9852e3d9483b.png)![image](https://user-images.githubusercontent.com/67832925/125046970-1597f900-e0d1-11eb-9d57-b51bd689133a.png)
-
-
-## 2、自动回复功能（智能聊天、酒店查询、小游戏、讲笑话、...）
- >![image](https://user-images.githubusercontent.com/67832925/125043653-bc7a9600-e0cd-11eb-8ab5-6bc64bc13c15.png)
-## 3、用户属性监测（头像、昵称、签名、朋友圈动态、对方打开与你的聊天框、...）
-   想象一下你的女神改个签名、打开你的聊天框你马上就能知道，那岂不是手到擒来。
- > ![image](https://user-images.githubusercontent.com/67832925/125041412-51c85b00-e0cb-11eb-9251-fc038bab3c2e.png)![image](https://user-images.githubusercontent.com/67832925/125045236-58f16800-e0cf-11eb-9de8-a8d261464e38.png)
-
-
-## 4、消息轰炸(不能太频繁，否则会被禁言)
->![image](https://user-images.githubusercontent.com/67832925/125042196-272ad200-e0cc-11eb-93a7-d112e89a599b.png)
-## 5、群成员统计功能(性别、城市、活跃度、...)
-![image](https://user-images.githubusercontent.com/67832925/125046255-6ce99980-e0d0-11eb-938e-256e70d458c3.png)![image](https://user-images.githubusercontent.com/67832925/125046015-2eec7580-e0d0-11eb-849d-e5350bf79504.png)![image](https://user-images.githubusercontent.com/67832925/125046044-390e7400-e0d0-11eb-971d-bec954ea1424.png)![image](https://user-images.githubusercontent.com/67832925/125046064-3e6bbe80-e0d0-11eb-8860-9a9e8c3a3630.png)
-## 6、共同好友的聊天记录截获
-## 7、定时消息、消息定时撤回
 
 
 
 
 > 以上几个功能只是起到抛砖引玉的作用，请打开你的脑洞吧，朋友。
-借鉴了开源项目wechat_desktop
+借鉴了开源项目wechat_desktop、itchat4j
