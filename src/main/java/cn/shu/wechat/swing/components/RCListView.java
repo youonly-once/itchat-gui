@@ -432,4 +432,12 @@ public class RCListView extends JScrollPane {
     public interface ScrollListener {
         void onScroll(int curr,int max);
     }
+
+    /**
+     * 移除
+     * @param pos 位置
+     */
+    public void removeItem(int pos){
+        contentPanel.remove(pos);
+    }
 }

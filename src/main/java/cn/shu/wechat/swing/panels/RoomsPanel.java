@@ -215,7 +215,45 @@ public class RoomsPanel extends ParentAvailablePanel {
             }
         }
     }
+    /**
+     * 删除房间
+     * @param pos 位置
+     * @param roomId 房间ID
+     */
+    public void removeItem(int pos,String roomId){
+        if (pos == -1){
+            return;
+        }
+        roomItemList.remove(pos);
+        roomItemsListView.notifyDataSetChanged(false);
+        roomItemsListView.scrollToPosition(0);
+        RoomChatContainer.getContext().removeCard(roomId);
+        Core.getRecentContacts().remove(roomId);
+    }
 
+    /**
+     * 删除房间
+     * @param roomId 房间ID
+     */
+    public void removeItem(String roomId){
+        int pos = -1;
+        roomItemsListView.notifyDataSetChanged(false);
+        roomItemsListView.scrollToPosition(0);
+        for (int i = 0; i < roomItemList.size(); i++) {
+            if (roomItemList.get(i).getRoomId() .equals(roomId)){
+                pos = i;
+                break;
+            }
+
+        }
+        if (pos == -1){
+            return;
+        }
+        roomItemList.remove(pos);
+        roomItemsListView.removeItem(pos);
+        RoomChatContainer.getContext().removeCard(roomId);
+        Core.getRecentContacts().remove(roomId);
+    }
     /**
      * 更新房间消息为已读
      *

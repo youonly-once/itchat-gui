@@ -10,6 +10,8 @@ import cn.shu.wechat.swing.utils.TimeUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -133,7 +135,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             viewHolder.mouseListener.setMyHolder(viewHolder);
             viewHolder.mouseListener.setMyRoomId(roomItem.getRoomId());
         }else{
-            viewHolder.mouseListener = new RoomItemAbstractMouseListener(viewHolder,roomItem.getRoomId());;
+            viewHolder.mouseListener = new RoomItemAbstractMouseListener(viewHolder,roomItem.getRoomId(),position);;
             viewHolder.addMouseListener(viewHolder.mouseListener);
         }
 
@@ -141,10 +143,20 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
 
 
     class RoomItemAbstractMouseListener extends AbstractMouseListener{
-
-        public RoomItemAbstractMouseListener(RoomItemViewHolder myHolder, String myRoomId) {
+        private final JPopupMenu jPopupMenu = new JPopupMenu();
+        private final int position;
+        public RoomItemAbstractMouseListener(RoomItemViewHolder myHolder, String myRoomId,int pos) {
             this.myHolder = myHolder;
             this.myRoomId = myRoomId;
+            this.position = pos;
+            JMenuItem delItem = new JMenuItem("删除");
+            delItem.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    RoomsPanel.getContext().removeItem(position,myRoomId);
+                }
+            });
+            jPopupMenu.add(delItem);
         }
 
         public void setMyHolder(RoomItemViewHolder myHolder) {
@@ -169,6 +181,8 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
 
                     selectedViewHolder = myHolder;
                 }
+            }else if(e.getButton() == MouseEvent.BUTTON3){
+                jPopupMenu.show(e.getComponent(),e.getX(),e.getY());
             }
         }
 
@@ -187,7 +201,6 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             }
         }
     };
-
     private void setBackground(RoomItemViewHolder holder, Color color) {
         if (holder == null){
             //首次启动时 holder为null

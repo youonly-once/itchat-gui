@@ -76,6 +76,18 @@ public class RoomChatContainer extends ParentAvailablePanel {
     }
 
     /**
+     * 删除聊天框
+     * @param roomId 房间ID
+     */
+    public void removeCard(String roomId){
+        if (!cards.containsKey(roomId)){
+            return;
+        }
+        RoomChatPanelCard remove = cards.remove(roomId);
+        remove(remove);
+    }
+
+    /**
      * 获取对应层
      * @param roomId roomId
      */
