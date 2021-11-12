@@ -56,6 +56,16 @@ public class RoomItem implements Comparable<RoomItem> {
      */
     private boolean isRefreshHead;
 
+    /**
+     * 是否静音
+     */
+    private boolean isMute;
+
+    /**
+     * 是否有新消息
+     */
+    private boolean hasNewMsg;
+
     @Override
     public int compareTo(RoomItem o) {
         // 注意，不能强制转int, 两个时间相差太远时有可能溢出
@@ -63,14 +73,17 @@ public class RoomItem implements Comparable<RoomItem> {
         long ret = o.getTimestamp() - this.getTimestamp();
         return ret > 0 ? 1 : -1;
     }
-    public RoomItem (Contacts contacts,String latestMsg, int msgCount){
+    public RoomItem (Contacts contacts,String latestMsg, int msgCount,Boolean hasNewMsg){
         setRoomId(contacts.getUsername());
         setTimestamp(System.currentTimeMillis());
         setName(ContactsTools.getContactDisplayNameByUserName(contacts.getUsername()));
-        setGroup(contacts.getUsername().startsWith("@@"));
+        setGroup(ContactsTools.isRoomContact(contacts));
         setLastMessage(latestMsg);
         setHeadImgPath(contacts.getHeadimgurl());
         setRefreshHead(true);
+        setHasNewMsg(true);
+        setMute(ContactsTools.isMute(contacts));
         setUnreadCount(msgCount);
+        setHasNewMsg(hasNewMsg);
     }
 }

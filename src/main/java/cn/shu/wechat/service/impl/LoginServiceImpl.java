@@ -358,7 +358,7 @@ public class LoginServiceImpl implements LoginService {
                         case MOBILE_LOGIN_OUT: {
                             log.warn(syncCheckRetCodeEnum.getType());
                             //重启客户端
-                            WeChatStater.restart();
+                            //WeChatStater.restart();
                             break;
                         }
                         case TICKET_ERROR:

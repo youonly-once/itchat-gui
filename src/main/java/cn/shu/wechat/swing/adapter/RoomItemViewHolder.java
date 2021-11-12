@@ -21,6 +21,7 @@ public class RoomItemViewHolder extends ViewHolder {
     public JPanel nameBrief = new JPanel();
     public JLabel time = new JLabel();
     public JLabel unreadCount = new JLabel();
+    public JLabel mutePoint = new JLabel();
     public JPanel timeUnread = new JPanel();
     public static final int HEIGHT = 64;
     private Object tag;
@@ -38,9 +39,7 @@ public class RoomItemViewHolder extends ViewHolder {
         setOpaque(true);
         setForeground(Colors.FONT_WHITE);
 
-//        ImageIcon imageIcon = IconUtil.getIcon(this,"/image/avatar.jpg"));
-//        imageIcon.setImage(imageIcon.getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH));
-//        avatar.setIcon(imageIcon);
+
 
 
         roomName.setFont(FontUtil.getDefaultFont(14));
@@ -66,10 +65,16 @@ public class RoomItemViewHolder extends ViewHolder {
         unreadCount.setVerticalAlignment(SwingConstants.CENTER);
         unreadCount.setVerticalTextPosition(SwingConstants.CENTER);
 
+        mutePoint.setIcon(IconUtil.getIcon(this,"/image/red_point.png"));
+        mutePoint.setVisible(false);
+        mutePoint.setHorizontalAlignment(SwingConstants.CENTER);
+        mutePoint.setVerticalAlignment(SwingConstants.CENTER);
+
         timeUnread = new JPanel();
         timeUnread.setLayout(new BorderLayout());
         timeUnread.setBackground(Colors.DARK);
         timeUnread.add(time, BorderLayout.NORTH);
+
         timeUnread.add(unreadCount, BorderLayout.CENTER);
 
     }

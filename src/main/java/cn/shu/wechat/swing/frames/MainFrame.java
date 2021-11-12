@@ -73,16 +73,13 @@ public class MainFrame extends JFrame  {
     }
 
     private void initResource() {
-        ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    initTray();
-                } catch (AWTException e) {
-                    e.printStackTrace();
-                }
-                initMessageSound();
+        ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
+            try {
+                initTray();
+            } catch (AWTException e) {
+                e.printStackTrace();
             }
+            initMessageSound();
         });
 
     }
@@ -117,7 +114,7 @@ public class MainFrame extends JFrame  {
      * 初始化系统托盘图标
      */
     private void initTray() throws AWTException {
-        SystemTray systemTray = SystemTray.getSystemTray();//获取系统托盘
+        SystemTray systemTray = SystemTray.getSystemTray();
 
             if (OSUtil.getOsType() == OSUtil.Mac_OS) {
                 normalTrayIcon = IconUtil.getIcon(this, "/image/ic_launcher_dark.png", 20, 20).getImage();
@@ -159,12 +156,7 @@ public class MainFrame extends JFrame  {
             });
 
             MenuItem showItem = new MenuItem("打开微信");
-            showItem.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    setVisible(true);
-                }
-            });
+            showItem.addActionListener(e -> setVisible(true));
             menu.add(showItem);
             menu.add(exitItem);
             trayIcon.setPopupMenu(menu);

@@ -26,8 +26,8 @@ public class TimedTask {
     public AsyncTaskExecutor asyncTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setThreadNamePrefix("ThreadPoolTaskExecutor-");
-        executor.setMaxPoolSize(3);
-        executor.setCorePoolSize(3);
+        executor.setMaxPoolSize(1);
+        executor.setCorePoolSize(1);
         executor.setQueueCapacity(0);
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         return executor;
@@ -50,47 +50,12 @@ public class TimedTask {
      * 30秒获取一次联系人信息 76j00
      */
     @Scheduled(cron = "*/59 * * * * ?")
-    /*@Async*/
     public void updateContactTask() {
         if (Core.isAlive()) {
-            //log.info("更新联系人！");
             loginService.webWxGetContact();
 
             loginService.WebWxBatchGetContact();
-            //  log.info("更新联系人完成！");
+
         }
-    }
-
-
-    /**
-     * 10分钟检测一次登录状态
-     */
-    @Scheduled(cron = "0 */10 * * * ?")
-    /*@Async*/
-    public void checkLoginStatusTask() {
-        if (Core.isAlive()) {
-            // 秒为单位
-            long t1 = System.currentTimeMillis();
-            if (t1 - Core.getLastNormalRetCodeTime() > 60 * 1000) {
-                // 超过60秒，判为离线
-                //Core.setAlive(false);
-                // 心跳检测不准确
-                log.error("微信已离线");
-                //重新开启 好像是线程循环出了问题
-                log.error("活跃线程数量：{}", ((ThreadPoolExecutor) ExecutorServiceUtil.getReceivingExecutorService()).getActiveCount());
-                Core.setAlive(false);
-                SleepUtils.sleep(60 * 1000);
-                loginService.startReceiving();
-            }
-        }
-    }
-
-    /**
-     * 生成图标
-     */
-    @Scheduled(cron = "0 0 12 * * ?")
-    @Async
-    public void createChart() {
-        chart.create();
     }
 }

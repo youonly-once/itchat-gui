@@ -317,7 +317,7 @@ public class LoginFrame extends JFrame {
             SwingUtilities.invokeLater(() -> {
                 ArrayList<RoomItem> rooms = new ArrayList<>();
                 for (String userId : recentContacts) {
-                    rooms.add(new RoomItem(Core.getMemberMap().get(userId), "", 0));
+                    rooms.add(new RoomItem(Core.getMemberMap().get(userId), "", 0,false));
                 }
                 RoomsPanel.getContext().addRoom(rooms);
             });

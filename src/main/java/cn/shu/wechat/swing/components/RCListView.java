@@ -100,8 +100,8 @@ public class RCListView extends JScrollPane {
     private void initComponents() {
         contentPanel = new JPanel();
         //用VerticalFlowLayout有问题，显示的房间数和实际不符
-        //contentPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, hGap, vGap, true, false));
-        contentPanel.setLayout(new GridLayout(0,1));
+        contentPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, hGap, vGap, true, false));
+        //contentPanel.setLayout(new GridLayout(0,1,hGap,vGap));
         contentPanel.setBackground(Colors.WINDOW_BACKGROUND);
 
         this.setViewportView(contentPanel);

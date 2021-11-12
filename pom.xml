@@ -424,7 +424,7 @@
             <id>1-dev</id>
             <properties>
                 <spring-profiles-active>dev</spring-profiles-active>
-                <output-basedir>E:\JAVA\eee\</output-basedir>
+                <output-basedir>E:\JAVA\eee\spring-profiles-active</output-basedir>
             </properties>
             <repositories>
                 <repository>
@@ -448,10 +448,10 @@
             </pluginRepositories>
         </profile>
         <profile>
-            <id>2-test</id>
+            <id>2-prod</id>
             <properties>
-                <spring-profiles-active>test</spring-profiles-active>
-                <output-basedir>E:\JAVA\eee\</output-basedir>
+                <spring-profiles-active>prod</spring-profiles-active>
+                <output-basedir>E:\JAVA\eee\${spring-profiles-active}</output-basedir>
             </properties>
             <repositories>
                 <repository>

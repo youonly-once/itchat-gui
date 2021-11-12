@@ -1,6 +1,7 @@
 package cn.shu.wechat.api;
 
 
+import cn.shu.wechat.constant.WebWeChatConstant;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.StorageLoginInfoEnum;
 import cn.shu.wechat.enums.URLEnum;
@@ -298,6 +299,50 @@ public class ContactsTools {
         }else{
             return "#";
         }
+    }
+
+    /**
+     * 是否消息免打扰
+     * @param contacts 联系人
+     * @return {@code false} 免打扰
+     */
+    public static boolean isMute(Contacts contacts){
+        if (isRoomContact(contacts.getUsername())) {
+            return (contacts.getStatues().intValue()== WebWeChatConstant.ChatRoomNute.CHATROOM_NOTIFY_CLOSE.CODE);
+        }else{
+            return ((contacts.getContactflag().intValue() & WebWeChatConstant.ContactFlag.CONTACTFLAG_NOTIFYCLOSECONTACT.CODE)>0);
+        }
+
+
+    }
+    /**
+     * 是否消息免打扰
+     * @param userName 联系人
+     * @return {@code false} 免打扰
+     */
+    public static boolean isMute(String  userName){
+
+        return isMute(Core.getMemberMap().get(userName));
+
+
+    }
+
+    /**
+     * 是否为群
+     * @param userName 用户名
+     * @return 是否为群
+     */
+    public static boolean isRoomContact(String userName){
+        return userName.startsWith("@@");
+    }
+
+    /**
+     * 是否为群
+     * @param contacts 用户
+     * @return 是否为群
+     */
+    public static boolean isRoomContact(Contacts contacts){
+        return isRoomContact(contacts.getUsername());
     }
 
 }

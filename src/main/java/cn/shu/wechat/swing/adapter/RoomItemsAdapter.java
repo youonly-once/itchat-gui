@@ -93,13 +93,33 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             viewHolder.time.setText(TimeUtil.diff(roomItem.getTimestamp()));
         }
 
-        // 未读消息数
-        if (roomItem.getUnreadCount() > 0) {
-            viewHolder.unreadCount.setVisible(true);
-            viewHolder.unreadCount.setText(roomItem.getUnreadCount() + "");
-        } else {
-            viewHolder.unreadCount.setVisible(false);
-        }
+
+            // 未读消息数
+            if (roomItem.getUnreadCount() > 0) {
+                //消息免打扰
+                if(roomItem.isMute()){
+                    viewHolder. timeUnread.add(viewHolder.mutePoint,BorderLayout.CENTER);
+                    viewHolder.mutePoint.setVisible(true);
+                    viewHolder.unreadCount.setVisible(false);
+                    viewHolder.unreadCount.setText( "");
+                }else{
+                    viewHolder. timeUnread.add(viewHolder.unreadCount,BorderLayout.CENTER);
+                    viewHolder.mutePoint.setVisible(false);
+                    viewHolder.unreadCount.setVisible(true);
+                    viewHolder.unreadCount.setText(roomItem.getUnreadCount() + "");
+                }
+
+            } else if (roomItem.isHasNewMsg() && roomItem.isMute()){
+                viewHolder. timeUnread.add(viewHolder.mutePoint,BorderLayout.CENTER);
+                viewHolder.mutePoint.setVisible(true);
+                viewHolder.unreadCount.setVisible(false);
+                viewHolder.unreadCount.setText( "");
+            }else{
+                viewHolder.unreadCount.setVisible(false);
+                viewHolder.mutePoint.setVisible(false);
+                viewHolder.unreadCount.setText("");
+            }
+
         // 设置是否激活
         if (roomItem.getRoomId().equals(RoomChatContainer.getCurrRoomId())) {
             setBackground(viewHolder, Colors.ITEM_SELECTED);
@@ -146,6 +166,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
                     setBackground(selectedViewHolder, Colors.DARK);
                     // 进入房间
                     RoomsPanel.getContext().enterRoom(myRoomId);
+
                     selectedViewHolder = myHolder;
                 }
             }

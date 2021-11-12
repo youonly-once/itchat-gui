@@ -28,6 +28,9 @@ public class Contacts {
 
     private Double attrstatus;
 
+    /**
+     * 等于0消息免打扰 1正常
+     */
     private Double statues;
 
     private String pyquanpin;

@@ -3,6 +3,7 @@ package cn.shu.wechat.swing.panels;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCBorder;
+import cn.shu.wechat.swing.label.CornerMarkJLabel;
 import cn.shu.wechat.swing.utils.IconUtil;
 
 import javax.swing.*;
@@ -14,7 +15,11 @@ import java.awt.event.MouseListener;
  * Created by 舒新胜 on 17-5-29.
  */
 public class TabOperationPanel extends ParentAvailablePanel {
-    private JLabel chatLabel;
+    public CornerMarkJLabel getChatLabel() {
+        return chatLabel;
+    }
+
+    private CornerMarkJLabel chatLabel;
     private JLabel contactsLabel;
     private JLabel meLable;
     private TabItemClickListener clickListener;
@@ -24,7 +29,6 @@ public class TabOperationPanel extends ParentAvailablePanel {
     private ImageIcon contactIconActive;
     private ImageIcon meIconNormal;
     private ImageIcon meIconActive;
-
     public static TabOperationPanel getContext() {
         return context;
     }
@@ -48,7 +52,8 @@ public class TabOperationPanel extends ParentAvailablePanel {
 
         chatIconActive = IconUtil.getIcon(this,"/image/chat_active.png");
         chatIconNormal = IconUtil.getIcon(this,"/image/chat_normal.png");
-        chatLabel = new JLabel();
+
+        chatLabel = new CornerMarkJLabel();
         chatLabel.setIcon(chatIconActive);
         chatLabel.setBorder(rcBorder);
         chatLabel.setHorizontalAlignment(JLabel.CENTER);

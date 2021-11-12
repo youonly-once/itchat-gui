@@ -61,7 +61,7 @@ public class ChatUtil {
      * @param lastMsg 最新消息
      * @param count   消息数
      */
-    public static void addNewMsg(Message message, String roomId, String lastMsg, int count) {
+    public static void addNewMsg(Message message, String roomId, String lastMsg, int count,Boolean isMute) {
         SwingUtilities.invokeLater(() -> {
 
             //刷新消息
@@ -75,7 +75,7 @@ public class ChatUtil {
                   RoomChatContainer.get(roomId).addMessageToEnd(message);
                 }
             //新增或选择聊天列表
-            RoomsPanel.getContext().addRoomOrOpenRoomNotSwitch(roomId, lastMsg, count);
+            RoomsPanel.getContext().addRoomOrOpenRoom(roomId, lastMsg, count,isMute,true);
 
         });
     }
@@ -87,7 +87,7 @@ public class ChatUtil {
      * @param roomId  房间ID
      */
     public static void addNewMsg(Message message, String roomId) {
-        addNewMsg(message, roomId, message.getPlaintext(), 0);
+        addNewMsg(message, roomId, message.getPlaintext(), 0,null);
     }
 
     /**
@@ -100,7 +100,7 @@ public class ChatUtil {
             return;
         }
         for (Message message : messages) {
-            addNewMsg(message, message.getToUsername(), message.getPlaintext(), 0);
+            addNewMsg(message, message.getToUsername(), message.getPlaintext(), 0, null);
         }
     }
 

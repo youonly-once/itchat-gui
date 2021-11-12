@@ -156,7 +156,7 @@ public class MsgCenter {
      *
      * @param msg 消息
      */
-    private void loadUserInfo(AddMsgList msg) {
+    private Contacts loadUserInfo(AddMsgList msg) {
 
         String userName = msg.getFromUserName();
         if (userName.equals(Core.getUserName())) {
@@ -179,6 +179,7 @@ public class MsgCenter {
                 contacts.setMemberlist(contactsList);
             }
         }
+        return contacts;
     }
 
     /**
@@ -210,68 +211,106 @@ public class MsgCenter {
 
     /**
      * 更新UI
-     *
-     * @param message
+     *  @param message
      * @param msg
+     * @param contacts
      */
-    private void updateUI(Message message, AddMsgList msg) {
+    private void updateUI(Message message, AddMsgList msg, Contacts contacts) {
         if (message == null){
             return;
         }
-        //################3聊天面板消息处理###########3333
-        int msgUnReadCount = 1;
-        String lastMsgPrefix = "";
+        //################聊天面板消息处理###########3333
+        //未读消息数量
+        Integer msgUnReadCount = null;
+        //消息预览文本
+        String previewLastMsg = "";
+        //是否播放音乐
+        boolean isPlaySound;
+        //是否闪烁任务栏图标
+        boolean isFlashingTray;
+
         //新增消息列表
         String userName = msg.getFromUserName();
-        if (userName.equals(Core.getUserName())) {
-            //自己的消息，默认已读
-            msgUnReadCount = 0;
-            userName = msg.getToUserName();
-        } else if (userName.startsWith("@@")) {
-            //自己在群里发的消息
+
+        if (userName.startsWith("@@")) {
+            //群消息
             if (Core.getUserName().equals(msg.getMemberName())) {
-                lastMsgPrefix = Core.getNickName() + ": ";
+                //自己在群里发的消息
                 msgUnReadCount = 0;
+                isPlaySound = false;
+                isFlashingTray = false;
+                previewLastMsg = Core.getNickName() + ": "+message.getPlaintext();
             } else {
+                //其他人在群里发的消息
                 if (isCurrRoom(message)) {
-                    MainFrame.getContext().setTrayFlashing(true);
+                    msgUnReadCount = 0;
+                    isPlaySound = true;
+                    isFlashingTray = false;
+                }else if(ContactsTools.isMute(contacts)){
+                    msgUnReadCount = 0;
+                    isPlaySound = false;
+                    isFlashingTray = false;
+                } else{
+                    isPlaySound = true;
+                    isFlashingTray = true;
+                    msgUnReadCount = 1;
                 }
-                lastMsgPrefix = ContactsTools.getMemberDisplayNameOfGroup(userName, msg.getMemberName()) + ": ";
+                previewLastMsg = ContactsTools.getMemberDisplayNameOfGroup(userName, msg.getMemberName()) + ": "+message.getPlaintext();
             }
-        } else {
-            MainFrame.getContext().playMessageSound();
-            if (isCurrRoom(message)) {
-                MainFrame.getContext().setTrayFlashing(true);
+        } else{
+            //自己的消息，默认已读
+            if (userName.equals(Core.getUserName())) {
+
+                msgUnReadCount = 0;
+                isPlaySound = false;
+                isFlashingTray = false;
+                previewLastMsg =  message.getPlaintext();
+                userName = msg.getToUserName();
+
+            } else {
+                //其他人的消息
+                if (isCurrRoom(message)) {
+                    msgUnReadCount = 0;
+                    isPlaySound = true;
+                    isFlashingTray = false;
+                }else if(ContactsTools.isMute(contacts)){
+                    msgUnReadCount = 0;
+                    isPlaySound = false;
+                    isFlashingTray = false;
+                } else{
+                    isPlaySound = true;
+                    isFlashingTray = true;
+                    msgUnReadCount = 1;
+                }
+                previewLastMsg =  message.getPlaintext();
             }
+
         }
 
-        String lastMsg = lastMsgPrefix + (message == null ? msg.getContent() : message.getPlaintext());
-        int count = msgUnReadCount;
-
-
-        //消息总数
-        MainFrame.getContext().setTrayFlashing(false);
-        if (isCurrRoom(message) && !isSelfMessage(message)) {
-            RoomsPanel.updateUnreadTotalCount(count);
+        if (isFlashingTray){
             MainFrame.getContext().setTrayFlashing(true);
         }
-
+        if (isPlaySound){
+            MainFrame.getContext().playMessageSound();
+        }
+        RoomsPanel.updateUnreadTotalCount(msgUnReadCount);
 
         //添加一条新消息
-        ChatUtil.addNewMsg(message, userName, lastMsg, count);
+        ChatUtil.addNewMsg(message, userName, previewLastMsg, msgUnReadCount,ContactsTools.isMute(contacts));
 
     }
 
     /**
      * 判断是否为当前房间
      *
-     * @param message
-     * @return
+     * @param message 消息
+     * @return {@code false 当前房间 }
      */
     private boolean isCurrRoom(Message message) {
-        return !message.getFromUsername().equals(RoomChatContainer.getCurrRoomId())
-                && !message.getToUsername().equals(RoomChatContainer.getCurrRoomId());
+        return message.getFromUsername().equals(RoomChatContainer.getCurrRoomId())
+                || message.getToUsername().equals(RoomChatContainer.getCurrRoomId());
     }
+
 
     /**
      * 判断是否为本人发得消息
@@ -385,7 +424,7 @@ public class MsgCenter {
 
         msg.setType(msgType);
         //=============加载群成员==============
-        loadUserInfo(msg);
+        Contacts contacts = loadUserInfo(msg);
 
         //=============打印日志==============
         String logStr = LogUtil.printFromMeg(msg, msgType.getDesc());
@@ -551,7 +590,7 @@ public class MsgCenter {
                             protected Object doInBackground() {
 
                                 for (String userId : msg.getStatusNotifyUserName().split(",")) {
-                                    rooms.add(new RoomItem(Core.getMemberMap().get(userId), "", 0));
+                                    rooms.add(new RoomItem(Core.getMemberMap().get(userId), "", 0,false));
                                 }
                                 return null;
                             }
@@ -566,13 +605,12 @@ public class MsgCenter {
                     case READ:
                         //=============用户在其他平台消息已读的通知=============
                         //更新聊天列表未读数量
-                        RoomsPanel.getContext().updateUnreadCount(msg.getToUserName(), 0);
+                        RoomsPanel.getContext().hasReadCount(msg.getToUserName());
                         return;
                     case DEFAULT:
 
                     default:
-                           /* msg.setPlainText(msg.getContent());
-                            message = newMsgToDBMessage(msg);*/
+
                             break;
 
                 }
@@ -669,7 +707,7 @@ public class MsgCenter {
             }
 
             //聊天界面
-            updateUI(message, msg);
+            updateUI(message, msg,contacts);
             messageMapper.insert(message);
         }
         processExtra(msg);

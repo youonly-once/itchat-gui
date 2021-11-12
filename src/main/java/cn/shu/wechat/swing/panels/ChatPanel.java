@@ -320,14 +320,16 @@ public class ChatPanel extends ParentAvailablePanel {
                     //多个图片消息添加到队列中
                     shareAttachmentUploadQueue.add(path);
                 }
-                RoomsPanel.getContext().updateRoomItem(roomId, 0, "[图片]发送中...", System.currentTimeMillis());
+                RoomsPanel.getContext().updateRoomItem(roomId, 0
+                        , "[图片]发送中..."
+                        , System.currentTimeMillis(),ContactsTools.isMute(roomId),false);
             } else if (data instanceof FileEditorThumbnail) {
                 //文件消息
                 isImageOrFile = true;
                 FileEditorThumbnail component = (FileEditorThumbnail) data;
                 //多个文件消息添加到队列中
                 shareAttachmentUploadQueue.add(component.getPath());
-                RoomsPanel.getContext().updateRoomItem(roomId, 0, "[文件]发送中...", System.currentTimeMillis());
+                RoomsPanel.getContext().updateRoomItem(roomId, 0, "[文件]发送中...", System.currentTimeMillis(),ContactsTools.isMute(roomId),false);
 
             }
 
@@ -540,7 +542,7 @@ public class ChatPanel extends ParentAvailablePanel {
      */
     public void sendTextMessage(String content)  {
         //更新房间列表
-        RoomsPanel.getContext().updateRoomItem(roomId, 0, content+"[发送中...]", System.currentTimeMillis());
+        RoomsPanel.getContext().updateRoomItem(roomId, 0, content+"[发送中...]", System.currentTimeMillis(),ContactsTools.isMute(roomId),false);
         String msgId = MessageTools.randomMessageId();
         Message message = Message.builder().isSend(false)
                 .id(msgId)
@@ -580,11 +582,11 @@ public class ChatPanel extends ParentAvailablePanel {
                 if (wxSendMsgResponse == null
                         || wxSendMsgResponse.getBaseResponse().getRet() != 0) {
                     message.setNeedToResend(true);
-                    RoomsPanel.getContext().updateRoomItem(roomId, 0, content+"[发送失败]", System.currentTimeMillis());
+                    RoomsPanel.getContext().updateRoomItem(roomId, 0, content+"[发送失败]", System.currentTimeMillis(),ContactsTools.isMute(roomId),false);
 
                 } else {
                     message.setNeedToResend(false);
-                    RoomsPanel.getContext().updateRoomItem(roomId, 0, content, System.currentTimeMillis());
+                    RoomsPanel.getContext().updateRoomItem(roomId, 0, content, System.currentTimeMillis(),ContactsTools.isMute(roomId),false);
 
                 }
                 updateMessage(viewHolder, message);
@@ -593,7 +595,7 @@ public class ChatPanel extends ParentAvailablePanel {
     }
 
     private void showSendingMessage() {
-        RoomsPanel.getContext().updateRoomItem(roomId, -1, "[发送中...]", System.currentTimeMillis());
+        RoomsPanel.getContext().updateRoomItem(roomId, 0, "[发送中...]", System.currentTimeMillis(),ContactsTools.isMute(roomId),false);
     }
 
     /**
@@ -774,7 +776,7 @@ public class ChatPanel extends ParentAvailablePanel {
                 Integer progress = chunks.get(chunks.size() - 1);
                 // 上传完成
                 if (progress == 100) {
-                    RoomsPanel.getContext().updateRoomItem(roomId, -1, finalMessage.getPlaintext(), System.currentTimeMillis());
+                    RoomsPanel.getContext().updateRoomItem(roomId, 0, finalMessage.getPlaintext(), System.currentTimeMillis(),ContactsTools.isMute(roomId),false);
                 }
                 if (viewHolder != null) {
                     finalMessage.setProgress(progress);
