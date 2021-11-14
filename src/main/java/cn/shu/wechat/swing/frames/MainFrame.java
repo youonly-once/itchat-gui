@@ -5,10 +5,13 @@ import cn.shu.wechat.api.WeChatTool;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.panels.LeftPanel;
 import cn.shu.wechat.swing.panels.RightPanel;
-import cn.shu.wechat.swing.utils.*;
+import cn.shu.wechat.swing.utils.ClipboardUtil;
+import cn.shu.wechat.swing.utils.FontUtil;
+import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.swing.utils.OSUtil;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
+import cn.shu.wechat.utils.SleepUtils;
 import lombok.Getter;
-import lombok.SneakyThrows;
 import sun.audio.AudioPlayer;
 import sun.audio.AudioStream;
 
@@ -17,12 +20,13 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * Created by 舒新胜 on 17-5-28.
  */
 @Getter
-public class MainFrame extends JFrame  {
+public class MainFrame extends JFrame {
     public final static int DEFAULT_WIDTH = 900;
     public final static int DEFAULT_HEIGHT = 650;
     public final static int LEFT_PANEL_WIDTH = 300;
@@ -61,6 +65,10 @@ public class MainFrame extends JFrame  {
      */
     private volatile boolean trayFlashing = false;
 
+    /**
+     * 任务栏图标闪烁线程
+     */
+    private Thread trayFlashingThread;
 
 
     public MainFrame() {
@@ -83,13 +91,15 @@ public class MainFrame extends JFrame  {
         });
 
     }
+
     /**
      * 消息到来的时候提示音
      */
-    private void initMessageSound(){
+    private void initMessageSound() {
 
 
     }
+
     /**
      * 播放消息提示间
      */
@@ -116,63 +126,65 @@ public class MainFrame extends JFrame  {
     private void initTray() throws AWTException {
         SystemTray systemTray = SystemTray.getSystemTray();
 
-            if (OSUtil.getOsType() == OSUtil.Mac_OS) {
-                normalTrayIcon = IconUtil.getIcon(this, "/image/ic_launcher_dark.png", 20, 20).getImage();
-            } else {
-                normalTrayIcon = IconUtil.getIcon(this, "/image/ic_launcher.png", 20, 20).getImage();
+        if (OSUtil.getOsType() == OSUtil.Mac_OS) {
+            normalTrayIcon = IconUtil.getIcon(this, "/image/ic_launcher_dark.png", 20, 20).getImage();
+        } else {
+            normalTrayIcon = IconUtil.getIcon(this, "/image/ic_launcher.png", 20, 20).getImage();
+        }
+
+        emptyTrayIcon = IconUtil.getIcon(this, "/image/ic_launcher_empty.png", 20, 20).getImage();
+
+        trayIcon = new TrayIcon(normalTrayIcon, "微信");
+        trayIcon.setImageAutoSize(true);
+        trayIcon.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                // 显示主窗口
+                setVisible(true);
+                setState(0);
+                // 任务栏图标停止闪动
+                if (trayFlashing) {
+                    trayFlashing = false;
+                    trayIcon.setImage(normalTrayIcon);
+                }
+
+                super.mouseClicked(e);
             }
+        });
 
-            emptyTrayIcon = IconUtil.getIcon(this, "/image/ic_launcher_empty.png", 20, 20).getImage();
+        PopupMenu menu = new PopupMenu();
 
-            trayIcon = new TrayIcon(normalTrayIcon, "微信");
-            trayIcon.setImageAutoSize(true);
-            trayIcon.addMouseListener(new MouseAdapter() {
+        MenuItem exitItem = new MenuItem("退出");
+        exitItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                clearClipboardCache();
+                WeChatTool.webWXLogOut();
+                System.exit(1);
+            }
+        });
 
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    // 显示主窗口
-                    setVisible(true);
-                    setState(0);
-                    // 任务栏图标停止闪动
-                    if (trayFlashing) {
-                        trayFlashing = false;
-                        trayIcon.setImage(normalTrayIcon);
-                    }
-
-                    super.mouseClicked(e);
-                }
-            });
-
-            PopupMenu menu = new PopupMenu();
-
-            MenuItem exitItem = new MenuItem("退出");
-            exitItem.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    clearClipboardCache();
-                    WeChatTool.webWXLogOut();
-                    System.exit(1);
-                }
-            });
-
-            MenuItem showItem = new MenuItem("打开微信");
-            showItem.addActionListener(e -> setVisible(true));
-            menu.add(showItem);
-            menu.add(exitItem);
-            trayIcon.setPopupMenu(menu);
-            systemTray.add(trayIcon);
+        MenuItem showItem = new MenuItem("打开微信");
+        showItem.addActionListener(e -> setVisible(true));
+        menu.add(showItem);
+        menu.add(exitItem);
+        trayIcon.setPopupMenu(menu);
+        systemTray.add(trayIcon);
 
     }
 
     /**
-     *  显示通知
-     * @param caption       说明文字
-     * @param text          提醒消息
-     * @param messageType   消息类型
+     * 显示通知
+     *
+     * @param caption     说明文字
+     * @param text        提醒消息
+     * @param messageType 消息类型
      */
-    private void displayMessage(String caption, String text, TrayIcon.MessageType messageType){
-        trayIcon.displayMessage(caption,text,messageType);
+    private void displayMessage(String caption, String text, TrayIcon.MessageType messageType) {
+        trayIcon.displayMessage(caption, text, messageType);
     }
+
     /**
      * 清除剪切板缓存文件
      */
@@ -184,19 +196,23 @@ public class MainFrame extends JFrame  {
     /**
      * 初始化任务栏图标闪烁 线程
      */
-    private void initTrayFlashingThread(){
+    private void initTrayFlashingThread() {
+
+
         ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
-            @SneakyThrows
             @Override
             public void run() {
+                trayFlashingThread = Thread.currentThread();
+                trayFlashingThread.setName("TrayFlashingThread");
                 while (true) {
-                    if (trayFlashing) {
-                        trayIcon.setImage(emptyTrayIcon);
-                        Thread.sleep(500);
-
-                        trayIcon.setImage(normalTrayIcon);
-                        Thread.sleep(500);
+                    if (!trayFlashing) {
+                        LockSupport.park();
                     }
+                    trayIcon.setImage(emptyTrayIcon);
+                    SleepUtils.sleep(500);
+
+                    trayIcon.setImage(normalTrayIcon);
+                    SleepUtils.sleep(500);
                 }
             }
         });
@@ -207,6 +223,10 @@ public class MainFrame extends JFrame  {
      */
     public synchronized void setTrayFlashing(boolean flashing) {
         trayFlashing = flashing;
+        if (flashing) {
+            LockSupport.unpark(trayFlashingThread);
+        }
+
     }
 
     public boolean isTrayFlashing() {
@@ -265,8 +285,6 @@ public class MainFrame extends JFrame  {
         add(rightPanel, BorderLayout.CENTER);
         setLocationRelativeTo(null);
     }
-
-
 
 
     private void setListeners() {

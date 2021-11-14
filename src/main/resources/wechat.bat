@@ -1,0 +1,1 @@
+java -Xverify:none -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5006 -jar -Xmx1024M ../wechat-1.0.jar

@@ -1,6 +1,5 @@
 package cn.shu.wechat.swing.frames;
 
-import cn.shu.WeChatStater;
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.core.Core;
@@ -14,9 +13,9 @@ import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.panels.ContactsPanel;
 import cn.shu.wechat.swing.panels.RoomsPanel;
+import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.OSUtil;
-import cn.shu.wechat.swing.utils.WindowUtil;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.HeadImageUtil;
 import cn.shu.wechat.utils.SleepUtils;
@@ -39,11 +38,9 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-
 import java.util.Base64;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 
 /**
  * Created by 舒新胜 on 08/06/2017.
@@ -91,12 +88,11 @@ public class LoginFrame extends JFrame {
 
         controlPanel = new JPanel();
         controlPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 10, 5));
-        //controlPanel.setBounds(0,5, windowWidth, 30);
+
 
         closeLabel = new JLabel();
         closeLabel.setIcon(IconUtil.getIcon(this, "/image/close.png"));
         closeLabel.setHorizontalAlignment(JLabel.CENTER);
-        //closeLabel.setPreferredSize(new Dimension(30,30));
         closeLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
 
@@ -119,6 +115,7 @@ public class LoginFrame extends JFrame {
         controlPanel.add(closeLabel);
         JPanel titleJPanel = new JPanel();
         JLabel titleJLabel = new JLabel(WechatConfiguration.getInstance().getLoginTitle());
+        titleJLabel.setFont(FontUtil.getDefaultFont(14, Font.BOLD));
         titleJPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5));
         titleJPanel.add(titleJLabel);
         if (OSUtil.getOsType() != OSUtil.Mac_OS) {
@@ -135,17 +132,18 @@ public class LoginFrame extends JFrame {
         ImageIcon icon = IconUtil.getIcon(this, "/image/image_loading.gif");
         codeLabel.setHorizontalAlignment(JLabel.CENTER);
         codeLabel.setIcon(icon);
-        centerPanel.add(codeLabel,BorderLayout.CENTER);
+        centerPanel.add(codeLabel, BorderLayout.CENTER);
 
-        JPanel bottomPanel = new JPanel(new VerticalFlowLayout(true,false));
+        JPanel bottomPanel = new JPanel(new VerticalFlowLayout(true, false));
 
         //重新扫描按钮
         refreshCodeBt = new JLabel("刷新");
         refreshCodeBt.setHorizontalAlignment(JLabel.CENTER);
         refreshCodeBt.setBorder(new LineBorder(Color.GRAY));
-        refreshCodeBt.setPreferredSize(new Dimension(150,40));
+        refreshCodeBt.setPreferredSize(new Dimension(150, 40));
         refreshCodeBt.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        refreshCodeBt.setForeground(Colors.FONT_GRAY);
+        //refreshCodeBt.setForeground(Colors.FONT_GRAY);
+        refreshCodeBt.setFont(FontUtil.getDefaultFont());
         JPanel refreshCodeBtPanel = new JPanel();
         refreshCodeBtPanel.add(refreshCodeBt);
         bottomPanel.add(refreshCodeBtPanel);
@@ -154,8 +152,8 @@ public class LoginFrame extends JFrame {
             public void mouseReleased(MouseEvent e) {
                 //TODO 重新登录功能
 
-                new SwingWorker<Object,Object>(){
-                   private  BufferedImage qr;
+                new SwingWorker<Object, Object>() {
+                    private BufferedImage qr;
                     @Override
                     protected Object doInBackground() throws Exception {
                         qr = loginService.getQR();

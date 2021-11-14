@@ -139,15 +139,12 @@
             <artifactId>dom4j</artifactId>
             <version>2.1.1</version>
         </dependency>
-
-        <!--TODO 这个不能打包到lib why？-->
         <dependency>
+            <groupId>com.android</groupId>
+            <artifactId>android.ninepatch</artifactId>
+            <version>1.0</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/src/main/resources/lib/android.ninepatch.jar</systemPath>
-            <groupId>com.android</groupId>
-            <artifactId>ninepatch</artifactId>
-            <version>142.1</version>
-
         </dependency>
         <dependency>
             <groupId>com.melloware</groupId>
@@ -340,6 +337,13 @@
                         <exclude>**/*.table</exclude>
                         <exclude>**/*.wav</exclude>
                         <exclude>**/*.db</exclude>
+                        <exclude>lib</exclude>
+                        <exclude>wav</exclude>
+                        <exclude>mapper</exclude>
+                        <exclude>image</exclude>import org.apache.commons.lang3.StringUtils;
+                        <exclude>emoji</exclude>
+                        <exclude>**/*.vbs</exclude>
+                        <exclude>**/*.bat</exclude>
                     </excludes>
                     <outputDirectory>${output-directory}</outputDirectory>
                     <archive>
@@ -392,6 +396,8 @@
                                         <include>**/*.table</include>
                                         <include>**/*.wav</include>
                                         <include>**/*.db</include>
+                                        <include>**/*.vbs</include>
+                                        <include>**/*.bat</include>
                                     </includes>
                                 </resource>
                             </resources>
@@ -424,7 +430,7 @@
             <id>1-dev</id>
             <properties>
                 <spring-profiles-active>dev</spring-profiles-active>
-                <output-basedir>E:\JAVA\eee\spring-profiles-active</output-basedir>
+                <output-basedir>E:\JAVA\eee\dev</output-basedir>
             </properties>
             <repositories>
                 <repository>
@@ -451,7 +457,7 @@
             <id>2-prod</id>
             <properties>
                 <spring-profiles-active>prod</spring-profiles-active>
-                <output-basedir>E:\JAVA\eee\${spring-profiles-active}</output-basedir>
+                <output-basedir>E:\JAVA\eee\prod</output-basedir>
             </properties>
             <repositories>
                 <repository>
