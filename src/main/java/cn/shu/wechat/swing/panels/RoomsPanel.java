@@ -224,11 +224,12 @@ public class RoomsPanel extends ParentAvailablePanel {
         if (pos == -1){
             return;
         }
+        Core.getRecentContacts().remove(roomId);
+        RoomChatContainer.getContext().removeCard(roomId);
         roomItemList.remove(pos);
         roomItemsListView.notifyDataSetChanged(false);
         roomItemsListView.scrollToPosition(0);
-        RoomChatContainer.getContext().removeCard(roomId);
-        Core.getRecentContacts().remove(roomId);
+
     }
 
     /**

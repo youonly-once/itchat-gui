@@ -6,6 +6,7 @@ import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.panels.RoomChatContainer;
 import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
+import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.TimeUtil;
 
 import javax.swing.*;
@@ -134,6 +135,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
         if (viewHolder.mouseListener != null){
             viewHolder.mouseListener.setMyHolder(viewHolder);
             viewHolder.mouseListener.setMyRoomId(roomItem.getRoomId());
+            viewHolder.mouseListener.setPosition(position);
         }else{
             viewHolder.mouseListener = new RoomItemAbstractMouseListener(viewHolder,roomItem.getRoomId(),position);;
             viewHolder.addMouseListener(viewHolder.mouseListener);
@@ -144,16 +146,24 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
 
     class RoomItemAbstractMouseListener extends AbstractMouseListener{
         private final JPopupMenu jPopupMenu = new JPopupMenu();
-        private final int position;
+
+        public void setPosition(int position) {
+            this.position = position;
+        }
+
+        private  int position;
+        private RoomItemViewHolder myHolder ;
+        private String myRoomId ;
         public RoomItemAbstractMouseListener(RoomItemViewHolder myHolder, String myRoomId,int pos) {
             this.myHolder = myHolder;
             this.myRoomId = myRoomId;
             this.position = pos;
             JMenuItem delItem = new JMenuItem("删除");
+            delItem.setIcon(IconUtil.getIcon(this,"/image/delete.png"));
             delItem.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    RoomsPanel.getContext().removeItem(position,myRoomId);
+                    RoomsPanel.getContext().removeItem(position,RoomItemAbstractMouseListener.this.myRoomId);
                 }
             });
             jPopupMenu.add(delItem);
@@ -167,8 +177,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             this.myRoomId = myRoomId;
         }
 
-        private RoomItemViewHolder myHolder ;
-        private String myRoomId ;
+
 
         @Override
         public void mouseReleased(MouseEvent e) {

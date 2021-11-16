@@ -90,8 +90,9 @@ public class SearchPanel extends ParentAvailablePanel {
                 // ESC清除已输入内容
                 if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                     searchTextField.setText("");
+                }else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    search();
                 }
-
                 super.keyTyped(e);
             }
 
