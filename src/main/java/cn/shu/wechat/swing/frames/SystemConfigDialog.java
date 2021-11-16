@@ -2,6 +2,10 @@ package cn.shu.wechat.swing.frames;
 
 import cn.shu.wechat.swing.components.*;
 import cn.shu.wechat.swing.panels.*;
+import cn.shu.wechat.swing.panels.setting.AboutPanel;
+import cn.shu.wechat.swing.panels.setting.ChangeAvatarPanel;
+import cn.shu.wechat.swing.panels.setting.ChangePasswordPanel;
+import cn.shu.wechat.swing.panels.setting.ClearCachePanel;
 import cn.shu.wechat.swing.utils.FontUtil;
 
 import javax.swing.*;

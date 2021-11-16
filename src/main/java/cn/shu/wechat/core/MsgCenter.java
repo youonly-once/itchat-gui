@@ -17,7 +17,7 @@ import cn.shu.wechat.service.IMsgHandlerFace;
 import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.frames.MainFrame;
-import cn.shu.wechat.swing.panels.RoomChatContainer;
+import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.swing.utils.ChatUtil;
 import cn.shu.wechat.utils.*;
@@ -322,8 +322,8 @@ public class MsgCenter {
      * @return {@code false 当前房间 }
      */
     private boolean isCurrRoom(Message message) {
-        return message.getFromUsername().equals(RoomChatContainer.getCurrRoomId())
-                || message.getToUsername().equals(RoomChatContainer.getCurrRoomId());
+        return message.getFromUsername().equals(ChatPanelContainer.getCurrRoomId())
+                || message.getToUsername().equals(ChatPanelContainer.getCurrRoomId());
     }
 
 
@@ -444,7 +444,7 @@ public class MsgCenter {
         //=============打印日志==============
         String logStr = LogUtil.printFromMeg(msg, msgType.getDesc());
         //=============如果是当前房间 发送已读通知==============
-        if (msg.getFromUserName().equals(RoomChatContainer.getCurrRoomId())) {
+        if (msg.getFromUserName().equals(ChatPanelContainer.getCurrRoomId())) {
             ExecutorServiceUtil.getGlobalExecutorService().execute(() -> MessageTools.sendStatusNotify(msg.getFromUserName()));
         }
         log.info(logStr);

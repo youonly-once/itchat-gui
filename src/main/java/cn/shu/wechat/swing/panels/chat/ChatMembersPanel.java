@@ -1,4 +1,4 @@
-package cn.shu.wechat.swing.panels;
+package cn.shu.wechat.swing.panels.chat;
 
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.pojo.entity.Contacts;
@@ -12,6 +12,7 @@ import cn.shu.wechat.swing.db.model.ContactsUser;
 import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.frames.AddOrRemoveMemberDialog;
 import cn.shu.wechat.swing.frames.MainFrame;
+import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
@@ -31,7 +32,7 @@ import java.util.List;
  * Created by 舒新胜 on 07/06/2017.
  */
 @Log4j2
-public class RoomMembersPanel extends ParentAvailablePanel {
+public class ChatMembersPanel extends ParentAvailablePanel {
     public final int ROOM_MEMBER_PANEL_WIDTH = 200;
 
     /**
@@ -69,7 +70,7 @@ public class RoomMembersPanel extends ParentAvailablePanel {
      */
     private volatile boolean isUpdatingUI = false;
 
-    public RoomMembersPanel(JPanel parent, String roomId) {
+    public ChatMembersPanel(JPanel parent, String roomId) {
         super(parent);
         this.roomId = roomId;
         initComponents();

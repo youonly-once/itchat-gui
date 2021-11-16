@@ -1,4 +1,7 @@
-package cn.shu.wechat.swing.panels;
+package cn.shu.wechat.swing.panels.chat;
+
+import cn.shu.wechat.swing.panels.ParentAvailablePanel;
+import cn.shu.wechat.swing.panels.TipPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,21 +13,21 @@ import java.util.LinkedHashMap;
  * @项目 AutoWechat
  * @创建时间 7/18/2021 11:40
  */
-public class RoomChatContainer extends ParentAvailablePanel {
+public class ChatPanelContainer extends ParentAvailablePanel {
     private CardLayout cardLayout;
 
-    private final static LinkedHashMap<String, RoomChatPanelCard> cards = new LinkedHashMap<>(5);
+    private final static LinkedHashMap<String, ChatPanel> cards = new LinkedHashMap<>(5);
     public static String  getCurrRoomId() {
         return currRoomId;
     }
 
     private static String currRoomId;
-    public static RoomChatContainer getContext() {
+    public static ChatPanelContainer getContext() {
         return context;
     }
 
-    private static RoomChatContainer context;
-    public RoomChatContainer(JPanel parent) {
+    private static ChatPanelContainer context;
+    public ChatPanelContainer(JPanel parent) {
         super(parent);
         context = this;
         init();
@@ -43,11 +46,11 @@ public class RoomChatContainer extends ParentAvailablePanel {
      * 添加层
      * @param roomId 房间id
      */
-    public RoomChatPanelCard addPanel(String roomId){
+    public ChatPanel addPanel(String roomId){
         if (cards.containsKey(roomId)){
             return cards.get(roomId);
         }
-        RoomChatPanelCard rightPanel = new RoomChatPanelCard(roomId);
+        ChatPanel rightPanel = new ChatPanel(roomId);
         add(rightPanel,roomId);
         cards.put(roomId,rightPanel);
         return rightPanel;
@@ -67,7 +70,7 @@ public class RoomChatContainer extends ParentAvailablePanel {
      * 创建显示
      * @param roomId 房间id
      */
-    public RoomChatPanelCard createAndShow(String roomId){
+    public ChatPanel createAndShow(String roomId){
         if (!cards.containsKey(roomId)){
             addPanel(roomId);
         }
@@ -83,7 +86,7 @@ public class RoomChatContainer extends ParentAvailablePanel {
         if (!cards.containsKey(roomId)){
             return;
         }
-        RoomChatPanelCard remove = cards.remove(roomId);
+        ChatPanel remove = cards.remove(roomId);
         remove(remove);
     }
 
@@ -91,14 +94,14 @@ public class RoomChatContainer extends ParentAvailablePanel {
      * 获取对应层
      * @param roomId roomId
      */
-    public static RoomChatPanelCard get(String roomId){
+    public static ChatPanel get(String roomId){
         return cards.get(roomId);
     }
 
     /**
      * 获取对应层
      */
-    public static RoomChatPanelCard getCurrRoom() {
+    public static ChatPanel getCurrRoom() {
         return cards.get(currRoomId);
     }
 

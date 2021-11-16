@@ -1,4 +1,4 @@
-package cn.shu.wechat.swing.panels;
+package cn.shu.wechat.swing.panels.chat;
 
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
@@ -12,7 +12,7 @@ import java.awt.*;
 /**
  * Created by 舒新胜 on 04/07/2017.
  */
-public class ExpressionPopup extends JPopupMenu {
+public class MessageEditorExpressionPopup extends JPopupMenu {
     private static final int WIDTH = 400;
     private static final int HEIGHT = 300;
 
@@ -21,14 +21,14 @@ public class ExpressionPopup extends JPopupMenu {
 
     private JPanel emojiTabPanel;
     private JLabel emojiTabLabel;
-    private EmojiPanel emojiPanel;
+    private MessageEditorEmojiPanel messageEditorEmojiPanel;
 
 
     private CardLayout cardLayout;
     public static final String EMOJI = "EMOJI";
 
 
-    public ExpressionPopup() {
+    public MessageEditorExpressionPopup() {
         initComponents();
         initView();
 
@@ -47,7 +47,7 @@ public class ExpressionPopup extends JPopupMenu {
         emojiTabPanel = new JPanel();
         emojiTabLabel = new JLabel();
         emojiTabLabel.setIcon(IconUtil.getIcon(this, "/image/smile.png", 23, 23));
-        emojiPanel = new EmojiPanel();
+        messageEditorEmojiPanel = new MessageEditorEmojiPanel();
 
         setBackground(Colors.WINDOW_BACKGROUND);
         this.setPopupSize(WIDTH, HEIGHT);
@@ -58,7 +58,7 @@ public class ExpressionPopup extends JPopupMenu {
 
         tabIconPanel.add(emojiTabPanel);
 
-        listPanel.add(emojiPanel);
+        listPanel.add(messageEditorEmojiPanel);
 
 
         setLayout(new GridBagLayout());
@@ -67,7 +67,7 @@ public class ExpressionPopup extends JPopupMenu {
     }
 
     public void setExpressionListener(ExpressionListener listener) {
-        emojiPanel.setExpressionListener(listener, this);
+        messageEditorEmojiPanel.setExpressionListener(listener, this);
     }
 
 

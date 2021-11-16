@@ -1,7 +1,8 @@
-package cn.shu.wechat.swing.panels;
+package cn.shu.wechat.swing.panels.chat;
 
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.listener.ExpressionListener;
+import cn.shu.wechat.swing.panels.chat.MessageEditorExpressionItemPanel;
 import cn.shu.wechat.swing.utils.IconUtil;
 
 import javax.swing.*;
@@ -13,11 +14,11 @@ import java.awt.event.MouseListener;
 /**
  * Created by 舒新胜 on 04/07/2017.
  */
-public class EmojiPanel extends JPanel {
+public class MessageEditorEmojiPanel extends JPanel {
     private ExpressionListener expressionListener;
     private JPopupMenu parentPopup;
 
-    public EmojiPanel() {
+    public MessageEditorEmojiPanel() {
         initComponents();
         initView();
         initData();
@@ -42,7 +43,7 @@ public class EmojiPanel extends JPanel {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                ExpressionItem panel = (ExpressionItem) e.getSource();
+                MessageEditorExpressionItemPanel panel = (MessageEditorExpressionItemPanel) e.getSource();
                 if (expressionListener != null) {
                     expressionListener.onSelected(panel.getCode());
                     if (parentPopup != null) {
@@ -70,7 +71,7 @@ public class EmojiPanel extends JPanel {
         String iconPath = "/emoji/";
         for (int i = 0; i < 80; i++) {
             String name = codeList[i].substring(1, codeList[i].length() - 1);
-            JPanel panel = new ExpressionItem(codeList[i], IconUtil.getIcon(this,
+            JPanel panel = new MessageEditorExpressionItemPanel(codeList[i], IconUtil.getIcon(this,
                     iconPath + name + ".png"), name);
             panel.addMouseListener(listener);
 

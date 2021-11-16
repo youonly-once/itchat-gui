@@ -1,4 +1,4 @@
-package cn.shu.wechat.swing.panels;
+package cn.shu.wechat.swing.panels.setting;
 
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCButton;

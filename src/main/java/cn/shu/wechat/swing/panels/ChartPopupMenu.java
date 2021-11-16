@@ -1,20 +1,15 @@
 package cn.shu.wechat.swing.panels;
 
-import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.pojo.entity.Contacts;
 import cn.shu.wechat.swing.frames.ImageViewerFrame;
 import cn.shu.wechat.utils.ChartUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Field;
 
 /**

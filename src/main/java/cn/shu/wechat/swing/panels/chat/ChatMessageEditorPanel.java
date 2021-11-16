@@ -1,50 +1,33 @@
-package cn.shu.wechat.swing.panels;
+package cn.shu.wechat.swing.panels.chat;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.mapper.StatusMapper;
-import cn.shu.wechat.pojo.entity.Contacts;
 import cn.shu.wechat.pojo.entity.Status;
 import cn.shu.wechat.service.impl.IMsgHandlerFaceImpl;
 import cn.shu.wechat.swing.components.*;
 import cn.shu.wechat.swing.components.message.ChatEditorPopupMenu;
 import cn.shu.wechat.swing.frames.BombFrame;
-import cn.shu.wechat.swing.frames.ImageViewerFrame;
 import cn.shu.wechat.swing.frames.ScreenShotFrame;
 import cn.shu.wechat.swing.listener.ExpressionListener;
-import cn.shu.wechat.swing.utils.ClipboardUtil;
+import cn.shu.wechat.swing.panels.ChartPopupMenu;
+import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.OSUtil;
-import cn.shu.wechat.utils.ChartUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import com.melloware.jintellitype.HotkeyListener;
 import com.melloware.jintellitype.JIntellitype;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 import java.awt.*;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetDropEvent;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Field;
 
 /**
  * Created by 舒新胜 on 17-5-30.
  */
-public class MessageEditorPanel extends ParentAvailablePanel {
+public class ChatMessageEditorPanel extends ParentAvailablePanel {
     private JPanel controlLabel;
     private JLabel fileLabel;
     private JLabel expressionLabel;
@@ -80,10 +63,10 @@ public class MessageEditorPanel extends ParentAvailablePanel {
     private ImageIcon chartNormalIcon;
     private ImageIcon chartActiveIcon;
 
-    private ExpressionPopup expressionPopup;
+    private MessageEditorExpressionPopup messageEditorExpressionPopup;
     private final String roomId;
 
-    public MessageEditorPanel(JPanel parent, String roomId) {
+    public ChatMessageEditorPanel(JPanel parent, String roomId) {
         super(parent);
         this.roomId = roomId;
         initComponents();
@@ -186,7 +169,7 @@ public class MessageEditorPanel extends ParentAvailablePanel {
 
         chatEditorPopupMenu = new ChatEditorPopupMenu();
 
-        expressionPopup = new ExpressionPopup();
+        messageEditorExpressionPopup = new MessageEditorExpressionPopup();
     }
 
     private void initView() {
@@ -237,7 +220,7 @@ public class MessageEditorPanel extends ParentAvailablePanel {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                expressionPopup.show((Component) e.getSource(), e.getX() - 200, e.getY() - 320);
+                messageEditorExpressionPopup.show((Component) e.getSource(), e.getX() - 200, e.getY() - 320);
                 super.mouseClicked(e);
             }
         });
@@ -349,7 +332,7 @@ public class MessageEditorPanel extends ParentAvailablePanel {
     }
 
     public void setExpressionListener(ExpressionListener listener) {
-        expressionPopup.setExpressionListener(listener);
+        messageEditorExpressionPopup.setExpressionListener(listener);
     }
 
     public RCTextEditor getEditor() {

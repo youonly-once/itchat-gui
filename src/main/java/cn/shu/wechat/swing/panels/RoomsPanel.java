@@ -1,6 +1,5 @@
 package cn.shu.wechat.swing.panels;
 
-import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.pojo.entity.Contacts;
@@ -9,9 +8,10 @@ import cn.shu.wechat.swing.adapter.RoomItemsAdapter;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCListView;
-import cn.shu.wechat.swing.db.model.Room;
 import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.frames.MainFrame;
+import cn.shu.wechat.swing.panels.chat.ChatPanel;
+import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 
 import javax.swing.*;
@@ -118,8 +118,8 @@ public class RoomsPanel extends ParentAvailablePanel {
      */
     public void enterRoom(String roomId) {
         //切换显示层
-        RoomChatPanelCard roomChatPanelCard = RoomChatContainer.getContext().createAndShow(roomId);
-        RoomChatContainer.getContext().show(roomId);
+        ChatPanel chatPanel = ChatPanelContainer.getContext().createAndShow(roomId);
+        ChatPanelContainer.getContext().show(roomId);
         //更新聊天列表未读数量
         hasReadCount(roomId);
         //发送消息已读通知
@@ -225,7 +225,7 @@ public class RoomsPanel extends ParentAvailablePanel {
             return;
         }
         Core.getRecentContacts().remove(roomId);
-        RoomChatContainer.getContext().removeCard(roomId);
+        ChatPanelContainer.getContext().removeCard(roomId);
         roomItemList.remove(pos);
         roomItemsListView.notifyDataSetChanged(false);
         roomItemsListView.scrollToPosition(0);
@@ -252,7 +252,7 @@ public class RoomsPanel extends ParentAvailablePanel {
         }
         roomItemList.remove(pos);
         roomItemsListView.removeItem(pos);
-        RoomChatContainer.getContext().removeCard(roomId);
+        ChatPanelContainer.getContext().removeCard(roomId);
         Core.getRecentContacts().remove(roomId);
     }
     /**

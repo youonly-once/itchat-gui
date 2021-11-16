@@ -11,6 +11,8 @@ import cn.shu.wechat.swing.entity.SearchResultItem;
 import cn.shu.wechat.swing.helper.AttachmentIconHelper;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.panels.*;
+import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
+import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.FileCache;
 import cn.shu.wechat.swing.utils.IconUtil;
@@ -414,7 +416,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
         RoomsPanel.getContext().addRoomOrOpenRoom(roomId,"",0,null,false);
         TabOperationPanel.getContext().switchToChatLabel();
         //添加聊天房
-         RoomChatContainer.getContext().createAndShow(roomId);
+         ChatPanelContainer.getContext().createAndShow(roomId);
 
     }
 

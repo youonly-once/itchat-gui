@@ -1,4 +1,4 @@
-package cn.shu.wechat.swing.panels;
+package cn.shu.wechat.swing.panels.chat;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.core.Core;
@@ -6,6 +6,7 @@ import cn.shu.wechat.pojo.entity.Contacts;
 import cn.shu.wechat.pojo.entity.Message;
 import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.components.Colors;
+import cn.shu.wechat.swing.panels.TitlePanel;
 import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -20,7 +21,7 @@ import java.util.ArrayList;
  */
 @Getter
 @Log4j2
-public class RoomChatPanelCard extends JPanel {
+public class ChatPanel extends JPanel {
 
     /**
      * 聊天房标题
@@ -29,12 +30,12 @@ public class RoomChatPanelCard extends JPanel {
     /**
      * 聊天房群成员
      */
-    private RoomMembersPanel roomMembersPanel;
+    private ChatMembersPanel chatMembersPanel;
 
     /**
      * 聊天面板
      */
-    private ChatPanel chatPanel;
+    private ChatMessagePanel chatMessagePanel;
 
     /**
      * 房间成员
@@ -46,7 +47,7 @@ public class RoomChatPanelCard extends JPanel {
      */
     private Contacts contacts;
 
-    public RoomChatPanelCard(String roomId) {
+    public ChatPanel(String roomId) {
         this.roomId = roomId;
         initComponents();
         initView();
@@ -75,7 +76,7 @@ public class RoomChatPanelCard extends JPanel {
 
         //加载群成员
         if (contacts.getMemberlist() == null || contacts.getMemberlist().isEmpty()) {
-            RoomChatPanelCard.this.getTitlePanel().showStatusLabel("加载中...");
+            ChatPanel.this.getTitlePanel().showStatusLabel("加载中...");
             new SwingWorker<Object, Object>() {
 
                 @Override
@@ -94,10 +95,10 @@ public class RoomChatPanelCard extends JPanel {
                     for (Contacts contacts1 : contacts.getMemberlist()) {
                         list.add(ContactsTools.getMemberDisplayNameOfGroup(roomId, contacts1.getUsername()));
                     }
-                    chatPanel.setRoomMembers(list);
+                    chatMessagePanel.setRoomMembers(list);
 
                     updateRoomTitle();
-                    RoomChatPanelCard.this.getTitlePanel().hideStatusLabel();
+                    ChatPanel.this.getTitlePanel().hideStatusLabel();
                 }
             }.execute();
         } else {
@@ -105,7 +106,7 @@ public class RoomChatPanelCard extends JPanel {
             for (Contacts contacts1 : contacts.getMemberlist()) {
                 list.add(ContactsTools.getMemberDisplayNameOfGroup(roomId, contacts1.getUsername()));
             }
-            chatPanel.setRoomMembers(list);
+            chatMessagePanel.setRoomMembers(list);
             updateRoomTitle();
         }
     }
@@ -130,8 +131,8 @@ public class RoomChatPanelCard extends JPanel {
     private void initComponents() {
 
         titlePanel = new TitlePanel(this);
-        chatPanel = new ChatPanel(this, roomId);
-        roomMembersPanel = new RoomMembersPanel(this, roomId);
+        chatMessagePanel = new ChatMessagePanel(this, roomId);
+        chatMembersPanel = new ChatMembersPanel(this, roomId);
 
         setBorder(new LineBorder(Colors.SCROLL_BAR_TRACK_LIGHT));
     }
@@ -141,8 +142,8 @@ public class RoomChatPanelCard extends JPanel {
         this.setBackground(Colors.FONT_WHITE);
         this.setLayout(new BorderLayout());
         add(titlePanel, BorderLayout.NORTH);
-        add(roomMembersPanel, BorderLayout.EAST);
-        add(chatPanel, BorderLayout.CENTER);
+        add(chatMembersPanel, BorderLayout.EAST);
+        add(chatMessagePanel, BorderLayout.CENTER);
     }
 
 
@@ -152,7 +153,7 @@ public class RoomChatPanelCard extends JPanel {
      * @param message 新消息
      */
     public void addMessageToEnd(Message message) {
-        chatPanel.addMessageToEnd(message);
+        chatMessagePanel.addMessageToEnd(message);
     }
 
 }

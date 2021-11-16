@@ -3,7 +3,7 @@ package cn.shu.wechat.swing.adapter;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
-import cn.shu.wechat.swing.panels.RoomChatContainer;
+import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
@@ -124,7 +124,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             }
 
         // 设置是否激活
-        if (roomItem.getRoomId().equals(RoomChatContainer.getCurrRoomId())) {
+        if (roomItem.getRoomId().equals(ChatPanelContainer.getCurrRoomId())) {
             setBackground(viewHolder, Colors.ITEM_SELECTED);
             selectedViewHolder = viewHolder;
         }else{

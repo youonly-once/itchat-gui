@@ -6,6 +6,8 @@ import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
+import cn.shu.wechat.swing.panels.chat.ChatPanel;
+import cn.shu.wechat.swing.panels.chat.ChatMembersPanel;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.OSUtil;
@@ -75,7 +77,7 @@ public class TitlePanel extends ParentAvailablePanel {
             public void mouseReleased(MouseEvent e) {
                 //if (roomInfoButton.isVisible())
                 {
-                    RoomMembersPanel roomMemberPanel = ((RoomChatPanelCard) getParentPanel()).getRoomMembersPanel();
+                    ChatMembersPanel roomMemberPanel = ((ChatPanel) getParentPanel()).getChatMembersPanel();
                     if (roomMemberPanel.isVisible()) {
                         roomInfoButton.setIcon(IconUtil.getIcon(this,"/image/options.png"));
                         roomMemberPanel.setVisibleAndUpdateUI(false);
@@ -146,7 +148,7 @@ public class TitlePanel extends ParentAvailablePanel {
      * 隐藏群成员面板
      */
     public void hideRoomMembersPanel() {
-        JPanel roomMemberPanel = ((RoomChatPanelCard) getParentPanel()).getRoomMembersPanel();
+        JPanel roomMemberPanel = ((ChatPanel) getParentPanel()).getChatMembersPanel();
         if (roomMemberPanel.isVisible()) {
             roomInfoButton.setIcon(IconUtil.getIcon(this,"/image/options.png"));
             roomMemberPanel.setVisible(false);
@@ -157,7 +159,7 @@ public class TitlePanel extends ParentAvailablePanel {
      * 显示群成员面板
      */
     public void showRoomMembersPanel() {
-        JPanel roomMemberPanel = ((RoomChatPanelCard) getParentPanel()).getRoomMembersPanel();
+        JPanel roomMemberPanel = ((ChatPanel) getParentPanel()).getChatMembersPanel();
         roomInfoButton.setIcon(IconUtil.getIcon(this,"/image/options_restore.png"));
         roomMemberPanel.setVisible(true);
     }

@@ -1,4 +1,4 @@
-package cn.shu.wechat.swing.panels;
+package cn.shu.wechat.swing.panels.chat;
 
 
 import javax.swing.*;
@@ -7,7 +7,7 @@ import java.awt.*;
 /**
  * Created by 舒新胜 on 04/07/2017.
  */
-public class ExpressionItem extends JPanel {
+public class MessageEditorExpressionItemPanel extends JPanel {
     protected String code;
     protected ImageIcon icon;
     protected String displayName;
@@ -16,7 +16,7 @@ public class ExpressionItem extends JPanel {
 
     private JLabel iconLabel;
 
-    public ExpressionItem(String code, ImageIcon icon, String displayName) {
+    public MessageEditorExpressionItemPanel(String code, ImageIcon icon, String displayName) {
         this.code = code;
         this.icon = icon;
         this.displayName = displayName;

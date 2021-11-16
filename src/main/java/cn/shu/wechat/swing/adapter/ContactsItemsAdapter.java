@@ -8,7 +8,6 @@ import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.swing.entity.ContactsItem;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.panels.RightPanel;
-import cn.shu.wechat.swing.panels.RoomChatPanelCard;
 import cn.shu.wechat.swing.panels.UserInfoPanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import org.apache.commons.lang3.StringUtils;

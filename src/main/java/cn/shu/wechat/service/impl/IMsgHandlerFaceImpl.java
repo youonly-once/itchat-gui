@@ -3,7 +3,6 @@ package cn.shu.wechat.service.impl;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.core.MsgCenter;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
 import cn.shu.wechat.enums.WXSendMsgCodeEnum;
@@ -18,11 +17,10 @@ import cn.shu.wechat.pojo.entity.MessageExample;
 import cn.shu.wechat.pojo.entity.Status;
 import cn.shu.wechat.pojo.entity.StatusExample;
 import cn.shu.wechat.service.IMsgHandlerFace;
-import cn.shu.wechat.swing.panels.RoomChatContainer;
+import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -188,7 +186,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 Status build = Status.builder().name(to)
                         .autoStatus((short) 1).build();
                 statusMapper.insertOrUpdateSelectiveForSqlite(build);
-                RoomChatContainer.get(toUserName).getChatPanel().getMessageEditorPanel().setUndoAndAutoLabel();
+                ChatPanelContainer.get(toUserName).getChatMessagePanel().getMessageEditorPanel().setUndoAndAutoLabel();
 
                 messages.add(Message.builder().msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .content("已开启【" + remarkNameByGroupUserName + "】自动回复功能")
@@ -201,7 +199,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                build = Status.builder().name(to)
                         .autoStatus((short) 2).build();
                 statusMapper.insertOrUpdateSelectiveForSqlite(build);
-                RoomChatContainer.get(toUserName).getChatPanel().getMessageEditorPanel().setUndoAndAutoLabel();
+                ChatPanelContainer.get(toUserName).getChatMessagePanel().getMessageEditorPanel().setUndoAndAutoLabel();
                 messages.add(Message.builder().msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .content("已关闭【" + remarkNameByGroupUserName + "】自动回复功能")
                         .toUsername(toUserName).build());
@@ -213,7 +211,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 build = Status.builder().name(to)
                         .undoStatus((short) 1).build();
                 statusMapper.insertOrUpdateSelectiveForSqlite(build);
-                RoomChatContainer.get(toUserName).getChatPanel().getMessageEditorPanel().setUndoAndAutoLabel();
+                ChatPanelContainer.get(toUserName).getChatMessagePanel().getMessageEditorPanel().setUndoAndAutoLabel();
 
                 messages.add(Message.builder().msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .content("已开启【" + remarkNameByGroupUserName + "】防撤回功能")
@@ -227,7 +225,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 statusMapper.insertOrUpdateSelectiveForSqlite(build);
                 //群消息
                 nonPreventUndoMsgUserName.add(to);
-                RoomChatContainer.get(toUserName).getChatPanel().getMessageEditorPanel().setUndoAndAutoLabel();
+                ChatPanelContainer.get(toUserName).getChatMessagePanel().getMessageEditorPanel().setUndoAndAutoLabel();
 
                 messages.add(Message.builder().msgType(WXSendMsgCodeEnum.TEXT.getCode())
                         .content("已关闭【" + remarkNameByGroupUserName + "】防撤回功能")
@@ -405,7 +403,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         if (roomId.equals(Core.getUserName())) {
             roomId = msg.getToUserName();
         }
-        RoomChatContainer.get(roomId).getChatPanel().setRevokeStatus(oldMessage.getId());
+        ChatPanelContainer.get(roomId).getChatMessagePanel().setRevokeStatus(oldMessage.getId());
 
 
         //==============是否为自己的消息

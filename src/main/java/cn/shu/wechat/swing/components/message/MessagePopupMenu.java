@@ -1,7 +1,6 @@
 package cn.shu.wechat.swing.components.message;
 
 import cn.shu.wechat.api.MessageTools;
-import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.pojo.dto.msg.send.WebWXSendMsgResponse;
@@ -9,7 +8,6 @@ import cn.shu.wechat.pojo.entity.Message;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCMenuItemUI;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
-import cn.shu.wechat.swing.panels.RoomChatContainer;
 import cn.shu.wechat.swing.utils.ChatUtil;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 import cn.shu.wechat.utils.ExecutorServiceUtil;

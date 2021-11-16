@@ -2,7 +2,6 @@ package cn.shu.wechat.swing.adapter.message;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
-import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
@@ -32,8 +31,7 @@ import cn.shu.wechat.swing.frames.ImageViewerFrame;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.helper.AttachmentIconHelper;
 import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
-import cn.shu.wechat.swing.panels.ChatPanel;
-import cn.shu.wechat.swing.panels.RoomChatContainer;
+import cn.shu.wechat.swing.panels.chat.ChatMessagePanel;
 import cn.shu.wechat.swing.utils.*;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import javazoom.jl.player.Player;
@@ -45,7 +43,6 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -68,11 +65,11 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     private final ImageCache imageCache;
 
     private final MessagePopupMenu popupMenu = new MessagePopupMenu();
-    private final ChatPanel parent;
+    private final ChatMessagePanel parent;
 
     MessageViewHolderCacheHelper messageViewHolderCacheHelper;
 
-    public MessageAdapter(ChatPanel parent,List<Message> messageItems, RCListView listView, MessageViewHolderCacheHelper messageViewHolderCacheHelper) {
+    public MessageAdapter(ChatMessagePanel parent, List<Message> messageItems, RCListView listView, MessageViewHolderCacheHelper messageViewHolderCacheHelper) {
         this.messageItems = messageItems;
         this.listView = listView;
         this.parent = parent;
@@ -508,7 +505,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    ChatPanel.openFile(item.getFilePath());
+                    ChatMessagePanel.openFile(item.getFilePath());
                 }
             }
         };
@@ -838,7 +835,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                         super.mouseReleased(e);
                         return;
                     }
-                    ChatPanel.openFile(item.getFilePath());
+                    ChatMessagePanel.openFile(item.getFilePath());
                 }
                 super.mouseReleased(e);
             }
@@ -907,13 +904,13 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                                     //阻塞
                                     DownloadTools.awaitDownload(item.getFilePath());
                                     if (ImageUtil.isGIF(item.getFilePath())){
-                                        ChatPanel.openFile(item.getFilePath());
+                                        ChatMessagePanel.openFile(item.getFilePath());
                                     }else{
                                         if (file.exists() && file.length() <= 1024 * 1024) {
                                             BufferedImage read = ImageIO.read(new File(item.getFilePath()));
                                             publish(read);
                                         } else {
-                                            ChatPanel.openFile(item.getFilePath());
+                                            ChatMessagePanel.openFile(item.getFilePath());
                                         }
                                     }
 

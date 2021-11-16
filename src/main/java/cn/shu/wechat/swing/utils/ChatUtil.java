@@ -3,7 +3,7 @@ package cn.shu.wechat.swing.utils;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.pojo.entity.Message;
 import cn.shu.wechat.swing.panels.RightPanel;
-import cn.shu.wechat.swing.panels.RoomChatContainer;
+import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.swing.panels.RoomsPanel;
 import cn.shu.wechat.swing.panels.TabOperationPanel;
 
@@ -27,11 +27,11 @@ public class ChatUtil {
         //注意先后顺序，否则可能不能激活
         if (!Core.getRecentContacts().contains(userId)) {
             //创建一层聊天面板
-            RoomChatContainer.getContext().createAndShow(userId);
+            ChatPanelContainer.getContext().createAndShow(userId);
             //房间不存在，创建左侧聊天房
             createDirectChat(userId);
         } else {
-            RoomChatContainer.getContext().createAndShow(userId);
+            ChatPanelContainer.getContext().createAndShow(userId);
             //房间列表激活 //TODO有问题
             RoomsPanel.getContext().activeItem(userId);
         }
@@ -71,8 +71,8 @@ public class ChatUtil {
                 //新消息来了后创建房间
                 //创建房间的时候会从数据库加载历史消息，由于这次的消息已经写入了数据库，所以不用再添加了
 
-                  RoomChatContainer.getContext().addPanel(roomId);
-                  RoomChatContainer.get(roomId).addMessageToEnd(message);
+                  ChatPanelContainer.getContext().addPanel(roomId);
+                  ChatPanelContainer.get(roomId).addMessageToEnd(message);
                 }
             //新增或选择聊天列表
             RoomsPanel.getContext().addRoomOrOpenRoom(roomId, lastMsg, count,isMute,hasNewMsg);
@@ -112,7 +112,7 @@ public class ChatUtil {
         String messageId = item.getId();
         if (messageId != null && !messageId.isEmpty()) {
             String roomId = item.getFromUsername().equals(Core.getUserName()) ? item.getToUsername() : item.getFromUsername();
-            RoomChatContainer.get(roomId).getChatPanel().deleteMessage(messageId);
+            ChatPanelContainer.get(roomId).getChatMessagePanel().deleteMessage(messageId);
         }
     }
 }

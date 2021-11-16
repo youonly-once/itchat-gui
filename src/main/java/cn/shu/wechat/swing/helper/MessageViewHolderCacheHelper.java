@@ -14,6 +14,7 @@ import cn.shu.wechat.swing.adapter.message.video.MessageLeftVideoViewHolder;
 import cn.shu.wechat.swing.adapter.message.video.MessageRightVideoViewHolder;
 import cn.shu.wechat.swing.adapter.message.voice.MessageLeftVoiceViewHolder;
 import cn.shu.wechat.swing.adapter.message.voice.MessageRightVoiceViewHolder;
+import cn.shu.wechat.swing.panels.RoomsPanel;
 
 import javax.swing.*;
 import java.awt.event.MouseListener;
@@ -26,7 +27,7 @@ import java.util.List;
  * <p>对消息的ViewHolder进入缓存能大大加速消息列表的加载速度，在刚进入房间时，默认先加载10条消息，
  * 这10条消息的ViewHolder将从缓存中获取，避免了new ViewHolder花费的时间。</p>
  * <p>
- * <p>在新进入新的房间时，{@link cn.shu.wechat.swing.panels.RoomsPanel#enterRoom(String)}
+ * <p>在新进入新的房间时，{@link RoomsPanel#enterRoom(String)}
  * 方法将会调用本类的{@link MessageViewHolderCacheHelper#reset()} 方法，
  * 对上一个房间所使用的ViewHolder对象进行释放，从而实现循环使用缓存的ViewHolder</p>
  * <p>

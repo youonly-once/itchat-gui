@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.panels;
 
+import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import lombok.Getter;
 
 import javax.swing.*;
@@ -16,7 +17,7 @@ public class RightPanel extends JPanel {
     /**
      * 显示聊天房的panel
      */
-    private final RoomChatContainer roomChatContainer;
+    private final ChatPanelContainer chatPanelContainer;
     /**
      * 显示用户信息的panel
      */
@@ -37,11 +38,11 @@ public class RightPanel extends JPanel {
     public RightPanel() {
         context =this;
         userInfoPanel = new UserInfoPanel(this);
-        roomChatContainer = new RoomChatContainer(this);
+        chatPanelContainer = new ChatPanelContainer(this);
         cardLayout = new CardLayout();
         setLayout(cardLayout);
         add(userInfoPanel, USER_INFO);
-        add(roomChatContainer, CHAT_ROOM);
+        add(chatPanelContainer, CHAT_ROOM);
         show(CHAT_ROOM);
     }
 

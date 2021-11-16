@@ -4,7 +4,6 @@ import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.pojo.entity.Message;
-import cn.shu.wechat.swing.panels.RoomChatContainer;
 import cn.shu.wechat.utils.DateUtils;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.SleepUtils;
@@ -15,7 +14,6 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.concurrent.ExecutorService;
 
 public class BombFrame extends JFrame {
 

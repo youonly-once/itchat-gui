@@ -1,4 +1,4 @@
-package cn.shu.wechat.swing.panels;
+package cn.shu.wechat.swing.panels.chat;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.MessageTools;
@@ -24,6 +24,9 @@ import cn.shu.wechat.swing.components.message.RemindUserPopup;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
 import cn.shu.wechat.swing.listener.ExpressionListener;
+import cn.shu.wechat.swing.panels.ParentAvailablePanel;
+import cn.shu.wechat.swing.panels.RoomsPanel;
+import cn.shu.wechat.swing.panels.TitlePanel;
 import cn.shu.wechat.swing.tasks.UploadTaskCallback;
 import cn.shu.wechat.swing.utils.FileCache;
 import cn.shu.wechat.swing.utils.ImageUtil;
@@ -45,7 +48,6 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.List;
 import java.util.Queue;
 import java.util.*;
@@ -56,20 +58,20 @@ import java.util.*;
  * Created by 舒新胜 on 17-5-30.
  */
 @Log4j2
-public class ChatPanel extends ParentAvailablePanel {
+public class ChatMessagePanel extends ParentAvailablePanel {
     /**
      * 消息面板
      */
-    private MessagePanel messagePanel;
+    private ChatMessageViewerPanel chatMessageViewerPanel;
 
-    public MessageEditorPanel getMessageEditorPanel() {
-        return messageEditorPanel;
+    public ChatMessageEditorPanel getMessageEditorPanel() {
+        return chatMessageEditorPanel;
     }
 
     /**
      * 消息输入框
      */
-    private MessageEditorPanel messageEditorPanel;
+    private ChatMessageEditorPanel chatMessageEditorPanel;
 
     /**
      * 消息列表
@@ -116,7 +118,7 @@ public class ChatPanel extends ParentAvailablePanel {
 
     private volatile boolean isLoadHis = false;
 
-    public ChatPanel(JPanel parent, String roomId) {
+    public ChatMessagePanel(JPanel parent, String roomId) {
 
         super(parent);
         this.roomId = roomId;
@@ -132,26 +134,27 @@ public class ChatPanel extends ParentAvailablePanel {
 
     private void initComponents() {
 
-        messagePanel = new MessagePanel(this);
-        messagePanel.setBorder(new RCBorder(RCBorder.BOTTOM, Colors.LIGHT_GRAY));
-        adapter = new MessageAdapter(this,messageItems, messagePanel.getMessageListView(), messageViewHolderCacheHelper);
-        messagePanel.getMessageListView().setAdapter(adapter);
+        chatMessageViewerPanel = new ChatMessageViewerPanel(this);
+        chatMessageViewerPanel.setBorder(new RCBorder(RCBorder.BOTTOM, Colors.LIGHT_GRAY));
+        adapter = new MessageAdapter(this,messageItems, chatMessageViewerPanel.getMessageListView(), messageViewHolderCacheHelper);
+        chatMessageViewerPanel.getMessageListView().setAdapter(adapter);
 
-        messageEditorPanel = new MessageEditorPanel(this, roomId);
-        messageEditorPanel.setPreferredSize(new Dimension(MainFrame.DEFAULT_WIDTH, MainFrame.DEFAULT_WIDTH / 4));
+        chatMessageEditorPanel = new ChatMessageEditorPanel(this, roomId);
+        chatMessageEditorPanel.setPreferredSize(new Dimension(MainFrame.DEFAULT_WIDTH, MainFrame.DEFAULT_WIDTH / 4));
     }
 
 
     private void initView() {
         this.setLayout(new GridBagLayout());
-        add(messagePanel, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 4));
-        add(messageEditorPanel, new GBC(0, 1).setFill(GBC.BOTH).setWeight(1, 1));
+        add(chatMessageViewerPanel, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 4));
+        add(chatMessageEditorPanel, new GBC(0, 1).setFill(GBC.BOTH).setWeight(1, 1));
 
     }
 
 
     private void setListeners() {
-        messagePanel.getMessageListView().setScrollToTopListener(new RCListView.ScrollToTopListener() {
+        //暂时不加载历史消息，无意义
+        /*chatMessageViewerPanel.getMessageListView().setScrollToTopListener(new RCListView.ScrollToTopListener() {
             @Override
             public void onScrollToTop() {
                 // 当滚动到顶部时，继续拿前面的消息
@@ -160,7 +163,7 @@ public class ChatPanel extends ParentAvailablePanel {
                 }
                 if (roomId != null) {
                     isLoadHis = true;
-                    ((RoomChatPanelCard) ChatPanel.this.getParentPanel()).getTitlePanel().showStatusLabel("加载中...");
+                    ((ChatPanel) ChatMessagePanel.this.getParentPanel()).getTitlePanel().showStatusLabel("加载中...");
 
                     new SwingWorker<Object, Object>() {
                         List<Message> messageList = null;
@@ -182,13 +185,13 @@ public class ChatPanel extends ParentAvailablePanel {
 
                                 if (messageList != null && !messageList.isEmpty()) {
                                     //TODO 顺序有问题
-                                    messagePanel.getMessageListView().notifyItemRangeInserted(0, messageList.size());
+                                    chatMessageViewerPanel.getMessageListView().notifyItemRangeInserted(0, messageList.size());
                                 }
                             } catch (Exception e) {
                                 e.printStackTrace();
                             } finally {
                                 isLoadHis = false;
-                                ((RoomChatPanelCard) ChatPanel.this.getParentPanel()).getTitlePanel().hideStatusLabel();
+                                ((ChatPanel) ChatMessagePanel.this.getParentPanel()).getTitlePanel().hideStatusLabel();
                             }
 
                         }
@@ -196,8 +199,8 @@ public class ChatPanel extends ParentAvailablePanel {
                 }
             }
         });
-
-        JTextPane editor = messageEditorPanel.getEditor();
+*/
+        JTextPane editor = chatMessageEditorPanel.getEditor();
         Document document = editor.getDocument();
 
         editor.addKeyListener(new KeyAdapter() {
@@ -248,13 +251,13 @@ public class ChatPanel extends ParentAvailablePanel {
         remindUserPopup.setSelectedCallBack(new RemindUserPopup.UserSelectedCallBack() {
             @Override
             public void onSelected(String username) {
-                JTextPane editor = messageEditorPanel.getEditor();
+                JTextPane editor = chatMessageEditorPanel.getEditor();
                 editor.replaceSelection(username + " ");
             }
         });
 
         // 发送按钮
-        messageEditorPanel.getSendButton().addActionListener(new ActionListener() {
+        chatMessageEditorPanel.getSendButton().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 sendMessage();
@@ -262,7 +265,7 @@ public class ChatPanel extends ParentAvailablePanel {
         });
 
         // 上传文件按钮
-        messageEditorPanel.getUploadFileLabel().addMouseListener(new MouseAdapter() {
+        chatMessageEditorPanel.getUploadFileLabel().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 JFileChooser fileChooser = new JFileChooser();
@@ -287,7 +290,7 @@ public class ChatPanel extends ParentAvailablePanel {
         });
 
         // 插入表情
-        messageEditorPanel.setExpressionListener(new ExpressionListener() {
+        chatMessageEditorPanel.setExpressionListener(new ExpressionListener() {
             @Override
             public void onSelected(String code) {
                 editor.replaceSelection(code);
@@ -339,7 +342,7 @@ public class ChatPanel extends ParentAvailablePanel {
             // 先上传第一个图片/文件
             dequeueAndUpload();
         }
-        messageEditorPanel.getEditor().setText("");
+        chatMessageEditorPanel.getEditor().setText("");
         RoomsPanel.getContext().scrollToPosition(0);
     }
 
@@ -351,7 +354,7 @@ public class ChatPanel extends ParentAvailablePanel {
     private List<Object> parseEditorInput() {
         List<Object> inputData = new ArrayList<>();
 
-        Document doc = messageEditorPanel.getEditor().getDocument();
+        Document doc = chatMessageEditorPanel.getEditor().getDocument();
         int count = doc.getRootElements()[0].getElementCount();
 
         // 是否是纯文本，如果发现有图片或附件，则不是纯文本
@@ -397,7 +400,7 @@ public class ChatPanel extends ParentAvailablePanel {
         // 如果是纯文本，直接返回整个文本，否则如果出消息中有换行符\n出现，那么每一行都会被解析成一句话，会造成一条消息被分散成多个消息发送
         if (pureText) {
             inputData.clear();
-            inputData.add(messageEditorPanel.getEditor().getText());
+            inputData.add(chatMessageEditorPanel.getEditor().getText());
         }
 
         return inputData;
@@ -427,7 +430,7 @@ public class ChatPanel extends ParentAvailablePanel {
      * 从数据库加载本地历史消息
      */
     private void loadLocalHistory() {
-        ((RoomChatPanelCard) this.getParentPanel()).getTitlePanel().showStatusLabel("加载中...");
+        ((ChatPanel) this.getParentPanel()).getTitlePanel().showStatusLabel("加载中...");
         //TODO 线程安全问题
         new SwingWorker<Object, Object>() {
 
@@ -444,10 +447,10 @@ public class ChatPanel extends ParentAvailablePanel {
 
             @Override
             protected void done() {
-                messagePanel.getMessageListView().notifyDataSetChanged(false);
+                chatMessageViewerPanel.getMessageListView().notifyDataSetChanged(false);
 
-                messagePanel.getMessageListView().setAutoScrollToBottom();
-                ((RoomChatPanelCard) ChatPanel.this.getParentPanel()).getTitlePanel().hideStatusLabel();
+                chatMessageViewerPanel.getMessageListView().setAutoScrollToBottom();
+                ((ChatPanel) ChatMessagePanel.this.getParentPanel()).getTitlePanel().hideStatusLabel();
             }
         }.execute();
 
@@ -476,7 +479,7 @@ public class ChatPanel extends ParentAvailablePanel {
      * 通知数据改变，需要重绘整个列表
      */
     public void notifyDataSetChanged() {
-        messagePanel.getMessageListView().setVisible(false);
+        chatMessageViewerPanel.getMessageListView().setVisible(false);
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -484,9 +487,9 @@ public class ChatPanel extends ParentAvailablePanel {
                 messageViewHolderCacheHelper.reset();
 
                 messageItems.clear();
-                messagePanel.setVisible(true);
-                messageEditorPanel.setVisible(true);
-                messagePanel.getMessageListView().setVisible(true);
+                chatMessageViewerPanel.setVisible(true);
+                chatMessageEditorPanel.setVisible(true);
+                chatMessageViewerPanel.getMessageListView().setVisible(true);
 
                 TitlePanel.getContext().hideRoomMembersPanel();
             }
@@ -501,11 +504,11 @@ public class ChatPanel extends ParentAvailablePanel {
      */
     public ViewHolder addMessageToEnd(Message messageItem) {
         this.messageItems.add(messageItem);
-        ViewHolder holder = messagePanel.getMessageListView().notifyItemInserted(messageItems.size() - 1, true);
+        ViewHolder holder = chatMessageViewerPanel.getMessageListView().notifyItemInserted(messageItems.size() - 1, true);
         // 只有当滚动条在最底部最，新消到来后才自动滚动到底部
-        JScrollBar scrollBar = messagePanel.getMessageListView().getVerticalScrollBar();
+        JScrollBar scrollBar = chatMessageViewerPanel.getMessageListView().getVerticalScrollBar();
         if (scrollBar.getValue() == (scrollBar.getModel().getMaximum() - scrollBar.getModel().getExtent())) {
-            messagePanel.getMessageListView().setAutoScrollToBottom();
+            chatMessageViewerPanel.getMessageListView().setAutoScrollToBottom();
         }
         return holder;
     }
@@ -523,7 +526,7 @@ public class ChatPanel extends ParentAvailablePanel {
         /*    Message messageItem = messageItems.get(pos);
             messageItem.setNeedToResend(!lastMessage.getIsSend());
             messageItem.setProgress(lastMessage.get);*/
-            messagePanel.getMessageListView().notifyItemChanged(viewHolder, pos);
+            chatMessageViewerPanel.getMessageListView().notifyItemChanged(viewHolder, pos);
         }
     }
 
@@ -531,7 +534,7 @@ public class ChatPanel extends ParentAvailablePanel {
         int pos = findMessagePositionInViewReverse(id);
         if (pos > -1) {
             messageItems.get(pos).setRevoke(true);
-            messagePanel.getMessageListView().notifyItemChanged(pos);
+            chatMessageViewerPanel.getMessageListView().notifyItemChanged(pos);
         }
     }
 
@@ -616,47 +619,6 @@ public class ChatPanel extends ParentAvailablePanel {
     }
 
 
-
-
-    /**
-     * 重发文件消息
-     *
-     * @param messageId
-     * @param type
-     */
-    public void resendFileMessage(String messageId, String type) {
-        cn.shu.wechat.swing.db.model.Message dbMessage = null;//= messageService.findById(messageId);
-        String path = null;
-
-        if (type.equals("file")) {
-            if (dbMessage.getFileAttachmentId() != null) {
-                //  path = fileAttachmentService.findById(dbMessage.getFileAttachmentId()).getLink();
-            } else {
-                path = null;
-            }
-        } else {
-            if (dbMessage.getImageAttachmentId() != null) {
-                // path = imageAttachmentService.findById(dbMessage.getImageAttachmentId()).getImagePath();
-            } else {
-                path = null;
-
-            }
-        }
-
-
-        if (path != null) {
-            int index = findMessagePositionInViewReverse(messageId);
-
-            if (index > -1) {
-                messageItems.remove(index);
-                messagePanel.getMessageListView().notifyItemRemoved(index);
-                // messageService.delete(dbMessage.getId());
-            }
-
-            sendFileMessage(path);
-            showSendingMessage();
-        }
-    }
 
 
     /**
@@ -836,7 +798,7 @@ public class ChatPanel extends ParentAvailablePanel {
         }
 
         try {
-            return (BaseMessageViewHolder) messagePanel.getMessageListView().getItem(position);
+            return (BaseMessageViewHolder) chatMessageViewerPanel.getMessageListView().getItem(position);
         } catch (Exception e) {
             return null;
         }
@@ -964,7 +926,7 @@ public class ChatPanel extends ParentAvailablePanel {
         int pos = findMessagePositionInViewReverse(messageId);
         if (pos > -1) {
             messageItems.remove(pos);
-            messagePanel.getMessageListView().notifyItemRemoved(pos);
+            chatMessageViewerPanel.getMessageListView().notifyItemRemoved(pos);
         }
     }
 
@@ -972,8 +934,8 @@ public class ChatPanel extends ParentAvailablePanel {
      * 粘贴
      */
     public void paste() {
-        messageEditorPanel.getEditor().paste();
-        messageEditorPanel.getEditor().requestFocus();
+        chatMessageEditorPanel.getEditor().paste();
+        chatMessageEditorPanel.getEditor().requestFocus();
     }
 
 }
