@@ -10,7 +10,6 @@ import cn.shu.wechat.swing.panels.left.tabcontent.LeftTabContentPanel;
 import cn.shu.wechat.swing.utils.IconUtil;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;

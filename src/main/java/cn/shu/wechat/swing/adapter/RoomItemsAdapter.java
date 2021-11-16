@@ -6,6 +6,7 @@ import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
+import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.TimeUtil;
 
@@ -159,7 +160,8 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             this.myRoomId = myRoomId;
             this.position = pos;
             JMenuItem delItem = new JMenuItem("删除");
-            delItem.setIcon(IconUtil.getIcon(this,"/image/delete.png"));
+            delItem.setFont(FontUtil.getDefaultFont(14));
+            delItem.setIcon(IconUtil.getIcon(this, "/image/delete.png"));
             delItem.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {

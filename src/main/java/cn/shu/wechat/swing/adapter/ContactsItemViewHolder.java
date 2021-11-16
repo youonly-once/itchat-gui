@@ -25,7 +25,7 @@ public class ContactsItemViewHolder extends ViewHolder {
     private void initComponents() {
         setPreferredSize(new Dimension(100, 50));
         setBackground(Colors.WINDOW_BACKGROUND);
-        setBorder(new RCBorder(RCBorder.BOTTOM,Color.WHITE));
+        setBorder(new RCBorder(RCBorder.BOTTOM, Colors.SCROLL_BAR_TRACK_LIGHT));
         setOpaque(true);
         setForeground(Colors.DARK);
 

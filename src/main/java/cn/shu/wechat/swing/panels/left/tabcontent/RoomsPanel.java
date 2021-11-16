@@ -334,7 +334,7 @@ public class RoomsPanel extends ParentAvailablePanel {
      */
     public void activeItem(int position) {
         RoomItemViewHolder holder = (RoomItemViewHolder) roomItemsListView.getItem(position);
-        setItemBackground(holder, Colors.ITEM_SELECTED);
+        setItemBackground(holder, Colors.SCROLL_BAR_TRACK_LIGHT);
         RoomItemsAdapter adapter = (RoomItemsAdapter) (roomItemsListView.getAdapter());
         adapter.setSelectedViewHolder(holder);
         for (int i = 0; i < roomItemsListView.getItems().size(); i++) {
@@ -342,7 +342,7 @@ public class RoomsPanel extends ParentAvailablePanel {
                 continue;
             }
             holder = (RoomItemViewHolder) roomItemsListView.getItem(i);
-            setItemBackground(holder, Colors.DARK);
+            setItemBackground(holder, Colors.WINDOW_BACKGROUND);
         }
         scrollToPosition(position*RoomItemViewHolder.HEIGHT);
     }

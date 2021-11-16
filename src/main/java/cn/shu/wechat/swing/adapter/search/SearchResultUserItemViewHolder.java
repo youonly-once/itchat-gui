@@ -15,7 +15,7 @@ import java.awt.*;
  */
 public class SearchResultUserItemViewHolder extends SearchResultItemViewHolder {
     public JLabel avatar = new JLabel();
-    public HighLightLabel name = new HighLightLabel();
+    public HighLightLabel name = new HighLightLabel(null, Colors.MAIN_COLOR);
     public JLabel type = new JLabel();
     public SearchResultUserItemViewHolder() {
         initComponents();

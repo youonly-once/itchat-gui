@@ -35,7 +35,7 @@ public class RoomItemViewHolder extends ViewHolder {
     private void initComponents() {
         setPreferredSize(new Dimension(100, HEIGHT));
         setBackground(Colors.WINDOW_BACKGROUND);
-        setBorder(new RCBorder(RCBorder.BOTTOM,Colors.WINDOW_BACKGROUND));
+        setBorder(new RCBorder(RCBorder.BOTTOM, Colors.SCROLL_BAR_TRACK_LIGHT));
         setOpaque(true);
         setForeground(Colors.DARK);
 
@@ -59,7 +59,7 @@ public class RoomItemViewHolder extends ViewHolder {
         unreadCount.setIcon(IconUtil.getIcon(this,"/image/count_bg.png"));
         unreadCount.setFont(FontUtil.getDefaultFont(12));
         unreadCount.setPreferredSize(new Dimension(10, 10));
-        unreadCount.setForeground(Color.BLACK);
+        unreadCount.setForeground(Color.WHITE);
         unreadCount.setHorizontalTextPosition(SwingConstants.CENTER);
         unreadCount.setHorizontalAlignment(SwingConstants.CENTER);
         unreadCount.setVerticalAlignment(SwingConstants.CENTER);

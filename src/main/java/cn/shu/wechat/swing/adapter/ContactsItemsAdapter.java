@@ -91,16 +91,14 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
     public void onBindHeaderViewHolder(HeaderViewHolder viewHolder, int position) {
         ContactsHeaderViewHolder holder = (ContactsHeaderViewHolder) viewHolder;
         holder.setPreferredSize(new Dimension(100, 25));
-        holder.setBackground(Colors.WINDOW_BACKGROUND_LIGHT);
-        holder.setBorder(new RCBorder(RCBorder.BOTTOM,Colors.SCROLL_BAR_TRACK_LIGHT));
+        holder.setBackground(Colors.SCROLL_BAR_TRACK_LIGHT);
+        holder.setBorder(new RCBorder(RCBorder.BOTTOM, Colors.BG_GRAY));
         holder.setOpaque(true);
 
         holder.letterLabel = new JLabel();
         holder.letterLabel.setText(holder.getLetter());
         holder.letterLabel.setForeground(Colors.DARK);
-        holder.letterLabel.setFont(FontUtil.getDefaultFont(14,Font.BOLD));
-        holder.letterLabel.setHorizontalAlignment(JLabel.CENTER);
-        holder.letterLabel.setBackground(Colors.SCROLL_BAR_TRACK_LIGHT);
+        holder.letterLabel.setFont(FontUtil.getDefaultFont(14, Font.BOLD));
         holder.setLayout(new BorderLayout());
         holder.add(holder.letterLabel, BorderLayout.WEST);
     }
