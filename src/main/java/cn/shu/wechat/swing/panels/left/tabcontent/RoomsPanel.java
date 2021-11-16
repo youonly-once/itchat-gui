@@ -1,4 +1,4 @@
-package cn.shu.wechat.swing.panels;
+package cn.shu.wechat.swing.panels.left.tabcontent;
 
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.core.Core;
@@ -10,8 +10,10 @@ import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCListView;
 import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.frames.MainFrame;
+import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.swing.panels.chat.ChatPanel;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
+import cn.shu.wechat.swing.panels.left.TabOperationPanel;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 
 import javax.swing.*;
@@ -85,11 +87,13 @@ public class RoomsPanel extends ParentAvailablePanel {
     private void initComponents() {
         roomItemsListView = new RCListView();
         roomItemsListView.getVerticalScrollBar().setUnitIncrement(RoomItemViewHolder.HEIGHT/3);
+        roomItemsListView.setScrollBarColor(Colors.SCROLL_BAR_TRACK_LIGHT,Colors.WINDOW_BACKGROUND);
     }
 
     private void initView() {
         setLayout(new GridBagLayout());
-        roomItemsListView.setContentPanelBackground(Colors.DARK);
+        setBackground(Colors.WINDOW_BACKGROUND);
+        roomItemsListView.setContentPanelBackground(Colors.WINDOW_BACKGROUND);
         add(roomItemsListView, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 1));
         //add(scrollPane, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 1));
     }

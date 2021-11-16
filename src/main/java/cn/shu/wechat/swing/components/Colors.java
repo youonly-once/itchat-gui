@@ -12,7 +12,7 @@ public class Colors {
     public static final Color GROUP_AVATAR_BACKGROUND = new Color(221, 221, 221);
     public static Color DARK = new Color(46, 50, 56);
     //public static Color WINDOW_BACKGROUND = new Color(245, 245, 245);
-    public static Color WINDOW_BACKGROUND = new Color(238, 238, 238);
+
     public static final Color WINDOW_BACKGROUND_LIGHT = new Color(250, 250, 250);
     public static Color BG_GRAY = new Color(234, 232, 231);
     public static Color SCROLL_BAR_TRACK_LIGHT = new Color(214, 214, 214);
@@ -20,8 +20,10 @@ public class Colors {
     public static Color FONT_GRAY = new Color(152, 152, 152);
     public static Color FONT_GRAY_DARKER = new Color(152, 152, 152);
     public static Color DARKER = new Color(38, 41, 46);
-    public static Color ITEM_SELECTED_DARK = new Color(57, 63, 68);
-    public static Color ITEM_SELECTED = new Color(65, 71, 78);
+    public static Color WINDOW_BACKGROUND = new Color(238, 238, 238);
+    public static Color ITEM_SELECTED_DARK = new Color(228, 228, 228);
+    public static Color ITEM_SELECTED = new Color(214, 214, 214);
+
     public static Color ITEM_SELECTED_LIGHT = new Color(228, 228, 228);
     public static Color LIGHT_GRAY = new Color(222, 222, 222);
     public static Color DIALOG_BORDER = new Color(204, 204, 204);

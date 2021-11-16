@@ -4,8 +4,8 @@ import cn.shu.wechat.core.Core;
 import cn.shu.wechat.pojo.entity.Message;
 import cn.shu.wechat.swing.panels.RightPanel;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
-import cn.shu.wechat.swing.panels.RoomsPanel;
-import cn.shu.wechat.swing.panels.TabOperationPanel;
+import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
+import cn.shu.wechat.swing.panels.left.TabOperationPanel;
 
 import javax.swing.*;
 import java.util.List;

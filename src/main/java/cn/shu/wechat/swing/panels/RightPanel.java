@@ -1,9 +1,11 @@
 package cn.shu.wechat.swing.panels;
 
+import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import lombok.Getter;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 
 /**
@@ -40,6 +42,7 @@ public class RightPanel extends JPanel {
         userInfoPanel = new UserInfoPanel(this);
         chatPanelContainer = new ChatPanelContainer(this);
         cardLayout = new CardLayout();
+        setBorder(new LineBorder(Colors.SCROLL_BAR_TRACK_LIGHT));
         setLayout(cardLayout);
         add(userInfoPanel, USER_INFO);
         add(chatPanelContainer, CHAT_ROOM);

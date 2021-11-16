@@ -1,6 +1,7 @@
-package cn.shu.wechat.swing.panels;
+package cn.shu.wechat.swing.panels.left.tabcontent;
 
 import cn.shu.wechat.swing.components.Colors;
+import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 
 import javax.swing.*;
 import java.awt.*;

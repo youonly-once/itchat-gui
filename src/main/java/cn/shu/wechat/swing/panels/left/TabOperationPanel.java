@@ -1,12 +1,16 @@
-package cn.shu.wechat.swing.panels;
+package cn.shu.wechat.swing.panels.left;
 
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.swing.label.CornerMarkJLabel;
+import cn.shu.wechat.swing.panels.ParentAvailablePanel;
+import cn.shu.wechat.swing.panels.RightPanel;
+import cn.shu.wechat.swing.panels.left.tabcontent.LeftTabContentPanel;
 import cn.shu.wechat.swing.utils.IconUtil;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -47,7 +51,7 @@ public class TabOperationPanel extends ParentAvailablePanel {
     private void initComponents() {
         Cursor handCursor = new Cursor(Cursor.HAND_CURSOR);
         clickListener = new TabItemClickListener();
-        RCBorder rcBorder = new RCBorder(RCBorder.RIGHT);
+        RCBorder rcBorder = new RCBorder(RCBorder.RIGHT,Colors.SCROLL_BAR_TRACK_LIGHT);
         rcBorder.setHeightScale(0.2F);
 
         chatIconActive = IconUtil.getIcon(this,"/image/chat_active.png");
@@ -64,7 +68,7 @@ public class TabOperationPanel extends ParentAvailablePanel {
         contactIconActive = IconUtil.getIcon(this,"/image/contacts_active.png");
         contactsLabel = new JLabel();
         contactsLabel.setIcon(contactIconNormal);
-        contactsLabel.setBorder(rcBorder);
+        //contactsLabel.setBorder(rcBorder);
         contactsLabel.setHorizontalAlignment(JLabel.CENTER);
         contactsLabel.setCursor(handCursor);
         contactsLabel.addMouseListener(clickListener);
@@ -82,11 +86,11 @@ public class TabOperationPanel extends ParentAvailablePanel {
 
     private void initView() {
         setLayout(new GridBagLayout());
-        setBackground(Colors.DARK);
-        setBorder(new RCBorder(RCBorder.BOTTOM));
+        setBackground(Colors.WINDOW_BACKGROUND);
+        setBorder(new RCBorder(RCBorder.BOTTOM,Colors.SCROLL_BAR_TRACK_LIGHT));
         add(chatLabel, new GBC(0, 0).setFill(GBC.HORIZONTAL).setWeight(1, 1).setInsets(0, 10, 0, 10));
         add(contactsLabel, new GBC(1, 0).setFill(GBC.HORIZONTAL).setWeight(1, 1).setInsets(0, 10, 0, 10));
-        add(meLable, new GBC(2, 0).setFill(GBC.HORIZONTAL).setWeight(1, 1).setInsets(0, 10, 0, 10));
+       // add(meLable, new GBC(2, 0).setFill(GBC.HORIZONTAL).setWeight(1, 1).setInsets(0, 10, 0, 10));
     }
 
     @Override
@@ -108,13 +112,13 @@ public class TabOperationPanel extends ParentAvailablePanel {
             chatLabel.setIcon(chatIconNormal);
             contactsLabel.setIcon(contactIconActive);
             meLable.setIcon(meIconNormal);
-            parent.getListPanel().showPanel(ListPanel.CONTACTS);
+            parent.getListPanel().showPanel(LeftTabContentPanel.CONTACTS);
             RightPanel.getContext().show(RightPanel.USER_INFO);
         } else if (e.getComponent() == meLable) {
             chatLabel.setIcon(chatIconNormal);
             contactsLabel.setIcon(contactIconNormal);
             meLable.setIcon(meIconActive);
-            parent.getListPanel().showPanel(ListPanel.COLLECTIONS);
+            parent.getListPanel().showPanel(LeftTabContentPanel.COLLECTIONS);
         }
     }
 
@@ -125,7 +129,7 @@ public class TabOperationPanel extends ParentAvailablePanel {
         chatLabel.setIcon(chatIconActive);
         contactsLabel.setIcon(contactIconNormal);
         meLable.setIcon(meIconNormal);
-        parent.getListPanel().showPanel(ListPanel.CHAT);
+        parent.getListPanel().showPanel(LeftTabContentPanel.CHAT);
         RightPanel.getContext().show(RightPanel.CHAT_ROOM);
     }
 

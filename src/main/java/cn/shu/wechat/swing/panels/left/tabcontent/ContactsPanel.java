@@ -1,4 +1,4 @@
-package cn.shu.wechat.swing.panels;
+package cn.shu.wechat.swing.panels.left.tabcontent;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.core.Core;
@@ -9,6 +9,7 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCListView;
 import cn.shu.wechat.swing.entity.ContactsItem;
+import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -51,7 +52,8 @@ public class ContactsPanel extends ParentAvailablePanel {
 
     private void initView() {
         setLayout(new GridBagLayout());
-        contactsListView.setContentPanelBackground(Colors.DARK);
+        contactsListView.setContentPanelBackground(Colors.WINDOW_BACKGROUND);
+        contactsListView.setScrollBarColor(Colors.SCROLL_BAR_TRACK_LIGHT,Colors.WINDOW_BACKGROUND);
         contactsListView.getVerticalScrollBar().setUnitIncrement(ContactsItemViewHolder.HEIGHT);
         //滑轮滚动逐步加载
         contactsListView.setScrollListener(new RCListView.ScrollListener() {

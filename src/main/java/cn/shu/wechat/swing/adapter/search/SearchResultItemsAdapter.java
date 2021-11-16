@@ -12,7 +12,10 @@ import cn.shu.wechat.swing.helper.AttachmentIconHelper;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.panels.*;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
-import cn.shu.wechat.swing.panels.RoomsPanel;
+import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
+import cn.shu.wechat.swing.panels.left.tabcontent.LeftTabContentPanel;
+import cn.shu.wechat.swing.panels.left.SearchPanel;
+import cn.shu.wechat.swing.panels.left.TabOperationPanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.FileCache;
 import cn.shu.wechat.swing.utils.IconUtil;
@@ -289,17 +292,17 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
 
         @Override
         public void mouseEntered(MouseEvent e) {
-            setBackground(holder, Colors.ITEM_SELECTED_DARK);
+            setBackground(holder, Colors.ITEM_SELECTED_LIGHT);
         }
 
         @Override
         public void mouseExited(MouseEvent e) {
-            setBackground(holder, Colors.DARK);
+            setBackground(holder, Colors.WINDOW_BACKGROUND);
         }
 
     };
     private void clearSearchText() {
-        ListPanel.getContext().showPanel(ListPanel.CHAT);
+        LeftTabContentPanel.getContext().showPanel(LeftTabContentPanel.CHAT);
         SearchPanel.getContext().clearSearchText();
     }
 

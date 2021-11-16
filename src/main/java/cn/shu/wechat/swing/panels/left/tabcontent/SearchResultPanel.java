@@ -1,4 +1,4 @@
-package cn.shu.wechat.swing.panels;
+package cn.shu.wechat.swing.panels.left.tabcontent;
 
 import cn.shu.wechat.swing.adapter.RoomItemViewHolder;
 import cn.shu.wechat.swing.adapter.search.SearchResultItemsAdapter;
@@ -6,6 +6,7 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCListView;
 import cn.shu.wechat.swing.entity.SearchResultItem;
+import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -37,17 +38,17 @@ public class SearchResultPanel extends ParentAvailablePanel {
 
     private void initComponents() {
         resultItemsListView = new RCListView();
-        this.setBackground(Colors.DARK);
+        this.setBackground(Colors.WINDOW_BACKGROUND);
 
         tipLabel = new JLabel("无搜索结果");
         tipLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        tipLabel.setForeground(Colors.FONT_GRAY);
+        tipLabel.setForeground(Colors.DARK);
         tipLabel.setVisible(false);
     }
 
     private void initView() {
         setLayout(new GridBagLayout());
-        resultItemsListView.setContentPanelBackground(Colors.DARK);
+        resultItemsListView.setContentPanelBackground(Colors.WINDOW_BACKGROUND);
         add(tipLabel, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 1).setInsets(10, 0, 0, 0));
         add(resultItemsListView, new GBC(0, 1).setFill(GBC.BOTH).setWeight(1, 1000));
     }

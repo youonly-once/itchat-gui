@@ -11,14 +11,16 @@ import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
 import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
-import cn.shu.wechat.swing.panels.ContactsPanel;
-import cn.shu.wechat.swing.panels.RoomsPanel;
+import cn.shu.wechat.swing.panels.left.tabcontent.ContactsPanel;
+import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.OSUtil;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.HeadImageUtil;
 import cn.shu.wechat.utils.SleepUtils;
+import com.melloware.jintellitype.HotkeyListener;
+import com.melloware.jintellitype.JIntellitype;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 
@@ -77,6 +79,9 @@ public class LoginFrame extends JFrame {
         initView();
        setLocationRelativeTo(null);
         setListeners();
+        if (OSUtil.getOsType() == OSUtil.Windows) {
+            registerHotKey();
+        }
     }
 
 
@@ -368,7 +373,31 @@ public class LoginFrame extends JFrame {
             SleepUtils.sleep(2000);
         }
     }
+    /**
+     * 注册截图快捷键
+     */
+    private void registerHotKey() {
 
+        int SCREEN_SHOT_CODE = 10001;
+        JIntellitype.getInstance().registerHotKey(SCREEN_SHOT_CODE, JIntellitype.MOD_ALT, 'S');
+
+        JIntellitype.getInstance().addHotKeyListener(new HotkeyListener() {
+            @Override
+            public void onHotKey(int markCode) {
+                if (markCode == SCREEN_SHOT_CODE) {
+                    screenShot();
+                }
+            }
+        });
+    }
+
+    /**
+     * 截图
+     */
+    private void screenShot() {
+        ScreenShotFrame ssw = new ScreenShotFrame();
+        ssw.setVisible(true);
+    }
     /**
      * 下载头像
      */
@@ -396,5 +425,6 @@ public class LoginFrame extends JFrame {
 
         }
     }
+
 
 }

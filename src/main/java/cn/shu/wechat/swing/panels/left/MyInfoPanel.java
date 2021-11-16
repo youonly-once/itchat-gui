@@ -1,4 +1,4 @@
-package cn.shu.wechat.swing.panels;
+package cn.shu.wechat.swing.panels.left;
 
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.pojo.entity.Contacts;
@@ -8,6 +8,7 @@ import cn.shu.wechat.swing.components.message.MainOperationPopupMenu;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.frames.SystemConfigDialog;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
+import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
@@ -46,8 +47,7 @@ public class MyInfoPanel extends ParentAvailablePanel {
 
     private void initComponents() {
 
-        //GImage.setBorder(new SubtleSquareBorder(true));
-        // currentUsername = currentUserService.findAll().get(0).getUsername();
+
         Contacts userSelf = Core.getUserSelf();
         String headImage = Core.getContactHeadImgPath().get(userSelf.getUsername());
         avatar = new JLabel();
@@ -70,12 +70,12 @@ public class MyInfoPanel extends ParentAvailablePanel {
         username = new JLabel();
         username.setText(userSelf.getNickname());
         username.setFont(FontUtil.getDefaultFont(16));
-        username.setForeground(Colors.FONT_WHITE);
+        username.setForeground(Colors.DARK);
 
 
         menuIcon = new JLabel();
         menuIcon.setIcon(IconUtil.getIcon(this,"/image/options.png"));
-        menuIcon.setForeground(Colors.FONT_WHITE);
+        menuIcon.setForeground(Colors.DARK);
         menuIcon.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
 
@@ -108,7 +108,7 @@ public class MyInfoPanel extends ParentAvailablePanel {
     }
 
     private void initView() {
-        this.setBackground(Colors.DARK);
+        this.setBackground(Colors.WINDOW_BACKGROUND);
         this.setLayout(new GridBagLayout());
 
         add(avatar, new GBC(0, 0).setFill(GBC.NONE).setWeight(2, 1));

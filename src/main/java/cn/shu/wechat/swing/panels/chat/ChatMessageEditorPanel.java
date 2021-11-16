@@ -73,24 +73,10 @@ public class ChatMessageEditorPanel extends ParentAvailablePanel {
         initView();
         setListeners();
 
-        if (OSUtil.getOsType() == OSUtil.Windows) {
-            registerHotKey();
-        }
+
     }
 
-    private void registerHotKey() {
-        int SCREEN_SHOT_CODE = 10001;
-        JIntellitype.getInstance().registerHotKey(SCREEN_SHOT_CODE, JIntellitype.MOD_ALT, 'S');
 
-        JIntellitype.getInstance().addHotKeyListener(new HotkeyListener() {
-            @Override
-            public void onHotKey(int markCode) {
-                if (markCode == SCREEN_SHOT_CODE) {
-                    screenShot();
-                }
-            }
-        });
-    }
 
     private void initComponents() {
         Cursor handCursor = new Cursor(Cursor.HAND_CURSOR);
@@ -240,7 +226,9 @@ public class ChatMessageEditorPanel extends ParentAvailablePanel {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                screenShot();
+                ScreenShotFrame ssw = new ScreenShotFrame();
+                ssw.setRoomId(roomId);
+                ssw.setVisible(true);
                 super.mouseClicked(e);
             }
         });
@@ -325,11 +313,7 @@ public class ChatMessageEditorPanel extends ParentAvailablePanel {
 
 
 
-    private void screenShot() {
-        ScreenShotFrame ssw = new ScreenShotFrame();
-        ssw.setRoomId(roomId);
-        ssw.setVisible(true);
-    }
+
 
     public void setExpressionListener(ExpressionListener listener) {
         messageEditorExpressionPopup.setExpressionListener(listener);

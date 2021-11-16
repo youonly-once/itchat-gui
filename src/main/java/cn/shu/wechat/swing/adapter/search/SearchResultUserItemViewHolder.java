@@ -24,14 +24,14 @@ public class SearchResultUserItemViewHolder extends SearchResultItemViewHolder {
 
     private void initComponents() {
         setPreferredSize(new Dimension(100, 50));
-        setBackground(Colors.DARK);
-        setBorder(new RCBorder(RCBorder.BOTTOM));
+        setBackground(Colors.WINDOW_BACKGROUND);
+        setBorder(new RCBorder(RCBorder.BOTTOM,Color.WHITE));
         setOpaque(true);
-        setForeground(Colors.FONT_WHITE);
+        setForeground(Colors.DARK);
 
 
         name.setFont(FontUtil.getDefaultFont(14));
-        name.setForeground(Colors.FONT_WHITE);
+        name.setForeground(Colors.DARK);
 
     }
 

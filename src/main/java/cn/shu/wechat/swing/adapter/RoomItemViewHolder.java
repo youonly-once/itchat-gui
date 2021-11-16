@@ -34,22 +34,22 @@ public class RoomItemViewHolder extends ViewHolder {
 
     private void initComponents() {
         setPreferredSize(new Dimension(100, HEIGHT));
-        setBackground(Colors.DARK);
-        setBorder(new RCBorder(RCBorder.BOTTOM));
+        setBackground(Colors.WINDOW_BACKGROUND);
+        setBorder(new RCBorder(RCBorder.BOTTOM,Colors.WINDOW_BACKGROUND));
         setOpaque(true);
-        setForeground(Colors.FONT_WHITE);
+        setForeground(Colors.DARK);
 
 
 
 
         roomName.setFont(FontUtil.getDefaultFont(14));
-        roomName.setForeground(Colors.FONT_WHITE);
+        roomName.setForeground(Colors.DARK);
 
         brief.setForeground(Colors.FONT_GRAY);
         brief.setFont(FontUtil.getDefaultFont(12));
 
         nameBrief.setLayout(new BorderLayout());
-        nameBrief.setBackground(Colors.DARK);
+        nameBrief.setBackground(Colors.WINDOW_BACKGROUND);
         nameBrief.add(roomName, BorderLayout.NORTH);
         nameBrief.add(brief, BorderLayout.CENTER);
 
@@ -59,7 +59,7 @@ public class RoomItemViewHolder extends ViewHolder {
         unreadCount.setIcon(IconUtil.getIcon(this,"/image/count_bg.png"));
         unreadCount.setFont(FontUtil.getDefaultFont(12));
         unreadCount.setPreferredSize(new Dimension(10, 10));
-        unreadCount.setForeground(Colors.FONT_WHITE);
+        unreadCount.setForeground(Color.BLACK);
         unreadCount.setHorizontalTextPosition(SwingConstants.CENTER);
         unreadCount.setHorizontalAlignment(SwingConstants.CENTER);
         unreadCount.setVerticalAlignment(SwingConstants.CENTER);
@@ -72,7 +72,7 @@ public class RoomItemViewHolder extends ViewHolder {
 
         timeUnread = new JPanel();
         timeUnread.setLayout(new BorderLayout());
-        timeUnread.setBackground(Colors.DARK);
+        timeUnread.setBackground(Colors.WINDOW_BACKGROUND);
         timeUnread.add(time, BorderLayout.NORTH);
 
         timeUnread.add(unreadCount, BorderLayout.CENTER);

@@ -18,7 +18,7 @@ import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
-import cn.shu.wechat.swing.panels.RoomsPanel;
+import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.swing.utils.ChatUtil;
 import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;

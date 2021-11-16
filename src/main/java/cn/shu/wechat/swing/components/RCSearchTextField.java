@@ -17,8 +17,8 @@ public class RCSearchTextField extends JTextField {
 
     public RCSearchTextField() {
         setBorder(null);
-        setBackground(Colors.DARK);
-        setForeground(Colors.FONT_WHITE);
+        setBackground(Colors.WINDOW_BACKGROUND);
+        setForeground(Colors.SCROLL_BAR_TRACK_LIGHT);
         setCaretColor(Color.GRAY);
 
         setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -54,10 +54,15 @@ public class RCSearchTextField extends JTextField {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setColor(new Color(30, 30, 30, 100));
+        g2.setColor(Colors.SCROLL_BAR_TRACK_LIGHT);
         g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
-        g2.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+        g2.setColor(Color.WHITE);
+      //  g2.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
 
+        /*if (FocusManager.getCurrentKeyboardFocusManager().getFocusOwner() == this){
+            g2.setColor(Color.WHITE);
+            g2.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+        }*/
         if (getText().isEmpty()/* && !(FocusManager.getCurrentKeyboardFocusManager().getFocusOwner() == this)*/) {
             g2.setBackground(Color.gray);
             g2.setFont(FontUtil.getDefaultFont());

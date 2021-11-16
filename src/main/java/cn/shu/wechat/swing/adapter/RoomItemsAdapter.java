@@ -4,7 +4,7 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
-import cn.shu.wechat.swing.panels.RoomsPanel;
+import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.TimeUtil;
@@ -125,10 +125,10 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
 
         // 设置是否激活
         if (roomItem.getRoomId().equals(ChatPanelContainer.getCurrRoomId())) {
-            setBackground(viewHolder, Colors.ITEM_SELECTED);
+            setBackground(viewHolder, Colors.SCROLL_BAR_TRACK_LIGHT);
             selectedViewHolder = viewHolder;
         }else{
-            setBackground(viewHolder, Colors.DARK);
+            setBackground(viewHolder, Colors.WINDOW_BACKGROUND);
         }
 
         //更新鼠标监听器
@@ -184,7 +184,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             if (e.getButton() == MouseEvent.BUTTON1) {
                 if (selectedViewHolder != myHolder) {
                     //之前选择的房间背景色去掉
-                    setBackground(selectedViewHolder, Colors.DARK);
+                    setBackground(selectedViewHolder, Colors.WINDOW_BACKGROUND);
                     // 进入房间
                     RoomsPanel.getContext().enterRoom(myRoomId);
 
@@ -199,14 +199,14 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
         @Override
         public void mouseEntered(MouseEvent e) {
             if (selectedViewHolder != myHolder) {
-                setBackground(myHolder, Colors.ITEM_SELECTED_DARK);
+                setBackground(myHolder, Colors.ITEM_SELECTED_LIGHT);
             }
         }
 
         @Override
         public void mouseExited(MouseEvent e) {
             if (selectedViewHolder != myHolder) {
-                setBackground(myHolder, Colors.DARK);
+                setBackground(myHolder, Colors.WINDOW_BACKGROUND);
             }
         }
     };

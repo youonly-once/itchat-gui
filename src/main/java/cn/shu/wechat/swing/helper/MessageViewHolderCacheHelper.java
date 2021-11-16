@@ -14,7 +14,7 @@ import cn.shu.wechat.swing.adapter.message.video.MessageLeftVideoViewHolder;
 import cn.shu.wechat.swing.adapter.message.video.MessageRightVideoViewHolder;
 import cn.shu.wechat.swing.adapter.message.voice.MessageLeftVoiceViewHolder;
 import cn.shu.wechat.swing.adapter.message.voice.MessageRightVoiceViewHolder;
-import cn.shu.wechat.swing.panels.RoomsPanel;
+import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 
 import javax.swing.*;
 import java.awt.event.MouseListener;

@@ -10,6 +10,7 @@ import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.panels.RightPanel;
 import cn.shu.wechat.swing.panels.UserInfoPanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
+import cn.shu.wechat.swing.utils.FontUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
@@ -90,14 +91,16 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
     public void onBindHeaderViewHolder(HeaderViewHolder viewHolder, int position) {
         ContactsHeaderViewHolder holder = (ContactsHeaderViewHolder) viewHolder;
         holder.setPreferredSize(new Dimension(100, 25));
-        holder.setBackground(Colors.DARKER);
-        holder.setBorder(new RCBorder(RCBorder.BOTTOM));
+        holder.setBackground(Colors.WINDOW_BACKGROUND_LIGHT);
+        holder.setBorder(new RCBorder(RCBorder.BOTTOM,Colors.SCROLL_BAR_TRACK_LIGHT));
         holder.setOpaque(true);
 
         holder.letterLabel = new JLabel();
         holder.letterLabel.setText(holder.getLetter());
-        holder.letterLabel.setForeground(Colors.FONT_GRAY);
-
+        holder.letterLabel.setForeground(Colors.DARK);
+        holder.letterLabel.setFont(FontUtil.getDefaultFont(14,Font.BOLD));
+        holder.letterLabel.setHorizontalAlignment(JLabel.CENTER);
+        holder.letterLabel.setBackground(Colors.SCROLL_BAR_TRACK_LIGHT);
         holder.setLayout(new BorderLayout());
         holder.add(holder.letterLabel, BorderLayout.WEST);
     }
@@ -133,12 +136,12 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
                 UserInfoPanel.getContext().setContacts(Core.getMemberMap().get(item.getId()));
                 RightPanel.getContext().show(RightPanel.USER_INFO);
 
-                setBackground(viewHolder, Colors.ITEM_SELECTED);
+                setBackground(viewHolder, Colors.SCROLL_BAR_TRACK_LIGHT);
                 selectedViewHolder = viewHolder;
 
                 for (ContactsItemViewHolder holder : viewHolders) {
                     if (holder != viewHolder) {
-                        setBackground(holder, Colors.DARK);
+                        setBackground(holder, Colors.WINDOW_BACKGROUND);
                     }
                 }
             }
@@ -146,14 +149,14 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
             @Override
             public void mouseEntered(MouseEvent e) {
                 if (selectedViewHolder != viewHolder) {
-                    setBackground(viewHolder, Colors.ITEM_SELECTED_DARK);
+                    setBackground(viewHolder, Colors.ITEM_SELECTED_LIGHT);
                 }
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
                 if (selectedViewHolder != viewHolder) {
-                    setBackground(viewHolder, Colors.DARK);
+                    setBackground(viewHolder, Colors.WINDOW_BACKGROUND);
                 }
             }
         };

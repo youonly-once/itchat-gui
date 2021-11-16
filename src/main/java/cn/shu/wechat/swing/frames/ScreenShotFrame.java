@@ -271,7 +271,13 @@ public class ScreenShotFrame extends JFrame {
                 } else if (e.getClickCount() >= 2) {
                     close();
                     ClipboardUtil.copyImage(saveImage);
-                    ChatPanelContainer.getContext().get(roomId).getChatMessagePanel().paste();
+                    if (roomId == null){
+                        roomId = ChatPanelContainer.getCurrRoomId();
+                    }
+                    if (roomId != null){
+                        ChatPanelContainer.get(roomId).getChatMessagePanel().paste();
+                    }
+
                 }
 
                 super.mouseClicked(e);
@@ -487,7 +493,12 @@ public class ScreenShotFrame extends JFrame {
                 } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     close();
                     ClipboardUtil.copyImage(saveImage);
-                    ChatPanelContainer.getContext().get(roomId).getChatMessagePanel().paste();
+                    if (roomId == null){
+                        roomId = ChatPanelContainer.getCurrRoomId();
+                    }
+                    if (roomId != null){
+                        ChatPanelContainer.get(roomId).getChatMessagePanel().paste();
+                    }
                 }
             }
         };
@@ -829,7 +840,12 @@ public class ScreenShotFrame extends JFrame {
             public void mouseClicked(MouseEvent e) {
                 close();
                 ClipboardUtil.copyImage(saveImage);
-                ChatPanelContainer.getContext().get(roomId).getChatMessagePanel().paste();
+                if (roomId == null){
+                    roomId = ChatPanelContainer.getCurrRoomId();
+                }
+                if (roomId != null){
+                    ChatPanelContainer.get(roomId).getChatMessagePanel().paste();
+                }
                 super.mouseClicked(e);
             }
 

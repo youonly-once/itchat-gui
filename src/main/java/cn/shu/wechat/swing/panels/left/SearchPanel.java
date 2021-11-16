@@ -1,4 +1,4 @@
-package cn.shu.wechat.swing.panels;
+package cn.shu.wechat.swing.panels.left;
 
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.pojo.entity.Contacts;
@@ -10,10 +10,14 @@ import cn.shu.wechat.swing.constant.SearchResultType;
 import cn.shu.wechat.swing.db.model.FileAttachment;
 import cn.shu.wechat.swing.db.model.Message;
 import cn.shu.wechat.swing.entity.SearchResultItem;
+import cn.shu.wechat.swing.panels.ParentAvailablePanel;
+import cn.shu.wechat.swing.panels.left.tabcontent.LeftTabContentPanel;
+import cn.shu.wechat.swing.panels.left.tabcontent.SearchResultPanel;
 import cn.shu.wechat.swing.utils.FontUtil;
 import lombok.extern.log4j.Log4j2;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
@@ -50,11 +54,11 @@ public class SearchPanel extends ParentAvailablePanel {
     private void initComponent() {
         searchTextField = new RCSearchTextField();
         searchTextField.setFont(FontUtil.getDefaultFont(14));
-        searchTextField.setForeground(Colors.FONT_WHITE);
+        searchTextField.setForeground(Colors.DARK);
     }
 
     private void initView() {
-        setBackground(Colors.DARK);
+        setBackground(Colors.WINDOW_BACKGROUND);
         this.setLayout(new GridBagLayout());
         this.add(searchTextField, new GBC(0, 0)
                 .setFill(GBC.HORIZONTAL)
@@ -111,14 +115,14 @@ public class SearchPanel extends ParentAvailablePanel {
      */
     private void search() {
         SearchResultPanel searchResultPanel = SearchResultPanel.getContext();
-        ListPanel listPanel = ListPanel.getContext();
+        LeftTabContentPanel leftTabContentPanel = LeftTabContentPanel.getContext();
         final String text = searchTextField.getText();
         if (text == null || text.isEmpty()) {
-            listPanel.showPanel(listPanel.getPreviousTab());
+            leftTabContentPanel.showPanel(leftTabContentPanel.getPreviousTab());
             return;
         }
         searchVer.incrementAndGet();
-        listPanel.showPanel(ListPanel.SEARCH);
+        leftTabContentPanel.showPanel(LeftTabContentPanel.SEARCH);
         new SwingWorker<Object, Object>() {
             private List<SearchResultItem> data;
             final int finalI = searchVer.get();

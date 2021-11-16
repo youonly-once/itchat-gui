@@ -11,6 +11,7 @@ public class ContactsHeaderViewHolder extends HeaderViewHolder {
 
     public ContactsHeaderViewHolder(String ch) {
         this.letter = ch;
+
     }
 
 

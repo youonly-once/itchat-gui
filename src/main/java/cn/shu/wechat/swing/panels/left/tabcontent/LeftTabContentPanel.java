@@ -1,4 +1,7 @@
-package cn.shu.wechat.swing.panels;
+package cn.shu.wechat.swing.panels.left.tabcontent;
+
+import cn.shu.wechat.swing.components.Colors;
+import cn.shu.wechat.swing.panels.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -6,8 +9,8 @@ import java.awt.*;
 /**
  * Created by 舒新胜 on 17-5-30.
  */
-public class ListPanel extends ParentAvailablePanel {
-    private static ListPanel context;
+public class LeftTabContentPanel extends ParentAvailablePanel {
+    private static LeftTabContentPanel context;
     private RoomsPanel roomsPanel;
     private ContactsPanel contactsPanel;
     private CollectionsPanel collectionPanel;
@@ -21,10 +24,10 @@ public class ListPanel extends ParentAvailablePanel {
     private String previousTab = CHAT;
     private String currentTab = CHAT;
 
-    private CardLayout cardLayout = new CardLayout();
+    private final CardLayout cardLayout = new CardLayout();
 
 
-    public ListPanel(JPanel parent) {
+    public LeftTabContentPanel(JPanel parent) {
         super(parent);
         context = this;
 
@@ -47,6 +50,7 @@ public class ListPanel extends ParentAvailablePanel {
 
     private void initView() {
         this.setLayout(cardLayout);
+        setBackground(Colors.WINDOW_BACKGROUND);
         add(roomsPanel, CHAT);
         add(contactsPanel, CONTACTS);
         add(collectionPanel, COLLECTIONS);
@@ -84,7 +88,7 @@ public class ListPanel extends ParentAvailablePanel {
         return currentTab;
     }
 
-    public static ListPanel getContext() {
+    public static LeftTabContentPanel getContext() {
         return context;
     }
 

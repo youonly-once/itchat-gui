@@ -3,7 +3,7 @@ package cn.shu.wechat.swing.frames;
 
 import cn.shu.wechat.api.WeChatTool;
 import cn.shu.wechat.swing.components.Colors;
-import cn.shu.wechat.swing.panels.LeftPanel;
+import cn.shu.wechat.swing.panels.left.LeftPanel;
 import cn.shu.wechat.swing.panels.RightPanel;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 import cn.shu.wechat.swing.utils.FontUtil;

@@ -134,7 +134,7 @@ public class ChatPanel extends JPanel {
         chatMessagePanel = new ChatMessagePanel(this, roomId);
         chatMembersPanel = new ChatMembersPanel(this, roomId);
 
-        setBorder(new LineBorder(Colors.SCROLL_BAR_TRACK_LIGHT));
+        //setBorder(new LineBorder(Colors.SCROLL_BAR_TRACK_LIGHT));
     }
 
     private void initView() {
