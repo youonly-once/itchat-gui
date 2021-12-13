@@ -14,6 +14,8 @@ public class WechatConfiguration {
     private List<String> specialUser ;
     private String appVersion;
     private String basePath;
+    private String autoChatPrefix;
+    private String autoChatSuffix;
     private static WechatConfiguration instance;
 
     public WechatConfiguration() {
@@ -46,6 +48,22 @@ public class WechatConfiguration {
 
     public void setBasePath(String basePath) {
         this.basePath = basePath;
+    }
+
+    public String getAutoChatPrefix() {
+        return autoChatPrefix;
+    }
+
+    public void setAutoChatPrefix(String autoChatPrefix) {
+        this.autoChatPrefix = autoChatPrefix;
+    }
+
+    public String getAutoChatSuffix() {
+        return autoChatSuffix;
+    }
+
+    public void setAutoChatSuffix(String autoChatSuffix) {
+        this.autoChatSuffix = autoChatSuffix;
     }
 
     /**

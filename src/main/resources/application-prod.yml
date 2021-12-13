@@ -11,6 +11,8 @@ spring:
     password: 123456
     url: jdbc:log4jdbc:sqlite::resource:wechat.db?date_string_format=yyyy-MM-dd HH:mm:ss
 wechat:
+  auto-chat-prefix: 宝
+  auto-chat-suffix: 【不是自动回复】
   app-version: 1.0
   login-title: 微信登录
   base-path: /weixin

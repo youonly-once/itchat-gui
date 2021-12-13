@@ -2,10 +2,7 @@ package cn.shu.wechat.swing.frames;
 
 import cn.shu.wechat.swing.components.*;
 import cn.shu.wechat.swing.panels.*;
-import cn.shu.wechat.swing.panels.setting.AboutPanel;
-import cn.shu.wechat.swing.panels.setting.ChangeAvatarPanel;
-import cn.shu.wechat.swing.panels.setting.ChangePasswordPanel;
-import cn.shu.wechat.swing.panels.setting.ClearCachePanel;
+import cn.shu.wechat.swing.panels.setting.*;
 import cn.shu.wechat.swing.utils.FontUtil;
 
 import javax.swing.*;
@@ -31,11 +28,13 @@ public class SystemConfigDialog extends JDialog {
     private JLabel meLabel;
     private JLabel aboutLabel;
     private JLabel clearCacheLabel;
+    private JLabel robotLabel;
 
     private ChangeAvatarPanel changeAvatarPanel;
     private ChangePasswordPanel changePasswordPanel;
     private MePanel mePanel;
     private AboutPanel aboutPanel;
+    private RobotSettingPanel robotPanel;
     private ClearCachePanel clearCachePanel;
 
 
@@ -46,6 +45,7 @@ public class SystemConfigDialog extends JDialog {
     public static final String ME = "ME";
     public static final String ABOUT = "ABOUT";
     public static final String CLEAR_CHACE = "CLEAR_CHACE";
+    public static final String ROBOT = "ROBOT";
 
     private CardLayout cardLayout = new CardLayout();
 
@@ -120,6 +120,12 @@ public class SystemConfigDialog extends JDialog {
         clearCacheLabel = new JLabel("清除缓存");
         processButtonLabel(clearCacheLabel);
 
+        // 聊天设置 按钮
+        robotLabel = new JLabel("机器人设置");
+        processButtonLabel(robotLabel);
+
+        //聊天设置 按钮
+        robotPanel= new RobotSettingPanel();
 
         // 更改头像面板
         changeAvatarPanel = new ChangeAvatarPanel();
@@ -152,6 +158,7 @@ public class SystemConfigDialog extends JDialog {
         settingMenuPanel.add(changeAvatarLabel);
         settingMenuPanel.add(changePasswordLabel);
         settingMenuPanel.add(clearCacheLabel);
+        settingMenuPanel.add(robotLabel);
         settingMenuPanel.add(aboutLabel);
 
         settingAreaPanel.setLayout(cardLayout);
@@ -159,6 +166,7 @@ public class SystemConfigDialog extends JDialog {
         settingAreaPanel.add(changeAvatarPanel, CHANGE_AVATAR);
         settingAreaPanel.add(changePasswordPanel, CHANGE_PASSWORD);
         settingAreaPanel.add(aboutPanel, ABOUT);
+        settingAreaPanel.add(robotPanel, ROBOT);
         settingAreaPanel.add(clearCachePanel, CLEAR_CHACE);
 
 
@@ -214,6 +222,8 @@ public class SystemConfigDialog extends JDialog {
                         cardLayout.show(settingAreaPanel, ABOUT);
                     } else if (source.getText().equals("清除缓存")) {
                         cardLayout.show(settingAreaPanel, CLEAR_CHACE);
+                    }else if (source.getText().equals("机器人设置")) {
+                        cardLayout.show(settingAreaPanel, ROBOT);
                     }
                 }
 
@@ -226,6 +236,7 @@ public class SystemConfigDialog extends JDialog {
         changePasswordLabel.addMouseListener(itemMouseListener);
         meLabel.addMouseListener(itemMouseListener);
         aboutLabel.addMouseListener(itemMouseListener);
+        robotLabel.addMouseListener(itemMouseListener);
         clearCacheLabel.addMouseListener(itemMouseListener);
     }
 

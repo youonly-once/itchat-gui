@@ -2,6 +2,7 @@ package cn.shu.wechat.service.impl;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.MessageTools;
+import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
@@ -654,7 +655,8 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 case NEWS:
                 case TEXT:
                     msgBuilder.msgType(WXSendMsgCodeEnum.TEXT.getCode());
-                    msgBuilder.content(msgStr + "【自动回复】");
+                    msgBuilder.content(WechatConfiguration.getInstance().getAutoChatPrefix()
+                            +msgStr + WechatConfiguration.getInstance().getAutoChatSuffix());
                     break;
                 case IMAGE:
                     msgBuilder.msgType(WXSendMsgCodeEnum.PIC.getCode());
