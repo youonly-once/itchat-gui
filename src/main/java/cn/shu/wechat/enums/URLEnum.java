@@ -8,7 +8,7 @@ public enum URLEnum {
 
 
     cAPI_qrcode("https://wx2.qq.com/l/", "API_qrcode"),
-    BASE_URL("https://wx2.qq.com/", "基本的URL"),
+    BASE_URL("https://login.weixin.qq.com/", "基本的URL"),
     UUID_URL(BASE_URL.url + "/jslogin", "UUIDLURL"),
     QRCODE_URL(BASE_URL.url + "/qrcode/", "初始化URL"),
     STATUS_NOTIFY_URL(BASE_URL.url + "/webwxstatusnotify?lang=zh_CN&pass_ticket=%s", "微信状态通知"),
