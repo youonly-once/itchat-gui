@@ -10,6 +10,20 @@
 # 小白教程
 > 下载JAVA JDK并安装
 > 下载右侧本项目release版本查看使用说明
+# 安装说明(专业人员)
+## 1、下载源代码，搭建开发环境
+## 2、安装jintellitype-1.3.9.jar依赖到本地仓库
+> 需要将resource/lib下面的二个JAR包安装到本地maven仓库，因为这个JAR经过特殊处理，中央仓库的JAR包文件不全会导致运行失败
+
+> mvn install:install-file -Dfile="你的JAR包位置" -DgroupId=com.melloware -DartifactId=jintellitype -Dversion=1.3.9 -Dpackaging=jar
+## 3、安装android.ninepatch.jar依赖到本地仓库
+> mvn install:install-file -Dfile="你的JAR包位置" -DgroupId=com.android -DartifactId=ninepatch -Dversion=1.0 -Dpackaging=jar
+
+## 4、安装jna-4.4.0.jar依赖到本地仓库
+> mvn install:install-file -Dfile=wechat\src\main\resources\lib\jna-platform-4.4.0.jar -DgroupId=com.sun -DartifactId=jna -Dversion=4.4.0 -Dpackaging=jar
+
+## 5、安装jna-platform-4.4.0.jar依赖到本地仓库
+> mvn install:install-file -Dfile=wechat\src\main\resources\lib\jna-4.4.0.jar -DgroupId=com.sun -DartifactId=jna.platform -Dversion=4.4.0 -Dpackaging=jar
 
 # 扩展功能
 ## 1、防撤回功能（语音、文字、图片、视频、...）
@@ -36,24 +50,6 @@
 ## 7、定时消息、消息定时撤回
 ## 8、好友分析（所有公开信息的分析）
 
-# 安装说明(普通人员)
-## 1、下载JAVA JDK安装
-## 2、下载右侧的release版本，解压并双击运行wechat.vbs即可
-# 安装说明(开发人员)
-## 1、下载源代码，搭建开发环境
-## 2、安装jintellitype-1.3.9.jar依赖到本地仓库
-> 需要将resource/lib下面的二个JAR包安装到本地maven仓库，因为这个JAR经过特殊处理，中央仓库的JAR包文件不全会导致运行失败
-
-
-> mvn install:install-file -Dfile="你的JAR包位置" -DgroupId=com.melloware -DartifactId=jintellitype -Dversion=1.3.9 -Dpackaging=jar
-## 3、安装android.ninepatch.jar依赖到本地仓库
-> mvn install:install-file -Dfile="你的JAR包位置" -DgroupId=com.android -DartifactId=ninepatch -Dversion=1.0 -Dpackaging=jar
-
-## 4、安装jna-4.4.0.jar依赖到本地仓库
-> mvn install:install-file -Dfile=wechat\src\main\resources\lib\jna-platform-4.4.0.jar -DgroupId=com.sun -DartifactId=jna -Dversion=4.4.0 -Dpackaging=jar
-
-## 5、安装jna-platform-4.4.0.jar依赖到本地仓库
-> mvn install:install-file -Dfile=wechat\src\main\resources\lib\jna-4.4.0.jar -DgroupId=com.sun -DartifactId=jna.platform -Dversion=4.4.0 -Dpackaging=jar
 
  # 效果预览
  
