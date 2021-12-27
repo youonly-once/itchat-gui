@@ -1,0 +1,2 @@
+双击wechat.vbs登录即可！
+项目GitHub地址：https://github.com/SXS-PRIVATE/itchat-GUI
