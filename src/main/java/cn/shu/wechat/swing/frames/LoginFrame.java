@@ -18,11 +18,13 @@ import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.OSUtil;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.HeadImageUtil;
+import cn.shu.wechat.utils.MD5Util;
 import cn.shu.wechat.utils.SleepUtils;
 import com.melloware.jintellitype.HotkeyListener;
 import com.melloware.jintellitype.JIntellitype;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
+import sun.security.provider.MD5;
 
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
@@ -38,6 +40,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -308,6 +311,10 @@ public class LoginFrame extends JFrame {
                 showMessage(" 微信初始化异常");
                 System.exit(0);
             }
+            wechatConfiguration.setBasePath(wechatConfiguration.getBasePath()+ File.separator+ MD5Util.MD5(Core.getNickName()));
+
+
+
             log.info("开启微信状态通知");
             loginService.wxStatusNotify();
 
@@ -379,16 +386,20 @@ public class LoginFrame extends JFrame {
     private void registerHotKey() {
 
         int SCREEN_SHOT_CODE = 10001;
-        JIntellitype.getInstance().registerHotKey(SCREEN_SHOT_CODE, JIntellitype.MOD_ALT, 'S');
+        try {
+            JIntellitype.getInstance().registerHotKey(SCREEN_SHOT_CODE, JIntellitype.MOD_ALT, 'S');
 
-        JIntellitype.getInstance().addHotKeyListener(new HotkeyListener() {
-            @Override
-            public void onHotKey(int markCode) {
-                if (markCode == SCREEN_SHOT_CODE) {
-                    screenShot();
+            JIntellitype.getInstance().addHotKeyListener(new HotkeyListener() {
+                @Override
+                public void onHotKey(int markCode) {
+                    if (markCode == SCREEN_SHOT_CODE) {
+                        screenShot();
+                    }
                 }
-            }
-        });
+            });
+        }catch (Exception e){
+            log.warn("注册截屏快捷键失败："+e.getMessage());
+        }
     }
 
     /**

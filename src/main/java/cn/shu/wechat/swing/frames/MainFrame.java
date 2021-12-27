@@ -2,6 +2,7 @@ package cn.shu.wechat.swing.frames;
 
 
 import cn.shu.wechat.api.WeChatTool;
+import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.panels.left.LeftPanel;
 import cn.shu.wechat.swing.panels.RightPanel;
@@ -134,7 +135,7 @@ public class MainFrame extends JFrame {
 
         emptyTrayIcon = IconUtil.getIcon(this, "/image/ic_launcher_empty.png", 20, 20).getImage();
 
-        trayIcon = new TrayIcon(normalTrayIcon, "微信");
+        trayIcon = new TrayIcon(normalTrayIcon, Core.getNickName());
         trayIcon.setImageAutoSize(true);
         trayIcon.addMouseListener(new MouseAdapter() {
 

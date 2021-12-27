@@ -28,12 +28,12 @@ public class Launcher {
     public static WechatConfiguration wechatConfiguration;
 
     public void launch() {
-
-        if (!isApplicationRunning()) {
+        openFrame();
+    /*    if (!isApplicationRunning()) {
             openFrame();
         } else {
             System.exit(-1);
-        }
+        }*/
     }
 
 
@@ -76,8 +76,7 @@ public class Launcher {
         } catch (IOException e1) {
             e1.printStackTrace();
         }
-        //关闭校验
-        return false;
+        return rv;
     }
 
 
