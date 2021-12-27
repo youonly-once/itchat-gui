@@ -9,7 +9,9 @@
 > 
 ## 2、登录后无法发送消息：
 > 原因：找不到lib/android.ninepatch.jar包导致
+> 
 > 解决办法：复制jar包到lib目录下。查看wechat-1.0.jar中的MANIFEST.MF中的jar包路径及名称是否一致，若不一致更改为一致。
+> 
 > ![image](https://user-images.githubusercontent.com/67832925/147431636-ac3c7697-95c9-4396-8ae0-f3a9048c6ea2.png)
 
 # 二、扩展功能介绍
