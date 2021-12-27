@@ -1,6 +1,8 @@
 package cn.shu.wechat.configuration;
 
+import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.OsNameEnum;
+import cn.shu.wechat.utils.MD5Util;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
