@@ -15,8 +15,8 @@ public enum BaseParaEnum {
     Skey("Skey", "skey"),
     DeviceID("DeviceID", "pass_ticket");
 
-    private String para;
-    private String value;
+    private final String para;
+    private final String value;
 
     BaseParaEnum(String para, String value) {
         this.para = para;

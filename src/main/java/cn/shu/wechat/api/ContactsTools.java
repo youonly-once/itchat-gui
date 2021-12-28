@@ -3,22 +3,14 @@ package cn.shu.wechat.api;
 
 import cn.shu.wechat.constant.WebWeChatConstant;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.enums.StorageLoginInfoEnum;
-import cn.shu.wechat.enums.URLEnum;
-import cn.shu.wechat.pojo.dto.msg.send.*;
 import cn.shu.wechat.pojo.entity.Contacts;
 import cn.shu.wechat.utils.CommonTools;
-import cn.shu.wechat.utils.HttpUtil;
-import com.alibaba.fastjson.JSON;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Consts;
-import org.apache.http.HttpEntity;
-import org.apache.http.util.EntityUtils;
-import org.springframework.util.CollectionUtils;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * 微信联系人工具，如获好友昵称、备注等
@@ -68,29 +60,20 @@ public class ContactsTools {
     }
 
     /**
+     * 获取群聊的默认名称
      * @param userName 用户UserName
      * @return 默认名称，如果是群，则以群成员的名称开始
      */
     public static String getGroupDefaultName(String userName){
+        if (userName!= null && userName.startsWith("@@") ){
 
-        if (userName.startsWith("@@") ){
-            Contacts contactByUserName = getContactByUserName(userName);
-            if (contactByUserName == null){
-                return null;
-            }
-            StringBuilder name = new StringBuilder();
-            List<Contacts> memberlist = contactByUserName.getMemberlist();
-            if (memberlist !=null&& !memberlist.isEmpty()){
-                for (int i = 0; i < Math.min(2, memberlist.size()); i++) {
-                    Contacts contacts = memberlist.get(i);
-                    name.append(contacts.getNickname()).append(",");
-                }
-                String string = name.toString();
-                if (string.isEmpty()){
-                    return string;
-                }
-                return string.substring(0,string.length()-1);
-            }
+            return Optional.ofNullable(getContactByUserName(userName))
+                    .map(Contacts::getMemberlist)
+                    .map(memberList->memberList.stream()
+                            .map(Contacts::getNickname)
+                            .limit(2)
+                            .collect(Collectors.joining(",")))
+                    .orElse(null);
         }
      return null;
     }
@@ -171,42 +154,17 @@ public class ContactsTools {
         if (StringUtils.isEmpty(userName)){
            return null;
         }
-        if (StringUtils.isEmpty(groupName )){
-            return null;
-        }
         //群成员为自己的好友
         if (Core.getMemberMap().containsKey(userName)){
             return Core.getMemberMap().get(userName);
         }
-        Map<String, Contacts> groupMemberMap =Core.getMemberMap();
-        Contacts group = groupMemberMap.getOrDefault(groupName, null);
-        if (group == null) {
-            log.warn("未找到用户：{}",groupName);
-            return null;
-        }
-        List<Contacts> memberList = group.getMemberlist();
-        if (CollectionUtils.isEmpty(memberList)) {
-            return null;
-        }
-        Contacts contacts =null;
-        try {
-            for (Contacts temp : memberList) {
-                if (userName.equals(temp.getUsername())) {
-                  contacts = temp;
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.warn(e.getMessage());
-        }
-
-        //群成员中没有找到成员或者成员信息不完整 这里重新获取
-        if (contacts == null ||
-                StringUtils.isEmpty(contacts.getHeadimgurl())){
-            log.warn("查找群成员失败：{}({})",groupName,userName);
-        }
-
-        return contacts;
+        Optional<Contacts> contacts1 = Optional.ofNullable(groupName)
+                .map(Core.getMemberMap()::get)
+                .map(Contacts::getMemberlist)
+                .flatMap(memberList -> memberList.parallelStream()
+                        .filter(contacts -> userName.equals(contacts.getUsername()))
+                        .findAny());
+        return contacts1.orElse(null);
     }
 
     /**
@@ -308,7 +266,7 @@ public class ContactsTools {
      */
     public static boolean isMute(Contacts contacts){
         if (isRoomContact(contacts.getUsername())) {
-            return (contacts.getStatues().intValue()== WebWeChatConstant.ChatRoomNute.CHATROOM_NOTIFY_CLOSE.CODE);
+            return (contacts.getStatues().intValue()== WebWeChatConstant.ChatRoomMute.CHATROOM_NOTIFY_CLOSE.CODE);
         }else{
             return ((contacts.getContactflag().intValue() & WebWeChatConstant.ContactFlag.CONTACTFLAG_NOTIFYCLOSECONTACT.CODE)>0);
         }

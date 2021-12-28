@@ -1,4 +1,4 @@
-package cn.shu.wechat.swing.app;
+package cn.shu.wechat.swing;
 
 import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.swing.frames.LoginFrame;
