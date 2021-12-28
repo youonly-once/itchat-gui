@@ -6,7 +6,7 @@ package cn.shu.wechat.constant;
  * @Date 2021/11/12 12:54
  */
 public interface WebWeChatConstant {
-    public enum ContactFlag{
+    enum ContactFlag{
         /**
          * 联系人标志
          */
@@ -28,14 +28,14 @@ public interface WebWeChatConstant {
             this.CODE = code;
         }
     }
-    public enum ChatRoomNute{
+    enum ChatRoomMute {
         /**
          * 消息免打扰
          */
         CHATROOM_NOTIFY_OPEN( 0x1),
         CHATROOM_NOTIFY_CLOSE ( 0x0);
         public int CODE;
-        ChatRoomNute(int code) {
+        ChatRoomMute(int code) {
             this.CODE = code;
         }
     }

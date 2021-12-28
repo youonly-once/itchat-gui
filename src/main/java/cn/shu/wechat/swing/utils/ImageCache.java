@@ -1,7 +1,7 @@
 package cn.shu.wechat.swing.utils;
 
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.swing.app.Launcher;
+import cn.shu.wechat.swing.Launcher;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import lombok.extern.log4j.Log4j2;
 

@@ -1,6 +1,6 @@
 package cn.shu.wechat.swing.utils;
 
-import cn.shu.wechat.swing.app.Launcher;
+import cn.shu.wechat.swing.Launcher;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

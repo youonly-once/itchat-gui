@@ -1,6 +1,6 @@
 package cn.shu.wechat.swing.panels.setting;
 
-import cn.shu.wechat.swing.app.Launcher;
+import cn.shu.wechat.swing.Launcher;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.utils.FontUtil;

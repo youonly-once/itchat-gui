@@ -372,7 +372,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         String to = ContactsTools.getContactDisplayNameByUserName(msg.getFromUserName());
         //======家人群不发送撤回消息====
         if (msg.getFromUserName().startsWith("@@")) {
-            if ("❤汪家人❤".equals(to) || to.startsWith("三盟")) {
+            if ("❤汪家人❤".equals(to) ) {
                 log.error("重要群群，不发送撤回消息");
                 return null;
             }

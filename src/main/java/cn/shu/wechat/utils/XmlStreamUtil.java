@@ -32,7 +32,6 @@ import java.util.Map;
  */
 @Log4j2
 public class XmlStreamUtil {
-    private static boolean test =false;
     public static <T> T xmlToBean(String xml, Class<T> clazz) {
         XStream xStream = getInstance();
         xStream.processAnnotations(clazz);
@@ -125,88 +124,4 @@ public class XmlStreamUtil {
                 .replace("<br/>", "").replace("\t", "");
     }
 
-    public static void main(String[] args) throws IOException {
-        JFrame jFrame = new JFrame();
-        jFrame.setSize(400,300);
-        JLabel jLabel1 = new JLabel();
-        JLabel jLabel2 = new JLabel();
-        ImageIcon imageIcon = new ImageIcon(ImageIO.read(new File("E:\\JAVA\\project_idea\\AutoWeChat\\wechat\\src\\main\\resources\\image\\app.png")));
-
-        Container contentPane = jFrame.getContentPane();
-        jLabel1.setIcon(imageIcon);
-        jLabel2.setIcon(imageIcon);
-        JPanel senderPanel = new JPanel(new FlowLayout(FlowLayout.LEFT,0,0));
-        JPanel senderPanel1 = new JPanel(new FlowLayout(FlowLayout.LEFT,0,0));
-        JLabel jLabel = new JLabel("556456");
-        senderPanel.add(jLabel);
-        senderPanel1.add(jLabel);
-        JButton jButton = new JButton("123");
-        jButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    imageIcon.setImage(ImageIO.read(new File("E:\\JAVA\\project_idea\\AutoWeChat\\wechat\\src\\main\\resources\\image\\audio.png")));
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                }
-            }
-        });
-        jButton.addMouseListener(new MouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                try {
-                    imageIcon.setImage(ImageIO.read(new File("E:\\JAVA\\project_idea\\AutoWeChat\\wechat\\src\\main\\resources\\image\\app.png")));
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                }
-                jLabel.setText("222");
-                jFrame.repaint();
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                contentPane.add(jLabel2,BorderLayout.SOUTH);
-                jLabel.setText("333");
-               jFrame.repaint();
-
-            }
-        });
-        contentPane.add(senderPanel1,BorderLayout.EAST);
-        contentPane.add(senderPanel,BorderLayout.WEST);
-        contentPane.add(jLabel1,BorderLayout.NORTH);
-
-        contentPane.add(jButton,BorderLayout.CENTER);
-        jFrame.setVisible(true);
-
-        for (int i = 0; i < 50; i++) {
-            int finalI = i;
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    if (finalI %2 == 0){
-                        test = true;
-                    }else {
-                        test =false;
-                    }
-                    System.out.println(Thread.currentThread().getName()+"="+test);
-                }
-            }).start();
-        }
-
-    }
 }
