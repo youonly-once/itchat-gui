@@ -15,11 +15,11 @@ public class OSUtil {
         if (currentOS == -1) {
             String os = System.getProperty("os.name");
 
-            if (os.indexOf("Windows") > -1) {
+            if (os.contains("Windows")) {
                 currentOS = Windows;
-            } else if (os.indexOf("Linux") > -1) {
+            } else if (os.contains("Linux")) {
                 currentOS = Linux;
-            } else if (os.indexOf("Mac OS") > -1) {
+            } else if (os.contains("Mac OS")) {
                 currentOS = Mac_OS;
             } else {
                 currentOS = Others;

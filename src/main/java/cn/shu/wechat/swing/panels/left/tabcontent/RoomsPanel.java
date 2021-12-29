@@ -18,6 +18,7 @@ import cn.shu.wechat.utils.ExecutorServiceUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -176,7 +177,7 @@ public class RoomsPanel extends ParentAvailablePanel {
             recentContacts.add(roomId);
         } else {
             //更新消息 置顶
-           updateRoomItem(roomId, newReadCount, latestMsg, System.currentTimeMillis(),isMute,hasNewMsg);
+           updateRoomItem(roomId, newReadCount, latestMsg, LocalDateTime.now(),isMute,hasNewMsg);
         }
     }
 
@@ -286,7 +287,7 @@ public class RoomsPanel extends ParentAvailablePanel {
      * @param isMute 是否免打扰
      * @param hasNewMsg 是否有未读消息 ，当房间为免打扰房间时newReadCount不计数，此时通过hasNewMsg判断
      */
-    public void updateRoomItem(String roomId, int newReadCount, String lastMsg, Long time,Boolean isMute,Boolean hasNewMsg) {
+    public void updateRoomItem(String roomId, int newReadCount, String lastMsg, LocalDateTime time, Boolean isMute, Boolean hasNewMsg) {
         if (roomId == null || roomId.isEmpty()) {
             notifyDataSetChanged(true);
             return;
@@ -303,7 +304,7 @@ public class RoomsPanel extends ParentAvailablePanel {
                     item.setLastMessage(lastMsg);
                 }
                 if (time != null) {
-                    item.setTimestamp(time);
+                    item.setLocalDateTime(time);
                 }
                  if (newReadCount>0) {
                     item.setUnreadCount(item.getUnreadCount() + newReadCount);
@@ -328,15 +329,16 @@ public class RoomsPanel extends ParentAvailablePanel {
     }
 
     /**
-     * 激活指定的房间项目
+     * 激活指定的房间
      *
-     * @param position 房间位置
+     * @param position 房间的位置
      */
     public void activeItem(int position) {
         RoomItemViewHolder holder = (RoomItemViewHolder) roomItemsListView.getItem(position);
         setItemBackground(holder, Colors.SCROLL_BAR_TRACK_LIGHT);
         RoomItemsAdapter adapter = (RoomItemsAdapter) (roomItemsListView.getAdapter());
         adapter.setSelectedViewHolder(holder);
+        //改变其它项的背景颜色未激活
         for (int i = 0; i < roomItemsListView.getItems().size(); i++) {
             if (i == position) {
                 continue;
@@ -348,15 +350,17 @@ public class RoomsPanel extends ParentAvailablePanel {
     }
 
     /**
-     * 激活指定的房间项目
+     * 激活指定的房间
      *
      * @param name 房间ID
      */
     public void activeItem(String name) {
+        long l = System.currentTimeMillis();
         for (int i = 0; i < roomItemList.size(); i++) {
             RoomItem roomItem = roomItemList.get(i);
             if (roomItem.getRoomId().equals(name)) {
                 activeItem(i);
+                System.out.println("System.nanoTime()-l = " + (System.currentTimeMillis() - l));
                 return;
             }
         }

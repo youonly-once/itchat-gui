@@ -1,93 +1,79 @@
 package cn.shu.wechat.swing.utils;
 
 import java.text.SimpleDateFormat;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 
 /**
  * Created by 舒新胜 on 28/04/2017.
+ * Updated by 舒新胜 on 29/12/2021.
  */
 
 public class TimeUtil {
-    private static final SimpleDateFormat daySimpleDateFormat = new SimpleDateFormat("HH:mm");
-    private static final SimpleDateFormat monthSimpleDateFormat = new SimpleDateFormat("MM/dd");
-    private static final SimpleDateFormat yearSimpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
 
-    private static final Calendar calendar = Calendar.getInstance();
+    /**
+     * 判断二个时间是否在同一分钟内
+     * @param ts1 时间一
+     * @param ts2 时间二
+     * @return true 同一分钟内 false不在同一分钟内
+     */
+    public static boolean inTheSameMinute(LocalDateTime ts1, LocalDateTime ts2) {
 
-    public static boolean inTheSameMinute(long ts1, long ts2) {
-        calendar.setTimeInMillis(ts1);
-        int min1 = calendar.get(Calendar.MINUTE);
-
-        calendar.setTimeInMillis(ts2);
-        int min2 = calendar.get(Calendar.MINUTE);
-
-        return min1 == min2;
+       return Duration.between(ts1,ts2).toMinutes() == 0;
     }
 
-    public static String diff(long timestamp) {
-        return diff(timestamp, false);
+    /**
+     * 微信 时间差的表示格式
+     * @param messageLocalDateTime 消息时间
+     * @return 微信时间差格式
+     */
+    public static String diff(LocalDateTime messageLocalDateTime) {
+        return diff(messageLocalDateTime, false);
     }
 
-    public static String diff(long timestamp, boolean detail) {
-        long current = System.currentTimeMillis();
-        calendar.setTimeInMillis(current);
-        int today = calendar.get(Calendar.DAY_OF_YEAR);
-        int thisYear = calendar.get(Calendar.YEAR);
+    /**
+     * 微信 时间差的表示格式
+     * @param messageLocalDateTime 消息时间
+     * @param detail 是否显示详细时间
+     * @return 微信时间差格式
+     */
+    public static String diff(LocalDateTime messageLocalDateTime, boolean detail) {
+        LocalDateTime currentLocalDateTime = LocalDateTime.now();
 
-        calendar.setTimeInMillis(timestamp);
-        int day = calendar.get(Calendar.DAY_OF_YEAR);
-        int year = calendar.get(Calendar.YEAR);
+        Duration duration = Duration.between(messageLocalDateTime, currentLocalDateTime);
+        Period period = Period.between(messageLocalDateTime.toLocalDate(), currentLocalDateTime.toLocalDate());
 
-        int diff = today - day;
-        boolean sameYear = thisYear == year;
+        //当前时间和消息时间相差天数
+        long diffDay = duration.toDays();
+        //是否为同一年
+        boolean sameYear = (period.getYears() == 0);
 
         String ret;
-        if (sameYear && diff < 1) {
-            ret = daySimpleDateFormat.format(new Date(timestamp));
-        } else if (sameYear && diff < 2) {
+        if (sameYear && diffDay < 1) {
+            //1天内的消息 时间显示时分秒
+            return messageLocalDateTime.format(DateTimeFormatter.ofPattern("HH:mm"));
+        } else if (sameYear && diffDay < 2) {
             if (detail) {
-                ret = "昨天 " + daySimpleDateFormat.format(new Date(timestamp));
+                return messageLocalDateTime.format(DateTimeFormatter.ofPattern("昨天 HH:mm"));
             } else {
-                ret = "昨天"/* + daySimpleDateFormat.format(new Date(timestamp))*/;
+                return "昨天"/* + daySimpleDateFormat.format(new Date(timestamp))*/;
             }
-        } else if (sameYear && diff < 8) {
+        } else if (sameYear && diffDay < 8) {
             if (detail) {
-                ret = "星期" + getWeekDay(calendar.get(Calendar.DAY_OF_WEEK)) + " " + daySimpleDateFormat.format(new Date(timestamp));
+                return messageLocalDateTime.getDayOfWeek().toString() + messageLocalDateTime.format(DateTimeFormatter.ofPattern(" HH:mm"));
             } else {
-                ret = "星期" + getWeekDay(calendar.get(Calendar.DAY_OF_WEEK))/* + " " + daySimpleDateFormat.format(new Date(timestamp))*/;
+                return  messageLocalDateTime.getDayOfWeek().toString()/* + " " + daySimpleDateFormat.format(new Date(timestamp))*/;
             }
-        } else if (sameYear && diff < 366) {
+        } else if (sameYear && diffDay < 366) {
             if (detail) {
-                ret = monthSimpleDateFormat.format(new Date(timestamp)) + " " + daySimpleDateFormat.format(new Date(timestamp));
+                return messageLocalDateTime.format(DateTimeFormatter.ofPattern("MM-dd HH:mm"));
             } else {
-                ret = monthSimpleDateFormat.format(new Date(timestamp));
+                return messageLocalDateTime.format(DateTimeFormatter.ofPattern("MM-dd"));
             }
         } else {
-            ret = yearSimpleDateFormat.format(new Date(timestamp));
-        }
-        return ret;
-    }
-
-
-    private static String getWeekDay(int val) {
-        switch (val) {
-            case 1:
-                return "日";
-            case 2:
-                return "一";
-            case 3:
-                return "二";
-            case 4:
-                return "三";
-            case 5:
-                return "四";
-            case 6:
-                return "五";
-            case 7:
-                return "六";
-            default:
-                return "";
+            return messageLocalDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE);
         }
     }
 }

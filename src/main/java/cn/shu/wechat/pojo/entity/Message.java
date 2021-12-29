@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.awt.image.BufferedImage;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 /**
@@ -108,7 +109,10 @@ public class Message implements Comparable<Message>{
     private Long voiceLength;
     private String fileName;
     private Long fileSize;
-    private long timestamp;
+    /**
+     * 消息时间
+     */
+    private LocalDateTime messageTime;
     private String desc ;
     private String url ;
     private String title;
@@ -135,7 +139,6 @@ public class Message implements Comparable<Message>{
     private String contactsTicket;
     @Override
     public int compareTo(Message o) {
-        return (int) (this.getTimestamp() - o.getTimestamp());
-
+        return this.getMessageTime().compareTo(o.getMessageTime());
     }
 }

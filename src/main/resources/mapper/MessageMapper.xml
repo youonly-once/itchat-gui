@@ -1041,4 +1041,14 @@
       order by create_time desc
       limit #{start},#{end}
     </select>
+
+  <select id="searchFileByName"  resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+    from message
+    where msg_type = 49
+        and app_msg_type = 6
+        and plaintext like '%${key}%'
+order by create_time desc
+  </select>
 </mapper>

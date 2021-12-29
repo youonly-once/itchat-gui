@@ -14,6 +14,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.LocalDateTime;
 
 public class BombFrame extends JFrame {
 
@@ -70,7 +71,7 @@ public class BombFrame extends JFrame {
                                     .msgType(WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
                                     .fromNickname(Core.getNickName())
                                     .progress(50)
-                                    .timestamp(System.currentTimeMillis())
+                                    .messageTime(LocalDateTime.now())
                                     .deleted(false)
                                     .isSend(true)
                                     .isNeedToResend(false)

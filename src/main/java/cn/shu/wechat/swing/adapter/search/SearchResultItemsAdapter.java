@@ -16,13 +16,14 @@ import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.swing.panels.left.tabcontent.LeftTabContentPanel;
 import cn.shu.wechat.swing.panels.left.SearchPanel;
 import cn.shu.wechat.swing.panels.left.TabOperationPanel;
-import cn.shu.wechat.swing.utils.AvatarUtil;
-import cn.shu.wechat.swing.utils.FileCache;
-import cn.shu.wechat.swing.utils.IconUtil;
-import cn.shu.wechat.swing.utils.TimeUtil;
+import cn.shu.wechat.swing.utils.*;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -49,7 +50,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
 
     private final List<String> downloadingFiles = new ArrayList<>();
 
-    private final Map<String, SearchResultFileItemViewHolder> fileItemViewHolders = new HashMap<>();
+    private final List<WeakReference<SearchResultFileItemViewHolder>> fileItemViewHolders = new ArrayList<>();
     private final List<WeakReference<SearchResultUserItemViewHolder>> searchResultUserItemViewHolderList = new ArrayList<>(10);
 
     public SearchResultItemsAdapter(List<SearchResultItem> searchResultItems) {
@@ -102,7 +103,19 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
                 return new SearchResultMessageViewHolder();
             }
             case VIEW_TYPE_FILE: {
-                return new SearchResultFileItemViewHolder();
+                //避免重复创建
+                SearchResultFileItemViewHolder holder = null;
+                if(fileItemViewHolders.size() > position){
+                    holder = fileItemViewHolders.get(position).get();
+                    if (holder == null){
+                        holder = new SearchResultFileItemViewHolder();
+                        fileItemViewHolders.set(position,new WeakReference<>(holder));
+                    }
+                }else{
+                    holder = new SearchResultFileItemViewHolder();
+                    fileItemViewHolders.add(position,new WeakReference<>(holder));
+                }
+                return holder;
             }
             default: {
                 return null;
@@ -141,14 +154,12 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
      */
     private void processFileResult(SearchResultItemViewHolder viewHolder, SearchResultItem item) {
         SearchResultFileItemViewHolder holder = (SearchResultFileItemViewHolder) viewHolder;
-        //fileItemViewHolders.add(holder);
-        fileItemViewHolders.put(item.getId(), holder);
 
         ImageIcon attachmentTypeIcon = attachmentIconHelper.getImageIcon(item.getName());
         attachmentTypeIcon.setImage(attachmentTypeIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH));
         holder.avatar.setIcon(attachmentTypeIcon);
         holder.name.setKeyWord(keyWord);
-
+        holder.dateTime.setText(item.getDateTime());
         String filename = item.getName();
         if (item.getName().length() > 20) {
             String suffix = filename.substring(filename.lastIndexOf("."));
@@ -157,34 +168,16 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
 
         holder.name.setText(filename);
 
-        String filePath = FileCache.tryGetFileCache(item.getId(), item.getName());
-        if (filePath != null) {
-            holder.size.setText(FileCache.fileSizeString(filePath));
-        } else {
+        if (item.getTag() != null && new File(item.getTag().toString()).exists()) {
+            holder.size.setText(FileCache.fileSizeString(item.getTag().toString()));
+        }else {
             holder.size.setText("未下载");
         }
 
+
         holder.setToolTipText(item.getName());
 
-        holder.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                setBackground(holder, Colors.ITEM_SELECTED_DARK);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                setBackground(holder, Colors.DARK);
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON1) {
-                    downloadOrOpenFile(item.getId(), holder);
-                }
-                super.mouseReleased(e);
-            }
-        });
+        processMouseListeners(viewHolder, item);
     }
 
     /**
@@ -203,13 +196,13 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
         holder.brief.setKeyWord(keyWord);
         holder.brief.setText(item.getName());
         holder.roomName.setText(room.getName());
-        holder.time.setText(TimeUtil.diff(message.getTimestamp()));
+        holder.time.setText(TimeUtil.diff(message.getLocalDateTime()));
 
         holder.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    enterRoom(room.getRoomId(), message.getTimestamp());
+                    enterRoom(room.getRoomId());
                     clearSearchText();
                 }
                 super.mouseReleased(e);
@@ -231,11 +224,13 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
         if (viewHolder.mouseListener != null){
             viewHolder.mouseListener.fresh(SearchResultType.getByCode(item.getType())
                     ,item.getId()
+                    ,item.getTag()
                     ,viewHolder);
 
         }else{
             viewHolder.mouseListener = new SearchResultItemAbstractMouseListener( SearchResultType.getByCode(item.getType())
             ,item.getId()
+            ,item.getTag()
             ,viewHolder);
            viewHolder.addMouseListener(  viewHolder.mouseListener);
         }
@@ -243,19 +238,22 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
 
     }
     class SearchResultItemAbstractMouseListener extends AbstractMouseListener {
+        private JPopupMenu jPopupMenu ;
         private SearchResultType type;
         private String id;
         private SearchResultItemViewHolder holder;
+        private String tag;
 
-        public void fresh(SearchResultType type, String id, SearchResultItemViewHolder viewHolder) {
+        public void fresh(SearchResultType type, String id,String tag, SearchResultItemViewHolder viewHolder) {
             this.holder = viewHolder;
             this.id = id;
             this.type = type;
+            this.tag = tag;
         }
-        public SearchResultItemAbstractMouseListener(SearchResultType type, String id, SearchResultItemViewHolder holder) {
-            fresh(type,id,holder);
-        }
+        public SearchResultItemAbstractMouseListener(SearchResultType type, String id,String filePath, SearchResultItemViewHolder holder) {
+            fresh(type,id,filePath,holder);
 
+        }
         @Override
         public void mouseReleased(MouseEvent e) {
             if (e.getButton() == MouseEvent.BUTTON1) {
@@ -282,10 +280,22 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
                             {
                                 icon.setImage(getRoomAvatar(room.getType(), room.getName()));
                             }*/
+                    case FILE:{
+                            downloadOrOpenFile(tag, holder);
                         break;
+                    }
                     default:
                         throw new RuntimeException("ViewType 不正确");
                 }
+            }else if (e.getButton() == MouseEvent.BUTTON3){
+                if (jPopupMenu == null){
+                    jPopupMenu = new JPopupMenu();
+                    JMenuItem jMenuItem = new JMenuItem("打开文件夹");
+                    jMenuItem.addActionListener(e1 -> ExecutorServiceUtil.getGlobalExecutorService().submit(() -> FileUtil.showAtExplorer(tag)));
+                    jPopupMenu.add(jMenuItem);
+                }
+                jPopupMenu.show(holder,e.getX()
+                        ,e.getY());
             }
         }
 
@@ -301,10 +311,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
         }
 
     };
-    private void clearSearchText() {
-        LeftTabContentPanel.getContext().showPanel(LeftTabContentPanel.CHAT);
-        SearchPanel.getContext().clearSearchText();
-    }
+
 
     /**
      * 处理通讯录或群组探索结果
@@ -323,7 +330,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
         new SwingWorker<Object,Object>(){
             ImageIcon icon = null;
             @Override
-            protected Object doInBackground() throws Exception {
+            protected Object doInBackground() {
                 switch (byCode) {
                     case CONTACTS:
                         icon = AvatarUtil.createOrLoadUserAvatar(item.getTag().toString());
@@ -391,7 +398,10 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
         return null;
     }*/
 
-
+    private void clearSearchText() {
+        LeftTabContentPanel.getContext().showPanel(LeftTabContentPanel.CHAT);
+        SearchPanel.getContext().clearSearchText();
+    }
 
     /**
      * 设置item的背影色
@@ -414,7 +424,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
         this.keyWord = keyWord;
     }
 
-    private void enterRoom(String roomId, long firstMessageTimestamp) {
+    private void enterRoom(String roomId) {
         //添加房间
         RoomsPanel.getContext().addRoomOrOpenRoom(roomId,"",0,null,false);
         TabOperationPanel.getContext().switchToChatLabel();
@@ -430,52 +440,24 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
     /**
      * 打开文件，如果文件不存在，则下载
      *
-     * @param fileId
+     * @param filePath 文件路径
      * @param holder
      */
-    public void downloadOrOpenFile(String fileId, SearchResultFileItemViewHolder holder) {
-        FileAttachment fileAttachment = null;
-
-        if (fileAttachment == null) {
+    public void downloadOrOpenFile(Object filePath, SearchResultItemViewHolder holder) {
+        if (filePath!=null){
+            FileUtil.openFileWithDefaultApplication(filePath.toString());
+        }else{
             JOptionPane.showMessageDialog(null, "无效的附件", "附件无效", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        String filepath = FileCache.tryGetFileCache(fileAttachment.getId(), fileAttachment.getTitle());
-        if (filepath == null) {
-            // 服务器上的文件
-            if (fileAttachment.getLink().startsWith("/file-upload")) {
-                // 如果当前文件正在下载，则不下载
-                if (downloadingFiles.contains(fileId)) {
-                    holder.progressBar.setVisible(true);
-                    holder.size.setText("下载中...");
-                } else {
-                    // downloadFile(fileAttachment);
-                }
-            }
-            // 本地的文件
-            else {
-                openFileWithDefaultApplication(fileAttachment.getLink());
-            }
-        } else {
-            openFileWithDefaultApplication(filepath);
-        }
+        //下载 循环设置progressBar值
+    /*    holder.progressBar.setVisible(true);
+        holder.size.setText("下载中...");*/
     }
 
 
-    /**
-     * 使用默认程序打开文件
-     *
-     * @param path
-     */
-    private void openFileWithDefaultApplication(String path) {
-        try {
-            Desktop.getDesktop().open(new File(path));
-        } catch (IOException e1) {
-            JOptionPane.showMessageDialog(null, "文件打开失败，没有找到关联的应用程序", "打开失败", JOptionPane.ERROR_MESSAGE);
-            e1.printStackTrace();
-        }
-    }
+
 
 
     public interface SearchMessageOrFileListener {

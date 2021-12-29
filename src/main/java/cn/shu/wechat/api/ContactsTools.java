@@ -65,6 +65,7 @@ public class ContactsTools {
      * @return 默认名称，如果是群，则以群成员的名称开始
      */
     public static String getGroupDefaultName(String userName){
+
         if (userName!= null && userName.startsWith("@@") ){
 
             return Optional.ofNullable(getContactByUserName(userName))
@@ -158,12 +159,14 @@ public class ContactsTools {
         if (Core.getMemberMap().containsKey(userName)){
             return Core.getMemberMap().get(userName);
         }
+        long l = System.currentTimeMillis();
         Optional<Contacts> contacts1 = Optional.ofNullable(groupName)
                 .map(Core.getMemberMap()::get)
                 .map(Contacts::getMemberlist)
-                .flatMap(memberList -> memberList.parallelStream()
+                .flatMap(memberList -> memberList.stream()
                         .filter(contacts -> userName.equals(contacts.getUsername()))
                         .findAny());
+        System.out.println("System.currentTimeMillis()-l = " + (System.currentTimeMillis() - l));
         return contacts1.orElse(null);
     }
 

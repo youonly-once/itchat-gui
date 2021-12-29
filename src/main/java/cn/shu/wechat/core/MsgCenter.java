@@ -29,6 +29,7 @@ import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import javax.swing.*;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -383,7 +384,7 @@ public class MsgCenter {
                 .fileName(msg.getFileName())
                 .fileSize(msg.getFileSize())
                 .contentMap(msg.getContentMap())
-                .timestamp(System.currentTimeMillis())
+                .messageTime(LocalDateTime.now())
                 .oriContent(msg.getOriContent())
                 .build();
     }

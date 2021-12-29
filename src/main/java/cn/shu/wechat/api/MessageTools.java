@@ -6,8 +6,6 @@ import cn.shu.wechat.enums.*;
 import cn.shu.wechat.exception.WebWXException;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.pojo.dto.msg.send.*;
-import cn.shu.wechat.pojo.dto.msg.sync.AddMsgList;
-import cn.shu.wechat.pojo.dto.msg.sync.RecommendInfo;
 import cn.shu.wechat.pojo.entity.Message;
 import cn.shu.wechat.swing.tasks.UploadTaskCallback;
 import cn.shu.wechat.swing.utils.ImageUtil;
@@ -30,6 +28,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.*;
 
@@ -178,7 +177,7 @@ public class MessageTools {
             if (message.getPlaintext() == null) {
                 message.setPlaintext(message.getContent());
             }
-            message.setTimestamp(System.currentTimeMillis());
+            message.setMessageTime(LocalDateTime.now());
         }
         try {
             int insert = messageMapper.batchInsert(results);

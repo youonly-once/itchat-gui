@@ -50,4 +50,11 @@ public interface MessageMapper extends BaseMapper<Message> {
             , @Param("userName") String userName
             , @Param("remarkName") String remarkName
             , @Param("nickName") String nickName);
+
+    /**
+     * 搜索文件
+     * @param key 关键词
+     * @return 消息列表
+     */
+    List<Message> searchFileByName(String key);
 }
