@@ -30,8 +30,8 @@ package cn.shu.wechat.swing.utils;
 /**
  * Created by jiang on 15/12/11.
  */
-public class CharacterParser {
-
+public final class CharacterParser {
+    private CharacterParser(){}
     private static int[] pyvalue = new int[]{-20319, -20317, -20304, -20295, -20292, -20283, -20265, -20257, -20242, -20230, -20051, -20036, -20032,
             -20026, -20002, -19990, -19986, -19982, -19976, -19805, -19784, -19775, -19774, -19763, -19756, -19751, -19746, -19741, -19739, -19728,
             -19725, -19715, -19540, -19531, -19525, -19515, -19500, -19484, -19479, -19467, -19289, -19288, -19281, -19275, -19270, -19263, -19261,
@@ -80,11 +80,7 @@ public class CharacterParser {
             "zhun", "zhuo", "zi", "zong", "zou", "zu", "zuan", "zui", "zun", "zuo"};
     private StringBuilder buffer;
     private String resource;
-    private static CharacterParser characterParser = new CharacterParser();
 
-    public static CharacterParser getInstance() {
-        return characterParser;
-    }
 
     public String getResource() {
         return resource;
@@ -101,8 +97,8 @@ public class CharacterParser {
         int asc = 0;
         try {
             byte[] bytes = chs.getBytes("gb2312");
-            if (bytes == null || bytes.length > 2 || bytes.length <= 0) {
-                throw new RuntimeException("illegal resource string");
+            if (bytes.length > 2 || bytes.length <= 0) {
+                throw new IllegalArgumentException("illegal resource string");
             }
             if (bytes.length == 1) {
                 asc = bytes[0];

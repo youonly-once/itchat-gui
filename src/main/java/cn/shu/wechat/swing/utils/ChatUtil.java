@@ -15,7 +15,7 @@ import java.util.List;
  * @项目 AutoWechat
  * @创建时间 7/23/2021 20:01
  */
-public class ChatUtil {
+public final class ChatUtil {
     private ChatUtil() {
 
     }

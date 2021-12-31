@@ -1,7 +1,7 @@
 package cn.shu.wechat.swing.utils;
 
+import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.swing.Launcher;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import lombok.extern.log4j.Log4j2;
 
@@ -22,17 +22,14 @@ public class ImageCache {
     public String IMAGE_CACHE_ROOT_PATH;
 
 
-
-
     public ImageCache() {
         try {
             //IMAGE_CACHE_ROOT_PATH = getClass().getResource("/cache").getPath() + "/image";
-            IMAGE_CACHE_ROOT_PATH = Launcher.wechatConfiguration.getBasePath() + "/cache/image";
+            IMAGE_CACHE_ROOT_PATH = WechatConfiguration.getInstance().getBasePath() + "/cache/image";
 
             File file = new File(IMAGE_CACHE_ROOT_PATH);
-            if (!file.exists()) {
-                file.mkdirs();
-                log.info("创建图片缓存目录：{}" , file.getAbsolutePath());
+            if (!file.mkdirs()) {
+                log.warn("创建图片缓存目录失败：{}", file.getAbsolutePath());
             }
         } catch (Exception e) {
             IMAGE_CACHE_ROOT_PATH = "./";
@@ -235,10 +232,10 @@ public class ImageCache {
             tag.getGraphics().drawImage(image.getScaledInstance(destWidth, destHeight, Image.SCALE_SMOOTH), 0, 0, null);
 
             File cacheFile = new File(IMAGE_CACHE_ROOT_PATH + "/" + identify + "_thumb");
-           // FileOutputStream out = new FileOutputStream(cacheFile);
-            ImageIO.write(tag,"jpeg",cacheFile);
+            // FileOutputStream out = new FileOutputStream(cacheFile);
+            ImageIO.write(tag, "jpeg", cacheFile);
             //JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
-           // encoder.encode(tag);
+            // encoder.encode(tag);
             //out.close();
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -246,20 +243,20 @@ public class ImageCache {
     }
 
     /**
-     *
      * @param filePath
      * @return
      */
-    public String createThumb(String filePath){
+    public String createThumb(String filePath) {
         BufferedImage read = null;
         try {
             read = ImageIO.read(getClass().getResource(filePath));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        createThumb(read,"sended_thumb");
+        createThumb(read, "sended_thumb");
         return IMAGE_CACHE_ROOT_PATH + "/" + "sended_thumb" + "_thumb";
     }
+
     public static int[] getImageSize(Image image) {
 
         if (image == null) {

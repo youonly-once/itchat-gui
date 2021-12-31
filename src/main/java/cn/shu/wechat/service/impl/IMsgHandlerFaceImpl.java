@@ -161,7 +161,8 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                             .content("1、【oauto/cauto】\n\t开启/关闭当前联系人自动回复\n"
                                     + "2、【opundo/cpundo】\n\t开启/关闭当前联系人消息防撤回\n"
                                     + "3、【op/cp】\n\t开启/关闭全局个人用户消息自动回复\n"
-                                    + "4、【mf10】\n\t聊天消息关键词TOP10\n")
+                                    + "4、【mf10】\n\t聊天消息关键词TOP10\n"
+                                    + "5、【gma10】\n\t活跃度TOP\n")
                             .toUsername(toUserName)
                             .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                             .build());
@@ -235,18 +236,23 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 break;
             case "ggr":
                 if (msg.isGroupMsg()) {
-                    String imgPath = chartUtil.makeContactsAttrPieChartAsPng(toUserName,"Sex", 1920, 1080);
-                    //群消息
-                    messages.add(MessageTools.toPicMessage(imgPath, toUserName));
+                    Optional<String> pathOptional = chartUtil.makeContactsAttrPieChartAsPng(toUserName,"Sex", 1920, 1080);
+                    if (pathOptional.isPresent()) {
+                        //群消息
+                        messages.add(MessageTools.toPicMessage(pathOptional.get(), toUserName));
+                    }
                     log.info("计算群【" + remarkNameByGroupUserName + "】成员性别分布图");
                 }
 
                 break;
             case "gpr":
                 if (msg.isGroupMsg()) {
-                    String imgPath = chartUtil.makeContactsAttrPieChartAsPng(toUserName, "Province", 1920, 1080);
-                    //群消息
-                    messages.add(MessageTools.toPicMessage(imgPath, toUserName));
+                    Optional<String> pathOptional = chartUtil.makeContactsAttrPieChartAsPng(toUserName, "Province", 1920, 1080);
+                    if (pathOptional.isPresent()) {
+                        //群消息
+                        messages.add(MessageTools.toPicMessage(pathOptional.get(), toUserName));
+                    }
+
                     log.info("计算群【" + remarkNameByGroupUserName + "】成员省份分布图");
                 }
                 break;
@@ -260,11 +266,15 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                     String imgPath = chartUtil.makeWXMemberOfGroupActivity(toUserName);
                     messages.add(MessageTools.toPicMessage(imgPath, toUserName));
                     log.info("计算【" + remarkNameByGroupUserName + "】成员活跃度");
+                }else{
+                    String imgPath = chartUtil.makeWXUserActivity(toUserName);
+                    messages.add(MessageTools.toPicMessage(imgPath, toUserName));
+                    log.info("计算聊天双方消息数");
                 }
                 break;
             case "mf10":
                 //聊天词语频率排名
-                List<String> imgs = chartUtil.makeWXUserMessageTop(toUserName);
+                List<String> imgs = chartUtil.makeWXUserMessageGroupTop(toUserName);
                 for (String s : imgs) {
                     //群消息
                     messages.add(MessageTools.toPicMessage(s, toUserName));
@@ -305,9 +315,11 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         }
         if (text.startsWith("attr_rate") && msg.isGroupMsg()) {
             String substring = msg.getPlainText().substring(msg.getPlainText().indexOf(":") + 1);
-            String imgPath = chartUtil.makeContactsAttrPieChartAsPng(toUserName, substring, 1920, 1080);
-            //群消息
-            messages.add(MessageTools.toPicMessage(imgPath, toUserName));
+            Optional<String> pathOptional = chartUtil.makeContactsAttrPieChartAsPng(toUserName, substring, 1920, 1080);
+            if (pathOptional.isPresent()) {
+                //群消息
+                messages.add(MessageTools.toPicMessage(pathOptional.get(), toUserName));
+            }
             log.info("计算群【" + remarkNameByGroupUserName + "】成员" + substring + "比例");
         }
         return messages;

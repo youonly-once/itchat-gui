@@ -1,11 +1,12 @@
 package cn.shu;
 
-import cn.shu.wechat.swing.Launcher;
+import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.frames.LoginFrame;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.utils.SpringContextHolder;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -15,6 +16,11 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -40,9 +46,11 @@ public class WeChatStater {
                 context = new SpringApplicationBuilder(WeChatStater.class)
                         .headless(false)
                         .run();
-                Launcher bean = context.getBean(Launcher.class);
+                LoginFrame loginFrame = new LoginFrame();
+                loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 countDownLatch.countDown();
-                bean.launch();
+                loginFrame.setVisible(true);
+                loginFrame.login(true);
                 return null;
             }
         }.execute();
@@ -93,6 +101,42 @@ public class WeChatStater {
             jWindow.dispose();
         }).start();
     }
+
+    /**
+     * 通过文件锁来判断程序是否正在运行
+     *
+     * @return 如果正在运行返回true，否则返回false
+     */
+    private boolean isApplicationRunning() {
+        WechatConfiguration wechatConfiguration = SpringContextHolder.getBean(WechatConfiguration.class);
+        boolean rv = false;
+        try {
+            String path = wechatConfiguration.getBasePath() + System.getProperty("file.separator") + "appLock";
+            File dir = new File(path);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            File lockFile = new File(path + System.getProperty("file.separator") + "appLaunch.lock");
+            if (!lockFile.exists()) {
+                lockFile.createNewFile();
+            }
+
+            //程序名称
+            RandomAccessFile fis = new RandomAccessFile(lockFile.getAbsolutePath(), "rw");
+            FileChannel fileChannel = fis.getChannel();
+            FileLock fileLock = fileChannel.tryLock();
+            if (fileLock == null) {
+                System.out.println("程序已在运行.");
+                rv = true;
+            }
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+        return rv;
+    }
+
+
     /**
      * 关闭
      */

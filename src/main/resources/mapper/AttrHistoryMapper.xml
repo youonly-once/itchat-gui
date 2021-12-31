@@ -317,14 +317,14 @@
         </trim>
     </insert>
     <select id="selectUpdateInfoCount" resultType="map">
-        select NickName AS name, COUNT(*) as cou
+        select NickName AS name, COUNT(*) as count
         from attr_history
         GROUP BY NickName
         ORDER BY COUNT(*) desc LIMIT 8
         , #{top};
     </select>
     <select id="selectUpdateAttrCount" resultType="map">
-        select Attr AS name, COUNT(*) as cou
+        select Attr AS name, COUNT(*) as count
         from attr_history
         GROUP BY Attr
         ORDER BY COUNT(*) desc

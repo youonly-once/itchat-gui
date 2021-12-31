@@ -2,9 +2,9 @@ package cn.shu.wechat.swing.utils;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
+import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.pojo.entity.Contacts;
-import cn.shu.wechat.swing.Launcher;
 import cn.shu.wechat.swing.components.Colors;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -26,9 +26,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * 头像创建工具类
  */
 @Log4j2
-public class AvatarUtil {
+public final class AvatarUtil {
     private static final Color[] colorArr;
-
+    private AvatarUtil() {
+    }
     static {
         colorArr = new Color[]{
                 new Color(244, 67, 54),
@@ -68,7 +69,7 @@ public class AvatarUtil {
     private static final Map<String, Image> avatarCacheBig = new ConcurrentHashMap<>();
 
     static {
-        AVATAR_CACHE_ROOT = Launcher.wechatConfiguration.getBasePath() + "/cache/avatar";
+        AVATAR_CACHE_ROOT = WechatConfiguration.getInstance().getBasePath() + "/cache/avatar";
 
         File file = new File(AVATAR_CACHE_ROOT);
         if (!file.exists()) {

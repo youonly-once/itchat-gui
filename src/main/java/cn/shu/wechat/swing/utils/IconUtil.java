@@ -7,6 +7,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
@@ -72,5 +73,17 @@ public class IconUtil {
 
         }
         return bufferedImage;
+    }
+
+
+    /**
+     * 文件转ImageIcon
+     * @param file 文件
+     * @return ImageIcon
+     */
+    public static ImageIcon getIconFromFile(File file) {
+        ImageIcon icon = new ImageIcon(file.getAbsolutePath());
+        icon.setDescription(file.getAbsolutePath());
+        return icon;
     }
 }

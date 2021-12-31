@@ -5,7 +5,10 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 
-public class FileUtil {
+public final class FileUtil {
+    private FileUtil() {
+    }
+
     /**
      * 打开文件在资源管理器的位置
      * @param filePath 文件路径

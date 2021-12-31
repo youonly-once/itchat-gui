@@ -38,7 +38,7 @@ public class TitlePanel extends ParentAvailablePanel {
     private Rectangle desktopBounds; // 去除任务栏后窗口的大小
     private Rectangle normalBounds;
     private long lastClickTime;
-    private static Point origin = new Point();
+    private static final Point origin = new Point();
 
 
     public TitlePanel(JPanel parent) {

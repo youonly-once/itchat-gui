@@ -1051,4 +1051,153 @@
         and plaintext like '%${key}%'
 order by create_time desc
   </select>
+  <select id="selectGroupUserMessageCount"  resultType="map">
+
+    SELECT
+      *
+    FROM
+      (
+        SELECT
+          ( CASE WHEN from_member_of_group_nickname IS NULL THEN '' ELSE from_member_of_group_nickname END ) AS nickName,
+          from_member_of_group_displayname as displayName,
+          ( CASE WHEN count( * ) IS NULL THEN 0 ELSE count( * ) END ) AS count
+        FROM
+          message
+    <where>
+    (
+       from_username =  #{fromUserName}
+      <if test="fromNickName!=''">
+        OR from_nickname =  #{fromNickName}
+      </if>
+      <if test="fromRemarkName!=''">
+        OR from_remarkname =  #{fromRemarkName}
+      </if>
+      ) and from_member_of_group_nickname is not null
+
+    </where>
+
+        GROUP BY
+          from_member_of_group_nickname
+        UNION ALL
+        SELECT
+          ( CASE WHEN from_nickname IS NULL THEN '' ELSE from_nickname END ) AS nickName,
+          from_nickname as displayName,
+          ( CASE WHEN count( * ) IS NULL THEN 0 ELSE count( * ) END ) AS count
+        FROM
+          message
+    <where>
+      <if test="fromUserName!=''">
+        OR to_username =  #{fromUserName}
+      </if>
+      <if test="fromNickName!=''">
+        OR to_nickname =  #{fromNickName}
+      </if>
+      <if test="fromRemarkName!=''">
+        OR to_remarkname =  #{fromRemarkName}
+      </if>
+    </where>
+       GROUP BY
+        from_nickname
+      )
+    ORDER BY count DESC
+
+  </select>
+
+  <select id="selectUserMessageCount"  resultType="map">
+
+    SELECT
+      from_nickname nickName,
+      ( CASE WHEN count( * ) IS NULL THEN 0 ELSE count( * ) END ) AS count
+    FROM
+      message
+
+    <where>
+      <if test="fromUserName!=''">
+        OR from_username =  #{fromUserName}
+      </if>
+      <if test="fromNickName!=''">
+        OR from_nickname =  #{fromNickName}
+      </if>
+      <if test="fromRemarkName!=''">
+        OR from_remarkname =  #{fromRemarkName}
+      </if>
+      <if test="fromUserName!=''">
+        OR to_username =  #{fromUserName}
+      </if>
+      <if test="fromNickName!=''">
+        OR to_nickname =  #{fromNickName}
+      </if>
+      <if test="fromRemarkName!=''">
+        OR to_remarkname =  #{fromRemarkName}
+      </if>
+
+    </where>
+
+    GROUP BY
+      from_nickname
+  </select>
+
+
+  <select id="groupByContent"  resultType="map">
+
+    select (case when content is null then '' else content end) as content,count(*) as count from message
+
+    <where>
+      <if test="fromUserName!=''">
+        OR from_username =  #{fromUserName}
+      </if>
+      <if test="fromNickName!=''">
+        OR from_nickname =  #{fromNickName}
+      </if>
+      <if test="fromRemarkName!=''">
+        OR from_remarkname =  #{fromRemarkName}
+      </if>
+      <if test="fromUserName!=''">
+        OR to_username =  #{fromUserName}
+      </if>
+      <if test="fromNickName!=''">
+        OR to_nickname =  #{fromNickName}
+      </if>
+      <if test="fromRemarkName!=''">
+        OR to_remarkname =  #{fromRemarkName}
+      </if>
+
+    </where>
+
+    GROUP BY
+    content ORDER BY count(*) DESC
+    limit 0,10
+  </select>
+
+
+  <select id="groupByType"  resultType="map">
+
+    select msg_type as type,count(*) as count from message
+
+    <where>
+      <if test="fromUserName!=''">
+        OR from_username =  #{fromUserName}
+      </if>
+      <if test="fromNickName!=''">
+        OR from_nickname =  #{fromNickName}
+      </if>
+      <if test="fromRemarkName!=''">
+        OR from_remarkname =  #{fromRemarkName}
+      </if>
+      <if test="fromUserName!=''">
+        OR to_username =  #{fromUserName}
+      </if>
+      <if test="fromNickName!=''">
+        OR to_nickname =  #{fromNickName}
+      </if>
+      <if test="fromRemarkName!=''">
+        OR to_remarkname =  #{fromRemarkName}
+      </if>
+
+    </where>
+
+    GROUP BY
+    msg_type ORDER BY count(*) DESC
+limit 0,10
+  </select>
 </mapper>

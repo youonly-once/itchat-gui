@@ -31,7 +31,7 @@ public class CreateGroupDialog extends JDialog {
     private JPanel buttonPanel;
     private JButton cancelButton;
     private JButton okButton;
-    private List<SelectUserData> userList = new ArrayList<>();
+    private final List<SelectUserData> userList = new ArrayList<>();
 
 
 

@@ -1,5 +1,6 @@
 package cn.shu.wechat.pojo.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,6 +23,7 @@ public class Message implements Comparable<Message>{
     private String id;
 
     private String msgId;
+    @TableField(exist = false)
     private boolean isGroup;
     private Integer msgType;
 

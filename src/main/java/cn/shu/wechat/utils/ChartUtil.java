@@ -3,15 +3,18 @@ package cn.shu.wechat.utils;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.enums.WXSendMsgCodeEnum;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.mapper.ContactsMapper;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.pojo.entity.Contacts;
+import cn.shu.wechat.pojo.entity.Message;
 import cn.shu.wechat.pojo.entity.MessageExample;
 import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.utils.EmojiUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jfree.chart.*;
@@ -34,6 +37,7 @@ import org.jfree.chart.title.TextTitle;
 import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.chart.util.SortOrder;
 import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DatasetUtils;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
@@ -49,9 +53,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 
 /**
@@ -65,10 +71,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Component
 @Slf4j
-public class ChartUtil {
+public final class ChartUtil {
+    private ChartUtil(){
 
+    }
     @Resource
     private WechatConfiguration wechatConfiguration;
+
     @Resource
     private AttrHistoryMapper attrHistoryMapper;
 
@@ -99,7 +108,26 @@ public class ChartUtil {
         makeWXContactMessageTop();
 
     }
+    /**
+     * 创建群成员属性饼图，或者创建所有好友的属性饼图
+     *
+     * @param userName 用户昵称
+     * @param attrName 属性名称
+     * @param width    图片宽度
+     * @param height   图片高度
+     * @return JFreeChart
+     */
+    private Optional<JFreeChart> makeContactsAttrPieChart(String userName, String attrName, int width, int height){
+        Optional<JFreeChart> jFreeChartOptional = Optional.empty();
+        if (ContactsTools.isRoomContact(userName)) {
+            String remarkNameByGroupUserName = ContactsTools.getContactDisplayNameByUserName(userName);
+            jFreeChartOptional = makeGroupMemberAttrPieChart(userName, remarkNameByGroupUserName, attrName, width, height);
+        } else if (userName.equals(Core.getUserName())) {
+            jFreeChartOptional = makeMineContactsAttrPieChart(attrName, width, height);
 
+        }
+        return jFreeChartOptional;
+    }
     /**
      * 创建群成员属性饼图，或者创建所有好友的属性饼图
      *
@@ -109,16 +137,10 @@ public class ChartUtil {
      * @param height   图片高度
      * @return 图片路径
      */
-    public String makeContactsAttrPieChartAsPng(String userName, String attrName, int width, int height) {
+    public Optional<String> makeContactsAttrPieChartAsPng(String userName, String attrName, int width, int height) {
         String chartName = UUID.randomUUID().toString().replace("-", "") + "_" + attrName + ".png";
-        if (userName.startsWith("@@")) {
-            String remarkNameByGroupUserName = ContactsTools.getContactDisplayNameByUserName(userName);
-
-            return saveChartAsPng(chartName, makeGroupMemberAttrPieChart(userName, remarkNameByGroupUserName, attrName, width, height), width, height);
-        } else if (userName.equals(Core.getUserName())) {
-            return saveChartAsPng(chartName, makeMineContactsAttrPieChart(attrName, width, height), width, height);
-        }
-        return null;
+        Optional<JFreeChart> jFreeChartOptional = makeContactsAttrPieChart(userName, attrName, width, height);
+        return jFreeChartOptional.map(a->saveChartAsPng(chartName,a , width, height));
     }
 
     /**
@@ -130,17 +152,9 @@ public class ChartUtil {
      * @param height   图片高度
      * @return BufferedImage
      */
-    public BufferedImage makeContactsAttrPieChartAsBufferedImage(String userName, String attrName, int width, int height) {
-        if (userName.startsWith("@@")) {
-            String remarkNameByGroupUserName = ContactsTools.getContactDisplayNameByUserName(userName);
-
-            JFreeChart jFreeChart = makeGroupMemberAttrPieChart(userName, remarkNameByGroupUserName, attrName, width, height);
-            return jFreeChart.createBufferedImage(width, height);
-        } else if (userName.equals(Core.getUserName())) {
-            JFreeChart jFreeChart = makeMineContactsAttrPieChart(attrName, width, height);
-            return jFreeChart.createBufferedImage(width, height);
-        }
-        return null;
+    public Optional<BufferedImage> makeContactsAttrPieChartAsBufferedImage(String userName, String attrName, int width, int height) {
+        Optional<JFreeChart> jFreeChartOptional = makeContactsAttrPieChart(userName, attrName, width, height);
+        return jFreeChartOptional.map(jFreeChart -> jFreeChart.createBufferedImage(width, height));
     }
 
     /**
@@ -153,26 +167,18 @@ public class ChartUtil {
      * @param height          图片高度
      * @return 图表对象
      */
-    public JFreeChart makeGroupMemberAttrPieChart(String groupName, String groupRemarkName, String attrName, int width, int height) {
+    public Optional<JFreeChart> makeGroupMemberAttrPieChart(String groupName, String groupRemarkName, String attrName, int width, int height) {
         log.info("makeGroupMemberAttrPieChart：" + attrName);
-        Contacts group = Core.getMemberMap().get(groupName);
-        List<Contacts> memberlist = null;
-        if (group == null
-                || group.getMemberlist() == null
-                || group.getMemberlist().isEmpty()) {
-            memberlist = loginService.WebWxBatchGetContact(groupName);
-        } else {
-            memberlist = group.getMemberlist();
-        }
-        if (memberlist == null || memberlist.isEmpty()) {
-            return null;
+
+        List<Contacts> memberList = Optional.ofNullable(Core.getMemberMap().get(groupName))
+                .map(Contacts::getMemberlist)
+                .orElseGet(() -> loginService.WebWxBatchGetContact(groupName));
+        if (!Optional.ofNullable(memberList).isPresent()) {
+            return Optional.empty();
         }
         String title = "【" + groupRemarkName + "】群成员" + attrName + "比例";
-        DefaultPieDataset<String> dataPieSet = getPieChatDatasetByWXContactsAttr(memberlist, attrName);
-        if (dataPieSet == null) {
-            return null;
-        }
-        return createValidityComparePimChar(dataPieSet, title);
+        Optional<DefaultPieDataset<String>> dataPieSet = getPieChatDatasetByWXContactsAttr(memberList, attrName);
+        return dataPieSet.flatMap(stringDefaultPieDataset -> createValidityComparePimChar(stringDefaultPieDataset, title));
 
     }
 
@@ -184,14 +190,10 @@ public class ChartUtil {
      * @param height   图片高度
      * @return 图表对象
      */
-    public JFreeChart makeMineContactsAttrPieChart(String attrName, int width, int height) {
+    public Optional<JFreeChart> makeMineContactsAttrPieChart(String attrName, int width, int height) {
         String title = attrName + "分布图";
-        DefaultPieDataset<String> dataPieSet = getPieChatDatasetByWXContactsAttr(Core.getContactMap().values(), attrName);
-        if (dataPieSet == null) {
-            return null;
-        }
-        return createValidityComparePimChar(dataPieSet, title);
-
+        Optional<DefaultPieDataset<String>> dataPieSet = getPieChatDatasetByWXContactsAttr(Core.getContactMap().values(), attrName);
+        return dataPieSet.flatMap(stringDefaultPieDataset -> createValidityComparePimChar(stringDefaultPieDataset, title));
     }
 
     /**
@@ -201,341 +203,131 @@ public class ChartUtil {
      * @param attr       属性名
      * @return 饼图数据集
      */
-    public DefaultPieDataset<String> getPieChatDatasetByWXContactsAttr(Collection<Contacts> sourceList, String attr) {
+    public Optional<DefaultPieDataset<String>> getPieChatDatasetByWXContactsAttr(Collection<Contacts> sourceList, String attr) {
         try {
+            Field declaredField = Contacts.class.getDeclaredField(attr);
+            declaredField.setAccessible(true);
             DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
-            for (Contacts contacts : sourceList) {
-                Field declaredField = contacts.getClass().getDeclaredField(attr);
-                declaredField.setAccessible(true);
-                Object value = declaredField.get(contacts);
-                if (value == null || "".equals(value.toString())) {
-                    value = "未设置" + attr;
-                } else if (attr.equals("sex")) {
-                    if (Byte.parseByte(value.toString()) == 2) {
-                        value = "女";
-                    } else if (Byte.parseByte(value.toString()) == 1) {
-                        value = "男";
-                    } else {
-                        value = "未设置";
-                    }
-                }
-
-                String vStr = value.toString();
-                if (dataset.getIndex(vStr) == -1) {
-                    dataset.setValue(vStr, 1);
-                } else {
-                    dataset.setValue(vStr, dataset.getValue(vStr).longValue() + 1);
-                }
-
+            Map<String, Long> map = sourceList.stream()
+                    .collect(Collectors.groupingBy(contacts -> {
+                        Object value = null;
+                        try {
+                            value = declaredField.get(contacts);
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
+                        if (value == null || "".equals(value.toString())) {
+                            value = "未设置" + attr;
+                        } else if (attr.equals("sex")) {
+                            if (Byte.parseByte(value.toString()) == 2) {
+                                value = "女";
+                            } else if (Byte.parseByte(value.toString()) == 1) {
+                                value = "男";
+                            } else {
+                                value = "未设置";
+                            }
+                        }
+                        return value.toString();
+                    }, Collectors.counting()));
+            for (Map.Entry<String, Long> entry : map.entrySet()) {
+                dataset.setValue(entry.getKey(), entry.getValue());
             }
             dataset.sortByValues(SortOrder.DESCENDING);
-            return dataset;
+            return Optional.of(dataset);
 
-        } catch (NoSuchFieldException | IllegalAccessException e) {
+        } catch (NoSuchFieldException e) {
             e.printStackTrace();
         }
-        return null;
+        return Optional.empty();
     }
 
-    /**
-     * 生成折线图
-     */
 
-    public void makeLineAndShapeChart() {
-        double[][] data = new double[][]{{672, 766, 223, 540, 126},
-                {325, 521, 210, 340, 106}, {332, 256, 523, 240, 526}};
-        String[] rowKeys = {"苹果", "梨子", "葡萄"};
-        String[] columnKeys = {"北京", "上海", "广州", "成都", "深圳"};
-        CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
-        createTimeXYChar("折线图", "x轴", "y轴", dataset, "lineAndShap.jpg");
-    }
-
-    /**
-     * 生成分组的柱状图
-     */
-    public void makeBarGroupChart() {
-        double[][] data = new double[][]{{672, 766, 223, 540, 126},
-                {325, 521, 210, 340, 106}, {332, 256, 523, 240, 526}};
-        String[] rowKeys = {"苹果", "梨子", "葡萄"};
-        String[] columnKeys = {"北京", "上海", "广州", "成都", "深圳"};
-        CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
-/*
-        createBarChart(dataset, "x坐标", "y坐标", "柱状图", "barGroup.png");
-*/
-    }
-
-    /**
-     * 生成柱状图
-     */
-
-    public void makeBarChart() {
-        double[][] data = new double[][]{{672, 766, 223, 540, 126}};
-        String[] rowKeys = {"苹果"};
-        String[] columnKeys = {"北京", "上海", "广州", "成都", "深圳"};
-        CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
-/*
-        createBarChart(dataset, "x坐标", "y坐标", "柱状图", "bar.png");
-*/
-    }
-
-    /**
-     * 生成柱状图
-     */
-
-    public void makeBarChart2() {
-        double[][] data = new double[][]{{672, 766, 223, 540, 126}};
-        String[] rowKeys = {"苹果"};
-        String[] columnKeys = {"北京", "上海", "广州", "成都", "深圳"};
-        CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
-        createHorizontalBarChart(dataset, "x坐标", "y坐标", "柱状图", "bar2.png");
-    }
-
-    /**
-     * 生成堆栈柱状图
-     */
-
-    public void makeStackedBarChart() {
-        double[][] data = new double[][]{{0.21, 0.66, 0.23, 0.40, 0.26},
-                {0.25, 0.21, 0.10, 0.40, 0.16}};
-        String[] rowKeys = {"苹果", "梨子"};
-        String[] columnKeys = {"北京", "上海", "广州", "成都", "深圳"};
-        CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
-        createStackedBarChart(dataset, "x坐标", "y坐标", "柱状图", "stsckedBar.png");
-    }
 
 
     /**
      * 聊天双方用户活跃度(消息发送次数)
      *
-     * @param userName
-     * @return
+     * @param userName 用户名
+     * @return 文件路径
      */
     public String makeWXUserActivity(String userName) {
 
-        MessageExample messageExample = new MessageExample();
-        MessageExample.Criteria criteria = messageExample.or();
-        MessageExample.Criteria criteria1 = messageExample.or();
-        MessageExample.Criteria criteria2 = messageExample.or();
-        //我发给对方的
-        criteria.andFromUsernameEqualTo(Core.getUserName());
-        criteria1.andFromNicknameEqualTo(Core.getNickName());
-        criteria2.andFromRemarknameEqualTo(Core.getNickName());
-        messageExample.or().andToNicknameEqualTo(ContactsTools.getContactNickNameByUserName(userName));
-        messageExample.or().andToUsernameEqualTo(userName);
-        messageExample.or().andToRemarknameEqualTo(ContactsTools.getContactRemarkNameByUserName(userName));
 
-        List<cn.shu.wechat.pojo.entity.Message> messages = messageMapper.selectByExample(messageExample);
+        List<Map<String, Object>> maps = messageMapper.selectUserMessageCount(
+                userName
+                , ContactsTools.getContactNickNameByUserName(userName)
+                , ContactsTools.getContactRemarkNameByUserName(userName));
 
-        Map<String, AtomicInteger> msgCount = new HashMap<>();
-        for (cn.shu.wechat.pojo.entity.Message message : messages) {
-            String fromMemberOfGroupDisplayname = message.getFromMemberOfGroupDisplayname();
-            if (StringUtils.isEmpty(fromMemberOfGroupDisplayname)) {
-                fromMemberOfGroupDisplayname = message.getFromNickname();
-            }
-            if (message.getMsgType() >= 1 && message.getMsgType() <= 48) {
-                msgCount.computeIfAbsent(fromMemberOfGroupDisplayname, v -> new AtomicInteger()).getAndIncrement();
-            }
+        //生成数据
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        for (Map<String, Object> map : maps) {
+            dataset.setValue(Double.parseDouble(map.get("count").toString()),
+                    "发送数量",
+                    map.get("nickName").toString());
         }
 
-
-        msgCount = sortMapByValue(msgCount);
-        int maxSize = 10;
-        int size = Math.min(maxSize, msgCount.size());
-        double[][] data = new double[1][size];
-        String[] columnKeys = new String[size];
-        String[] rowKeys = {"发送数量"};
-        double[] values = new double[size];
-
-        int i = 0;
-        for (Map.Entry<String, AtomicInteger> type : msgCount.entrySet()) {
-            if (i == size) {
-                break;
-            }
-            columnKeys[i] = type.getKey();
-            values[i] = type.getValue().get();
-            i++;
-        }
-        data[0] = values;
-        if (values.length > 0) {
-            CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
-            String barImg1 = createBarChart(dataset, "用户昵称", "发送消息数量", "群成员活跃度", "makeWXGroupMessageTop1.png", 1024, 768);
-            return barImg1;
-        }
-        return null;
+        return createBarChart(dataset, "用户昵称", "发送消息数量", "双方发送消息数", "makeWXUserActivity"+System.nanoTime()+".png", 500, 400);
     }
 
     /**
      * 群用户活跃度(消息发送次数)
      *
-     * @param userName
-     * @return
+     * @param userName 用户名称
+     * @return 图片路径
      */
     public String makeWXMemberOfGroupActivity(String userName) {
 
-        MessageExample messageExample = new MessageExample();
-        MessageExample.Criteria criteria = messageExample.or();
-        MessageExample.Criteria criteria1 = messageExample.or();
-        MessageExample.Criteria criteria2 = messageExample.or();
-
-        criteria.andFromUsernameEqualTo(userName);
-        criteria1.andFromNicknameEqualTo(ContactsTools.getContactNickNameByUserName(userName));
-        criteria2.andFromRemarknameEqualTo(ContactsTools.getContactRemarkNameByUserName(userName));
-        messageExample.or().andToNicknameEqualTo(ContactsTools.getContactNickNameByUserName(userName));
-        messageExample.or().andToUsernameEqualTo(userName);
-        messageExample.or().andToRemarknameEqualTo(ContactsTools.getContactRemarkNameByUserName(userName));
-        List<cn.shu.wechat.pojo.entity.Message> messages = messageMapper.selectByExample(messageExample);
-
-        Map<String, AtomicInteger> msgCount = new HashMap<>();
-        for (cn.shu.wechat.pojo.entity.Message message : messages) {
-            String fromMemberOfGroupNickname = message.getFromMemberOfGroupNickname();
-            if (StringUtils.isEmpty(fromMemberOfGroupNickname)) {
-                fromMemberOfGroupNickname = message.getFromNickname();
-            }
-            if (message.getMsgType() >= 1 && message.getMsgType() <= 48) {
-                msgCount.computeIfAbsent(fromMemberOfGroupNickname, v -> new AtomicInteger()).getAndIncrement();
-            }
+        //查询数据
+        List<Map<String, Object>> maps = messageMapper.selectGroupUserMessageCount(userName
+                , ContactsTools.getContactNickNameByUserName(userName)
+                , ContactsTools.getContactRemarkNameByUserName(userName)
+                ,10);
+        //生成数据
+        DefaultCategoryDataset defaultCategoryDataset = new DefaultCategoryDataset();
+        for (Map<String, Object> map : maps) {
+            defaultCategoryDataset.setValue(Double.parseDouble(map.get("count").toString()),
+                    "发送数量",
+                    map.get("nickName").toString());
         }
-
-
-        msgCount = sortMapByValue(msgCount);
-        int maxSize = 10;
-        int size = Math.min(maxSize, msgCount.size());
-        double[][] data = new double[1][size];
-        String[] columnKeys = new String[size];
-        String[] rowKeys = {"发送数量"};
-        double[] values = new double[size];
-
-        int i = 0;
-        for (Map.Entry<String, AtomicInteger> type : msgCount.entrySet()) {
-            if (i == size) {
-                break;
-            }
-            columnKeys[i] = type.getKey();
-            values[i] = type.getValue().get();
-            i++;
-        }
-        data[0] = values;
-        if (values.length > 0) {
-            CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
-            String barImg1 = createBarChart(dataset, "用户昵称", "发送消息数量", "群成员活跃度", "makeWXGroupMessageTop1.png", 1024, 768);
-            return barImg1;
-        }
-        return null;
+        return createBarChart(defaultCategoryDataset, "用户昵称", "发送消息数量", "群成员活跃度", "makeWXGroupMessageTop"+System.nanoTime()+".png", 760, 540);
     }
 
     /**
-     * 聊天信息统计
+     * 聊天双方 聊天关键词分析
+     * 消息类型排行
+     * 消息关键词排行
      *
-     * @param userName
-     * @return
+     * @param userName 用户名
+     * @return 图片列表
      */
-    public List<String> makeWXUserMessageTop(String userName) {
-
-        MessageExample messageExample = new MessageExample();
-        MessageExample.Criteria criteria = messageExample.or();
-        MessageExample.Criteria criteria1 = messageExample.or();
-        MessageExample.Criteria criteria2 = messageExample.or();
-        String contactRemarkNameByUserName = ContactsTools.getContactRemarkNameByUserName(userName);
-        criteria.andFromUsernameEqualTo(userName);
-        criteria1.andFromNicknameEqualTo(ContactsTools.getContactNickNameByUserName(userName));
-        if (StringUtils.isNotEmpty(contactRemarkNameByUserName)) {
-            criteria2.andFromRemarknameEqualTo(contactRemarkNameByUserName);
-        }
-        messageExample.or().andToNicknameEqualTo(ContactsTools.getContactNickNameByUserName(userName));
-        messageExample.or().andToUsernameEqualTo(userName);
-        if (StringUtils.isNotEmpty(contactRemarkNameByUserName)) {
-            messageExample.or().andToRemarknameEqualTo(contactRemarkNameByUserName);
-        }
-
-        List<cn.shu.wechat.pojo.entity.Message> messages = messageMapper.selectByExample(messageExample);
-
-        Map<String, AtomicInteger> msgType = new HashMap<>();
-        Map<String, AtomicInteger> msgTerm = new HashMap<>();
-      /*  for (cn.shu.wechat.beans.pojo.Message message : messages) {
-            String msg = message.getContent();
-            String type = message.getMsgDesc();
-            msgType.computeIfAbsent(type, v -> new AtomicInteger()).getAndIncrement();
-            if (message.getMsgType() == WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode()
-                    && StringUtils.isNotBlank(msg)) {
-                Result result = ToAnalysis.parse(msg);
-                for (Term term : result.getTerms()) {
-                    //System.out.println(term);
-                    String natureStr = term.getNatureStr().substring(0, 1);
-                    if (StringUtils.isBlank(term.getName())) {
-                        continue;
-                    }
-                    switch (natureStr) {
-                        //case "e":
-                        case "n":
-                            //case "v":
-                        case "t":
-
-                            //case "a":
-                            //  case "b":
-                            // case "d":
-                            // case "r":
-                            msgTerm.computeIfAbsent(term.toString(), v -> new AtomicInteger()).getAndIncrement();
-                            break;
-                        default:
-
-                    }
-
-                }
-            }
-        }*/
-
-
+    public List<String> makeWXUserMessageGroupTop(String userName) {
         ArrayList<String> imgs = new ArrayList<>();
-        msgType = sortMapByValue(msgType);
-        msgTerm = sortMapByValue(msgTerm);
+        String nickName = ContactsTools.getContactNickNameByUserName(userName);
+        String remarkName = ContactsTools.getContactRemarkNameByUserName(userName);
+        //内容汇总
+        List<Map<String, Object>> mapsContent = messageMapper.groupByContent(userName, nickName, remarkName);
+        DefaultCategoryDataset categoryDatasetOfContent = new DefaultCategoryDataset();
 
-        int maxSize = 10;
-        int size = Math.min(maxSize, msgType.size());
-        double[][] data = new double[1][size];
-        String[] columnKeys = new String[size];
-        String[] rowKeys = {"发送数量"};
-        double[] values = new double[size];
+        for (Map<String, Object> map : mapsContent) {
+            categoryDatasetOfContent.setValue(Double.parseDouble(map.get("count").toString())
+                    ,"发送次数"
+                    ,map.get("content").toString());
+        }
+        String barImg1 = createBarChart(categoryDatasetOfContent, "消息内容", "发送数量", "【"+nickName+"】消息内容排行", "makeWXGroupMessageTop1"+System.nanoTime()+".png", 500, 400);
+        imgs.add(barImg1);
 
-        int i = 0;
-        for (Map.Entry<String, AtomicInteger> type : msgType.entrySet()) {
-            if (i == size) {
-                break;
-            }
-            columnKeys[i] = type.getKey();
-            values[i] = type.getValue().get();
-            i++;
-        }
-        data[0] = values;
-        if (values.length > 0) {
-            CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
-            String barImg1 = createBarChart(dataset, "消息类型", "发送数量", "消息类型排行", "makeWXGroupMessageTop1.png", 500, 400);
-            imgs.add(barImg1);
-        }
 
-        size = Math.min(maxSize, msgTerm.size());
-        double[][] data1 = new double[1][size];
-        String[] columnKeys1 = new String[size];
-        String[] rowKeys1 = {"更新次数"};
-        double[] values1 = new double[size];
+        //类型汇总
+        List<Map<String, Object>> mapsType = messageMapper.groupByType(userName, nickName, remarkName);
+        DefaultCategoryDataset categoryDatasetOfType= new DefaultCategoryDataset();
 
-        int i1 = 0;
-        for (Map.Entry<String, AtomicInteger> term : msgTerm.entrySet()) {
-            if (i1 == size) {
-                break;
-            }
-            columnKeys1[i1] = term.getKey();
-            values1[i1] = term.getValue().get();
-           /* if (term.getValue().get() >= 1500) {
-                continue;
-            }*/
-            i1++;
+        for (Map<String, Object> map : mapsType) {
+            categoryDatasetOfType.setValue(Double.parseDouble(map.get("count").toString())
+                    ,"发送次数"
+                    , WXSendMsgCodeEnum.getByCode(Integer.parseInt(map.get("type").toString())).getMsg());
         }
-        data1[0] = values1;
-        if (size > 0) {
-            CategoryDataset dataset1 = getBarData(data1, rowKeys1, columnKeys1);
-            String barImg2 = createBarChart(dataset1, "词语", "发送数量", "消息常用关键词排行", "makeWXGroupMessageTop2.png", 500, 400);
-            imgs.add(barImg2);
-        }
+        String barImg2 = createBarChart(categoryDatasetOfType, "消息类型", "发送数量", "【"+nickName+"】消息类型排行", "makeWXGroupMessageTop2"+System.nanoTime()+".png", 500, 400);
+        imgs.add(barImg2);
 
         return imgs;
     }
@@ -544,101 +336,6 @@ public class ChartUtil {
      * 获取消息top20
      */
     public void makeWXContactMessageTop() {
-        Path path = Paths.get("E:\\JAVA\\project_idea\\weixin");
-        File[] files = path.toFile().listFiles();
-        if (files == null) {
-            return;
-        }
-        Properties properties = new Properties();
-        Map<String, AtomicInteger> msgType = new TreeMap<>();
-        Map<String, AtomicInteger> msgTerm = new HashMap<>();
-        for (File file : files) {
-            if (file.isFile() && file.getName().endsWith(".property")) {
-                try {
-                    properties.load(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
-                   /* for (Object value : properties.values()) {
-
-                        String type = value.toString().substring(0, value.toString().indexOf(":"));
-                        String msg = value.toString().substring(value.toString().indexOf("-") + 1);
-                        msgType.computeIfAbsent(type, v -> new AtomicInteger()).getAndIncrement();
-                        if (type.equals("TEXT") && StringUtils.isNotBlank(msg)
-                                && !value.toString().contains("@@")) {
-                            Result result = ToAnalysis.parse(msg);
-                            for (Term term : result.getTerms()) {
-                                //System.out.println(term);
-                                String natureStr = term.getNatureStr().substring(0, 1);
-                                if (StringUtils.isBlank(term.getName())) {
-                                    continue;
-                                }
-                                switch (natureStr) {
-                                    //case "e":
-                                    case "n":
-                                        //case "v":
-                                        //case "t":
-
-                                        // case "a":
-                                        // case "b":
-                                        //case "d":
-                                        //case "r":
-                                        msgTerm.computeIfAbsent(term.toString(), v -> new AtomicInteger()).getAndIncrement();
-                                        break;
-                                    default:
-
-                                }
-
-                            }
-                        }
-                    }*/
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        msgType = sortMapByValue(msgType);
-        msgTerm = sortMapByValue(msgTerm);
-
-        int maxSize = 20;
-        double[][] data = new double[1][msgType.size()];
-        String[] columnKeys = new String[msgType.size()];
-        String[] rowKeys = {"发送数量"};
-        double[] values = new double[msgType.size()];
-
-        int i = 0;
-        for (Map.Entry<String, AtomicInteger> type : msgType.entrySet()) {
-            /*if (i==maxSize){
-                break;
-            }*/
-            columnKeys[i] = type.getKey();
-            values[i] = type.getValue().get();
-            i++;
-        }
-        data[0] = values;
-        CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
-        createBarChart(dataset, "消息类型", "发送数量", "消息类型排行", "makeWXContactMessageTop2.png", 500, 400);
-
-
-        double[][] data1 = new double[1][maxSize];
-        String[] columnKeys1 = new String[maxSize];
-        String[] rowKeys1 = {"更新次数"};
-        double[] values1 = new double[maxSize];
-
-        int i1 = 0;
-        for (Map.Entry<String, AtomicInteger> term : msgTerm.entrySet()) {
-            if (i1 == maxSize) {
-                break;
-            }
-            columnKeys1[i1] = term.getKey();
-            values1[i1] = term.getValue().get();
-            if (term.getValue().get() >= 1500) {
-                continue;
-            }
-            i1++;
-        }
-        data1[0] = values1;
-        CategoryDataset dataset1 = getBarData(data1, rowKeys1, columnKeys1);
-        createBarChart(dataset1, "词语", "发送数量", "消息常用词语", "makeWXContactMessageTop2.png", 500, 400);
-
 
     }
 
@@ -647,39 +344,40 @@ public class ChartUtil {
      */
     public void makeWXContactUpdateAttrBarChart() {
 
-        List<Map<String, Object>> stringAtomicIntegerMap = attrHistoryMapper.selectUpdateInfoCount(10);
-        double[][] data = new double[1][stringAtomicIntegerMap.size()];
-        String[] columnKeys = new String[stringAtomicIntegerMap.size()];
-        String[] rowKeys = {"更新次数"};
-        double[] values = new double[stringAtomicIntegerMap.size()];
-        for (int i = 0; i < stringAtomicIntegerMap.size(); i++) {
-            Map<String, Object> stringObjectMap = stringAtomicIntegerMap.get(i);
-            columnKeys[i] = stringObjectMap.get("name").toString();
-            values[i] = Double.parseDouble(stringObjectMap.get("cou").toString());
+        List<Map<String, Object>> updateInfoMap = attrHistoryMapper.selectUpdateInfoCount(10);
+        DefaultCategoryDataset categoryDatasetInfo = new DefaultCategoryDataset();
+        for (Map<String, Object> map : updateInfoMap) {
+            categoryDatasetInfo.setValue(Double.parseDouble(
+                    map.get("count").toString()),
+                    "更新次数",
+                    map.get("name").toString());
         }
-        data[0] = values;
-        CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
-        createBarChart(dataset, "好友昵称", "更新数量", "微信好友个人信息更新次数/月", "makeWXContactUpdateAttrBarChart.png", 1024, 768);
+        createBarChart(categoryDatasetInfo, "好友昵称", "更新数量", "微信好友个人信息更新次数/月", "makeWXContactUpdateAttrBarChart.png", 1024, 768);
 
 
-        List<Map<String, Object>> stringAtomicIntegerMapAttr = attrHistoryMapper.selectUpdateAttrCount(10);
-        for (int i = 0; i < stringAtomicIntegerMapAttr.size(); i++) {
-            Map<String, Object> stringObjectMap = stringAtomicIntegerMapAttr.get(i);
-            columnKeys[i] = stringObjectMap.get("name").toString();
-            values[i] = Double.parseDouble(stringObjectMap.get("cou").toString());
+        List<Map<String, Object>> attrMap = attrHistoryMapper.selectUpdateAttrCount(10);
+        DefaultCategoryDataset categoryDatasetAttr = new DefaultCategoryDataset();
+        for (Map<String, Object> map : attrMap) {
+            categoryDatasetAttr.setValue(Double.parseDouble(
+                            map.get("count").toString()),
+                    "更新次数",
+                    map.get("name").toString());
         }
-        data[0] = values;
-        dataset = getBarData(data, rowKeys, columnKeys);
-        createBarChart(dataset, "好友昵称", "更新数量", "微信好友个人信息更新次数TYPE/月", "makeWXContactUpdateAttrBarChartTYPE.png"
+        createBarChart(categoryDatasetAttr, "好友昵称", "更新数量", "微信好友个人信息更新次数TYPE/月", "makeWXContactUpdateAttrBarChartTYPE.png"
                 , 1024, 768);
 
 
     }
 
-    // 柱状图,折线图 数据集
+    /**
+     * 生成 柱状图,折线图 数据集
+     * @param data 数据
+     * @param rowKeys 行
+     * @param columnKeys 列
+     * @return 数据集
+     */
     public CategoryDataset getBarData(double[][] data, String[] rowKeys,
                                       String[] columnKeys) {
-
         return DatasetUtils.createCategoryDataset(rowKeys, columnKeys, data);
 
     }
@@ -981,7 +679,7 @@ public class ChartUtil {
      * @param chartTitle 图标题
      * @return 图表对象
      */
-    public JFreeChart createValidityComparePimChar(PieDataset<String> dataset, String chartTitle) {
+    public Optional<JFreeChart> createValidityComparePimChar(PieDataset<String> dataset, String chartTitle) {
 
         JFreeChart chart = ChartFactory.createPieChart3D(chartTitle,
                 // title
@@ -1037,7 +735,7 @@ public class ChartUtil {
         plot.setSectionPaint(pieKeys[0], new Color(65, 105, 225));
         plot.setSectionPaint(pieKeys[1], new Color(30, 144, 255));
         plot.setLabelLinkMargin(0.2);
-        return chart;
+        return Optional.of(chart);
     }
 
     /**
@@ -1099,7 +797,7 @@ public class ChartUtil {
      * @param charName
      * @return
      */
-    public String createTimeXYChar(String chartTitle, String x, String y,
+    public JFreeChart createTimeXYChar(String chartTitle, String x, String y,
                                    CategoryDataset xyDataset, String charName) {
         JFreeChart chart = ChartFactory.createLineChart(chartTitle, x, y,
                 xyDataset, PlotOrientation.VERTICAL, true, true, false);
@@ -1160,29 +858,7 @@ public class ChartUtil {
         // StandardCategoryItemLabelGenerator());
         // lineandshaperenderer.setBaseItemLabelsVisible(true);
 
-        FileOutputStream fos_jpg = null;
-        try {
-            isChartPathExist(wechatConfiguration.getBasePath());
-            String chartName = wechatConfiguration.getBasePath() + charName;
-            fos_jpg = new FileOutputStream(chartName);
-
-            // 将报表保存为png文件
-            ChartUtils.writeChartAsPNG(fos_jpg, chart, 500, 510);
-
-            return chartName;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        } finally {
-            try {
-                if (fos_jpg != null) {
-                    fos_jpg.close();
-                }
-                System.out.println("create time-createTimeXYChar.");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+      return chart;
     }
 
     /**
@@ -1195,7 +871,7 @@ public class ChartUtil {
      * @param charName
      * @return
      */
-    public String createStackedBarChart(CategoryDataset dataset, String xName,
+    public JFreeChart createStackedBarChart(CategoryDataset dataset, String xName,
                                         String yName, String chartTitle, String charName) {
         // 1:得到 CategoryDataset
 
@@ -1288,90 +964,74 @@ public class ChartUtil {
         // 设置柱的透明度(如果是3D的必须设置才能达到立体效果，如果是2D的设置则使颜色变淡)
         // plot.setForegroundAlpha(0.65f);
 
-        FileOutputStream fos_jpg = null;
-        try {
-            isChartPathExist(wechatConfiguration.getBasePath());
-            String chartName = wechatConfiguration.getBasePath() + charName;
-            fos_jpg = new FileOutputStream(chartName);
-            ChartUtils.writeChartAsPNG(fos_jpg, chart, 500, 500, true, 10);
-            return chartName;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        } finally {
-            try {
-                fos_jpg.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+       return chart;
     }
 
 
-    /*  *
-     * 使用 Map按value进行排序
-     *
-     * @param
-     * @return
+    /**
+     * 生成折线图
      */
-    public Map<String, AtomicInteger> sortMapByValue(Map<String, AtomicInteger> oriMap) {
-        if (oriMap == null) {
-            return null;
-        }
-        if (oriMap.isEmpty()) {
-            return oriMap;
-        }
-        Map<String, AtomicInteger> sortedMap = new LinkedHashMap<String, AtomicInteger>();
-        List<Map.Entry<String, AtomicInteger>> entryList = new ArrayList<Map.Entry<String, AtomicInteger>>(
-                oriMap.entrySet());
-        entryList.sort(new MapValueComparator());
 
-        Iterator<Map.Entry<String, AtomicInteger>> iter = entryList.iterator();
-        Map.Entry<String, AtomicInteger> tmpEntry = null;
-        while (iter.hasNext()) {
-            tmpEntry = iter.next();
-            sortedMap.put(tmpEntry.getKey(), tmpEntry.getValue());
-        }
-        return sortedMap;
+    public void makeLineAndShapeChart() {
+        double[][] data = new double[][]{{672, 766, 223, 540, 126},
+                {325, 521, 210, 340, 106}, {332, 256, 523, 240, 526}};
+        String[] rowKeys = {"苹果", "梨子", "葡萄"};
+        String[] columnKeys = {"北京", "上海", "广州", "成都", "深圳"};
+        CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
+        createTimeXYChar("折线图", "x轴", "y轴", dataset, "lineAndShap.jpg");
     }
 
-    public void arrSortByDesc(Double[] args) {
-        // 注意，要想改变默认的排列顺序，不能使用基本类型（int,double, char）
-        // 而要使用它们对应的类
-        // 定义一个自定义类MyComparator的对象
-        Comparator cmp = new MyComparator();
-        Arrays.sort(args, cmp);
+    /**
+     * 生成分组的柱状图
+     */
+    public void makeBarGroupChart() {
+        double[][] data = new double[][]{{672, 766, 223, 540, 126},
+                {325, 521, 210, 340, 106}, {332, 256, 523, 240, 526}};
+        String[] rowKeys = {"苹果", "梨子", "葡萄"};
+        String[] columnKeys = {"北京", "上海", "广州", "成都", "深圳"};
+        CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
+/*
+        createBarChart(dataset, "x坐标", "y坐标", "柱状图", "barGroup.png");
+*/
     }
 
-    static class MapValueComparator implements Comparator<Map.Entry<String, AtomicInteger>> {
+    /**
+     * 生成柱状图
+     */
 
-        @Override
-        public int compare(Map.Entry<String, AtomicInteger> me1, Map.Entry<String, AtomicInteger> me2) {
-            if (me1.getValue().get() == me2.getValue().get()) {
-                return 0;
-            }
-            return me1.getValue().get() > me2.getValue().get() ? -1 : 1;
-        }
+    public void makeBarChart() {
+        double[][] data = new double[][]{{672, 766, 223, 540, 126}};
+        String[] rowKeys = {"苹果"};
+        String[] columnKeys = {"北京", "上海", "广州", "成都", "深圳"};
+        CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
+/*
+        createBarChart(dataset, "x坐标", "y坐标", "柱状图", "bar.png");
+*/
     }
 
+    /**
+     * 生成柱状图
+     */
 
-    // Comparator是一个接口
-//Comparator是一个比较器
-//Comparator中的compare可以将传入进行比对，按照返回的参数大于(1)等于(0)小于(-1)进行排序
-//默认情况下返回1的在后，返回-1的在前
-//如果我们需要逆序，只要把返回值-1和1的换位置即可。
-    class MyComparator implements Comparator<Double> {
-        @Override
-        public int compare(Double o1, Double o2) {
-            // 如果o1小于o2，我们就返回正值，如果n1大于n2我们就返回负值，
-            if (o1 < o2) {
-                return 1;
-            } else if (o1 > o2) {
-                return -1;
-            } else {
-                return 0;
-            }
-        }
+    public void makeBarChart2() {
+        double[][] data = new double[][]{{672, 766, 223, 540, 126}};
+        String[] rowKeys = {"苹果"};
+        String[] columnKeys = {"北京", "上海", "广州", "成都", "深圳"};
+        CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
+        createHorizontalBarChart(dataset, "x坐标", "y坐标", "柱状图", "bar2.png");
+    }
+
+    /**
+     * 生成堆栈柱状图
+     */
+
+    public void makeStackedBarChart() {
+        double[][] data = new double[][]{{0.21, 0.66, 0.23, 0.40, 0.26},
+                {0.25, 0.21, 0.10, 0.40, 0.16}};
+        String[] rowKeys = {"苹果", "梨子"};
+        String[] columnKeys = {"北京", "上海", "广州", "成都", "深圳"};
+        CategoryDataset dataset = getBarData(data, rowKeys, columnKeys);
+        createStackedBarChart(dataset, "x坐标", "y坐标", "柱状图", "stsckedBar.png");
     }
 }
 
