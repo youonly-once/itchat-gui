@@ -430,7 +430,7 @@
             <id>1-dev</id>
             <properties>
                 <spring-profiles-active>dev</spring-profiles-active>
-                <output-basedir>D:\JAVA\eee\dev</output-basedir>
+                <output-basedir>E:\JAVA\eee\dev</output-basedir>
             </properties>
             <repositories>
                 <repository>
@@ -457,7 +457,7 @@
             <id>2-prod</id>
             <properties>
                 <spring-profiles-active>prod</spring-profiles-active>
-                <output-basedir>D:\JAVA\eee\prod</output-basedir>
+                <output-basedir>E:\JAVA\eee\prod</output-basedir>
             </properties>
             <repositories>
                 <repository>
