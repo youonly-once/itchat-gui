@@ -1139,9 +1139,11 @@ order by create_time desc
 
 
   <select id="groupByContent"  resultType="map">
-
-    select (case when content is null then '' else content end) as content,count(*) as count from message
-
+    SELECT
+    content,
+    count( * ) count
+    FROM
+    ( SELECT ( CASE WHEN content is null or content = '' THEN plaintext ELSE content END ) AS content FROM message
     <where>
       <if test="fromUserName!=''">
         OR from_username =  #{fromUserName}
@@ -1163,9 +1165,12 @@ order by create_time desc
       </if>
 
     </where>
-
+        )
+    where content is not null
     GROUP BY
-    content ORDER BY count(*) DESC
+    content
+    ORDER BY
+    count( * ) DESC
     limit 0,10
   </select>
 

@@ -3,6 +3,7 @@ package cn.shu.wechat.utils;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.enums.WXSendMsgCodeEnum;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.mapper.ContactsMapper;
@@ -313,7 +314,7 @@ public final class ChartUtil {
                     ,"发送次数"
                     ,map.get("content").toString());
         }
-        String barImg1 = createBarChart(categoryDatasetOfContent, "消息内容", "发送数量", "【"+nickName+"】消息内容排行", "makeWXGroupMessageTop1"+System.nanoTime()+".png", 500, 400);
+        String barImg1 = createBarChart(categoryDatasetOfContent, "消息内容", "发送数量", "与【"+nickName+"】聊天的消息内容排行", "makeWXGroupMessageTop1"+System.nanoTime()+".png", 500, 400);
         imgs.add(barImg1);
 
 
@@ -324,9 +325,9 @@ public final class ChartUtil {
         for (Map<String, Object> map : mapsType) {
             categoryDatasetOfType.setValue(Double.parseDouble(map.get("count").toString())
                     ,"发送次数"
-                    , WXSendMsgCodeEnum.getByCode(Integer.parseInt(map.get("type").toString())).getMsg());
+                    , WXReceiveMsgCodeEnum.getByCode(Integer.parseInt(map.get("type").toString())).getDesc());
         }
-        String barImg2 = createBarChart(categoryDatasetOfType, "消息类型", "发送数量", "【"+nickName+"】消息类型排行", "makeWXGroupMessageTop2"+System.nanoTime()+".png", 500, 400);
+        String barImg2 = createBarChart(categoryDatasetOfType, "消息类型", "发送数量", "与【"+nickName+"】聊天的消息类型排行", "makeWXGroupMessageTop2"+System.nanoTime()+".png", 500, 400);
         imgs.add(barImg2);
 
         return imgs;
