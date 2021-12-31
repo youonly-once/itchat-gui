@@ -162,7 +162,8 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                                     + "2、【opundo/cpundo】\n\t开启/关闭当前联系人消息防撤回\n"
                                     + "3、【op/cp】\n\t开启/关闭全局个人用户消息自动回复\n"
                                     + "4、【mf10】\n\t聊天消息关键词TOP10\n"
-                                    + "5、【gma10】\n\t活跃度TOP\n")
+                                    + "5、【gma10】\n\t活跃度TOP\n"
+                                    + "6、【updateinfo】\n\t好友属性更新次数排行\n")
                             .toUsername(toUserName)
                             .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                             .build());
@@ -282,6 +283,17 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
 
                 log.info("计算【" + remarkNameByGroupUserName + "】聊天类型及关键词");
                 break;
+            case "updateinfo":{
+                //生成自己的聊天类型
+                imgs = chartUtil.makeWXContactUpdateAttrBarChart();
+                for (String s : imgs) {
+                    //群消息
+                    messages.add(MessageTools.toPicMessage(s, toUserName));
+                }
+
+                log.info("计算【" + Core.getUserName() + "】所有好友聊天类型及关键词");
+                break;
+            }
             case "不要问了":
             case "不要问我":
                 if (msg.getFromUserName().equals(Core.getUserName())) {

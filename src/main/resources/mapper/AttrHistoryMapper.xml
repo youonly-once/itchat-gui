@@ -320,7 +320,7 @@
         select NickName AS name, COUNT(*) as count
         from attr_history
         GROUP BY NickName
-        ORDER BY COUNT(*) desc LIMIT 8
+        ORDER BY COUNT(*) desc LIMIT 0
         , #{top};
     </select>
     <select id="selectUpdateAttrCount" resultType="map">
@@ -328,7 +328,7 @@
         from attr_history
         GROUP BY Attr
         ORDER BY COUNT(*) desc
-            LIMIT #{top};
+            LIMIT 0,#{top};
     </select>
 
     <select id="selectByAll" resultMap="BaseResultMap">

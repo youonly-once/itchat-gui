@@ -342,19 +342,20 @@ public final class ChartUtil {
 
     /**
      * 生成微信好友个人信息更新次数柱状图
+     * @return 图片列表
      */
-    public void makeWXContactUpdateAttrBarChart() {
-
+    public List<String> makeWXContactUpdateAttrBarChart() {
+        ArrayList<String> imgList = new ArrayList<>();
         List<Map<String, Object>> updateInfoMap = attrHistoryMapper.selectUpdateInfoCount(10);
         DefaultCategoryDataset categoryDatasetInfo = new DefaultCategoryDataset();
         for (Map<String, Object> map : updateInfoMap) {
             categoryDatasetInfo.setValue(Double.parseDouble(
                     map.get("count").toString()),
                     "更新次数",
-                    map.get("name").toString());
+                    map.get("name").toString().length()>10?map.get("name").toString().substring(0,10):map.get("name").toString());
         }
-        createBarChart(categoryDatasetInfo, "好友昵称", "更新数量", "微信好友个人信息更新次数/月", "makeWXContactUpdateAttrBarChart.png", 1024, 768);
-
+        String barChart1 = createBarChart(categoryDatasetInfo, "好友昵称", "更新数量", "微信好友个人信息更新次数/月", "makeWXContactUpdateAttrBarChart.png", 1024, 768);
+        imgList.add(barChart1);
 
         List<Map<String, Object>> attrMap = attrHistoryMapper.selectUpdateAttrCount(10);
         DefaultCategoryDataset categoryDatasetAttr = new DefaultCategoryDataset();
@@ -364,9 +365,10 @@ public final class ChartUtil {
                     "更新次数",
                     map.get("name").toString());
         }
-        createBarChart(categoryDatasetAttr, "好友昵称", "更新数量", "微信好友个人信息更新次数TYPE/月", "makeWXContactUpdateAttrBarChartTYPE.png"
+        String barChart = createBarChart(categoryDatasetAttr, "好友昵称", "更新数量", "微信好友个人信息更新次数TYPE/月", "makeWXContactUpdateAttrBarChartTYPE.png"
                 , 1024, 768);
-
+        imgList.add(barChart);
+        return imgList;
 
     }
 
