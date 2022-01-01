@@ -10,6 +10,7 @@ import cn.shu.wechat.swing.components.RCMenuItemUI;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
 import cn.shu.wechat.swing.utils.ChatUtil;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
+import cn.shu.wechat.swing.utils.FileUtil;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import com.alibaba.fastjson.JSON;
@@ -199,23 +200,7 @@ public class MessagePopupMenu extends JPopupMenu {
                 }
                 Message item = (Message) obj;
                 if (StringUtils.isNotEmpty(item.getFilePath())) {
-                    ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
-                        @Override
-                        public void run() {
-
-                            File file = new File(item.getFilePath());
-                            if (file.exists()) {
-                                try {
-                                    Runtime.getRuntime().exec(
-                                            "rundll32 SHELL32.DLL,ShellExec_RunDLL "
-                                                    + "Explorer.exe /select," + file.getAbsolutePath());
-                                   // Desktop.getDesktop().open(file.getParentFile());
-                                } catch (IOException ioException) {
-                                    ioException.printStackTrace();
-                                }
-                            }
-                        }
-                    });
+                    ExecutorServiceUtil.getGlobalExecutorService().submit(() -> FileUtil.showAtExplorer(item.getFilePath()));
                 }
 
 

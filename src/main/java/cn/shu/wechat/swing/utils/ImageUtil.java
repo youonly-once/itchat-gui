@@ -236,4 +236,13 @@ public class ImageUtil {
 
         return new Dimension(0, 0);
     }
+
+    /**
+     * @param file
+     * @return
+     */
+    public static boolean isImage(File file) {
+        String suffix = file.getName().substring(file.getName().lastIndexOf(".") + 1).toLowerCase();
+        return suffix.equals("jpg") || suffix.equals("jpeg") || suffix.equals("png") || suffix.equals("gif");
+    }
 }

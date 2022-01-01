@@ -27,7 +27,13 @@ public class SearchResultItem implements Comparable<SearchResultItem> {
      * 类型
      */
     private int type;
-    private Object tag;
+
+    /**
+     * 时间
+     */
+    private String dateTime;
+
+    private String tag;
 
     public SearchResultItem(String id, String name, SearchResultType type) {
         this.id = id;
@@ -35,7 +41,13 @@ public class SearchResultItem implements Comparable<SearchResultItem> {
         this.type = type.CODE;
         this.tag = id;
     }
-
+    public SearchResultItem(String id, String name, SearchResultType type,String dateTime,String tag) {
+        this.id = id;
+        this.name = name;
+        this.type = type.CODE;
+        this.tag = tag;
+        this.dateTime = dateTime;
+    }
 
     @Override
     public int compareTo(SearchResultItem o) {

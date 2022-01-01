@@ -3,6 +3,8 @@ package cn.shu.wechat.swing.db.model;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
  * Created by 舒新胜 on 20/03/2017.
  */
@@ -13,7 +15,7 @@ public class Message extends BasicModel {
     private String roomId;
     private String messageContent;
     private boolean groupable;
-    private long timestamp;
+    private LocalDateTime localDateTime;
     private String senderUsername;
     private String senderId;
     private long updatedAt;

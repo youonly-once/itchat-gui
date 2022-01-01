@@ -1,19 +1,21 @@
 package cn.shu.wechat.swing.panels.left;
 
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.pojo.entity.Contacts;
+import cn.shu.wechat.pojo.entity.Message;
 import cn.shu.wechat.swing.adapter.search.SearchResultItemsAdapter;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCSearchTextField;
 import cn.shu.wechat.swing.constant.SearchResultType;
 import cn.shu.wechat.swing.db.model.FileAttachment;
-import cn.shu.wechat.swing.db.model.Message;
 import cn.shu.wechat.swing.entity.SearchResultItem;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.swing.panels.left.tabcontent.LeftTabContentPanel;
 import cn.shu.wechat.swing.panels.left.tabcontent.SearchResultPanel;
 import cn.shu.wechat.swing.utils.FontUtil;
+import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.extern.log4j.Log4j2;
 
 import javax.swing.*;
@@ -28,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * Created by 舒新胜 on 17-5-29.
@@ -71,6 +74,9 @@ public class SearchPanel extends ParentAvailablePanel {
         return context;
     }
 
+    /**
+     * 添加搜索框事件
+     */
     private void setListeners() {
         searchTextField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -91,10 +97,12 @@ public class SearchPanel extends ParentAvailablePanel {
         searchTextField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                // ESC清除已输入内容
+
                 if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    searchTextField.setText("");
+                    // ESC清除已输入内容
+                    clearSearchText();
                 }else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    //回车搜索
                     search();
                 }
                 super.keyTyped(e);
@@ -116,8 +124,8 @@ public class SearchPanel extends ParentAvailablePanel {
     private void search() {
         SearchResultPanel searchResultPanel = SearchResultPanel.getContext();
         LeftTabContentPanel leftTabContentPanel = LeftTabContentPanel.getContext();
-        final String text = searchTextField.getText();
-        if (text == null || text.isEmpty()) {
+        final String key = searchTextField.getText();
+        if (key == null || key.isEmpty()) {
             leftTabContentPanel.showPanel(leftTabContentPanel.getPreviousTab());
             return;
         }
@@ -131,7 +139,7 @@ public class SearchPanel extends ParentAvailablePanel {
                 //TODO 会创建大量 SearchResultItem对象 导致FUllGC卡顿
                 if (finalI >= searchVer.get()) {
                     searchCount.set(0);
-                    searchUserOrRoom(text, finalI);
+                    searchUserOrRoom(key, finalI);
                     if (searchResultItemList.isEmpty()||searchCount.get()<=0){
                         return null;
                     }
@@ -143,8 +151,6 @@ public class SearchPanel extends ParentAvailablePanel {
                 }else{
                     log.warn(finalI+"==="+searchVer.get()+"-版本号异常停止更新");
                 }
-                //list.add(new SearchResultItem("searchAndListMessage", "搜索 \"" + key + "\" 相关消息", SearchResultType.SEARCH_MESSAGE));
-                //list.add(new SearchResultItem("searchFile", "搜索 \"" + key + "\" 相关文件", SearchResultType.SEARCH_FILE));
 
                 return null;
             }
@@ -158,8 +164,10 @@ public class SearchPanel extends ParentAvailablePanel {
                 if (data==null ){
                     data = new ArrayList<>();
                 }
+                data.add(0,new SearchResultItem("searchAndListMessage", "搜索 \"" + key + "\" 相关消息", SearchResultType.SEARCH_MESSAGE));
+                data.add(0,new SearchResultItem("searchFile", "搜索 \"" + key + "\" 相关文件", SearchResultType.SEARCH_FILE));
                 searchResultPanel.setData(data);
-                searchResultPanel.setKeyWord(text);
+                searchResultPanel.setKeyWord(key);
                 searchResultPanel.notifyDataSetChanged(false);
                 searchResultPanel.getTipLabel().setVisible(false);
             }
@@ -176,9 +184,8 @@ public class SearchPanel extends ParentAvailablePanel {
 
     /**
      * 搜索用户或房间
-     *
-     * @param key
-     * @return
+     * @param key 关键词
+     * @param version 搜索版本 本次搜索未完成时另一次搜索开始，此时通过版本号终止本次搜索
      */
     private void searchUserOrRoom(String key,int version) {
 
@@ -215,7 +222,7 @@ public class SearchPanel extends ParentAvailablePanel {
      * @param key
      */
     private void searchAndListMessage(String key) {
-        SearchResultPanel searchResultPanel = SearchResultPanel.getContext();
+       /* SearchResultPanel searchResultPanel = SearchResultPanel.getContext();
         List<Message> messages = null; //= messageService.search(key);
         List<SearchResultItem> searchResultItems = new ArrayList<>();
 
@@ -246,33 +253,34 @@ public class SearchPanel extends ParentAvailablePanel {
 
         searchResultPanel.setData(searchResultItems);
         searchResultPanel.setKeyWord(key);
-        searchResultPanel.notifyDataSetChanged(false);
+        searchResultPanel.notifyDataSetChanged(false);*/
     }
 
     /**
      * 搜索并展示文件
      *
-     * @param key
+     * @param key 搜索关键字
      */
     private void searchAndListFile(String key) {
+        MessageMapper messageMapper = SpringContextHolder.getBean(MessageMapper.class);
         SearchResultPanel searchResultPanel = SearchResultPanel.getContext();
-        List<FileAttachment> fileAttachments = null;//fileAttachmentService.search(key);
-        List<SearchResultItem> searchResultItems = new ArrayList<>();
 
-        if (fileAttachments == null || fileAttachments.size() < 1) {
+        //搜索数据库
+        List<SearchResultItem> searchResultItems;
+       List<Message> messages = messageMapper.searchFileByName(key);
+        if (messages.isEmpty()) {
+            searchResultItems = new ArrayList<>();
             searchResultPanel.getTipLabel().setVisible(true);
         } else {
             searchResultPanel.getTipLabel().setVisible(false);
-            SearchResultItem item;
-            for (FileAttachment file : fileAttachments) {
-                String content = file.getTitle();
-                //content = content.length() > 10 ? content.substring(0, 10) : content;
 
-                item = new SearchResultItem(file.getId(), content, SearchResultType.FILE);
-                //item.setTag(msg.getRoomId());
+            searchResultItems = messages.stream()
+                    .map(message -> new SearchResultItem(key, message.getPlaintext(),
+                            SearchResultType.FILE,
+                            message.getCreateTime(),
+                            message.getFilePath()))
+                    .collect(Collectors.toList());
 
-                searchResultItems.add(item);
-            }
         }
 
         searchResultPanel.setKeyWord(key);
@@ -335,9 +343,8 @@ public class SearchPanel extends ParentAvailablePanel {
 
     /**
      * 搜索通讯录
-     *
-     * @param key
-     * @return
+     * @param key 关键词
+     * @param version 搜索版本 本次搜索未完成时另一次搜索开始，此时通过版本号终止本次搜索
      */
     private void searchContacts(String key,int version) {
         Map<String, Contacts> memberMap = Core.getMemberMap();

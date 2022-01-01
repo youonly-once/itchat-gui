@@ -22,6 +22,14 @@ public enum WXSendMsgCodeEnum {
         this.code = code;
         this.msg = msg;
     }
+    public static WXSendMsgCodeEnum getByCode(Integer code){
+        for (WXSendMsgCodeEnum value : WXSendMsgCodeEnum.values()) {
+            if (value.code.equals(code)) {
+                return value;
+            }
+        }
+        throw new IllegalArgumentException("非法参数："+code);
+    }
 
     public Integer getCode() {
         return code;

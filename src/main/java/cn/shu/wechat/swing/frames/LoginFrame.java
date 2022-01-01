@@ -16,10 +16,7 @@ import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.OSUtil;
-import cn.shu.wechat.utils.ExecutorServiceUtil;
-import cn.shu.wechat.utils.HeadImageUtil;
-import cn.shu.wechat.utils.MD5Util;
-import cn.shu.wechat.utils.SleepUtils;
+import cn.shu.wechat.utils.*;
 import com.melloware.jintellitype.HotkeyListener;
 import com.melloware.jintellitype.JIntellitype;
 import lombok.extern.log4j.Log4j2;
@@ -44,23 +41,25 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created by 舒新胜 on 08/06/2017.
  */
 @Log4j2
-@Component
-public class LoginFrame extends JFrame {
+public final class LoginFrame extends JFrame {
     /**
      * 登陆服务实现类
      */
-    @Resource
-    private LoginService loginService;
+    private final LoginService loginService;
 
-    @Resource
-    private WechatConfiguration wechatConfiguration;
+    /**
+     * 微信配置类
+     */
+    private final WechatConfiguration wechatConfiguration;
 
     private static final int WINDOW_WIDTH = 300;
     private static final int WINDOW_HEIGHT = 450;
@@ -80,11 +79,13 @@ public class LoginFrame extends JFrame {
         super("微信-舒专用版");
         initComponents();
         initView();
-       setLocationRelativeTo(null);
+        setLocationRelativeTo(null);
         setListeners();
         if (OSUtil.getOsType() == OSUtil.Windows) {
             registerHotKey();
         }
+        loginService = SpringContextHolder.getBean(LoginService.class);
+        wechatConfiguration = SpringContextHolder.getBean(WechatConfiguration.class);
     }
 
 
@@ -133,8 +134,8 @@ public class LoginFrame extends JFrame {
         }
 
 
-        JPanel centerPanel = new JPanel(new BorderLayout(0,0));
-        centerPanel.setBorder(new EmptyBorder(0,0,0,0));
+        JPanel centerPanel = new JPanel(new BorderLayout(0, 0));
+        centerPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 
         codeLabel = new JLabel();
         ImageIcon icon = IconUtil.getIcon(this, "/image/image_loading.gif");
@@ -162,6 +163,7 @@ public class LoginFrame extends JFrame {
 
                 new SwingWorker<Object, Object>() {
                     private BufferedImage qr;
+
                     @Override
                     protected Object doInBackground() throws Exception {
                         qr = loginService.getQR();
@@ -179,8 +181,8 @@ public class LoginFrame extends JFrame {
         });
 
         bottomPanel.add(statusLabel);
-        bottomPanel.setBorder(new EmptyBorder(0,0,50,0));
-        centerPanel.add(bottomPanel,BorderLayout.SOUTH);
+        bottomPanel.setBorder(new EmptyBorder(0, 0, 50, 0));
+        centerPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         add(contentPanel);
         contentPanel.add(centerPanel, new GBC(0, 2).setFill(GBC.BOTH).setWeight(1, 10).setInsets(10, 10, 0, 10));
@@ -284,7 +286,7 @@ public class LoginFrame extends JFrame {
 
                 @Override
                 public void avatar(String avatarBase64) {
-                    if (avatarBase64 == null){
+                    if (avatarBase64 == null) {
                         return;
                     }
                     try {
@@ -302,7 +304,7 @@ public class LoginFrame extends JFrame {
             });
             refreshCodeBt.setVisible(false);
             //登录失败
-            if (!Core.isAlive()){
+            if (!Core.isAlive()) {
                 return;
             }
 
@@ -311,8 +313,7 @@ public class LoginFrame extends JFrame {
                 showMessage(" 微信初始化异常");
                 System.exit(0);
             }
-            wechatConfiguration.setBasePath(wechatConfiguration.getBasePath()+ File.separator+ MD5Util.MD5(Core.getNickName()));
-
+            wechatConfiguration.setBasePath(wechatConfiguration.getBasePath() + File.separator + MD5Util.MD5(Core.getNickName())+ File.separator);
 
 
             log.info("开启微信状态通知");
@@ -325,11 +326,10 @@ public class LoginFrame extends JFrame {
             //初始化聊天列表
             Set<String> recentContacts = Core.getRecentContacts();
             SwingUtilities.invokeLater(() -> {
-                ArrayList<RoomItem> rooms = new ArrayList<>();
-                for (String userId : recentContacts) {
-                    rooms.add(new RoomItem(Core.getMemberMap().get(userId), "", 0,false));
-                }
-                RoomsPanel.getContext().addRoom(rooms);
+                List<RoomItem> roomItems = recentContacts.stream()
+                        .map(userId -> new RoomItem(Core.getMemberMap().get(userId), "", 0, false))
+                        .collect(Collectors.toList());
+                RoomsPanel.getContext().addRoom(roomItems);
             });
 
 
@@ -380,6 +380,7 @@ public class LoginFrame extends JFrame {
             SleepUtils.sleep(2000);
         }
     }
+
     /**
      * 注册截图快捷键
      */
@@ -397,8 +398,8 @@ public class LoginFrame extends JFrame {
                     }
                 }
             });
-        }catch (Exception e){
-            log.warn("注册截屏快捷键失败："+e.getMessage());
+        } catch (Exception e) {
+            log.warn("注册截屏快捷键失败：" + e.getMessage());
         }
     }
 
@@ -409,6 +410,7 @@ public class LoginFrame extends JFrame {
         ScreenShotFrame ssw = new ScreenShotFrame();
         ssw.setVisible(true);
     }
+
     /**
      * 下载头像
      */
@@ -416,10 +418,14 @@ public class LoginFrame extends JFrame {
         ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(() -> HeadImageUtil.deleteLoseEfficacyHeadImg(wechatConfiguration.getBasePath() + "/headimg/"));
         statusLabel.setText("11. 下载联系人头像");
         log.info("11. 下载联系人头像");
-        for (Map.Entry<String, Contacts> entry : Core.getMemberMap().entrySet()) {
-            Core.getContactHeadImgPath().put(entry.getValue().getUsername(), DownloadTools.downloadBigHeadImg(entry.getValue().getHeadimgurl(), entry.getValue().getUsername()));
-            log.info("下载头像：({}):{}", entry.getValue().getNickname(), entry.getValue().getHeadimgurl());
-        /*    ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(
+        Core.getMemberMap().entrySet().parallelStream()
+                .forEach(contacts->{
+                    Core.getContactHeadImgPath().put(contacts.getValue().getUsername(), DownloadTools.downloadBigHeadImg(contacts.getValue().getHeadimgurl(), contacts.getValue().getUsername()));
+                    log.info("下载头像：({}):{}", contacts.getValue().getNickname(), contacts.getValue().getHeadimgurl());
+                });
+        /*  for (Map.Entry<String, Contacts> entry : Core.getMemberMap().entrySet()) {
+
+          ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(
 
                     () -> {
 
@@ -432,9 +438,9 @@ public class LoginFrame extends JFrame {
                 public void run() {
                     AvatarUtil.putUserAvatarCache(entry.getValue().getUsername(), DownloadTools.downloadImage(entry.getValue().getHeadimgurl()));
                 }
-            });*/
+            });
 
-        }
+        }*/
     }
 
 

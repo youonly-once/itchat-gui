@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.utils;
 
-import cn.shu.wechat.swing.Launcher;
+import cn.shu.wechat.configuration.WechatConfiguration;
+import lombok.extern.log4j.Log4j2;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -9,23 +10,30 @@ import java.awt.datatransfer.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Created by 舒新胜 on 20/06/2017.
  */
-public class ClipboardUtil {
+@Log4j2
+public final class ClipboardUtil {
+    private ClipboardUtil(){
+
+    }
     private static final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
     public static final String CLIPBOARD_TEMP_DIR;
 
     static {
-        CLIPBOARD_TEMP_DIR = Launcher.wechatConfiguration.getBasePath() + System.getProperty("file.separator") + "clipboard_temp";
+        CLIPBOARD_TEMP_DIR = WechatConfiguration.getInstance().getBasePath() + System.getProperty("file.separator") + "clipboard_temp";
         File file = new File(CLIPBOARD_TEMP_DIR);
-        if (!file.exists()) {
-            System.out.println("创建剪切板临时文件缓存目录：" + file.getAbsolutePath());
-            file.mkdirs();
+        log.info("创建剪切板临时文件缓存目录：{}" , file.getAbsolutePath());
+        if (!file.mkdirs()) {
+            log.warn("创建剪贴板目录失败");
         }
     }
 
@@ -50,17 +58,20 @@ public class ClipboardUtil {
         clipboard.setContents(new ImageTransferable(image), null);
     }
 
+    /**
+     * 复制文件
+     * @param path 文件路径
+     */
     public static void copyFile(String path) {
         try {
             File file = new File(path);
             //clipboard.setContents(new FileTransferable(file), null);
             Transferable contents = new Transferable() {
-                DataFlavor[] dataFlavors = new DataFlavor[]{DataFlavor.javaFileListFlavor};
+                final DataFlavor[] dataFlavors = new DataFlavor[]{DataFlavor.javaFileListFlavor};
 
                 @Override
-                public Object getTransferData(DataFlavor flavor)
-                        throws UnsupportedFlavorException, IOException {
-                    ArrayList<File> files = new ArrayList<>();
+                public Object getTransferData(DataFlavor flavor) {
+                    ArrayList<File> files = new ArrayList<>(1);
                     files.add(file);
                     return files;
                 }
@@ -72,8 +83,8 @@ public class ClipboardUtil {
 
                 @Override
                 public boolean isDataFlavorSupported(DataFlavor flavor) {
-                    for (int i = 0; i < dataFlavors.length; i++) {
-                        if (dataFlavors[i].equals(flavor)) {
+                    for (DataFlavor dataFlavor : dataFlavors) {
+                        if (dataFlavor.equals(flavor)) {
                             return true;
                         }
                     }
@@ -88,29 +99,37 @@ public class ClipboardUtil {
         }
     }
 
+    /**
+     * 粘贴
+     * @return 粘贴内容
+     */
     public static Object paste() {
         Transferable transferable = clipboard.getContents(null);
         return paste(transferable);
     }
 
+    /**
+     * 粘贴
+     * @param transferable 粘贴内容
+     * @return 粘贴内容
+     */
     public static Object paste(Transferable transferable) {
 
         if (transferable != null) {
             try {
                 if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-                    List<File> files = (List<File>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
-                    List<Object> datas = new ArrayList<>();
-                    for (File file : files) {
-                        // 复制的是图片
-                        if (isImage(file)) {
-                            datas.add(transferImageFileToImageIcon(file));
-                        }else if (file.isFile()){
-                            datas.add(file.getAbsolutePath());
-                        }
+                    List<File> files = (List<File>)transferable.getTransferData(DataFlavor.javaFileListFlavor);
 
-                    }
-
-                    return datas;
+                    return files.stream()
+                            .map(file -> {
+                                if (ImageUtil.isImage(file)) {
+                                    return IconUtil.getIconFromFile(file);
+                                }else if (file.isFile()){
+                                    return file.getAbsolutePath();
+                                }
+                                //TODO
+                                return null;
+                            }).collect(Collectors.toList());
                 } else if (transferable.isDataFlavorSupported(DataFlavor.imageFlavor)) {
                     Object obj = transferable.getTransferData(DataFlavor.imageFlavor);
 
@@ -136,36 +155,32 @@ public class ClipboardUtil {
         return null;
     }
 
-    /**
-     * @param file
-     * @return
-     */
-    private static boolean isImage(File file) {
-        String suffix = file.getName().substring(file.getName().lastIndexOf(".") + 1).toLowerCase();
-        return suffix.equals("jpg") || suffix.equals("jpeg") || suffix.equals("png") || suffix.equals("gif");
-    }
 
-    private static ImageIcon transferImageFileToImageIcon(File file) {
-        ImageIcon icon = new ImageIcon(file.getAbsolutePath());
-        icon.setDescription(file.getAbsolutePath());
-        return icon;
-    }
 
     /**
      * 清除剪切板缓存文件
      */
     public static void clearCache() {
-        System.out.println("清除剪切板缓存文件...");
-        File file = new File(CLIPBOARD_TEMP_DIR);
-        File[] files = file.listFiles();
-        for (File f : files) {
-            f.delete();
+        log.info("清除剪切板缓存文件...");
+        try {
+            Files.list(Paths.get(CLIPBOARD_TEMP_DIR)).forEach(path1 -> {
+                try {
+                    Files.delete(path1);
+                } catch (IOException e) {
+                    log.warn(e.getMessage());
+                }
+            });
+        }catch (IOException e){
+            log.warn(e.getMessage());
         }
+
     }
+
+
 }
 
 class ImageTransferable implements Transferable {
-    private Image image;
+    private final Image image;
 
     public ImageTransferable(Image image) {
         this.image = image;
@@ -188,7 +203,7 @@ class ImageTransferable implements Transferable {
 }
 
 class FileTransferable implements Transferable {
-    private File file;
+    private final File file;
 
     public FileTransferable(File file) {
         this.file = file;
@@ -209,8 +224,8 @@ class FileTransferable implements Transferable {
 
     @Override
     public boolean isDataFlavorSupported(DataFlavor flavor) {
-        for (int i = 0; i < dataFlavors.length; i++) {
-            if (dataFlavors[i].equals(flavor)) {
+        for (DataFlavor dataFlavor : dataFlavors) {
+            if (dataFlavor.equals(flavor)) {
                 return true;
             }
         }

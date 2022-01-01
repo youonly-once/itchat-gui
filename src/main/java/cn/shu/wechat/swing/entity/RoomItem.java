@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 /**
  * 消息列表中显示的房间(聊天)条目
  *
@@ -37,9 +39,9 @@ public class RoomItem implements Comparable<RoomItem> {
     private int unreadCount;
 
     /**
-     * 时间戳
+     * 时间
      */
-    private long timestamp;
+    private LocalDateTime localDateTime;
 
     /**
      * 是否为群聊
@@ -70,12 +72,11 @@ public class RoomItem implements Comparable<RoomItem> {
     public int compareTo(RoomItem o) {
         // 注意，不能强制转int, 两个时间相差太远时有可能溢出
         // 忽略结果为0的情况，两个item必有先后，没有相同
-        long ret = o.getTimestamp() - this.getTimestamp();
-        return ret > 0 ? 1 : -1;
+        return o.getLocalDateTime().compareTo(this.getLocalDateTime());
     }
     public RoomItem (Contacts contacts,String latestMsg, int msgCount,Boolean hasNewMsg){
         setRoomId(contacts.getUsername());
-        setTimestamp(System.currentTimeMillis());
+        setLocalDateTime(LocalDateTime.now());
         setName(ContactsTools.getContactDisplayNameByUserName(contacts.getUsername()));
         setGroup(ContactsTools.isRoomContact(contacts));
         setLastMessage(latestMsg);

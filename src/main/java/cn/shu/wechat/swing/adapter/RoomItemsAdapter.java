@@ -93,11 +93,9 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
         }
 
         // 时间
-        if (roomItem.getTimestamp() > 0) {
-            viewHolder.time.setText(TimeUtil.diff(roomItem.getTimestamp()));
+        if (roomItem.getLocalDateTime() != null) {
+            viewHolder.time.setText(TimeUtil.diff(roomItem.getLocalDateTime()));
         }
-
-
             // 未读消息数
             if (roomItem.getUnreadCount() > 0) {
                 //消息免打扰

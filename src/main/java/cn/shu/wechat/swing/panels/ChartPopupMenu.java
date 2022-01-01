@@ -11,6 +11,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Field;
+import java.util.Optional;
 
 /**
  * @Description
@@ -51,17 +52,16 @@ public class ChartPopupMenu extends JPopupMenu {
     private void createAndShowChart(String attr) {
 
         ChartUtil chartUtil = SpringContextHolder.getBean(ChartUtil.class);
-        BufferedImage bufferedImage = chartUtil.makeContactsAttrPieChartAsBufferedImage(roomId, attr, Toolkit.getDefaultToolkit().getScreenSize().width, Toolkit.getDefaultToolkit().getScreenSize().height);
-        if (bufferedImage == null) {
-            JOptionPane.showMessageDialog(this, "创建失败。");
-            return;
-        }
+        Optional<BufferedImage> bufferedImageOptional = chartUtil.makeContactsAttrPieChartAsBufferedImage(roomId, attr, Toolkit.getDefaultToolkit().getScreenSize().width, Toolkit.getDefaultToolkit().getScreenSize().height);
 
-        ImageViewerFrame instance = ImageViewerFrame.getInstance();
-        instance.setImage(bufferedImage);
+        bufferedImageOptional.ifPresent(a -> {
+            ImageViewerFrame instance = ImageViewerFrame.getInstance();
+            instance.setImage(bufferedImageOptional.get());
 
-        instance.toFront();
-        instance.setVisible(true);
+            instance.toFront();
+            instance.setVisible(true);
+        });
+
 
     }
 }

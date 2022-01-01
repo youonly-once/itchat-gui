@@ -1,6 +1,6 @@
 package cn.shu.wechat.swing.utils;
 
-import cn.shu.wechat.swing.Launcher;
+import cn.shu.wechat.configuration.WechatConfiguration;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.File;
@@ -15,7 +15,7 @@ import java.text.DecimalFormat;
 public class FileCache {
 
     public static String FILE_CACHE_ROOT_PATH;
-    private static DecimalFormat decimalFormat = new DecimalFormat("#.0");
+    private static final DecimalFormat decimalFormat = new DecimalFormat("#.0");
 
     private FileCache(){
     }
@@ -23,12 +23,11 @@ public class FileCache {
     static  {
         try {
             //FILE_CACHE_ROOT_PATH = getClass().getResource("/cache").getPath() + "/file";
-            FILE_CACHE_ROOT_PATH = Launcher.wechatConfiguration.getBasePath() + "/cache/file";
+            FILE_CACHE_ROOT_PATH = WechatConfiguration.getInstance().getBasePath() + "/cache/file";
             File file = new File(FILE_CACHE_ROOT_PATH);
-            if (!file.exists()) {
-                file.mkdirs();
-                log.info("创建文件缓存目录：{}",file.getAbsolutePath() );
-            }
+                if (!file.mkdirs()) {
+                    log.warn("创建文件缓存目录失败：{}",file.getAbsolutePath() );
+                }
         } catch (Exception e) {
             FILE_CACHE_ROOT_PATH = "./";
         }
@@ -60,10 +59,7 @@ public class FileCache {
     }
 
     public static String fileSizeString(String path) {
-        File file = new File(path);
-
-        long size = file.length();
-       return fileSizeString(size);
+       return fileSizeString(new File(path).length());
 
     }
 

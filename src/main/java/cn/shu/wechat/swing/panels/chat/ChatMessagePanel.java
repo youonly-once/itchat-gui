@@ -47,6 +47,7 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Queue;
 import java.util.*;
@@ -324,14 +325,14 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                 }
                 RoomsPanel.getContext().updateRoomItem(roomId, 0
                         , "[图片]发送中..."
-                        , System.currentTimeMillis(),ContactsTools.isMute(roomId),false);
+                        , LocalDateTime.now(),ContactsTools.isMute(roomId),false);
             } else if (data instanceof FileEditorThumbnail) {
                 //文件消息
                 isImageOrFile = true;
                 FileEditorThumbnail component = (FileEditorThumbnail) data;
                 //多个文件消息添加到队列中
                 shareAttachmentUploadQueue.add(component.getPath());
-                RoomsPanel.getContext().updateRoomItem(roomId, 0, "[文件]发送中...", System.currentTimeMillis(),ContactsTools.isMute(roomId),false);
+                RoomsPanel.getContext().updateRoomItem(roomId, 0, "[文件]发送中...", LocalDateTime.now(),ContactsTools.isMute(roomId),false);
 
             }
 
@@ -544,7 +545,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
      */
     public void sendTextMessage(String content)  {
         //更新房间列表
-        RoomsPanel.getContext().updateRoomItem(roomId, 0, content+"[发送中...]", System.currentTimeMillis(),ContactsTools.isMute(roomId),false);
+        RoomsPanel.getContext().updateRoomItem(roomId, 0, content+"[发送中...]",LocalDateTime.now(),ContactsTools.isMute(roomId),false);
         String msgId = MessageTools.randomMessageId();
         Message message = Message.builder().isSend(false)
                 .id(msgId)
@@ -556,7 +557,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                 .msgType(WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
                 .fromNickname(Core.getNickName())
                 .progress(50)
-                .timestamp(System.currentTimeMillis())
+                .messageTime(LocalDateTime.now())
                 .deleted(false)
                 .isSend(true)
                 .isNeedToResend(false)
@@ -584,11 +585,11 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                 if (wxSendMsgResponse == null
                         || wxSendMsgResponse.getBaseResponse().getRet() != 0) {
                     message.setNeedToResend(true);
-                    RoomsPanel.getContext().updateRoomItem(roomId, 0, content+"[发送失败]", System.currentTimeMillis(),ContactsTools.isMute(roomId),false);
+                    RoomsPanel.getContext().updateRoomItem(roomId, 0, content+"[发送失败]", LocalDateTime.now(),ContactsTools.isMute(roomId),false);
 
                 } else {
                     message.setNeedToResend(false);
-                    RoomsPanel.getContext().updateRoomItem(roomId, 0, content, System.currentTimeMillis(),ContactsTools.isMute(roomId),false);
+                    RoomsPanel.getContext().updateRoomItem(roomId, 0, content, LocalDateTime.now(),ContactsTools.isMute(roomId),false);
 
                 }
                 updateMessage(viewHolder, message);
@@ -597,7 +598,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
     }
 
     private void showSendingMessage() {
-        RoomsPanel.getContext().updateRoomItem(roomId, 0, "[发送中...]", System.currentTimeMillis(),ContactsTools.isMute(roomId),false);
+        RoomsPanel.getContext().updateRoomItem(roomId, 0, "[发送中...]", LocalDateTime.now(),ContactsTools.isMute(roomId),false);
     }
 
     /**
@@ -702,7 +703,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
         message.setProgress(0);
         message.setToUsername(roomId);
         message.setFromUsername(Core.getUserName());
-        message.setTimestamp(System.currentTimeMillis());
+        message.setMessageTime(LocalDateTime.now());
         //添加消息 到面板
         ViewHolder viewHolder = addMessageToEnd(message);
 
@@ -737,7 +738,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                 Integer progress = chunks.get(chunks.size() - 1);
                 // 上传完成
                 if (progress == 100) {
-                    RoomsPanel.getContext().updateRoomItem(roomId, 0, finalMessage.getPlaintext(), System.currentTimeMillis(),ContactsTools.isMute(roomId),false);
+                    RoomsPanel.getContext().updateRoomItem(roomId, 0, finalMessage.getPlaintext(), LocalDateTime.now(),ContactsTools.isMute(roomId),false);
                 }
                 if (viewHolder != null) {
                     finalMessage.setProgress(progress);

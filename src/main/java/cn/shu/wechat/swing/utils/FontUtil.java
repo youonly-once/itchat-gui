@@ -6,7 +6,7 @@ import java.awt.*;
  * Created by 舒新胜 on 17-5-29.
  */
 public class FontUtil {
-    private static Font font;
+    private static final Font font;
 
     static {
         if (OSUtil.getOsType() == OSUtil.Windows) {

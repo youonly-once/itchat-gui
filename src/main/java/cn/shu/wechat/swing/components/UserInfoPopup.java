@@ -34,7 +34,6 @@ public class UserInfoPopup extends JPopupMenu {
     private JLabel remarkNameLabel;
     private JLabel signatureLabel;
     private JLabel chat;
-    private static UserInfoPopup Context;
 
     private UserInfoPopup() {
         initComponents();
@@ -42,15 +41,13 @@ public class UserInfoPopup extends JPopupMenu {
         setListener();
 
     }
+
+    private static final class ContextHolder {
+        static final UserInfoPopup Context = new UserInfoPopup();
+    }
+
     public static UserInfoPopup getInstance(){
-        if (Context == null){
-            synchronized (UserInfoPopup.class){
-                if (Context == null){
-                    Context = new UserInfoPopup();
-                }
-            }
-        }
-        return Context;
+        return ContextHolder.Context;
     }
 
     /**

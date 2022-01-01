@@ -52,6 +52,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -1171,19 +1172,19 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      * @param holder
      */
     private void processTimeAndAvatar(Message item, Message preItem, BaseMessageViewHolder holder) {
-        long parse = item.getTimestamp();
+        LocalDateTime messageTime = item.getMessageTime();
         // 如果当前消息的时间与上条消息时间相差大于1分钟，则显示当前消息的时间
         if (preItem != null) {
-            if (TimeUtil.inTheSameMinute(parse
-                    , preItem.getTimestamp())) {
+            if (TimeUtil.inTheSameMinute(messageTime
+                    , preItem.getMessageTime())) {
                 holder.time.setVisible(false);
             } else {
                 holder.time.setVisible(true);
-                holder.time.setText(TimeUtil.diff(parse, true));
+                holder.time.setText(TimeUtil.diff(messageTime, true));
             }
         } else {
             holder.time.setVisible(true);
-            holder.time.setText(TimeUtil.diff(parse, true));
+            holder.time.setText(TimeUtil.diff(messageTime, true));
         }
 
         String senderId = item.isGroup()&&! item.getFromUsername().equals(Core.getUserName())? item.getFromMemberOfGroupUsername()

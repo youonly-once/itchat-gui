@@ -1,6 +1,6 @@
 package cn.shu.wechat.swing.panels.setting;
 
-import cn.shu.wechat.swing.Launcher;
+import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.utils.FontUtil;
@@ -27,7 +27,7 @@ public class AboutPanel extends JPanel {
         imageLabel.setIcon(icon);
 
         versionLabel = new JLabel();
-        versionLabel.setText("微信 v" + Launcher.wechatConfiguration.getAppVersion());
+        versionLabel.setText("微信 v" + WechatConfiguration.getInstance().getAppVersion());
         versionLabel.setFont(FontUtil.getDefaultFont(20));
         versionLabel.setForeground(Colors.FONT_GRAY_DARKER);
     }

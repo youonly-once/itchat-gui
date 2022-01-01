@@ -19,27 +19,21 @@ public class WindowUtil {
         final List<WindowInfo> windowInfoList = new ArrayList<>();
         final List<Integer> order = new ArrayList<>();
 
-        User32.instance.EnumWindows(new WndEnumProc() {
-            public boolean callback(int hWnd, int lParam) {
-                if (User32.instance.IsWindowVisible(hWnd)) {
-                    RECT r = new RECT();
-                    User32.instance.GetWindowRect(hWnd, r);
-                    if (r.left > -32000) {     // minimized
-                        byte[] buffer = new byte[1024];
-                        User32.instance.GetWindowTextA(hWnd, buffer, buffer.length);
-                        String title = Native.toString(buffer);
-                        windowInfoList.add(new WindowInfo(hWnd, r, title));
-                    }
+        User32.instance.EnumWindows((hWnd, lParam) -> {
+            if (User32.instance.IsWindowVisible(hWnd)) {
+                RECT r = new RECT();
+                User32.instance.GetWindowRect(hWnd, r);
+                if (r.left > -32000) {     // minimized
+                    byte[] buffer = new byte[1024];
+                    User32.instance.GetWindowTextA(hWnd, buffer, buffer.length);
+                    String title = Native.toString(buffer);
+                    windowInfoList.add(new WindowInfo(hWnd, r, title));
                 }
-                return true;
             }
+            return true;
         }, 0);
 
-        Collections.sort(windowInfoList, new Comparator<WindowInfo>() {
-            public int compare(WindowInfo o1, WindowInfo o2) {
-                return order.indexOf(o1.hwnd) - order.indexOf(o2.hwnd);
-            }
-        });
+        windowInfoList.sort(Comparator.comparingInt(o -> order.indexOf(o.hwnd)));
 
         return windowInfoList;
     }

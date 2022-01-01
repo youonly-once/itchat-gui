@@ -40,6 +40,8 @@ import java.io.OutputStream;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 登陆服务实现类
@@ -239,12 +241,8 @@ public class LoginServiceImpl implements LoginService {
             Set<String> recentContacts = Core.getRecentContacts();
             for (Contacts contacts : contactsList) {
                 //下载头像
-                ExecutorServiceUtil.getHeadImageDownloadExecutorService().submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        AvatarUtil.putUserAvatarCache(contacts.getUsername(), DownloadTools.downloadHeadImgByRelativeUrl(contacts.getHeadimgurl()));
-                        ;
-                    }
+                ExecutorServiceUtil.getHeadImageDownloadExecutorService().submit(() -> {
+                    AvatarUtil.putUserAvatarCache(contacts.getUsername(), DownloadTools.downloadHeadImgByRelativeUrl(contacts.getHeadimgurl()));
                 });
                 addContacts(contacts, false);
                 recentContacts.add(contacts.getUsername());
@@ -657,14 +655,6 @@ public class LoginServiceImpl implements LoginService {
         }
         return null;
     }
-    public static void main(String[] args) {
-        String str = "window.code=201;window.userAvatar = 'data:img/jpg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAoHBwgHBgoICAgLCgoLDhgQDg0NDh0VFhEYIx8lJCIfIiEmKzcvJik0KSEiMEExNDk7Pj4+JS5ESUM8SDc9Pjv/2wBDAQoLCw4NDhwQEBw7KCIoOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozv/wAARCACEAIQDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAEH/8QAGhABAAIDAQAAAAAAAAAAAAAAAAFBEVGBAv/EABUBAQEAAAAAAAAAAAAAAAAAAAAB/8QAFhEBAQEAAAAAAAAAAAAAAAAAACEB/9oADAMBAAIRAxEAPwDJQAAAzACIAIiIAMwAiIgAiAAAiAAAAAAAAAAAAAAAAAAAAAAAAAAAAWgQAAFoEAAAAAAAAAAAAWuItdBAAFpFpRAEAAAAAAAAAABa6i5mPPV0QXM7Mzsgi0ZnRmdkEFzO0QAAAAAAAAAAFrqAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP/2Q==';";
-        String regEx = "window.userAvatar\\s*=\\s*'(.+)'";
-        Matcher matcher = CommonTools.getMatcher(regEx, str);
-        if (matcher.find()) {
-            System.out.println(matcher.group(1));
-        }
-    }
     /**
      * 检查登录人的头像
      *
@@ -1025,19 +1015,21 @@ public class LoginServiceImpl implements LoginService {
      * @return
      */
     private String mapToString(Map<String, Map<String, String>> differenceMap) {
-        String str = "";
-        for (Entry<String, Map<String, String>> stringMapEntry : differenceMap.entrySet()) {
-            Map<String, String> value = stringMapEntry.getValue();
-            for (Entry<String, String> stringStringEntry : value.entrySet()) {
-                if (stringMapEntry.getKey().equals("头像更换")
-                        || stringMapEntry.getKey().equals("HeadImgUrl")
-                        || stringMapEntry.getKey().equals("headimgurl")) {
-                    str = str + "\n【" + stringMapEntry.getKey() + "】更换前后如下";
-                } else {
-                    str = str + "\n【" + stringMapEntry.getKey() + "】(\"" + stringStringEntry.getKey() + "\" -> \"" + stringStringEntry.getValue() + "\")";
-                }
-            }
-        }
-        return str;
+
+        return differenceMap.entrySet().stream()
+                .flatMap(firstMapEntry -> {
+                    String key = firstMapEntry.getKey();
+                    return firstMapEntry.getValue().entrySet().stream().map(
+                            secondMapEntry -> {
+                                StringBuilder str = new StringBuilder();
+                                if (key.equals("头像更换")|| key.equals("HeadImgUrl")|| key.equals("headimgurl")) {
+                                    str.append("\n【").append(key).append("】更换前后如下");
+                                } else {
+                                    str.append("\n【").append(key).append("】(\"").append(secondMapEntry.getKey()).append("\" -> \"").append(secondMapEntry.getValue()).append("\")");
+                                }
+                                return str;
+                            }
+                    );
+                }).collect(Collectors.joining(""));
     }
 }

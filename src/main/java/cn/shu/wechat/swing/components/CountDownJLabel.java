@@ -64,33 +64,4 @@ public class CountDownJLabel extends JLabel {
         count = Integer.parseInt( this.text);
         timer.stop();
     }
-
-    public static void main(String[] args) throws IOException {
-        JFrame jFrame = new JFrame();
-        Container contentPane = jFrame.getContentPane();
-        contentPane.setLayout(new FlowLayout());
-
-        CountDownJLabel countDownJLabel = new CountDownJLabel("100");
-        contentPane.add(countDownJLabel);
-        JButton jButton = new JButton("start");
-        JButton jButton1 = new JButton("stop");
-        contentPane.add(jButton);
-        contentPane.add(jButton1);
-        jButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                countDownJLabel.start();
-            }
-        });
-        jButton1.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                countDownJLabel.stop();
-            }
-        });
-        JLabel jLabel = new JLabel(new ImageIcon("D:/1.gif"));
-        contentPane.add(jLabel);
-        jFrame.setVisible(true);
-        jFrame.setSize(400,300);
-    }
 }
