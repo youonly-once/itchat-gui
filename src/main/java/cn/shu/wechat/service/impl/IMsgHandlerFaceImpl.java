@@ -150,6 +150,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                                     + "5、【op/cp】\n\t开启/关闭全局个人用户消息自动回复\n"
                                     + "6、【gma10】\n\t群成员活跃度TOP10\n"
                                     + "7、【mf10】\n\t聊天消息关键词TOP10\n"
+                                    + "8、【mft10】\n\t聊天消息类型TOP10\n"
                             )
                             .toUsername(toUserName)
                             .msgType(WXSendMsgCodeEnum.TEXT.getCode())
@@ -163,7 +164,8 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                                     + "3、【op/cp】\n\t开启/关闭全局个人用户消息自动回复\n"
                                     + "4、【mf10】\n\t聊天消息关键词TOP10\n"
                                     + "5、【gma10】\n\t活跃度TOP\n"
-                                    + "6、【updateinfo】\n\t好友属性更新次数排行\n")
+                                    + "6、【updateinfo】\n\t好友属性更新次数排行\n"
+                                    + "7、【mft10】\n\t聊天消息类型TOP10\n")
                             .toUsername(toUserName)
                             .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                             .build());
@@ -264,28 +266,32 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             case "gma10":
                 //群成员活跃度排名
                 if (msg.isGroupMsg()) {
-                    String imgPath = chartUtil.makeWXMemberOfGroupActivity(toUserName);
+                    String imgPath = chartUtil.makeWXMemberOfGroupActivityFile(toUserName);
                     messages.add(MessageTools.toPicMessage(imgPath, toUserName));
                     log.info("计算【" + remarkNameByGroupUserName + "】成员活跃度");
                 }else{
-                    String imgPath = chartUtil.makeWXUserActivity(toUserName);
+                    String imgPath = chartUtil.makeWXUserActivityFile(toUserName);
                     messages.add(MessageTools.toPicMessage(imgPath, toUserName));
                     log.info("计算聊天双方消息数");
                 }
                 break;
-            case "mf10":
+            case "mf10": {
                 //聊天词语频率排名
-                List<String> imgs = chartUtil.makeWXUserMessageGroupTop(toUserName);
-                for (String s : imgs) {
-                    //群消息
-                    messages.add(MessageTools.toPicMessage(s, toUserName));
-                }
-
-                log.info("计算【" + remarkNameByGroupUserName + "】聊天类型及关键词");
+                String imgPath = chartUtil.makeWXGroupMessageTopFile(toUserName);
+                messages.add(MessageTools.toPicMessage(imgPath, toUserName));
+                log.info("计算【" + remarkNameByGroupUserName + "】聊天关键词");
                 break;
+            }
+            case "mft10": {
+                //聊天词语频率排名
+                String imgPath = chartUtil.makeWXGroupMessageTypeTopFile(toUserName);
+                messages.add(MessageTools.toPicMessage(imgPath, toUserName));
+                log.info("计算【" + remarkNameByGroupUserName + "】聊天类型");
+                break;
+            }
             case "updateinfo":{
                 //生成自己的聊天类型
-                imgs = chartUtil.makeWXContactUpdateAttrBarChart();
+                List<String> imgs = chartUtil.makeWXContactUpdateAttrBarChart();
                 for (String s : imgs) {
                     //群消息
                     messages.add(MessageTools.toPicMessage(s, toUserName));

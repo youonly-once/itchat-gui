@@ -7,12 +7,17 @@ import java.awt.*;
  */
 public class FontUtil {
     private static final Font font;
+    private static final Font iconFont;
 
     static {
         if (OSUtil.getOsType() == OSUtil.Windows) {
-            font = new Font("微软雅黑", Font.PLAIN, 14);
+            //SansSerif
+            iconFont = new Font("SansSerif", Font.PLAIN, 14);
+            font=iconFont;
+            //font = new Font("微软雅黑", Font.PLAIN, 14);
         } else {
             font = new Font("PingFang SC", Font.PLAIN, 14);
+            iconFont = font;
         }
     }
 
@@ -29,5 +34,15 @@ public class FontUtil {
         //return new Font("YaHei Consolas Hybrid",  style, size);
         //return new Font("微软雅黑", style, size);
     }
+    public static Font getDefaultIconFont() {
+        return getDefaultIconFont(14, Font.PLAIN);
+    }
+    public static Font getDefaultIconFont(int size, int style) {
+        return iconFont.deriveFont(style, size);
+        //return new Font("YaHei Consolas Hybrid",  style, size);
+        //return new Font("微软雅黑", style, size);
+    }
+
+
 
 }
