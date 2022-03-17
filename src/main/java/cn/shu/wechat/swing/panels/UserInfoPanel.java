@@ -161,6 +161,7 @@ public class UserInfoPanel extends ParentAvailablePanel {
 
     static class UserInfoDetailItemLabel extends JPanel{
         private final JLabel  nameLabel = new JLabel ();
+
         private final SizeAutoAdjustTextArea  valueLabel = new SizeAutoAdjustTextArea (200);
         public UserInfoDetailItemLabel(String name,String value){
             setNameAndValue(name,value);

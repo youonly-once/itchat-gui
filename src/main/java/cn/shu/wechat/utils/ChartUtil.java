@@ -243,15 +243,54 @@ public final class ChartUtil {
     }
 
 
-
-
     /**
      * 聊天双方用户活跃度(消息发送次数)
      *
      * @param userName 用户名
      * @return 文件路径
      */
-    public String makeWXUserActivity(String userName) {
+    public String makeWXUserActivityFile(String userName) {
+        Optional<BufferedImage> bufferedImage = makeWXUserActivityBufferedImage(userName);
+        return writeBufferedImageAsPNG(bufferedImage,"makeWXUserActivity"+System.nanoTime()+".png");
+    }
+
+    /**
+     * writeBufferedImageAsPNG
+     * @param bufferedImage bufferedImage
+     * @return 文件路径
+     */
+    private String writeBufferedImageAsPNG(Optional<BufferedImage> bufferedImage,String fileName){
+        if (!bufferedImage.isPresent()){
+            return null;
+        }
+        FileOutputStream fos_jpg = null;
+        try {
+            isChartPathExist(wechatConfiguration.getBasePath());
+            String chartName = wechatConfiguration.getBasePath() + fileName;
+            fos_jpg = new FileOutputStream(chartName);
+            ChartUtils.writeBufferedImageAsPNG(fos_jpg, bufferedImage.get());
+
+            return chartName;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            try {
+                if (fos_jpg != null) {
+                    fos_jpg.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    /**
+     * 聊天双方用户活跃度(消息发送次数)
+     *
+     * @param userName 用户名
+     * @return 文件路径
+     */
+    public Optional<BufferedImage>  makeWXUserActivityBufferedImage(String userName) {
 
 
         List<Map<String, Object>> maps = messageMapper.selectUserMessageCount(
@@ -266,17 +305,30 @@ public final class ChartUtil {
                     "发送数量",
                     map.get("nickName").toString());
         }
-
-        return createBarChart(dataset, "用户昵称", "发送消息数量", "双方发送消息数", "makeWXUserActivity"+System.nanoTime()+".png", 500, 400);
+        Optional<JFreeChart> barChart = createBarChart(dataset, "用户昵称", "发送消息数量", "双方发送消息数");
+        return barChart.map(jFreeChart -> jFreeChart.createBufferedImage(500, 400));
     }
-
     /**
      * 群用户活跃度(消息发送次数)
      *
      * @param userName 用户名称
      * @return 图片路径
      */
-    public String makeWXMemberOfGroupActivity(String userName) {
+    public String makeWXMemberOfGroupActivityFile(String userName) {
+
+        //查询数据
+        Optional<BufferedImage> bufferedImage = makeWXMemberOfGroupActivityBufferedImage(userName);
+        return writeBufferedImageAsPNG(bufferedImage,"makeWXGroupMessageTop"+System.nanoTime()+".png");
+
+
+    }
+    /**
+     * 群用户活跃度(消息发送次数)
+     *
+     * @param userName 用户名称
+     * @return BufferedImage
+     */
+    public Optional<BufferedImage> makeWXMemberOfGroupActivityBufferedImage(String userName) {
 
         //查询数据
         List<Map<String, Object>> maps = messageMapper.selectGroupUserMessageCount(userName
@@ -288,21 +340,46 @@ public final class ChartUtil {
         for (Map<String, Object> map : maps) {
             defaultCategoryDataset.setValue(Double.parseDouble(map.get("count").toString()),
                     "发送数量",
-                    map.get("nickName").toString());
+                    map.get("nickName").toString().length()>20?map.get("nickName").toString().substring(0,19)+"...":map.get("nickName").toString());
         }
-        return createBarChart(defaultCategoryDataset, "用户昵称", "发送消息数量", "群成员活跃度", "makeWXGroupMessageTop"+System.nanoTime()+".png", 760, 540);
+        Optional<JFreeChart> barChart = createBarChart(defaultCategoryDataset, "用户昵称", "发送消息数量", "群成员活跃度");
+        return barChart.map(jFreeChart -> jFreeChart.createBufferedImage(900, 540));
     }
 
     /**
-     * 聊天双方 聊天关键词分析
+     * 聊天双方聊天消息类型排行排行
      * 消息类型排行
-     * 消息关键词排行
      *
      * @param userName 用户名
-     * @return 图片列表
+     * @return BufferedImage
      */
-    public List<String> makeWXUserMessageGroupTop(String userName) {
-        ArrayList<String> imgs = new ArrayList<>();
+    public Optional<BufferedImage> makeWXGroupMessageTypeTopBufferedImage(String userName) {
+
+        String nickName = ContactsTools.getContactNickNameByUserName(userName);
+        String remarkName = ContactsTools.getContactRemarkNameByUserName(userName);
+
+        //类型汇总
+        List<Map<String, Object>> mapsType = messageMapper.groupByType(userName, nickName, remarkName);
+        DefaultCategoryDataset categoryDatasetOfType= new DefaultCategoryDataset();
+
+        for (Map<String, Object> map : mapsType) {
+            categoryDatasetOfType.setValue(Double.parseDouble(map.get("count").toString())
+                    ,"发送次数"
+                    , WXReceiveMsgCodeEnum.getByCode(Integer.parseInt(map.get("type").toString())).getDesc());
+        }
+        Optional<JFreeChart> barChart = createBarChart(categoryDatasetOfType, "消息类型", "发送数量", "与【" + nickName + "】聊天的消息类型排行");
+        return barChart.map(chart -> chart.createBufferedImage(500, 400));
+
+    }
+    /**
+     * 聊天双方聊天词语排行
+     *
+     *消息内容排行
+     * @param userName 用户名
+     * @return BufferedImage
+     */
+    public Optional<BufferedImage> makeWXGroupMessageTopBufferedImage(String userName) {
+
         String nickName = ContactsTools.getContactNickNameByUserName(userName);
         String remarkName = ContactsTools.getContactRemarkNameByUserName(userName);
         //内容汇总
@@ -314,23 +391,35 @@ public final class ChartUtil {
                     ,"发送次数"
                     ,map.get("content").toString());
         }
-        String barImg1 = createBarChart(categoryDatasetOfContent, "消息内容", "发送数量", "与【"+nickName+"】聊天的消息内容排行", "makeWXGroupMessageTop1"+System.nanoTime()+".png", 500, 400);
-        imgs.add(barImg1);
+        Optional<JFreeChart> barChart = createBarChart(categoryDatasetOfContent, "消息内容", "发送数量", "与【" + nickName + "】聊天的消息内容排行");
+        return barChart.map(chart -> chart.createBufferedImage(1920, 1080));
+
+    }
 
 
-        //类型汇总
-        List<Map<String, Object>> mapsType = messageMapper.groupByType(userName, nickName, remarkName);
-        DefaultCategoryDataset categoryDatasetOfType= new DefaultCategoryDataset();
+    /**
+     * 聊天双方聊天消息类型排行排行
+     * 消息类型排行
+     *
+     * @param userName 用户名
+     * @return 文件路径
+     */
+    public String makeWXGroupMessageTypeTopFile(String userName) {
 
-        for (Map<String, Object> map : mapsType) {
-            categoryDatasetOfType.setValue(Double.parseDouble(map.get("count").toString())
-                    ,"发送次数"
-                    , WXReceiveMsgCodeEnum.getByCode(Integer.parseInt(map.get("type").toString())).getDesc());
-        }
-        String barImg2 = createBarChart(categoryDatasetOfType, "消息类型", "发送数量", "与【"+nickName+"】聊天的消息类型排行", "makeWXGroupMessageTop2"+System.nanoTime()+".png", 500, 400);
-        imgs.add(barImg2);
+        Optional<BufferedImage> bufferedImage = makeWXGroupMessageTypeTopBufferedImage(userName);
+        return writeBufferedImageAsPNG(bufferedImage,"makeWXGroupMessageTop2"+System.nanoTime()+".png");
 
-        return imgs;
+    }
+    /**
+     * 聊天双方聊天词语排行
+     *
+     *
+     * @param userName 用户名
+     * @return 文件路径
+     */
+    public String makeWXGroupMessageTopFile(String userName) {
+        Optional<BufferedImage> bufferedImage = makeWXGroupMessageTopBufferedImage(userName);
+        return writeBufferedImageAsPNG(bufferedImage,"makeWXGroupMessageTop1"+System.nanoTime()+".png");
     }
 
     /**
@@ -354,8 +443,10 @@ public final class ChartUtil {
                     "更新次数",
                     map.get("name").toString().length()>10?map.get("name").toString().substring(0,10):map.get("name").toString());
         }
-        String barChart1 = createBarChart(categoryDatasetInfo, "好友昵称", "更新数量", "微信好友个人信息更新次数/月", "makeWXContactUpdateAttrBarChart.png", 1024, 768);
-        imgList.add(barChart1);
+        Optional<JFreeChart> barChart1 = createBarChart(categoryDatasetInfo, "好友昵称", "更新数量", "微信好友个人信息更新次数/月");
+        Optional<BufferedImage> bufferedImage1 = barChart1.map(chart -> chart.createBufferedImage(1024, 768));
+        String barChartFile1 = writeBufferedImageAsPNG(bufferedImage1, "makeWXContactUpdateAttrBarChart.png");
+        imgList.add(barChartFile1);
 
         List<Map<String, Object>> attrMap = attrHistoryMapper.selectUpdateAttrCount(10);
         DefaultCategoryDataset categoryDatasetAttr = new DefaultCategoryDataset();
@@ -365,9 +456,11 @@ public final class ChartUtil {
                     "更新次数",
                     map.get("name").toString());
         }
-        String barChart = createBarChart(categoryDatasetAttr, "好友昵称", "更新数量", "微信好友个人信息更新次数TYPE/月", "makeWXContactUpdateAttrBarChartTYPE.png"
-                , 1024, 768);
-        imgList.add(barChart);
+
+        Optional<JFreeChart> barChart2= createBarChart(categoryDatasetAttr, "好友昵称", "更新数量", "微信好友个人信息更新次数TYPE/月");
+        Optional<BufferedImage> bufferedImage2 = barChart2.map(chart -> chart.createBufferedImage(1024, 768));
+        String barChartFile2 = writeBufferedImageAsPNG(bufferedImage2, "makeWXContactUpdateAttrBarChartTYPE.png");
+        imgList.add(barChartFile2);
         return imgList;
 
     }
@@ -420,11 +513,9 @@ public final class ChartUtil {
      * @param xName      x轴的说明（如种类，时间等）
      * @param yName      y轴的说明（如速度，时间等）
      * @param chartTitle 图标题
-     * @param charName   生成图片的名字
-     * @return
+     * @return JFreeChart
      */
-    public String createBarChart(CategoryDataset dataset, String xName,
-                                 String yName, String chartTitle, String charName, int width, int height) {
+    public Optional<JFreeChart> createBarChart(CategoryDataset dataset, String xName, String yName, String chartTitle) {
         JFreeChart chart = ChartFactory.createBarChart(chartTitle, // 图表标题
                 xName, // 目录轴的显示标签
                 yName, // 数值轴的显示标签
@@ -441,7 +532,7 @@ public final class ChartUtil {
          */
         chart.getRenderingHints().put(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
         chart.setTextAntiAlias(false);
-        chart.getTitle().setFont(new Font("宋体", Font.PLAIN, 14));
+        chart.getTitle().setFont(new Font("SansSerif", Font.PLAIN, 14));
         chart.setBackgroundPaint(Color.white);
         // create plot
         CategoryPlot plot = chart.getCategoryPlot();
@@ -519,7 +610,7 @@ public final class ChartUtil {
         //设置图例位置
         LegendTitle legend = chart.getLegend();
         legend.setPosition(RectangleEdge.RIGHT);
-        legend.setItemFont(new Font("宋体", Font.PLAIN, 14));
+        legend.setItemFont(new Font("SansSerif", Font.PLAIN, 14));
         class CustomRender extends BarRenderer {
             private Paint[] colors;
             // 初始化柱子颜色
@@ -564,25 +655,7 @@ public final class ChartUtil {
         // 设置柱的透明度
         plot.setForegroundAlpha(1.0f);
 
-        FileOutputStream fos_jpg = null;
-        try {
-            isChartPathExist(wechatConfiguration.getBasePath());
-            String chartName = wechatConfiguration.getBasePath() + charName;
-            fos_jpg = new FileOutputStream(chartName);
-            ChartUtils.writeChartAsPNG(fos_jpg, chart, width, height, true, 10);
-            return chartName;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        } finally {
-            try {
-                if (fos_jpg != null) {
-                    fos_jpg.close();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        return Optional.of(chart);
     }
 
     /**
@@ -722,14 +795,14 @@ public final class ChartUtil {
         plot.setLegendLabelGenerator(new StandardPieSectionLabelGenerator(
                 "{0}-{1}人  ({2})"));
 
-        plot.setLabelFont(new Font("宋体", Font.BOLD, 24));
+        plot.setLabelFont(new Font("SansSerif", Font.BOLD, 24));
 
         // 指定图片的透明度(0.0-1.0)
         plot.setForegroundAlpha(1);
         // 指定显示的饼图上圆形(false)还椭圆形(true)
         plot.setCircular(false, true);
         LegendTitle legend = chart.getLegend();
-        legend.setItemFont(new Font("宋体", Font.PLAIN, 24));
+        legend.setItemFont(new Font("SansSerif", Font.PLAIN, 24));
         // 设置第一个 饼块section 的开始位置，默认是12点钟方向
         plot.setStartAngle(90);
         plot.setBackgroundPaint(new Color(39, 43, 88));

@@ -1100,7 +1100,7 @@ order by create_time desc
         from_nickname
       )
     ORDER BY count DESC
-
+    limit 0,10
   </select>
 
   <select id="selectUserMessageCount"  resultType="map">

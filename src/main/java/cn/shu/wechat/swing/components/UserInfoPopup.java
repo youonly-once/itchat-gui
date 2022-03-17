@@ -157,7 +157,7 @@ public class UserInfoPopup extends JPopupMenu {
 
 
         nickNameArea.add(chat,BorderLayout.EAST);
-        usernameLabel.setFont(FontUtil.getDefaultFont(16));
+        usernameLabel.setFont(FontUtil.getDefaultIconFont());
         infoPanel.add(nickNameArea);
 
         infoPanel.add(signatureLabel);
