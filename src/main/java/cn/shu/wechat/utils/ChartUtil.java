@@ -389,7 +389,7 @@ public final class ChartUtil {
         for (Map<String, Object> map : mapsContent) {
             categoryDatasetOfContent.setValue(Double.parseDouble(map.get("count").toString())
                     ,"发送次数"
-                    ,map.get("content").toString());
+                    ,map.get("content").toString().length()>100?map.get("content").toString().substring(0,100)+"...":map.get("content").toString());
         }
         Optional<JFreeChart> barChart = createBarChart(categoryDatasetOfContent, "消息内容", "发送数量", "与【" + nickName + "】聊天的消息内容排行");
         return barChart.map(chart -> chart.createBufferedImage(1920, 1080));
@@ -993,7 +993,6 @@ public final class ChartUtil {
         vn.setNumberFormatOverride(df); // 数据轴数据标签的显示格式
         // DomainAxis （区域轴，相当于 x 轴）， RangeAxis （范围轴，相当于 y 轴）
         CategoryAxis domainAxis = plot.getDomainAxis();
-
         domainAxis.setLabelFont(labelFont);// 轴标题
         domainAxis.setTickLabelFont(labelFont);// 轴数值
 
