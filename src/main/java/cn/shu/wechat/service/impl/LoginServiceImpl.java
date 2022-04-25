@@ -473,6 +473,12 @@ public class LoginServiceImpl implements LoginService {
                 Core.getGroupIdSet().add(userName);
             }
             contacts.setType(Contacts.ContactsType.GROUP_USER);
+            //比较上次差异
+            if (compare) {
+                //比较群成员信息
+                Contacts old = Core.getContactMap().get(userName);
+                compareGroupOld(old,  contacts, "群信息更改");
+            }
         } else {
             contacts.setType(Contacts.ContactsType.ORDINARY_USER);
             //比较上次差异
@@ -907,7 +913,42 @@ public class LoginServiceImpl implements LoginService {
         }
         return "";
     }
+    /**
+     * 联系人相关map的put操作
+     * put前统计哪些信息变了
+     *
+     * @param oldV 旧值
+     * @param newV 新值
+     * @param tip  提示信息
+     */
+    private void compareGroupOld(Contacts oldV,  Contacts newV, String tip) {
+        String groupName = ContactsTools.getContactDisplayNameByUserName(oldV.getUsername());
+        //判断新增与删除
+            boolean isDel = true;
+            for (Contacts contactsOld : oldV.getMemberlist()) {
 
+                for (Contacts contactsNew : newV.getMemberlist()) {
+                    if (contactsOld.getUsername().equals(contactsNew.getUsername())){
+                        isDel = false;
+                        //TODO 更改一次头像  有二次seq都不一样，导致重发
+                        compareOld(contactsOld,contactsOld.getUsername(),contactsNew,groupName+"--"+tip);
+                    }
+                }
+                if (isDel){
+                    //已删除
+                    String name = ContactsTools.getContactDisplayNameByUserName(contactsOld.getUsername());
+                    ArrayList<Message> messages = new ArrayList<>();
+                    messages.add(Message.builder().content("退群消息:"+name)
+                            .msgType(WXSendMsgCodeEnum.TEXT.getCode())
+                            .toUsername("filehelper")
+                            .build());
+
+                    MessageTools.sendMsgByUserId(messages);
+                }
+            }
+
+
+    }
     /**
      * 联系人相关map的put操作
      * put前统计哪些信息变了

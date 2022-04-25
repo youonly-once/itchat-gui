@@ -338,11 +338,18 @@ public final class ChartUtil {
         //生成数据
         DefaultCategoryDataset defaultCategoryDataset = new DefaultCategoryDataset();
         for (Map<String, Object> map : maps) {
+
+            String name = "";
+            if (map.get("displayName")!=null){
+                name = map.get("displayName").toString();
+            }else  if (map.get("nickName")!=null){
+                name = map.get("nickName").toString();
+            }
             defaultCategoryDataset.setValue(Double.parseDouble(map.get("count").toString()),
                     "发送数量",
-                    map.get("nickName").toString().length()>20?map.get("nickName").toString().substring(0,19)+"...":map.get("nickName").toString());
+                    name.length()>20?name.substring(0,19)+"...": name);
         }
-        Optional<JFreeChart> barChart = createBarChart(defaultCategoryDataset, "用户昵称", "发送消息数量", "群成员活跃度");
+        Optional<JFreeChart> barChart = createBarChart(defaultCategoryDataset, "用户昵称", "发送消息数量", "【"+ContactsTools.getContactNickNameByUserName(userName)+"】群成员活跃度");
         return barChart.map(jFreeChart -> jFreeChart.createBufferedImage(900, 540));
     }
 
@@ -367,7 +374,7 @@ public final class ChartUtil {
                     ,"发送次数"
                     , WXReceiveMsgCodeEnum.getByCode(Integer.parseInt(map.get("type").toString())).getDesc());
         }
-        Optional<JFreeChart> barChart = createBarChart(categoryDatasetOfType, "消息类型", "发送数量", "与【" + nickName + "】聊天的消息类型排行");
+        Optional<JFreeChart> barChart = createBarChart(categoryDatasetOfType, "消息类型", "发送数量", "【" + nickName + "】群消息类型排行");
         return barChart.map(chart -> chart.createBufferedImage(500, 400));
 
     }
@@ -389,10 +396,10 @@ public final class ChartUtil {
         for (Map<String, Object> map : mapsContent) {
             categoryDatasetOfContent.setValue(Double.parseDouble(map.get("count").toString())
                     ,"发送次数"
-                    ,map.get("content").toString().length()>100?map.get("content").toString().substring(0,100)+"...":map.get("content").toString());
+                    ,map.get("content").toString().length()>10?map.get("content").toString().substring(0,10)+"...":map.get("content").toString());
         }
-        Optional<JFreeChart> barChart = createBarChart(categoryDatasetOfContent, "消息内容", "发送数量", "与【" + nickName + "】聊天的消息内容排行");
-        return barChart.map(chart -> chart.createBufferedImage(1920, 1080));
+        Optional<JFreeChart> barChart = createBarChart(categoryDatasetOfContent, "消息内容", "发送数量", "【" + nickName + "】群消息内容排行");
+        return barChart.map(chart -> chart.createBufferedImage(900, 700));
 
     }
 
