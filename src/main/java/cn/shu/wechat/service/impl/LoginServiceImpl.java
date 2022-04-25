@@ -1,6 +1,5 @@
 package cn.shu.wechat.service.impl;
 
-import cn.shu.WeChatStater;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.api.MessageTools;
@@ -41,7 +40,6 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 登陆服务实现类
@@ -450,6 +448,10 @@ public class LoginServiceImpl implements LoginService {
         contacts.setIscontacts(true);
         String userName = contacts.getUsername();
         String nickName = contacts.getNickname();
+        //保存之前的群信息 方便compare
+        if (Core.getMemberMap().containsKey(contacts.getUsername())) {
+            contacts.setMemberlist(Core.getMemberMap().get(contacts.getUsername()).getMemberlist());
+        }
         Core.getMemberMap().put(userName, contacts);
 
         if ((contacts.getVerifyflag() & 8) != 0) {
@@ -473,18 +475,12 @@ public class LoginServiceImpl implements LoginService {
                 Core.getGroupIdSet().add(userName);
             }
             contacts.setType(Contacts.ContactsType.GROUP_USER);
-            //比较上次差异
-            if (compare) {
-                //比较群成员信息
-                Contacts old = Core.getContactMap().get(userName);
-                compareGroupOld(old,  contacts, "群信息更改");
-            }
         } else {
             contacts.setType(Contacts.ContactsType.ORDINARY_USER);
             //比较上次差异
             if (compare) {
                 Contacts old = Core.getContactMap().get(userName);
-                compareOld(old, userName, contacts, "普通联系人");
+                compareOld(old, userName, contacts, "普通联系人", null);
             }
 
             // 普通联系人
@@ -523,6 +519,12 @@ public class LoginServiceImpl implements LoginService {
                     JSONArray memberArray = WebWxBatchGetContactDetail(group);
                     List<Contacts> memberList = JSON.parseArray(JSON.toJSONString(memberArray), Contacts.class);
                     group.setMemberlist(memberList);
+
+                    //比较群成员信息
+                    Contacts old = Core.getGroupMap().get(userName);
+                    //比较上次差异
+                    compareGroupOld(old, group, "群成员信息更改");
+
                     Core.getMemberMap().put(userName, group);
                     Core.getGroupMap().put(userName, group);
                 }
@@ -922,23 +924,26 @@ public class LoginServiceImpl implements LoginService {
      * @param tip  提示信息
      */
     private void compareGroupOld(Contacts oldV,  Contacts newV, String tip) {
+        if (oldV == null) {
+            return;
+        }
         String groupName = ContactsTools.getContactDisplayNameByUserName(oldV.getUsername());
         //判断新增与删除
-            boolean isDel = true;
-            for (Contacts contactsOld : oldV.getMemberlist()) {
-
-                for (Contacts contactsNew : newV.getMemberlist()) {
-                    if (contactsOld.getUsername().equals(contactsNew.getUsername())){
-                        isDel = false;
-                        //TODO 更改一次头像  有二次seq都不一样，导致重发
-                        compareOld(contactsOld,contactsOld.getUsername(),contactsNew,groupName+"--"+tip);
+        boolean isDel = true;
+        for (Contacts contactsOld : oldV.getMemberlist()) {
+            isDel = true;
+            for (Contacts contactsNew : newV.getMemberlist()) {
+                if (contactsOld.getUsername().equals(contactsNew.getUsername())) {
+                    isDel = false;
+                    //TODO 更改一次头像  有二次seq都不一样，导致重发
+                    compareOld(contactsOld, contactsOld.getUsername(), contactsNew, tip + "：【" + groupName + "】", oldV.getUsername());
                     }
                 }
                 if (isDel){
                     //已删除
                     String name = ContactsTools.getContactDisplayNameByUserName(contactsOld.getUsername());
                     ArrayList<Message> messages = new ArrayList<>();
-                    messages.add(Message.builder().content("退群消息:"+name)
+                    messages.add(Message.builder().content("【" + groupName + "】（" + name + "）:退群!")
                             .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                             .toUsername("filehelper")
                             .build());
@@ -949,6 +954,7 @@ public class LoginServiceImpl implements LoginService {
 
 
     }
+
     /**
      * 联系人相关map的put操作
      * put前统计哪些信息变了
@@ -958,7 +964,7 @@ public class LoginServiceImpl implements LoginService {
      * @param newV 新值
      * @param tip  提示信息
      */
-    private void compareOld(Contacts oldV, String key, Contacts newV, String tip) {
+    private void compareOld(Contacts oldV, String key, Contacts newV, String tip, String groupUserName) {
         if (oldV == null) {
             return;
         }
@@ -971,7 +977,12 @@ public class LoginServiceImpl implements LoginService {
             //发送消息
             String userName = newV.getUsername();
             userName = "filehelper";
-            String name = ContactsTools.getContactDisplayNameByUserName(key);
+            String name = "";
+            if (groupUserName != null) {
+                name = ContactsTools.getMemberDisplayNameOfGroup(groupUserName, key);
+            } else {
+                name = ContactsTools.getContactDisplayNameByUserName(key);
+            }
             messages.add(Message.builder().content(tip + "（" + name + "）属性更新：" + s)
                     .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                     .toUsername(userName)
