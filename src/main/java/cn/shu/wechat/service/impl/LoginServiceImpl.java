@@ -2,7 +2,6 @@ package cn.shu.wechat.service.impl;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
-import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.core.MsgCenter;
@@ -14,12 +13,13 @@ import cn.shu.wechat.enums.parameters.UUIDParaEnum;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.pojo.dto.msg.sync.AddMsgList;
 import cn.shu.wechat.pojo.dto.msg.sync.WebWxSyncMsg;
-import cn.shu.wechat.pojo.entity.AttrHistory;
 import cn.shu.wechat.pojo.entity.Contacts;
-import cn.shu.wechat.pojo.entity.Message;
 import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.utils.AvatarUtil;
-import cn.shu.wechat.utils.*;
+import cn.shu.wechat.utils.CommonTools;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
+import cn.shu.wechat.utils.HttpUtil;
+import cn.shu.wechat.utils.SleepUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -39,7 +39,6 @@ import java.io.OutputStream;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
-import java.util.stream.Collectors;
 
 /**
  * 登陆服务实现类
@@ -74,7 +73,8 @@ public class LoginServiceImpl implements LoginService {
         params.add(new BasicNameValuePair(LoginParaEnum.UUID.para(), Core.getUuid()));
         params.add(new BasicNameValuePair(LoginParaEnum.TIP.para(), LoginParaEnum.TIP.value()));
 
-       while1:while (!isLogin) {
+        while1:
+        while (!isLogin) {
 
             long millis = System.currentTimeMillis();
             params.add(new BasicNameValuePair(LoginParaEnum.R.para(), String.valueOf(millis / 1579L)));
@@ -84,20 +84,20 @@ public class LoginServiceImpl implements LoginService {
             try {
                 String result = EntityUtils.toString(entity);
                 String status = checklogin(result);
-                if (status == null){
-                    continue ;
+                if (status == null) {
+                    continue;
                 }
                 CheckLoginResultEnum byCode = CheckLoginResultEnum.getByCode(status);
 
                 switch (byCode) {
 
-                    case SUCCESS:{
+                    case SUCCESS: {
                         String loginInfo = processLoginInfo(result);
-                        if (loginInfo == null){
+                        if (loginInfo == null) {
                             isLogin = true;
                             Core.setAlive(true);
                             callBack.CallBack(byCode.getMsg());
-                        }else{
+                        } else {
                             callBack.CallBack(loginInfo);
                         }
                         break while1;
@@ -108,12 +108,12 @@ public class LoginServiceImpl implements LoginService {
                         callBack.avatar(avatar);
                         callBack.CallBack(byCode.getMsg());
                         break;
-                    case WAIT_SCAN:{
+                    case WAIT_SCAN: {
                         log.info(byCode.getMsg());
                         callBack.CallBack(byCode.getMsg());
                         break;
                     }
-                    case NONE:{
+                    case NONE: {
                         log.info(byCode.getMsg());
                         break;
                     }
@@ -480,7 +480,7 @@ public class LoginServiceImpl implements LoginService {
             //比较上次差异
             if (compare) {
                 Contacts old = Core.getContactMap().get(userName);
-                compareOld(old, userName, contacts, "普通联系人", null);
+                ContactsTools.compareContacts(old, contacts);
             }
 
             // 普通联系人
@@ -523,7 +523,7 @@ public class LoginServiceImpl implements LoginService {
                     //比较群成员信息
                     Contacts old = Core.getGroupMap().get(userName);
                     //比较上次差异
-                    compareGroupOld(old, group, "群成员信息更改");
+                    ContactsTools.compareGroup(old, group);
 
                     Core.getMemberMap().put(userName, group);
                     Core.getGroupMap().put(userName, group);
@@ -663,6 +663,7 @@ public class LoginServiceImpl implements LoginService {
         }
         return null;
     }
+
     /**
      * 检查登录人的头像
      *
@@ -677,6 +678,7 @@ public class LoginServiceImpl implements LoginService {
         }
         return null;
     }
+
     /**
      * 处理登陆信息
      *
@@ -915,173 +917,6 @@ public class LoginServiceImpl implements LoginService {
         }
         return "";
     }
-    /**
-     * 联系人相关map的put操作
-     * put前统计哪些信息变了
-     *
-     * @param oldV 旧值
-     * @param newV 新值
-     * @param tip  提示信息
-     */
-    private void compareGroupOld(Contacts oldV,  Contacts newV, String tip) {
-        if (oldV == null) {
-            return;
-        }
-        String groupName = ContactsTools.getContactDisplayNameByUserName(oldV.getUsername());
-        //判断新增与删除
-        boolean isDel = true;
-        for (Contacts contactsOld : oldV.getMemberlist()) {
-            isDel = true;
-            for (Contacts contactsNew : newV.getMemberlist()) {
-                if (contactsOld.getUsername().equals(contactsNew.getUsername())) {
-                    isDel = false;
-                    //TODO 更改一次头像  有二次seq都不一样，导致重发
-                    compareOld(contactsOld, contactsOld.getUsername(), contactsNew, tip + "：【" + groupName + "】", oldV.getUsername());
-                    }
-                }
-                if (isDel){
-                    //已删除
-                    String name = ContactsTools.getContactDisplayNameByUserName(contactsOld.getUsername());
-                    ArrayList<Message> messages = new ArrayList<>();
-                    messages.add(Message.builder().content("【" + groupName + "】（" + name + "）:退群!")
-                            .msgType(WXSendMsgCodeEnum.TEXT.getCode())
-                            .toUsername("filehelper")
-                            .build());
-
-                    MessageTools.sendMsgByUserId(messages);
-                }
-            }
 
 
-    }
-
-    /**
-     * 联系人相关map的put操作
-     * put前统计哪些信息变了
-     *
-     * @param oldV 旧值
-     * @param key  联系人key
-     * @param newV 新值
-     * @param tip  提示信息
-     */
-    private void compareOld(Contacts oldV, String key, Contacts newV, String tip, String groupUserName) {
-        if (oldV == null) {
-            return;
-        }
-        //TODO 更改一次头像  有二次seq都不一样，导致重发
-        Map<String, Map<String, String>> differenceMap = JSONObjectUtil.getDifferenceMap(oldV, newV);
-        if (differenceMap.size() > 0) {
-            //待发消息列表
-            ArrayList<Message> messages = new ArrayList<>();
-            String s = mapToString(differenceMap);
-            //发送消息
-            String userName = newV.getUsername();
-            userName = "filehelper";
-            String name = "";
-            if (groupUserName != null) {
-                name = ContactsTools.getMemberDisplayNameOfGroup(groupUserName, key);
-            } else {
-                name = ContactsTools.getContactDisplayNameByUserName(key);
-            }
-            messages.add(Message.builder().content(tip + "（" + name + "）属性更新：" + s)
-                    .msgType(WXSendMsgCodeEnum.TEXT.getCode())
-                    .toUsername(userName)
-                    .build());
-            //Old与New存在差异
-            log.info("{}（{}）属性更新：{}", tip, name, s);
-            //差异存到数据库
-            store(differenceMap, oldV, messages);
-            MessageTools.sendMsgByUserId(messages);
-        }
-
-    }
-
-    /**
-     * 保存修改记录到数据库
-     *
-     * @param differenceMap
-     * @param oldV
-     */
-    private void store(Map<String, Map<String, String>> differenceMap, Contacts oldV, ArrayList<Message> messages) {
-        ArrayList<AttrHistory> attrHistories = new ArrayList<>();
-        for (Entry<String, Map<String, String>> stringMapEntry : differenceMap.entrySet()) {
-            for (Entry<String, String> stringStringEntry : stringMapEntry.getValue().entrySet()) {
-                if (stringMapEntry.getKey().equals("HeadImgUrl")
-                        || stringMapEntry.getKey().equals("头像更换")
-                        || stringMapEntry.getKey().equals("headimgurl")) {
-                    String oldHeadPath = Core.getContactHeadImgPath().get(oldV.getUsername());
-                    String newHeadPath = DownloadTools.downloadBigHeadImg(stringStringEntry.getValue()
-                            , oldV.getUsername());
-                    Core.getContactHeadImgPath().put(oldV.getUsername(), newHeadPath);
-                    //更换头像需要发送图片
-                    //更换前
-                    messages.add(Message.builder()
-                            .msgType(WXSendMsgCodeEnum.PIC.getCode())
-                            .toUsername("filehelper")
-                            .filePath(oldHeadPath).build());
-                    //更换后
-                    messages.add(Message.builder()
-                            .toUsername("filehelper")
-                            .msgType(WXSendMsgCodeEnum.PIC.getCode())
-                            .filePath(newHeadPath).build());
-                    //刷新头像
-                    AvatarUtil.putUserAvatarCache(oldV.getUsername(), newHeadPath);
-                    AttrHistory build = AttrHistory.builder()
-                            .attr(stringMapEntry.getKey())
-                            .oldval(oldHeadPath)
-                            .newval(newHeadPath)
-                            .id(0)
-                            .nickname(oldV.getNickname())
-                            .remarkname(oldV.getNickname())
-                            .username(oldV.getUsername())
-                            .createtime(new Date())
-                            .build();
-                    attrHistories.add(build);
-                } else {
-                    AttrHistory build = AttrHistory.builder()
-                            .attr(stringMapEntry.getKey())
-                            .oldval(stringStringEntry.getKey())
-                            .newval(stringStringEntry.getValue())
-                            .id(0)
-                            .nickname(oldV.getNickname())
-                            .remarkname(oldV.getRemarkname())
-                            .username(oldV.getUsername())
-                            .createtime(new Date())
-                            .build();
-                    attrHistories.add(build);
-                }
-
-            }
-        }
-        try {
-            attrHistoryMapper.batchInsert(attrHistories);
-        } catch (Exception e) {
-            log.warn(e.getMessage());
-        }
-    }
-
-    /**
-     * map转string
-     *
-     * @param differenceMap
-     * @return
-     */
-    private String mapToString(Map<String, Map<String, String>> differenceMap) {
-
-        return differenceMap.entrySet().stream()
-                .flatMap(firstMapEntry -> {
-                    String key = firstMapEntry.getKey();
-                    return firstMapEntry.getValue().entrySet().stream().map(
-                            secondMapEntry -> {
-                                StringBuilder str = new StringBuilder();
-                                if (key.equals("头像更换")|| key.equals("HeadImgUrl")|| key.equals("headimgurl")) {
-                                    str.append("\n【").append(key).append("】更换前后如下");
-                                } else {
-                                    str.append("\n【").append(key).append("】(\"").append(secondMapEntry.getKey()).append("\" -> \"").append(secondMapEntry.getValue()).append("\")");
-                                }
-                                return str;
-                            }
-                    );
-                }).collect(Collectors.joining(""));
-    }
 }

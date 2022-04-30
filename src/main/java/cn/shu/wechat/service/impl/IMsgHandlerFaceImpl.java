@@ -239,7 +239,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 break;
             case "ggr":
                 if (msg.isGroupMsg()) {
-                    Optional<String> pathOptional = chartUtil.makeContactsAttrPieChartAsPng(toUserName,"Sex", 1920, 1080);
+                    Optional<String> pathOptional = chartUtil.makeContactsAttrPieChartAsPng(toUserName, "sex", 1920, 1080);
                     if (pathOptional.isPresent()) {
                         //群消息
                         messages.add(MessageTools.toPicMessage(pathOptional.get(), toUserName));
@@ -250,7 +250,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 break;
             case "gpr":
                 if (msg.isGroupMsg()) {
-                    Optional<String> pathOptional = chartUtil.makeContactsAttrPieChartAsPng(toUserName, "Province", 1920, 1080);
+                    Optional<String> pathOptional = chartUtil.makeContactsAttrPieChartAsPng(toUserName, "province", 1920, 1080);
                     if (pathOptional.isPresent()) {
                         //群消息
                         messages.add(MessageTools.toPicMessage(pathOptional.get(), toUserName));
