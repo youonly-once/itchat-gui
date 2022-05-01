@@ -603,17 +603,8 @@ public class LoginServiceImpl implements LoginService {
         List<Map<String, String>> list = new ArrayList<Map<String, String>>(group.getMemberlist().size());
         for (Contacts o : group.getMemberlist()) {
             //遍历群成员
-            String userName = o.getUsername();
-            if (Core.getContactMap().containsKey(userName)) {
-                memberArray.add(Core.getContactMap().get(userName));
-                continue;
-            }
-            if (userName.equals(Core.getUserName())) {
-                memberArray.add(Core.getUserSelf());
-                continue;
-            }
             HashMap<String, String> map = new HashMap<String, String>();
-            map.put("UserName", userName);
+            map.put("UserName", o.getUsername());
             map.put("EncryChatRoomId", group.getUsername());
             list.add(map);
         }

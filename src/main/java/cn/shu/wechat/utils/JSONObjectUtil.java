@@ -41,6 +41,15 @@ public class JSONObjectUtil {
                     equals = groupNew.equals(groupOld);
                 }
             }
+            if ("memberlist".equals(entry.getKey()) || "MemberList".equals(entry.getKey())) {
+                equals = true;
+            }
+            if ("remarkpyinitial".equals(entry.getKey())) {
+                equals = true;
+            }
+            if ("remarkpyquanpin".equals(entry.getKey())) {
+                equals = true;
+            }
             if (!equals) {
                 HashMap<String, String> temp = new HashMap<>(1);
                 temp.put(CommonTools.emojiFormatter(oldV), CommonTools.emojiFormatter(newV));

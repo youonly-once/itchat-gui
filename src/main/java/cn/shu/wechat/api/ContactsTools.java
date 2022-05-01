@@ -208,10 +208,6 @@ public class ContactsTools {
         if (StringUtils.isEmpty(userName)){
            return null;
         }
-        //群成员为自己的好友
-        if (Core.getMemberMap().containsKey(userName)){
-            return Core.getMemberMap().get(userName);
-        }
         long l = System.currentTimeMillis();
         Optional<Contacts> contacts1 = Optional.ofNullable(groupName)
                 .map(Core.getMemberMap()::get)
@@ -220,6 +216,26 @@ public class ContactsTools {
                         .filter(contacts -> userName.equals(contacts.getUsername()))
                         .findAny());
         System.out.println("System.currentTimeMillis()-l = " + (System.currentTimeMillis() - l));
+        return contacts1.orElse(null);
+    }
+
+    /**
+     * 获取群成员
+     *
+     * @param group    群
+     * @param userName 成员UserName
+     * @return 成员
+     */
+    public static Contacts getMemberOfGroup(Contacts group, String userName) {
+        if (StringUtils.isEmpty(userName)) {
+            return null;
+        }
+
+        Optional<Contacts> contacts1 = Optional.of(group)
+                .map(Contacts::getMemberlist)
+                .flatMap(memberList -> memberList.stream()
+                        .filter(contacts -> userName.equals(contacts.getUsername()))
+                        .findAny());
         return contacts1.orElse(null);
     }
 
@@ -248,14 +264,26 @@ public class ContactsTools {
      */
     public static String getMemberDisplayNameOfGroup(String groupName, String userName) {
         Contacts memberOfGroup = getMemberOfGroup(groupName, userName);
-        return getMemberDisplayNameOfGroup(memberOfGroup,userName);
+        return getMemberDisplayNameOfGroup(memberOfGroup, userName);
+    }
+
+    /**
+     * 获取群成员显示名称
+     *
+     * @param group    群
+     * @param userName 成员UserName
+     * @return 群成员显示名称
+     */
+    public static String getMemberDisplayNameOfGroupObj(Contacts group, String userName) {
+        Contacts memberOfGroup = getMemberOfGroup(group, userName);
+        return getMemberDisplayNameOfGroup(memberOfGroup, userName);
     }
 
     /**
      * 获取群成员显示名称
      *
      * @param memberOfGroup 群
-     * @param userName  成员UserName
+     * @param userName      成员UserName
      * @return 群成员显示名称
      */
     public static String getMemberDisplayNameOfGroup(Contacts memberOfGroup, String userName) {
@@ -368,32 +396,36 @@ public class ContactsTools {
      * @param newGroup 新值
      */
     public static void compareGroup(Contacts oldGroup, Contacts newGroup) {
-        if (oldGroup == null) {
-            return;
-        }
-        compareContacts(oldGroup, newGroup);
-        String groupName = ContactsTools.getContactDisplayNameByUserName(oldGroup.getUsername());
-        //判断新增与删除
-        boolean isDel;
-        for (Contacts memberOld : oldGroup.getMemberlist()) {
-            isDel = true;
-            for (Contacts memberNew : newGroup.getMemberlist()) {
-                if (memberOld.getUsername().equals(memberNew.getUsername())) {
-                    isDel = false;
-                    compareGroupMember(memberOld, memberNew, oldGroup);
+        try {
+            if (oldGroup == null) {
+                return;
+            }
+            compareContacts(oldGroup, newGroup);
+            String groupName = ContactsTools.getContactDisplayNameByUserName(oldGroup.getUsername());
+            //判断新增与删除
+            boolean isDel;
+            for (Contacts memberOld : oldGroup.getMemberlist()) {
+                isDel = true;
+                for (Contacts memberNew : newGroup.getMemberlist()) {
+                    if (memberOld.getUsername().equals(memberNew.getUsername())) {
+                        isDel = false;
+                        compareGroupMember(memberOld, memberNew, oldGroup);
+                    }
+                }
+                if (isDel) {
+                    //已删除
+                    String name = ContactsTools.getMemberDisplayNameOfGroup(oldGroup, memberOld.getUsername());
+                    ArrayList<Message> messages = new ArrayList<>();
+                    messages.add(Message.builder().content("【" + groupName + "】（" + name + "）:退群!")
+                            .msgType(WXSendMsgCodeEnum.TEXT.getCode())
+                            .toUsername("filehelper")
+                            .build());
+
+                    MessageTools.sendMsgByUserId(messages);
                 }
             }
-            if (isDel) {
-                //已删除
-                String name = ContactsTools.getMemberDisplayNameOfGroup(oldGroup, memberOld.getUsername());
-                ArrayList<Message> messages = new ArrayList<>();
-                messages.add(Message.builder().content("【" + groupName + "】（" + name + "）:退群!")
-                        .msgType(WXSendMsgCodeEnum.TEXT.getCode())
-                        .toUsername("filehelper")
-                        .build());
-
-                MessageTools.sendMsgByUserId(messages);
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
 
@@ -419,7 +451,7 @@ public class ContactsTools {
         //待发消息列表
         String differenceStr = differenceMapToString(differenceMap);
         //获取群成员姓名
-        String memberDisplayNameOfGroup = ContactsTools.getMemberDisplayNameOfGroup(oldGroup, oldMember.getUsername());
+        String memberDisplayNameOfGroup = ContactsTools.getMemberDisplayNameOfGroupObj(oldGroup, oldMember.getUsername());
         //获取群昵称
         String groupName = ContactsTools.getContactDisplayNameByUserName(oldGroup);
         List<Message> messages = Collections.singletonList(Message.builder().content("群成员信息更改" + "：【" + groupName + "】" + "（" + memberDisplayNameOfGroup + "）属性更新：" + differenceStr)
@@ -443,25 +475,28 @@ public class ContactsTools {
      * @param newV 新值
      */
     public static void compareContacts(Contacts oldV, Contacts newV) {
-        if (oldV == null) {
-            return;
+        try {
+            if (oldV == null) {
+                return;
+            }
+            //TODO 更改一次头像  有二次seq都不一样，导致重发
+            Map<String, Map<String, String>> differenceMap = JSONObjectUtil.getDifferenceMap(oldV, newV);
+            if (differenceMap.isEmpty()) {
+                return;
+            }
+            String s = differenceMapToString(differenceMap);
+            String name = ContactsTools.getContactDisplayNameByUserName(newV.getUsername());
+            List<Message> messages = Collections.singletonList(Message.builder().content("普通联系人" + "（" + name + "）属性更新：" + s)
+                    .msgType(WXSendMsgCodeEnum.TEXT.getCode())
+                    .toUsername("filehelper")
+                    .build());
+            log.info("普通联系人" + "（" + name + "）属性更新：" + s);
+            //差异存到数据库
+            store(differenceMap, oldV, messages);
+            MessageTools.sendMsgByUserId(messages);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        //TODO 更改一次头像  有二次seq都不一样，导致重发
-        Map<String, Map<String, String>> differenceMap = JSONObjectUtil.getDifferenceMap(oldV, newV);
-        if (differenceMap.isEmpty()) {
-            return;
-        }
-        String s = differenceMapToString(differenceMap);
-        String name = ContactsTools.getContactDisplayNameByUserName(newV.getUsername());
-        List<Message> messages = Collections.singletonList(Message.builder().content("普通联系人" + "（" + name + "）属性更新：" + s)
-                .msgType(WXSendMsgCodeEnum.TEXT.getCode())
-                .toUsername("filehelper")
-                .build());
-        log.info("普通联系人" + "（" + name + "）属性更新：" + s);
-        //差异存到数据库
-        store(differenceMap, oldV, messages);
-        MessageTools.sendMsgByUserId(messages);
-
 
     }
 
