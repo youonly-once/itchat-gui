@@ -709,7 +709,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
 
         Message finalMessage = message;
         WXReceiveMsgCodeEnum finalMsgType = msgType;
-        new SwingWorker<Void, Integer>() {
+        new SwingWorker<Void, Long>() {
             private WebWXSendMsgResponse wxSendMsgResponse;
             @Override
             protected Void doInBackground() throws Exception {
@@ -718,8 +718,8 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                 UploadTaskCallback callback = new UploadTaskCallback() {
                     @Override
                     public void onTaskSuccess(int curr, int size) {
-                        int progress = (int) (((curr * 1.0f) / size) * 100);
-                        publish(progress);
+
+                        publish((long)curr,(long)size);
                     }
 
                     @Override
@@ -736,8 +736,10 @@ public class ChatMessagePanel extends ParentAvailablePanel {
             }
 
             @Override
-            protected void process(List<Integer> chunks) {
-                Integer progress = chunks.get(chunks.size() - 1);
+            protected void process(List<Long> chunks) {
+                Long curr = chunks.get(chunks.size() - 2);
+                Long size = chunks.get(chunks.size() - 1);
+                int progress = (int) (((curr * 1.0f) / size) * 100);
                 // 上传完成
                 if (progress == 100) {
                     RoomsPanel.getContext().updateRoomItem(roomId, 0, finalMessage.getPlaintext(), LocalDateTime.now(),ContactsTools.isMute(roomId),false);
@@ -755,14 +757,17 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                             MessageRightAttachmentViewHolder holder = (MessageRightAttachmentViewHolder) viewHolder;
 
                             // 隐藏"等待上传"，并显示进度条
-                            holder.sizeLabel.setVisible(false);
                             holder.progressBar.setVisible(true);
                             holder.progressBar.setValue(progress);
 
                             if (progress >= 100) {
                                 holder.progressBar.setVisible(false);
-                                holder.sizeLabel.setVisible(true);
                                 holder.sizeLabel.setText(FileCache.fileSizeString(uploadFilename));
+                            }else{
+                                float v = (curr * 1.0f) / size;
+                                long length = file.length();
+                                long v1 = (long)(v * length);
+                                holder.sizeLabel.setText(FileCache.fileSizeString(v1)+"/"+FileCache.fileSizeString(uploadFilename));
                             }
                         }
                         break;

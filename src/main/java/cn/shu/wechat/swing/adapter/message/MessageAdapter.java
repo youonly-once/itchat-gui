@@ -54,6 +54,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Created by 舒新胜 on 17-6-2.
@@ -428,7 +429,10 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         holder.attachmentIcon.setIcon(attachmentTypeIcon);
         holder.attachmentTitle.setText(item.getFileName());
         holder.sender.setText(item.getPlainName());
-        holder.sizeLabel.setText(FileCache.fileSizeString(item.getFileSize()));
+        if (DownloadTools.FILE_DOWNLOAD_PROCESS.containsKey(item.getFilePath())){
+            updateFileDownloadProgress(holder,item);
+        }
+        holder.sizeLabel.setText("0/"+FileCache.fileSizeString(item.getFileSize()));
 
         setAttachmentClickListener(holder, item);
 
@@ -455,6 +459,8 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         holder.attachmentTitle.setText(item.getFileName());
         if (item.getProgress()==0 || item.getProgress() == 100){
             holder.progressBar.setVisible(false);
+        }else if (DownloadTools.FILE_DOWNLOAD_PROCESS.containsKey(item.getFilePath())){
+            updateFileDownloadProgress(holder,item);
         }
 
 
@@ -480,9 +486,10 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         }
 
         setAttachmentClickListener(holder, item);
-
-        if (item.getProgress() > 0) {
+        if (item.getProgress() >= 100) {
             holder.sizeLabel.setText(FileCache.fileSizeString(item.getFileSize()));
+        }else if (item.getProgress() > 0) {
+            holder.sizeLabel.setText("0/"+FileCache.fileSizeString(item.getFileSize()));
         } else {
             holder.sizeLabel.setText("等待上传...");
         }
@@ -495,6 +502,51 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         listView.setScrollHiddenOnMouseLeave(holder.attachmentTitle);
     }
 
+    /**
+     * 更新下载文件进度
+     * @param holder
+     * @param item
+     */
+    private void updateFileDownloadProgress(MessageAttachmentViewHolder holder, Message item){
+        holder.progressBar.setValue(1);
+        holder.progressBar.setVisible(true);
+        holder.sizeLabel.setText("0/"+FileCache.fileSizeString(item.getFileSize()));
+        LinkedBlockingDeque<Long> progress = DownloadTools.FILE_DOWNLOAD_PROCESS.get(item.getFilePath());
+        new SwingWorker<Object,Long>(){
+            @Override
+            protected Object doInBackground() throws Exception {
+                //已下载字节数
+                long p = 0;
+                while((p = progress.take())!=-100L){
+                    publish(p);
+                }
+                DownloadTools.FILE_DOWNLOAD_STATUS.remove(item.getFilePath());
+                return null;
+            }
+
+            @Override
+            protected void process(List<Long> chunks) {
+                Long loadedSize = chunks.get(0);
+                int progress = (int) (((loadedSize * 1.0f) / item.getFileSize()) * 100);
+                if (progress>=100){
+                    holder.progressBar.setValue(100);
+                    holder.progressBar.setVisible(false);
+                }
+                holder.sizeLabel.setText(FileCache.fileSizeString(loadedSize)+"/"+FileCache.fileSizeString(item.getFileSize()));
+                holder.progressBar.setValue(progress);
+                super.process(chunks);
+            }
+
+            @Override
+            protected void done() {
+                super.done();
+                holder.progressBar.setValue(100);
+                holder.progressBar.setVisible(false);
+                holder.sizeLabel.setText(FileCache.fileSizeString(item.getFileSize()));
+
+            }
+        }.execute();
+    }
     /**
      * 设置附件点击监听
      *

@@ -27,7 +27,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * 下载工具类
@@ -46,6 +48,12 @@ public class DownloadTools {
      * null 下载失败 或者未下载
      */
     public final static ConcurrentHashMap<String, Boolean> FILE_DOWNLOAD_STATUS = new ConcurrentHashMap<>();
+
+    /**
+     * 文件下载进度
+     */
+    public final static HashMap<String, LinkedBlockingDeque<Long>> FILE_DOWNLOAD_PROCESS = new HashMap<>();
+
     private final static WechatConfiguration WECHAT_CONFIGURATION = SpringContextHolder.getBean(WechatConfiguration.class);
 
 
@@ -143,11 +151,16 @@ public class DownloadTools {
     private static void entity2File(HttpEntity entity, String path) {
         if (entity == null) {
             DownloadTools.FILE_DOWNLOAD_STATUS.remove(path);
+            DownloadTools.FILE_DOWNLOAD_PROCESS.remove(path);
             log.error("下载失败：response entity is null.");
             return;
         }
         if (!DownloadTools.FILE_DOWNLOAD_STATUS.containsKey(path)) {
             DownloadTools.FILE_DOWNLOAD_STATUS.put(path, false);
+        }
+
+        if (!DownloadTools.FILE_DOWNLOAD_PROCESS.containsKey(path)) {
+            DownloadTools.FILE_DOWNLOAD_PROCESS.put(path,new LinkedBlockingDeque<Long>());
         }
         OutputStream out = null;
         try {
@@ -167,12 +180,22 @@ public class DownloadTools {
 
             }
             out = new FileOutputStream(file);
-            byte[] bytes = EntityUtils.toByteArray(entity);
-            out.write(bytes);
+            int size = 1024 * 1024;
+            byte[] data = new byte[size];
+            int readLen =0;
+            long readed = 0;
+            while ((readLen = entity.getContent().read(data, 0, size))>0){
+                out.write(data,0,readLen);
+                readed = readed +readLen;
+                DownloadTools.FILE_DOWNLOAD_PROCESS.get(path).offer(readed);
+                System.out.println(readed);
+            }
+            DownloadTools.FILE_DOWNLOAD_PROCESS.get(path).offer(-100L);
             out.flush();
             log.info("资源下载完成：{}", path);
             DownloadTools.FILE_DOWNLOAD_STATUS.put(path, true);
         } catch (Exception e) {
+            DownloadTools.FILE_DOWNLOAD_PROCESS.remove(path);
             DownloadTools.FILE_DOWNLOAD_STATUS.remove(path);
             log.info(e.getMessage());
             e.printStackTrace();

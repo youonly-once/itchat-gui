@@ -215,7 +215,6 @@ public class ContactsTools {
                 .flatMap(memberList -> memberList.stream()
                         .filter(contacts -> userName.equals(contacts.getUsername()))
                         .findAny());
-        System.out.println("System.currentTimeMillis()-l = " + (System.currentTimeMillis() - l));
         return contacts1.orElse(null);
     }
 

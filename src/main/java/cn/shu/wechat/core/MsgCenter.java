@@ -32,6 +32,7 @@ import javax.swing.*;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import static cn.shu.wechat.enums.WXReceiveMsgCodeEnum.MSGTYPE_TEXT;
 
@@ -194,6 +195,7 @@ public class MsgCenter {
         msg.setFilePath(path);
 
         fileDownloadStatus.put(path, false);
+        DownloadTools.FILE_DOWNLOAD_PROCESS.put(path,new LinkedBlockingDeque<Long>());
         ExecutorServiceUtil.getGlobalExecutorService().execute(() -> DownloadTools.getDownloadFn(msg));
 
 

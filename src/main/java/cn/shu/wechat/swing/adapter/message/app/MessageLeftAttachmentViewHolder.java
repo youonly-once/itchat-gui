@@ -64,7 +64,7 @@ public class MessageLeftAttachmentViewHolder extends MessageAttachmentViewHolder
         attachmentPanel.add(attachmentTitle, new GBC(1, 0).setWeight(100, 1).setAnchor(GBC.NORTH)
                 .setInsets(5, 8, 5, 5));
         attachmentPanel.add(progressBar, new GBC(1, 1).setWeight(1, 1).setFill(GBC.HORIZONTAL)
-                .setAnchor(GBC.SOUTH).setInsets(0, 8, 5, 5));
+                .setAnchor(GBC.SOUTH).setInsets(-20, 100, 5, 5));
 
         attachmentPanel.add(sizeLabel, new GBC(1, 1).setWeight(1, 1).setFill(GBC.HORIZONTAL).setAnchor(GBC.SOUTH).setInsets(-20, 8, 3, 0));
 
