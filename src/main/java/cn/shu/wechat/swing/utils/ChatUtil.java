@@ -66,7 +66,7 @@ public final class ChatUtil {
 
             //刷新消息
             if (message != null) {
-                message.setProgress(1);
+                message.setProgress(100);
                 message.setIsSend(true);
                 //新消息来了后创建房间
                 //创建房间的时候会从数据库加载历史消息，由于这次的消息已经写入了数据库，所以不用再添加了

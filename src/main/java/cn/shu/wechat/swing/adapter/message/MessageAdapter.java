@@ -459,7 +459,8 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         holder.attachmentTitle.setText(item.getFileName());
         if (item.getProgress()==0 || item.getProgress() == 100){
             holder.progressBar.setVisible(false);
-        }else if (DownloadTools.FILE_DOWNLOAD_PROCESS.containsKey(item.getFilePath())){
+        }
+        if (DownloadTools.FILE_DOWNLOAD_PROCESS.containsKey(item.getFilePath())){
             updateFileDownloadProgress(holder,item);
         }
 
@@ -486,8 +487,12 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         }
 
         setAttachmentClickListener(holder, item);
-        if (item.getProgress() >= 100) {
-            holder.sizeLabel.setText(FileCache.fileSizeString(item.getFileSize()));
+        if (item.getProgress() >= 100 ) {
+            if (DownloadTools.FILE_DOWNLOAD_PROCESS.containsKey(item.getFilePath())){
+                holder.sizeLabel.setText("0/"+FileCache.fileSizeString(item.getFileSize()));
+            }else{
+                holder.sizeLabel.setText(FileCache.fileSizeString(item.getFileSize()));
+            }
         }else if (item.getProgress() > 0) {
             holder.sizeLabel.setText("0/"+FileCache.fileSizeString(item.getFileSize()));
         } else {
