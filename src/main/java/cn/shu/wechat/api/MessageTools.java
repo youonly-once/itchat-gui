@@ -118,7 +118,7 @@ public class MessageTools {
         } catch (Exception e) {
             e.printStackTrace();
             log.error("发送消息失败：{}", e.getMessage());
-            return WebWXSendMsgResponse.error("messages is null");
+            return WebWXSendMsgResponse.error(e.getMessage());
 
         }
         return sendMsgResponse;
@@ -256,7 +256,7 @@ public class MessageTools {
             }
         }
         if (file.length() > maxFileSize) {
-            throw new WebWXException("不能上传大于20M的文件：" + filePath);
+            throw new WebWXException("不能上传大于20M的文件" );
         }
         int fileId = fileCount++;
         String fileMime = MimeTypeUtil.getMimeByPath(file.getAbsolutePath());

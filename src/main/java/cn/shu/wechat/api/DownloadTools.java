@@ -88,13 +88,13 @@ public class DownloadTools {
                         ,null,headerMap,true);
                 break;
             case MSGTYPE_APP:
-                headerMap.put("Range", "bytes=0-");
+               // headerMap.put("Range", "bytes=0-");
                 url = String.format(URLEnum.WEB_WX_GET_MEDIA.getUrl(), (String) Core.getLoginInfoMap().get("fileUrl"));
                 params.add(new BasicNameValuePair("sender", msg.getFromUserName()));
                 params.add(new BasicNameValuePair("mediaid", msg.getMediaId()));
                 params.add(new BasicNameValuePair("filename", msg.getFileName()));
-                params.add(new BasicNameValuePair("msgid", String.valueOf(msg.getNewMsgId())));
-                params.add(new BasicNameValuePair("skey", (String) Core.getLoginInfoMap().get("skey")));
+               // params.add(new BasicNameValuePair("msgid", String.valueOf(msg.getNewMsgId())));
+               // params.add(new BasicNameValuePair("skey", (String) Core.getLoginInfoMap().get("skey")));
                 entity = HttpUtil.doGet(url, params, true, headerMap);
                 break;
             case MSGTYPE_MAP:

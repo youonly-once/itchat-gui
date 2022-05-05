@@ -727,8 +727,10 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                     }
                 };
                 //发送消息 等待回调
-                wxSendMsgResponse = MessageTools.sendMsgByUserId(finalMessage, callback);
-
+                    wxSendMsgResponse = MessageTools.sendMsgByUserId(finalMessage, callback);
+                    if (wxSendMsgResponse.getBaseResponse().getRet()==-1) {
+                        JOptionPane.showMessageDialog(null, wxSendMsgResponse.getBaseResponse().getErrMsg(), "上传失败", JOptionPane.ERROR_MESSAGE);
+                    }
                 return null;
 
             }
@@ -909,7 +911,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                     JOptionPane.showMessageDialog(null, "文件打开失败，没有找到关联的应用程序", "打开失败", JOptionPane.ERROR_MESSAGE);
                     e1.printStackTrace();
                 } catch (IllegalArgumentException e2) {
-                    JOptionPane.showMessageDialog(null, "文件不存在，可能已被删除", "打开失败", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "文件下载中或已被删除", "打开失败", JOptionPane.ERROR_MESSAGE);
                 }
 
             }
