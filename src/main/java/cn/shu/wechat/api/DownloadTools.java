@@ -189,7 +189,6 @@ public class DownloadTools {
                 out.write(data,0,readLen);
                 readed = readed +readLen;
                 DownloadTools.FILE_DOWNLOAD_PROCESS.get(path).offer(readed);
-                System.out.println(readed);
             }
             DownloadTools.FILE_DOWNLOAD_PROCESS.get(path).offer(-100L);
             out.flush();

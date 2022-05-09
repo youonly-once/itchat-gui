@@ -46,7 +46,7 @@ public class MessageTools {
     /**
      * 微信上传最大文件大小
      */
-    public static final long maxFileSize = 1024 * 1024 * 20;
+    public static final long maxFileSize = 1024 * 1024 * 25;
     /**
      * 本次登录以来上传文件的数量
      */
@@ -256,7 +256,7 @@ public class MessageTools {
             }
         }
         if (file.length() > maxFileSize) {
-            throw new WebWXException("不能上传大于20M的文件" );
+            throw new WebWXException("不能上传大于25M的文件" );
         }
         int fileId = fileCount++;
         String fileMime = MimeTypeUtil.getMimeByPath(file.getAbsolutePath());

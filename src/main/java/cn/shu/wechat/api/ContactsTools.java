@@ -453,7 +453,8 @@ public class ContactsTools {
         String memberDisplayNameOfGroup = ContactsTools.getMemberDisplayNameOfGroupObj(oldGroup, oldMember.getUsername());
         //获取群昵称
         String groupName = ContactsTools.getContactDisplayNameByUserName(oldGroup);
-        List<Message> messages = Collections.singletonList(Message.builder().content("群成员信息更改" + "：【" + groupName + "】" + "（" + memberDisplayNameOfGroup + "）属性更新：" + differenceStr)
+        ArrayList<Message> messages = new ArrayList<>();
+         messages.add(Message.builder().content("群成员信息更改" + "：【" + groupName + "】" + "（" + memberDisplayNameOfGroup + "）属性更新：" + differenceStr)
                 .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                 .toUsername("filehelper")
                 .build());
@@ -485,7 +486,8 @@ public class ContactsTools {
             }
             String s = differenceMapToString(differenceMap);
             String name = ContactsTools.getContactDisplayNameByUserName(newV.getUsername());
-            List<Message> messages = Collections.singletonList(Message.builder().content("普通联系人" + "（" + name + "）属性更新：" + s)
+            ArrayList<Message> messages = new ArrayList<>();
+             messages.add(Message.builder().content("普通联系人" + "（" + name + "）属性更新：" + s)
                     .msgType(WXSendMsgCodeEnum.TEXT.getCode())
                     .toUsername("filehelper")
                     .build());
