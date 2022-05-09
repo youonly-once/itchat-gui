@@ -25,6 +25,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -515,16 +516,22 @@ public class DownloadTools {
         //发消息的用户或群名称
         String username = ContactsTools.getContactDisplayNameByUserName(msg.getFromUserName());
         username = replace(username);
+
         //群成员名称
         String groupUsername = "";
         if (msg.isGroupMsg() && msg.getMemberName() != null) {
-            groupUsername = ContactsTools.getContactDisplayNameByUserName(msg.getMemberName());
+            groupUsername = ContactsTools.getMemberDisplayNameOfGroup(msg.getFromUserName(),msg.getMemberName());
         }
         groupUsername = groupUsername == null ? "" : replace(groupUsername);
-        String path = WECHAT_CONFIGURATION.getBasePath() + File.separator + msg.getType() + File.separator + username + File.separator + groupUsername + File.separator;
+        //basePath/消息类型/用户或群名/群成员名称/日期/文件名-日期.类型
+        String path = WECHAT_CONFIGURATION.getBasePath() + File.separator + msg.getType()
+                + File.separator + username
+                + File.separator + groupUsername
+                + File.separator + DateUtils.formatDate(new Date(), "yyyy-MM-dd")
+                + File.separator;
 
-        fileName = fileName
-                + "-" + DateUtils.formatDate(new Date(), "yyyy-MM-dd-HH-mm-ss")
+        fileName = fileName.substring(0,fileName.length()-ext.length())+ "-"
+                + DateUtils.formatDate(new Date(), "yyyy-MM-dd-HH-mm-ss")
                 + ext;
 
 

@@ -28,7 +28,7 @@ public class ImageCache {
             IMAGE_CACHE_ROOT_PATH = WechatConfiguration.getInstance().getBasePath() + "/cache/image";
 
             File file = new File(IMAGE_CACHE_ROOT_PATH);
-            if (!file.mkdirs()) {
+            if (!file.exists() && !file.mkdirs()) {
                 log.warn("创建图片缓存目录失败：{}", file.getAbsolutePath());
             }
         } catch (Exception e) {
