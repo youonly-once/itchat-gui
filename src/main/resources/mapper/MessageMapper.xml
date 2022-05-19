@@ -101,21 +101,7 @@
     to_nickname, is_send, slave_path, response, play_length, img_height, img_width, voice_length,file_size,
     file_name
   </sql>
-  <select id="selectByExample" parameterType="cn.shu.wechat.pojo.entity.MessageExample" resultMap="BaseResultMap">
-    <!--@mbg.generated-->
-    select
-    <if test="distinct">
-      distinct
-    </if>
-    <include refid="Base_Column_List" />
-    from message
-    <if test="_parameter != null">
-      <include refid="Example_Where_Clause" />
-    </if>
-    <if test="orderByClause != null">
-      order by ${orderByClause}
-    </if>
-  </select>
+
   <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
     <!--@mbg.generated-->
     select 
@@ -128,13 +114,7 @@
     delete from message
     where id = #{id,jdbcType=CHAR}
   </delete>
-  <delete id="deleteByExample" parameterType="cn.shu.wechat.pojo.entity.MessageExample">
-    <!--@mbg.generated-->
-    delete from message
-    <if test="_parameter != null">
-      <include refid="Example_Where_Clause" />
-    </if>
-  </delete>
+
   <insert id="insert" parameterType="cn.shu.wechat.pojo.entity.Message">
     <!--@mbg.generated-->
     insert into message (id, msg_id, msg_type, 
@@ -325,13 +305,7 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="cn.shu.wechat.pojo.entity.MessageExample" resultType="java.lang.Long">
-    <!--@mbg.generated-->
-    select count(*) from message
-    <if test="_parameter != null">
-      <include refid="Example_Where_Clause" />
-    </if>
-  </select>
+
   <update id="updateByExampleSelective" parameterType="map">
     <!--@mbg.generated-->
     update message

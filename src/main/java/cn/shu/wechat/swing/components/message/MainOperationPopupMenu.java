@@ -16,7 +16,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * Created by 舒新胜 on 2017/6/5.
+ *
+ * @author 舒新胜
+ * @date 2017/6/5
  */
 public class MainOperationPopupMenu extends JPopupMenu {
     public MainOperationPopupMenu() {
@@ -43,16 +45,13 @@ public class MainOperationPopupMenu extends JPopupMenu {
         icon.setImage(icon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
         item1.setIcon(icon1);
         statistics.setIcon(icon);
-        statistics.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        statistics.addActionListener(e -> {
 
-                ChartPopupMenu instance = ChartPopupMenu.getInstance(Core.getUserName());
-                int posX =  (MainFrame.getContext().currentWindowWidth - instance.getWidth()) / 2;
-                int  posY =  (MainFrame.getContext().currentWindowHeight - instance.getHeight()) / 2;
+            ChartPopupMenu instance = ChartPopupMenu.getInstance(Core.getUserName());
+            int posX =  (MainFrame.getContext().currentWindowWidth - instance.getWidth()) / 2;
+            int  posY =  (MainFrame.getContext().currentWindowHeight - instance.getHeight()) / 2;
 
-                instance.show(MainFrame.getContext(), posX, posY);
-            }
+            instance.show(MainFrame.getContext(), posX, posY);
         });
         statistics.setIconTextGap(5);
         statistics.setUI(new RCMainOperationMenuItemUI());

@@ -1,5 +1,7 @@
 package cn.shu.wechat.pojo.entity;
 
+import cn.afterturn.easypoi.excel.annotation.Excel;
+import cn.afterturn.easypoi.excel.annotation.ExcelCollection;
 import com.alibaba.fastjson.annotation.JSONField;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,71 +22,104 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Contacts {
+    @Excel(name="用户名",width = 50)
     private String username;
 
-    private Double chatroomid;
+    @Excel(name="昵称",width = 20)
+    private String nickname;
 
+    @Excel(name="签名",width = 50)
+    private String signature;
+
+    @Excel(name="性别",replace ={"男_1","女_2"} )
     private Byte sex;
 
+    @Excel(name="备注",width = 20)
+    private String remarkname;
+
+    @Excel(name="省份")
+    private String province;
+
+    @Excel(name="城市")
+    private String city;
+
+    @Excel(name="chatroomid")
+    private Double chatroomid;
+
+    @Excel(name="attrstatus")
     private Double attrstatus;
 
     /**
      * 等于0消息免打扰 1正常
      */
+    @Excel(name="statues")
     private Double statues;
 
+    @Excel(name="pyquanpin")
     private String pyquanpin;
 
+    @Excel(name="encrychatroomid")
     private String encrychatroomid;
 
+    @Excel(name="displayname")
     private String displayname;
 
+    @Excel(name="verifyflag")
     private Integer verifyflag;
 
+    @Excel(name="unifriend")
     private Double unifriend;
 
+    @Excel(name="contactflag")
     private Double contactflag;
 
+    //@ExcelCollection(name="群成员")
     private List<Contacts> memberlist;
 
+    @Excel(name="starfriend")
     private Double starfriend;
 
+    @Excel(name="headimgurl")
     private String headimgurl;
 
+    @Excel(name="appaccountflag")
     private Double appaccountflag;
 
+    @Excel(name="membercount")
     private Double membercount;
 
+    @Excel(name="remarkpyinitial")
     private String remarkpyinitial;
 
-    private String city;
 
-    private String nickname;
-
-    private String province;
-
+    @Excel(name="snsflag")
     private Double snsflag;
 
+    @Excel(name="alias")
     private String alias;
 
+    @Excel(name="keyword")
     private String keyword;
 
+    @Excel(name="hideinputbarflag")
     private Double hideinputbarflag;
 
-    private String signature;
-
-    private String remarkname;
-
+    @Excel(name="remarkpyquanpin")
     private String remarkpyquanpin;
 
+    @Excel(name="uin")
     private Double uin;
 
+    @Excel(name="owneruin")
     private Double owneruin;
 
+    @Excel(name="isowner")
     private Double isowner;
 
+    @Excel(name="pyinitial")
     private String pyinitial;
 
+    @Excel(name="ticket")
     private String ticket;
 
 
@@ -123,8 +158,12 @@ public class Contacts {
     private String groupName;
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Contacts contacts = (Contacts) o;
         return contacts.username.equals(username);
     }

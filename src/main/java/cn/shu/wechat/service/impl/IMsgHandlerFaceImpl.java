@@ -14,13 +14,13 @@ import cn.shu.wechat.pojo.dto.tuling.enums.ResultType;
 import cn.shu.wechat.pojo.dto.tuling.response.Results;
 import cn.shu.wechat.pojo.dto.tuling.response.TuLingResponseBean;
 import cn.shu.wechat.pojo.entity.Message;
-import cn.shu.wechat.pojo.entity.MessageExample;
 import cn.shu.wechat.pojo.entity.Status;
 import cn.shu.wechat.pojo.entity.StatusExample;
 import cn.shu.wechat.service.IMsgHandlerFace;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 
@@ -420,10 +420,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         }
 
         //查询历史消息
-        MessageExample messageExample = new MessageExample();
-        MessageExample.Criteria criteria = messageExample.createCriteria();
-        criteria.andMsgIdEqualTo(msgId.toString());
-        List<Message> messages = messageMapper.selectByExample(messageExample);
+        List<Message> messages = messageMapper.selectList(Wrappers.<Message>lambdaQuery().eq(Message::getMsgId,msgId.toString()));
         if (messages.isEmpty()) {
             log.error("未获取到历史消息。");
             return null;

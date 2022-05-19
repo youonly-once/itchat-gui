@@ -1,7 +1,6 @@
 package cn.shu.wechat.mapper;
 
 import cn.shu.wechat.pojo.entity.Message;
-import cn.shu.wechat.pojo.entity.MessageExample;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -14,9 +13,6 @@ import java.util.Map;
  * @创建时间 8/7/2021 12:31
  */
 public interface MessageMapper extends BaseMapper<Message> {
-    long countByExample(MessageExample example);
-
-    int deleteByExample(MessageExample example);
 
     int deleteByPrimaryKey(String id);
 
@@ -26,13 +22,7 @@ public interface MessageMapper extends BaseMapper<Message> {
 
     int insertSelective(Message record);
 
-    List<Message> selectByExample(MessageExample example);
-
     Message selectByPrimaryKey(String id);
-
-    int updateByExampleSelective(@Param("record") Message record, @Param("example") MessageExample example);
-
-    int updateByExample(@Param("record") Message record, @Param("example") MessageExample example);
 
     int updateByPrimaryKeySelective(Message record);
 
@@ -41,8 +31,6 @@ public interface MessageMapper extends BaseMapper<Message> {
     int updateBatch(List<Message> list);
 
     int batchInsert(@Param("list") List<Message> list);
-
-    int updateBatchSelective(List<Message> list);
 
     Message selectLastMessage(String roomId);
 

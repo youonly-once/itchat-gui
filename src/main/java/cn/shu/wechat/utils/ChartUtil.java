@@ -4,20 +4,11 @@ import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
-import cn.shu.wechat.enums.WXSendMsgCodeEnum;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
-import cn.shu.wechat.mapper.ContactsMapper;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.pojo.entity.Contacts;
-import cn.shu.wechat.pojo.entity.Message;
-import cn.shu.wechat.pojo.entity.MessageExample;
 import cn.shu.wechat.service.LoginService;
-import cn.shu.wechat.swing.utils.EmojiUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.jfree.chart.*;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.CategoryLabelPositions;
@@ -49,12 +40,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.reflect.Field;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -84,9 +71,6 @@ public final class ChartUtil {
 
     @Resource
     private MessageMapper messageMapper;
-
-    @Resource
-    private ContactsMapper contactsMapper;
 
     @Resource
     private LoginService loginService;
