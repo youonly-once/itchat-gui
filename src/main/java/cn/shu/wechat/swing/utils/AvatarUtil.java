@@ -6,6 +6,7 @@ import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.pojo.entity.Contacts;
 import cn.shu.wechat.swing.components.Colors;
+import cn.shu.wechat.swing.frames.MainFrame;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 
@@ -24,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 头像创建工具类
+ * @author SXS
  */
 @Log4j2
 public final class AvatarUtil {
@@ -63,6 +65,10 @@ public final class AvatarUtil {
      */
     private static final Map<String, ImageIcon> avatarCache = new ConcurrentHashMap<>();
 
+    public static void invalidateAvatarCache(){
+        avatarCache.clear();
+        avatarCacheBig.clear();
+    }
     /**
      * 大头像缓存
      */
@@ -138,6 +144,13 @@ public final class AvatarUtil {
      * @param userName 用户名
      */
     private static ImageIcon getOrDownloadUserAvatar(String userName, Contacts user) {
+        if (WechatConfiguration.getInstance().getFuzzUpAvatar()){
+            Image avatar = createAvatar(ContactsTools.getContactDisplayNameByUserName(userName));
+            if (avatar == null){
+                return IconUtil.getIcon(MainFrame.getContext(),"/image/smile.png");
+            }
+           return new ImageIcon(avatar.getScaledInstance(40, 40, Image.SCALE_SMOOTH));
+        }
         //获取内存中的头像
         ImageIcon avatarIcon = avatarCache.get(userName);
         if (avatarIcon != null) {

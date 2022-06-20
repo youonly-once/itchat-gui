@@ -29,12 +29,14 @@ public class SystemConfigDialog extends JDialog {
     private JLabel aboutLabel;
     private JLabel clearCacheLabel;
     private JLabel robotLabel;
+    private JLabel privacyLabel;
 
     private ChangeAvatarPanel changeAvatarPanel;
     private ChangePasswordPanel changePasswordPanel;
     private MePanel mePanel;
     private AboutPanel aboutPanel;
     private RobotSettingPanel robotPanel;
+    private PrivacySettingPanel privacyPanel;
     private ClearCachePanel clearCachePanel;
 
 
@@ -46,8 +48,9 @@ public class SystemConfigDialog extends JDialog {
     public static final String ABOUT = "ABOUT";
     public static final String CLEAR_CHACE = "CLEAR_CHACE";
     public static final String ROBOT = "ROBOT";
+    public static final String PRIVACY = "PRIVACY";
 
-    private CardLayout cardLayout = new CardLayout();
+    private final CardLayout cardLayout = new CardLayout();
 
 
     public static final int DIALOG_WIDTH = 580;
@@ -124,9 +127,13 @@ public class SystemConfigDialog extends JDialog {
         robotLabel = new JLabel("机器人设置");
         processButtonLabel(robotLabel);
 
+        // 隐私设置 按钮
+        privacyLabel = new JLabel("隐私设置");
+        processButtonLabel(privacyLabel);
+
         //聊天设置 按钮
         robotPanel= new RobotSettingPanel();
-
+        privacyPanel = new PrivacySettingPanel();
         // 更改头像面板
         changeAvatarPanel = new ChangeAvatarPanel();
 
@@ -159,6 +166,7 @@ public class SystemConfigDialog extends JDialog {
         settingMenuPanel.add(changePasswordLabel);
         settingMenuPanel.add(clearCacheLabel);
         settingMenuPanel.add(robotLabel);
+        settingMenuPanel.add(privacyLabel);
         settingMenuPanel.add(aboutLabel);
 
         settingAreaPanel.setLayout(cardLayout);
@@ -167,6 +175,7 @@ public class SystemConfigDialog extends JDialog {
         settingAreaPanel.add(changePasswordPanel, CHANGE_PASSWORD);
         settingAreaPanel.add(aboutPanel, ABOUT);
         settingAreaPanel.add(robotPanel, ROBOT);
+        settingAreaPanel.add(privacyPanel, PRIVACY);
         settingAreaPanel.add(clearCachePanel, CLEAR_CHACE);
 
 
@@ -224,6 +233,8 @@ public class SystemConfigDialog extends JDialog {
                         cardLayout.show(settingAreaPanel, CLEAR_CHACE);
                     }else if (source.getText().equals("机器人设置")) {
                         cardLayout.show(settingAreaPanel, ROBOT);
+                    }else if (source.getText().equals("隐私设置")) {
+                        cardLayout.show(settingAreaPanel, PRIVACY);
                     }
                 }
 
@@ -237,6 +248,7 @@ public class SystemConfigDialog extends JDialog {
         meLabel.addMouseListener(itemMouseListener);
         aboutLabel.addMouseListener(itemMouseListener);
         robotLabel.addMouseListener(itemMouseListener);
+        privacyLabel.addMouseListener(itemMouseListener);
         clearCacheLabel.addMouseListener(itemMouseListener);
     }
 

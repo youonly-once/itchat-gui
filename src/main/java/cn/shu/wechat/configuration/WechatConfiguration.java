@@ -18,6 +18,10 @@ public class WechatConfiguration {
     private String basePath;
     private String autoChatPrefix;
     private String autoChatSuffix;
+    /**
+     * 是否模糊头像
+     */
+    private Boolean fuzzUpAvatar;
     private static WechatConfiguration instance;
 
     public WechatConfiguration() {
@@ -103,5 +107,13 @@ public class WechatConfiguration {
     public void setSpecialUser(String specialUser) {
         String[] split = specialUser.split(",");
         this.specialUser = Arrays.asList(split);
+    }
+
+    public Boolean getFuzzUpAvatar() {
+        return fuzzUpAvatar;
+    }
+
+    public void setFuzzUpAvatar(Boolean fuzzUpAvatar) {
+        this.fuzzUpAvatar = fuzzUpAvatar;
     }
 }
