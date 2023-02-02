@@ -1,5 +1,6 @@
 package cn.shu.wechat.utils;
 
+import cn.shu.wechat.configuration.OpenAIConfiguration;
 import cn.shu.wechat.pojo.entity.Message;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -26,7 +27,6 @@ public class OpenAPIUtil {
     private static final String BASE_URL = "https://api.openai.com/";
 
     public static List<Message> chat(String q) {
-        String token = "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";
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -38,7 +38,7 @@ public class OpenAPIUtil {
                     public Response intercept(Chain chain) throws IOException {
                         Request request = chain.request()
                                 .newBuilder()
-                                .header("Authorization", "Bearer " + token)
+                                .header("Authorization", "Bearer " + OpenAIConfiguration.getInstance().getOpenaiKey())
                                 .build();
                         return chain.proceed(request);
                     }
@@ -46,7 +46,7 @@ public class OpenAPIUtil {
                 .sslSocketFactory(TestSSLSocketClient.getSSLSocketFactory(), TestSSLSocketClient.getX509TrustManager())
                 .hostnameVerifier(TestSSLSocketClient.getHostnameVerifier())
                 .connectionPool(new ConnectionPool(5, 1, TimeUnit.SECONDS))
-                .readTimeout(ofSeconds(60).toMillis(), TimeUnit.MILLISECONDS)
+                .readTimeout(ofSeconds(OpenAIConfiguration.getInstance().getExpire()).toMillis(), TimeUnit.MILLISECONDS)
                 .build();
 
 
