@@ -357,9 +357,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             //是否需要自动回复
             String to = ContactsTools.getContactDisplayNameByUserName(msg.getFromUserName());
             if (autoChatUserNameList.contains(to)) {
-                messages = handleTuLingMsg(TuLingUtil.robotMsgTuling(text), msg);
+                messages = autoReply(text, msg);
             } else if (autoChatWithPersonal && !msg.isGroupMsg()) {
-                messages = handleTuLingMsg(TuLingUtil.robotMsgTuling(text), msg);
+                messages = autoReply(text, msg);
             }
         } catch (NullPointerException | IOException e) {
             e.printStackTrace();
@@ -367,6 +367,28 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         return messages;
     }
 
+    /**
+     * 自动回复
+     *
+     * @param text
+     * @param msg
+     * @return
+     * @throws IOException
+     */
+    private List<Message> autoReply(String text, AddMsgList msg) throws IOException {
+        try {
+            List<Message> messageList = OpenAPIUtil.chat(text);
+            for (Message message : messageList) {
+                message.setToUsername(msg.getFromUserName());
+                message.setMsgType(WXSendMsgCodeEnum.TEXT.getCode());
+            }
+            return messageList;
+
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return handleTuLingMsg(TuLingUtil.robotMsgTuling(text), msg);
+        }
+    }
 
     /**
      * 图片消息(non-Javadoc)
