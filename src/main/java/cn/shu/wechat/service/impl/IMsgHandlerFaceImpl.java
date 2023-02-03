@@ -360,6 +360,11 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 messages = autoReply(text, msg);
             } else if (autoChatWithPersonal && !msg.isGroupMsg()) {
                 messages = autoReply(text, msg);
+            } else if (text.startsWith("；") && msg.getFromUserName().equals(Core.getUserName())) {
+                messages = autoReply(text.substring(1), msg);
+                for (Message message : messages) {
+                    message.setToUsername(msg.getToUserName());
+                }
             }
         } catch (NullPointerException | IOException e) {
             e.printStackTrace();
