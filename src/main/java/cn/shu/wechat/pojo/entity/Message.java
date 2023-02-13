@@ -45,6 +45,7 @@ public class Message implements Comparable<Message>{
      */
     private String content;
 
+
     private String oriContent;
     /**
      * 资源文件保存路径
@@ -83,6 +84,7 @@ public class Message implements Comparable<Message>{
     /**
      * 视频缩略图
      */
+    @TableField(exist = false)
     private BufferedImage videoPic;
 
     /**
@@ -114,30 +116,51 @@ public class Message implements Comparable<Message>{
     /**
      * 消息时间
      */
+    @TableField(exist = false)
     private LocalDateTime messageTime;
+    @TableField(exist = false)
     private String desc ;
+    @TableField(exist = false)
     private String url ;
+    @TableField(exist = false)
     private String title;
+    @TableField(exist = false)
     private String thumbUrl ;
+    @TableField(exist = false)
     private String sourceIconUrl ;
+    @TableField(exist = false)
     private  String sourceName ;
     /**
      * content map
      */
+    @TableField(exist = false)
     private Map<String, Object> contentMap;
+    @TableField(exist = false)
     private boolean isRevoke;
+    @TableField(exist = false)
     private String plainName;
+    @TableField(exist = false)
     private int progress = 100;
+    @TableField(exist = false)
     private boolean isNeedToResend;
 
     //联系人卡片消息
+
+    @TableField(exist = false)
     private String contactsUserName;
+    @TableField(exist = false)
     private String contactsNickName;
+    @TableField(exist = false)
     private String contactsId;
+    @TableField(exist = false)
     private Byte contactsSex;
+    @TableField(exist = false)
     private String contactsProvince;
+    @TableField(exist = false)
     private String contactsCity;
+    @TableField(exist = false)
     private String contactsHeadImgUrl;
+    @TableField(exist = false)
     private String contactsTicket;
     @Override
     public int compareTo(Message o) {

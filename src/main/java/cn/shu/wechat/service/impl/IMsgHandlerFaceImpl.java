@@ -146,7 +146,6 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                                     + "2、【opundo/cpundo】\n\t开启/关闭群消息防撤回\n"
                                     + "3、【ggr】\n\t群成员性别比例图\n"
                                     + "4、【gpr】\n\t群成员省市分布图\n"
-                                    // +"opundo/cpundo：群成员活跃度\n"
                                     + "5、【op/cp】\n\t开启/关闭全局个人用户消息自动回复\n"
                                     + "6、【gma10】\n\t群成员活跃度TOP10\n"
                                     + "7、【mf10】\n\t聊天消息关键词TOP10\n"
@@ -447,7 +446,8 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         }
 
         //查询历史消息
-        List<Message> messages = messageMapper.selectList(Wrappers.<Message>lambdaQuery().eq(Message::getMsgId,msgId.toString()));
+        List<Message> messages = messageMapper.selectList(Wrappers.<Message>lambdaQuery()
+                .eq(Message::getMsgId, msgId.toString()));
         if (messages.isEmpty()) {
             log.error("未获取到历史消息。");
             return null;
@@ -458,6 +458,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         if (roomId.equals(Core.getUserName())) {
             roomId = msg.getToUserName();
         }
+        //在被撤回的消息旁边标注“已撤回”
         ChatPanelContainer.get(roomId).getChatMessagePanel().setRevokeStatus(oldMessage.getId());
 
 
@@ -481,7 +482,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         String filePath = oldMessage.getFilePath();
         String createTime = oldMessage.getCreateTime().substring(10);
         switch (WXReceiveMsgCodeEnum.getByCode(oldMessage.getMsgType())) {
-            case MSGTYPE_TEXT:
+            case MSGTYPE_TEXT: {
                 message = Message.builder()
                         .content("【" + fromNickName + " " + createTime + " " + "】撤回的消息：" + realMsgContent)
                         .msgType(WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
@@ -489,18 +490,20 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                         .build();
                 results.add(message);
                 break;
-            case MSGTYPE_IMAGE:
+            }
+            case MSGTYPE_IMAGE: {
                 message = Message.builder()
                         .content("【" + fromNickName + " " + createTime + " " + "】撤回的图片(发送中...)：")
                         .msgType(WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
                         .toUsername(msg.getFromUserName())
                         .build();
                 results.add(message);
-                oldMessage.setId(UUID.randomUUID().toString().replace("-",""));
+                oldMessage.setId(UUID.randomUUID().toString().replace("-", ""));
                 oldMessage.setFromUsername(Core.getUserName());
                 oldMessage.setToUsername(msg.getFromUserName());
                 results.add(oldMessage);
                 break;
+            }
             case MSGTYPE_EMOTICON:
                 message = Message.builder()
                         .content("【" + fromNickName + " " + createTime + " " + "】撤回的表情：")
@@ -508,7 +511,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                         .toUsername(msg.getFromUserName())
                         .build();
                 results.add(message);
-                oldMessage.setId(UUID.randomUUID().toString().replace("-",""));
+                oldMessage.setId(UUID.randomUUID().toString().replace("-", ""));
                 oldMessage.setFromUsername(Core.getUserName());
                 oldMessage.setToUsername(msg.getFromUserName());
                 results.add(oldMessage);
@@ -520,7 +523,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                         .toUsername(msg.getFromUserName())
                         .build();
                 results.add(message);
-                oldMessage.setId(UUID.randomUUID().toString().replace("-",""));
+                oldMessage.setId(UUID.randomUUID().toString().replace("-", ""));
                 oldMessage.setFromUsername(Core.getUserName());
                 oldMessage.setContent("");
                 oldMessage.setToUsername(msg.getFromUserName());
@@ -533,12 +536,12 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                         .toUsername(msg.getFromUserName())
                         .build();
                 results.add(message);
-                oldMessage.setId(UUID.randomUUID().toString().replace("-",""));
+                oldMessage.setId(UUID.randomUUID().toString().replace("-", ""));
                 oldMessage.setFromUsername(Core.getUserName());
                 oldMessage.setToUsername(msg.getFromUserName());
                 results.add(oldMessage);
                 break;
-            case MSGTYPE_MAP:
+            case MSGTYPE_MAP: {
                 //TODO 地图消息可直接发送
                 String msgJson = oldMessage.getMsgJson();
                 AddMsgList addMsgList = JSON.parseObject(msgJson, AddMsgList.class);
@@ -559,7 +562,8 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                         .build();
                 results.add(message);
                 break;
-            case MSGTYPE_SHARECARD:
+            }
+            case MSGTYPE_SHARECARD: {
                 message = Message.builder()
                         .content("【" + fromNickName + " " + createTime + " " + "】撤回的联系人名片：")
                         .msgType(WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
@@ -571,19 +575,34 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                         .msgType(WXReceiveMsgCodeEnum.MSGTYPE_SHARECARD.getCode())
                         .toUsername(msg.getFromUserName())
                         .build();
+
+                MessageTools.setMessageCardField(oldMessage.getContent(), message);
                 results.add(message);
                 break;
-            case MSGTYPE_APP:
+            }
+            case MSGTYPE_APP: {
+                Map<String, Object> oldMsgContentMap = new HashMap<>();
+                try {
+                    oldMsgContentMap = XmlStreamUtil.toMap(XmlStreamUtil.formatXml(realMsgContent));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                msg.setContentMap(map);
+                Object desc = oldMsgContentMap.get("msg.appmsg.des");
+                Object url = oldMsgContentMap.get("msg.appmsg.url");
+                Object title = oldMsgContentMap.get("msg.appmsg.title");
+                Object thumbUrl = oldMsgContentMap.get("msg.appmsg.thumburl");
+                Object sourceIconUrl = oldMsgContentMap.get("msg.appmsg.weappinfo.weappiconurl");
+                Object sourceName = oldMsgContentMap.get("msg.appmsg.sourcedisplayname");
+                Object height = oldMsgContentMap.get("msg.appmsg.appattach.cdnthumbheight");
+                Object width = oldMsgContentMap.get("msg.appmsg.appattach.cdnthumbwidth");
                 switch (WXReceiveMsgCodeOfAppEnum.getByCode(oldMessage.getAppMsgType())) {
                     case OTHER:
                         break;
                     case LINK:
-                        Map<String, Object> mapA = XmlStreamUtil.toMap(XmlStreamUtil.formatXml(realMsgContent));
-                        Object title = mapA.get("msg.appmsg.title");
-                        Object url = mapA.get("msg.appmsg.url");
                         message = Message.builder()
-
-                                .content("【" + fromNickName + " " + createTime + " " + "】撤回的收藏消息：" + title + "," + url)
+                                .content("【" + fromNickName + " " + createTime + " " + "】撤回的收藏消息："
+                                        + title + "," + url)
                                 .msgType(WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
                                 .toUsername(msg.getFromUserName())
                                 .build();
@@ -598,22 +617,48 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                                 .build();
                         results.add(message);
                         break;
-                    case FILE:
-                    default:
-                        //目前是文件消息
+                    case MUSIC:
                         message = Message.builder()
-                                .content("【" + fromNickName + " " + createTime + " " + "】撤回的APP消息(发送中...)：")
+                                .content("【" + fromNickName + " " + createTime + " " + "】撤回的音乐：")
                                 .msgType(WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
                                 .toUsername(msg.getFromUserName())
                                 .build();
                         results.add(message);
-                        oldMessage.setId(UUID.randomUUID().toString().replace("-",""));
-                        oldMessage.setFromUsername(Core.getUserName());
-                        oldMessage.setToUsername(msg.getFromUserName());
-                        results.add(oldMessage);
+                        message = oldMessage;
+                        message.setId(UUID.randomUUID().toString().replace("-", ""));
+                        message.setFromUsername(Core.getUserName());
+                        message.setToUsername(msg.getFromUserName());
+                        results.add(message);
                         break;
+                    case FILE:
+                    default: {
+                        //目前是文件消息
+                        message = Message.builder()
+                                .content("【" + fromNickName + " " + createTime + " " + "】撤回的APP消息：")
+                                .msgType(WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
+                                .toUsername(msg.getFromUserName())
+                                .build();
+                        results.add(message);
+                        message = oldMessage;
+                        message.setId(UUID.randomUUID().toString().replace("-", ""));
+                        message.setFromUsername(Core.getUserName());
+                        message.setToUsername(msg.getFromUserName());
+                        results.add(message);
+                        break;
+                    }
+                }
+                if (message != null) {
+                    message.setTitle(title == null ? null : title.toString());
+                    message.setDesc(desc == null ? null : desc.toString());
+                    message.setImgWidth(width == null ? null : Integer.parseInt(width.toString()));
+                    message.setImgHeight(height == null ? null : Integer.parseInt(height.toString()));
+                    message.setThumbUrl(thumbUrl == null ? null : thumbUrl.toString());
+                    message.setUrl(url == null ? null : url.toString());
+                    message.setSourceIconUrl(sourceIconUrl == null ? null : sourceIconUrl.toString());
+                    message.setSourceName(sourceName == null ? null : sourceName.toString());
                 }
                 break;
+            }
                 default:
                     break;
 

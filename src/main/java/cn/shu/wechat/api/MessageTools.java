@@ -770,6 +770,7 @@ public class MessageTools {
         }
         return null;
     }
+
     /**
      * 随机生成MessageId
      *
@@ -778,5 +779,38 @@ public class MessageTools {
     public static String randomMessageId() {
         String raw = UUID.randomUUID().toString().replace("-", "");
         return raw;
+    }
+
+    /**
+     * 将 卡片消息的xml提取到各个字段
+     *
+     * @param content xml
+     * @param message 消息
+     */
+    public static Map<String, Object> setMessageCardField(String content, Message message) {
+        Map<String, Object> map = new HashMap<>();
+        try {
+            map = XmlStreamUtil.toMap(content);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Object title = map.get("msg.attr.nickname");
+        Object thumbUrl = map.get("msg.attr.smallheadimgurl");
+        Object headImgUrl = map.get("msg.attr.bigheadimgurl");
+        Object id = map.get("msg.attr.alias");
+        Object province = map.get("msg.attr.province");
+        Object city = map.get("msg.attr.city");
+        Object sex = map.get("msg.attr.sex");
+        Object userName = map.get("msg.attr.username");
+
+        message.setContactsNickName(title == null ? null : title.toString());
+        message.setContactsId(id == null ? null : id.toString());
+        message.setContactsProvince(province == null ? null : province.toString());
+        message.setContactsCity(city == null ? null : city.toString());
+        message.setContactsSex(sex == null ? null : Byte.valueOf(sex.toString()));
+        message.setThumbUrl(thumbUrl == null ? null : thumbUrl.toString());
+        message.setContactsUserName(userName == null ? null : userName.toString());
+        message.setContactsHeadImgUrl(headImgUrl == null ? null : headImgUrl.toString());
+        return map;
     }
 }
