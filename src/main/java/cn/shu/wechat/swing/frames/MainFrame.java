@@ -4,8 +4,8 @@ package cn.shu.wechat.swing.frames;
 import cn.shu.wechat.api.WeChatTool;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.components.Colors;
-import cn.shu.wechat.swing.panels.left.LeftPanel;
 import cn.shu.wechat.swing.panels.RightPanel;
+import cn.shu.wechat.swing.panels.left.LeftPanel;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
@@ -13,14 +13,12 @@ import cn.shu.wechat.swing.utils.OSUtil;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.SleepUtils;
 import lombok.Getter;
-import sun.audio.AudioPlayer;
-import sun.audio.AudioStream;
 
+import javax.sound.sampled.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.Objects;
 import java.util.concurrent.locks.LockSupport;
 
 /**
@@ -107,16 +105,42 @@ public class MainFrame extends JFrame {
     public void playMessageSound() {
 
         try {
-            InputStream inputStream = getClass().getResourceAsStream("/wav/msg.wav");
 
-            if (inputStream != null) {
-                AudioStream messageSound = new AudioStream(inputStream);
-                AudioPlayer.player.start(messageSound);
+            // 创建音频输入流
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(
+                    Objects.requireNonNull(MainFrame.class.getResourceAsStream("/wav/msg.wav")));
+
+            // 获取音频格式
+            AudioFormat audioFormat = audioInputStream.getFormat();
+
+            // 创建数据行信息对象
+            DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
+
+            // 打开数据行
+            SourceDataLine sourceDataLine = (SourceDataLine) AudioSystem.getLine(info);
+            sourceDataLine.open(audioFormat);
+
+            // 启动数据行
+            sourceDataLine.start();
+
+            // 缓冲区大小
+            int bufferSize = 4096;
+            byte[] buffer = new byte[bufferSize];
+
+            int bytesRead = 0;
+
+            // 从音频输入流读取数据到缓冲区，并写入数据行进行播放
+            while ((bytesRead = audioInputStream.read(buffer)) != -1) {
+                sourceDataLine.write(buffer, 0, bytesRead);
             }
-        } catch (IOException e) {
+
+            // 停止数据行
+            sourceDataLine.drain();
+            sourceDataLine.close();
+            audioInputStream.close();
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
 
     }
 

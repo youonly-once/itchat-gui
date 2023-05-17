@@ -3,7 +3,6 @@ package cn.shu.wechat.swing.frames;
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.pojo.entity.Contacts;
 import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
@@ -20,10 +19,7 @@ import cn.shu.wechat.utils.*;
 import com.melloware.jintellitype.HotkeyListener;
 import com.melloware.jintellitype.JIntellitype;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.stereotype.Component;
-import sun.security.provider.MD5;
 
-import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -39,10 +35,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -82,7 +76,7 @@ public final class LoginFrame extends JFrame {
         setLocationRelativeTo(null);
         setListeners();
         if (OSUtil.getOsType() == OSUtil.Windows) {
-            registerHotKey();
+           // registerHotKey();
         }
         loginService = SpringContextHolder.getBean(LoginService.class);
         wechatConfiguration = SpringContextHolder.getBean(WechatConfiguration.class);
@@ -388,7 +382,7 @@ public final class LoginFrame extends JFrame {
 
         int SCREEN_SHOT_CODE = 10001;
         try {
-            JIntellitype.getInstance().registerHotKey(SCREEN_SHOT_CODE, JIntellitype.MOD_ALT, 'S');
+           JIntellitype.getInstance().registerHotKey(SCREEN_SHOT_CODE, JIntellitype.MOD_ALT, 'S');
 
             JIntellitype.getInstance().addHotKeyListener(new HotkeyListener() {
                 @Override
@@ -423,24 +417,6 @@ public final class LoginFrame extends JFrame {
                     Core.getContactHeadImgPath().put(contacts.getValue().getUsername(), DownloadTools.downloadBigHeadImg(contacts.getValue().getHeadimgurl(), contacts.getValue().getUsername()));
                     log.info("下载头像：({}):{}", contacts.getValue().getNickname(), contacts.getValue().getHeadimgurl());
                 });
-        /*  for (Map.Entry<String, Contacts> entry : Core.getMemberMap().entrySet()) {
-
-          ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(
-
-                    () -> {
-
-                        Core.getContactHeadImgPath().put(entry.getValue().getUsername(), DownloadTools.downloadHeadImgBig(entry.getValue().getHeadimgurl(), entry.getValue().getUsername()));
-                        log.info("下载头像：({}):{}", entry.getValue().getNickname(), entry.getValue().getHeadimgurl());
-                    });
-
-            ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
-                @Override
-                public void run() {
-                    AvatarUtil.putUserAvatarCache(entry.getValue().getUsername(), DownloadTools.downloadImage(entry.getValue().getHeadimgurl()));
-                }
-            });
-
-        }*/
     }
 
 
