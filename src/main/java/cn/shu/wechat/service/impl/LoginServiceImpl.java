@@ -1,5 +1,6 @@
 package cn.shu.wechat.service.impl;
 
+import cn.shu.WeChatStater;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
@@ -354,7 +355,7 @@ public class LoginServiceImpl implements LoginService {
                         case MOBILE_LOGIN_OUT: {
                             log.warn(syncCheckRetCodeEnum.getType());
                             //重启客户端
-                            //WeChatStater.restart();
+                            WeChatStater.restartApplication();
                             break;
                         }
                         case TICKET_ERROR:

@@ -8,6 +8,7 @@ import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -136,27 +137,16 @@ public class WeChatStater {
         return rv;
     }
 
-
-    /**
-     * 关闭
-     */
-    public static void close(){
-       try {
-           LoginFrame bean = context.getBean(LoginFrame.class);
-           bean.dispose();
-           MainFrame.getContext().dispose();
-       }catch (Exception e){
-           e.printStackTrace();
-       }
-        context.close();
-    }
-
-    /**
-     * restart
-     */
-    public static void restart(){
-        //TODO 有问题
-        close();
-        main(new String[1]);
+    public static void restartApplication() {
+        try {
+            String javaCommand = System.getProperty("java.home") + "/bin/java";
+            String className = WeChatStater.class.getName();
+            String classPath = System.getProperty("java.class.path");
+            ProcessBuilder processBuilder = new ProcessBuilder(javaCommand, "-cp", classPath, className);
+            processBuilder.start();
+            System.exit(0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
