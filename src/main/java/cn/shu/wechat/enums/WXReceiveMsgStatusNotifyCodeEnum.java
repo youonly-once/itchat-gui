@@ -8,11 +8,12 @@ package cn.shu.wechat.enums;
  * @date 创建时间：2017年4月23日 下午12:15:00
  */
 public enum WXReceiveMsgStatusNotifyCodeEnum {
-
-    DEFAULT(0, "默认"),
-    READ(2, "已读通知"),
-    NOTIFY_USER_NAME(4, "通知最近联系人列表"),
-
+    READED(1, "已读"),
+    ENTER_SESSION(2, "进入会话"),
+    INITED(3, "sync mobile chatList"),
+    SYNC_CONV(4, "会话同步"),
+    QUIT_SESSION(5, "退出会话"),
+    DEFAULT(0,"未知")
     ;
 
     private int code;

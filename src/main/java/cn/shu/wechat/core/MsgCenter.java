@@ -600,7 +600,9 @@ public class MsgCenter {
             }
             case MSGTYPE_STATUSNOTIFY: {
                 switch ( WXReceiveMsgStatusNotifyCodeEnum.getByCode(msg.getStatusNotifyCode())){
-                    case NOTIFY_USER_NAME: {
+                    case INITED:
+
+                    case SYNC_CONV: {
                         new SwingWorker<Object, Object>() {
                             ArrayList<RoomItem> rooms = new ArrayList<>();
 
@@ -620,12 +622,11 @@ public class MsgCenter {
                         }.execute();
                         break;
                     }
-                    case READ:
+                    case READED:
                         //=============用户在其他平台消息已读的通知=============
                         //更新聊天列表未读数量
                         RoomsPanel.getContext().hasReadCount(msg.getToUserName());
                         return;
-                    case DEFAULT:
 
                     default:
 

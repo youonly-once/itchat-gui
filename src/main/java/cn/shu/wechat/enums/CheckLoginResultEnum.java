@@ -16,14 +16,20 @@ public enum CheckLoginResultEnum {
      * 扫描成功 但为确认
      */
     WAIT_CONFIRM("201", "请在手机上点击确认登录"),
+
+    /**
+     * 扫描成功 但为确认
+     */
+    CANCEL("202", "用户取消"),
+
     /**
      * 未扫描
      */
-    WAIT_SCAN("400", "请使用微信扫一扫以登录"),
+    WAIT_SCAN("400", "请使用微信扫一扫以登录,刷新二维码"),
     /**
      * 未扫描
      */
-    NONE("408", "未知");
+    NONE("408", "请使用微信扫一扫以登录");
     private final String code;
     private final String msg;
 
