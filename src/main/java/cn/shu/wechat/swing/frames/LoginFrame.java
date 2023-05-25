@@ -160,7 +160,7 @@ public final class LoginFrame extends JFrame {
 
                     @Override
                     protected Object doInBackground() throws Exception {
-                        getUUID();
+                       // getUUID(); 刷新后的码不能登录
                         qr = loginService.getQR();
                         return null;
                     }
@@ -314,12 +314,10 @@ public final class LoginFrame extends JFrame {
             log.info("开启微信状态通知");
             loginService.wxStatusNotify();
 
-            loginService.startReceiving();
             //打开窗体
             log.info("登录成功");
             openMainFrame();
-            log.info(" 开始接收消息");
-            loginService.startReceiving();
+
             //初始化聊天列表
             Set<String> recentContacts = Core.getRecentContacts();
             SwingUtilities.invokeLater(() -> {

@@ -103,6 +103,7 @@ public class LoginServiceImpl implements LoginService {
                         }
                         break while1;
                     }
+                    case CANCEL:
                     case WAIT_CONFIRM:
                         log.info(byCode.getMsg());
                         String avatar = getUserAvatar(result);
@@ -111,6 +112,7 @@ public class LoginServiceImpl implements LoginService {
                         break;
                     case WAIT_SCAN: {
                         log.info(byCode.getMsg());
+                        //TODO 刷新二维码
                         callBack.CallBack(byCode.getMsg());
                         break;
                     }

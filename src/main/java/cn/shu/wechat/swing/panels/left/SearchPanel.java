@@ -9,7 +9,6 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCSearchTextField;
 import cn.shu.wechat.swing.constant.SearchResultType;
-import cn.shu.wechat.swing.db.model.FileAttachment;
 import cn.shu.wechat.swing.entity.SearchResultItem;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.swing.panels.left.tabcontent.LeftTabContentPanel;
@@ -19,7 +18,6 @@ import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.extern.log4j.Log4j2;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
@@ -40,10 +38,17 @@ public class SearchPanel extends ParentAvailablePanel {
     private static SearchPanel context;
     private RCSearchTextField searchTextField;
     private boolean setSearchMessageOrFileListener = false;
+    /**
+     * 设置的搜索返回结果上线
+     */
     private final int resultSize = 20;
     private final List<SearchResultItem> searchResultItemList = new ArrayList<>();
     private final AtomicInteger searchVer = new AtomicInteger();
+    /**
+     * 搜索到的数量
+     */
     private final AtomicInteger searchCount = new AtomicInteger();
+
     public SearchPanel(JPanel parent) {
         super(parent);
         context = this;
@@ -129,11 +134,11 @@ public class SearchPanel extends ParentAvailablePanel {
             leftTabContentPanel.showPanel(leftTabContentPanel.getPreviousTab());
             return;
         }
-        searchVer.incrementAndGet();
+
         leftTabContentPanel.showPanel(LeftTabContentPanel.SEARCH);
         new SwingWorker<Object, Object>() {
             private List<SearchResultItem> data;
-            final int finalI = searchVer.get();
+            final int finalI = searchVer.incrementAndGet();
             @Override
             protected Object doInBackground() throws Exception {
                 //TODO 会创建大量 SearchResultItem对象 导致FUllGC卡顿
@@ -149,7 +154,7 @@ public class SearchPanel extends ParentAvailablePanel {
                         e.printStackTrace();
                     }
                 }else{
-                    log.warn(finalI+"==="+searchVer.get()+"-版本号异常停止更新");
+                    log.warn("当前：" + key + "（" + finalI + ")" + "===" + searchVer.get() + "-版本号异常停止更新");
                 }
 
                 return null;
@@ -158,7 +163,7 @@ public class SearchPanel extends ParentAvailablePanel {
             @Override
             protected void done() {
                 if (finalI <searchVer.get()) {
-                    log.warn(finalI+"==="+searchVer.get()+"-版本号异常停止更新");
+                    log.warn("当前：" + key + "（" + finalI + ")" + "===" + searchVer.get() + "-版本号异常停止更新");
                     return;
                 }
                 if (data==null ){
@@ -364,7 +369,7 @@ public class SearchPanel extends ParentAvailablePanel {
                         || (displayname!=null && displayname.contains(key))){
                     int i = searchCount.get();
                     if (i >= resultSize){
-                        log.warn("已达搜索条数上限10");
+                        log.warn("已达搜索条数上限" + resultSize);
                         return;
                     }
                     searchCount.incrementAndGet();
