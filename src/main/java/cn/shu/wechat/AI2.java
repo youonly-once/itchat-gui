@@ -24,7 +24,7 @@ public class AI2 {
     private static final String BASE_URL = "https://api.openai.com/";
 
     public static void main(String[] args) {
-        String token = "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";
+        String token = "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";
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);

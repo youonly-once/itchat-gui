@@ -1,7 +1,7 @@
 package cn.shu.wechat.swing.utils;
 
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.pojo.entity.Message;
+import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.swing.panels.RightPanel;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;

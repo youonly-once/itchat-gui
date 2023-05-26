@@ -1,7 +1,7 @@
 package cn.shu.wechat.service;
 
-import cn.shu.wechat.pojo.dto.msg.sync.AddMsgList;
-import cn.shu.wechat.pojo.entity.Message;
+import cn.shu.wechat.dto.response.sync.AddMsgList;
+import cn.shu.wechat.entity.Message;
 
 import java.util.List;
 

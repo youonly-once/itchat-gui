@@ -1,6 +1,6 @@
 package cn.shu.wechat.service;
 
-import cn.shu.wechat.pojo.entity.Contacts;
+import cn.shu.wechat.entity.Contacts;
 import com.alibaba.fastjson.JSONArray;
 
 import java.awt.image.BufferedImage;
@@ -14,8 +14,6 @@ import java.util.List;
  * @date 创建时间：2017年5月13日 上午12:07:21
  */
 public interface LoginService {
-
-    public static final String x = "100";
 
 
     /**
@@ -53,7 +51,7 @@ public interface LoginService {
      * @author SXS
      * @date 2017年5月13日 上午12:14:07
      */
-    boolean login(LoginCallBack loginCallBack) throws Exception;
+    boolean preLogin(LoginCallBack loginCallBack) throws Exception;
     interface LoginCallBack{
         void CallBack(String loginInfo);
         void avatar(String avatarBase64);

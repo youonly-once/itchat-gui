@@ -2,7 +2,7 @@ package cn.shu.wechat.utils;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.pojo.dto.msg.sync.AddMsgList;
+import cn.shu.wechat.dto.response.sync.AddMsgList;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 

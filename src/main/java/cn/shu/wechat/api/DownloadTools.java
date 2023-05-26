@@ -1,11 +1,11 @@
 package cn.shu.wechat.api;
 
 import cn.shu.wechat.configuration.WechatConfiguration;
+import cn.shu.wechat.constant.WxRespConstant;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.enums.URLEnum;
-import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
-import cn.shu.wechat.pojo.dto.msg.sync.AddMsgList;
-import cn.shu.wechat.pojo.dto.msg.url.WXMsgUrl;
+import cn.shu.wechat.constant.WxURLEnum;
+import cn.shu.wechat.dto.response.sync.AddMsgList;
+import cn.shu.wechat.dto.request.msg.url.WXMsgUrl;
 import cn.shu.wechat.utils.HttpUtil;
 import cn.shu.wechat.utils.MD5Util;
 import cn.shu.wechat.utils.SleepUtils;
@@ -25,10 +25,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -69,46 +67,46 @@ public class DownloadTools {
         Map<String, String> headerMap = new HashMap<String, String>();
         List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
 
-        WXReceiveMsgCodeEnum msgTypeEnum = WXReceiveMsgCodeEnum.getByCode(msg.getMsgType());
+        WxRespConstant.WXReceiveMsgCodeEnum msgTypeEnum = WxRespConstant.WXReceiveMsgCodeEnum.getByCode(msg.getMsgType());
         String url = "";
         HttpEntity entity = null;
         switch (msgTypeEnum) {
             case MSGTYPE_IMAGE:
-                url = String.format(URLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String) Core.getLoginInfoMap().get("url"));
+                url = String.format(WxURLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String) Core.getLoginResultData().getUrl());
                 entity = downloadEntityByMsgID(
                         url,String.valueOf(msg.getNewMsgId())
                         ,null,headerMap,true);
                 break;
             case MSGTYPE_EMOTICON:
-                url = String.format(URLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String) Core.getLoginInfoMap().get("url"));
+                url = String.format(WxURLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String)Core.getLoginResultData().getUrl());
                 entity = downloadEntityByMsgID(url,String.valueOf(msg.getNewMsgId()), WXMsgUrl.BIG_TYPE,headerMap,true);
                 break;
             case MSGTYPE_VOICE:
-                url = String.format(URLEnum.WEB_WX_GET_VOICE.getUrl(), (String) Core.getLoginInfoMap().get("url"));
+                url = String.format(WxURLEnum.WEB_WX_GET_VOICE.getUrl(), (String)Core.getLoginResultData().getUrl());
                 entity = downloadEntityByMsgID(
                         url,String.valueOf(msg.getNewMsgId())
                         ,null,headerMap,true);
                 break;
             case MSGTYPE_VIDEO:
                 headerMap.put("Range", "bytes=0-");
-                url = String.format(URLEnum.WEB_WX_GET_VIEDO.getUrl(), (String) Core.getLoginInfoMap().get("url"));
+                url = String.format(WxURLEnum.WEB_WX_GET_VIEDO.getUrl(), (String)Core.getLoginResultData().getUrl());
                 entity = downloadEntityByMsgID(
                         url,String.valueOf(msg.getNewMsgId())
                         ,null,headerMap,true);
                 break;
             case MSGTYPE_APP:
                // headerMap.put("Range", "bytes=0-");
-                url = String.format(URLEnum.WEB_WX_GET_MEDIA.getUrl(), (String) Core.getLoginInfoMap().get("fileUrl"));
+                url = String.format(WxURLEnum.WEB_WX_GET_MEDIA.getUrl(), (String)  Core.getLoginResultData().getFileUrl());
                 params.add(new BasicNameValuePair("sender", msg.getFromUserName()));
                 params.add(new BasicNameValuePair("mediaid", msg.getMediaId()));
                 params.add(new BasicNameValuePair("filename", msg.getFileName()));
                // params.add(new BasicNameValuePair("msgid", String.valueOf(msg.getNewMsgId())));
-               // params.add(new BasicNameValuePair("skey", (String) Core.getLoginInfoMap().get("skey")));
+               // params.add(new BasicNameValuePair("skey", (String)  Core.getLoginResultData().getBaseRequest().getSKey()));
                 entity = HttpUtil.doGet(url, params, true, headerMap);
                 break;
             case MSGTYPE_MAP:
                 url = msg.getContent().substring(msg.getContent().indexOf(":<br/>") + ":<br/>".length());
-                url = URLEnum.BASE_URL.getUrl() + url;
+                url = WxURLEnum.BASE_URL.getUrl() + url;
                 entity = HttpUtil.doGet(url, null, false, null);
                 break;
             default:
@@ -131,7 +129,7 @@ public class DownloadTools {
         Map<String, String> headerMap = new HashMap<String, String>();
         String url = "";
         HttpEntity entity = null;
-        url = String.format(URLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String) Core.getLoginInfoMap().get("url"));
+        url = String.format(WxURLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String)Core.getLoginResultData().getUrl());
         entity = downloadEntityByMsgID(
                 url, String.valueOf(msgId)
                 , WXMsgUrl.SLAVE_TYPE, headerMap, true);
@@ -279,7 +277,7 @@ public class DownloadTools {
      */
     public static String downloadBigHeadImg(String relativeUrl, String userName) {
         //获取远端对象字节数组
-        String url = String.format(URLEnum.WEB_WX_GET_HEAD_IMAGE_BIG.getUrl(), relativeUrl);
+        String url = String.format(WxURLEnum.WEB_WX_GET_HEAD_IMAGE_BIG.getUrl(), relativeUrl);
         return downloadHeadImg(url, userName);
 
     }
@@ -295,7 +293,7 @@ public class DownloadTools {
     public static String downloadHeadImgThum(String relativeUrl, String userName) {
 
         //获取远端对象字节数组
-        String url = String.format(URLEnum.WEB_WX_GET_HEAD_IMAGE_THUM.getUrl(), relativeUrl);
+        String url = String.format(WxURLEnum.WEB_WX_GET_HEAD_IMAGE_THUM.getUrl(), relativeUrl);
         return downloadHeadImg(url,userName);
 
     }
@@ -375,7 +373,7 @@ public class DownloadTools {
      * @return Image对象
      */
     public static Image downloadHeadImgByRelativeUrl(String relativeUrl) {
-        String url = String.format(URLEnum.WEB_WX_GET_HEAD_IMAGE_THUM.getUrl(), relativeUrl);
+        String url = String.format(WxURLEnum.WEB_WX_GET_HEAD_IMAGE_THUM.getUrl(), relativeUrl);
         return downloadImgByAbsoluteUrl(url);
 
     }
@@ -435,7 +433,7 @@ public class DownloadTools {
      * @return Image
      */
     private static HttpEntity downloadImgEntityByMsgID(String msgId, String type){
-        String url = String.format(URLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String) Core.getLoginInfoMap().get("url"));
+        String url = String.format(WxURLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String)Core.getLoginResultData().getUrl());
         HttpEntity entity = downloadEntityByMsgID(
                 url, String.valueOf(msgId), type
                 , null, true);
@@ -454,7 +452,7 @@ public class DownloadTools {
         if (StringUtils.isNotEmpty(type)){
             params.add(new BasicNameValuePair("type", type));
         }
-        params.add(new BasicNameValuePair("skey", (String) Core.getLoginInfoMap().get("skey")));
+        params.add(new BasicNameValuePair("skey", (String) Core.getLoginResultData().getBaseRequest().getSKey()));
         HttpEntity entity = HttpUtil.doGet(url, params, redirect, headerMap);
         return entity;
     }

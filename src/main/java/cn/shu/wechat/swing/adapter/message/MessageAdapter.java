@@ -2,12 +2,11 @@ package cn.shu.wechat.swing.adapter.message;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
+import cn.shu.wechat.constant.WxRespConstant;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
-import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
-import cn.shu.wechat.pojo.dto.msg.url.WXMsgUrl;
-import cn.shu.wechat.pojo.entity.Contacts;
-import cn.shu.wechat.pojo.entity.Message;
+import cn.shu.wechat.dto.request.msg.url.WXMsgUrl;
+import cn.shu.wechat.entity.Contacts;
+import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.swing.adapter.BaseAdapter;
 import cn.shu.wechat.swing.adapter.ViewHolder;
 import cn.shu.wechat.swing.adapter.message.app.*;
@@ -99,7 +98,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     public BaseMessageViewHolder onCreateViewHolder(int viewType,int subViewType, int position) {
         Message messageItem = messageItems.get(position);
         boolean isSelf = Core.getUserName().equals(messageItem.getFromUsername());
-        switch (WXReceiveMsgCodeEnum.getByCode(viewType)) {
+        switch (WxRespConstant.WXReceiveMsgCodeEnum.getByCode(viewType)) {
             case MSGTYPE_VERIFYMSG:
             case MSGTYPE_SHARECARD:{
                 if (isSelf) {
@@ -177,7 +176,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 }
             }
             case MSGTYPE_APP:{
-               switch (WXReceiveMsgCodeOfAppEnum.getByCode(subViewType)){
+               switch (WxRespConstant.WXReceiveMsgCodeOfAppEnum.getByCode(subViewType)){
                    case FILE:{
                        if (isSelf){
                            MessageRightAttachmentViewHolder holder = messageViewHolderCacheHelper.tryGetRightAttachmentViewHolder();
@@ -1323,7 +1322,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     private void attachPopupMenu(ViewHolder viewHolder, Message item) {
         JComponent contentComponent = null;
         RCMessageBubble messageBubble = null;
-        WXReceiveMsgCodeEnum typeEnum = WXReceiveMsgCodeEnum.getByCode(item.getMsgType());
+        WxRespConstant.WXReceiveMsgCodeEnum typeEnum = WxRespConstant.WXReceiveMsgCodeEnum.getByCode(item.getMsgType());
         boolean isSelf = Core.getUserName().equals(item.getFromUsername());
         switch (typeEnum) {
             case MSGTYPE_TEXT: {
@@ -1382,7 +1381,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 break;
             }
             case MSGTYPE_APP:{
-                switch (WXReceiveMsgCodeOfAppEnum.getByCode(item.getAppMsgType())){
+                switch (WxRespConstant.WXReceiveMsgCodeOfAppEnum.getByCode(item.getAppMsgType())){
 
                     case FILE:{
                         if (isSelf){

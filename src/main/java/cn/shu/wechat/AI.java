@@ -11,7 +11,7 @@ public class AI {
     public static void main(String[] args) {
 
 
-        OpenAiService service = new OpenAiService("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", 20);
+        OpenAiService service = new OpenAiService("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", 20);
 
         CompletionRequest completionRequest = CompletionRequest.builder()
                 .prompt("导师call我了")

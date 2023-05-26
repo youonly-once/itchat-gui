@@ -5,9 +5,8 @@ import cn.afterturn.easypoi.excel.entity.ExportParams;
 import cn.afterturn.easypoi.excel.entity.enmus.ExcelType;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
-import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.pojo.entity.Contacts;
+import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.swing.frames.ImageViewerFrame;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.utils.ChartUtil;
@@ -23,7 +22,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.List;
 import java.util.Optional;
 
 /**

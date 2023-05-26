@@ -1,6 +1,6 @@
 package cn.shu.wechat.mapper;
 
-import cn.shu.wechat.pojo.entity.AttrHistory;
+import cn.shu.wechat.entity.AttrHistory;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 

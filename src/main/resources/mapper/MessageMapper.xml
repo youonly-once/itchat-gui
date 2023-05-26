@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.shu.wechat.mapper.MessageMapper">
-  <resultMap id="BaseResultMap" type="cn.shu.wechat.pojo.entity.Message">
+  <resultMap id="BaseResultMap" type="cn.shu.wechat.entity.Message">
     <!--@mbg.generated-->
     <!--@Table message-->
     <id column="id" jdbcType="CHAR" property="id" />
@@ -115,7 +115,7 @@
     where id = #{id,jdbcType=CHAR}
   </delete>
 
-  <insert id="insert" parameterType="cn.shu.wechat.pojo.entity.Message">
+  <insert id="insert" parameterType="cn.shu.wechat.entity.Message">
     <!--@mbg.generated-->
     insert into message (id, msg_id, msg_type, 
       app_msg_type, msg_desc, create_time, 
@@ -141,7 +141,7 @@
       #{fileName,jdbcType=VARCHAR}
       )
   </insert>
-  <insert id="insertSelective" parameterType="cn.shu.wechat.pojo.entity.Message">
+  <insert id="insertSelective" parameterType="cn.shu.wechat.entity.Message">
     <!--@mbg.generated-->
     insert into message
     <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -426,7 +426,7 @@
       <include refid="Update_By_Example_Where_Clause" />
     </if>
   </update>
-  <update id="updateByPrimaryKeySelective" parameterType="cn.shu.wechat.pojo.entity.Message">
+  <update id="updateByPrimaryKeySelective" parameterType="cn.shu.wechat.entity.Message">
     <!--@mbg.generated-->
     update message
     <set>
@@ -508,7 +508,7 @@
     </set>
     where id = #{id,jdbcType=CHAR}
   </update>
-  <update id="updateByPrimaryKey" parameterType="cn.shu.wechat.pojo.entity.Message">
+  <update id="updateByPrimaryKey" parameterType="cn.shu.wechat.entity.Message">
     <!--@mbg.generated-->
     update message
     set msg_id = #{msgId,jdbcType=VARCHAR},
@@ -696,7 +696,7 @@
           #{item.fileName,jdbcType=VARCHAR})
     </foreach>
   </insert>
-  <insert id="insertOrUpdate" parameterType="cn.shu.wechat.pojo.entity.Message">
+  <insert id="insertOrUpdate" parameterType="cn.shu.wechat.entity.Message">
     <!--@mbg.generated-->
     insert into message
     (id, msg_id, msg_type, app_msg_type, msg_desc, create_time, plaintext, content, file_path, 
@@ -743,7 +743,7 @@
     img_width = #{imgWidth,jdbcType=INTEGER}, 
     voice_length = #{voiceLength,jdbcType=BIGINT}
   </insert>
-  <insert id="insertOrUpdateSelective" parameterType="cn.shu.wechat.pojo.entity.Message">
+  <insert id="insertOrUpdateSelective" parameterType="cn.shu.wechat.entity.Message">
     <!--@mbg.generated-->
     insert into message
     <trim prefix="(" suffix=")" suffixOverrides=",">

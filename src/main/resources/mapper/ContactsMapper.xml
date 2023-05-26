@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.shu.wechat.mapper.ContactsMapper">
-    <resultMap id="BaseResultMap" type="cn.shu.wechat.pojo.entity.Contacts">
+    <resultMap id="BaseResultMap" type="cn.shu.wechat.entity.Contacts">
         <!--@mbg.generated-->
         <!--@Table contacts-->
         <id column="UserName" jdbcType="VARCHAR" property="username"/>
@@ -61,7 +61,7 @@
         where UserName = #{username,jdbcType=VARCHAR}
     </delete>
 
-    <insert id="insert" parameterType="cn.shu.wechat.pojo.entity.Contacts">
+    <insert id="insert" parameterType="cn.shu.wechat.entity.Contacts">
         <!--@mbg.generated-->
         insert into contacts (UserName, ChatRoomId, Sex,
         AttrStatus, Statues, PYQuanPin,
@@ -86,7 +86,7 @@
         #{uin,jdbcType=DOUBLE}, #{owneruin,jdbcType=DOUBLE}, #{isowner,jdbcType=DOUBLE},
         #{pyinitial,jdbcType=VARCHAR}, #{iscontacts,jdbcType=BOOLEAN})
     </insert>
-    <insert id="insertSelective" parameterType="cn.shu.wechat.pojo.entity.Contacts">
+    <insert id="insertSelective" parameterType="cn.shu.wechat.entity.Contacts">
         <!--@mbg.generated-->
         insert into contacts
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -288,7 +288,7 @@
     </insert>
 
 
-    <update id="updateByPrimaryKeySelective" parameterType="cn.shu.wechat.pojo.entity.Contacts">
+    <update id="updateByPrimaryKeySelective" parameterType="cn.shu.wechat.entity.Contacts">
         <!--@mbg.generated-->
         update contacts
         <set>
@@ -388,7 +388,7 @@
         </set>
         where UserName = #{username,jdbcType=VARCHAR}
     </update>
-    <update id="updateByPrimaryKey" parameterType="cn.shu.wechat.pojo.entity.Contacts">
+    <update id="updateByPrimaryKey" parameterType="cn.shu.wechat.entity.Contacts">
         <!--@mbg.generated-->
         update contacts
         set ChatRoomId = #{chatroomid,jdbcType=DOUBLE},
@@ -616,7 +616,7 @@
             )
         </foreach>
     </insert>
-    <insert id="insertOrUpdate" parameterType="cn.shu.wechat.pojo.entity.Contacts">
+    <insert id="insertOrUpdate" parameterType="cn.shu.wechat.entity.Contacts">
         <!--@mbg.generated-->
         insert into contacts
         (UserName, ChatRoomId, Sex, AttrStatus, Statues, PYQuanPin, EncryChatRoomId, DisplayName,
@@ -670,7 +670,7 @@
         PYInitial = #{pyinitial,jdbcType=VARCHAR},
         IsContacts = #{iscontacts,jdbcType=BOOLEAN}
     </insert>
-    <insert id="insertOrUpdateSelective" parameterType="cn.shu.wechat.pojo.entity.Contacts">
+    <insert id="insertOrUpdateSelective" parameterType="cn.shu.wechat.entity.Contacts">
         <!--@mbg.generated-->
         insert into contacts
         <trim prefix="(" suffix=")" suffixOverrides=",">

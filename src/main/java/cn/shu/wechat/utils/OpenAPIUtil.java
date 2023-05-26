@@ -1,7 +1,7 @@
 package cn.shu.wechat.utils;
 
 import cn.shu.wechat.configuration.OpenAIConfiguration;
-import cn.shu.wechat.pojo.entity.Message;
+import cn.shu.wechat.entity.Message;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -1,7 +1,7 @@
 package cn.shu.wechat.swing.db.model;
 
 
-import cn.shu.wechat.pojo.entity.Contacts;
+import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.swing.RoomTypeEnum;
 import lombok.Data;
 

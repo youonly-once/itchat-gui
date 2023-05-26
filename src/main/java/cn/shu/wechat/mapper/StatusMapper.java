@@ -1,7 +1,7 @@
 package cn.shu.wechat.mapper;
 
-import cn.shu.wechat.pojo.entity.Status;
-import cn.shu.wechat.pojo.entity.StatusExample;
+import cn.shu.wechat.entity.Status;
+import cn.shu.wechat.entity.StatusExample;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 

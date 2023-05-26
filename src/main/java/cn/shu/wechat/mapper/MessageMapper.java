@@ -1,6 +1,6 @@
 package cn.shu.wechat.mapper;
 
-import cn.shu.wechat.pojo.entity.Message;
+import cn.shu.wechat.entity.Message;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 

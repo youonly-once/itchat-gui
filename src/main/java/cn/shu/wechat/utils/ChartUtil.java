@@ -2,11 +2,11 @@ package cn.shu.wechat.utils;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
+import cn.shu.wechat.constant.WxRespConstant;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.mapper.MessageMapper;
-import cn.shu.wechat.pojo.entity.Contacts;
+import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.service.LoginService;
 import lombok.extern.slf4j.Slf4j;
 import org.jfree.chart.*;
@@ -356,7 +356,7 @@ public final class ChartUtil {
         for (Map<String, Object> map : mapsType) {
             categoryDatasetOfType.setValue(Double.parseDouble(map.get("count").toString())
                     ,"发送次数"
-                    , WXReceiveMsgCodeEnum.getByCode(Integer.parseInt(map.get("type").toString())).getDesc());
+                    , WxRespConstant.WXReceiveMsgCodeEnum.getByCode(Integer.parseInt(map.get("type").toString())).getDesc());
         }
         Optional<JFreeChart> barChart = createBarChart(categoryDatasetOfType, "消息类型", "发送数量", "【" + nickName + "】群消息类型排行");
         return barChart.map(chart -> chart.createBufferedImage(500, 400));

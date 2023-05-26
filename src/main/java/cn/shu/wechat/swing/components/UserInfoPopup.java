@@ -3,8 +3,8 @@ package cn.shu.wechat.swing.components;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.pojo.dto.msg.send.WebWXSendMsgResponse;
-import cn.shu.wechat.pojo.entity.Contacts;
+import cn.shu.wechat.dto.response.msg.send.WebWXSendMsgResponse;
+import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.swing.frames.ImageViewerFrame;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.AvatarUtil;
@@ -19,7 +19,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.util.concurrent.ExecutorService;
 
 /**
  * Created by 舒新胜 on 07/06/2017.

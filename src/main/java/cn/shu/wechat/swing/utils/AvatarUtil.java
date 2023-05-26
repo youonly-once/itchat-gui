@@ -4,7 +4,7 @@ import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.pojo.entity.Contacts;
+import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.frames.MainFrame;
 import lombok.extern.log4j.Log4j2;

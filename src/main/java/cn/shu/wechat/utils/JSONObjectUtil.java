@@ -1,6 +1,6 @@
 package cn.shu.wechat.utils;
 
-import cn.shu.wechat.pojo.entity.Contacts;
+import cn.shu.wechat.entity.Contacts;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 

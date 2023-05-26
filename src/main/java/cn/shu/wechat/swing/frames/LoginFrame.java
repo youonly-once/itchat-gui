@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.frames;
 
+import cn.shu.WeChatStater;
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.core.Core;
@@ -273,7 +274,7 @@ public final class LoginFrame extends JFrame {
 
             showMessage("请使用微信扫一扫以登录");
 
-            loginService.login(new LoginService.LoginCallBack() {
+            loginService.preLogin(new LoginService.LoginCallBack() {
                 @Override
                 public void CallBack(String loginInfo) {
                     showMessage(loginInfo);
@@ -306,7 +307,7 @@ public final class LoginFrame extends JFrame {
             showMessage("登陆成功，微信初始化...");
             if (!loginService.webWxInit()) {
                 showMessage(" 微信初始化异常");
-                System.exit(0);
+                WeChatStater.restartApplication();
             }
             wechatConfiguration.setBasePath(wechatConfiguration.getBasePath() + File.separator + MD5Util.MD5(Core.getNickName())+ File.separator);
 
@@ -345,7 +346,7 @@ public final class LoginFrame extends JFrame {
                     ContactsPanel.getContext().notifyDataSetChanged();
 
                     ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
-                        log.info("9. 获取群好友及群好友列表");
+                        log.info("获取群好友及群好友列表");
                         loginService.WebWxBatchGetContact();
                         if (dHImg) {
                             downloadHeadImage();

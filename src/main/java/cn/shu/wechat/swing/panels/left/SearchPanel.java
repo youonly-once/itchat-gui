@@ -2,8 +2,8 @@ package cn.shu.wechat.swing.panels.left;
 
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.mapper.MessageMapper;
-import cn.shu.wechat.pojo.entity.Contacts;
-import cn.shu.wechat.pojo.entity.Message;
+import cn.shu.wechat.entity.Contacts;
+import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.swing.adapter.search.SearchResultItemsAdapter;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;

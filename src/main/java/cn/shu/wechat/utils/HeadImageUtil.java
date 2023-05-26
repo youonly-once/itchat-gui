@@ -1,7 +1,7 @@
 package cn.shu.wechat.utils;
 
 import cn.shu.wechat.mapper.AttrHistoryMapper;
-import cn.shu.wechat.pojo.entity.AttrHistory;
+import cn.shu.wechat.entity.AttrHistory;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.File;

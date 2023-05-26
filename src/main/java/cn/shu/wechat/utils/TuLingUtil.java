@@ -1,7 +1,7 @@
 package cn.shu.wechat.utils;
 
-import cn.shu.wechat.pojo.dto.tuling.request.*;
-import cn.shu.wechat.pojo.dto.tuling.response.TuLingResponseBean;
+import cn.shu.wechat.dto.response.tuling.TuLingResponseBean;
+import cn.shu.wechat.dto.request.tuling.*;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;

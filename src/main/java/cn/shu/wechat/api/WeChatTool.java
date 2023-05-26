@@ -6,8 +6,7 @@
 package cn.shu.wechat.api;
 
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.enums.StorageLoginInfoEnum;
-import cn.shu.wechat.enums.URLEnum;
+import cn.shu.wechat.constant.WxURLEnum;
 import cn.shu.wechat.utils.HttpUtil;
 import lombok.extern.log4j.Log4j2;
 import org.apache.http.Consts;
@@ -192,13 +191,12 @@ public final class WeChatTool {
      * @date 2017年5月18日 下午11:56:54
      */
     public static void webWXLogOut() {
-        String url = String.format(URLEnum.WEB_WX_LOGOUT.getUrl(),
-                Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()));
+        String url = String.format(WxURLEnum.WEB_WX_LOGOUT.getUrl(),
+                Core.getLoginResultData().getUrl());
         List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
         params.add(new BasicNameValuePair("redirect", "1"));
         params.add(new BasicNameValuePair("type", "1"));
-        params.add(
-                new BasicNameValuePair("skey", (String) Core.getLoginInfoMap().get(StorageLoginInfoEnum.skey.getKey())));
+        params.add(new BasicNameValuePair("skey", (String) Core.getLoginResultData().getBaseRequest().getSKey()));
         try {
             HttpEntity entity = HttpUtil.doGet(url, params, false, null);
             String text = EntityUtils.toString(entity, Consts.UTF_8);
@@ -226,7 +224,7 @@ public final class WeChatTool {
      * @param remName 联系人备注
      */
   /*  public static void remarkNameByNickName(String nickName, String remName) {
-        String url = String.format(URLEnum.WEB_WX_REMARKNAME.getUrl(), Core.getLoginInfoMap().get("url"),
+        String url = String.format(URLEnum.WEB_WX_REMARKNAME.getUrl(),Core.getLoginResultData().getUrl(),
                 Core.getLoginInfoMap().get(StorageLoginInfoEnum.pass_ticket.getKey()));
         Map<String, Object> msgMap = new HashMap<String, Object>();
         Map<String, Object> msgMap_BaseRequest = new HashMap<String, Object>();

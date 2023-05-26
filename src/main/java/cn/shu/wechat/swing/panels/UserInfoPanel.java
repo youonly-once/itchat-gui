@@ -3,7 +3,7 @@ package cn.shu.wechat.swing.panels;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.pojo.entity.Contacts;
+import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.swing.components.*;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.ChatUtil;

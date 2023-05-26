@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.shu.wechat.mapper.StatusMapper">
-    <resultMap id="BaseResultMap" type="cn.shu.wechat.pojo.entity.Status">
+    <resultMap id="BaseResultMap" type="cn.shu.wechat.entity.Status">
         <!--@mbg.generated-->
         <!--@Table `status`-->
         <id column="name" jdbcType="VARCHAR" property="name"/>
@@ -74,7 +74,7 @@
         <!--@mbg.generated-->
         `name`, undo_status, auto_status
     </sql>
-    <select id="selectByExample" parameterType="cn.shu.wechat.pojo.entity.StatusExample" resultMap="BaseResultMap">
+    <select id="selectByExample" parameterType="cn.shu.wechat.entity.StatusExample" resultMap="BaseResultMap">
         <!--@mbg.generated-->
         select
         <if test="distinct">
@@ -101,21 +101,21 @@
         delete from `status`
         where `name` = #{name,jdbcType=VARCHAR}
     </delete>
-    <delete id="deleteByExample" parameterType="cn.shu.wechat.pojo.entity.StatusExample">
+    <delete id="deleteByExample" parameterType="cn.shu.wechat.entity.StatusExample">
         <!--@mbg.generated-->
         delete from `status`
         <if test="_parameter != null">
             <include refid="Example_Where_Clause"/>
         </if>
     </delete>
-    <insert id="insert" parameterType="cn.shu.wechat.pojo.entity.Status">
+    <insert id="insert" parameterType="cn.shu.wechat.entity.Status">
         <!--@mbg.generated-->
         insert into `status` (`name`, undo_status, auto_status
         )
         values (#{name,jdbcType=VARCHAR}, #{undoStatus,jdbcType=SMALLINT}, #{autoStatus,jdbcType=SMALLINT}
         )
     </insert>
-    <insert id="insertSelective" parameterType="cn.shu.wechat.pojo.entity.Status">
+    <insert id="insertSelective" parameterType="cn.shu.wechat.entity.Status">
         <!--@mbg.generated-->
         insert into `status`
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -141,7 +141,7 @@
             </if>
         </trim>
     </insert>
-    <select id="countByExample" parameterType="cn.shu.wechat.pojo.entity.StatusExample" resultType="java.lang.Long">
+    <select id="countByExample" parameterType="cn.shu.wechat.entity.StatusExample" resultType="java.lang.Long">
         <!--@mbg.generated-->
         select count(*) from `status`
         <if test="_parameter != null">
@@ -176,7 +176,7 @@
             <include refid="Update_By_Example_Where_Clause"/>
         </if>
     </update>
-    <update id="updateByPrimaryKeySelective" parameterType="cn.shu.wechat.pojo.entity.Status">
+    <update id="updateByPrimaryKeySelective" parameterType="cn.shu.wechat.entity.Status">
         <!--@mbg.generated-->
         update `status`
         <set>
@@ -189,7 +189,7 @@
         </set>
         where `name` = #{name,jdbcType=VARCHAR}
     </update>
-    <update id="updateByPrimaryKey" parameterType="cn.shu.wechat.pojo.entity.Status">
+    <update id="updateByPrimaryKey" parameterType="cn.shu.wechat.entity.Status">
         <!--@mbg.generated-->
         update `status`
         set undo_status = #{undoStatus,jdbcType=SMALLINT},
@@ -226,7 +226,7 @@
             )
         </foreach>
     </insert>
-    <insert id="insertOrUpdate" parameterType="cn.shu.wechat.pojo.entity.Status">
+    <insert id="insertOrUpdate" parameterType="cn.shu.wechat.entity.Status">
         <!--@mbg.generated-->
         insert into `status`
         (`name`, undo_status, auto_status)
@@ -238,7 +238,7 @@
         undo_status = #{undoStatus,jdbcType=SMALLINT},
         auto_status = #{autoStatus,jdbcType=SMALLINT}
     </insert>
-    <insert id="insertOrUpdateSelective" parameterType="cn.shu.wechat.pojo.entity.Status">
+    <insert id="insertOrUpdateSelective" parameterType="cn.shu.wechat.entity.Status">
         <!--@mbg.generated-->
         insert into `status`
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -277,7 +277,7 @@
             </if>
         </trim>
     </insert>
-    <insert id="insertOrUpdateSelectiveForSqlite" parameterType="cn.shu.wechat.pojo.entity.Status">
+    <insert id="insertOrUpdateSelectiveForSqlite" parameterType="cn.shu.wechat.entity.Status">
         INSERT OR REPLACE INTO status
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="name != null">

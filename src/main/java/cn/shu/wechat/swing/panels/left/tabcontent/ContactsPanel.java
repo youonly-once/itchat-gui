@@ -2,7 +2,7 @@ package cn.shu.wechat.swing.panels.left.tabcontent;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.pojo.entity.Contacts;
+import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.swing.adapter.ContactsItemViewHolder;
 import cn.shu.wechat.swing.adapter.ContactsItemsAdapter;
 import cn.shu.wechat.swing.components.Colors;

@@ -1,8 +1,8 @@
 package cn.shu.wechat.utils;
 
 import cn.shu.wechat.configuration.WechatConfiguration;
-import cn.shu.wechat.enums.OsNameEnum;
-import cn.shu.wechat.pojo.dto.msg.sync.AddMsgList;
+import cn.shu.wechat.constant.OsNameEnum;
+import cn.shu.wechat.dto.response.sync.AddMsgList;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;

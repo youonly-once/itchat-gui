@@ -1,9 +1,9 @@
 package cn.shu.wechat.swing.frames;
 
 import cn.shu.wechat.api.MessageTools;
+import cn.shu.wechat.constant.WxRespConstant;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
-import cn.shu.wechat.pojo.entity.Message;
+import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.utils.DateUtils;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.SleepUtils;
@@ -68,7 +68,7 @@ public class BombFrame extends JFrame {
                                     .createTime(DateUtils.getCurrDateString(DateUtils.YYYY_MM_DD_HH_MM_SS))
                                     .fromUsername(Core.getUserName())
                                     .toUsername(roomId)
-                                    .msgType(WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
+                                    .msgType(WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
                                     .fromNickname(Core.getNickName())
                                     .progress(50)
                                     .messageTime(LocalDateTime.now())

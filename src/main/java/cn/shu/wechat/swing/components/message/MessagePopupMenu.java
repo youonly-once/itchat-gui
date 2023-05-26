@@ -1,10 +1,10 @@
 package cn.shu.wechat.swing.components.message;
 
 import cn.shu.wechat.api.MessageTools;
-import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
+import cn.shu.wechat.constant.WxRespConstant;
 import cn.shu.wechat.mapper.MessageMapper;
-import cn.shu.wechat.pojo.dto.msg.send.WebWXSendMsgResponse;
-import cn.shu.wechat.pojo.entity.Message;
+import cn.shu.wechat.dto.response.msg.send.WebWXSendMsgResponse;
+import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCMenuItemUI;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
@@ -20,14 +20,12 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.io.File;
-import java.io.IOException;
 
 /**
  * Created by 舒新胜 on 2017/6/5.
  */
 public class MessagePopupMenu extends JPopupMenu {
-    private WXReceiveMsgCodeEnum messageType;
+    private WxRespConstant.WXReceiveMsgCodeEnum messageType;
     private final JMenuItem showPathItem = new JMenuItem("文件夹");
     private final JMenuItem revokeItem = new JMenuItem("撤回");
 
@@ -223,7 +221,7 @@ public class MessagePopupMenu extends JPopupMenu {
     }
 
     public void show(Component invoker, int x, int y, int messageType) {
-        this.messageType = WXReceiveMsgCodeEnum.getByCode(messageType);
+        this.messageType = WxRespConstant.WXReceiveMsgCodeEnum.getByCode(messageType);
         switch (this.messageType) {
             case MSGTYPE_TEXT:
                 remove(showPathItem);

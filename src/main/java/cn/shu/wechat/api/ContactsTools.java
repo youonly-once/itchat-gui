@@ -1,13 +1,13 @@
 package cn.shu.wechat.api;
 
 
-import cn.shu.wechat.constant.WebWeChatConstant;
+import cn.shu.wechat.constant.WxConstant;
+import cn.shu.wechat.constant.WxReqParamsConstant;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.enums.WXSendMsgCodeEnum;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
-import cn.shu.wechat.pojo.entity.AttrHistory;
-import cn.shu.wechat.pojo.entity.Contacts;
-import cn.shu.wechat.pojo.entity.Message;
+import cn.shu.wechat.entity.AttrHistory;
+import cn.shu.wechat.entity.Contacts;
+import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.utils.CommonTools;
 import cn.shu.wechat.utils.JSONObjectUtil;
@@ -349,9 +349,9 @@ public class ContactsTools {
      */
     public static boolean isMute(Contacts contacts){
         if (isRoomContact(contacts.getUsername())) {
-            return (contacts.getStatues().intValue()== WebWeChatConstant.ChatRoomMute.CHATROOM_NOTIFY_CLOSE.CODE);
+            return (contacts.getStatues().intValue()== WxConstant.ChatRoomMute.CHATROOM_NOTIFY_CLOSE.CODE);
         }else{
-            return ((contacts.getContactflag().intValue() & WebWeChatConstant.ContactFlag.CONTACTFLAG_NOTIFYCLOSECONTACT.CODE)>0);
+            return ((contacts.getContactflag().intValue() & WxConstant.ContactFlag.CONTACTFLAG_NOTIFYCLOSECONTACT.CODE)>0);
         }
 
 
@@ -416,7 +416,7 @@ public class ContactsTools {
                     String name = ContactsTools.getMemberDisplayNameOfGroup(oldGroup, memberOld.getUsername());
                     ArrayList<Message> messages = new ArrayList<>();
                     messages.add(Message.builder().content("【" + groupName + "】（" + name + "）:退群!")
-                            .msgType(WXSendMsgCodeEnum.TEXT.getCode())
+                            .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                             .toUsername("filehelper")
                             .build());
 
@@ -455,7 +455,7 @@ public class ContactsTools {
         String groupName = ContactsTools.getContactDisplayNameByUserName(oldGroup);
         ArrayList<Message> messages = new ArrayList<>();
          messages.add(Message.builder().content("群成员信息更改" + "：【" + groupName + "】" + "（" + memberDisplayNameOfGroup + "）属性更新：" + differenceStr)
-                .msgType(WXSendMsgCodeEnum.TEXT.getCode())
+                .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                 .toUsername("filehelper")
                 .build());
         log.info("群成员信息更改" + "：【" + groupName + "】" + "（" + memberDisplayNameOfGroup + "）属性更新：" + differenceStr);
@@ -488,7 +488,7 @@ public class ContactsTools {
             String name = ContactsTools.getContactDisplayNameByUserName(newV.getUsername());
             ArrayList<Message> messages = new ArrayList<>();
              messages.add(Message.builder().content("普通联系人" + "（" + name + "）属性更新：" + s)
-                    .msgType(WXSendMsgCodeEnum.TEXT.getCode())
+                    .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                     .toUsername("filehelper")
                     .build());
             log.info("普通联系人" + "（" + name + "）属性更新：" + s);
@@ -521,13 +521,13 @@ public class ContactsTools {
                     //更换头像需要发送图片
                     //更换前
                     messages.add(Message.builder()
-                            .msgType(WXSendMsgCodeEnum.PIC.getCode())
+                            .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.PIC.getCode())
                             .toUsername("filehelper")
                             .filePath(oldHeadPath).build());
                     //更换后
                     messages.add(Message.builder()
                             .toUsername("filehelper")
-                            .msgType(WXSendMsgCodeEnum.PIC.getCode())
+                            .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.PIC.getCode())
                             .filePath(newHeadPath).build());
                     //刷新头像
                     AvatarUtil.putUserAvatarCache(oldV.getUsername(), newHeadPath);

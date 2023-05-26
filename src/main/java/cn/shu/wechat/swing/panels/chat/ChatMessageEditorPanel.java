@@ -2,7 +2,7 @@ package cn.shu.wechat.swing.panels.chat;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.mapper.StatusMapper;
-import cn.shu.wechat.pojo.entity.Status;
+import cn.shu.wechat.entity.Status;
 import cn.shu.wechat.service.impl.IMsgHandlerFaceImpl;
 import cn.shu.wechat.swing.components.*;
 import cn.shu.wechat.swing.components.message.ChatEditorPopupMenu;
@@ -15,8 +15,6 @@ import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.OSUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
-import com.melloware.jintellitype.HotkeyListener;
-import com.melloware.jintellitype.JIntellitype;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.shu.wechat.mapper.AttrHistoryMapper">
-    <resultMap id="BaseResultMap" type="cn.shu.wechat.pojo.entity.AttrHistory">
+    <resultMap id="BaseResultMap" type="cn.shu.wechat.entity.AttrHistory">
         <!--@mbg.generated-->
         <!--@Table attr_history-->
         <id column="id" jdbcType="INTEGER" property="id"/>
@@ -30,7 +30,7 @@
         from attr_history
         where id = #{id,jdbcType=INTEGER}
     </delete>
-    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.shu.wechat.pojo.entity.AttrHistory"
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.shu.wechat.entity.AttrHistory"
             useGeneratedKeys="true">
         <!--@mbg.generated-->
         insert into attr_history (UserName, NickName, Attr,
@@ -40,7 +40,7 @@
         #{remarkname,jdbcType=VARCHAR}, #{createtime,jdbcType=TIMESTAMP}, #{newval,jdbcType=VARCHAR},
         #{oldval,jdbcType=VARCHAR})
     </insert>
-    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="cn.shu.wechat.pojo.entity.AttrHistory"
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="cn.shu.wechat.entity.AttrHistory"
             useGeneratedKeys="true">
         <!--@mbg.generated-->
         insert into attr_history
@@ -91,7 +91,7 @@
             </if>
         </trim>
     </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="cn.shu.wechat.pojo.entity.AttrHistory">
+    <update id="updateByPrimaryKeySelective" parameterType="cn.shu.wechat.entity.AttrHistory">
         <!--@mbg.generated-->
         update attr_history
         <set>
@@ -119,7 +119,7 @@
         </set>
         where id = #{id,jdbcType=INTEGER}
     </update>
-    <update id="updateByPrimaryKey" parameterType="cn.shu.wechat.pojo.entity.AttrHistory">
+    <update id="updateByPrimaryKey" parameterType="cn.shu.wechat.entity.AttrHistory">
         <!--@mbg.generated-->
         update attr_history
         set UserName = #{username,jdbcType=VARCHAR},
@@ -188,7 +188,7 @@
             #{item.oldval,jdbcType=VARCHAR})
         </foreach>
     </insert>
-    <insert id="insertOrUpdate" keyColumn="id" keyProperty="id" parameterType="cn.shu.wechat.pojo.entity.AttrHistory"
+    <insert id="insertOrUpdate" keyColumn="id" keyProperty="id" parameterType="cn.shu.wechat.entity.AttrHistory"
             useGeneratedKeys="true">
         <!--@mbg.generated-->
         insert into attr_history
@@ -232,7 +232,7 @@
         </trim>
     </insert>
     <insert id="insertOrUpdateSelective" keyColumn="id" keyProperty="id"
-            parameterType="cn.shu.wechat.pojo.entity.AttrHistory" useGeneratedKeys="true">
+            parameterType="cn.shu.wechat.entity.AttrHistory" useGeneratedKeys="true">
         <!--@mbg.generated-->
         insert into attr_history
         <trim prefix="(" suffix=")" suffixOverrides=",">

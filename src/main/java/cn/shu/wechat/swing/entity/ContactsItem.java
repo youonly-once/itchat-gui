@@ -1,7 +1,7 @@
 package cn.shu.wechat.swing.entity;
 
 import cn.shu.wechat.api.ContactsTools;
-import cn.shu.wechat.pojo.entity.Contacts;
+import cn.shu.wechat.entity.Contacts;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

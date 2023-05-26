@@ -2,8 +2,8 @@ package cn.shu.wechat.swing.panels.chat;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.pojo.entity.Contacts;
-import cn.shu.wechat.pojo.entity.Message;
+import cn.shu.wechat.entity.Contacts;
+import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.panels.TitlePanel;
@@ -12,7 +12,6 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.util.ArrayList;
 

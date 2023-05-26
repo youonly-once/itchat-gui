@@ -1,12 +1,16 @@
 package cn.shu.wechat.api;
 
 
+import cn.shu.wechat.constant.WxURLEnum;
+import cn.shu.wechat.constant.WxReqParamsConstant;
+import cn.shu.wechat.constant.WxRespConstant;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.enums.*;
 import cn.shu.wechat.exception.WebWXException;
 import cn.shu.wechat.mapper.MessageMapper;
-import cn.shu.wechat.pojo.dto.msg.send.*;
-import cn.shu.wechat.pojo.entity.Message;
+import cn.shu.wechat.entity.Message;
+import cn.shu.wechat.dto.request.msg.send.*;
+import cn.shu.wechat.dto.response.msg.send.WebWXSendMsgResponse;
+import cn.shu.wechat.dto.response.msg.send.WebWXUploadMediaResponse;
 import cn.shu.wechat.swing.tasks.UploadTaskCallback;
 import cn.shu.wechat.swing.utils.ImageUtil;
 import cn.shu.wechat.swing.utils.MimeTypeUtil;
@@ -63,7 +67,7 @@ public class MessageTools {
      * @param messages    消息列表
      * @param callback 文件上传进度回调
      */
-    public static WebWXSendMsgResponse sendMsgByUserId(List<Message> messages,UploadTaskCallback callback) {
+    public static WebWXSendMsgResponse sendMsgByUserId(List<Message> messages, UploadTaskCallback callback) {
         if (messages == null){
             return WebWXSendMsgResponse.error("messages is null");
         }
@@ -79,7 +83,7 @@ public class MessageTools {
                 }
 
                     String content = XmlStreamUtil.formatXml(message.getContent());
-                    WXReceiveMsgCodeEnum byCode = WXReceiveMsgCodeEnum.getByCode(message.getMsgType());
+                    WxRespConstant.WXReceiveMsgCodeEnum byCode = WxRespConstant.WXReceiveMsgCodeEnum.getByCode(message.getMsgType());
                     switch (byCode) {
                         case MSGTYPE_IMAGE:
                             sendMsgResponse = sendPicMsgByUserId(toUserName, message.getFilePath(), content, callback);
@@ -264,15 +268,15 @@ public class MessageTools {
             fileMime ="application";
         }
         String lastModifyFileDate = new SimpleDateFormat("yyyy MM dd HH:mm:ss").format(file.lastModified());
-        String passTicket = (String) Core.getLoginInfoMap().get("pass_ticket");
+        String passTicket = (String)  Core.getLoginResultData().getPassTicket();
         if (StringUtils.isEmpty(passTicket)) {
             passTicket = "undefined";
         }
         String clientMediaId = System.currentTimeMillis() + String.valueOf(new Random().nextLong()).substring(0, 4);
         String webWXDataTicket = HttpUtil.getCookie("webwx_data_ticket");
-        Map<String, Object> paramMap = Core.getParamMap();
+        Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("UploadType", 2);
-        paramMap.put("BaseRequest", Core.getParamMap().get("BaseRequest"));
+        paramMap.put("BaseRequest", Core.getLoginResultData().getBaseRequest());
         paramMap.put("ClientMediaId", clientMediaId);
         paramMap.put("TotalLen", file.length());
         paramMap.put("StartPos", 0);
@@ -282,7 +286,7 @@ public class MessageTools {
         paramMap.put("ToUserName", toUserName);
         paramMap.put("FileMd5", MD5Util.getMD5(file));
         String result = null;
-        String url = String.format(URLEnum.WEB_WX_UPLOAD_MEDIA.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.fileUrl.getKey()));
+        String url = String.format(WxURLEnum.WEB_WX_UPLOAD_MEDIA.getUrl(), Core.getLoginResultData().getFileUrl());
         if (file.length() <= singleFileMaxSize) {
             //小于1M发送方式
             MultipartEntityBuilder builder = MultipartEntityBuilder.create();
@@ -363,7 +367,7 @@ public class MessageTools {
      * @date 2017年5月4日 下午11:17:38
      */
     private static WebWXSendMsgResponse sendTextMsgByUserId(String content, String toUserName) throws IOException {
-        String url = String.format(URLEnum.WEB_WX_SEND_MSG.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()));
+        String url = String.format(WxURLEnum.WEB_WX_SEND_MSG.getUrl(),  Core.getLoginResultData().getUrl());
         WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
         WebWXSendingMsg textMsg = new WebWXSendingTextMsg();
         textMsg.Content = content;
@@ -381,7 +385,7 @@ public class MessageTools {
      * @date 2021年9月26日 下午14:18:38
      */
     private static WebWXSendMsgResponse sendMapMsgByUserId(String toUserName,String content) throws IOException {
-        String url = String.format(URLEnum.WEB_WX_SEND_MSG.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()));
+        String url = String.format(WxURLEnum.WEB_WX_SEND_MSG.getUrl(),  Core.getLoginResultData().getUrl());
         WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
         WebWXSendingMsg textMsg = new WebWXSendingMapMsg();
         textMsg.Content = content;
@@ -399,7 +403,7 @@ public class MessageTools {
      * @date 2017年5月4日 下午11:17:38
      */
     private static WebWXSendMsgResponse sendCardMsgByUserId(String toUserName, String content) throws IOException {
-        String url = String.format(URLEnum.WEB_WX_SEND_MSG.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()));
+        String url = String.format(WxURLEnum.WEB_WX_SEND_MSG.getUrl(),  Core.getLoginResultData().getUrl());
         WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
         WebWXSendingCardMsg textMsg = new WebWXSendingCardMsg();
         textMsg.Content = content;
@@ -431,8 +435,8 @@ public class MessageTools {
             mediaId = resp.getMediaId();
             content = "";
         }
-        String url = String.format(URLEnum.WEB_WX_SEND_PIC_MSG.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()),
-                Core.getLoginInfoMap().get("pass_ticket"));
+        String url = String.format(WxURLEnum.WEB_WX_SEND_PIC_MSG.getUrl(),  Core.getLoginResultData().getUrl(),
+                 Core.getLoginResultData().getPassTicket());
 
         WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
         WebWXSendingPicMsg textMsg = new WebWXSendingPicMsg();
@@ -464,7 +468,7 @@ public class MessageTools {
      */
     private static WebWXSendMsgResponse sendEmotionMsgByUserId(String userId, String filePath, String content) throws WebWXException, IOException {
 
-        String url = String.format(URLEnum.WEB_WX_SEND_EMOTION_MSG.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()));
+        String url = String.format(WxURLEnum.WEB_WX_SEND_EMOTION_MSG.getUrl(),  Core.getLoginResultData().getUrl());
 
         WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
         WebWXSendingEmotionMsg textMsg = new WebWXSendingEmotionMsg();
@@ -504,13 +508,15 @@ public class MessageTools {
      */
     public static boolean sendRevokeMsgByUserId(String userId, String clientMsgId, String svrMsgId) {
 
-        String url = String.format(URLEnum.WEB_WX_REVOKE_MSG.getUrl()
-                , URLEnum.BASE_URL.getUrl());
+        String url = String.format(WxURLEnum.WEB_WX_REVOKE_MSG.getUrl()
+                , Core.getLoginResultData().getUrl()
+        ,Core.getLoginResultData().getPassTicket());
 
         WebWXSendingRevokeMsg webWXSendingRevokeMsg = new WebWXSendingRevokeMsg();
         webWXSendingRevokeMsg.ClientMsgId = clientMsgId;
         webWXSendingRevokeMsg.SvrMsgId = svrMsgId;
         webWXSendingRevokeMsg.ToUserName = userId;
+        webWXSendingRevokeMsg.BaseRequest = Core.getLoginResultData().getBaseRequest();
         String paramStr = JSON.toJSONString(webWXSendingRevokeMsg);
         HttpEntity entity = HttpUtil.doPost(url, paramStr);
         if (entity != null) {
@@ -542,14 +548,15 @@ public class MessageTools {
             mediaId = resp.getMediaId();
             content = "";
         }
-        String url = String.format(URLEnum.WEB_WX_SEND_VIDEO_MSG.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()),
-                Core.getLoginInfoMap().get(StorageLoginInfoEnum.pass_ticket.getKey()));
+        String url = String.format(WxURLEnum.WEB_WX_SEND_VIDEO_MSG.getUrl(),  Core.getLoginResultData().getUrl(),
+                Core.getLoginResultData().getPassTicket());
         WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
         WebWXSendingVideoMsg textMsg = new WebWXSendingVideoMsg();
         textMsg.MediaId = mediaId;
         textMsg.ToUserName = userId;
         textMsg.Content = content;
         msgRequest.Msg = textMsg;
+        msgRequest.BaseRequest = Core.getLoginResultData().getBaseRequest();
         WebWXSendMsgResponse webWXSendMsgResponse = sendMsg(msgRequest, url);
         if (callback!=null){
             callback.onTaskSuccess(100,100);
@@ -572,8 +579,8 @@ public class MessageTools {
      * @date 2017年5月10日 上午12:21:28
      */
     private static WebWXSendMsgResponse sendAppMsgByUserId(String userId, String filePath, String content, UploadTaskCallback callback) throws IOException, WebWXException {
-        String url = String.format(URLEnum.WEB_WX_SEND_APP_MSG.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()),
-                Core.getLoginInfoMap().get("pass_ticket"));
+        String url = String.format(WxURLEnum.WEB_WX_SEND_APP_MSG.getUrl(),  Core.getLoginResultData().getUrl(),
+                 Core.getLoginResultData().getPassTicket());
 
         if (StringUtils.isEmpty(content)) {
             String title = new File(filePath).getName();
@@ -625,8 +632,8 @@ public class MessageTools {
      * @date 2017年5月10日 上午12:21:28
      */
     private static WebWXSendMsgResponse sendAppMsgByUserId(String userId, WebWXUploadMediaResponse webWXUploadMediaResponse,String filePath) throws IOException, WebWXException {
-        String url = String.format(URLEnum.WEB_WX_SEND_APP_MSG.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()),
-                Core.getLoginInfoMap().get("pass_ticket"));
+        String url = String.format(WxURLEnum.WEB_WX_SEND_APP_MSG.getUrl(),  Core.getLoginResultData().getUrl(),
+                 Core.getLoginResultData().getPassTicket());
             String title = new File(filePath).getName();
             String fileext = title.split("\\.")[1];
             if (fileext == null) {
@@ -657,7 +664,7 @@ public class MessageTools {
      * @date 2017年5月10日 上午12:21:28
      */
     public static WebWXSendMsgResponse sendStatusNotify(String toUserName) {
-        String url = String.format(URLEnum.WEB_WX_SEND_NOTIFY_MSG.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()));
+        String url = String.format(WxURLEnum.WEB_WX_SEND_NOTIFY_MSG.getUrl(),  Core.getLoginResultData().getUrl());
         WebWXSendingNotifyMsg webWXSendingNotifyMsg = new WebWXSendingNotifyMsg();
         webWXSendingNotifyMsg.Code = 1;
         webWXSendingNotifyMsg.FromUserName = Core.getUserName();
@@ -684,11 +691,11 @@ public class MessageTools {
     public static WebWXSendMsgResponse addFriend(String userName,String ticket) {
 
         // 接受好友请求
-        int status = VerifyFriendEnum.ACCEPT.getCode();
+        int status = WxReqParamsConstant.VerifyFriendEnum.ACCEPT.getCode();
 
 
-        String url = String.format(URLEnum.WEB_WX_VERIFYUSER.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()),
-                System.currentTimeMillis() / 3158L, Core.getLoginInfoMap().get(StorageLoginInfoEnum.pass_ticket.getKey()));
+        String url = String.format(WxURLEnum.WEB_WX_VERIFYUSER.getUrl(),  Core.getLoginResultData().getUrl(),
+                System.currentTimeMillis() / 3158L, Core.getLoginResultData().getPassTicket());
 
         List<Map<String, Object>> verifyUserList = new ArrayList<Map<String, Object>>();
         Map<String, Object> verifyUser = new HashMap<String, Object>();
@@ -700,14 +707,14 @@ public class MessageTools {
         sceneList.add(33);
 
         JSONObject body = new JSONObject();
-        body.put("BaseRequest", Core.getParamMap().get("BaseRequest"));
+        body.put("BaseRequest", Core.getLoginResultData().getBaseRequest());
         body.put("Opcode", status);
         body.put("VerifyUserListSize", 1);
         body.put("VerifyUserList", verifyUserList);
         body.put("VerifyContent", "");
         body.put("SceneListCount", 1);
         body.put("SceneList", sceneList);
-        body.put("skey", Core.getLoginInfoMap().get(StorageLoginInfoEnum.skey.getKey()));
+        body.put("skey", Core.getLoginResultData().getBaseRequest().getSKey());
         String result = null;
         try {
             String paramStr = JSON.toJSONString(body);
@@ -730,7 +737,7 @@ public class MessageTools {
      * @return 参数
      */
     public static WebWXSendMsgResponse modifyRemarkName(String userName ,String remarkName) throws IOException {
-        String url = String.format(URLEnum.WEB_WX_REMARKNAME.getUrl(), Core.getLoginInfoMap().get(StorageLoginInfoEnum.url.getKey()));
+        String url = String.format(WxURLEnum.WEB_WX_REMARKNAME.getUrl(),  Core.getLoginResultData().getUrl());
         WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
         WebWXModifyRemarkNameMsg msg = new WebWXModifyRemarkNameMsg();
         msg.CmdId = 2;
@@ -748,7 +755,9 @@ public class MessageTools {
      * @throws IOException IOException
      */
     private static WebWXSendMsgResponse sendMsg(WebWXSendMsgRequest webWXSendMsgRequest, String url) throws IOException {
+        webWXSendMsgRequest.BaseRequest = Core.getLoginResultData().getBaseRequest();
         String paramStr = JSON.toJSONString(webWXSendMsgRequest);
+
         HttpEntity entity = HttpUtil.doPost(url, paramStr);
         if (entity == null){
             return  WebWXSendMsgResponse.error("response is null.");
@@ -762,7 +771,7 @@ public class MessageTools {
 
         if (filePath != null) {
             Dimension imageSize = ImageUtil.getImageSize(filePath);
-            return Message.builder().msgType(WXSendMsgCodeEnum.PIC.getCode())
+            return Message.builder().msgType(WxReqParamsConstant.WXSendMsgCodeEnum.PIC.getCode())
                     .filePath(filePath)
                     .imgWidth(imageSize.width)
                     .imgHeight(imageSize.height)

@@ -1,7 +1,7 @@
 package cn.shu.wechat.swing.panels.chat;
 
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.pojo.entity.Contacts;
+import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.adapter.RoomMembersAdapter;
 import cn.shu.wechat.swing.components.Colors;

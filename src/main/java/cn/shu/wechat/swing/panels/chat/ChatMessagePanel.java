@@ -2,13 +2,12 @@ package cn.shu.wechat.swing.panels.chat;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.MessageTools;
+import cn.shu.wechat.constant.WxRespConstant;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
-import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
 import cn.shu.wechat.mapper.MessageMapper;
-import cn.shu.wechat.pojo.dto.msg.send.WebWXSendMsgResponse;
-import cn.shu.wechat.pojo.entity.Contacts;
-import cn.shu.wechat.pojo.entity.Message;
+import cn.shu.wechat.dto.response.msg.send.WebWXSendMsgResponse;
+import cn.shu.wechat.entity.Contacts;
+import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.swing.adapter.ViewHolder;
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.adapter.message.MessageAdapter;
@@ -440,7 +439,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                 Contacts contacts = Core.getMemberMap().get(roomId);
                 String remarkName = ContactsTools.getContactRemarkNameByUserName(contacts);
                 String nickName = ContactsTools.getContactNickNameByUserName(contacts);
-                List<cn.shu.wechat.pojo.entity.Message> messageList = mapper.selectByPage(messageItems.size(), messageItems.size() + PAGE_LENGTH, roomId, remarkName, nickName);
+                List<cn.shu.wechat.entity.Message> messageList = mapper.selectByPage(messageItems.size(), messageItems.size() + PAGE_LENGTH, roomId, remarkName, nickName);
                 messageItems.addAll(messageList);
                 return null;
             }
@@ -554,7 +553,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                 .createTime(DateUtils.getCurrDateString(DateUtils.YYYY_MM_DD_HH_MM_SS))
                 .fromUsername(Core.getUserName())
                 .toUsername(roomId)
-                .msgType(WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
+                .msgType(WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
                 .fromNickname(Core.getNickName())
                 .progress(50)
                 .messageTime(LocalDateTime.now())
@@ -634,15 +633,15 @@ public class ChatMessagePanel extends ParentAvailablePanel {
         }
 
         String mime = MimeTypeUtil.getMime(uploadFilename.substring(uploadFilename.lastIndexOf(".")));
-        WXReceiveMsgCodeEnum msgType = WXReceiveMsgCodeEnum.MSGTYPE_APP;
-        WXReceiveMsgCodeOfAppEnum fileOfAppType = WXReceiveMsgCodeOfAppEnum.FILE;
+        WxRespConstant.WXReceiveMsgCodeEnum msgType = WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_APP;
+        WxRespConstant.WXReceiveMsgCodeOfAppEnum fileOfAppType = WxRespConstant.WXReceiveMsgCodeOfAppEnum.FILE;
         if (mime == null) {
-            msgType = WXReceiveMsgCodeEnum.MSGTYPE_APP;
+            msgType = WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_APP;
             mime = "app";
         } else if (mime.startsWith("image/")) {
-            msgType = WXReceiveMsgCodeEnum.MSGTYPE_IMAGE;
+            msgType = WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_IMAGE;
         } else if (mime.startsWith("video/")) {
-            msgType = WXReceiveMsgCodeEnum.MSGTYPE_VIDEO;
+            msgType = WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_VIDEO;
         }
         //新增消息项
         Message message = null;
@@ -708,7 +707,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
         ViewHolder viewHolder = addMessageToEnd(message);
 
         Message finalMessage = message;
-        WXReceiveMsgCodeEnum finalMsgType = msgType;
+        WxRespConstant.WXReceiveMsgCodeEnum finalMsgType = msgType;
         new SwingWorker<Void, Long>() {
             private WebWXSendMsgResponse wxSendMsgResponse;
             @Override

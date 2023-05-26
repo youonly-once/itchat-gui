@@ -1,6 +1,6 @@
 package cn.shu.wechat.swing.db.model;
 
-import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
+import cn.shu.wechat.constant.WxRespConstant;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -23,7 +23,7 @@ public class Message extends BasicModel {
     private int progress; // 文件上传进度
     private boolean deleted;
     private boolean systemMessage; //是否是系统消息
-    private WXReceiveMsgCodeEnum msgType;
+    private WxRespConstant.WXReceiveMsgCodeEnum msgType;
     private String fileAttachmentId;
     private String imageAttachmentId;
 

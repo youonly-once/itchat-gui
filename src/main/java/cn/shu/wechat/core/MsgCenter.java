@@ -3,16 +3,14 @@ package cn.shu.wechat.core;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.api.MessageTools;
-import cn.shu.wechat.enums.URLEnum;
-import cn.shu.wechat.enums.WXReceiveMsgCodeEnum;
-import cn.shu.wechat.enums.WXReceiveMsgCodeOfAppEnum;
-import cn.shu.wechat.enums.WXReceiveMsgStatusNotifyCodeEnum;
+import cn.shu.wechat.constant.WxRespConstant;
+import cn.shu.wechat.constant.WxURLEnum;
 import cn.shu.wechat.mapper.MessageMapper;
-import cn.shu.wechat.pojo.dto.msg.send.WebWXSendMsgResponse;
-import cn.shu.wechat.pojo.dto.msg.sync.AddMsgList;
-import cn.shu.wechat.pojo.dto.msg.sync.RecommendInfo;
-import cn.shu.wechat.pojo.entity.Contacts;
-import cn.shu.wechat.pojo.entity.Message;
+import cn.shu.wechat.dto.response.msg.send.WebWXSendMsgResponse;
+import cn.shu.wechat.dto.response.sync.AddMsgList;
+import cn.shu.wechat.dto.response.sync.RecommendInfo;
+import cn.shu.wechat.entity.Contacts;
+import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.service.IMsgHandlerFace;
 import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.entity.RoomItem;
@@ -34,7 +32,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 
-import static cn.shu.wechat.enums.WXReceiveMsgCodeEnum.MSGTYPE_TEXT;
+import static cn.shu.wechat.constant.WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_TEXT;
 
 /**
  * 消息处理中心
@@ -367,7 +365,7 @@ public class MsgCenter {
                 .isSend(isFromSelf)
                 .appMsgType(msg.getAppMsgType())
                 .msgJson(JSON.toJSONString(msg))
-                .msgDesc(WXReceiveMsgCodeEnum.getByCode(msg.getMsgType()).getDesc())
+                .msgDesc(WxRespConstant.WXReceiveMsgCodeEnum.getByCode(msg.getMsgType()).getDesc())
                 .fromMemberOfGroupDisplayname(msg.isGroupMsg() && !msg.getFromUserName().equals(Core.getUserName())
                         ? ContactsTools.getMemberDisplayNameOfGroup(msg.getFromUserName(), msg.getMemberName()) : null)
                 .fromMemberOfGroupNickname(msg.isGroupMsg() && !msg.getFromUserName().equals(Core.getUserName())
@@ -429,12 +427,12 @@ public class MsgCenter {
      */
     public void handleNewMsg(AddMsgList msg) {
         //消息类型封装
-        WXReceiveMsgCodeEnum msgType = WXReceiveMsgCodeEnum.getByCode(msg.getMsgType());
+        WxRespConstant.WXReceiveMsgCodeEnum msgType = WxRespConstant.WXReceiveMsgCodeEnum.getByCode(msg.getMsgType());
         //=============地图消息，特殊处理=============
         if (msgType == MSGTYPE_TEXT && !StringUtils.isEmpty(msg.getUrl())) {
             //地图消息 地图消息的发送
-            msg.setMsgType(WXReceiveMsgCodeEnum.MSGTYPE_MAP.getCode());
-            msgType = WXReceiveMsgCodeEnum.MSGTYPE_MAP;
+            msg.setMsgType(WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_MAP.getCode());
+            msgType = WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_MAP;
         }
         //=============群消息处理=============
         groupMsgFormat(msg);
@@ -463,7 +461,7 @@ public class MsgCenter {
         switch (msgType) {
             case MSGTYPE_MAP: {
                 Map<String, Object> map = XmlStreamUtil.toMap(msg.getOriContent());
-                String thumbUrl = URLEnum.BASE_URL.getUrl() + msg.getContent();
+                String thumbUrl = WxURLEnum.BASE_URL.getUrl() + msg.getContent();
                 String url = msg.getUrl();
                 String title = map.get("msg.location.attr.poiname").toString();
                 String subTitle = map.get("msg.location.attr.label").toString();
@@ -472,8 +470,8 @@ public class MsgCenter {
                 ext = ".gif";
                 downloadFile(msg, fileName, ext);
                 message = newMsgToDBMessage(msg);
-                message.setMsgType(WXReceiveMsgCodeEnum.MSGTYPE_APP.getCode());
-                message.setAppMsgType(WXReceiveMsgCodeOfAppEnum.PICTURE.getType());
+                message.setMsgType(WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_APP.getCode());
+                message.setAppMsgType(WxRespConstant.WXReceiveMsgCodeOfAppEnum.PICTURE.getType());
                 message.setThumbUrl(msg.getFilePath());
                 message.setUrl(url);
                 message.setTitle(title);
@@ -534,7 +532,7 @@ public class MsgCenter {
                 Object height = map.get("msg.appmsg.appattach.cdnthumbheight");
                 Object width = map.get("msg.appmsg.appattach.cdnthumbwidth");
 
-                switch (WXReceiveMsgCodeOfAppEnum.getByCode(msg.getAppMsgType())) {
+                switch (WxRespConstant.WXReceiveMsgCodeOfAppEnum.getByCode(msg.getAppMsgType())) {
                     case LINK:
                         msg.setPlainText("[链接]" + title);
                         break;
@@ -563,7 +561,7 @@ public class MsgCenter {
                         break;
                     case TRANSFER:
                         msg.setPlainText(desc == null ? "[微信转账]" : desc.toString());
-                        msg.setAppMsgType(WXReceiveMsgCodeOfAppEnum.LINK.getType());
+                        msg.setAppMsgType(WxRespConstant.WXReceiveMsgCodeOfAppEnum.LINK.getType());
                         break;
                   /*  default:
                         msg.setMsgType(MSGTYPE_TEXT.getCode());
@@ -599,7 +597,7 @@ public class MsgCenter {
                 break;
             }
             case MSGTYPE_STATUSNOTIFY: {
-                switch ( WXReceiveMsgStatusNotifyCodeEnum.getByCode(msg.getStatusNotifyCode())){
+                switch ( WxRespConstant.WXReceiveMsgStatusNotifyCodeEnum.getByCode(msg.getStatusNotifyCode())){
                     case INITED:
 
                     case SYNC_CONV: {
