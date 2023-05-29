@@ -16,6 +16,7 @@ public enum WxURLEnum {
     INIT_URL("%s/webwxinit?r=%s&pass_ticket=%s&lang=zh_CN", "初始化URL"),
     SYNC_CHECK_URL("%s/synccheck", "检查心跳URL"),
     WEB_WX_SYNC_URL("%s/webwxsync?sid=%s&skey=%s", "web微信消息同步URL"),
+    WEB_WX_CREATE_ROOM("/webwxcreatechatroom?r=%s", "创建群聊"),
     WEB_WX_GET_CONTACT("%s/webwxgetcontact", "web微信获取联系人信息URL"),
     WEB_WX_SEND_MSG("%s/webwxsendmsg", "发送消息URL"),
     WEB_WX_UPLOAD_MEDIA("%s/webwxuploadmedia?f=json", "上传文件到服务器"),

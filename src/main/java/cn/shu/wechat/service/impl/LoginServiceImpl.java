@@ -10,14 +10,13 @@ import cn.shu.wechat.constant.WxReqParamsConstant;
 import cn.shu.wechat.constant.WxRespConstant;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.core.MsgCenter;
+import cn.shu.wechat.dto.request.*;
+import cn.shu.wechat.dto.response.WxCreateRoomResp;
+import cn.shu.wechat.exception.WebWXException;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
-import cn.shu.wechat.dto.request.BaseRequest;
 import cn.shu.wechat.dto.response.sync.AddMsgList;
 import cn.shu.wechat.dto.response.sync.WebWxSyncResp;
 import cn.shu.wechat.entity.Contacts;
-import cn.shu.wechat.dto.request.WxInitReq;
-import cn.shu.wechat.dto.request.WxStatusNotifyReq;
-import cn.shu.wechat.dto.request.WxSyncReq;
 import cn.shu.wechat.dto.response.SyncCheckResp;
 import cn.shu.wechat.dto.response.wxinit.WxInitResponse;
 import cn.shu.wechat.service.LoginService;
@@ -41,6 +40,7 @@ import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
 import java.util.Map.Entry;
@@ -915,5 +915,17 @@ public class LoginServiceImpl implements LoginService {
         return "";
     }
 
-
+    @Override
+    public WxCreateRoomResp webWxCreateRoom(List<Contacts> contacts) throws Exception {
+        if (contacts.isEmpty()){
+            throw new WebWXException("contacts is empty.");
+        };
+        String url = String.format(WxURLEnum.WEB_WX_CREATE_ROOM.getUrl(),System.currentTimeMillis());
+        WxCreateRoomReq createRoomReq = WxCreateRoomReq.builder().BaseRequest(Core.getLoginResultData().getBaseRequest())
+                .MemberCount(contacts.size())
+                .MemberList(contacts)
+                .build();
+        HttpEntity httpEntity = HttpUtil.doPost(url, JSON.toJSONString(createRoomReq));
+        return JSON.parseObject(EntityUtils.toString(httpEntity), WxCreateRoomResp.class);
+    }
 }

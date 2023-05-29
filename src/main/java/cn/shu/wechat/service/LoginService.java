@@ -1,9 +1,11 @@
 package cn.shu.wechat.service;
 
+import cn.shu.wechat.dto.response.WxCreateRoomResp;
 import cn.shu.wechat.entity.Contacts;
 import com.alibaba.fastjson.JSONArray;
 
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -97,6 +99,13 @@ public interface LoginService {
      */
     void WebWxBatchGetContact();
 
+
+    /**
+     * 创建群聊
+     * @param contacts 联系人列表
+     * @return
+     */
+    WxCreateRoomResp webWxCreateRoom(List<Contacts> contacts) throws IOException, Exception;
     /**
      * 获取群成员信息
      * @param groupName 群名
