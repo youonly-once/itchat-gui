@@ -12,6 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by 舒新胜 on 17-5-30.
@@ -20,7 +21,7 @@ public class SelectUserItemsAdapter extends BaseAdapter<SelectUserItemViewHolder
     private final ImageIcon checkIcon;
     private final ImageIcon uncheckIcon;
     private List<SelectUserData> userList;
-    private List<SelectUserItemViewHolder> viewHolders = new ArrayList<>();
+    private final List<SelectUserItemViewHolder> viewHolders = new ArrayList<>();
     Map<Integer, String> positionMap = new HashMap<>();
     private AbstractMouseListener mouseListener;
 
@@ -45,6 +46,7 @@ public class SelectUserItemsAdapter extends BaseAdapter<SelectUserItemViewHolder
 
     @Override
     public SelectUserItemViewHolder onCreateViewHolder(int viewType, int subViewType, int position) {
+
         return new SelectUserItemViewHolder();
     }
 
@@ -80,14 +82,12 @@ public class SelectUserItemsAdapter extends BaseAdapter<SelectUserItemViewHolder
     @Override
     public void onBindViewHolder(SelectUserItemViewHolder viewHolder, int position) {
         viewHolders.add(position, viewHolder);
-        String name = userList.get(position).getName();
+        String name = userList.get(position).getDisplayName();
 
-        // TODO 小 头像 30 30
-        ImageIcon imageIcon = AvatarUtil.createOrLoadUserAvatar(name);
-        viewHolder.avatar.setIcon(imageIcon);
-
+        AvatarUtil.loadAvatar(userList.get(position).getUserName(),viewHolder.avatar);
+        viewHolder.username = userList.get(position).getUserName();
         // 名字
-        viewHolder.username.setText(name);
+        viewHolder.disPlayNameLabel.setText(name);
 
         if (userList.get(position).isSelected()) {
             viewHolder.icon.setIcon(checkIcon);
@@ -100,24 +100,20 @@ public class SelectUserItemsAdapter extends BaseAdapter<SelectUserItemViewHolder
 
 
     private void processData() {
-        Collections.sort(userList, new Comparator<SelectUserData>() {
-            @Override
-            public int compare(SelectUserData o1, SelectUserData o2) {
-                String tc = CharacterParser.getSelling(o1.getName().toUpperCase());
-                String oc = CharacterParser.getSelling(o2.getName().toUpperCase());
-                return tc.compareTo(oc);
-            }
+        userList.sort((o1, o2) -> {
+            String tc = CharacterParser.getSelling(o1.getDisplayName().toUpperCase());
+            String oc = CharacterParser.getSelling(o2.getDisplayName().toUpperCase());
+            return tc.compareTo(oc);
         });
 
         int index = 0;
         String lastChara = "";
         for (SelectUserData item : userList) {
-            String ch = CharacterParser.getSelling(item.getName()).substring(0, 1).toUpperCase();
+            String ch = CharacterParser.getSelling(item.getDisplayName()).substring(0, 1).toUpperCase();
             if (!ch.equals(lastChara)) {
                 lastChara = ch;
                 positionMap.put(index, ch);
             }
-
             index++;
         }
     }

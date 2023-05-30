@@ -1,31 +1,15 @@
 package cn.shu.wechat.swing.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
 /**
  * Created by 舒新胜 on 20/06/2017.
  */
+@Data
+@AllArgsConstructor
 public class SelectUserData {
-    private String name;
+    private String userName;
+    private String displayName;
     private boolean selected;
-
-    public SelectUserData(String name, boolean selected) {
-        this.name = name;
-        this.selected = selected;
-    }
-
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public boolean isSelected() {
-        return selected;
-    }
-
-    public void setSelected(boolean selected) {
-        this.selected = selected;
-    }
 }

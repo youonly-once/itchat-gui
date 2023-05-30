@@ -9,6 +9,7 @@ import cn.shu.wechat.constant.WxURLEnum;
 import cn.shu.wechat.constant.WxReqParamsConstant;
 import cn.shu.wechat.constant.WxRespConstant;
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.core.LoginResultData;
 import cn.shu.wechat.core.MsgCenter;
 import cn.shu.wechat.dto.request.*;
 import cn.shu.wechat.dto.response.WxCreateRoomResp;
@@ -42,6 +43,8 @@ import java.awt.image.BufferedImage;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -920,12 +923,19 @@ public class LoginServiceImpl implements LoginService {
         if (contacts.isEmpty()){
             throw new WebWXException("contacts is empty.");
         };
-        String url = String.format(WxURLEnum.WEB_WX_CREATE_ROOM.getUrl(),System.currentTimeMillis());
+        String url = String.format(WxURLEnum.WEB_WX_CREATE_ROOM.getUrl(),
+                Core.getLoginResultData().getUrl(),
+                System.currentTimeMillis());
         WxCreateRoomReq createRoomReq = WxCreateRoomReq.builder().BaseRequest(Core.getLoginResultData().getBaseRequest())
                 .MemberCount(contacts.size())
-                .MemberList(contacts)
+                .MemberList(contacts.stream()
+                        .map(e-> WxCreateRoomReq.NewRoomMember
+                                .builder()
+                                .UserName(e.getUsername()).build())
+                        .collect(Collectors.toList()))
+                .Topic("")
                 .build();
         HttpEntity httpEntity = HttpUtil.doPost(url, JSON.toJSONString(createRoomReq));
-        return JSON.parseObject(EntityUtils.toString(httpEntity), WxCreateRoomResp.class);
+        return JSON.parseObject(EntityUtils.toString(httpEntity, StandardCharsets.UTF_8), WxCreateRoomResp.class);
     }
 }

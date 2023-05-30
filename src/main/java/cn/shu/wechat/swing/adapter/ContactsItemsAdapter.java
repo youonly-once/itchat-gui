@@ -108,21 +108,7 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
 
         ContactsItem item = contactsItems.get(position);
 
-        new SwingWorker<Object,Object>(){
-            ImageIcon orLoadAvatar = null;
-            @Override
-            protected Object doInBackground() throws Exception {
-                orLoadAvatar = AvatarUtil.createOrLoadUserAvatar(item.getId());
-                return null;
-            }
-
-            @Override
-            protected void done() {
-                if (orLoadAvatar != null){
-                    viewHolder.avatar.setIcon(orLoadAvatar);
-                }
-            }
-        }.execute();
+        AvatarUtil.loadAvatar(item.getId(),viewHolder.avatar);
 
         viewHolder.roomName.setText(item.getDisplayName());
         if (viewHolder.mouseListener!=null){

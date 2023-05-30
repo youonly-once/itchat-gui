@@ -349,7 +349,8 @@ public class ContactsTools {
      */
     public static boolean isMute(Contacts contacts){
         if (isRoomContact(contacts.getUsername())) {
-            return (contacts.getStatues().intValue()== WxConstant.ChatRoomMute.CHATROOM_NOTIFY_CLOSE.CODE);
+            return (contacts.getStatues() == null||
+                    contacts.getStatues().intValue()== WxConstant.ChatRoomMute.CHATROOM_NOTIFY_CLOSE.CODE);
         }else{
             return ((contacts.getContactflag().intValue() & WxConstant.ContactFlag.CONTACTFLAG_NOTIFYCLOSECONTACT.CODE)>0);
         }

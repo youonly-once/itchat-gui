@@ -1,5 +1,12 @@
 package cn.shu.wechat.swing.frames;
 
+import cn.shu.WeChatStater;
+import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.constant.WxConstant;
+import cn.shu.wechat.core.Core;
+import cn.shu.wechat.dto.response.WxCreateRoomResp;
+import cn.shu.wechat.entity.Contacts;
+import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCButton;
@@ -7,15 +14,20 @@ import cn.shu.wechat.swing.components.RCTextField;
 import cn.shu.wechat.swing.db.model.ContactsUser;
 import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.panels.SelectUserPanel;
+import cn.shu.wechat.swing.utils.ChatUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
+import cn.shu.wechat.utils.SpringContextHolder;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -25,7 +37,6 @@ public class CreateGroupDialog extends JDialog {
     private static CreateGroupDialog context;
     private JPanel editorPanel;
     private RCTextField groupNameTextField;
-    private JCheckBox privateCheckBox;
 
     private SelectUserPanel selectUserPanel;
     private JPanel buttonPanel;
@@ -51,19 +62,14 @@ public class CreateGroupDialog extends JDialog {
     }
 
     private void initData() {
-        List<ContactsUser> contactsUsers = null ;//=// contactsUserService.findAll();
-        for (ContactsUser con : contactsUsers) {
-            /*if (con.getUsername().equals("admin") || con.getUsername().equals("appStoreTest"))
-            {
-                continue;
-            }*/
-            userList.add(new SelectUserData(con.getUsername(), false));
+        for (Contacts con : Core.getContactMap().values()) {
+            userList.add(new SelectUserData(con.getUsername(),
+                    ContactsTools.getContactDisplayNameByUserName(con.getUsername()),
+                    false));
         }
-
         selectUserPanel = new SelectUserPanel(DIALOG_WIDTH, DIALOG_HEIGHT - 100, userList);
 
     }
-
 
     private void initComponents() {
         int posX = MainFrame.getContext().getX();
@@ -73,7 +79,6 @@ public class CreateGroupDialog extends JDialog {
         posY = posY + (MainFrame.getContext().currentWindowHeight - DIALOG_HEIGHT) / 2;
         setBounds(posX, posY, DIALOG_WIDTH, DIALOG_HEIGHT);
         setUndecorated(true);
-
         getRootPane().setBorder(new LineBorder(Colors.DIALOG_BORDER));
 
         /*if (OSUtil.getOsType() != OSUtil.Mac_OS)
@@ -93,10 +98,6 @@ public class CreateGroupDialog extends JDialog {
         groupNameTextField.setForeground(Colors.FONT_BLACK);
         groupNameTextField.setMargin(new Insets(0, 15, 0, 0));
 
-        privateCheckBox = new JCheckBox("私有");
-        privateCheckBox.setFont(FontUtil.getDefaultFont(14));
-        privateCheckBox.setToolTipText("私有群组对外不可见，聊天内容无法被非群成员浏览，只有创建者才有权限添加成员，建议勾选此项");
-        privateCheckBox.setSelected(true);
 
 
         // 按钮组
@@ -113,8 +114,7 @@ public class CreateGroupDialog extends JDialog {
 
     private void initView() {
         editorPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
-        editorPanel.add(groupNameTextField);
-        editorPanel.add(privateCheckBox);
+      //  editorPanel.add(groupNameTextField);
 
         buttonPanel.add(cancelButton, new GBC(0, 0).setWeight(1, 1).setInsets(15, 0, 0, 0));
         buttonPanel.add(okButton, new GBC(1, 0).setWeight(1, 1));
@@ -140,24 +140,62 @@ public class CreateGroupDialog extends JDialog {
             public void mouseClicked(MouseEvent e) {
                 if (okButton.isEnabled()) {
                     okButton.setEnabled(false);
-
-                    String roomName = groupNameTextField.getText();
-                    if (roomName == null || roomName.isEmpty()) {
-                        JOptionPane.showMessageDialog(null, "请输入群聊名称", "请输入群聊名称", JOptionPane.WARNING_MESSAGE);
-                        groupNameTextField.requestFocus();
-                        okButton.setEnabled(true);
-                        return;
-                    }
-
-                    checkRoomExists(roomName);
+                    okButton.setText("创建中...");
+                    cancelButton.setEnabled(false);
+                    createRoom();
                 }
-
 
                 super.mouseClicked(e);
             }
         });
     }
 
+    private void createRoom(){
+        try{
+            new SwingWorker<Object,Object>() {
+                private  WxCreateRoomResp wxCreateRoomResp;
+                @Override
+                protected Object doInBackground() throws Exception {
+                   wxCreateRoomResp = SpringContextHolder.getBean(LoginService.class).webWxCreateRoom(
+                            selectUserPanel.getSelectedUser().stream()
+                                    .map(O -> Core.getContactMap().get(O.getUserName())
+                                    ).collect(Collectors.toList()));
+                    return null;
+                }
+
+                @Override
+                protected void done() {
+                    if (wxCreateRoomResp.getBaseResponse().getRet() ==0
+                            && StringUtils.isNotEmpty(wxCreateRoomResp.getChatRoomName())){
+                        Contacts group = Contacts.builder().username(wxCreateRoomResp.getChatRoomName())
+                                .memberlist(wxCreateRoomResp.getMemberList()).build();
+                        Core.getMemberMap().put(wxCreateRoomResp.getChatRoomName(),group);
+                        Core.getGroupIdSet().add(wxCreateRoomResp.getChatRoomName());
+                        Core.getGroupMap().put(wxCreateRoomResp.getChatRoomName(),group);
+
+                        ChatUtil.openOrCreateDirectChat(wxCreateRoomResp.getChatRoomName());
+                        CreateGroupDialog.context.dispose();
+                    }else{
+                        JOptionPane.showMessageDialog(MainFrame.getContext(), wxCreateRoomResp.getBaseResponse().getErrMsg(), "创建失败", JOptionPane.ERROR_MESSAGE);
+                        okButton.setEnabled(true);
+                        okButton.setText("创建");
+                        cancelButton.setEnabled(true);
+                    }
+                    super.done();
+                }
+            }.execute();
+
+
+
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(MainFrame.getContext(), e.getMessage(), "创建失败", JOptionPane.ERROR_MESSAGE);
+            okButton.setEnabled(true);
+            cancelButton.setEnabled(true);
+            okButton.setText("创建");
+        }
+    }
     private void checkRoomExists(String name) {
         if (/*roomService.findByName(name)*/ ""!= null) {
             showRoomExistMessage(name);
@@ -167,10 +205,10 @@ public class CreateGroupDialog extends JDialog {
             String[] usernames = new String[list.size()];
 
             for (int i = 0; i < list.size(); i++) {
-                usernames[i] = list.get(i).getName();
+                usernames[i] = list.get(i).getUserName();
             }
 
-            createChannelOrGroup(name, privateCheckBox.isSelected(), usernames);
+            //createChannelOrGroup(name, privateCheckBox.isSelected(), usernames);
         }
     }
 

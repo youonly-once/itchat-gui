@@ -71,19 +71,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
         RoomItem roomItem = roomItems.get(position);
         viewHolder.setTag(roomItem.getRoomId());
         viewHolder.roomName.setText(roomItem.getName());
-        new SwingWorker<Object,Object>(){
-            ImageIcon orLoadAvatar = null;
-            @Override
-            protected Object doInBackground() throws Exception {
-                orLoadAvatar = AvatarUtil.createOrLoadUserAvatar(roomItem.getRoomId());
-                return null;
-            }
-
-            @Override
-            protected void done() {
-                viewHolder.avatar.setIcon(orLoadAvatar);
-            }
-        }.execute();
+        AvatarUtil.loadAvatar(roomItem.getRoomId(),viewHolder.avatar);
         // 消息
         viewHolder.brief.setText(roomItem.getLastMessage());
         if (roomItem.getLastMessage() != null && roomItem.getLastMessage().length() > 15) {

@@ -15,7 +15,8 @@ import java.awt.*;
  */
 public class SelectUserItemViewHolder extends ViewHolder {
     public JLabel avatar = new JLabel();
-    public JLabel username = new JLabel();
+    public String username ;
+    public JLabel disPlayNameLabel = new JLabel();
     public JLabel icon = new JLabel();
 
     public SelectUserItemViewHolder() {
@@ -29,15 +30,14 @@ public class SelectUserItemViewHolder extends ViewHolder {
         setBorder(new RCBorder(RCBorder.BOTTOM, Colors.LIGHT_GRAY));
         setOpaque(true);
         setForeground(Colors.FONT_BLACK);
-
-        username.setFont(FontUtil.getDefaultFont(13));
-        username.setForeground(Colors.FONT_BLACK);
+        disPlayNameLabel.setFont(FontUtil.getDefaultFont(13));
+        disPlayNameLabel.setForeground(Colors.FONT_BLACK);
 
         icon.setIcon(IconUtil.getIcon(this, "/image/uncheck.png"));
 
         setLayout(new GridBagLayout());
         add(avatar, new GBC(0, 0).setWeight(1, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0));
-        add(username, new GBC(1, 0).setWeight(100, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0));
+        add(disPlayNameLabel, new GBC(1, 0).setWeight(100, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0));
         add(icon, new GBC(2, 0).setWeight(1, 1).setFill(GBC.BOTH).setInsets(0, 0, 0, 5));
     }
 

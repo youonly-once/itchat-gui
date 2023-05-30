@@ -355,12 +355,10 @@ public class RoomsPanel extends ParentAvailablePanel {
      * @param name 房间ID
      */
     public void activeItem(String name) {
-        long l = System.currentTimeMillis();
         for (int i = 0; i < roomItemList.size(); i++) {
             RoomItem roomItem = roomItemList.get(i);
             if (roomItem.getRoomId().equals(name)) {
                 activeItem(i);
-                System.out.println("System.nanoTime()-l = " + (System.currentTimeMillis() - l));
                 return;
             }
         }

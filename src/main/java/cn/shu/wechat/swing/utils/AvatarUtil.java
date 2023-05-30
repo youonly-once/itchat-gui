@@ -163,10 +163,13 @@ public final class AvatarUtil {
                 return avatarIcon;
             }
             Image avatar = null;
-            if (user != null
-                    && StringUtils.isNotEmpty((user.getHeadimgurl()))) {
+            if (user != null) {
                 //下载头像
-                avatar = DownloadTools.downloadHeadImgByRelativeUrl(user.getHeadimgurl());
+                if (StringUtils.isNotEmpty((user.getHeadimgurl()))) {
+                    avatar = DownloadTools.downloadHeadImgByRelativeUrl(user.getHeadimgurl());
+                }else{
+                    avatar = DownloadTools.downloadHeadImgByUserName(user.getUsername());
+                }
             }
             if (avatar != null) {
                 avatarIcon = putUserAvatarCache(userName, avatar);
@@ -737,5 +740,29 @@ public final class AvatarUtil {
         }
 
         return rectangles;
+    }
+
+    /**
+     * 后台加载头像
+     * @param userName 用户名
+     * @param avatar 头像标签
+     */
+    public static void loadAvatar(String userName,JLabel avatar){
+        // 头像
+        new SwingWorker<Object,Object>(){
+            ImageIcon orLoadAvatar = null;
+            @Override
+            protected Object doInBackground() throws Exception {
+                orLoadAvatar = AvatarUtil.createOrLoadUserAvatar(userName);
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                if (orLoadAvatar != null){
+                    avatar.setIcon(orLoadAvatar);
+                }
+            }
+        }.execute();
     }
 }

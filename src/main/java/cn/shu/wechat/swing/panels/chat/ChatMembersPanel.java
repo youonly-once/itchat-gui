@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.panels.chat;
 
+import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.service.LoginService;
@@ -315,7 +316,8 @@ public class ChatMembersPanel extends ParentAvailablePanel {
 
         for (ContactsUser contactsUser : contactsUsers) {
             if (!members.contains(contactsUser.getUsername())) {
-                selectUsers.add(new SelectUserData(contactsUser.getUsername(), false));
+                selectUsers.add(new SelectUserData(contactsUser.getUsername(),
+                        ContactsTools.getContactDisplayNameByUserName(contactsUser.getUsername()),false));
             }
         }
         addOrRemoveMemberDialog = new AddOrRemoveMemberDialog(MainFrame.getContext(), true, selectUsers);
@@ -328,7 +330,7 @@ public class ChatMembersPanel extends ParentAvailablePanel {
                     List<SelectUserData> selectedUsers = addOrRemoveMemberDialog.getSelectedUser();
                     String[] userArr = new String[selectedUsers.size()];
                     for (int i = 0; i < selectedUsers.size(); i++) {
-                        userArr[i] = selectedUsers.get(i).getName();
+                        userArr[i] = selectedUsers.get(i).getUserName();
                     }
 
                     inviteOrKick(userArr, "invite");
@@ -364,7 +366,7 @@ public class ChatMembersPanel extends ParentAvailablePanel {
                     List<SelectUserData> selectedUsers = addOrRemoveMemberDialog.getSelectedUser();
                     String[] userArr = new String[selectedUsers.size()];
                     for (int i = 0; i < selectedUsers.size(); i++) {
-                        userArr[i] = selectedUsers.get(i).getName();
+                        userArr[i] = selectedUsers.get(i).getUserName();
                     }
 
                     inviteOrKick(userArr, "kick");

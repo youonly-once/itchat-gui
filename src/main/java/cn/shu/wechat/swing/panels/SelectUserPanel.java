@@ -35,7 +35,10 @@ public class SelectUserPanel extends JPanel {
     private int height;
 
     private List<SelectUserData> leftUserList;
-    private List<SelectUserData> selectedUserList = new ArrayList<>();
+    /**
+     * 已选择的用户列表
+     */
+    private final List<SelectUserData> selectedUserList = new ArrayList<>();
     private SelectUserItemsAdapter selectUserItemsAdapter;
     private SelectedUserItemsAdapter selectedUserItemsAdapter;
     private ImageIcon checkIcon;
@@ -59,7 +62,6 @@ public class SelectUserPanel extends JPanel {
         leftPanel = new JPanel();
         leftPanel.setPreferredSize(new Dimension(width / 2 - 1, height - 10));
         leftPanel.setBorder(new RCBorder(RCBorder.RIGHT, Colors.LIGHT_GRAY));
-
         rightPanel = new JPanel();
         rightPanel.setPreferredSize(new Dimension(width / 2 - 1, height - 10));
 
@@ -73,7 +75,7 @@ public class SelectUserPanel extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 SelectUserItemViewHolder holder = (SelectUserItemViewHolder) e.getSource();
 
-                String username = holder.username.getText();
+                String username = holder.username;
                 if (unSelectUser(username)) {
                     holder.icon.setIcon(uncheckIcon);
                 } else {
@@ -96,7 +98,7 @@ public class SelectUserPanel extends JPanel {
                 if (unSelectUser(username)) {
                     for (Component holder : selectUserListView.getItems()) {
                         SelectUserItemViewHolder viewHolder = (SelectUserItemViewHolder) holder;
-                        if (viewHolder.username.getText().equals(username)) {
+                        if (viewHolder.username.equals(username)) {
                             viewHolder.icon.setIcon(uncheckIcon);
                             break;
                         }
@@ -130,7 +132,7 @@ public class SelectUserPanel extends JPanel {
      */
     private void selectUser(String username) {
         for (SelectUserData item : leftUserList) {
-            if (item.getName().equals(username)) {
+            if (item.getUserName().equals(username)) {
                 selectedUserList.add(item);
                 selectedUserListView.notifyDataSetChanged(false);
                 break;
@@ -143,7 +145,7 @@ public class SelectUserPanel extends JPanel {
         boolean dataChanged = false;
         while (itemIterator.hasNext()) {
             SelectUserData user = itemIterator.next();
-            if (user.getName().equals(username)) {
+            if (user.getUserName().equals(username)) {
                 dataChanged = true;
                 itemIterator.remove();
                 break;

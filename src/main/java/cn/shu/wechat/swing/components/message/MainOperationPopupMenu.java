@@ -26,12 +26,12 @@ public class MainOperationPopupMenu extends JPopupMenu {
     }
 
     private void initMenuItem() {
-        JMenuItem item1 = new JMenuItem("创建群聊");
+        JMenuItem createRoomMenuItem = new JMenuItem("创建群聊");
         JMenuItem statistics = new JMenuItem("好友统计");
         JMenuItem item2 = new JMenuItem("设置");
 
-        item1.setUI(new RCMainOperationMenuItemUI());
-        item1.addActionListener(new AbstractAction() {
+        createRoomMenuItem.setUI(new RCMainOperationMenuItemUI());
+        createRoomMenuItem.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 showCreateGroupDialog();
@@ -39,11 +39,11 @@ public class MainOperationPopupMenu extends JPopupMenu {
         });
         ImageIcon icon1 = IconUtil.getIcon(this,"/image/chat.png");
         icon1.setImage(icon1.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
-        item1.setIcon(icon1);
-        item1.setIconTextGap(5);
+        createRoomMenuItem.setIcon(icon1);
+        createRoomMenuItem.setIconTextGap(5);
         ImageIcon icon = IconUtil.getIcon(this, "/image/chart.png");
         icon.setImage(icon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
-        item1.setIcon(icon1);
+        createRoomMenuItem.setIcon(icon1);
         statistics.setIcon(icon);
         statistics.addActionListener(e -> {
 
@@ -69,8 +69,7 @@ public class MainOperationPopupMenu extends JPopupMenu {
         item2.setIcon(icon2);
         item2.setIconTextGap(5);
 
-
-        this.add(item1);
+        this.add(createRoomMenuItem);
         this.add(statistics);
         this.add(item2);
 

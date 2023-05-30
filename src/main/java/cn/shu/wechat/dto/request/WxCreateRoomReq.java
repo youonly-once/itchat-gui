@@ -15,12 +15,17 @@ public class WxCreateRoomReq {
     private Integer	MemberCount;
 
     @JSONField(name = "MemberList")
-    private List<Contacts> MemberList;
+    private List<NewRoomMember> MemberList;
 
     @JSONField(name = "Topic")
     private String	Topic;
 
     @JSONField(name = "BaseRequest")
     private BaseRequest	BaseRequest;
-
+    @Data
+    @Builder
+    public static class NewRoomMember{
+        @JSONField(name = "UserName")
+        String UserName;
+    }
 }

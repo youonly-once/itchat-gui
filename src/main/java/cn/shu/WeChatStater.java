@@ -51,7 +51,7 @@ public class WeChatStater {
                 loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 countDownLatch.countDown();
                 loginFrame.setVisible(true);
-                loginFrame.login(false);
+                loginFrame.login(true);
                 return null;
             }
         }.execute();

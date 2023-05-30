@@ -149,7 +149,7 @@ public class AddOrRemoveMemberDialog extends JDialog {
         List<SelectUserData> users = new ArrayList<>();
 
         for (SelectUserData item : userList) {
-            if (item.getName().toLowerCase().indexOf(key) > -1 && (!selectUserPanel.getSelectedUser().contains(item))) {
+            if (item.getUserName().toLowerCase().contains(key) && (!selectUserPanel.getSelectedUser().contains(item))) {
                 users.add(item);
             }
         }

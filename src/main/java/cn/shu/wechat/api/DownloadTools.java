@@ -547,4 +547,16 @@ public class DownloadTools {
         }
         DownloadTools.FILE_DOWNLOAD_STATUS.remove(path);
     }
+
+    /**
+     * 根据UserName下载头像
+     * @param username 用户名
+     * @return 头像
+     */
+    public static Image downloadHeadImgByUserName(String username) {
+        //获取远端对象字节数组
+        String url = String.format(WxURLEnum.WEB_WX_GET_HEAD_IMAGE.getUrl(),
+                Core.getLoginResultData().getUrl(),System.currentTimeMillis(),username);
+        return downloadImgByAbsoluteUrl(url);
+    }
 }
