@@ -37,9 +37,15 @@ public class MainFrame extends JFrame {
     private LeftPanel leftPanel;
 
     /**
+     * 是否锁屏
+     */
+    private boolean isLock;
+    /**
      * 右面版
      */
     private RightPanel rightPanel;
+
+    private LockFrame lockFrame;
 
 
     private static MainFrame context;
@@ -165,14 +171,23 @@ public class MainFrame extends JFrame {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                // 显示主窗口
-                setVisible(true);
-                setState(0);
-                // 任务栏图标停止闪动
-                if (trayFlashing) {
-                    trayFlashing = false;
-                    trayIcon.setImage(normalTrayIcon);
+                if (e.getButton() != MouseEvent.BUTTON1) {
+                    super.mouseClicked(e);
+                    return;
                 }
+                // 显示主窗口
+                if (isLock){
+                   lock();
+                }else{
+                    setVisible(true);
+                    setState(0);
+                    // 任务栏图标停止闪动
+                    if (trayFlashing) {
+                        trayFlashing = false;
+                        trayIcon.setImage(normalTrayIcon);
+                    }
+                }
+
 
                 super.mouseClicked(e);
             }
@@ -185,14 +200,24 @@ public class MainFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 clearClipboardCache();
-                WeChatTool.webWXLogOut();
                 System.exit(1);
+                WeChatTool.webWXLogOut();
+
             }
         });
 
         MenuItem showItem = new MenuItem("打开微信");
-        showItem.addActionListener(e -> setVisible(true));
+        showItem.addActionListener(
+                e -> {
+                    if (isLock)lock();
+                    else unLock();
+                });
+
+        MenuItem lockItem = new MenuItem("锁屏");
+        lockItem.addActionListener(
+                e -> lock());
         menu.add(showItem);
+        menu.add(lockItem);
         menu.add(exitItem);
         trayIcon.setPopupMenu(menu);
         systemTray.add(trayIcon);
@@ -332,5 +357,25 @@ public class MainFrame extends JFrame {
     }
 
 
+    public void lock(){
+        this.isLock = true;
+
+        if (lockFrame == null){
+            lockFrame = new LockFrame();
+        }
+        lockFrame.setVisible(true);
+
+        this.setVisible(false);
+    }
+
+    public void unLock(){
+        this.isLock = false;
+
+        this.setVisible(true);
+        if (lockFrame != null){
+            lockFrame.dispose();
+            lockFrame =null;
+        }
+    }
 }
 

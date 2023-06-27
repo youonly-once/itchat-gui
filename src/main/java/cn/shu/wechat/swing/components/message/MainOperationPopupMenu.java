@@ -13,7 +13,6 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
  *
@@ -28,7 +27,8 @@ public class MainOperationPopupMenu extends JPopupMenu {
     private void initMenuItem() {
         JMenuItem createRoomMenuItem = new JMenuItem("创建群聊");
         JMenuItem statistics = new JMenuItem("好友统计");
-        JMenuItem item2 = new JMenuItem("设置");
+        JMenuItem setting = new JMenuItem("设置");
+        JMenuItem lock = new JMenuItem("锁屏");
 
         createRoomMenuItem.setUI(new RCMainOperationMenuItemUI());
         createRoomMenuItem.addActionListener(new AbstractAction() {
@@ -55,8 +55,8 @@ public class MainOperationPopupMenu extends JPopupMenu {
         });
         statistics.setIconTextGap(5);
         statistics.setUI(new RCMainOperationMenuItemUI());
-        item2.setUI(new RCMainOperationMenuItemUI());
-        item2.addActionListener(new AbstractAction() {
+        setting.setUI(new RCMainOperationMenuItemUI());
+        setting.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
 
@@ -66,12 +66,25 @@ public class MainOperationPopupMenu extends JPopupMenu {
         });
         ImageIcon icon2 = IconUtil.getIcon(this,"/image/setting.png");
         icon2.setImage(icon2.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
-        item2.setIcon(icon2);
-        item2.setIconTextGap(5);
+        setting.setIcon(icon2);
+        setting.setIconTextGap(5);
+
+        lock.setUI(new RCMainOperationMenuItemUI());
+        lock.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                MainFrame.getContext().lock();
+            }
+        });
+        ImageIcon lockIcon = IconUtil.getIcon(this, "/image/lock.png");
+        lockIcon.setImage(lockIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+        lock.setIcon(lockIcon);
+        lock.setIconTextGap(5);
 
         this.add(createRoomMenuItem);
         this.add(statistics);
-        this.add(item2);
+        this.add(setting);
+        this.add(lock);
 
         setBorder(new LineBorder(Colors.SCROLL_BAR_TRACK_LIGHT));
         setBackground(Colors.FONT_WHITE);
