@@ -19,6 +19,7 @@ import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
 
 /**
  * Created by 舒新胜 on 17-5-28.
@@ -34,7 +35,7 @@ public class LockFrame extends JFrame {
     private static LockFrame context;
 
 
-    private JTextField textField;
+    private JPasswordField textField;
     private JButton button;
     private JPanel contentPanel;
 
@@ -67,13 +68,14 @@ public class LockFrame extends JFrame {
         UIManager.put("CheckBox.background", Colors.WINDOW_BACKGROUND);
 
         // 创建输入框和按钮
-        textField = new JTextField();
+        textField = new JPasswordField();
         button = new JButton("解锁");
         contentPanel = new JPanel();
     }
 
     private void initView() {
         setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+        setResizable(false);
         setMinimumSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
 
 
@@ -88,15 +90,19 @@ public class LockFrame extends JFrame {
                 e.printStackTrace();
             }
         }
+        textField.addActionListener(e->{
+            if (Arrays.equals(textField.getPassword(), "950720".toCharArray())){
+                MainFrame.getContext().unLock();
+            }else{
+                JOptionPane.showMessageDialog(LockFrame.getContext(),"密码错误","密码错误",JOptionPane.WARNING_MESSAGE);
+            }
+        });
 
-        button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (textField.getText().equals("950720")){
-                    MainFrame.getContext().unLock();
-                }else{
-                    JOptionPane.showMessageDialog(LockFrame.getContext(),"密码错误","密码错误",JOptionPane.WARNING_MESSAGE);
-                }
+        button.addActionListener(e -> {
+            if (Arrays.equals(textField.getPassword(), "950720".toCharArray())){
+                MainFrame.getContext().unLock();
+            }else{
+                JOptionPane.showMessageDialog(LockFrame.getContext(),"密码错误","密码错误",JOptionPane.WARNING_MESSAGE);
             }
         });
         setLayout(null);

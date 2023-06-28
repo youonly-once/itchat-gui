@@ -364,8 +364,10 @@ public class MainFrame extends JFrame {
             lockFrame = new LockFrame();
         }
         lockFrame.setVisible(true);
-
         this.setVisible(false);
+
+
+
     }
 
     public void unLock(){
