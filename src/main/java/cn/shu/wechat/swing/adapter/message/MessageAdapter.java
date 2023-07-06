@@ -907,8 +907,8 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      */
     private void processImage(Message item, MessageImageLabel imageLabel) {
         //显示加载中
-        ImageIcon imageIcon = IconUtil.getIcon(this,"/image/image_loading.gif");
-        imageLabel.setIcon(imageIcon);
+        ImageIcon imageIcon = IconUtil.getIcon(this,"/image/image_loading.gif",item.getImgWidth(),item.getImgHeight());
+        //imageLabel.setIcon(imageIcon);
         String filePath = item.getSlavePath();
         if (StringUtils.isEmpty(filePath)) {
             filePath = item.getFilePath();

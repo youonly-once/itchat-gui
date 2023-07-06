@@ -256,12 +256,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
         });
 
         // 发送按钮
-        chatMessageEditorPanel.getSendButton().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                sendMessage();
-            }
-        });
+        chatMessageEditorPanel.getSendButton().addActionListener(e -> sendMessage());
 
         // 上传文件按钮
         chatMessageEditorPanel.getUploadFileLabel().addMouseListener(new MouseAdapter() {
@@ -294,6 +289,10 @@ public class ChatMessagePanel extends ParentAvailablePanel {
             public void onSelected(String code) {
                 editor.replaceSelection(code);
             }
+            @Override
+            public void onSelected(Icon icon) {
+                editor.insertIcon(icon);
+            }
         });
     }
 
@@ -312,7 +311,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                     //文本消息
                     sendTextMessage(data.toString());
 
-            } else if (data instanceof JLabel) {
+            } else if (data instanceof JLabel ) {
                 //图片消息
                 isImageOrFile = true;
                 JLabel label = (JLabel) data;
@@ -325,7 +324,11 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                 RoomsPanel.getContext().updateRoomItem(roomId, 0
                         , "[图片]发送中..."
                         , LocalDateTime.now(),ContactsTools.isMute(roomId),false);
-            } else if (data instanceof FileEditorThumbnail) {
+            }else if (data instanceof Icon ) {
+                //表情消息
+                ImageIcon imageIcon = (ImageIcon) data;
+                sendEmojiMessage(imageIcon);
+            }  else if (data instanceof FileEditorThumbnail) {
                 //文件消息
                 isImageOrFile = true;
                 FileEditorThumbnail component = (FileEditorThumbnail) data;
@@ -595,7 +598,88 @@ public class ChatMessagePanel extends ParentAvailablePanel {
             }
         }.execute();
     }
+    /**
+     * 发送文本消息
+     *
+     * @param imageIcon 表情
+     */
+    public void sendEmojiMessage(ImageIcon imageIcon)  {
+        //更新房间列表
+        RoomsPanel.getContext().updateRoomItem(roomId, 0, "[表情][发送中...]",LocalDateTime.now(),ContactsTools.isMute(roomId),false);
+        String msgId = MessageTools.randomMessageId();
 
+        String pathAndCode = imageIcon.getDescription();
+        String code = pathAndCode.substring(0,pathAndCode.indexOf("&"));
+        String path = pathAndCode.substring(pathAndCode.indexOf("&file:/")+"&file:/".length());
+
+        //绘制消息项
+        Message messageView = Message.builder().isSend(false)
+                .id(msgId)
+                .content(code)
+                .plaintext(code)
+                .createTime(DateUtils.getCurrDateString(DateUtils.YYYY_MM_DD_HH_MM_SS))
+                .fromUsername(Core.getUserName())
+                .toUsername(roomId)
+                .msgType(WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_IMAGE.getCode())
+                .fromNickname(Core.getNickName())
+                .progress(50)
+                .messageTime(LocalDateTime.now())
+                .deleted(false)
+                .isSend(true)
+                .filePath(path)
+                .slavePath(path)
+                .imgWidth(imageIcon.getIconWidth())
+                .imgHeight(imageIcon.getIconHeight())
+                .isNeedToResend(false)
+                .build();
+
+        ViewHolder viewHolder = addMessageToEnd(messageView);
+        new SwingWorker<WebWXSendMsgResponse, WebWXSendMsgResponse>() {
+            private WebWXSendMsgResponse wxSendMsgResponse;
+
+            @Override
+            protected WebWXSendMsgResponse doInBackground() throws Exception {
+                //后台发送消息
+                wxSendMsgResponse = MessageTools.sendMsgByUserId(Message.builder().isSend(false)
+                        .id(msgId)
+                        .content(code)
+                        .plaintext(code)
+                        .createTime(DateUtils.getCurrDateString(DateUtils.YYYY_MM_DD_HH_MM_SS))
+                        .fromUsername(Core.getUserName())
+                        .toUsername(roomId)
+                        .msgType(WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
+                        .fromNickname(Core.getNickName())
+                        .progress(50)
+                        .messageTime(LocalDateTime.now())
+                        .deleted(false)
+                        .isSend(true)
+                        .isNeedToResend(false)
+                        .build());
+                return null;
+            }
+
+            @Override
+            protected void process(List<WebWXSendMsgResponse> chunks) {
+                super.process(chunks);
+            }
+
+            @Override
+            protected void done() {
+                messageView.setProgress(100);
+                if (wxSendMsgResponse == null
+                        || wxSendMsgResponse.getBaseResponse().getRet() != 0) {
+                    messageView.setNeedToResend(true);
+                    RoomsPanel.getContext().updateRoomItem(roomId, 0, "[发送失败]", LocalDateTime.now(),ContactsTools.isMute(roomId),false);
+
+                } else {
+                    messageView.setNeedToResend(false);
+                    RoomsPanel.getContext().updateRoomItem(roomId, 0, "[表情]", LocalDateTime.now(),ContactsTools.isMute(roomId),false);
+
+                }
+                updateMessage(viewHolder, messageView);
+            }
+        }.execute();
+    }
     private void showSendingMessage() {
         RoomsPanel.getContext().updateRoomItem(roomId, 0, "[发送中...]", LocalDateTime.now(),ContactsTools.isMute(roomId),false);
     }
@@ -617,16 +701,13 @@ public class ChatMessagePanel extends ParentAvailablePanel {
         return -1;
     }
 
-
-
-
     /**
      * 上传文件
      *
      * @param uploadFilename
      */
     public void sendFileMessage(String uploadFilename) {
-        String msgId =  MessageTools.randomMessageId();
+        String msgId = MessageTools.randomMessageId();
         File file = new File(uploadFilename);
         if (!file.exists()) {
             JOptionPane.showMessageDialog(null, "文件不存在", "上传失败", JOptionPane.ERROR_MESSAGE);
