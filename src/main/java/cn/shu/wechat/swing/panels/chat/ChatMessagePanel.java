@@ -26,6 +26,7 @@ import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.swing.panels.TitlePanel;
 import cn.shu.wechat.swing.tasks.UploadTaskCallback;
+import cn.shu.wechat.swing.utils.EmojiUtil;
 import cn.shu.wechat.swing.utils.FileCache;
 import cn.shu.wechat.swing.utils.ImageUtil;
 import cn.shu.wechat.swing.utils.MimeTypeUtil;
@@ -389,7 +390,20 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                             pureText = false;
 
                             ImageIcon icon = (ImageIcon) StyleConstants.getIcon(elem.getAttributes());
-                            inputData.add(icon);
+
+                            String pathAndCode = icon.getDescription();
+                            if (pathAndCode.contains("&")){
+                                String code = pathAndCode.substring(0,pathAndCode.indexOf("&"));
+                                if (EmojiUtil.isWeChatEmoji(this,code)){
+                                    inputData.add(code);
+                                }else{
+                                    inputData.add(icon);
+                                }
+                            }else{
+                                inputData.add(icon);
+                            }
+
+
                             break;
                         }
                     }
@@ -403,11 +417,43 @@ public class ChatMessagePanel extends ParentAvailablePanel {
         if (pureText) {
             inputData.clear();
             inputData.add(chatMessageEditorPanel.getEditor().getText());
+        }else{
+            inputData = mergeConsecutiveStrings(inputData);
         }
 
         return inputData;
     }
+    private  List<Object> mergeConsecutiveStrings(List<Object> inputList) {
+        List<Object> mergedList = new ArrayList<>();
 
+        StringBuilder currentString = null;
+        for (Object element : inputList) {
+            if (element instanceof String) {
+                String str = (String) element;
+                if ("\n".equals(str)){
+                    continue;
+                }
+                if (currentString == null) {
+                    currentString = new StringBuilder(str);
+                } else {
+                    currentString.append(str);
+                }
+            } else {
+                if (currentString != null) {
+                    mergedList.add(currentString.toString());
+                    currentString = null;
+                }
+                mergedList.add(element);
+            }
+        }
+
+        // Add the last merged string if there is one
+        if (currentString != null) {
+            mergedList.add(currentString.toString());
+        }
+
+        return mergedList;
+    }
     /**
      * 从待上传附件队列中出队一个，并上传
      */

@@ -8,17 +8,19 @@ import com.vdurmont.emoji.EmojiParser;
 import org.springframework.util.StringUtils;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import javax.swing.text.*;
+import javax.swing.text.html.HTMLDocument;
+import javax.swing.text.html.HTMLEditorKit;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URI;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Created by 舒新胜 on 17-6-4.
@@ -57,7 +59,6 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
         emojiRegx = ":.+?:";
         emojiPattern = Pattern.compile(emojiRegx);// 懒惰匹配，最小匹配
         fontMetrics = getFontMetrics(getFont());
-
         setListeners();
     }
 
@@ -66,11 +67,11 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
     public void setText(String t) {
         // 对emoji的Unicode编码转别名
 
-        try{
+  /*      try{
             t = EmojiParser.parseToAliases(t);
         }catch (Exception e){
 
-        }
+        }*/
 
         if (t == null) {
             return;
@@ -116,15 +117,17 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
 
 
         String targetText = t.replaceAll(emojiRegx, "");
-        super.setText(targetText);
-
-        /*long start = System.currentTimeMillis();
-        Map<Integer, String> emojiPositionMap = insertEmoji(t);
-        System.out.println("花费时间 ：" + (System.currentTimeMillis() - start));*/
+        for (String code : EmojiUtil.getWechatEmojiList()) {
+            targetText = targetText.replace(code, "");
+        }
+        super.setText("");
+       // super.setText(targetText);
 
         // 插入emoji表情，并计算需要增加的高度
-        Map<Integer, String> emojiPositionMap = insertEmoji(t);
-        String exceptEmoji = t.replaceAll("\\r\\n", "\n");
+        //Map<Integer, String> emojiPositionMap = insertEmoji(t);
+        Map<Integer, String> emojiPositionMap = insertWechatEmoji(t);
+
+/*        String exceptEmoji = t.replaceAll("\\r\\n", "\n");
         for (String emoji : emojiPositionMap.values()) {
             exceptEmoji = exceptEmoji.replace(emoji, "\0");
         }
@@ -167,7 +170,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
         }
 
         this.setPreferredSize(new Dimension(targetWidth, targetHeight + 2));
-
+*/
         if (parseUrl) {
             // 解析网址
             highlightUrls(t);
@@ -207,6 +210,72 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
         }
     }
 
+
+    private Map<Integer,String> insertWechatEmoji(String str){
+
+        Map<Integer, String> retMap = new TreeMap<>();
+
+        List<String> result = new ArrayList<>();
+        String regex = "(\\[.*?\\])"; // 正则表达式匹配以 [ 开始，以 ] 结尾的字符，并使用括号 () 将其捕获为一个组
+
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(str);
+
+        while (matcher.find()) {
+            String extracted = matcher.group(1); // 获取捕获组中的内容
+            result.add(extracted);
+        }
+        List<String> existCode = result.stream()
+                .filter(e -> EmojiUtil.getWechatEmojiList().contains(e))
+                .collect(Collectors.toList());
+
+
+        StyledDocument doc = this.getStyledDocument();
+        SimpleAttributeSet normalStyle = new SimpleAttributeSet();
+        StyleConstants.setAlignment(normalStyle, StyleConstants.ALIGN_CENTER); // 设置对齐方式为居中
+
+        int start = 0;
+        int i = 0;
+        while (start < str.length()) {
+            int index = -1;
+            for (; i < existCode.size(); i++) {
+                String specialCode = existCode.get(i);
+                index = str.indexOf(specialCode, start);
+                if (index != -1) {
+                    // 添加普通文本
+                    String normalText = str.substring(start, index);
+                    try {
+                        doc.insertString(doc.getLength(), normalText, normalStyle);
+                    } catch (BadLocationException e) {
+                        e.printStackTrace();
+                    }
+
+                    // 添加ICON
+                    ImageIcon  icon = EmojiUtil.getWeChatEmoji(this,specialCode,emojiSize,emojiSize);
+                    if (icon != null) {
+                        this.setCaretPosition(doc.getLength()); // 移动插入点
+                        retMap.put(doc.getLength(), specialCode);
+                        this.insertIcon(new ImageIcon(icon.getImage()));
+                    }
+                    i++;
+                    start = index + specialCode.length();
+                    break; // 处理完一个特殊编码后跳出循环继续处理下一个
+                }
+            }
+
+            // 处理剩余的普通文本
+            if (index == -1) {
+                String normalText = str.substring(start);
+                try {
+                    doc.insertString(doc.getLength(), normalText, normalStyle);
+                } catch (BadLocationException e) {
+                    e.printStackTrace();
+                }
+                break;
+            }
+        }
+        return retMap;
+    }
     private Map<Integer, String> insertEmoji(String src) {
         src = src.replaceAll("\\r\\n", "\n");
         Document doc = getDocument();
@@ -299,15 +368,20 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
     private List<String> parseEmoji(String src) {
         List<String> emojiList = new ArrayList<>();
 
-        Matcher emojiMatcher = emojiPattern.matcher(src);
+        //微信表情
+        List<String> weChatEmoji = EmojiUtil.getWechatEmojiList().stream()
+                .filter(src::contains)
+                .collect(Collectors.toList());
 
+        //其它表情
+        Matcher emojiMatcher = emojiPattern.matcher(src);
         while (emojiMatcher.find()) {
             String code = emojiMatcher.group();
             if (EmojiUtil.isRecognizableEmoji(this, code)) {
                 emojiList.add(code);
             }
         }
-
+        emojiList.addAll(weChatEmoji);
         return emojiList;
     }
 

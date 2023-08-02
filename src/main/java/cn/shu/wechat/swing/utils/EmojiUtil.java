@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Created by 舒新胜 on 2017/7/1.
@@ -145,8 +147,53 @@ public final class EmojiUtil {
             "[Whimper]", "[Wilt]", "[Worship]", "[Wow]", "[Yawn]", "[Yeah!]"
     );
 
+    public static List<String> getWechatEmojiList() {
+        return wechatEmojiList;
+    }
 
+    public static void setWechatEmojiList(List<String> wechatEmojiList) {
+        EmojiUtil.wechatEmojiList = wechatEmojiList;
+    }
 
+    /**
+     * 获取微信表情
+     * @param context context
+     * @param code 表情代码
+     * @return Icon
+     */
+    public static ImageIcon getWeChatEmoji(Object context,String code) {
+        int i = wechatEmojiList.indexOf(code);
+        if (i == -1){
+            return null;
+        }
+        String weChatIconPath = "/emoji/wechat_emoji/";
+        return IconUtil.getIcon(context, weChatIconPath + (2*i + 4) + ".png",22,22);
+    }
+    /**
+     * 获取微信表情
+     * @param context context
+     * @param code 表情代码
+     * @return Icon
+     */
+    public static ImageIcon getWeChatEmoji(Object context,String code,int width,int height) {
+        int i = wechatEmojiList.indexOf(code);
+        if (i == -1){
+            return null;
+        }
+        String weChatIconPath = "/emoji/wechat_emoji/";
+
+        return IconUtil.getIcon(context, weChatIconPath + (2*i + 4) + ".png",width,height);
+    }
+
+    /**
+     * 是否为微信表情
+     * @param context context
+     * @param code 表情代码
+     * @return Boolean
+     */
+    public static boolean isWeChatEmoji(Object context,String code) {
+       return wechatEmojiList.contains(code);
+    }
     /**
      * 获取Emoji表情
      *
@@ -154,6 +201,10 @@ public final class EmojiUtil {
      * @return Icon
      */
     public static ImageIcon getEmoji(Object context, String code) {
+        ImageIcon weChatEmoji = getWeChatEmoji(context, code);
+        if (weChatEmoji != null){
+            return weChatEmoji;
+        }
         String iconPath = "/emoji/" + code.subSequence(1, code.length() - 1) + ".png";
         URL url = context.getClass().getResource(iconPath);
         return url == null ? null : new ImageIcon(url);
