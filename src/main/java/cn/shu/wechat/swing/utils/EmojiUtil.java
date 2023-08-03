@@ -131,7 +131,7 @@ public final class EmojiUtil {
             "/:&>"     //右太极)
     );
     public static List<String> wechatEmojiList = Arrays.asList(
-            "[Aaagh!]", "[Angry]", "[Awesome]", "[Awkward]", "[Bah！R]", "[Bah！L]", "[Beckon]", "[Beer]",
+            "[Aaagh!]", "[Pout]", "[Awesome]", "[Awkward]", "[Bah！R]", "[Bah！L]", "[Beckon]", "[Beer]",
             "[Blessing]", "[Blush]", "[Bomb]", "[Boring]", "[Broken]", "[BrokenHeart]", "[Bye]", "[Cake]",
             "[Chuckle]", "[Clap]", "[Cleaver]", "[Coffee]", "[Commando]", "[Concerned]", "[CoolGuy]", "[Cry]",
             "[Determined]", "[Dizzy]", "[Doge]", "[Drool]", "[Drowsy]", "[Duh]", "[Emm]", "[Facepalm]",

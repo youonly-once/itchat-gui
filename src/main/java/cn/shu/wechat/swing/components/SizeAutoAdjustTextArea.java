@@ -127,7 +127,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
         //Map<Integer, String> emojiPositionMap = insertEmoji(t);
         Map<Integer, String> emojiPositionMap = insertWechatEmoji(t);
 
-/*        String exceptEmoji = t.replaceAll("\\r\\n", "\n");
+        String exceptEmoji = t.replaceAll("\\r\\n", "\n");
         for (String emoji : emojiPositionMap.values()) {
             exceptEmoji = exceptEmoji.replace(emoji, "\0");
         }
@@ -143,9 +143,8 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
                 int l = ret == 0 ? ret : ret + 1;
                 targetHeight = l * emojiSize;
             }
-
             int h = OSUtil.getOsType() == OSUtil.Mac_OS ? 0 : 3;
-            setPreferredSize(new Dimension(targetWidth, targetHeight + h));
+            setPreferredSize(new Dimension(targetWidth+(emojiCount-1<=0?0:18), targetHeight + h));
             return;
         }
 
@@ -154,7 +153,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
         for (int pos : emojiPositionMap.keySet()) {
             String substr = exceptEmoji.substring(0, pos + 1);
             int width = fontMetrics.stringWidth(substr) + emojiSize;
-            if (width > maxWidth || substr.indexOf("\n") > -1) {
+            if (width > maxWidth || substr.contains("\n")) {
                 targetHeight += emojiExtraHeight;
                 break;
             }
@@ -169,8 +168,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
             targetHeight += emojiExtraHeight;
         }
 
-        this.setPreferredSize(new Dimension(targetWidth, targetHeight + 2));
-*/
+        this.setPreferredSize(new Dimension(targetWidth+(emojiCount-1<=0?0:18), targetHeight + 2));
         if (parseUrl) {
             // 解析网址
             highlightUrls(t);
@@ -231,8 +229,6 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
 
 
         StyledDocument doc = this.getStyledDocument();
-        SimpleAttributeSet normalStyle = new SimpleAttributeSet();
-        StyleConstants.setAlignment(normalStyle, StyleConstants.ALIGN_CENTER); // 设置对齐方式为居中
 
         int start = 0;
         int i = 0;
@@ -245,7 +241,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
                     // 添加普通文本
                     String normalText = str.substring(start, index);
                     try {
-                        doc.insertString(doc.getLength(), normalText, normalStyle);
+                        doc.insertString(doc.getLength(), normalText, getCharacterAttributes());
                     } catch (BadLocationException e) {
                         e.printStackTrace();
                     }
@@ -267,7 +263,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
             if (index == -1) {
                 String normalText = str.substring(start);
                 try {
-                    doc.insertString(doc.getLength(), normalText, normalStyle);
+                    doc.insertString(doc.getLength(), normalText, getCharacterAttributes());
                 } catch (BadLocationException e) {
                     e.printStackTrace();
                 }

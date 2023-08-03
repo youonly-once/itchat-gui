@@ -3,6 +3,7 @@ package cn.shu.wechat.swing.components;
 import cn.shu.wechat.swing.components.message.FileEditorThumbnail;
 import cn.shu.wechat.swing.frames.ImageViewerFrame;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
+import cn.shu.wechat.swing.utils.ImageUtil;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -55,7 +56,7 @@ public class RCTextEditor extends JTextPane implements DropTargetListener {
         int iconHeight = icon.getIconHeight();
         float scale = iconWidth * 1.0F / iconHeight;
         boolean needToScale = false;
-        int max = 100;
+        int max = 50;
         if (iconWidth >= iconHeight && iconWidth > max) {
             iconWidth = max;
             iconHeight = (int) (iconWidth / scale);
@@ -68,10 +69,17 @@ public class RCTextEditor extends JTextPane implements DropTargetListener {
 
         JLabel label = new JLabel();
         if (needToScale) {
-            ImageIcon scaledIcon = new ImageIcon(icon.getImage().getScaledInstance(iconWidth, iconHeight, Image.SCALE_SMOOTH));
-            scaledIcon.setDescription(icon.getDescription());
-            //this.insertIcon(scaledIcon);
-            label.setIcon(scaledIcon);
+            if (ImageUtil.isGIF(path)){
+                icon = ImageUtil.preferredGifSizeWithTargetDimension(path,iconWidth, iconHeight);
+                icon.setDescription(path);
+                label.setIcon(icon);
+            }else {
+                ImageIcon scaledIcon = new ImageIcon(icon.getImage().getScaledInstance(iconWidth, iconHeight, Image.SCALE_SMOOTH));
+                scaledIcon.setDescription(icon.getDescription());
+                //this.insertIcon(scaledIcon);
+                label.setIcon(scaledIcon);
+            }
+
         } else {
             //this.insertIcon(icon);
             label.setIcon(icon);

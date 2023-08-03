@@ -139,6 +139,27 @@ public class ImageUtil {
     }
     /**
      * 根据图片尺寸大小调整图片显示的大小
+     * @param filePath
+     * @return
+     */
+    public static ImageIcon preferredGifSizeWithTargetDimension(String filePath,int targetW,int targetH) {
+        if (filePath == null||filePath.isEmpty()){
+            return null;
+        }
+        File file = new File(filePath);
+        if (!file.exists()){
+            return null;
+        }
+        try {
+            GifUtil.zoomGifBySize(filePath,targetW,targetH,filePath+".slave");
+            return new ImageIcon(filePath + ".slave");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    /**
+     * 根据图片尺寸大小调整图片显示的大小
      * @param bytes
      * @return
      */
@@ -163,6 +184,34 @@ public class ImageUtil {
                 e.printStackTrace();
             }
         }
+    }
+    public static ImageIcon preferredGifSize(ImageIcon icon, int w, int h) {
+        try {
+            return preferredGifSize(convertImageIconToBytes(icon), w, h);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return icon;
+    }
+    public static byte[] convertImageIconToBytes(ImageIcon icon) throws IOException{
+        BufferedImage bufferedImage = new BufferedImage(
+                icon.getIconWidth(),
+                icon.getIconHeight(),
+                BufferedImage.TYPE_INT_ARGB
+        );
+        icon.paintIcon(null, bufferedImage.getGraphics(), 0, 0);
+
+
+        try(ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            ImageIO.write(bufferedImage, "png", baos);
+            baos.flush();
+            return baos.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw e;
+        }
+
+
     }
     /**
      * 判断是否为GIF
@@ -194,7 +243,6 @@ public class ImageUtil {
                 + String.valueOf(bytes[2]);
         return type.equals(stringToAscii("GIF"));
     }
-
     public static boolean isGif(String imagePath) {
 
         String suffix = "";
@@ -244,5 +292,14 @@ public class ImageUtil {
     public static boolean isImage(File file) {
         String suffix = file.getName().substring(file.getName().lastIndexOf(".") + 1).toLowerCase();
         return suffix.equals("jpg") || suffix.equals("jpeg") || suffix.equals("png") || suffix.equals("gif");
+    }
+
+    public static boolean isGIF(ImageIcon icon) {
+        try {
+            return isGIF(convertImageIconToBytes(icon));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

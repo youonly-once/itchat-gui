@@ -51,7 +51,7 @@ public class MessageEditorEmojiPanel extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 MessageEditorExpressionItemPanel panel = (MessageEditorExpressionItemPanel) e.getSource();
                 if (expressionListener != null) {
-                    ImageIcon icon = panel.getIcon();
+                    ImageIcon icon = new ImageIcon(panel.getIcon().getImage());
                     icon.setDescription(panel.getCode()+"&"+icon.getDescription());
                     expressionListener.onSelected(icon);
                     if (parentPopup != null) {
@@ -59,7 +59,7 @@ public class MessageEditorEmojiPanel extends JPanel {
                     }
 
                 }
-                super.mouseClicked(e);
+               // super.mouseClicked(e);
             }
         };
 
