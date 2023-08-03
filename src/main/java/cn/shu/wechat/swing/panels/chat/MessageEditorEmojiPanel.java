@@ -54,12 +54,9 @@ public class MessageEditorEmojiPanel extends JPanel {
                     ImageIcon icon = new ImageIcon(panel.getIcon().getImage());
                     icon.setDescription(panel.getCode()+"&"+icon.getDescription());
                     expressionListener.onSelected(icon);
-                    if (parentPopup != null) {
-                        parentPopup.setVisible(false);
-                    }
 
                 }
-               // super.mouseClicked(e);
+                super.mouseClicked(e);
             }
         };
 
