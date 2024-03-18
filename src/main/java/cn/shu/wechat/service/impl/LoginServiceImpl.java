@@ -213,6 +213,7 @@ public class LoginServiceImpl implements LoginService {
                 callBack.CallBack(e.getMessage());
                 log.error("微信登陆异常：{}", e.getMessage());
             }
+            Thread.sleep(100);
         }
         return isLogin;
     }
