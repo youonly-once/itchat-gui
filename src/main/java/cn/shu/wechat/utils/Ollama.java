@@ -1,5 +1,6 @@
 package cn.shu.wechat.utils;
 
+import cn.shu.wechat.configuration.WechatConfiguration;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
 import lombok.AllArgsConstructor;
@@ -109,12 +110,14 @@ public class Ollama {
             List<Message> messages =msgHistory.get(userName);
 
              Message message = Message.builder().role("user").build();
+
+            WechatConfiguration instance = WechatConfiguration.getInstance();
             if(StringUtils.isNotEmpty(question)){
                 message.setContent(question);
-                request.setModel("qwen:7b");
+                request.setModel(instance.getBigModelUni());//
             }
             if(imgPath != null && Files.exists(imgPath)){
-                request.setModel("llava");
+                request.setModel(instance.getBigModelDual());
                 byte[] imageData = Files.readAllBytes(imgPath);
                 String base64Image = Base64.getEncoder().encodeToString(imageData);
                 if(StringUtils.isNotEmpty(base64Image)) {
@@ -163,7 +166,7 @@ public class Ollama {
             Message message = Message.builder().role("user").build();
             if(StringUtils.isNotEmpty(question)){
                 message.setContent(question);
-                request.setModel("qwen:7b");
+                request.setModel("qwen2:72b");
             }
             if(imgPath != null && Files.exists(imgPath)){
                 request.setModel("llava");

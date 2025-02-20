@@ -16,6 +16,8 @@ public class WechatConfiguration {
     private String basePath;
     private String autoChatPrefix;
     private String autoChatSuffix;
+    private String bigModelUni;
+    private String bigModelDual;
     /**
      * 是否模糊头像
      */
@@ -35,6 +37,22 @@ public class WechatConfiguration {
 
     public void setLoginTitle(String loginTitle) {
         this.loginTitle = loginTitle;
+    }
+
+    public String getBigModelUni() {
+        return bigModelUni;
+    }
+
+    public void setBigModelUni(String bigModelUni) {
+        this.bigModelUni = bigModelUni;
+    }
+
+    public String getBigModelDual() {
+        return bigModelDual;
+    }
+
+    public void setBigModelDual(String bigModelDual) {
+        this.bigModelDual = bigModelDual;
     }
 
     private String loginTitle;
