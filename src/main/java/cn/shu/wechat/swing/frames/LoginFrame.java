@@ -77,7 +77,7 @@ public final class LoginFrame extends JFrame {
         setLocationRelativeTo(null);
         setListeners();
         if (OSUtil.getOsType() == OSUtil.Windows) {
-           // registerHotKey();
+            registerHotKey();
         }
         loginService = SpringContextHolder.getBean(LoginService.class);
         wechatConfiguration = SpringContextHolder.getBean(WechatConfiguration.class);

@@ -45,35 +45,37 @@
             <version>4.0.0</version>
         </dependency>
 
-        <!--监听数据库操作-->
+        <!-- SLF4J 统一日志接口 -->
         <dependency>
-            <groupId>org.bgee.log4jdbc-log4j2</groupId>
-            <artifactId>log4jdbc-log4j2-jdbc4.1</artifactId>
-            <version>1.16</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.12</version>
         </dependency>
 
-        <!--log4j2依赖包-->
+        <!-- Log4j2 实现 -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>2.6.2</version>
+            <version>2.25.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.6.2</version>
+            <version>2.25.0</version>
         </dependency>
-        <!--log4j2与slf4j的桥接依赖-->
+
+        <!-- SLF4J -> Log4j2 桥接 -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <version>2.6.2</version>
+            <artifactId>log4j-slf4j2-impl</artifactId>
+            <version>2.25.0</version>
         </dependency>
-        <!--slf4j依赖包-->
+
+        <!-- JDBC SQL 打印工具，依赖 Log4j2 -->
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.2</version>
+            <groupId>org.bgee.log4jdbc-log4j2</groupId>
+            <artifactId>log4jdbc-log4j2-jdbc4.1</artifactId>
+            <version>1.16</version>
         </dependency>
         <!--log color-->
         <!--        <dependency>
@@ -119,6 +121,10 @@
                     <artifactId>logback-core</artifactId>
                     <groupId>ch.qos.logback</groupId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
             </exclusions>
             <version>2.1.2</version>
         </dependency>
@@ -145,14 +151,13 @@
             <artifactId>android.ninepatch</artifactId>
             <version>1.0</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/android.ninepatch.jar</systemPath>
+            <systemPath>${project.basedir}/src/main/resources/lib/android.ninepatch-1.0.jar</systemPath>
         </dependency>
+
         <dependency>
             <groupId>com.melloware</groupId>
             <artifactId>jintellitype</artifactId>
-            <version>1.3.9</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/jintellitype-1.3.9.jar</systemPath>
+            <version>1.5.6</version>
         </dependency>
 
         <!--语音播放-->
@@ -420,8 +425,7 @@
                         <manifestEntries>
                             <!-- 在Class-Path下添加配置文件的路径 -->
                             <!--maven依赖为system的包需手动添加到manifest.MF文件中-->
-                            <Class-Path>conf/ lib/jintellitype-1.3.9.jar lib/jna-4.4.0.jar lib/android.ninepatch.jar
-                                lib/jna-platform-4.4.0.jar
+                            <Class-Path>lib/jna-4.4.0.jar lib/android.ninepatch-1.0.jar lib/jna-platform-4.4.0.jar
                             </Class-Path>
 
                         </manifestEntries>
