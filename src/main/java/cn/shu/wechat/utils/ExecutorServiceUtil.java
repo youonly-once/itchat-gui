@@ -28,8 +28,8 @@ public class ExecutorServiceUtil {
      * 全局线程池
      */
     private final static ExecutorService globalExecutorService = new ThreadPoolExecutor(
-            1
-            , Integer.MAX_VALUE
+            12
+            , 100
             , 0L
             , TimeUnit.SECONDS
             , new SynchronousQueue<>()

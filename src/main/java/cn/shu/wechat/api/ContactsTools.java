@@ -4,10 +4,10 @@ package cn.shu.wechat.api;
 import cn.shu.wechat.constant.WxConstant;
 import cn.shu.wechat.constant.WxReqParamsConstant;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.entity.AttrHistory;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.entity.Message;
+import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.utils.CommonTools;
 import cn.shu.wechat.utils.JSONObjectUtil;
@@ -16,6 +16,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -400,30 +401,54 @@ public class ContactsTools {
             if (oldGroup == null) {
                 return;
             }
-            compareContacts(oldGroup, newGroup);
-            String groupName = ContactsTools.getContactDisplayNameByUserName(oldGroup.getUsername());
-            //判断新增与删除
-            boolean isDel;
-            for (Contacts memberOld : oldGroup.getMemberlist()) {
-                isDel = true;
-                for (Contacts memberNew : newGroup.getMemberlist()) {
-                    if (memberOld.getUsername().equals(memberNew.getUsername())) {
-                        isDel = false;
-                        compareGroupMember(memberOld, memberNew, oldGroup);
-                    }
-                }
-                if (isDel) {
-                    //已删除
-                    String name = ContactsTools.getMemberDisplayNameOfGroup(oldGroup, memberOld.getUsername());
-                    ArrayList<Message> messages = new ArrayList<>();
-                    messages.add(Message.builder().content("【" + groupName + "】（" + name + "）:退群!")
-                            .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
-                            .toUsername("filehelper")
-                            .build());
 
-                    MessageTools.sendMsgByUserId(messages);
-                }
+            compareContacts(oldGroup, newGroup);
+            List<Contacts> oldMemberList = oldGroup.getMemberlist();
+            List<Contacts> newMemberList = newGroup.getMemberlist();
+            String groupName = ContactsTools.getContactDisplayNameByUserName(oldGroup.getUsername());
+
+            //新旧集合交集 判断更新的内容
+            Map<String, Contacts> oldMap = oldMemberList.stream()
+                    .collect(Collectors.toMap(Contacts::getUsername, Function.identity()));
+
+            Map<String, Contacts> newMap = newMemberList.stream()
+                    .collect(Collectors.toMap(Contacts::getUsername, Function.identity()));
+
+
+            Set<String> oldKeys = oldMap.keySet();
+
+            Set<String> newKeys = newMap.keySet();
+
+            // 新增的用户
+            Set<String> addedIds = new HashSet<>(newKeys);
+            addedIds.removeAll(oldKeys);
+            for (String addedId : addedIds) {
+                String name = ContactsTools.getMemberDisplayNameOfGroup(newGroup, addedId);
+                ArrayList<Message> messages = new ArrayList<>();
+                messages.add(Message.builder().content("【" + groupName + "】（" + name + "）:加入群聊!")
+                        .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
+                        .toUsername("filehelper")
+                        .build());
+                MessageTools.sendMsgByUserId(messages);
             }
+            // 删除的用户
+            Set<String> removedIds = new HashSet<>(oldKeys);
+            removedIds.removeAll(newKeys);
+            for (String removeId : removedIds) {
+                String name = ContactsTools.getMemberDisplayNameOfGroup(oldGroup, removeId);
+                ArrayList<Message> messages = new ArrayList<>();
+                messages.add(Message.builder().content("【" + groupName + "】（" + name + "）:退出群聊!")
+                        .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
+                        .toUsername("filehelper")
+                        .build());
+                MessageTools.sendMsgByUserId(messages);
+            }
+            //交集
+            oldKeys.removeAll(removedIds);
+            for (String commonKey : oldKeys) {
+                compareGroupMember(oldMap.get(commonKey), newMap.get(commonKey), oldGroup);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -589,6 +614,21 @@ public class ContactsTools {
                             }
                     );
                 }).collect(Collectors.joining(""));
+    }
+
+    /**
+     * 联系人相关map的put操作
+     * put前统计哪些信息变了
+     *
+     * @param oldV 旧值
+     * @param newV 新值
+     */
+    public static void compare(Contacts oldV, Contacts newV) {
+        if (isRoomContact(oldV)) {
+            compareGroup(oldV, newV);
+        } else {
+            compareContacts(oldV, newV);
+        }
     }
 
 }

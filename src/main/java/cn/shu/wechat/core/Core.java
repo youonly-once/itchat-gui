@@ -1,13 +1,11 @@
 package cn.shu.wechat.core;
 
-import cn.shu.wechat.constant.WxReqParamsConstant;
 import cn.shu.wechat.entity.Contacts;
-import lombok.Data;
+import cn.shu.wechat.map.ComparableConcurrentHashMap;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.awt.*;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -55,14 +53,16 @@ public class Core {
     /**
      * 好友
      */
-    @Getter @Setter
-    static private Map<String, Contacts> contactMap = new ConcurrentHashMap<>(1024);
+    @Getter
+    @Setter
+    static private Map<String, Contacts> contactMap = new ComparableConcurrentHashMap<>(1024);
 
     /**
      * 群
      */
-    @Getter @Setter
-    static private Map<String, Contacts> groupMap = new ConcurrentHashMap<>(32);
+    @Getter
+    @Setter
+    static private Map<String, Contacts> groupMap = new ComparableConcurrentHashMap<>(32);
 
     /**
      * 公众号／服务号
@@ -124,14 +124,24 @@ public class Core {
     /**
      * 消息同步失败重试次数
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     static private int receivingRetryCount = 5;
 
     /**
      * 最后一次收到正常retcode的时间，秒为单位
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     static private long lastNormalRetCodeTime;
+
+    /**
+     * 当前是否 发送联系人变更的信息
+     * 刚启动时 初始化联系人，无需发送
+     */
+    @Getter
+    @Setter
+    static private boolean compare;
 
 
 }

@@ -4,18 +4,18 @@ import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
+import cn.shu.wechat.constant.TulLingResultType;
 import cn.shu.wechat.constant.WxReqParamsConstant;
 import cn.shu.wechat.constant.WxRespConstant;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.mapper.MessageMapper;
-import cn.shu.wechat.mapper.StatusMapper;
 import cn.shu.wechat.dto.response.sync.AddMsgList;
-import cn.shu.wechat.constant.TulLingResultType;
 import cn.shu.wechat.dto.response.tuling.Results;
 import cn.shu.wechat.dto.response.tuling.TuLingResponseBean;
 import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.entity.Status;
 import cn.shu.wechat.entity.StatusExample;
+import cn.shu.wechat.mapper.MessageMapper;
+import cn.shu.wechat.mapper.StatusMapper;
 import cn.shu.wechat.service.IMsgHandlerFace;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.utils.*;
@@ -86,7 +86,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         List<Message> messages = new ArrayList<>();
 
         //=========================手动发送消息=====================
-        String[] split = msg.getPlainText().split("：");
+        String[] split = msg.getPlainText().split(":");
         if (split.length >= 2 && msg.getFromUserName().equals(Core.getUserName())) {
             try {
                 long sleep = 100;
@@ -97,17 +97,24 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 }
                 String s = split[1];
                 int i = Integer.parseInt(s);
-                messages.add(Message.builder()
+                Message build = Message.builder()
                         .content("开始发送：" + i + "个" + split[0])
                         .toUsername(msg.getToUserName())
                         .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
-                        .build());
+                        .build();
+                MessageTools.sendMsgByUserId(build);
                 for (int j = 0; j < i; j++) {
-                    messages.add(Message.builder()
+                    Message build1 = Message.builder()
                             .content(split[0])
                             .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                             .toUsername(msg.getToUserName())
-                            .build());
+                            .build();
+                    MessageTools.sendMsgByUserId(build1);
+                    try {
+                        Thread.sleep(sleep);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
                 return messages;
 
@@ -144,14 +151,16 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 if (msg.isGroupMsg()) {
                     //群消息
                     messages.add(Message.builder()
-                            .content("1、【oauto/cauto】\n\t开启/关闭群消息自动回复\n"
-                                    + "2、【opundo/cpundo】\n\t开启/关闭群消息防撤回\n"
-                                    + "3、【ggr】\n\t群成员性别比例图\n"
-                                    + "4、【gpr】\n\t群成员省市分布图\n"
-                                    + "5、【op/cp】\n\t开启/关闭全局个人用户消息自动回复\n"
-                                    + "6、【gma10】\n\t群成员活跃度TOP10\n"
-                                    + "7、【mf10】\n\t聊天消息关键词TOP10\n"
-                                    + "8、【mft10】\n\t聊天消息类型TOP10\n"
+                            .content("【oauto/cauto】\n\t开启/关闭群消息自动回复\n"
+                                    + "【opundo/cpundo】\n\t开启/关闭群消息防撤回\n"
+                                    + "【ggr】\n\t群成员性别比例图\n"
+                                    + "【gpr】\n\t群成员省市分布图\n"
+                                    + "【op/cp】\n\t开启/关闭全局个人用户消息自动回复\n"
+                                    + "【gma10】\n\t群成员活跃度TOP10\n"
+                                    + "【mf10】\n\t聊天消息关键词TOP10\n"
+                                    + "【mft10】\n\t聊天消息类型TOP10\n"
+                                    + "【attr_rate:{属性名}】\n\t群成员属性比例\n"
+                                    + "【{消息}&amp;{时间(秒)}】\n\t延迟撤回\n"
                             )
                             .toUsername(toUserName)
                             .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
@@ -160,13 +169,15 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 } else {
                     //个人消息
                     messages.add(Message.builder()
-                            .content("1、【oauto/cauto】\n\t开启/关闭当前联系人自动回复\n"
-                                    + "2、【opundo/cpundo】\n\t开启/关闭当前联系人消息防撤回\n"
-                                    + "3、【op/cp】\n\t开启/关闭全局个人用户消息自动回复\n"
-                                    + "4、【mf10】\n\t聊天消息关键词TOP10\n"
-                                    + "5、【gma10】\n\t活跃度TOP\n"
-                                    + "6、【updateinfo】\n\t好友属性更新次数排行\n"
-                                    + "7、【mft10】\n\t聊天消息类型TOP10\n")
+                            .content("【oauto/cauto】\n\t开启/关闭当前联系人自动回复\n"
+                                    + "【opundo/cpundo】\n\t开启/关闭当前联系人消息防撤回\n"
+                                    + "【op/cp】\n\t开启/关闭全局个人用户消息自动回复\n"
+                                    + "【mf10】\n\t聊天消息关键词TOP10\n"
+                                    + "【gma10】\n\t活跃度TOP\n"
+                                    + "【updateinfo】\n\t好友属性更新次数排行\n"
+                                    + "【mft10】\n\t聊天消息类型TOP10\n"
+                                    + "【{消息}&amp;{时间(秒)}】\n\t延迟撤回\n"
+                            )
                             .toUsername(toUserName)
                             .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                             .build());

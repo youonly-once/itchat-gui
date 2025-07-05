@@ -76,9 +76,9 @@ public final class LoginFrame extends JFrame {
         initView();
         setLocationRelativeTo(null);
         setListeners();
-        if (OSUtil.getOsType() == OSUtil.Windows) {
-            registerHotKey();
-        }
+//        if (OSUtil.getOsType() == OSUtil.Windows) {
+//            registerHotKey();
+//        }
         loginService = SpringContextHolder.getBean(LoginService.class);
         wechatConfiguration = SpringContextHolder.getBean(WechatConfiguration.class);
     }
@@ -154,24 +154,25 @@ public final class LoginFrame extends JFrame {
         refreshCodeBt.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
-                //TODO 重新登录功能
-
-                new SwingWorker<Object, Object>() {
-                    private BufferedImage qr;
-
-                    @Override
-                    protected Object doInBackground() throws Exception {
-                       // getUUID(); 刷新后的码不能登录
-                        qr = loginService.getQR();
-                        return null;
-                    }
-
-                    @Override
-                    protected void done() {
-                        codeLabel.setIcon(new ImageIcon(qr.getScaledInstance(250, 250, Image.SCALE_SMOOTH)));
-                        showMessage("请扫描二维码以登录");
-                    }
-                }.execute();
+                WeChatStater.restartApplication();
+//                //TODO 重新登录功能
+//
+//                new SwingWorker<Object, Object>() {
+//                    private BufferedImage qr;
+//
+//                    @Override
+//                    protected Object doInBackground() throws Exception {
+//                       // getUUID(); 刷新后的码不能登录
+//                        qr = loginService.getQR();
+//                        return null;
+//                    }
+//
+//                    @Override
+//                    protected void done() {
+//                        codeLabel.setIcon(new ImageIcon(qr.getScaledInstance(250, 250, Image.SCALE_SMOOTH)));
+//                        showMessage("请扫描二维码以登录");
+//                    }
+//                }.execute();
                 super.mouseReleased(e);
             }
         });
@@ -348,6 +349,7 @@ public final class LoginFrame extends JFrame {
                     ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
                         log.info("获取群好友及群好友列表");
                         loginService.WebWxBatchGetContact();
+                        Core.setCompare(true);
                         if (dHImg) {
                             downloadHeadImage();
                         }
@@ -414,11 +416,13 @@ public final class LoginFrame extends JFrame {
         ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(() -> HeadImageUtil.deleteLoseEfficacyHeadImg(wechatConfiguration.getBasePath() + "/headimg/"));
         statusLabel.setText("11. 下载联系人头像");
         log.info("11. 下载联系人头像");
+        long time = System.currentTimeMillis();
         Core.getMemberMap().entrySet().parallelStream()
-                .forEach(contacts->{
+                .forEach(contacts -> {
                     Core.getContactHeadImgPath().put(contacts.getValue().getUsername(), DownloadTools.downloadBigHeadImg(contacts.getValue().getHeadimgurl(), contacts.getValue().getUsername()));
-                    log.info("下载头像：({}):{}", contacts.getValue().getNickname(), contacts.getValue().getHeadimgurl());
+                    //log.info("下载头像：({}):{}", contacts.getValue().getNickname(), contacts.getValue().getHeadimgurl());
                 });
+        log.info("11. 下载联系人头像完成，耗时{}秒", (System.currentTimeMillis() - time) / 1000);
     }
 
 

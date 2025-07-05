@@ -369,7 +369,7 @@ public class LoginServiceImpl implements LoginService {
                 ExecutorServiceUtil.getHeadImageDownloadExecutorService().submit(() -> {
                     AvatarUtil.putUserAvatarCache(contacts.getUsername(), DownloadTools.downloadHeadImgByRelativeUrl(contacts.getHeadimgurl()));
                 });
-                addContacts(contacts, false);
+                addContacts(contacts);
                 recentContacts.add(contacts.getUsername());
             }
 
@@ -546,11 +546,12 @@ public class LoginServiceImpl implements LoginService {
                 // 累加好友列表
                 member.addAll(fullFriendsJsonList.getJSONArray(StorageLoginInfoEnum.MemberList.getKey()));
             }
-            for (Object value : member) {
+            member.parallelStream().forEach(value -> {
+
                 JSONObject o = (JSONObject) value;
                 Contacts contacts = JSON.parseObject(JSON.toJSONString(o), Contacts.class);
-                addContacts(contacts, true);
-            }
+                addContacts(contacts);
+            });
             if (!Core.getMemberMap().containsKey("filehelper")) {
                 Core.getMemberMap().put("filehelper",
                         Contacts.builder().username("filehelper").displayname("文件传输助手")
@@ -564,9 +565,8 @@ public class LoginServiceImpl implements LoginService {
 
     /**
      * 添加联系人
-     *
      */
-    private void addContacts(Contacts contacts, boolean compare) {
+    private void addContacts(Contacts contacts) {
 
         contacts.setIscontacts(true);
         String userName = contacts.getUsername();
@@ -600,12 +600,6 @@ public class LoginServiceImpl implements LoginService {
             contacts.setType(Contacts.ContactsType.GROUP_USER);
         } else {
             contacts.setType(Contacts.ContactsType.ORDINARY_USER);
-            //比较上次差异
-            if (compare) {
-                Contacts old = Core.getContactMap().get(userName);
-                ContactsTools.compareContacts(old, contacts);
-            }
-
             // 普通联系人
             Core.getContactMap().put(userName, contacts);
         }
@@ -618,13 +612,12 @@ public class LoginServiceImpl implements LoginService {
                 Core.getLoginResultData().getPassTicket());
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("Count", Core.getGroupIdSet().size());
-        List<Map<String, String>> list = new ArrayList<Map<String, String>>(Core.getGroupIdSet().size());
-        for (String s : Core.getGroupIdSet()) {
+        List<Map<String, String>> list = Core.getGroupIdSet().parallelStream().map(s -> {
             HashMap<String, String> map = new HashMap<String, String>(2);
             map.put("UserName", s);
             map.put("EncryChatRoomId", "");
-            list.add(map);
-        }
+            return map;
+        }).collect(Collectors.toList());
         paramMap.put("List", list);
         paramMap.put("BaseRequest",Core.getLoginResultData().getBaseRequest());
         HttpEntity entity = HttpUtil.doPost(url, JSON.toJSONString(paramMap));
@@ -632,27 +625,19 @@ public class LoginServiceImpl implements LoginService {
             String text = EntityUtils.toString(entity, Consts.UTF_8);
             JSONObject obj = JSON.parseObject(text);
             //群列表
-            JSONArray contactList = obj.getJSONArray("ContactList");
-            for (int i = 0; i < contactList.size(); i++) {
+            obj.getJSONArray("ContactList").parallelStream().forEach(groupObject -> {
                 // 群好友
-                JSONObject groupObject = contactList.getJSONObject(i);
                 Contacts group = JSON.parseObject(JSON.toJSONString(groupObject), Contacts.class);
                 String userName = group.getUsername();
-                if (userName.startsWith("@@")) {
+                if (ContactsTools.isRoomContact(userName)) {
                     //以上接口返回的成员属性不全，以下的接口获取群成员详细属性
                     JSONArray memberArray = WebWxBatchGetContactDetail(group);
                     List<Contacts> memberList = JSON.parseArray(JSON.toJSONString(memberArray), Contacts.class);
                     group.setMemberlist(memberList);
-
-                    //比较群成员信息
-                    Contacts old = Core.getGroupMap().get(userName);
-                    //比较上次差异
-                    ContactsTools.compareGroup(old, group);
-
                     Core.getMemberMap().put(userName, group);
                     Core.getGroupMap().put(userName, group);
                 }
-            }
+            });
 
 
         } catch (Exception e) {

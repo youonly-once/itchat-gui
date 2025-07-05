@@ -5,12 +5,12 @@ import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.constant.WxRespConstant;
 import cn.shu.wechat.constant.WxURLEnum;
-import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.dto.response.msg.send.WebWXSendMsgResponse;
 import cn.shu.wechat.dto.response.sync.AddMsgList;
 import cn.shu.wechat.dto.response.sync.RecommendInfo;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.entity.Message;
+import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.service.IMsgHandlerFace;
 import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.entity.RoomItem;
@@ -413,6 +413,11 @@ public class MsgCenter {
         log.info("联系人修改");
         if (contacts != null) {
             Core.getMemberMap().put(contacts.getUsername(), contacts);
+            if (ContactsTools.isRoomContact(contacts)) {
+                Core.getGroupMap().put(contacts.getUsername(), contacts);
+            } else {
+                Core.getContactMap().put(contacts.getUsername(), contacts);
+            }
         }
 
     }
