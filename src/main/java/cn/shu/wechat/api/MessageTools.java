@@ -227,7 +227,10 @@ public class MessageTools {
         long singleFileMaxSize = 1048576L;
         File file = new File(filePath);
         //等待另一线程的下载该资源完成
-        DownloadManager.awaitDownload(filePath, 10 * 60 * 1000L);
+        //如果是上传之前下载或正在下载的资源，则等待下载完成
+        if (DownloadManager.containsTask(filePath)) {
+            DownloadManager.awaitDownload(filePath, 10 * 60 * 1000L);
+        }
         if (!file.exists()) {
             throw new WebWXException("待上传文件不存在：" + filePath);
         }

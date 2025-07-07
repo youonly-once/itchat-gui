@@ -2,12 +2,13 @@ package cn.shu.wechat.swing.panels.chat;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.MessageTools;
+import cn.shu.wechat.constant.DownloadStatus;
 import cn.shu.wechat.constant.WxRespConstant;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.dto.response.msg.send.WebWXSendMsgResponse;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.entity.Message;
+import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.swing.adapter.ViewHolder;
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.adapter.message.MessageAdapter;
@@ -23,13 +24,14 @@ import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
 import cn.shu.wechat.swing.listener.ExpressionListener;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
-import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.swing.panels.TitlePanel;
+import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.swing.tasks.UploadTaskCallback;
 import cn.shu.wechat.swing.utils.EmojiUtil;
 import cn.shu.wechat.swing.utils.FileCache;
 import cn.shu.wechat.swing.utils.ImageUtil;
 import cn.shu.wechat.swing.utils.MimeTypeUtil;
+import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.utils.DateUtils;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.MediaUtil;
@@ -43,14 +45,18 @@ import javax.swing.text.Document;
 import javax.swing.text.Element;
 import javax.swing.text.StyleConstants;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
-import java.util.*;
 
 /**
  * 右侧聊天面板
@@ -1037,13 +1043,25 @@ public class ChatMessagePanel extends ParentAvailablePanel {
             @Override
             public void run() {
                 try {
-                    Desktop.getDesktop().open(new File(path));
+                    if (DownloadManager.containsTask(path)) {
+                        if (DownloadManager.getStatus(path) == DownloadStatus.SUCCESS) {
+                            Desktop.getDesktop().open(new File(path));
+                        } else if (DownloadManager.getStatus(path) == DownloadStatus.RUNNING || DownloadManager.getStatus(path) == DownloadStatus.WAITING) {
+                            JOptionPane.showMessageDialog(null, "下载中", "打开失败", JOptionPane.ERROR_MESSAGE);
+                        } else if (DownloadManager.getStatus(path) == DownloadStatus.FAIL) {
+                            JOptionPane.showMessageDialog(null, "下载失败", "打开失败", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } else {
+                        Desktop.getDesktop().open(new File(path));
+                    }
+
                 } catch (IOException e1) {
                     JOptionPane.showMessageDialog(null, "文件打开失败，没有找到关联的应用程序", "打开失败", JOptionPane.ERROR_MESSAGE);
                     e1.printStackTrace();
                 } catch (IllegalArgumentException e2) {
-                    JOptionPane.showMessageDialog(null, "文件下载中或已被删除", "打开失败", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "文件已被删除", "打开失败", JOptionPane.ERROR_MESSAGE);
                 }
+
 
             }
         });
