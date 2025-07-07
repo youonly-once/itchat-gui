@@ -3,6 +3,7 @@ package cn.shu.wechat.core;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.api.MessageTools;
+import cn.shu.wechat.constant.DownloadType;
 import cn.shu.wechat.constant.WxRespConstant;
 import cn.shu.wechat.constant.WxURLEnum;
 import cn.shu.wechat.dto.response.msg.send.WebWXSendMsgResponse;
@@ -18,6 +19,8 @@ import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.swing.utils.ChatUtil;
+import cn.shu.wechat.task.DownloadManager;
+import cn.shu.wechat.task.DownloadTask;
 import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.log4j.Log4j2;
@@ -31,6 +34,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.function.Consumer;
 
 import static cn.shu.wechat.constant.WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_TEXT;
 
@@ -202,14 +206,18 @@ public class MsgCenter {
      */
     private void downloadFile(AddMsgList msg, String filename, String ext) {
 
-        ConcurrentHashMap<String, Boolean> fileDownloadStatus = DownloadTools.FILE_DOWNLOAD_STATUS;
+        //ConcurrentHashMap<String, Boolean> fileDownloadStatus = DownloadTools.FILE_DOWNLOAD_STATUS;
         //下载资源文件
         String path = DownloadTools.getDownloadFilePath(msg, filename, ext);
         msg.setFilePath(path);
 
-        fileDownloadStatus.put(path, false);
-        DownloadTools.FILE_DOWNLOAD_PROCESS.put(path,new LinkedBlockingDeque<Long>());
-        ExecutorServiceUtil.getGlobalExecutorService().execute(() -> DownloadTools.getDownloadFn(msg));
+       // fileDownloadStatus.put(path, false);
+       // DownloadTools.FILE_DOWNLOAD_PROCESS.put(path,new LinkedBlockingDeque<Long>());
+        DownloadTask downloadTask = new DownloadTask(msg, null);
+        downloadTask.setType(DownloadType.FN);
+        downloadTask.setTaskId(String.valueOf(msg.getNewMsgId()));
+        DownloadManager.submit(downloadTask);
+        //ExecutorServiceUtil.getGlobalExecutorService().execute(() -> DownloadTools.getDownloadFn(msg));
 
 
     }
@@ -219,10 +227,16 @@ public class MsgCenter {
      */
     private void downloadThumImg(AddMsgList msg, String filename, String ext) {
         String pathSlave = DownloadTools.getDownloadThumImgPath(msg, filename, ext);
-        ConcurrentHashMap<String, Boolean> fileDownloadStatus = DownloadTools.FILE_DOWNLOAD_STATUS;
-        fileDownloadStatus.put(pathSlave, false);
+       // ConcurrentHashMap<String, Boolean> fileDownloadStatus = DownloadTools.FILE_DOWNLOAD_STATUS;
+        //fileDownloadStatus.put(pathSlave, false);
         msg.setSlavePath(pathSlave);
-        ExecutorServiceUtil.getGlobalExecutorService().execute(() -> DownloadTools.downloadFileByMsgId(msg.getNewMsgId(), pathSlave));
+
+        DownloadTask downloadTask = new DownloadTask(msg.getNewMsgId(), pathSlave,null);
+        downloadTask.setType(DownloadType.RESOURCE_BY_MSGID);
+        downloadTask.setTaskId(pathSlave);
+        DownloadManager.submit(downloadTask);
+
+        //ExecutorServiceUtil.getGlobalExecutorService().execute(() -> DownloadTools.downloadFileByMsgId(msg.getNewMsgId(), pathSlave));
     }
 
     /**

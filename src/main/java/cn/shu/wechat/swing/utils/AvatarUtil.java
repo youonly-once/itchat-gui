@@ -3,10 +3,14 @@ package cn.shu.wechat.swing.utils;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
+import cn.shu.wechat.constant.DownloadStatus;
+import cn.shu.wechat.constant.DownloadType;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.frames.MainFrame;
+import cn.shu.wechat.task.DownloadManager;
+import cn.shu.wechat.task.DownloadTask;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 
@@ -106,7 +110,11 @@ public final class AvatarUtil {
         if (avatarIcon == null) {
             //获取网络图片
             Contacts contacts = Core.getMemberMap().get(userName);
-            avatar = DownloadTools.downloadHeadImgByRelativeUrl(contacts.getHeadimgurl());
+            DownloadTask downloadTask = new DownloadTask();
+            downloadTask.setRelativeUrl(contacts.getHeadimgurl());
+            downloadTask.setTaskId(contacts.getHeadimgurl());
+            downloadTask.setType(DownloadType.ByRelativeUrl);
+            avatar = (Image)DownloadManager.submitAwait(downloadTask);
             if (avatar == null) {
                 //获取缓存在磁盘的头像
                 avatar = getCachedImageAvatar(userName);
@@ -165,11 +173,18 @@ public final class AvatarUtil {
             Image avatar = null;
             if (user != null) {
                 //下载头像
+
+                DownloadTask downloadTask = new DownloadTask();
                 if (StringUtils.isNotEmpty((user.getHeadimgurl()))) {
-                    avatar = DownloadTools.downloadHeadImgByRelativeUrl(user.getHeadimgurl());
+                    downloadTask.setRelativeUrl(user.getHeadimgurl());
+                    downloadTask.setTaskId(user.getHeadimgurl());
+                    downloadTask.setType(DownloadType.ByRelativeUrl);
                 }else{
-                    avatar = DownloadTools.downloadHeadImgByUserName(user.getUsername());
+                    downloadTask.setUserName(user.getUsername());
+                    downloadTask.setTaskId(user.getUsername());
+                    downloadTask.setType(DownloadType.RESOURCE_BY_USERNAME);
                 }
+                avatar = (Image)DownloadManager.submitAwait(downloadTask);
             }
             if (avatar != null) {
                 avatarIcon = putUserAvatarCache(userName, avatar);
@@ -209,7 +224,17 @@ public final class AvatarUtil {
 
             if (filePath == null) {
 
-                filePath = DownloadTools.downloadBigHeadImg(url, userName);
+                DownloadTask downloadTask = new DownloadTask(url, userName, null);
+                downloadTask.setTaskId(url);
+                downloadTask.setType(DownloadType.HEAD_IMAGE_BIG);
+                DownloadManager.submit(downloadTask);
+                while (downloadTask.getStatus() == DownloadStatus.WAITING || downloadTask.getStatus() == DownloadStatus.RUNNING) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
 
         }

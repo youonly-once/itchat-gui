@@ -2,6 +2,7 @@ package cn.shu.wechat.swing.adapter.message;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.DownloadTools;
+import cn.shu.wechat.constant.DownloadType;
 import cn.shu.wechat.constant.WxRespConstant;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.dto.request.msg.url.WXMsgUrl;
@@ -32,6 +33,8 @@ import cn.shu.wechat.swing.helper.AttachmentIconHelper;
 import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
 import cn.shu.wechat.swing.panels.chat.ChatMessagePanel;
 import cn.shu.wechat.swing.utils.*;
+import cn.shu.wechat.task.DownloadManager;
+import cn.shu.wechat.task.DownloadTask;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import javazoom.jl.player.Player;
 import lombok.extern.log4j.Log4j2;
@@ -330,9 +333,20 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 ImageIcon imageIcon = null;
                 @Override
                 protected Object doInBackground() throws Exception {
-                    byte[] bytes = DownloadTools.downloadImgByteByMsgID(item.getMsgId(), WXMsgUrl.BIG_TYPE);
+
+                    DownloadTask downloadTask = new DownloadTask();
+                    downloadTask.setMsgId(item.getMsgId());
+                    downloadTask.setTaskId(item.getMsgId()+WXMsgUrl.BIG_TYPE);
+                    downloadTask.setType(DownloadType.ImgByteByMsgID);
+                    downloadTask.setResourceType(WXMsgUrl.BIG_TYPE);
+                    byte[] bytes = (byte[])DownloadManager.submitAwait(downloadTask);
+
+
+
                     if (bytes == null || bytes.length<=0){
-                        bytes = DownloadTools.downloadImgByteByMsgID(item.getMsgId(), WXMsgUrl.SLAVE_TYPE);
+                        downloadTask.setResourceType(WXMsgUrl.SLAVE_TYPE);
+                        downloadTask.setTaskId(item.getMsgId()+WXMsgUrl.SLAVE_TYPE);
+                        bytes = (byte[])DownloadManager.submitAwait(downloadTask);
                     }
                     if (bytes != null && bytes.length>0) {
                         if (ImageUtil.isGIF(bytes)) {
@@ -365,7 +379,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
                 @Override
                 protected Object doInBackground() throws Exception {
-                    DownloadTools.awaitDownload(item.getFilePath());
+                    DownloadManager.awaitDownloadTimeOut(item.getFilePath());
                     imageIcon = new ImageIcon(item.getFilePath());
                     ImageUtil.preferredImageSize(imageIcon, 200);
                     return null;
@@ -856,7 +870,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 @Override
                 protected Object doInBackground() {
                     //等待下载完成
-                    DownloadTools.awaitDownload(slaveImgPath);
+                    DownloadManager.awaitDownload(slaveImgPath,1000*60*5);
                     File file = new File(slaveImgPath);
                     try {
                         imageIcon = new ImageIcon(ImageIO.read(file));
@@ -926,7 +940,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     return null;
                 }
                 //阻塞
-                DownloadTools.awaitDownload(finalPath);
+                DownloadManager.awaitDownload(finalPath,1000*60*5);
                 File file = new File(finalPath);
                 if (file.length()>0){
                     if (ImageUtil.isGIF(finalPath)){
@@ -959,7 +973,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                                 @Override
                                 protected Object doInBackground() throws Exception {
                                     //阻塞
-                                    DownloadTools.awaitDownload(item.getFilePath());
+                                    DownloadManager.awaitDownloadTimeOut(item.getFilePath());
                                     if (ImageUtil.isGIF(item.getFilePath())){
                                         ChatMessagePanel.openFile(item.getFilePath());
                                     }else{
@@ -1113,7 +1127,12 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 if (StringUtils.isNotEmpty(item.getThumbUrl())) {
                     image = ImageIO.read(new URL(item.getThumbUrl()));
                 }else{
-                    image = DownloadTools.downloadImgByMsgID(item.getMsgId(),WXMsgUrl.SLAVE_TYPE);
+                    DownloadTask downloadTask = new DownloadTask();
+                    downloadTask.setMsgId(item.getMsgId());
+                    downloadTask.setResourceType(WXMsgUrl.SLAVE_TYPE);
+                    downloadTask.setTaskId(item.getMsgId()+WXMsgUrl.SLAVE_TYPE);
+                    downloadTask.setType(DownloadType.ImgByMsgID);
+                    image = (BufferedImage)DownloadManager.submitAwait(downloadTask);
                 }
                 return null;
             }
@@ -1176,7 +1195,12 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 if (StringUtils.isNotEmpty(item.getThumbUrl())) {
                     image = ImageIO.read(new URL(item.getThumbUrl()));
                 }else{
-                    image = DownloadTools.downloadImgByMsgID(item.getMsgId(),WXMsgUrl.SLAVE_TYPE);
+                    DownloadTask downloadTask = new DownloadTask();
+                    downloadTask.setMsgId(item.getMsgId());
+                    downloadTask.setResourceType(WXMsgUrl.SLAVE_TYPE);
+                    downloadTask.setTaskId(item.getMsgId()+WXMsgUrl.SLAVE_TYPE);
+                    downloadTask.setType(DownloadType.ImgByteByMsgID);
+                    image = (BufferedImage)DownloadManager.submitAwait(downloadTask);
                 }
                 return null;
             }

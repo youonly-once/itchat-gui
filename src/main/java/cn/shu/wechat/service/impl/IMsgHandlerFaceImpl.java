@@ -18,6 +18,7 @@ import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.mapper.StatusMapper;
 import cn.shu.wechat.service.IMsgHandlerFace;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
+import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -425,7 +426,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             String to = ContactsTools.getContactDisplayNameByUserName(msg.getFromUserName());
             String msgFilePath = msg.getFilePath();
             if (autoChatUserNameList.contains(to)) {
-                DownloadTools.awaitDownload(msgFilePath);
+                DownloadManager.awaitDownloadTimeOut(msgFilePath);
                 String result = Ollama.chatWithHistory(msg.getFromUserName(), Paths.get(msgFilePath));
                 if(StringUtils.isEmpty(result)){
                     return null;
@@ -435,7 +436,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                         .toUsername(msg.getFromUserName())
                         .content(result).build());
             } else if (autoChatWithPersonal && !msg.isGroupMsg()) {
-                DownloadTools.awaitDownload(msgFilePath);
+                DownloadManager.awaitDownloadTimeOut(msgFilePath);
                 String result = Ollama.chatWithHistory(msg.getFromUserName(),Paths.get(msgFilePath));
                 if(StringUtils.isEmpty(result)){
                     return null;
@@ -748,7 +749,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             String to = ContactsTools.getContactDisplayNameByUserName(msg.getFromUserName());
             String msgFilePath = msg.getFilePath();
             if (autoChatUserNameList.contains(to)) {
-                DownloadTools.awaitDownload(msgFilePath);
+                DownloadManager.awaitDownloadTimeOut(msgFilePath);
                 String result = Ollama.chatWithHistory(msg.getFromUserName(), Paths.get(msgFilePath));
                 if(StringUtils.isEmpty(result)){
                     return null;
@@ -758,7 +759,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                         .toUsername(msg.getFromUserName())
                         .content(result).build());
             } else if (autoChatWithPersonal && !msg.isGroupMsg()) {
-                DownloadTools.awaitDownload(msgFilePath);
+                DownloadManager.awaitDownloadTimeOut(msgFilePath);
                 String result = Ollama.chatWithHistory(msg.getFromUserName(),Paths.get(msgFilePath));
                 if(StringUtils.isEmpty(result)){
                     return null;

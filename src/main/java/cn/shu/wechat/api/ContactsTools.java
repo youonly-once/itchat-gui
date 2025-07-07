@@ -1,6 +1,7 @@
 package cn.shu.wechat.api;
 
 
+import cn.shu.wechat.constant.DownloadType;
 import cn.shu.wechat.constant.WxConstant;
 import cn.shu.wechat.constant.WxReqParamsConstant;
 import cn.shu.wechat.core.Core;
@@ -9,6 +10,8 @@ import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.swing.utils.AvatarUtil;
+import cn.shu.wechat.task.DownloadManager;
+import cn.shu.wechat.task.DownloadTask;
 import cn.shu.wechat.utils.CommonTools;
 import cn.shu.wechat.utils.JSONObjectUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
@@ -423,7 +426,7 @@ public class ContactsTools {
             Set<String> addedIds = new HashSet<>(newKeys);
             addedIds.removeAll(oldKeys);
             for (String addedId : addedIds) {
-                String name = ContactsTools.getMemberDisplayNameOfGroup(newGroup, addedId);
+                String name = ContactsTools.getMemberDisplayNameOfGroup(newMap.get(addedId), addedId);
                 ArrayList<Message> messages = new ArrayList<>();
                 messages.add(Message.builder().content("【" + groupName + "】（" + name + "）:加入群聊!")
                         .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
@@ -435,7 +438,7 @@ public class ContactsTools {
             Set<String> removedIds = new HashSet<>(oldKeys);
             removedIds.removeAll(newKeys);
             for (String removeId : removedIds) {
-                String name = ContactsTools.getMemberDisplayNameOfGroup(oldGroup, removeId);
+                String name = ContactsTools.getMemberDisplayNameOfGroup(oldMap.get(removeId), removeId);
                 ArrayList<Message> messages = new ArrayList<>();
                 messages.add(Message.builder().content("【" + groupName + "】（" + name + "）:退出群聊!")
                         .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
@@ -541,8 +544,18 @@ public class ContactsTools {
                         || stringMapEntry.getKey().equals("头像更换")
                         || stringMapEntry.getKey().equals("headimgurl")) {
                     String oldHeadPath = Core.getContactHeadImgPath().get(oldV.getUsername());
-                    String newHeadPath = DownloadTools.downloadBigHeadImg(stringStringEntry.getValue()
-                            , oldV.getUsername());
+
+
+                    DownloadTask downloadTask = new DownloadTask();
+                    downloadTask.setRelativeUrl(stringStringEntry.getValue());
+                    downloadTask.setType(DownloadType.ByRelativeUrl);
+                    downloadTask.setUserName(oldV.getUsername());
+                    downloadTask.setTaskId(stringStringEntry.getValue()+oldV.getUsername());
+                    DownloadManager.submit(downloadTask);
+                    DownloadManager.awaitDownload(downloadTask.getTaskId());
+                    String newHeadPath = (String)downloadTask.getResult();
+
+
                     Core.getContactHeadImgPath().put(oldV.getUsername(), newHeadPath);
                     //更换头像需要发送图片
                     //更换前

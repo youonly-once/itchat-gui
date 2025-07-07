@@ -258,6 +258,9 @@ public final class LoginFrame extends JFrame {
         statusLabel.setToolTipText(message);
     }
 
+    public static void main(String[] args) {
+        System.out.println(3 &0x02);
+    }
     /**
      * 调用网页版微信登录
      *

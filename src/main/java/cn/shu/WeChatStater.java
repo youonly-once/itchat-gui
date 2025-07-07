@@ -37,29 +37,39 @@ import java.util.concurrent.CountDownLatch;
 public class WeChatStater {
     private static ConfigurableApplicationContext context;
     private static final CountDownLatch countDownLatch = new CountDownLatch(1);
+//    public static void main(String[] args) {
+//        boot();
+//
+//        new SwingWorker<Object,Object>() {
+//
+//            @Override
+//            protected Object doInBackground() throws Exception {
+//                context = new SpringApplicationBuilder(WeChatStater.class)
+//                        .headless(false)
+//                        .run();
+//                LoginFrame loginFrame = new LoginFrame();
+//                loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//                countDownLatch.countDown();
+//                loginFrame.setVisible(true);
+//                loginFrame.login(true);
+//                return null;
+//            }
+//        }.execute();
+//        try {
+//            countDownLatch.await();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
     public static void main(String[] args) {
-        boot();
-
-        new SwingWorker<Object,Object>() {
-
-            @Override
-            protected Object doInBackground() throws Exception {
-                context = new SpringApplicationBuilder(WeChatStater.class)
-                        .headless(false)
+        context = new SpringApplicationBuilder(WeChatStater.class)
+                       .headless(false)
                         .run();
-                LoginFrame loginFrame = new LoginFrame();
-                loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                countDownLatch.countDown();
-                loginFrame.setVisible(true);
-                loginFrame.login(true);
-                return null;
-            }
-        }.execute();
-        try {
-            countDownLatch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        LoginFrame loginFrame = new LoginFrame();
+        loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        loginFrame.setVisible(true);
+        loginFrame.login(true);
     }
 
     /**

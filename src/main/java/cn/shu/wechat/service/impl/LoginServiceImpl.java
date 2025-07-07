@@ -435,8 +435,11 @@ public class LoginServiceImpl implements LoginService {
                     });
                 }
                 //联系人修改
-                msgCenter.handleModContact(webWxSyncMsg.getModContactList());
-                for (Contacts contacts : webWxSyncMsg.getDelContactList()) {
+                ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
+
+                    msgCenter.handleModContact(webWxSyncMsg.getModContactList());
+                });
+                    for (Contacts contacts : webWxSyncMsg.getDelContactList()) {
                     log.info("联系人删除：{}", contacts);
                 }
 
