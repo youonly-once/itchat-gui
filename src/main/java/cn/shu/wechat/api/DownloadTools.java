@@ -1,16 +1,13 @@
 package cn.shu.wechat.api;
 
 import cn.shu.wechat.configuration.WechatConfiguration;
-import cn.shu.wechat.constant.DownloadStatus;
 import cn.shu.wechat.constant.WxRespConstant;
-import cn.shu.wechat.core.Core;
 import cn.shu.wechat.constant.WxURLEnum;
-import cn.shu.wechat.dto.response.sync.AddMsgList;
+import cn.shu.wechat.core.Core;
 import cn.shu.wechat.dto.request.msg.url.WXMsgUrl;
-import cn.shu.wechat.task.DownloadTask;
+import cn.shu.wechat.dto.response.sync.AddMsgList;
 import cn.shu.wechat.utils.HttpUtil;
 import cn.shu.wechat.utils.MD5Util;
-import cn.shu.wechat.utils.SleepUtils;
 import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -23,14 +20,15 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.function.Consumer;
 
 /**
@@ -42,20 +40,10 @@ import java.util.function.Consumer;
  */
 @Log4j2
 public class DownloadTools {
-    /**
-     * 文件下载状态
-     * 文件路径为KEY、状态为VALUE
-     * true： 下载成功
-     * false：下载中
-     * null 下载失败 或者未下载
-     */
-    public final static ConcurrentHashMap<String, Boolean> FILE_DOWNLOAD_STATUS = new ConcurrentHashMap<>();
 
     /**
-     * 文件下载进度
+     * 配置文件
      */
-    public final static HashMap<String, LinkedBlockingDeque<Long>> FILE_DOWNLOAD_PROCESS = new HashMap<>();
-
     private final static WechatConfiguration WECHAT_CONFIGURATION = SpringContextHolder.getBean(WechatConfiguration.class);
 
 
@@ -285,7 +273,6 @@ public class DownloadTools {
 
         Path saveDir = Paths.get(WECHAT_CONFIGURATION.getBasePath(), "headimg", remarkNameByUserName);
         Path savePath = saveDir.resolve(md5Str + ".jpg");
-        DownloadTools.FILE_DOWNLOAD_STATUS.put(savePath.toString(), false);
         try {
             if (Files.notExists(saveDir)) {
                 Files.createDirectories(saveDir);
@@ -300,9 +287,7 @@ public class DownloadTools {
                 out.write(bytes);
                 out.flush();
             }
-            DownloadTools.FILE_DOWNLOAD_STATUS.put(savePath.toString(), true);
         } catch (Exception e) {
-            DownloadTools.FILE_DOWNLOAD_STATUS.remove(savePath.toString());
             log.error(e);
         }
         return savePath.toString();
@@ -469,65 +454,6 @@ public class DownloadTools {
         return path + fileName;
     }
 
-    /**
-     * 等待下载完成
-     * @param path 文件路径
-     */
-    public static void awaitDownload(String path){
-        Boolean aBoolean = DownloadTools.FILE_DOWNLOAD_STATUS.get(path);
-        while (aBoolean != null && !aBoolean) {
-            SleepUtils.sleep(100);
-            aBoolean = DownloadTools.FILE_DOWNLOAD_STATUS.get(path);
-        }
-        DownloadTools.FILE_DOWNLOAD_STATUS.remove(path);
-    }
-
-
-    /**
-     * 等待下载完成，最多等待 10 分钟
-     * @param path 文件路径
-     */
-    public static void awaitDownload(String path,long timeOut) {
-        long startTime = System.currentTimeMillis();
-
-        Boolean aBoolean = DownloadTools.FILE_DOWNLOAD_STATUS.get(path);
-        while (aBoolean != null && !aBoolean) {
-            // 检查是否超时
-            if (System.currentTimeMillis() - startTime > timeOut) {
-                log.error("下载等待超时: {}" , path);
-                break;
-            }
-            SleepUtils.sleep(100); // 每 100ms 轮询一次
-            aBoolean = DownloadTools.FILE_DOWNLOAD_STATUS.get(path);
-        }
-
-        // 清理状态标记（不论成功或超时都移除）
-        DownloadTools.FILE_DOWNLOAD_STATUS.remove(path);
-    }
-
-    /**
-     * 等待下载完成
-     * @param path 文件路径
-     */
-    public static void awaitDownload(String path,int retryCount){
-        Boolean aBoolean = DownloadTools.FILE_DOWNLOAD_STATUS.get(path);
-        while (aBoolean != null && !aBoolean && retryCount>0) {
-            SleepUtils.sleep(100);
-            aBoolean = DownloadTools.FILE_DOWNLOAD_STATUS.get(path);
-            retryCount--;
-        }
-        DownloadTools.FILE_DOWNLOAD_STATUS.remove(path);
-    }
-
-    /**
-     * 等待下载完成
-     * @param downloadTask 下载任务
-     */
-    public static void awaitDownload(DownloadTask downloadTask){
-        while (downloadTask.getStatus() == DownloadStatus.RUNNING || downloadTask.getStatus() == DownloadStatus.FAIL) {
-            SleepUtils.sleep(100);
-        }
-    }
 
     /**
      * 根据UserName下载头像

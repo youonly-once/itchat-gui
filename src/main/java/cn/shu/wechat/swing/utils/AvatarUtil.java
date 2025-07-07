@@ -108,11 +108,11 @@ public final class AvatarUtil {
         if (avatarIcon == null) {
             //获取网络图片
             Contacts contacts = Core.getMemberMap().get(userName);
-            DownloadTask downloadTask = new DownloadTask();
+            DownloadTask<Image> downloadTask = new DownloadTask<>();
             downloadTask.setRelativeUrl(contacts.getHeadimgurl());
             downloadTask.setTaskId(contacts.getHeadimgurl());
             downloadTask.setType(DownloadType.ByRelativeUrl);
-            avatar = (Image)DownloadManager.submitAwait(downloadTask);
+            avatar = DownloadManager.submitAwait(downloadTask);
             if (avatar == null) {
                 //获取缓存在磁盘的头像
                 avatar = getCachedImageAvatar(userName);
@@ -172,7 +172,7 @@ public final class AvatarUtil {
             if (user != null) {
                 //下载头像
 
-                DownloadTask downloadTask = new DownloadTask();
+                DownloadTask<Image> downloadTask = new DownloadTask<>();
                 if (StringUtils.isNotEmpty((user.getHeadimgurl()))) {
                     downloadTask.setRelativeUrl(user.getHeadimgurl());
                     downloadTask.setTaskId(user.getHeadimgurl());
@@ -182,7 +182,7 @@ public final class AvatarUtil {
                     downloadTask.setTaskId(user.getUsername());
                     downloadTask.setType(DownloadType.RESOURCE_BY_USERNAME);
                 }
-                avatar = (Image)DownloadManager.submitAwait(downloadTask);
+                avatar = DownloadManager.submitAwait(downloadTask);
             }
             if (avatar != null) {
                 avatarIcon = putUserAvatarCache(userName, avatar);
@@ -222,10 +222,10 @@ public final class AvatarUtil {
 
             if (filePath == null) {
 
-                DownloadTask downloadTask = new DownloadTask(url, userName, null);
+                DownloadTask<String> downloadTask = new DownloadTask<>(url, userName, null);
                 downloadTask.setTaskId(url);
                 downloadTask.setType(DownloadType.HEAD_IMAGE_BIG);
-                filePath = (String) DownloadManager.submitAwait(downloadTask);
+                filePath = DownloadManager.submitAwait(downloadTask);
             }
 
         }

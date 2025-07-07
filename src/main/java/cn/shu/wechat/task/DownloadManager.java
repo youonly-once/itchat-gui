@@ -1,130 +1,199 @@
 package cn.shu.wechat.task;
 
-import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.constant.DownloadStatus;
 import cn.shu.wechat.utils.SleepUtils;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 下载管理器（队列驱动）
+ * 下载管理器（线程池驱动）
+ * 支持提交异步下载任务、同步等待下载结果、任务状态查询等功能。
  */
-
 @Log4j2
-public class DownloadManager  {
+public class DownloadManager {
 
-    private final static BlockingQueue<DownloadTask> taskQueue = new LinkedBlockingQueue<>();
-    private final static ExecutorService workerPool;
+    /**
+     * 下载任务执行线程池：
+     * - 核心线程数为 CPU 核心数
+     * - 最大线程数为 核心数 * 5（可根据并发量调整）
+     * - 使用 SynchronousQueue：不缓存任务，任务必须直接交付给线程执行
+     * - 拒绝策略为 AbortPolicy：任务无法提交时抛出异常
+     */
+    private final static ExecutorService workerPool = new ThreadPoolExecutor(
+            Runtime.getRuntime().availableProcessors(),                          // 核心线程数
+            Runtime.getRuntime().availableProcessors() * 5,                      // 最大线程数
+            0L, TimeUnit.MILLISECONDS,                                           // 空闲线程立即释放
+            new SynchronousQueue<>(),                                            // 不缓存任务，直接交付
+            new ThreadFactory() {                                                // 自定义线程命名
+                private final AtomicInteger index = new AtomicInteger(1);
+
+                public Thread newThread(Runnable r) {
+                    return new Thread(r, "DownloadWorker-" + index.getAndIncrement());
+                }
+            },
+            new ThreadPoolExecutor.AbortPolicy()                                 // 提交失败时抛出异常
+    );
+
+    /**
+     * 当前所有下载任务的缓存映射，key 为任务 ID，value 为任务实例
+     */
     private final static Map<String, DownloadTask> taskMap = new ConcurrentHashMap<>();
 
-    static  {
-        int concurrentWorkers = 10;
-        workerPool = Executors.newFixedThreadPool(concurrentWorkers);
-        for (int i = 0; i < concurrentWorkers; i++) {
-            workerPool.submit(DownloadManager::workerLoop);
-        }
-    }
-
-    private static void workerLoop() {
-        while (!Thread.currentThread().isInterrupted()) {
-            try {
-                DownloadTask task = taskQueue.take();
-                if (task.isCancelled()) continue;
-                task.run();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
-    }
-
-    public static void submit(DownloadTask task) {
+    /**
+     * 异步提交下载任务
+     *
+     * @param task 下载任务
+     * @param <R>  结果类型
+     */
+    public static <R> void submit(DownloadTask<R> task) {
         if (taskMap.containsKey(task.getTaskId())) {
             throw new IllegalArgumentException("任务已存在: " + task.getTaskId());
         }
         taskMap.put(task.getTaskId(), task);
-        taskQueue.offer(task);
+        workerPool.submit(task); // 异步执行
     }
 
-    public static Object submitAwait(DownloadTask task) {
-        submit(task);
-        while (task.getStatus() == DownloadStatus.RUNNING || task.getStatus() == DownloadStatus.FAIL) {
-            SleepUtils.sleep(100);
+    /**
+     * 同步提交下载任务，阻塞等待执行完成
+     *
+     * @param task 下载任务
+     * @param <R>  结果类型
+     * @return 下载结果，失败或中断时返回 null
+     */
+    public static <R> R submitAwait(DownloadTask<R> task) {
+        if (taskMap.containsKey(task.getTaskId())) {
+            throw new IllegalArgumentException("任务已存在: " + task.getTaskId());
         }
-        return task.getResult();
+        taskMap.put(task.getTaskId(), task);
+        Future<R> submit = workerPool.submit(task);
+        try {
+            return submit.get(); // 阻塞等待执行完成
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
-    public DownloadStatus getStatus(String taskId) {
+    /**
+     * 同步提交任务，带超时控制
+     *
+     * @param task    下载任务
+     * @param timeout 最大等待时间
+     * @param unit    时间单位
+     * @param <R>     返回结果类型
+     * @return 下载结果，超时或失败时返回 null
+     */
+    public static <R> Object submitAwait(DownloadTask<R> task, long timeout, TimeUnit unit) {
+        if (taskMap.containsKey(task.getTaskId())) {
+            log.error("任务已存在: " + task.getTaskId());
+            throw new IllegalArgumentException("任务已存在: " + task.getTaskId());
+        }
+        taskMap.put(task.getTaskId(), task);
+        Future<R> submit = workerPool.submit(task);
+        try {
+            return submit.get(timeout, unit); // 带超时时间阻塞
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 获取指定任务的下载状态
+     *
+     * @param taskId 任务ID
+     * @return 下载状态，若任务不存在则返回 null
+     */
+    public static DownloadStatus getStatus(String taskId) {
         return Optional.ofNullable(taskMap.get(taskId))
                 .map(DownloadTask::getStatus)
                 .orElse(null);
     }
 
-    public long getDownloadedBytes(String taskId) {
+    /**
+     * 获取指定任务的已下载字节数
+     *
+     * @param taskId 任务ID
+     * @return 字节数，任务不存在返回 -1
+     */
+    public static long getDownloadedBytes(String taskId) {
         return Optional.ofNullable(taskMap.get(taskId))
                 .map(DownloadTask::getDownloadedBytes)
                 .orElse(-1L);
     }
 
-
-    public boolean cancel(String taskId) {
-        DownloadTask task = taskMap.get(taskId);
-        if (task != null && task.getStatus() == DownloadStatus.WAITING) {
-            task.cancel();
-            taskQueue.remove(task);
-            return true;
-        }
-        return false;
-    }
     /**
-     * 等待下载完成
+     * 获取任务的实时下载进度队列（如每秒下载量）
+     *
+     * @param taskId 任务ID
+     * @return 下载过程队列（可能为 null）
      */
-    public static void awaitDownload(String taskId){
+    public static LinkedBlockingDeque<Long> getProcessLinkedBlockingDeque(String taskId) {
+        return Optional.ofNullable(taskMap.get(taskId))
+                .map(DownloadTask::getFILE_DOWNLOAD_PROCESS)
+                .orElseThrow(() -> new IllegalArgumentException("任务不存在，taskId=" + taskId));
+    }
+
+    /**
+     * 判断任务是否存在
+     *
+     * @param taskId 任务ID
+     * @return 是否存在任务
+     */
+    public static boolean containsTask(String taskId) {
+        return taskMap.containsKey(taskId);
+    }
+
+    /**
+     * 阻塞等待任务完成
+     *
+     * @param taskId 任务ID
+     */
+    public static void awaitDownload(String taskId) {
         DownloadTask task = taskMap.get(taskId);
+        if (task == null) {
+            log.error("任务不存在，taskId=" + taskId);
+            throw new IllegalArgumentException("任务不存在，taskId=" + taskId);
+        }
         while (task.getStatus() == DownloadStatus.RUNNING || task.getStatus() == DownloadStatus.FAIL) {
+            SleepUtils.sleep(100); // 每 100ms 轮询一次
+        }
+    }
+
+    /**
+     * 等待任务完成（最长 5 分钟），超时打印错误日志
+     *
+     * @param taskId 任务ID
+     */
+    public static void awaitDownloadTimeOut(String taskId) {
+        awaitDownload(taskId, 1000 * 60 * 5);
+    }
+
+    /**
+     * 等待任务完成，支持自定义超时时间
+     *
+     * @param taskId  任务ID
+     * @param timeOut 超时时间（单位：毫秒）
+     */
+    public static void awaitDownload(String taskId, long timeOut) {
+        long startTime = System.currentTimeMillis();
+        DownloadTask task = taskMap.get(taskId);
+        if (task == null) {
+            log.error("任务不存在，taskId=" + taskId);
+            throw new IllegalArgumentException("任务不存在，taskId=" + taskId);
+        }
+        while (task.getStatus() == DownloadStatus.RUNNING || task.getStatus() == DownloadStatus.FAIL) {
+            if (System.currentTimeMillis() - startTime > timeOut) {
+                log.error("下载等待超时: {}", taskId);
+                break;
+            }
             SleepUtils.sleep(100);
         }
     }
-    /**
-     * 等待下载完成
-     */
-    public static void awaitDownloadTimeOut(String taskId){
-        long startTime = System.currentTimeMillis();
-        long timeOut = 1000 * 60 *5;
 
-        DownloadTask task = taskMap.get(taskId);
-        while (task.getStatus() == DownloadStatus.RUNNING || task.getStatus() == DownloadStatus.FAIL) {
-            // 检查是否超时
-            if (System.currentTimeMillis() - startTime > timeOut) {
-                log.error("下载等待超时: {}" , taskId);
-                break;
-            }
-            SleepUtils.sleep(100); // 每 100ms 轮询一次
-        }
-    }
-    /**
-         * 等待下载完成，最多等待 10 分钟
-     * @param taskId 文件路径
-     */
-    public static void awaitDownload(String taskId,long timeOut) {
-        long startTime = System.currentTimeMillis();
-
-        DownloadTask task = taskMap.get(taskId);
-        while (task.getStatus() == DownloadStatus.RUNNING || task.getStatus() == DownloadStatus.FAIL) {
-            // 检查是否超时
-            if (System.currentTimeMillis() - startTime > timeOut) {
-                log.error("下载等待超时: {}" , taskId);
-                break;
-            }
-            SleepUtils.sleep(100); // 每 100ms 轮询一次
-        }
-    }
-
-    public void shutdown() {
-        workerPool.shutdownNow();
-    }
 
 }

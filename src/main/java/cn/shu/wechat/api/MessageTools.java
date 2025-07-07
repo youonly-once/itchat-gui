@@ -1,19 +1,20 @@
 package cn.shu.wechat.api;
 
 
-import cn.shu.wechat.constant.WxURLEnum;
 import cn.shu.wechat.constant.WxReqParamsConstant;
 import cn.shu.wechat.constant.WxRespConstant;
+import cn.shu.wechat.constant.WxURLEnum;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.exception.WebWXException;
-import cn.shu.wechat.mapper.MessageMapper;
-import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.dto.request.msg.send.*;
 import cn.shu.wechat.dto.response.msg.send.WebWXSendMsgResponse;
 import cn.shu.wechat.dto.response.msg.send.WebWXUploadMediaResponse;
+import cn.shu.wechat.entity.Message;
+import cn.shu.wechat.exception.WebWXException;
+import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.swing.tasks.UploadTaskCallback;
 import cn.shu.wechat.swing.utils.ImageUtil;
 import cn.shu.wechat.swing.utils.MimeTypeUtil;
+import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -226,7 +227,7 @@ public class MessageTools {
         long singleFileMaxSize = 1048576L;
         File file = new File(filePath);
         //等待另一线程的下载该资源完成
-        DownloadTools.awaitDownload(filePath,10 * 60 * 1000L);
+        DownloadManager.awaitDownload(filePath, 10 * 60 * 1000L);
         if (!file.exists()) {
             throw new WebWXException("待上传文件不存在：" + filePath);
         }

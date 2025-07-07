@@ -47,7 +47,7 @@ public class TimedTask {
     /**
      * 30秒获取一次联系人信息 76j00
      */
-    @Scheduled(cron = "*/30 * * * * ?")
+    @Scheduled(cron = "*/59 * * * * ?")
     public void updateContactTask() {
         if (Core.isAlive()) {
             long l = System.currentTimeMillis();

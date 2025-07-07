@@ -1,7 +1,7 @@
 package cn.shu.wechat.swing.adapter.message;
 
 import cn.shu.wechat.api.ContactsTools;
-import cn.shu.wechat.api.DownloadTools;
+import cn.shu.wechat.constant.DownloadStatus;
 import cn.shu.wechat.constant.DownloadType;
 import cn.shu.wechat.constant.WxRespConstant;
 import cn.shu.wechat.core.Core;
@@ -334,19 +334,17 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 @Override
                 protected Object doInBackground() throws Exception {
 
-                    DownloadTask downloadTask = new DownloadTask();
+                    DownloadTask<byte[]> downloadTask = new DownloadTask<>();
                     downloadTask.setMsgId(item.getMsgId());
                     downloadTask.setTaskId(item.getMsgId()+WXMsgUrl.BIG_TYPE);
                     downloadTask.setType(DownloadType.ImgByteByMsgID);
                     downloadTask.setResourceType(WXMsgUrl.BIG_TYPE);
-                    byte[] bytes = (byte[])DownloadManager.submitAwait(downloadTask);
-
-
+                    byte[] bytes = DownloadManager.submitAwait(downloadTask);
 
                     if (bytes == null || bytes.length<=0){
                         downloadTask.setResourceType(WXMsgUrl.SLAVE_TYPE);
-                        downloadTask.setTaskId(item.getMsgId()+WXMsgUrl.SLAVE_TYPE);
-                        bytes = (byte[])DownloadManager.submitAwait(downloadTask);
+                        downloadTask.setTaskId(item.getMsgId() + WXMsgUrl.SLAVE_TYPE);
+                        bytes = DownloadManager.submitAwait(downloadTask);
                     }
                     if (bytes != null && bytes.length>0) {
                         if (ImageUtil.isGIF(bytes)) {
@@ -442,8 +440,8 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         holder.attachmentIcon.setIcon(attachmentTypeIcon);
         holder.attachmentTitle.setText(item.getFileName());
         holder.sender.setText(item.getPlainName());
-        if (DownloadTools.FILE_DOWNLOAD_PROCESS.containsKey(item.getFilePath())){
-            updateFileDownloadProgress(holder,item);
+        if (DownloadManager.containsTask(item.getFilePath())) {
+            updateFileDownloadProgress(holder, item);
         }
         holder.sizeLabel.setText("0/"+FileCache.fileSizeString(item.getFileSize()));
 
@@ -470,11 +468,11 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         ImageIcon attachmentTypeIcon = attachmentIconHelper.getImageIcon(filename);
         holder.attachmentIcon.setIcon(attachmentTypeIcon);
         holder.attachmentTitle.setText(item.getFileName());
-        if (item.getProgress()==0 || item.getProgress() == 100){
+        if (item.getProgress() == 0 || item.getProgress() == 100) {
             holder.progressBar.setVisible(false);
         }
-        if (DownloadTools.FILE_DOWNLOAD_PROCESS.containsKey(item.getFilePath())){
-            updateFileDownloadProgress(holder,item);
+        if (DownloadManager.containsTask(item.getFilePath())) {
+            updateFileDownloadProgress(holder, item);
         }
 
 
@@ -501,9 +499,9 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
         setAttachmentClickListener(holder, item);
         if (item.getProgress() >= 100 ) {
-            if (DownloadTools.FILE_DOWNLOAD_PROCESS.containsKey(item.getFilePath())){
-                holder.sizeLabel.setText("0/"+FileCache.fileSizeString(item.getFileSize()));
-            }else{
+            if (DownloadManager.containsTask(item.getFilePath())) {
+                holder.sizeLabel.setText("0/" + FileCache.fileSizeString(item.getFileSize()));
+            } else {
                 holder.sizeLabel.setText(FileCache.fileSizeString(item.getFileSize()));
             }
         }else if (item.getProgress() > 0) {
@@ -525,20 +523,20 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      * @param holder
      * @param item
      */
-    private void updateFileDownloadProgress(MessageAttachmentViewHolder holder, Message item){
+    private void updateFileDownloadProgress(MessageAttachmentViewHolder holder, Message item) {
         holder.progressBar.setValue(1);
         holder.progressBar.setVisible(true);
-        holder.sizeLabel.setText("0/"+FileCache.fileSizeString(item.getFileSize()));
-        LinkedBlockingDeque<Long> progress = DownloadTools.FILE_DOWNLOAD_PROCESS.get(item.getFilePath());
-        new SwingWorker<Object,Long>(){
+        holder.sizeLabel.setText("0/" + FileCache.fileSizeString(item.getFileSize()));
+
+        LinkedBlockingDeque<Long> progress = DownloadManager.getProcessLinkedBlockingDeque(item.getFilePath());
+        new SwingWorker<Object, Long>() {
             @Override
             protected Object doInBackground() throws Exception {
                 //已下载字节数
                 long p = 0;
-                while((p = progress.take())!=-100L){
+                while ((p = progress.take()) != -100L) {
                     publish(p);
                 }
-                DownloadTools.FILE_DOWNLOAD_STATUS.remove(item.getFilePath());
                 return null;
             }
 
@@ -674,11 +672,11 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     String voicePath = item.getFilePath();
                     File file = new File(voicePath);
                     if (!file.exists()) {
-                        Boolean aBoolean = DownloadTools.FILE_DOWNLOAD_STATUS.get(voicePath);
-                        if (aBoolean == null) {
-                            JOptionPane.showMessageDialog(null, "下载失败", "打开失败", JOptionPane.ERROR_MESSAGE);
-                        } else {
+                        DownloadStatus status = DownloadManager.getStatus(voicePath);
+                        if (status == DownloadStatus.RUNNING) {
                             JOptionPane.showMessageDialog(null, "下载中...", "打开失败", JOptionPane.ERROR_MESSAGE);
+                        } else if (status != DownloadStatus.SUCCESS) {
+                            JOptionPane.showMessageDialog(null, "下载失败", "打开失败", JOptionPane.ERROR_MESSAGE);
                         }
                     } else {
                         holder.removeUnreadPoint();
@@ -900,8 +898,9 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    Boolean aBoolean1 = DownloadTools.FILE_DOWNLOAD_STATUS.get(item.getFilePath());
-                    if (aBoolean1!=null && !aBoolean1){
+
+                    DownloadStatus status = DownloadManager.getStatus(item.getFilePath());
+                    if (status == DownloadStatus.RUNNING) {
                         JOptionPane.showMessageDialog(MainFrame.getContext(), "下载中...", "文件不存在", JOptionPane.WARNING_MESSAGE);
                         super.mouseReleased(e);
                         return;
@@ -1127,12 +1126,12 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 if (StringUtils.isNotEmpty(item.getThumbUrl())) {
                     image = ImageIO.read(new URL(item.getThumbUrl()));
                 }else{
-                    DownloadTask downloadTask = new DownloadTask();
+                    DownloadTask<BufferedImage> downloadTask = new DownloadTask<>();
                     downloadTask.setMsgId(item.getMsgId());
                     downloadTask.setResourceType(WXMsgUrl.SLAVE_TYPE);
                     downloadTask.setTaskId(item.getMsgId()+WXMsgUrl.SLAVE_TYPE);
                     downloadTask.setType(DownloadType.ImgByMsgID);
-                    image = (BufferedImage)DownloadManager.submitAwait(downloadTask);
+                    image = DownloadManager.submitAwait(downloadTask);
                 }
                 return null;
             }
@@ -1195,12 +1194,12 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 if (StringUtils.isNotEmpty(item.getThumbUrl())) {
                     image = ImageIO.read(new URL(item.getThumbUrl()));
                 }else{
-                    DownloadTask downloadTask = new DownloadTask();
+                    DownloadTask<BufferedImage> downloadTask = new DownloadTask<>();
                     downloadTask.setMsgId(item.getMsgId());
                     downloadTask.setResourceType(WXMsgUrl.SLAVE_TYPE);
                     downloadTask.setTaskId(item.getMsgId()+WXMsgUrl.SLAVE_TYPE);
                     downloadTask.setType(DownloadType.ImgByteByMsgID);
-                    image = (BufferedImage)DownloadManager.submitAwait(downloadTask);
+                    image = DownloadManager.submitAwait(downloadTask);
                 }
                 return null;
             }
