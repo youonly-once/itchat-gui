@@ -1,9 +1,7 @@
 package cn.shu.wechat.swing.utils;
 
 import cn.shu.wechat.api.ContactsTools;
-import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
-import cn.shu.wechat.constant.DownloadStatus;
 import cn.shu.wechat.constant.DownloadType;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.Contacts;
@@ -227,14 +225,7 @@ public final class AvatarUtil {
                 DownloadTask downloadTask = new DownloadTask(url, userName, null);
                 downloadTask.setTaskId(url);
                 downloadTask.setType(DownloadType.HEAD_IMAGE_BIG);
-                DownloadManager.submit(downloadTask);
-                while (downloadTask.getStatus() == DownloadStatus.WAITING || downloadTask.getStatus() == DownloadStatus.RUNNING) {
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+                filePath = (String) DownloadManager.submitAwait(downloadTask);
             }
 
         }
