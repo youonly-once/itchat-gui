@@ -7,6 +7,7 @@ import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.frames.MainFrame;
+import cn.shu.wechat.swing.panels.chat.ChatPanel;
 import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.task.DownloadTask;
 import lombok.extern.log4j.Log4j2;
@@ -186,6 +187,8 @@ public final class AvatarUtil {
             }
             if (avatar != null) {
                 avatarIcon = putUserAvatarCache(userName, avatar);
+            }else {
+                avatarIcon = IconUtil.getIcon(MainFrame.getContext(),"/image/default_head.png",40,40);
             }
         }
 
@@ -231,7 +234,14 @@ public final class AvatarUtil {
         }
         Core.getContactHeadImgPath().put(userName, filePath);
         try {
-            BufferedImage read = ImageIO.read(new File(filePath));
+            BufferedImage read = null;
+            if (filePath != null) {
+                read = ImageIO.read(new File(filePath));
+            }
+            if (read == null) {
+                read = IconUtil.getBufferedImage(MainFrame.getContext(), "/image/default_head.png");
+                return read;
+            }
             return read;
         } catch (IOException e) {
             return null;

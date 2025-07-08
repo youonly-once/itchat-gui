@@ -269,7 +269,62 @@ public class LoginServiceImpl implements LoginService {
 
 
     }
+    /**
+     * 登录
+     *
+     * @param redirectUrl
+     */
+    //TODO 未实现
+    @Override
+    public void doNoScanLogin(String uin) throws Exception {
+        try {
+//            String url = redirectUrl + "&fun=new&version=v2&mod=desktop&lang=zh_CN";
+//            Map<String, String> header = new HashMap<>();
+//            //UOS header
+//            header.put("client-version", "2.0.0");
+//            header.put("extspam", "Go8FCIkFEokFCggwMDAwMDAwMRAGGvAESySibk50w5Wb3uTl2c2h64jVVrV7gNs06GFlWplHQbY/5FfiO++1yH4ykCyNPWKXmco+wfQzK5R98D3so7rJ5LmGFvBLjGceleySrc3SOf2Pc1gVehzJgODeS0lDL3/I/0S2SSE98YgKleq6Uqx6ndTy9yaL9qFxJL7eiA/R3SEfTaW1SBoSITIu+EEkXff+Pv8NHOk7N57rcGk1w0ZzRrQDkXTOXFN2iHYIzAAZPIOY45Lsh+A4slpgnDiaOvRtlQYCt97nmPLuTipOJ8Qc5pM7ZsOsAPPrCQL7nK0I7aPrFDF0q4ziUUKettzW8MrAaiVfmbD1/VkmLNVqqZVvBCtRblXb5FHmtS8FxnqCzYP4WFvz3T0TcrOqwLX1M/DQvcHaGGw0B0y4bZMs7lVScGBFxMj3vbFi2SRKbKhaitxHfYHAOAa0X7/MSS0RNAjdwoyGHeOepXOKY+h3iHeqCvgOH6LOifdHf/1aaZNwSkGotYnYScW8Yx63LnSwba7+hESrtPa/huRmB9KWvMCKbDThL/nne14hnL277EDCSocPu3rOSYjuB9gKSOdVmWsj9Dxb/iZIe+S6AiG29Esm+/eUacSba0k8wn5HhHg9d4tIcixrxveflc8vi2/wNQGVFNsGO6tB5WF0xf/plngOvQ1/ivGV/C1Qpdhzznh0ExAVJ6dwzNg7qIEBaw+BzTJTUuRcPk92Sn6QDn2Pu3mpONaEumacjW4w6ipPnPw+g2TfywJjeEcpSZaP4Q3YV5HG8D6UjWA4GSkBKculWpdCMadx0usMomsSS/74QgpYqcPkmamB4nVv1JxczYITIqItIKjD35IGKAUwAA==");
+//
+//            HttpEntity entity = HttpUtil.doGet(url, null, false, header);
+            HttpEntity entity = HttpUtil.doGet("https://wx2.qq.com/cgi-bin/mmwebwx-bin/webwxpushloginurl?uin="+uin, null, false, null);
+            //结果格式：
+            //<error>
+            // <ret>0</ret>
+            // <message></message>
+            // <skey>@crypt_acc90d00_30f16e0f14fbf5bb094e7542866de58c</skey>
+            // <wxsid>9fP/G/y4Ggnr4G2v</wxsid>
+            // <wxuin>2955965517</wxuin>
+            // <pass_ticket>KHZtdahInDUwtz486wGnaLKVAWJoVDZ6cxNJWs5KfWQ0qUW7F%2Ffqf1JebBG77B98</pass_ticket>
+            // <isgrayscale>1</isgrayscale>
+            // </error>
+            String resultOfXml = EntityUtils.toString(entity);
 
+            //如果登录被禁止时，则登录返回的message内容不为空，下面代码则判断登录内容是否为空，不为空则退出程序
+            String msg = getLoginMessage(resultOfXml);
+            if (!"".equals(msg)) {
+                throw new Exception(msg);
+            }
+            //解析XML
+            Document doc = CommonTools.xmlParser(resultOfXml);
+            if (doc != null) {
+                Core.getLoginResultData().getBaseRequest().setSKey(
+                        doc.getElementsByTagName(StorageLoginInfoEnum.skey.getKey()).item(0).getFirstChild()
+                                .getNodeValue());
+                Core.getLoginResultData().getBaseRequest().setWxSid(
+                        doc.getElementsByTagName(StorageLoginInfoEnum.wxsid.getKey()).item(0).getFirstChild()
+                                .getNodeValue());
+                Core.getLoginResultData().getBaseRequest().setWxUin(
+                        doc.getElementsByTagName(StorageLoginInfoEnum.wxuin.getKey()).item(0).getFirstChild()
+                                .getNodeValue());
+                Core.getLoginResultData().setPassTicket(
+                        doc.getElementsByTagName(StorageLoginInfoEnum.pass_ticket.getKey()).item(0).getFirstChild()
+                                .getNodeValue());
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+
+
+    }
     @Override
     public String getUuid() {
         // 组装参数和URL

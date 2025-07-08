@@ -25,7 +25,7 @@ public class FileCache {
             //FILE_CACHE_ROOT_PATH = getClass().getResource("/cache").getPath() + "/file";
             FILE_CACHE_ROOT_PATH = WechatConfiguration.getInstance().getBasePath() + "/cache/file";
             File file = new File(FILE_CACHE_ROOT_PATH);
-                if (!file.mkdirs()) {
+                if (!file.exists() && !file.mkdirs()) {
                     log.warn("创建文件缓存目录失败：{}",file.getAbsolutePath() );
                 }
         } catch (Exception e) {

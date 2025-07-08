@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.shu.wechat.mapper.LoginInfoMapper">
+
+    <resultMap id="LoginInfoMap" type="cn.shu.wechat.entity.LoginInfo">
+        <result property="uin" column="uin"/>
+        <result property="uuid" column="uuid"/>
+        <result property="skey" column="skey"/>
+        <result property="wxsid" column="wxsid"/>
+        <result property="wxuin" column="wxuin"/>
+        <result property="passTicket" column="pass_ticket"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="cn.shu.wechat.entity.LoginInfo">
+        INSERT INTO login_info (uin, uuid, skey, wxsid, wxuin, pass_ticket)
+        VALUES (#{uin}, #{uuid}, #{skey}, #{wxsid}, #{wxuin}, #{passTicket})
+    </insert>
+
+    <select id="selectByUuid" resultMap="LoginInfoMap">
+        SELECT * FROM login_info WHERE uuid = #{uuid}
+    </select>
+
+    <select id="selectAll" resultMap="LoginInfoMap">
+        SELECT * FROM login_info
+    </select>
+
+    <update id="updateByUuid" parameterType="cn.shu.wechat.entity.LoginInfo">
+        UPDATE login_info
+        SET uin = #{uin},
+            skey = #{skey},
+            wxsid = #{wxsid},
+            wxuin = #{wxuin},
+            pass_ticket = #{passTicket}
+        WHERE uuid = #{uuid}
+    </update>
+
+    <delete id="deleteByUuid">
+        DELETE FROM login_info WHERE uuid = #{uuid}
+    </delete>
+
+</mapper>

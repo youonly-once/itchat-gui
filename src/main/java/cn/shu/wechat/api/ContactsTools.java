@@ -19,6 +19,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -546,17 +547,18 @@ public class ContactsTools {
                     String oldHeadPath = Core.getContactHeadImgPath().get(oldV.getUsername());
 
 
-                    DownloadTask downloadTask = new DownloadTask();
+                    DownloadTask<String> downloadTask = new DownloadTask<>();
                     downloadTask.setRelativeUrl(stringStringEntry.getValue());
-                    downloadTask.setType(DownloadType.ByRelativeUrl);
+                    downloadTask.setType(DownloadType.HEAD_IMAGE_BIG);
                     downloadTask.setUserName(oldV.getUsername());
                     downloadTask.setTaskId(stringStringEntry.getValue()+oldV.getUsername());
-                    DownloadManager.submit(downloadTask);
-                    DownloadManager.awaitDownload(downloadTask.getTaskId());
-                    String newHeadPath = (String)downloadTask.getResult();
+                    String newHeadPath = DownloadManager.submitAwait(downloadTask,1000*60*5, TimeUnit.MILLISECONDS);
 
-
-                    Core.getContactHeadImgPath().put(oldV.getUsername(), newHeadPath);
+                    if (newHeadPath != null) {
+                        Core.getContactHeadImgPath().put(oldV.getUsername(), newHeadPath);
+                        //刷新头像
+                        AvatarUtil.putUserAvatarCache(oldV.getUsername(), newHeadPath);
+                    }
                     //更换头像需要发送图片
                     //更换前
                     messages.add(Message.builder()
@@ -568,8 +570,7 @@ public class ContactsTools {
                             .toUsername("filehelper")
                             .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.PIC.getCode())
                             .filePath(newHeadPath).build());
-                    //刷新头像
-                    AvatarUtil.putUserAvatarCache(oldV.getUsername(), newHeadPath);
+
                     AttrHistory build = AttrHistory.builder()
                             .attr(stringMapEntry.getKey())
                             .oldval(oldHeadPath)

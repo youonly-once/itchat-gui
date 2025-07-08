@@ -1,5 +1,7 @@
 package cn.shu.wechat.utils;
 
+import lombok.Getter;
+
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -15,6 +17,7 @@ public class ExecutorServiceUtil {
      * 核心线程 0，临时线程最大
      * 线程执行完任务立即销毁
      */
+    @Getter
     private final static ExecutorService headImageDownloadExecutorService = new ThreadPoolExecutor(
             0
             , Integer.MAX_VALUE
@@ -27,22 +30,20 @@ public class ExecutorServiceUtil {
     /**
      * 全局线程池
      */
+    @Getter
     private final static ExecutorService globalExecutorService = new ThreadPoolExecutor(
-            12
-            , 100
+            Runtime.getRuntime().availableProcessors() *2
+            , Integer.MAX_VALUE
             , 0L
             , TimeUnit.SECONDS
             , new SynchronousQueue<>()
             , new MyThreadFactory("GlobalPool-Thread-", false, 6)
     );
 
-    public static ExecutorService getReceivingExecutorService() {
-        return receivingExecutorService;
-    }
-
     /**
      * 接收消息线程池
      */
+    @Getter
     private final static ExecutorService receivingExecutorService = new ThreadPoolExecutor(
             1
             , 10
@@ -72,13 +73,6 @@ public class ExecutorServiceUtil {
             thread.setName(prefix + integer.getAndIncrement());
             return thread;
         }
-    }
-    public static ExecutorService getGlobalExecutorService() {
-        return globalExecutorService;
-    }
-
-    public static ExecutorService getHeadImageDownloadExecutorService() {
-        return headImageDownloadExecutorService;
     }
 
 

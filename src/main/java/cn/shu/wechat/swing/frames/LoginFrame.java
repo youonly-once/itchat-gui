@@ -4,6 +4,9 @@ import cn.shu.WeChatStater;
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.entity.LoginInfo;
+import cn.shu.wechat.mapper.AttrHistoryMapper;
+import cn.shu.wechat.mapper.LoginInfoMapper;
 import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
@@ -39,6 +42,7 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -309,6 +313,16 @@ public final class LoginFrame extends JFrame {
             }
 
             showMessage("登陆成功，微信初始化...");
+            //保存登录信息
+            LoginInfo loginInfo = new LoginInfo();
+            loginInfo.setUuid(Core.getUuid());
+            loginInfo.setSkey(Core.getLoginResultData().getBaseRequest().getSKey());
+            loginInfo.setWxsid(Core.getLoginResultData().getBaseRequest().getWxSid());
+            loginInfo.setWxuin(Core.getLoginResultData().getBaseRequest().getWxUin());
+            loginInfo.setPassTicket(Core.getLoginResultData().getPassTicket());
+            loginInfo.setUin(Core.getLoginResultData().getBaseRequest().getWxUin());
+            SpringContextHolder.getBean(LoginInfoMapper.class).insert(loginInfo);
+
             if (!loginService.webWxInit()) {
                 showMessage(" 微信初始化异常");
                 WeChatStater.restartApplication();
@@ -420,12 +434,26 @@ public final class LoginFrame extends JFrame {
         statusLabel.setText("11. 下载联系人头像");
         log.info("11. 下载联系人头像");
         long time = System.currentTimeMillis();
-        Core.getMemberMap().entrySet().parallelStream()
-                .forEach(contacts -> {
-                    Core.getContactHeadImgPath().put(contacts.getValue().getUsername(), DownloadTools.downloadBigHeadImg(contacts.getValue().getHeadimgurl(), contacts.getValue().getUsername()));
-                    //log.info("下载头像：({}):{}", contacts.getValue().getNickname(), contacts.getValue().getHeadimgurl());
-                });
+        Core.getMemberMap().forEach((key, value) -> {
+            ExecutorServiceUtil.getHeadImageDownloadExecutorService().submit(new Runnable() {
+                @Override
+                public void run() {
+                    Core.getContactHeadImgPath().put(value.getUsername(), DownloadTools.downloadBigHeadImg(value.getHeadimgurl(), value.getUsername()));
+                }
+            });
+
+            //log.info("下载头像：({}):{}", contacts.getValue().getNickname(), contacts.getValue().getHeadimgurl());
+        });
         log.info("11. 下载联系人头像完成，耗时{}秒", (System.currentTimeMillis() - time) / 1000);
+        ExecutorServiceUtil.getHeadImageDownloadExecutorService().shutdown();
+        try {
+            boolean b = ExecutorServiceUtil.getHeadImageDownloadExecutorService().awaitTermination(5, TimeUnit.MINUTES);
+            if (!b){
+                log.warn("线程池关闭失败！");
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

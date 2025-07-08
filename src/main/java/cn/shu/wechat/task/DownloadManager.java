@@ -25,7 +25,7 @@ public class DownloadManager {
      */
     private final static ExecutorService workerPool = new ThreadPoolExecutor(
             Runtime.getRuntime().availableProcessors(),                          // 核心线程数
-            Runtime.getRuntime().availableProcessors() * 5,                      // 最大线程数
+            Runtime.getRuntime().availableProcessors() * 4,                      // 最大线程数
             0L, TimeUnit.MILLISECONDS,                                           // 空闲线程立即释放
             new SynchronousQueue<>(),                                            // 不缓存任务，直接交付
             new ThreadFactory() {                                                // 自定义线程命名
@@ -73,7 +73,7 @@ public class DownloadManager {
         try {
             return submit.get(); // 阻塞等待执行完成
         } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return null;
     }
@@ -87,7 +87,7 @@ public class DownloadManager {
      * @param <R>     返回结果类型
      * @return 下载结果，超时或失败时返回 null
      */
-    public static <R> Object submitAwait(DownloadTask<R> task, long timeout, TimeUnit unit) {
+    public static <R> R submitAwait(DownloadTask<R> task, long timeout, TimeUnit unit) {
         if (taskMap.containsKey(task.getTaskId())) {
             log.error("任务已存在: " + task.getTaskId());
             throw new IllegalArgumentException("任务已存在: " + task.getTaskId());
@@ -97,7 +97,7 @@ public class DownloadManager {
         try {
             return submit.get(timeout, unit); // 带超时时间阻塞
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return null;
     }
@@ -157,7 +157,7 @@ public class DownloadManager {
         DownloadTask task = taskMap.get(taskId);
         if (task == null) {
             log.error("任务不存在，taskId=" + taskId);
-            throw new IllegalArgumentException("任务不存在，taskId=" + taskId);
+            return;
         }
         while (task.getStatus() == DownloadStatus.RUNNING || task.getStatus() == DownloadStatus.FAIL) {
             SleepUtils.sleep(100); // 每 100ms 轮询一次
@@ -183,8 +183,8 @@ public class DownloadManager {
         long startTime = System.currentTimeMillis();
         DownloadTask task = taskMap.get(taskId);
         if (task == null) {
-            log.error("任务不存在，taskId=" + taskId);
-            throw new IllegalArgumentException("任务不存在，taskId=" + taskId);
+            log.warn("任务不存在，taskId=" + taskId);
+            return;
         }
         while (task.getStatus() == DownloadStatus.RUNNING || task.getStatus() == DownloadStatus.FAIL) {
             if (System.currentTimeMillis() - startTime > timeOut) {

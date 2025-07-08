@@ -178,7 +178,9 @@ public class DownloadTask<R> implements Callable<R> {
                 default:
                     throw new IllegalArgumentException("未知下载类型: " + type);
             }
-
+            if (result == null) {
+                throw new Exception("result is null!");
+            }
             status = DownloadStatus.SUCCESS;
             log.info("资源下载完成：{}", this);
             return (R) result;

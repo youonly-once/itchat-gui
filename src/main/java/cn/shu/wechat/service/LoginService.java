@@ -18,6 +18,8 @@ import java.util.List;
 public interface LoginService {
 
 
+    void doNoScanLogin(String uin) throws Exception;
+
     /**
      * 获取UUID
      *
