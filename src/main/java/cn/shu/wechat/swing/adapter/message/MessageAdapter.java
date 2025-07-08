@@ -328,43 +328,33 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         }
 
         if (StringUtils.isEmpty(item.getThumbUrl())){
-            appViewHolder.imageLabel.setIcon(IconUtil.getIcon(this,"/image/image_loading.gif"));
-            new SwingWorker<Object,Object>(){
-                ImageIcon imageIcon = null;
-                @Override
-                protected Object doInBackground() throws Exception {
+            appViewHolder.imageLabel.setIcon(IconUtil.getIcon(this, "/image/image_loading.gif"));
 
-                    DownloadTask<byte[]> downloadTask = new DownloadTask<>();
-                    downloadTask.setMsgId(item.getMsgId());
-                    downloadTask.setTaskId(item.getMsgId()+WXMsgUrl.BIG_TYPE);
-                    downloadTask.setType(DownloadType.ImgByteByMsgID);
-                    downloadTask.setResourceType(WXMsgUrl.BIG_TYPE);
-                    byte[] bytes = DownloadManager.submitAwait(downloadTask);
+            DownloadTask<byte[]> downloadTask = new DownloadTask<>();
+            downloadTask.setMsgId(item.getMsgId());
+            downloadTask.setTaskId(item.getMsgId() + WXMsgUrl.BIG_TYPE);
+            downloadTask.setType(DownloadType.ImgByteByMsgID);
+            downloadTask.setResourceType(WXMsgUrl.BIG_TYPE);
 
-                    if (bytes == null || bytes.length<=0){
-                        downloadTask.setResourceType(WXMsgUrl.SLAVE_TYPE);
-                        downloadTask.setTaskId(item.getMsgId() + WXMsgUrl.SLAVE_TYPE);
-                        bytes = DownloadManager.submitAwait(downloadTask);
-                    }
-                    if (bytes != null && bytes.length>0) {
-                        if (ImageUtil.isGIF(bytes)) {
-                            imageIcon = ImageUtil.preferredGifSize(bytes, item.getImgWidth(), item.getImgHeight());
-                        }else{
-                           imageIcon = new ImageIcon(bytes);
-                           ImageUtil.preferredImageSize(imageIcon, 200);
+            downloadTask.setCallback(task -> {
+                byte[] bytes = (byte[]) task.getResult();
+                if (bytes != null && bytes.length > 0) {
+                    process(item, appViewHolder, bytes);
+                } else {
+                    downloadTask.setResourceType(WXMsgUrl.SLAVE_TYPE);
+                    downloadTask.setTaskId(item.getMsgId() + WXMsgUrl.SLAVE_TYPE);
+                    downloadTask.setCallback(secondTask -> {
+                        byte[] secondBytes = (byte[]) secondTask.getResult();
+                        if (secondBytes != null && secondBytes.length > 0) {
+                            process(item, appViewHolder, secondBytes);
                         }
-
-                    }
-                    return null;
+                    });
+                    DownloadManager.submit(downloadTask);
                 }
 
-                @Override
-                protected void done() {
-                    if (imageIcon != null) {
-                        appViewHolder.imageLabel.setIcon(imageIcon);
-                    }
-                }
-            }.execute();
+            });
+            DownloadManager.submit(downloadTask);
+
         } else if (StringUtils.isEmpty(item.getFilePath())) {
             try {
                 appViewHolder.imageLabel.setIcon(new ImageIcon(new URL(item.getThumbUrl())));
@@ -411,6 +401,19 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         }
         // 绑定右键菜单
         attachPopupMenu(viewHolder, item);
+    }
+
+    private void process(Message item, MessageProgramOfAppViewHolder appViewHolder, byte[] secondBytes) {
+        ImageIcon imageIcon = null;
+        if (ImageUtil.isGIF(secondBytes)) {
+            imageIcon = ImageUtil.preferredGifSize(secondBytes, item.getImgWidth(), item.getImgHeight());
+        } else {
+            imageIcon = new ImageIcon(secondBytes);
+            ImageUtil.preferredImageSize(imageIcon, 200);
+        }
+        if (imageIcon != null) {
+            appViewHolder.imageLabel.setIcon(imageIcon);
+        }
     }
 
     /**

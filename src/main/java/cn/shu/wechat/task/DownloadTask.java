@@ -51,6 +51,8 @@ public class DownloadTask<R> implements Callable<R> {
     /**
      * 任务完成后的回调处理逻辑（可选）
      */
+    @Getter
+    @Setter
     private Consumer<DownloadTask<R>> callback = null;
     /**
      * 当前下载任务的状态（默认 WAITING）
@@ -184,6 +186,9 @@ public class DownloadTask<R> implements Callable<R> {
                     break;
                 default:
                     throw new IllegalArgumentException("未知下载类型: " + type);
+            }
+            if (callback != null) {
+                callback.accept(this);
             }
             if (result == null) {
                 throw new Exception("result is null!");
