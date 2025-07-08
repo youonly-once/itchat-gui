@@ -92,7 +92,7 @@ public class UserInfoPopup extends JPopupMenu {
             Image orLoadBigAvatar ;
             @Override
             protected Object doInBackground() throws Exception {
-                orLoadBigAvatar = AvatarUtil.createOrLoadBigAvatar(contacts.getUsername(), contacts.getHeadimgurl());
+                orLoadBigAvatar = AvatarUtil.createOrLoadBigAvatar(contacts);
                 return null;
             }
             @Override
@@ -206,7 +206,7 @@ public class UserInfoPopup extends JPopupMenu {
             @Override
             public void mouseClicked(MouseEvent e) {
                 setVisible(false);
-                BufferedImage bufferedImage = AvatarUtil.createOrLoadBigAvatar(contacts.getUsername(), contacts.getHeadimgurl());
+                BufferedImage bufferedImage = AvatarUtil.createOrLoadBigAvatar(contacts);
                 if (bufferedImage == null) {
                     JOptionPane.showMessageDialog(MainFrame.getContext(), "图片下载中...", "文件不存在", JOptionPane.WARNING_MESSAGE);
                     return;

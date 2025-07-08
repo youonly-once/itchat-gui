@@ -7,7 +7,6 @@ import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.frames.MainFrame;
-import cn.shu.wechat.swing.panels.chat.ChatPanel;
 import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.task.DownloadTask;
 import lombok.extern.log4j.Log4j2;
@@ -144,54 +143,78 @@ public final class AvatarUtil {
         return avatarIcon;
     }
 
+    /**
+     * 获取 小 模糊头像
+     *
+     * @param user
+     * @return
+     */
+    private static ImageIcon getFuzzUpAvatar(Contacts user) {
+        Image avatar = createAvatar(ContactsTools.getContactDisplayNameByUserName(user));
+        if (avatar == null) {
+            return IconUtil.getIcon(MainFrame.getContext(), "/image/smile.png");
+        }
+        return new ImageIcon(avatar.getScaledInstance(40, 40, Image.SCALE_SMOOTH));
+    }
+
+    /**
+     * 获取 大 模糊头像
+     *
+     * @param user
+     * @return
+     */
+    private static ImageIcon getFuzzUpBigAvatar(Contacts user) {
+        Image avatar = createAvatar(ContactsTools.getContactDisplayNameByUserName(user));
+        if (avatar == null) {
+            return IconUtil.getIcon(MainFrame.getContext(), "/image/smile.png");
+        }
+        return new ImageIcon(avatar);
+    }
 
     /**
      * 获取用户头像
      *
-     * @param userName 用户名
+     * @param user 用户名
      */
-    private static ImageIcon getOrDownloadUserAvatar(String userName, Contacts user) {
-        if (WechatConfiguration.getInstance().getFuzzUpAvatar()){
-            Image avatar = createAvatar(ContactsTools.getContactDisplayNameByUserName(userName));
-            if (avatar == null){
-                return IconUtil.getIcon(MainFrame.getContext(),"/image/smile.png");
-            }
-           return new ImageIcon(avatar.getScaledInstance(40, 40, Image.SCALE_SMOOTH));
-        }
-        //获取内存中的头像
+    private static ImageIcon getOrDownloadUserAvatar(Contacts user) {
+        String userName = user.getUsername();
+        //获取内存缓存中的头像
         ImageIcon avatarIcon = avatarCache.get(userName);
         if (avatarIcon != null) {
             return avatarIcon;
         }
-        String s = userName + "_avatar";
-        synchronized (s.intern()){
-           avatarIcon = avatarCache.get(userName);
+        //防止多个线程同时下载
+        synchronized ((userName + "_avatar").intern()) {
+            avatarIcon = avatarCache.get(userName);
             if (avatarIcon != null) {
                 return avatarIcon;
             }
-            Image avatar = null;
-            if (user != null) {
-                //下载头像
-
-                DownloadTask<Image> downloadTask = new DownloadTask<>();
-                if (StringUtils.isNotEmpty((user.getHeadimgurl()))) {
-                    downloadTask.setRelativeUrl(user.getHeadimgurl());
-                    downloadTask.setTaskId(user.getHeadimgurl());
-                    downloadTask.setType(DownloadType.ByRelativeUrl);
-                }else{
-                    downloadTask.setUserName(user.getUsername());
-                    downloadTask.setTaskId(user.getUsername());
-                    downloadTask.setType(DownloadType.RESOURCE_BY_USERNAME);
-                }
-                avatar = DownloadManager.submitAwait(downloadTask);
+            //获取模糊头像
+            if (WechatConfiguration.getInstance().getFuzzUpAvatar()) {
+                avatarIcon = getFuzzUpAvatar(user);
+                return putUserAvatarCache(userName, avatarIcon);
             }
+            //下载头像
+            DownloadTask<Image> downloadTask = new DownloadTask<>();
+            if (StringUtils.isNotEmpty((user.getHeadimgurl()))) {
+                downloadTask.setRelativeUrl(user.getHeadimgurl());
+                downloadTask.setTaskId(user.getHeadimgurl());
+                downloadTask.setType(DownloadType.ByRelativeUrl);
+            } else {
+                downloadTask.setUserName(user.getUsername());
+                downloadTask.setTaskId(user.getUsername());
+                downloadTask.setType(DownloadType.RESOURCE_BY_USERNAME);
+            }
+            Image avatar = DownloadManager.submitAwait(downloadTask);
             if (avatar != null) {
                 avatarIcon = putUserAvatarCache(userName, avatar);
-            }else {
-                avatarIcon = IconUtil.getIcon(MainFrame.getContext(),"/image/default_head.png",40,40);
+                return avatarIcon;
             }
-        }
+            //下载失败 按名称生成头像
+            avatarIcon = getFuzzUpAvatar(user);
+            avatarIcon = putUserAvatarCache(userName, avatarIcon);
 
+        }
         return avatarIcon;
     }
 
@@ -203,48 +226,52 @@ public final class AvatarUtil {
      */
     public static ImageIcon createOrLoadMemberAvatar(String groupName, String userName) {
         Contacts member = ContactsTools.getMemberOfGroup(groupName, userName);
-        return getOrDownloadUserAvatar(userName, member);
+        return getOrDownloadUserAvatar(member);
     }
 
     /**
      * 创建或读取群成员头像
      *
-     * @param userName 用户名也是房间id
+     * @param user 用户也是房间id
      * @return 头像
      */
-    public static BufferedImage createOrLoadBigAvatar(String userName, String url) {
+    public static BufferedImage createOrLoadBigAvatar(Contacts user) {
+        String userName = user.getUsername();
+        String url = user.getHeadimgurl();
         String filePath = Core.getContactHeadImgPath().get(userName);
-        if (url.startsWith("http")){
+        if (url.startsWith("http")) {
             try {
-                return  ImageIO.read(new URL(url));
+                return ImageIO.read(new URL(url));
             } catch (IOException e) {
                 e.printStackTrace();
-                return null;
             }
-        }else{
+        } else if (filePath == null) {
 
-            if (filePath == null) {
-
-                DownloadTask<String> downloadTask = new DownloadTask<>(url, userName, null);
-                downloadTask.setTaskId(url);
-                downloadTask.setType(DownloadType.HEAD_IMAGE_BIG);
-                filePath = DownloadManager.submitAwait(downloadTask);
-            }
+            DownloadTask<String> downloadTask = new DownloadTask<>(url, userName, null);
+            downloadTask.setTaskId(url);
+            downloadTask.setType(DownloadType.HEAD_IMAGE_BIG);
+            filePath = DownloadManager.submitAwait(downloadTask);
 
         }
+        if (filePath == null) {
+            ImageIcon fuzzUpBigAvatar = getFuzzUpBigAvatar(user);
+            putUserAvatarCache(user.getUsername(), fuzzUpBigAvatar);
+            return (BufferedImage) fuzzUpBigAvatar.getImage();
+        }
+
         Core.getContactHeadImgPath().put(userName, filePath);
         try {
-            BufferedImage read = null;
-            if (filePath != null) {
-                read = ImageIO.read(new File(filePath));
-            }
+            BufferedImage read = ImageIO.read(new File(filePath));
             if (read == null) {
-                read = IconUtil.getBufferedImage(MainFrame.getContext(), "/image/default_head.png");
-                return read;
+                ImageIcon fuzzUpBigAvatar = getFuzzUpBigAvatar(user);
+                putUserAvatarCache(user.getUsername(), fuzzUpBigAvatar);
+                return (BufferedImage) fuzzUpBigAvatar.getImage();
             }
             return read;
         } catch (IOException e) {
-            return null;
+            ImageIcon fuzzUpBigAvatar = getFuzzUpBigAvatar(user);
+            putUserAvatarCache(user.getUsername(), fuzzUpBigAvatar);
+            return (BufferedImage) fuzzUpBigAvatar.getImage();
         }
     }
 
@@ -255,9 +282,8 @@ public final class AvatarUtil {
      * @return 头像
      */
     public static ImageIcon createOrLoadUserAvatar(String userName) {
-
         Contacts contacts = Core.getMemberMap().get(userName);
-        return getOrDownloadUserAvatar(userName, contacts);
+        return getOrDownloadUserAvatar( contacts);
     }
     /**
      * 刷新用户头像缓存
@@ -306,6 +332,19 @@ public final class AvatarUtil {
             avatarCache.put(username, imageIcon);
         }
         return imageIcon;
+    }
+
+    /**
+     * 添加用户头像
+     *
+     * @param username 用户名
+     * @param image    头像
+     */
+    public static ImageIcon putUserAvatarCache(String username, ImageIcon image) {
+        if (image != null) {
+            avatarCache.put(username, image);
+        }
+        return image;
     }
 
     /**

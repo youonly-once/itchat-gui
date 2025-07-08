@@ -61,7 +61,7 @@ public class UserInfoPanel extends ParentAvailablePanel {
             private final String userId = contacts.getUsername();
             @Override
             protected Object doInBackground() throws Exception {
-                orLoadBigAvatar = AvatarUtil.createOrLoadBigAvatar(contacts.getUsername(), contacts.getHeadimgurl());
+                orLoadBigAvatar = AvatarUtil.createOrLoadBigAvatar(contacts);
                 if (orLoadBigAvatar != null){
                     orLoadBigAvatar = orLoadBigAvatar.getScaledInstance(200,200,Image.SCALE_SMOOTH);
                 }

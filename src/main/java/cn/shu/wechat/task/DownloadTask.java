@@ -10,6 +10,7 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.function.Consumer;
 
@@ -21,6 +22,10 @@ import java.util.function.Consumer;
 @NoArgsConstructor
 @Log4j2
 public class DownloadTask<R> implements Callable<R> {
+
+    @Getter
+    @Setter
+    private Future<R> future;
 
     /**
      * 下载过程进度队列（每次进度更新时追加）
@@ -156,9 +161,11 @@ public class DownloadTask<R> implements Callable<R> {
             switch (type) {
                 case FN:
                     DownloadTools.getDownloadFn(msg, progressCallback);
+                    this.result = msg;
                     break;
                 case RESOURCE_BY_MSGID:
                     DownloadTools.downloadFileByMsgId(msgId, destPath, progressCallback);
+                    this.result = destPath;
                     break;
                 case HEAD_IMAGE_BIG:
                     this.result = DownloadTools.downloadBigHeadImg(relativeUrl, userName);

@@ -5,7 +5,6 @@ import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.LoginInfo;
-import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.mapper.LoginInfoMapper;
 import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.components.Colors;
@@ -444,16 +443,17 @@ public final class LoginFrame extends JFrame {
 
             //log.info("下载头像：({}):{}", contacts.getValue().getNickname(), contacts.getValue().getHeadimgurl());
         });
-        log.info("11. 下载联系人头像完成，耗时{}秒", (System.currentTimeMillis() - time) / 1000);
         ExecutorServiceUtil.getHeadImageDownloadExecutorService().shutdown();
         try {
             boolean b = ExecutorServiceUtil.getHeadImageDownloadExecutorService().awaitTermination(5, TimeUnit.MINUTES);
-            if (!b){
+            if (!b) {
                 log.warn("线程池关闭失败！");
             }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+
+        log.info("11. 下载联系人头像完成，耗时{}秒", (System.currentTimeMillis() - time) / 1000);
     }
 
 

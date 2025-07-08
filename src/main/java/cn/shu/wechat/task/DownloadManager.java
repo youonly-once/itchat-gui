@@ -51,7 +51,12 @@ public class DownloadManager {
      */
     public static <R> void submit(DownloadTask<R> task) {
         if (taskMap.containsKey(task.getTaskId())) {
-            throw new IllegalArgumentException("任务已存在: " + task.getTaskId());
+            DownloadTask<R> downloadTask = taskMap.get(task.getTaskId());
+            if (downloadTask.getStatus() == DownloadStatus.FAIL) {
+                taskMap.remove(task.getTaskId());
+            } else if (downloadTask.getStatus() == DownloadStatus.WAITING || downloadTask.getStatus() == DownloadStatus.RUNNING) {
+                return;
+            }
         }
         taskMap.put(task.getTaskId(), task);
         workerPool.submit(task); // 异步执行
@@ -66,12 +71,26 @@ public class DownloadManager {
      */
     public static <R> R submitAwait(DownloadTask<R> task) {
         if (taskMap.containsKey(task.getTaskId())) {
-            throw new IllegalArgumentException("任务已存在: " + task.getTaskId());
+            DownloadTask<R> downloadTask = taskMap.get(task.getTaskId());
+            if (downloadTask.getStatus() == DownloadStatus.FAIL) {
+                taskMap.remove(task.getTaskId());
+            } else if (downloadTask.getStatus() == DownloadStatus.WAITING || downloadTask.getStatus() == DownloadStatus.RUNNING) {
+                if (downloadTask.getFuture() == null) {
+                    awaitDownload(task.getTaskId());
+                    return (R) task.getResult();
+                }
+                try {
+                    return downloadTask.getFuture().get();
+                } catch (InterruptedException | ExecutionException e) {
+                    log.error(e.getMessage());
+                }
+            }
         }
         taskMap.put(task.getTaskId(), task);
-        Future<R> submit = workerPool.submit(task);
+        Future<R> future = workerPool.submit(task);
+        task.setFuture(future);
         try {
-            return submit.get(); // 阻塞等待执行完成
+            return future.get(); // 阻塞等待执行完成
         } catch (InterruptedException | ExecutionException e) {
             log.error(e.getMessage());
         }
@@ -159,7 +178,7 @@ public class DownloadManager {
             log.error("任务不存在，taskId=" + taskId);
             return;
         }
-        while (task.getStatus() == DownloadStatus.RUNNING || task.getStatus() == DownloadStatus.FAIL) {
+        while (task.getStatus() == DownloadStatus.RUNNING || task.getStatus() == DownloadStatus.WAITING) {
             SleepUtils.sleep(100); // 每 100ms 轮询一次
         }
     }
@@ -186,7 +205,7 @@ public class DownloadManager {
             log.warn("任务不存在，taskId=" + taskId);
             return;
         }
-        while (task.getStatus() == DownloadStatus.RUNNING || task.getStatus() == DownloadStatus.FAIL) {
+        while (task.getStatus() == DownloadStatus.RUNNING || task.getStatus() == DownloadStatus.WAITING) {
             if (System.currentTimeMillis() - startTime > timeOut) {
                 log.error("下载等待超时: {}", taskId);
                 break;
