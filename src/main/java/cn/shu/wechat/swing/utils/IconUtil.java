@@ -27,13 +27,13 @@ public class IconUtil {
     private static final Map<String, ImageIcon> ICON_CACHE =
             Collections.synchronizedMap(new LinkedHashMap<String, ImageIcon>(128, 0.75f, true) {
                 protected boolean removeEldestEntry(Map.Entry<String, ImageIcon> eldest) {
-                    return size() > 100; // 最多缓存 100 张图标
+                    return size() > 500; // 最多缓存 100 张图标
                 }
             });
     private static final Map<String, BufferedImage> BUFFERED_IMAGE_CACHE =
             Collections.synchronizedMap(new LinkedHashMap<String, BufferedImage>(128, 0.75f, true) {
                 protected boolean removeEldestEntry(Map.Entry<String, BufferedImage> eldest) {
-                    return size() > 10; // 最多缓存 10 张图标
+                    return size() > 20; // 最多缓存 10 张图标
                 }
             });
 
