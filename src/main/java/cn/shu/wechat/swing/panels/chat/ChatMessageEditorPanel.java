@@ -1,8 +1,8 @@
 package cn.shu.wechat.swing.panels.chat;
 
 import cn.shu.wechat.api.ContactsTools;
-import cn.shu.wechat.mapper.StatusMapper;
 import cn.shu.wechat.entity.Status;
+import cn.shu.wechat.mapper.StatusMapper;
 import cn.shu.wechat.service.impl.IMsgHandlerFaceImpl;
 import cn.shu.wechat.swing.components.*;
 import cn.shu.wechat.swing.components.message.ChatEditorPopupMenu;
@@ -125,8 +125,8 @@ public class ChatMessageEditorPanel extends ParentAvailablePanel {
 
 
         chartMsgLabel = new JLabel();
-        chartNormalIcon = IconUtil.getIcon(this, "/image/chart.png");
-        chartActiveIcon = IconUtil.getIcon(this, "/image/chart_active.png");
+        chartNormalIcon = IconUtil.getIcon(this, "/image/chart.png", 20, 20);
+        chartActiveIcon = IconUtil.getIcon(this, "/image/chart_active.png", 20, 20);
         chartMsgLabel.setIcon(chartNormalIcon);
 
         textEditor = new RCTextEditor();

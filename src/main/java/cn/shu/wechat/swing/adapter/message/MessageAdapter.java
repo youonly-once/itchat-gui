@@ -56,7 +56,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * Created by 舒新胜 on 17-6-2.
@@ -337,14 +337,14 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             downloadTask.setResourceType(WXMsgUrl.BIG_TYPE);
 
             downloadTask.setCallback(task -> {
-                byte[] bytes = (byte[]) task.getResult();
+                byte[] bytes = task.getResult();
                 if (bytes != null && bytes.length > 0) {
                     process(item, appViewHolder, bytes);
                 } else {
                     downloadTask.setResourceType(WXMsgUrl.SLAVE_TYPE);
                     downloadTask.setTaskId(item.getMsgId() + WXMsgUrl.SLAVE_TYPE);
                     downloadTask.setCallback(secondTask -> {
-                        byte[] secondBytes = (byte[]) secondTask.getResult();
+                        byte[] secondBytes = secondTask.getResult();
                         if (secondBytes != null && secondBytes.length > 0) {
                             process(item, appViewHolder, secondBytes);
                         }
@@ -531,12 +531,12 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         holder.progressBar.setVisible(true);
         holder.sizeLabel.setText("0/" + FileCache.fileSizeString(item.getFileSize()));
 
-        LinkedBlockingDeque<Long> progress = DownloadManager.getProcessLinkedBlockingDeque(item.getFilePath());
+        BlockingQueue<Long> progress = DownloadManager.getProcessLinkedBlockingDeque(item.getFilePath());
         new SwingWorker<Object, Long>() {
             @Override
             protected Object doInBackground() throws Exception {
                 //已下载字节数
-                long p = 0;
+                long p;
                 while ((p = progress.take()) != -100L) {
                     publish(p);
                 }
@@ -924,7 +924,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     private void processImage(Message item, MessageImageLabel imageLabel) {
         //显示加载中
         ImageIcon imageIcon = IconUtil.getIcon(this,"/image/image_loading.gif",item.getImgWidth(),item.getImgHeight());
-        //imageLabel.setIcon(imageIcon);
+        imageLabel.setIcon(imageIcon);
         String filePath = item.getSlavePath();
         if (StringUtils.isEmpty(filePath)) {
             filePath = item.getFilePath();

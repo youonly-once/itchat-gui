@@ -37,12 +37,10 @@ public class MainOperationPopupMenu extends JPopupMenu {
                 showCreateGroupDialog();
             }
         });
-        ImageIcon icon1 = IconUtil.getIcon(this,"/image/chat.png");
-        icon1.setImage(icon1.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+        ImageIcon icon1 = IconUtil.getIcon(this, "/image/chat.png", 20, 20);
         createRoomMenuItem.setIcon(icon1);
         createRoomMenuItem.setIconTextGap(5);
-        ImageIcon icon = IconUtil.getIcon(this, "/image/chart.png");
-        icon.setImage(icon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+        ImageIcon icon = IconUtil.getIcon(this, "/image/chart.png", 20, 20);
         createRoomMenuItem.setIcon(icon1);
         statistics.setIcon(icon);
         statistics.addActionListener(e -> {

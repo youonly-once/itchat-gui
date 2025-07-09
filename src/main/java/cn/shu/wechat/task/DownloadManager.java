@@ -1,7 +1,6 @@
 package cn.shu.wechat.task;
 
 import cn.shu.wechat.constant.DownloadStatus;
-import cn.shu.wechat.utils.SleepUtils;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.Map;
@@ -15,6 +14,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Log4j2
 public class DownloadManager {
+
+    private final static ScheduledExecutorService cleanerScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+        Thread t = new Thread(r, "Download-Cleaner");
+        t.setDaemon(true); // 设置为守护线程
+        return t;
+    });
+
+    static {
+        cleanerScheduler.scheduleAtFixedRate(DownloadManager::cleanFinishedTasks, 1, 1, TimeUnit.MINUTES);
+    }
 
     /**
      * 下载任务执行线程池：
@@ -59,7 +68,8 @@ public class DownloadManager {
             }
         }
         taskMap.put(task.getTaskId(), task);
-        workerPool.submit(task); // 异步执行
+        Future<R> submit = workerPool.submit(task);// 异步执行
+        task.setFuture(submit);
     }
 
     /**
@@ -113,6 +123,7 @@ public class DownloadManager {
         }
         taskMap.put(task.getTaskId(), task);
         Future<R> submit = workerPool.submit(task);
+        task.setFuture(submit);
         try {
             return submit.get(timeout, unit); // 带超时时间阻塞
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -133,17 +144,6 @@ public class DownloadManager {
                 .orElse(null);
     }
 
-    /**
-     * 获取指定任务的已下载字节数
-     *
-     * @param taskId 任务ID
-     * @return 字节数，任务不存在返回 -1
-     */
-    public static long getDownloadedBytes(String taskId) {
-        return Optional.ofNullable(taskMap.get(taskId))
-                .map(DownloadTask::getDownloadedBytes)
-                .orElse(-1L);
-    }
 
     /**
      * 获取任务的实时下载进度队列（如每秒下载量）
@@ -151,9 +151,9 @@ public class DownloadManager {
      * @param taskId 任务ID
      * @return 下载过程队列（可能为 null）
      */
-    public static LinkedBlockingDeque<Long> getProcessLinkedBlockingDeque(String taskId) {
+    public static BlockingQueue<Long> getProcessLinkedBlockingDeque(String taskId) {
         return Optional.ofNullable(taskMap.get(taskId))
-                .map(DownloadTask::getFILE_DOWNLOAD_PROCESS)
+                .map(DownloadTask::getProcessBlockingQueue)
                 .orElseThrow(() -> new IllegalArgumentException("任务不存在，taskId=" + taskId));
     }
 
@@ -178,8 +178,11 @@ public class DownloadManager {
             log.error("任务不存在，taskId=" + taskId);
             return;
         }
-        while (task.getStatus() == DownloadStatus.RUNNING || task.getStatus() == DownloadStatus.WAITING) {
-            SleepUtils.sleep(100); // 每 100ms 轮询一次
+        Future<?> future = task.getFuture();
+        try {
+            future.get(); // 阻塞等待
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("等待任务执行出错", e);
         }
     }
 
@@ -202,17 +205,29 @@ public class DownloadManager {
         long startTime = System.currentTimeMillis();
         DownloadTask task = taskMap.get(taskId);
         if (task == null) {
-            log.warn("任务不存在，taskId=" + taskId);
+            log.error("任务不存在，taskId=" + taskId);
             return;
         }
-        while (task.getStatus() == DownloadStatus.RUNNING || task.getStatus() == DownloadStatus.WAITING) {
-            if (System.currentTimeMillis() - startTime > timeOut) {
-                log.error("下载等待超时: {}", taskId);
-                break;
-            }
-            SleepUtils.sleep(100);
+
+        Future<?> future = task.getFuture();
+        try {
+            future.get(timeOut, TimeUnit.MILLISECONDS); // 阻塞等待
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            log.error("等待任务执行出错", e);
         }
+
     }
 
+    private static void cleanFinishedTasks() {
+        int before = taskMap.size();
+        taskMap.entrySet().removeIf(entry -> {
+            DownloadStatus status = entry.getValue().getStatus();
+            return (status == DownloadStatus.SUCCESS || status == DownloadStatus.FAIL) && entry.getValue().getFuture().isDone();
+        });
+        int after = taskMap.size();
+        if (before != after) {
+            log.info("定时清理下载任务：共清理 {} 条，剩余任务 {} 条", (before - after), after);
+        }
+    }
 
 }

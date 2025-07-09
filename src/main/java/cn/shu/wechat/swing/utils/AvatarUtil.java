@@ -20,9 +20,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -63,7 +64,11 @@ public final class AvatarUtil {
      * 小头像缓存 userName,ImageIcon
      */
 
-    private static final Map<String, ImageIcon> avatarCache = new ConcurrentHashMap<>();
+    private static final Map<String, ImageIcon> avatarCache = Collections.synchronizedMap(new LinkedHashMap<String, ImageIcon>(128, 0.75f, true) {
+        protected boolean removeEldestEntry(Map.Entry<String, ImageIcon> eldest) {
+            return size() > 100;
+        }
+    });
 
 
     public static void invalidateAvatarCache(){
@@ -186,37 +191,37 @@ public final class AvatarUtil {
             return avatarIcon;
         }
         //防止多个线程同时下载
-        synchronized ((userName + "_avatar").intern()) {
-            avatarIcon = avatarCache.get(userName);
-            if (avatarIcon != null) {
-                return avatarIcon;
-            }
-            //获取模糊头像
-            if (WechatConfiguration.getInstance().getFuzzUpAvatar()) {
-                avatarIcon = getFuzzUpAvatar(user);
-                return putUserAvatarCache(userName, avatarIcon);
-            }
-            //下载头像
-            DownloadTask<Image> downloadTask = new DownloadTask<>();
-            if (StringUtils.isNotEmpty((user.getHeadimgurl()))) {
-                downloadTask.setRelativeUrl(user.getHeadimgurl());
-                downloadTask.setTaskId(user.getHeadimgurl());
-                downloadTask.setType(DownloadType.ByRelativeUrl);
-            } else {
-                downloadTask.setUserName(user.getUsername());
-                downloadTask.setTaskId(user.getUsername());
-                downloadTask.setType(DownloadType.RESOURCE_BY_USERNAME);
-            }
-            Image avatar = DownloadManager.submitAwait(downloadTask);
-            if (avatar != null) {
-                avatarIcon = putUserAvatarCache(userName, avatar);
-                return avatarIcon;
-            }
-            //下载失败 按名称生成头像
-            avatarIcon = getFuzzUpAvatar(user);
-            avatarIcon = putUserAvatarCache(userName, avatarIcon);
 
+        avatarIcon = avatarCache.get(userName);
+        if (avatarIcon != null) {
+            return avatarIcon;
         }
+        //获取模糊头像
+        if (WechatConfiguration.getInstance().getFuzzUpAvatar()) {
+            avatarIcon = getFuzzUpAvatar(user);
+            return putUserAvatarCache(userName, avatarIcon);
+        }
+        //下载头像
+        DownloadTask<Image> downloadTask = new DownloadTask<>();
+        if (StringUtils.isNotEmpty((user.getHeadimgurl()))) {
+            downloadTask.setRelativeUrl(user.getHeadimgurl());
+            downloadTask.setTaskId(user.getHeadimgurl());
+            downloadTask.setType(DownloadType.ByRelativeUrl);
+        } else {
+            downloadTask.setUserName(user.getUsername());
+            downloadTask.setTaskId(user.getUsername());
+            downloadTask.setType(DownloadType.RESOURCE_BY_USERNAME);
+        }
+        Image avatar = DownloadManager.submitAwait(downloadTask);
+        if (avatar != null) {
+            avatarIcon = putUserAvatarCache(userName, avatar);
+            return avatarIcon;
+        }
+        //下载失败 按名称生成头像
+        avatarIcon = getFuzzUpAvatar(user);
+        avatarIcon = putUserAvatarCache(userName, avatarIcon);
+
+
         return avatarIcon;
     }
 

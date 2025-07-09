@@ -29,7 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.*;
-import java.util.function.Consumer;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * 下载工具类
@@ -54,7 +54,7 @@ public class DownloadTools {
      * @author SXS
      * @date 2017年4月21日 下午11:00:25
      */
-    public static void getDownloadFn(AddMsgList msg , Consumer<Long> progressCallback) throws Exception {
+    public static void getDownloadFn(AddMsgList msg, BlockingQueue<Long> process) throws Exception {
         Map<String, String> headerMap = new HashMap<String, String>();
         List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
 
@@ -103,7 +103,7 @@ public class DownloadTools {
             default:
                 break;
         }
-        entity2File(entity, msg.getFilePath(),progressCallback);
+        entity2File(entity, msg.getFilePath(), process);
     }
 
     /**
@@ -116,13 +116,13 @@ public class DownloadTools {
      * @author SXS
      * @date 2017年4月21日 下午11:00:25
      */
-    public static void downloadFileByMsgId(String msgId, String path, Consumer<Long> progressCallback) throws Exception {
+    public static void downloadFileByMsgId(String msgId, String path, BlockingQueue<Long> progress) throws Exception {
         Map<String, String> headerMap = new HashMap<>();
         String url = String.format(WxURLEnum.WEB_WX_GET_MSG_IMG.getUrl(), Core.getLoginResultData().getUrl());
         HttpEntity entity = downloadEntityByMsgID(
                 url, msgId
                 , WXMsgUrl.SLAVE_TYPE, headerMap, true);
-        entity2File(entity, path,progressCallback);
+        entity2File(entity, path, progress);
 
     }
 
@@ -132,17 +132,17 @@ public class DownloadTools {
      * @param entity
      * @param path
      */
-    private static void entity2File(HttpEntity entity, String path, Consumer<Long> progressCallback ) throws Exception {
+    private static void entity2File(HttpEntity entity, String path, BlockingQueue<Long> progress) throws Exception {
         if (entity == null) {
-            throw new Exception("response entity is null："+path);
+            throw new Exception("response entity is null：" + path);
         }
 
-            File file = new File(path);
-            if (!file.exists()) {
-                File parentFile = file.getParentFile();
-                if (!parentFile.exists()) {
-                    if (!parentFile.mkdirs()) {
-                        log.warn("创建目录失败：{}", parentFile.getAbsolutePath());
+        File file = new File(path);
+        if (!file.exists()) {
+            File parentFile = file.getParentFile();
+            if (!parentFile.exists()) {
+                if (!parentFile.mkdirs()) {
+                    log.warn("创建目录失败：{}", parentFile.getAbsolutePath());
                     }
                 }
                 if (!file.createNewFile()) {
@@ -160,10 +160,10 @@ public class DownloadTools {
                 while ((readLen = in.read(data, 0, size)) > 0) {
                     out.write(data, 0, readLen);
                     readed = readed + readLen;
-                    progressCallback.accept(readed);
+                    progress.offer(readed);
                 }
                 out.flush();
-                progressCallback.accept(-100L);
+                progress.offer(-100L);
             }
 
     }

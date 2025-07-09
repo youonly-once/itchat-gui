@@ -11,7 +11,6 @@ import cn.shu.wechat.swing.components.RCListView;
 import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
-import cn.shu.wechat.swing.panels.chat.ChatPanel;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.swing.panels.left.TabOperationPanel;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
@@ -60,35 +59,38 @@ public class RoomsPanel extends ParentAvailablePanel {
 
     /**
      * 消息已读数量
+     *
      * @param count 本次已读
      */
-    public static  void updateUnreadTotalCount(int count){
-        if (count == 0){
-            return;
-        }
-        synchronized (RoomsPanel.class) {
-            int i = UNREAD_TOTAL_COUNT.addAndGet(count);
-            if (i<0){
-                UNREAD_TOTAL_COUNT.set(0);
-            }
-            if (i > 0) {
-                TabOperationPanel.getContext().getChatLabel().setCornerText(String.valueOf(i));
-                TabOperationPanel.getContext().repaint();
-            } else if (UNREAD_TOTAL_COUNT.get() == 0) {
-                MainFrame.getContext().setTrayFlashing(false);
-                TabOperationPanel.getContext().getChatLabel().setCornerText("");
-                TabOperationPanel.getContext().repaint();
-                ;
+    public static void updateUnreadTotalCount(int count) {
+        if (count == 0) return;
 
-            }
+        int total = UNREAD_TOTAL_COUNT.addAndGet(count);
+        if (total < 0) {
+            UNREAD_TOTAL_COUNT.set(0);
+            total = 0;
         }
 
+        if (total > 0) {
+            updateUnreadUI(String.valueOf(total));
+        } else {
+            UNREAD_TOTAL_COUNT.set(0); // double ensure
+            updateUnreadUI("");
+            MainFrame.getContext().setTrayFlashing(false);
+        }
+    }
+
+    private static void updateUnreadUI(String cornerText) {
+        SwingUtilities.invokeLater(() -> {
+            TabOperationPanel.getContext().getChatLabel().setCornerText(cornerText);
+            TabOperationPanel.getContext().repaint();
+        });
     }
 
     private void initComponents() {
         roomItemsListView = new RCListView();
-        roomItemsListView.getVerticalScrollBar().setUnitIncrement(RoomItemViewHolder.HEIGHT/3);
-        roomItemsListView.setScrollBarColor(Colors.SCROLL_BAR_TRACK_LIGHT,Colors.WINDOW_BACKGROUND);
+        roomItemsListView.getVerticalScrollBar().setUnitIncrement(RoomItemViewHolder.HEIGHT / 3);
+        roomItemsListView.setScrollBarColor(Colors.SCROLL_BAR_TRACK_LIGHT, Colors.WINDOW_BACKGROUND);
     }
 
     private void initView() {
@@ -123,7 +125,7 @@ public class RoomsPanel extends ParentAvailablePanel {
      */
     public void enterRoom(String roomId) {
         //切换显示层
-        ChatPanel chatPanel = ChatPanelContainer.getContext().createAndShow(roomId);
+        ChatPanelContainer.getContext().createAndShow(roomId);
         ChatPanelContainer.getContext().show(roomId);
         //更新聊天列表未读数量
         hasReadCount(roomId);

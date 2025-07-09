@@ -1,6 +1,5 @@
 package cn.shu.wechat.swing.utils;
 
-import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 
 import javax.imageio.ImageIO;
@@ -11,9 +10,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * 图标缓存工具类
@@ -25,10 +23,19 @@ public class IconUtil {
     /**
      * 图标缓存
      * key：图标名相对路径
-     *
      */
-    private static final Map<String, ImageIcon> ICON_CACHE = Collections.synchronizedMap(new WeakHashMap<>());
-    private static final Map<String, BufferedImage> BUFFERED_IMAGE_CACHE = Collections.synchronizedMap(new WeakHashMap<>());
+    private static final Map<String, ImageIcon> ICON_CACHE =
+            Collections.synchronizedMap(new LinkedHashMap<String, ImageIcon>(128, 0.75f, true) {
+                protected boolean removeEldestEntry(Map.Entry<String, ImageIcon> eldest) {
+                    return size() > 100; // 最多缓存 100 张图标
+                }
+            });
+    private static final Map<String, BufferedImage> BUFFERED_IMAGE_CACHE =
+            Collections.synchronizedMap(new LinkedHashMap<String, BufferedImage>(128, 0.75f, true) {
+                protected boolean removeEldestEntry(Map.Entry<String, BufferedImage> eldest) {
+                    return size() > 10; // 最多缓存 10 张图标
+                }
+            });
 
     public static ImageIcon getIcon(Object context, String path) {
         return getIcon(context, path, -1, -1);
@@ -39,23 +46,26 @@ public class IconUtil {
     }
 
     public static ImageIcon getIcon(Object context, String path, int width, int height) {
-        ImageIcon imageIcon = ICON_CACHE.get(path);
-        if (imageIcon == null) {
+        ImageIcon rawIcon = ICON_CACHE.get(path);
+        if (rawIcon == null) {
             URL url = context.getClass().getResource(path);
             if (url == null) {
                 return null;
             }
-            imageIcon = new ImageIcon(url);
+            rawIcon = new ImageIcon(url);
 
             if (width > 0 && height > 0) {
-                imageIcon.setImage(imageIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
+                // 返回一个新的缩放副本，不影响缓存
+                Image scaledImage = rawIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+                return new ImageIcon(scaledImage);
             }
 
-            ICON_CACHE.put(path, imageIcon);
+            ICON_CACHE.put(path, rawIcon);
         }
 
-        return imageIcon;
+        return rawIcon;
     }
+
     public static BufferedImage getBufferedImage(Object context, String path) {
         BufferedImage bufferedImage = BUFFERED_IMAGE_CACHE.get(path);
         if (bufferedImage == null) {

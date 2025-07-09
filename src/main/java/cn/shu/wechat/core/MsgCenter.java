@@ -210,7 +210,7 @@ public class MsgCenter {
 
        // fileDownloadStatus.put(path, false);
        // DownloadTools.FILE_DOWNLOAD_PROCESS.put(path,new LinkedBlockingDeque<Long>());
-        DownloadTask downloadTask = new DownloadTask(msg, null);
+        DownloadTask<AddMsgList> downloadTask = new DownloadTask<>(msg, null);
         downloadTask.setType(DownloadType.FN);
         downloadTask.setTaskId(path);
         DownloadManager.submit(downloadTask);
@@ -228,7 +228,7 @@ public class MsgCenter {
         //fileDownloadStatus.put(pathSlave, false);
         msg.setSlavePath(pathSlave);
 
-        DownloadTask downloadTask = new DownloadTask(msg.getNewMsgId(), pathSlave,null);
+        DownloadTask<String> downloadTask = new DownloadTask<>(msg.getNewMsgId(), pathSlave, null);
         downloadTask.setType(DownloadType.RESOURCE_BY_MSGID);
         downloadTask.setTaskId(pathSlave);
         DownloadManager.submit(downloadTask);

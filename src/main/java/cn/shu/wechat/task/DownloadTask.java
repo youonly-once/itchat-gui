@@ -4,14 +4,13 @@ import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.constant.DownloadStatus;
 import cn.shu.wechat.constant.DownloadType;
 import cn.shu.wechat.dto.response.sync.AddMsgList;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.extern.log4j.Log4j2;
 
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.function.Consumer;
 
 /**
@@ -21,17 +20,20 @@ import java.util.function.Consumer;
  */
 @NoArgsConstructor
 @Log4j2
+@ToString
 public class DownloadTask<R> implements Callable<R> {
-
-    @Getter
-    @Setter
-    private Future<R> future;
 
     /**
      * 下载过程进度队列（每次进度更新时追加）
      */
+    @Getter(value = AccessLevel.PROTECTED)
+    private final BlockingQueue<Long> processBlockingQueue = new ArrayBlockingQueue<>(100);
+    /**
+     * 微信资源路径（如头像路径）
+     */
     @Getter
-    private final LinkedBlockingDeque<Long> FILE_DOWNLOAD_PROCESS = new LinkedBlockingDeque<>();
+    @Setter
+    protected String relativeUrl;
     /**
      * 任务唯一标识
      */
@@ -49,21 +51,15 @@ public class DownloadTask<R> implements Callable<R> {
     @Getter
     private String destPath;
     /**
-     * 任务完成后的回调处理逻辑（可选）
+     * 用户名（用于下载头像等）
      */
     @Getter
     @Setter
-    private Consumer<DownloadTask<R>> callback = null;
-    /**
-     * 当前下载任务的状态（默认 WAITING）
-     */
-    @Getter
-    private volatile DownloadStatus status = DownloadStatus.WAITING;
-    /**
-     * 已下载字节数，用于进度跟踪
-     */
-    @Getter
-    private volatile long downloadedBytes = 0;
+    protected String userName;
+    @Getter(value = AccessLevel.PROTECTED)
+    @Setter(value = AccessLevel.PROTECTED)
+    private Future<R> future;
+
     /**
      * 下载类型（由上层设置）
      */
@@ -77,27 +73,22 @@ public class DownloadTask<R> implements Callable<R> {
     @Getter
     @Setter
     private String msgId;
-
+    /**
+     * 任务完成后的回调处理逻辑（可选）
+     */
+    @Getter(value = AccessLevel.PROTECTED)
+    @Setter
+    private Consumer<DownloadTask<R>> callback = null;
+    /**
+     * 当前下载任务的状态（默认 WAITING）
+     */
+    @Getter(value = AccessLevel.PROTECTED)
+    private volatile DownloadStatus status = DownloadStatus.WAITING;
     /**
      * 下载结果，支持泛型返回
      */
     @Getter
-    @Setter
-    private Object result;
-
-    /**
-     * 微信资源路径（如头像路径）
-     */
-    @Getter
-    @Setter
-    private String relativeUrl;
-
-    /**
-     * 用户名（用于下载头像等）
-     */
-    @Getter
-    @Setter
-    private String userName;
+    private R result;
 
     /**
      * 消息体对象（适用于 FN 类型下载）
@@ -153,36 +144,30 @@ public class DownloadTask<R> implements Callable<R> {
         try {
             status = DownloadStatus.RUNNING;
 
-            // 下载进度回调，用于实时记录进度
-            Consumer<Long> progressCallback = downloaded -> {
-                this.downloadedBytes = downloaded;
-                FILE_DOWNLOAD_PROCESS.offer(downloaded);
-            };
-
             // 根据下载类型执行对应的工具方法
             switch (type) {
                 case FN:
-                    DownloadTools.getDownloadFn(msg, progressCallback);
-                    this.result = msg;
+                    DownloadTools.getDownloadFn(msg, processBlockingQueue);
+                    this.result = (R) msg;
                     break;
                 case RESOURCE_BY_MSGID:
-                    DownloadTools.downloadFileByMsgId(msgId, destPath, progressCallback);
-                    this.result = destPath;
+                    DownloadTools.downloadFileByMsgId(msgId, destPath, processBlockingQueue);
+                    this.result = (R) destPath;
                     break;
                 case HEAD_IMAGE_BIG:
-                    this.result = DownloadTools.downloadBigHeadImg(relativeUrl, userName);
+                    this.result = (R) DownloadTools.downloadBigHeadImg(relativeUrl, userName);
                     break;
                 case ByRelativeUrl:
-                    this.result = DownloadTools.downloadHeadImgByRelativeUrl(relativeUrl);
+                    this.result = (R) DownloadTools.downloadHeadImgByRelativeUrl(relativeUrl);
                     break;
                 case RESOURCE_BY_USERNAME:
-                    this.result = DownloadTools.downloadHeadImgByUserName(userName);
+                    this.result = (R) DownloadTools.downloadHeadImgByUserName(userName);
                     break;
                 case ImgByMsgID:
-                    this.result = DownloadTools.downloadImgByMsgID(String.valueOf(msgId), resourceType);
+                    this.result = (R) DownloadTools.downloadImgByMsgID(String.valueOf(msgId), resourceType);
                     break;
                 case ImgByteByMsgID:
-                    this.result = DownloadTools.downloadImgByteByMsgID(String.valueOf(msgId), resourceType);
+                    this.result = (R) DownloadTools.downloadImgByteByMsgID(String.valueOf(msgId), resourceType);
                     break;
                 default:
                     throw new IllegalArgumentException("未知下载类型: " + type);
@@ -204,26 +189,5 @@ public class DownloadTask<R> implements Callable<R> {
         return null;
     }
 
-    /**
-     * 打印任务的详细信息（用于日志和调试）
-     */
-    @Override
-    public String toString() {
-        return "DownloadTask{" +
-                "taskId='" + taskId + '\'' +
-                ", url='" + url + '\'' +
-                ", destPath='" + destPath + '\'' +
-                ", callback=" + callback +
-                ", status=" + status +
-                ", downloadedBytes=" + downloadedBytes +
-                ", FILE_DOWNLOAD_PROCESS=" + FILE_DOWNLOAD_PROCESS +
-                ", type=" + type +
-                ", msgId='" + msgId + '\'' +
-                ", result=" + result +
-                ", relativeUrl='" + relativeUrl + '\'' +
-                ", userName='" + userName + '\'' +
-                ", msg=" + msg +
-                ", resourceType='" + resourceType + '\'' +
-                '}';
-    }
+
 }

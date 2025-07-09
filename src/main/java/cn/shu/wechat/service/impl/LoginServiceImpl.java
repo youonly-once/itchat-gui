@@ -2,7 +2,6 @@ package cn.shu.wechat.service.impl;
 
 import cn.shu.WeChatStater;
 import cn.shu.wechat.api.ContactsTools;
-import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.constant.StorageLoginInfoEnum;
 import cn.shu.wechat.constant.WxReqParamsConstant;
@@ -422,7 +421,7 @@ public class LoginServiceImpl implements LoginService {
             for (Contacts contacts : wxInitResponse.getContactList()) {
                 //下载头像
                 ExecutorServiceUtil.getHeadImageDownloadExecutorService().submit(() -> {
-                    AvatarUtil.putUserAvatarCache(contacts.getUsername(), DownloadTools.downloadHeadImgByRelativeUrl(contacts.getHeadimgurl()));
+                    AvatarUtil.createOrLoadUserAvatar(contacts.getUsername());
                 });
                 addContacts(contacts);
                 recentContacts.add(contacts.getUsername());
@@ -720,11 +719,9 @@ public class LoginServiceImpl implements LoginService {
         map.put("EncryChatRoomId", "");
         list.add(map);
         paramMap.put("List", list);
-        paramMap.put("BaseRequest",Core.getLoginResultData().getBaseRequest());
-        HttpEntity entity = null;
-        synchronized ((groupName + "WebWxBatchGetContact").intern()) {
-            entity = HttpUtil.doPost(url, JSON.toJSONString(paramMap));
-        }
+        paramMap.put("BaseRequest", Core.getLoginResultData().getBaseRequest());
+        HttpEntity entity = HttpUtil.doPost(url, JSON.toJSONString(paramMap));
+
         try {
             String text = EntityUtils.toString(entity, Consts.UTF_8);
             JSONObject obj = JSON.parseObject(text);
@@ -793,10 +790,8 @@ public class LoginServiceImpl implements LoginService {
             paramMap.put("Count", subList.size());
             paramMap.put("List", subList);
 
-            HttpEntity entity = null;
-            synchronized ((group.getUsername() + "WebWxBatchGetContact").intern()) {
-                entity = HttpUtil.doPost(url, JSON.toJSONString(paramMap));
-            }
+            HttpEntity entity = HttpUtil.doPost(url, JSON.toJSONString(paramMap));
+
             try {
                 String text = EntityUtils.toString(entity, Consts.UTF_8);
                 JSONObject obj = JSON.parseObject(text);
