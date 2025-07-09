@@ -316,7 +316,7 @@ public class RoomsPanel extends ParentAvailablePanel {
                 if (i != 0) {
                     roomItemList.add(0, roomItemList.remove(i));
                     //重绘整个列表
-                    roomItemsListView.notifyDataSetChanged(true);
+                    roomItemsListView.notifyDataSetChanged(false);
 
                 } else {
                     //当前消息位于首行，则无需重绘整个列表

@@ -206,7 +206,7 @@ public class UserInfoPopup extends JPopupMenu {
             @Override
             public void mouseClicked(MouseEvent e) {
                 setVisible(false);
-                BufferedImage bufferedImage = AvatarUtil.createOrLoadBigAvatar(contacts);
+                Image bufferedImage = AvatarUtil.createOrLoadBigAvatar(contacts);
                 if (bufferedImage == null) {
                     JOptionPane.showMessageDialog(MainFrame.getContext(), "图片下载中...", "文件不存在", JOptionPane.WARNING_MESSAGE);
                     return;

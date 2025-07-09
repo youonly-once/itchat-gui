@@ -98,25 +98,33 @@ public class VerticalFlowLayout extends FlowLayout {
      *
      * @param target the component to lay out
      */
+    @Override
     public Dimension preferredLayoutSize(Container target) {
-        Dimension tarsiz = new Dimension(0, 0);
+        Insets insets = target.getInsets();
+        int maxWidth = 0;
+        int totalHeight = 0;
+        int visibleCount = 0;
 
         for (int i = 0; i < target.getComponentCount(); i++) {
             Component m = target.getComponent(i);
             if (m.isVisible()) {
                 Dimension d = m.getPreferredSize();
-                tarsiz.width = Math.max(tarsiz.width, d.width);
-                if (i > 0) {
-                    tarsiz.height += hgap;
-                }
-                tarsiz.height += d.height;
+                maxWidth = Math.max(maxWidth, d.width);
+                totalHeight += d.height;
+                visibleCount++;
             }
         }
-        Insets insets = target.getInsets();
-        tarsiz.width += insets.left + insets.right + hgap * target.getComponentCount();
-        tarsiz.height += insets.top + insets.bottom + vgap * target.getComponentCount();
-        return tarsiz;
+
+        if (visibleCount > 1) {
+            totalHeight += vgap * (visibleCount - 1);
+        }
+
+        return new Dimension(
+                maxWidth + insets.left + insets.right + hgap * 2,
+                totalHeight + insets.top + insets.bottom + vgap * 2
+        );
     }
+
 
     /**
      * Returns the minimum size needed to layout the target container.

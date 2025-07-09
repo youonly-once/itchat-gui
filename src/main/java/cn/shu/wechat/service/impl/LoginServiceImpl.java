@@ -669,6 +669,7 @@ public class LoginServiceImpl implements LoginService {
                 Core.getLoginResultData().getUrl(), new Date().getTime(),
                 Core.getLoginResultData().getPassTicket());
         Map<String, Object> paramMap = new HashMap<>();
+        Core.getGroupIdSet().addAll(Core.getGroupMap().keySet());
         paramMap.put("Count", Core.getGroupIdSet().size());
         List<Map<String, String>> list = Core.getGroupIdSet().parallelStream().map(s -> {
             HashMap<String, String> map = new HashMap<String, String>(2);

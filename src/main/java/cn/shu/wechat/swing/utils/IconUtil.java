@@ -24,7 +24,7 @@ import java.util.concurrent.CountDownLatch;
 public class IconUtil {
     /**
      * 图标缓存
-     * key：图标名
+     * key：图标名相对路径
      *
      */
     private static final Map<String, ImageIcon> ICON_CACHE = Collections.synchronizedMap(new WeakHashMap<>());
@@ -45,7 +45,6 @@ public class IconUtil {
             if (url == null) {
                 return null;
             }
-
             imageIcon = new ImageIcon(url);
 
             if (width > 0 && height > 0) {
@@ -68,10 +67,44 @@ public class IconUtil {
                 bufferedImage = ImageIO.read(url);
                 BUFFERED_IMAGE_CACHE.put(path, bufferedImage);
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
 
         }
+        return bufferedImage;
+    }
+
+    public static BufferedImage getBufferedImage(String path) {
+        BufferedImage bufferedImage = BUFFERED_IMAGE_CACHE.get(path);
+        if (bufferedImage !=null){
+            return bufferedImage;
+        }
+        try {
+            bufferedImage = ImageIO.read(new File(path));
+            if (bufferedImage != null) {
+                BUFFERED_IMAGE_CACHE.put(path, bufferedImage);
+            }
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+
+        return bufferedImage;
+    }
+
+    public static BufferedImage getBufferedImageByUrl(String url) {
+        BufferedImage bufferedImage = BUFFERED_IMAGE_CACHE.get(url);
+        if (bufferedImage !=null){
+            return bufferedImage;
+        }
+        try {
+            bufferedImage = ImageIO.read(new URL(url));
+            if (bufferedImage != null) {
+                BUFFERED_IMAGE_CACHE.put(url, bufferedImage);
+            }
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+
         return bufferedImage;
     }
 

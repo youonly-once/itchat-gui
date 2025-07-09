@@ -10,6 +10,7 @@ import java.awt.datatransfer.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -29,10 +30,10 @@ public final class ClipboardUtil {
     public static final String CLIPBOARD_TEMP_DIR;
 
     static {
-        CLIPBOARD_TEMP_DIR = WechatConfiguration.getInstance().getBasePath() + System.getProperty("file.separator") + "clipboard_temp";
+        CLIPBOARD_TEMP_DIR = WechatConfiguration.getInstance().getBasePath() + FileSystems.getDefault().getSeparator() + "clipboard_temp";
         File file = new File(CLIPBOARD_TEMP_DIR);
         log.info("创建剪切板临时文件缓存目录：{}" , file.getAbsolutePath());
-        if (!file.mkdirs()) {
+        if (!file.exists() && !file.mkdirs()) {
             log.warn("创建剪贴板目录失败");
         }
     }
