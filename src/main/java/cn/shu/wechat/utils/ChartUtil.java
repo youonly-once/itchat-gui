@@ -8,6 +8,7 @@ import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.service.LoginService;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.jfree.chart.*;
 import org.jfree.chart.axis.CategoryAxis;
@@ -35,7 +36,6 @@ import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -72,8 +72,8 @@ public final class ChartUtil {
     @Resource
     private MessageMapper messageMapper;
 
-    @Resource
-    private LoginService loginService;
+    //@Resource
+   // private LoginService loginService;
 
 
     public void create() {
@@ -157,7 +157,14 @@ public final class ChartUtil {
 
         List<Contacts> memberList = Optional.ofNullable(Core.getMemberMap().get(groupName))
                 .map(Contacts::getMemberlist)
-                .orElseGet(() -> loginService.WebWxBatchGetContact(groupName));
+                .orElseGet(() -> {
+                    /*try {
+                        return loginService.WebWxBatchGetContact(groupName);
+                    } catch (IOException | InterruptedException e) {
+                        return Core.getMemberMap().get(groupName).getMemberlist();
+                    }*/
+                    return new ArrayList<>();
+                });
         if (!Optional.ofNullable(memberList).isPresent()) {
             return Optional.empty();
         }

@@ -59,6 +59,8 @@ public final class AvatarUtil {
     private static final String CUSTOM_AVATAR_CACHE_ROOT;
     private static final int DEFAULT_AVATAR = 0;
     private static final int CUSTOM_AVATAR = 1;
+    private static final int NORMAL_AVATAR_SIZE = 40;
+    private static final int BIG_AVATAR_SIZE = 200;
 
     /**
      * 小头像缓存 userName,ImageIcon
@@ -134,7 +136,7 @@ public final class AvatarUtil {
                         // 默认群组头像不存在，则生成
                         if (avatar == null) {
                             log.info("创建群组默认头像 : {}", userName);
-                            avatar = createAvatar(ContactsTools.getContactDisplayNameByUserName(userName));
+                            avatar = createAvatar(ContactsTools.getContactDisplayNameByUserName(userName),NORMAL_AVATAR_SIZE,NORMAL_AVATAR_SIZE);
                         }
                     } else {
                         List<Contacts> memberList = contacts.getMemberlist();
@@ -157,11 +159,8 @@ public final class AvatarUtil {
      * @return
      */
     private static ImageIcon getFuzzUpAvatar(Contacts user) {
-        Image avatar = createAvatar(ContactsTools.getContactDisplayNameByUserName(user));
-        if (avatar == null) {
-            return IconUtil.getIcon(MainFrame.getContext(), "/image/smile.png");
-        }
-        return new ImageIcon(avatar.getScaledInstance(40, 40, Image.SCALE_SMOOTH));
+        Image avatar = createAvatar(ContactsTools.getContactDisplayNameByUserName(user),NORMAL_AVATAR_SIZE,NORMAL_AVATAR_SIZE);
+        return new ImageIcon(avatar);
     }
 
     /**
@@ -171,11 +170,8 @@ public final class AvatarUtil {
      * @return
      */
     private static Image getFuzzUpBigAvatar(Contacts user) {
-        Image avatar = createAvatar(ContactsTools.getContactDisplayNameByUserName(user));
-        if (avatar == null) {
-            return IconUtil.getBufferedImage(MainFrame.getContext(), "/image/smile.png");
-        }
-        return avatar;
+
+        return createAvatar(ContactsTools.getContactDisplayNameByUserName(user),BIG_AVATAR_SIZE,BIG_AVATAR_SIZE);
     }
 
     /**
@@ -184,6 +180,9 @@ public final class AvatarUtil {
      * @param user 用户名
      */
     private static ImageIcon getOrDownloadUserAvatar(Contacts user) {
+        if (user == null) {
+            return IconUtil.getIcon(MainFrame.getContext(), "/image/default_head.png",NORMAL_AVATAR_SIZE,NORMAL_AVATAR_SIZE);
+        }
         String userName = user.getUsername();
         //获取内存缓存中的头像
         ImageIcon avatarIcon = avatarCache.get(userName);
@@ -243,7 +242,9 @@ public final class AvatarUtil {
      * @return 头像
      */
     public static Image createOrLoadBigAvatar(Contacts user) {
-
+        if (user == null) {
+            return IconUtil.getBufferedImage(MainFrame.getContext(), "/image/default_head.png");
+        }
         String userName = user.getUsername();
         //获取模糊头像
         if (WechatConfiguration.getInstance().getFuzzUpAvatar()) {
@@ -315,7 +316,7 @@ public final class AvatarUtil {
      */
     public static ImageIcon createOrLoadUserAvatar(String userName) {
         Contacts contacts = Core.getMemberMap().get(userName);
-        return getOrDownloadUserAvatar( contacts);
+        return getOrDownloadUserAvatar(contacts);
     }
     /**
      * 刷新用户头像缓存
@@ -349,7 +350,7 @@ public final class AvatarUtil {
         if (image != null) {
             try {
                 image = ImageUtil.setRadius(image, ((BufferedImage) image).getWidth(), ((BufferedImage) image).getHeight(), 35)
-                        .getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+                        .getScaledInstance(NORMAL_AVATAR_SIZE, NORMAL_AVATAR_SIZE, Image.SCALE_SMOOTH);
             } catch (IOException e) {
                 log.error(e.getMessage());
             }
@@ -404,7 +405,7 @@ public final class AvatarUtil {
      * @param displayName 显示名称
      * @return 头像
      */
-    private static Image createAvatar(String displayName) {
+    private static Image createAvatar(String displayName,int width, int height) {
         String drawString;
         //取前几位绘制头像
         if (displayName.length() > 1) {
@@ -414,11 +415,9 @@ public final class AvatarUtil {
         }
 
         try {
-            int width = 200;
-            int height = 200;
 
             // 创建BufferedImage对象
-            Font font = FontUtil.getDefaultFont(96, Font.PLAIN);
+            Font font = FontUtil.getDefaultFont(width/2, Font.PLAIN);
             BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
             // 获取Graphics2D
             Graphics2D g2d = image.createGraphics();
@@ -439,18 +438,21 @@ public final class AvatarUtil {
 
             g2d.drawString(drawString, x, strHeight);
 
-            BufferedImage roundImage = ImageUtil.setRadius(image, width, height, 35);
+            BufferedImage roundImage = ImageUtil.setRadius(image, width, height, width/3);
 
             g2d.dispose();
-            File file = new File(AVATAR_CACHE_ROOT + "/" + displayName + ".png");
-            ImageIO.write(roundImage, "png", file);
+
 
             return roundImage;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error(ex.getMessage());
         }
 
-        return null;
+        Image scaledInstance = IconUtil.getBufferedImage(MainFrame.getContext(), "/image/default_head.png");
+        if (scaledInstance != null) {
+            scaledInstance  .getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        }
+        return scaledInstance;
     }
 
 

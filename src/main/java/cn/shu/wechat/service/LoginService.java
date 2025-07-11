@@ -2,6 +2,7 @@ package cn.shu.wechat.service;
 
 import cn.shu.wechat.dto.response.WxCreateRoomResp;
 import cn.shu.wechat.entity.Contacts;
+import cn.shu.wechat.exception.WebWXException;
 import com.alibaba.fastjson.JSONArray;
 
 import java.awt.image.BufferedImage;
@@ -27,17 +28,16 @@ public interface LoginService {
      * @author SXS
      * @date 2017年5月13日 上午12:21:40
      */
-    String getUuid();
+    String getUuid() throws IOException, InterruptedException, WebWXException;
 
     /**
      * 下周登录二维码图片
      *
      * @param qrPath 二维码图片保存路径
-     * @return {@code true} 获取成功 {@code false} 获取失败
      * @author SXS
      * @date 2017年5月13日 上午12:13:51
      */
-    boolean getQR(String qrPath);
+    void getQR(String qrPath) throws IOException, InterruptedException ;
 
 
     /**
@@ -46,7 +46,7 @@ public interface LoginService {
      * @author SXS
      * @date 2017年5月13日 上午12:13:51
      */
-    BufferedImage getQR();
+    BufferedImage getQR() throws IOException, InterruptedException;
 
     /**
      * 登陆
@@ -64,11 +64,10 @@ public interface LoginService {
     /**
      * web初始化
      *
-     * @return {@code true} 成功 {@code false} 失败
      * @author SXS
      * @date 2017年5月13日 上午12:14:13
      */
-    boolean webWxInit();
+    void webWxInit() throws IOException, InterruptedException;
 
     /**
      * 微信状态通知
@@ -92,14 +91,14 @@ public interface LoginService {
      * @author SXS
      * @date 2017年5月13日 下午2:26:18
      */
-    void webWxGetContact();
+    void webWxGetContact() throws IOException, InterruptedException;
 
     /**
      * 批量获取群成员信息
      *
      * @date 2017年6月22日 下午11:24:35
      */
-    void WebWxBatchGetContact();
+    void WebWxBatchGetContact() throws IOException, InterruptedException;
 
 
     /**
@@ -112,7 +111,7 @@ public interface LoginService {
      * 获取群成员信息
      * @param groupName 群名
      */
-    List<Contacts> WebWxBatchGetContact(String groupName);
+    List<Contacts> WebWxBatchGetContact(String groupName) throws IOException, InterruptedException;
 
     /**
      * 批量获取群成员详细信息

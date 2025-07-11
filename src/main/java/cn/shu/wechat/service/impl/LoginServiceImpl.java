@@ -27,20 +27,16 @@ import cn.shu.wechat.utils.SleepUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
-import org.apache.http.Consts;
-import org.apache.http.HttpEntity;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 
-import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
+import java.net.http.HttpResponse;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -155,21 +151,20 @@ public class LoginServiceImpl implements LoginService {
 
         boolean isLogin = false;
         // 组装参数和URL
-        List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
-        params.add(new BasicNameValuePair(WxReqParamsConstant.LoginParaEnum.LOGIN_ICON.para(), WxReqParamsConstant.LoginParaEnum.LOGIN_ICON.value()));
-        params.add(new BasicNameValuePair(WxReqParamsConstant.LoginParaEnum.UUID.para(), Core.getUuid()));
-        params.add(new BasicNameValuePair(WxReqParamsConstant.LoginParaEnum.TIP.para(), WxReqParamsConstant.LoginParaEnum.TIP.value()));
+        HashMap<String, String> params = new HashMap<>();
+        params.put (WxReqParamsConstant.LoginParaEnum.LOGIN_ICON.para(), WxReqParamsConstant.LoginParaEnum.LOGIN_ICON.value());
+        params.put (WxReqParamsConstant.LoginParaEnum.UUID.para(), Core.getUuid());
+        params.put (WxReqParamsConstant.LoginParaEnum.TIP.para(), WxReqParamsConstant.LoginParaEnum.TIP.value());
 
         while1:
         while (!isLogin) {
 
             long millis = System.currentTimeMillis();
-            params.add(new BasicNameValuePair(WxReqParamsConstant.LoginParaEnum.R.para(), String.valueOf(millis / 1579L)));
-            params.add(new BasicNameValuePair(WxReqParamsConstant.LoginParaEnum._.para(), String.valueOf(millis)));
-            HttpEntity entity = HttpUtil.doGet(WxURLEnum.LOGIN_URL.getUrl(), params, true, null);
+            params.put (WxReqParamsConstant.LoginParaEnum.R.para(), String.valueOf(millis / 1579L));
+            params.put(WxReqParamsConstant.LoginParaEnum.LINE.para(), String.valueOf(millis));
 
             try {
-                String result = EntityUtils.toString(entity);
+                String result = HttpUtil.doGet(WxURLEnum.LOGIN_URL.getUrl(), params,null,true, HttpResponse.BodyHandlers.ofString());
                 WxRespConstant.CheckLoginResultCodeEnum codeEnum = checkQRCodeScanStatus(result);
                 switch (codeEnum) {
 
@@ -205,7 +200,6 @@ public class LoginServiceImpl implements LoginService {
                 }
 
             } catch (Exception e) {
-                e.printStackTrace();
                 callBack.CallBack(e.getMessage());
                 log.error("微信登陆异常：{}", e.getMessage());
             }
@@ -228,7 +222,6 @@ public class LoginServiceImpl implements LoginService {
 //            header.put("extspam", "Go8FCIkFEokFCggwMDAwMDAwMRAGGvAESySibk50w5Wb3uTl2c2h64jVVrV7gNs06GFlWplHQbY/5FfiO++1yH4ykCyNPWKXmco+wfQzK5R98D3so7rJ5LmGFvBLjGceleySrc3SOf2Pc1gVehzJgODeS0lDL3/I/0S2SSE98YgKleq6Uqx6ndTy9yaL9qFxJL7eiA/R3SEfTaW1SBoSITIu+EEkXff+Pv8NHOk7N57rcGk1w0ZzRrQDkXTOXFN2iHYIzAAZPIOY45Lsh+A4slpgnDiaOvRtlQYCt97nmPLuTipOJ8Qc5pM7ZsOsAPPrCQL7nK0I7aPrFDF0q4ziUUKettzW8MrAaiVfmbD1/VkmLNVqqZVvBCtRblXb5FHmtS8FxnqCzYP4WFvz3T0TcrOqwLX1M/DQvcHaGGw0B0y4bZMs7lVScGBFxMj3vbFi2SRKbKhaitxHfYHAOAa0X7/MSS0RNAjdwoyGHeOepXOKY+h3iHeqCvgOH6LOifdHf/1aaZNwSkGotYnYScW8Yx63LnSwba7+hESrtPa/huRmB9KWvMCKbDThL/nne14hnL277EDCSocPu3rOSYjuB9gKSOdVmWsj9Dxb/iZIe+S6AiG29Esm+/eUacSba0k8wn5HhHg9d4tIcixrxveflc8vi2/wNQGVFNsGO6tB5WF0xf/plngOvQ1/ivGV/C1Qpdhzznh0ExAVJ6dwzNg7qIEBaw+BzTJTUuRcPk92Sn6QDn2Pu3mpONaEumacjW4w6ipPnPw+g2TfywJjeEcpSZaP4Q3YV5HG8D6UjWA4GSkBKculWpdCMadx0usMomsSS/74QgpYqcPkmamB4nVv1JxczYITIqItIKjD35IGKAUwAA==");
 //
 //            HttpEntity entity = HttpUtil.doGet(url, null, false, header);
-            HttpEntity entity = HttpUtil.doGet(redirectUrl, null, false, null);
             //结果格式：
             //<error>
             // <ret>0</ret>
@@ -239,7 +232,7 @@ public class LoginServiceImpl implements LoginService {
             // <pass_ticket>KHZtdahInDUwtz486wGnaLKVAWJoVDZ6cxNJWs5KfWQ0qUW7F%2Ffqf1JebBG77B98</pass_ticket>
             // <isgrayscale>1</isgrayscale>
             // </error>
-            String resultOfXml = EntityUtils.toString(entity);
+            String resultOfXml = HttpUtil.doGet(redirectUrl, null, null, false,HttpResponse.BodyHandlers.ofString());
 
             //如果登录被禁止时，则登录返回的message内容不为空，下面代码则判断登录内容是否为空，不为空则退出程序
             String msg = getLoginMessage(resultOfXml);
@@ -271,12 +264,12 @@ public class LoginServiceImpl implements LoginService {
     /**
      * 登录
      *
-     * @param redirectUrl
+     * @param =
      */
     //TODO 未实现
     @Override
     public void doNoScanLogin(String uin) throws Exception {
-        try {
+
 //            String url = redirectUrl + "&fun=new&version=v2&mod=desktop&lang=zh_CN";
 //            Map<String, String> header = new HashMap<>();
 //            //UOS header
@@ -284,7 +277,6 @@ public class LoginServiceImpl implements LoginService {
 //            header.put("extspam", "Go8FCIkFEokFCggwMDAwMDAwMRAGGvAESySibk50w5Wb3uTl2c2h64jVVrV7gNs06GFlWplHQbY/5FfiO++1yH4ykCyNPWKXmco+wfQzK5R98D3so7rJ5LmGFvBLjGceleySrc3SOf2Pc1gVehzJgODeS0lDL3/I/0S2SSE98YgKleq6Uqx6ndTy9yaL9qFxJL7eiA/R3SEfTaW1SBoSITIu+EEkXff+Pv8NHOk7N57rcGk1w0ZzRrQDkXTOXFN2iHYIzAAZPIOY45Lsh+A4slpgnDiaOvRtlQYCt97nmPLuTipOJ8Qc5pM7ZsOsAPPrCQL7nK0I7aPrFDF0q4ziUUKettzW8MrAaiVfmbD1/VkmLNVqqZVvBCtRblXb5FHmtS8FxnqCzYP4WFvz3T0TcrOqwLX1M/DQvcHaGGw0B0y4bZMs7lVScGBFxMj3vbFi2SRKbKhaitxHfYHAOAa0X7/MSS0RNAjdwoyGHeOepXOKY+h3iHeqCvgOH6LOifdHf/1aaZNwSkGotYnYScW8Yx63LnSwba7+hESrtPa/huRmB9KWvMCKbDThL/nne14hnL277EDCSocPu3rOSYjuB9gKSOdVmWsj9Dxb/iZIe+S6AiG29Esm+/eUacSba0k8wn5HhHg9d4tIcixrxveflc8vi2/wNQGVFNsGO6tB5WF0xf/plngOvQ1/ivGV/C1Qpdhzznh0ExAVJ6dwzNg7qIEBaw+BzTJTUuRcPk92Sn6QDn2Pu3mpONaEumacjW4w6ipPnPw+g2TfywJjeEcpSZaP4Q3YV5HG8D6UjWA4GSkBKculWpdCMadx0usMomsSS/74QgpYqcPkmamB4nVv1JxczYITIqItIKjD35IGKAUwAA==");
 //
 //            HttpEntity entity = HttpUtil.doGet(url, null, false, header);
-            HttpEntity entity = HttpUtil.doGet("https://wx2.qq.com/cgi-bin/mmwebwx-bin/webwxpushloginurl?uin="+uin, null, false, null);
             //结果格式：
             //<error>
             // <ret>0</ret>
@@ -295,7 +287,7 @@ public class LoginServiceImpl implements LoginService {
             // <pass_ticket>KHZtdahInDUwtz486wGnaLKVAWJoVDZ6cxNJWs5KfWQ0qUW7F%2Ffqf1JebBG77B98</pass_ticket>
             // <isgrayscale>1</isgrayscale>
             // </error>
-            String resultOfXml = EntityUtils.toString(entity);
+            String resultOfXml = HttpUtil.doGet("https://wx2.qq.com/cgi-bin/mmwebwx-bin/webwxpushloginurl?uin="+uin, null, null,false, HttpResponse.BodyHandlers.ofString());
 
             //如果登录被禁止时，则登录返回的message内容不为空，下面代码则判断登录内容是否为空，不为空则退出程序
             String msg = getLoginMessage(resultOfXml);
@@ -318,76 +310,55 @@ public class LoginServiceImpl implements LoginService {
                         doc.getElementsByTagName(StorageLoginInfoEnum.pass_ticket.getKey()).item(0).getFirstChild()
                                 .getNodeValue());
             }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
 
 
     }
     @Override
-    public String getUuid() {
+    public String getUuid() throws IOException, InterruptedException, WebWXException {
         // 组装参数和URL
-        List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
-        params.add(new BasicNameValuePair(WxReqParamsConstant.UUIDParaEnum.APP_ID.para(), WxReqParamsConstant.UUIDParaEnum.APP_ID.value()));
-        params.add(new BasicNameValuePair(WxReqParamsConstant.UUIDParaEnum.FUN.para(), WxReqParamsConstant.UUIDParaEnum.FUN.value()));
-        params.add(new BasicNameValuePair(WxReqParamsConstant.UUIDParaEnum.LANG.para(), WxReqParamsConstant.UUIDParaEnum.LANG.value()));
-        params.add(new BasicNameValuePair(WxReqParamsConstant.UUIDParaEnum._.para(), String.valueOf(System.currentTimeMillis())));
+        HashMap<String, String> params = new HashMap<>();
+        params.put (WxReqParamsConstant.UUIDParaEnum.APP_ID.para(), WxReqParamsConstant.UUIDParaEnum.APP_ID.value());
+        params.put (WxReqParamsConstant.UUIDParaEnum.FUN.para(), WxReqParamsConstant.UUIDParaEnum.FUN.value());
+        params.put (WxReqParamsConstant.UUIDParaEnum.LANG.para(), WxReqParamsConstant.UUIDParaEnum.LANG.value());
+        params.put (WxReqParamsConstant.UUIDParaEnum.LINE.para(), String.valueOf(System.currentTimeMillis()));
 
-        HttpEntity entity = HttpUtil.doGet(WxURLEnum.UUID_URL.getUrl(), params, true, null);
-
-        try {
-            String result = EntityUtils.toString(entity);
+            String result = HttpUtil.doGet(WxURLEnum.UUID_URL.getUrl(), params,null,true, HttpResponse.BodyHandlers.ofString());
             String regEx = "window.QRLogin.code = (\\d+); window.QRLogin.uuid = \"(\\S+?)\";";
             Matcher matcher = CommonTools.getMatcher(regEx, result);
             if (matcher.find()) {
                 if (("200".equals(matcher.group(1)))) {
                     Core.setUuid(matcher.group(2));
+                }else{
+                    throw new WebWXException("get uuid return code {}"+matcher.group(1));
                 }
+            }else{
+                throw new WebWXException("matcher not find.");
             }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
 
         return Core.getUuid();
     }
 
     @Override
-    public boolean getQR(String qrPath) {
+    public void getQR(String qrPath) throws IOException, InterruptedException {
 
         String qrUrl = WxURLEnum.QRCODE_URL.getUrl() + Core.getUuid();
-        HttpEntity entity = HttpUtil.doGet(qrUrl, null, true, null);
-        try {
-            //下载二维码图片
-            OutputStream out = new FileOutputStream(qrPath);
-            byte[] bytes = EntityUtils.toByteArray(entity);
-            out.write(bytes);
-            out.flush();
-            out.close();
+         HttpUtil.doGet(qrUrl, null,null, true, HttpResponse.BodyHandlers.ofFile(Path.of(qrPath)));
             //二维码地址
-            String qrUrl2 = WxURLEnum.cAPI_qrcode.getUrl() + Core.getUuid();
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return false;
-        }
+        String qrUrl2 = WxURLEnum.cAPI_qrcode.getUrl() + Core.getUuid();
 
-        return true;
     }
 
     @Override
-    public BufferedImage getQR() {
+    public BufferedImage getQR() throws IOException, InterruptedException {
         String qrUrl = WxURLEnum.QRCODE_URL.getUrl() + Core.getUuid();
-        HttpEntity entity = HttpUtil.doGet(qrUrl, null, true, null);
-        try {
-            BufferedImage image = ImageIO.read(entity.getContent());
-            return image;
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
-        return null;
+
+        BufferedImage image = ImageIO.read(HttpUtil.doGet(qrUrl, null, null,true, HttpResponse.BodyHandlers.ofInputStream()));
+        return image;
+
     }
 
     @Override
-    public boolean webWxInit() {
+    public void webWxInit() throws IOException, InterruptedException {
         Core.setAlive(true);
         Core.setLastNormalRetCodeTime(System.currentTimeMillis());
         // 组装请求URL和参数
@@ -399,10 +370,7 @@ public class LoginServiceImpl implements LoginService {
         // 请求初始化接口
         WxInitReq wxInitReq = new WxInitReq();
         wxInitReq.setBaseRequest(Core.getLoginResultData().getBaseRequest());
-        HttpEntity entity = HttpUtil.doPost(url, JSON.toJSONString(wxInitReq));
-        try {
-            String result = EntityUtils.toString(entity, Consts.UTF_8);
-            WxInitResponse wxInitResponse = JSON.parseObject(result, WxInitResponse.class);
+            WxInitResponse wxInitResponse = HttpUtil.doPost(url, JSON.toJSONString(wxInitReq),HttpUtil.getJsonEntityBodyHandler(WxInitResponse.class));
             Contacts me = wxInitResponse.getUser();
             ;
 
@@ -427,11 +395,6 @@ public class LoginServiceImpl implements LoginService {
                 recentContacts.add(contacts.getUsername());
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
     }
 
     @Override
@@ -450,8 +413,7 @@ public class LoginServiceImpl implements LoginService {
         String paramStr = JSON.toJSONString(wxStatusNotifyReq);
 
         try {
-            HttpEntity entity = HttpUtil.doPost(url, paramStr);
-            EntityUtils.toString(entity, Consts.UTF_8);
+            HttpUtil.doPost(url, paramStr, HttpResponse.BodyHandlers.ofString());
         } catch (Exception e) {
             log.error("微信状态通知接口失败！", e);
         }
@@ -561,21 +523,16 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public void webWxGetContact() {
+    public void webWxGetContact() throws IOException, InterruptedException {
         String url = String.format(WxURLEnum.WEB_WX_GET_CONTACT.getUrl(),
                 Core.getLoginResultData().getUrl());
-        HttpEntity entity = HttpUtil.doPost(url, JSON.toJSONString(Core.getLoginResultData().getBaseRequest()));
-        if (entity == null) {
-            return;
-        }
-        try {
-            String result = EntityUtils.toString(entity, Consts.UTF_8);
-            JSONObject fullFriendsJsonList = JSON.parseObject(result);
+
+            JSONObject fullFriendsJsonList = HttpUtil.doPost(url, JSON.toJSONString(Core.getLoginResultData().getBaseRequest()),HttpUtil.getJsonEntityBodyHandler(JSONObject.class));
             // 查看seq是否为0，0表示好友列表已全部获取完毕，若大于0，则表示好友列表未获取完毕，当前的字节数（断点续传）
             long seq = 0;
             long currentTime = 0L;
-            List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
-            if (fullFriendsJsonList.get("Seq") != null) {
+        HashMap<String, String> params = new HashMap<>();
+        if (fullFriendsJsonList.get("Seq") != null) {
                 seq = fullFriendsJsonList.getLong("Seq");
                 currentTime = System.currentTimeMillis();
             }
@@ -585,15 +542,10 @@ public class LoginServiceImpl implements LoginService {
             // >0：好友未获取完毕，此时seq为已获取的字节数
             while (seq > 0) {
                 // 设置seq传参
-                params.add(new BasicNameValuePair("r", String.valueOf(currentTime)));
-                params.add(new BasicNameValuePair("seq", String.valueOf(seq)));
-                entity = HttpUtil.doGet(url, params, false, null);
+                params.put("r", String.valueOf(currentTime));
+                params.put("seq", String.valueOf(seq));
 
-                params.remove(new BasicNameValuePair("r", String.valueOf(currentTime)));
-                params.remove(new BasicNameValuePair("seq", String.valueOf(seq)));
-
-                result = EntityUtils.toString(entity, Consts.UTF_8);
-                fullFriendsJsonList = JSON.parseObject(result);
+                fullFriendsJsonList = HttpUtil.doGet(url, params, null,false, HttpUtil.getJsonEntityBodyHandler(JSONObject.class));
 
                 if (fullFriendsJsonList.get("Seq") != null) {
                     seq = fullFriendsJsonList.getLong("Seq");
@@ -615,9 +567,6 @@ public class LoginServiceImpl implements LoginService {
                                 .type(Contacts.ContactsType.ORDINARY_USER).build());
             }
 
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
     }
 
     /**
@@ -663,7 +612,7 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public void WebWxBatchGetContact() {
+    public void WebWxBatchGetContact() throws IOException, InterruptedException {
         String url = String.format(WxURLEnum.WEB_WX_BATCH_GET_CONTACT.getUrl(),
                 Core.getLoginResultData().getUrl(), new Date().getTime(),
                 Core.getLoginResultData().getPassTicket());
@@ -678,10 +627,9 @@ public class LoginServiceImpl implements LoginService {
         }).collect(Collectors.toList());
         paramMap.put("List", list);
         paramMap.put("BaseRequest",Core.getLoginResultData().getBaseRequest());
-        HttpEntity entity = HttpUtil.doPost(url, JSON.toJSONString(paramMap));
-        try {
-            String text = EntityUtils.toString(entity, Consts.UTF_8);
-            JSONObject obj = JSON.parseObject(text);
+
+
+            JSONObject obj =  HttpUtil.doPost(url, JSON.toJSONString(paramMap),HttpUtil.getJsonEntityBodyHandler(JSONObject.class));
             //群列表
             obj.getJSONArray("ContactList").parallelStream().forEach(groupObject -> {
                 // 群好友
@@ -698,14 +646,10 @@ public class LoginServiceImpl implements LoginService {
             });
 
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.error(e.getMessage());
-        }
     }
 
     @Override
-    public List<Contacts> WebWxBatchGetContact(String groupName) {
+    public List<Contacts> WebWxBatchGetContact(String groupName) throws IOException, InterruptedException {
 
         log.info("加载群成员开始：" + groupName);
         String url = String.format(WxURLEnum.WEB_WX_BATCH_GET_CONTACT.getUrl(),
@@ -720,11 +664,9 @@ public class LoginServiceImpl implements LoginService {
         list.add(map);
         paramMap.put("List", list);
         paramMap.put("BaseRequest", Core.getLoginResultData().getBaseRequest());
-        HttpEntity entity = HttpUtil.doPost(url, JSON.toJSONString(paramMap));
 
-        try {
-            String text = EntityUtils.toString(entity, Consts.UTF_8);
-            JSONObject obj = JSON.parseObject(text);
+
+            JSONObject obj = HttpUtil.doPost(url, JSON.toJSONString(paramMap),HttpUtil.getJsonEntityBodyHandler(JSONObject.class));
             //群列表
             JSONArray contactList = obj.getJSONArray("ContactList");
             for (int i = 0; i < contactList.size(); i++) {
@@ -747,10 +689,6 @@ public class LoginServiceImpl implements LoginService {
             }
 
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.error(e.getMessage());
-        }
         log.info("加载群成员结束：0");
         return new ArrayList<>();
     }
@@ -790,14 +728,11 @@ public class LoginServiceImpl implements LoginService {
             paramMap.put("Count", subList.size());
             paramMap.put("List", subList);
 
-            HttpEntity entity = HttpUtil.doPost(url, JSON.toJSONString(paramMap));
-
             try {
-                String text = EntityUtils.toString(entity, Consts.UTF_8);
-                JSONObject obj = JSON.parseObject(text);
+                JSONObject obj = HttpUtil.doPost(url, JSON.toJSONString(paramMap),HttpUtil.getJsonEntityBodyHandler(JSONObject.class));
                 JSONArray contactListArray = obj.getJSONArray("ContactList");
                 memberArray.addAll(contactListArray);
-            } catch (Exception e) {
+            } catch (IOException | InterruptedException e) {
                 log.error(e.getMessage());
             }
         }
@@ -886,7 +821,7 @@ public class LoginServiceImpl implements LoginService {
      * 同步消息 sync the messages
      *
      */
-    private WebWxSyncResp webWxSync() throws Exception {
+    private WebWxSyncResp webWxSync() throws IOException, InterruptedException, WebWXException {
         String url = String.format(WxURLEnum.WEB_WX_SYNC_URL.getUrl(),
                 Core.getLoginResultData().getUrl(),
                 Core.getLoginResultData().getBaseRequest().getWxSid(),
@@ -898,12 +833,9 @@ public class LoginServiceImpl implements LoginService {
                 .BaseRequest(Core.getLoginResultData().getBaseRequest()).build();
         String paramStr = JSON.toJSONString(wxSyncReq);
 
-
-        HttpEntity entity = HttpUtil.doPost(url, paramStr);
-        String text = EntityUtils.toString(entity, Consts.UTF_8);
-        WebWxSyncResp webWxSyncMsg = JSON.parseObject(text, WebWxSyncResp.class);
+        WebWxSyncResp webWxSyncMsg = HttpUtil.doPost(url, paramStr,HttpUtil.getJsonEntityBodyHandler(WebWxSyncResp.class));
         if (webWxSyncMsg.getBaseResponse().getRet() != 0) {
-            throw new Exception("消息同步失败！");
+            throw new WebWXException("消息同步失败！");
         } else {
             Core.getLoginResultData().setSyncCheckKey(webWxSyncMsg.getSyncCheckKey());
             Core.getLoginResultData().setSyncKey(
@@ -922,27 +854,24 @@ public class LoginServiceImpl implements LoginService {
      * 检查是否有新消息 check whether there's a message
      *
      */
-    private SyncCheckResp syncCheck() throws Exception {
+    private SyncCheckResp syncCheck() throws IOException, InterruptedException, WebWXException {
         // 组装请求URL和参数
         String url = String.format(WxURLEnum.SYNC_CHECK_URL.getUrl(), Core.getLoginResultData().getSyncUrl());
-        List<BasicNameValuePair> params = new ArrayList<>();
-        params.add(new BasicNameValuePair(WxReqParamsConstant.SyncCheckParaEnum.R.para(), String.valueOf(System.currentTimeMillis())));
-        params.add(new BasicNameValuePair(WxReqParamsConstant.SyncCheckParaEnum.S_KEY.para(), Core.getLoginResultData().getBaseRequest().getSKey()));
-        params.add(new BasicNameValuePair(WxReqParamsConstant.SyncCheckParaEnum.SID.para(), Core.getLoginResultData().getBaseRequest().getWxSid()));
-        params.add(new BasicNameValuePair(WxReqParamsConstant.SyncCheckParaEnum.UIN.para(), Core.getLoginResultData().getBaseRequest().getWxUin()));
-        params.add(new BasicNameValuePair(WxReqParamsConstant.SyncCheckParaEnum.DEVICE_ID.para(), Core.getLoginResultData().getBaseRequest().getDeviceId()));
-        params.add(new BasicNameValuePair(WxReqParamsConstant.SyncCheckParaEnum.SYNC_KEY.para(), Core.getLoginResultData().getSyncKey()));
-        params.add(new BasicNameValuePair(WxReqParamsConstant.SyncCheckParaEnum._.para(), String.valueOf(System.currentTimeMillis())));
+        HashMap<String, String> params = new HashMap<>();
+        params.put(WxReqParamsConstant.SyncCheckParaEnum.R.para(), String.valueOf(System.currentTimeMillis()));
+        params.put (WxReqParamsConstant.SyncCheckParaEnum.S_KEY.para(), Core.getLoginResultData().getBaseRequest().getSKey());
+        params.put (WxReqParamsConstant.SyncCheckParaEnum.SID.para(), Core.getLoginResultData().getBaseRequest().getWxSid());
+        params.put (WxReqParamsConstant.SyncCheckParaEnum.UIN.para(), Core.getLoginResultData().getBaseRequest().getWxUin());
+        params.put (WxReqParamsConstant.SyncCheckParaEnum.DEVICE_ID.para(), Core.getLoginResultData().getBaseRequest().getDeviceId());
+        params.put(WxReqParamsConstant.SyncCheckParaEnum.SYNC_KEY.para(), Core.getLoginResultData().getSyncKey());
+        params.put (WxReqParamsConstant.SyncCheckParaEnum.LINE.para(), String.valueOf(System.currentTimeMillis()));
         SleepUtils.sleep(7);
-        HttpEntity entity = HttpUtil.doGetOfReceive(url, params, true, null);
-        if (entity == null) {
-            throw new Exception("Entity is null!");
-        }
-        String result = EntityUtils.toString(entity);
+        String result = HttpUtil.doGet(url, params, null,true, HttpResponse.BodyHandlers.ofString());
+
         String regEx = "window.synccheck=\\{retcode:\"(\\d+)\",selector:\"(\\d+)\"\\}";
         Matcher matcher = CommonTools.getMatcher(regEx, result);
         if (!matcher.find()) {
-            throw new Exception("Unexpected sync check result: " + result);
+            throw new WebWXException("Unexpected sync check result: " + result);
         } else {
             return SyncCheckResp.builder().retCode(Integer.parseInt(matcher.group(1)))
                     .selector(matcher.group(2)).build();
@@ -979,7 +908,6 @@ public class LoginServiceImpl implements LoginService {
                         .collect(Collectors.toList()))
                 .Topic("")
                 .build();
-        HttpEntity httpEntity = HttpUtil.doPost(url, JSON.toJSONString(createRoomReq));
-        return JSON.parseObject(EntityUtils.toString(httpEntity, StandardCharsets.UTF_8), WxCreateRoomResp.class);
+        return HttpUtil.doPost(url, JSON.toJSONString(createRoomReq),HttpUtil.getJsonEntityBodyHandler(WxCreateRoomResp.class));
     }
 }

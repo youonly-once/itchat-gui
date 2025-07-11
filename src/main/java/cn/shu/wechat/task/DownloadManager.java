@@ -202,7 +202,6 @@ public class DownloadManager {
      * @param timeOut 超时时间（单位：毫秒）
      */
     public static void awaitDownload(String taskId, long timeOut) {
-        long startTime = System.currentTimeMillis();
         DownloadTask task = taskMap.get(taskId);
         if (task == null) {
             log.error("任务不存在，taskId=" + taskId);

@@ -26,6 +26,8 @@ public class WebWXSendingMsg {
 
     public String MediaId = null;
 
+    public String Signature;
+
     public WebWXSendingMsg() {
 
     }

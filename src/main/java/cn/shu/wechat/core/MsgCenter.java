@@ -23,13 +23,14 @@ import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.task.DownloadTask;
 import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
+import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
-import javax.annotation.Resource;
 import javax.swing.*;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -54,8 +55,8 @@ public class MsgCenter {
     @Resource
     private MessageMapper messageMapper;
 
-    @Resource
-    private LoginService loginService;
+   // @Resource
+  //  private LoginService loginService;
 
     /**
      * 群消息处理
@@ -180,8 +181,12 @@ public class MsgCenter {
         }
         Contacts contacts = Core.getMemberMap().get(userName);
         if (contacts == null) {
-            loginService.WebWxBatchGetContact(userName);
-            contacts = Core.getMemberMap().get(userName);
+//            try {
+//                loginService.WebWxBatchGetContact(userName);
+//            } catch (IOException | InterruptedException e) {
+//                log.error(e.getMessage());
+//            }
+//            contacts = Core.getMemberMap().get(userName);
         }
         if (userName.startsWith("@@")
                 && !StringUtils.isEmpty(msg.getMemberName()) &&
@@ -191,8 +196,14 @@ public class MsgCenter {
                     || CollectionUtils.isEmpty(contacts.getMemberlist())
                     || StringUtils.isEmpty(contacts.getMemberlist().get(0).getHeadimgurl())) {
                 //使用头像地址来判断是否获取过成员详细信息
-                List<Contacts> contactsList = loginService.WebWxBatchGetContact(userName);
-                contacts.setMemberlist(contactsList);
+//                List<Contacts> contactsList = null;
+//                try {
+//                    contactsList = loginService.WebWxBatchGetContact(userName);
+//                    contacts.setMemberlist(contactsList);
+//                } catch (IOException | InterruptedException e) {
+//                    log.error(e.getMessage());
+//                }
+
             }
         }
         return contacts;
@@ -477,7 +488,14 @@ public class MsgCenter {
         String logStr = LogUtil.printFromMeg(msg, msgType.getDesc());
         //=============如果是当前房间 发送已读通知==============
         if (msg.getFromUserName().equals(ChatPanelContainer.getCurrRoomId())) {
-            ExecutorServiceUtil.getGlobalExecutorService().execute(() -> MessageTools.sendStatusNotify(msg.getFromUserName()));
+            ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
+                try {
+                    MessageTools.sendStatusNotify(msg.getFromUserName());
+                } catch (IOException | InterruptedException e) {
+                    log.warn(e.getMessage());
+                    throw new RuntimeException(e);
+                }
+            });
         }
         log.info(logStr);
 

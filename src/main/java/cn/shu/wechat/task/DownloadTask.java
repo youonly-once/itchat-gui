@@ -7,6 +7,7 @@ import cn.shu.wechat.dto.response.sync.AddMsgList;
 import lombok.*;
 import lombok.extern.log4j.Log4j2;
 
+import java.net.http.HttpResponse;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -20,7 +21,6 @@ import java.util.function.Consumer;
  */
 @NoArgsConstructor
 @Log4j2
-@ToString
 public class DownloadTask<R> implements Callable<R> {
 
     /**
@@ -167,7 +167,7 @@ public class DownloadTask<R> implements Callable<R> {
                     this.result = (R) DownloadTools.downloadImgByMsgID(String.valueOf(msgId), resourceType);
                     break;
                 case ImgByteByMsgID:
-                    this.result = (R) DownloadTools.downloadImgByteByMsgID(String.valueOf(msgId), resourceType);
+                    this.result = (R) DownloadTools.downloadImgEntityByMsgID(String.valueOf(msgId), resourceType, HttpResponse.BodyHandlers.ofByteArray());
                     break;
                 default:
                     throw new IllegalArgumentException("未知下载类型: " + type);
@@ -189,5 +189,10 @@ public class DownloadTask<R> implements Callable<R> {
         return null;
     }
 
-
+    @Override
+    public String toString() {
+        return "DownloadTask{" +
+                "taskId='" + taskId + '\'' +
+                '}';
+    }
 }

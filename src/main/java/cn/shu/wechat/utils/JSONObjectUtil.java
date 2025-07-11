@@ -27,6 +27,12 @@ public class JSONObjectUtil {
     public static Map<String, Map<String, String>> getDifferenceMap(JSONObject oldO, JSONObject newO) {
         Map<String, Map<String, String>> difference = new HashMap<>(1);
         for (Map.Entry<String, Object> entry : oldO.entrySet()) {
+            if (entry.getKey().toLowerCase().equals("pyinitial")){
+                continue;
+            }
+            if (entry.getKey().toLowerCase().equals("pyquanpin")){
+                continue;
+            }
             String newV = newO.getString(entry.getKey());
             String oldV = entry.getValue() == null ? "" : entry.getValue().toString();
             //是否相同

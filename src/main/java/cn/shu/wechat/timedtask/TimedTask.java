@@ -3,16 +3,16 @@ package cn.shu.wechat.timedtask;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.utils.ChartUtil;
+import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
-import java.util.concurrent.ThreadPoolExecutor;
 
+import java.io.IOException;
+import java.util.concurrent.ThreadPoolExecutor;
 /**
  * @author SXS
  * @since 4/13/2021
@@ -21,9 +21,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Log4j2
 public class TimedTask {
     @Bean
-    public AsyncTaskExecutor asyncTaskExecutor() {
+    public ThreadPoolTaskExecutor asyncTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setThreadNamePrefix("ThreadPoolTaskExecutor-");
+        executor.setThreadNamePrefix("GetContactsTaskExecutor-");
         executor.setMaxPoolSize(1);
         executor.setCorePoolSize(1);
         executor.setQueueCapacity(0);
@@ -51,10 +51,15 @@ public class TimedTask {
     public void updateContactTask() {
         if (Core.isAlive()) {
             long l = System.currentTimeMillis();
-            loginService.webWxGetContact();
+            try {
+                loginService.webWxGetContact();
 
-            loginService.WebWxBatchGetContact();
-            log.info("获取联系人，耗时：{}（秒）", (System.currentTimeMillis() - l) / 1000);
+
+                loginService.WebWxBatchGetContact();
+                log.info("获取联系人，耗时：{}（秒）", (System.currentTimeMillis() - l) / 1000);
+            } catch (IOException | InterruptedException e) {
+                log.error("获取联系人，失败：{}",e.getMessage());
+            }
         }
     }
 }

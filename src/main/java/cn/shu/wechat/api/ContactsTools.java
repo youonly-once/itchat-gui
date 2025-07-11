@@ -213,7 +213,9 @@ public class ContactsTools {
         if (StringUtils.isEmpty(userName)){
            return null;
         }
-        long l = System.currentTimeMillis();
+        if (Core.getUserName().equals(userName)) {
+            return Core.getUserSelf();
+        }
         Optional<Contacts> contacts1 = Optional.ofNullable(groupName)
                 .map(Core.getMemberMap()::get)
                 .map(Contacts::getMemberlist)

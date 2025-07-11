@@ -18,14 +18,15 @@ import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -182,11 +183,16 @@ public class ChatMembersPanel extends ParentAvailablePanel {
             if (CollectionUtils.isEmpty(memberlist)
                     || StringUtils.isEmpty(memberlist.get(0).getHeadimgurl())) {
                 LoginService bean = SpringContextHolder.getBean(LoginService.class);
-                memberlist = bean.WebWxBatchGetContact(roomId);
-                members.clear();
-                Contacts contacts1 = Core.getMemberMap().get(Core.getUserName());
-                boolean remove = memberlist.remove(contacts1);
-                members.addAll(memberlist);
+                try {
+                    memberlist = bean.WebWxBatchGetContact(roomId);
+                    members.clear();
+                    Contacts contacts1 = Core.getMemberMap().get(Core.getUserName());
+                    boolean remove = memberlist.remove(contacts1);
+                    members.addAll(memberlist);
+                } catch (IOException | InterruptedException e) {
+                    log.error(e.getMessage());
+                }
+
             } else {
                 members.clear();
                 Contacts contacts1 = Core.getMemberMap().get(Core.getUserName());

@@ -9,10 +9,10 @@ public enum WxURLEnum {
 
     cAPI_qrcode("https://wx2.qq.com/l/", "API_qrcode"),
     BASE_URL("https://login.weixin.qq.com/", "基本的URL"),
-    UUID_URL("https://login.weixin.qq.com/" + "/jslogin", "获取UUID"),
-    QRCODE_URL("https://login.weixin.qq.com/" + "/qrcode/", "获取二维码"),
+    UUID_URL("https://login.weixin.qq.com" + "/jslogin", "获取UUID"),
+    QRCODE_URL("https://login.weixin.qq.com" + "/qrcode/", "获取二维码"),
     STATUS_NOTIFY_URL("%s/webwxstatusnotify?lang=zh_CN&pass_ticket=%s", "微信状态通知"),
-    LOGIN_URL(BASE_URL.url + "/cgi-bin/mmwebwx-bin/login", "登陆URL"),
+    LOGIN_URL(BASE_URL.url + "cgi-bin/mmwebwx-bin/login", "登陆URL"),
     INIT_URL("%s/webwxinit?r=%s&pass_ticket=%s&lang=zh_CN", "初始化URL"),
     SYNC_CHECK_URL("%s/synccheck", "检查心跳URL"),
     WEB_WX_SYNC_URL("%s/webwxsync?sid=%s&skey=%s", "web微信消息同步URL"),
@@ -29,15 +29,16 @@ public enum WxURLEnum {
     WEB_WX_REMARKNAME("%s/webwxoplog", "修改好友备注"),
     WEB_WX_VERIFYUSER("%s/webwxverifyuser?r=%s&lang=zh_CN&pass_ticket=%s", "被动添加好友"),
     WEB_WX_GET_MEDIA("%s/webwxgetmedia", "下载文件"),
-    WEB_WX_GET_HEAD_IMAGE_THUM("https://wx2.qq.com/%s", "下载头像"),
+    WEB_WX_GET_HEAD_IMAGE_THUM("https://wx2.qq.com%s", "下载头像"),
     WEB_WX_GET_HEAD_IMAGE("%s/webwxgetheadimg?seq=%s&username=%s", "下载头像"),
-    WEB_WX_GET_HEAD_IMAGE_BIG("https://wx2.qq.com/%s&type=big", "下载缩略图"),
+    WEB_WX_GET_HEAD_IMAGE_BIG("https://wx2.qq.com%s&type=big", "下载缩略图"),
     WEB_WX_REVOKE_MSG("%s/webwxrevokemsg?lang=zh_CN&pass_ticket=%s", "撤回消息"),
     WEB_WX_SEND_PIC_MSG("%s/webwxsendmsgimg?fun=async&f=json&pass_ticket=%s", "图片消息"),
     WEB_WX_SEND_VIDEO_MSG("%s/webwxsendvideomsg?fun=async&f=json&pass_ticket=%s", "图片消息"),
     WEB_WX_SEND_EMOTION_MSG("%s/webwxsendemoticon?fun=sys", "表情消息"),
     WEB_WX_SEND_APP_MSG("%s/webwxsendappmsg?fun=async&f=json&pass_ticket=%s", "APP消息"),
-    WEB_WX_SEND_NOTIFY_MSG("%s/webwxstatusnotify?lang=zh_CN", "状态通知");
+    WEB_WX_SEND_NOTIFY_MSG("%s/webwxstatusnotify?lang=zh_CN", "状态通知"),
+    WEB_WX_CHECK_UPLOAD_MSG("https://wx2.qq.com/cgi-bin/mmwebwx-bin/webwxcheckupload?lang=zh_CN&pass_ticket=%s","预上传检查");
 
     private String url;
     private String msg;

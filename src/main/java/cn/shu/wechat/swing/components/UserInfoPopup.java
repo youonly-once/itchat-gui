@@ -12,6 +12,7 @@ import cn.shu.wechat.swing.utils.ChatUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
+import lombok.extern.log4j.Log4j2;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -19,10 +20,12 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 /**
  * Created by 舒新胜 on 07/06/2017.
  */
+@Log4j2
 public class UserInfoPopup extends JPopupMenu {
     private JPanel contentPanel;
     private JLabel avatarLabel;
@@ -186,13 +189,19 @@ public class UserInfoPopup extends JPopupMenu {
                     ExecutorServiceUtil.getGlobalExecutorService().execute(new Runnable() {
                         @Override
                         public void run() {
-                            WebWXSendMsgResponse webWXSendMsgResponse = MessageTools.addFriend(contacts.getUsername(), contacts.getTicket());
-
-                            if (webWXSendMsgResponse.getBaseResponse().getRet() == 0) {
-                                Core.getMemberMap().put(contacts.getUsername(),contacts);
-                                ChatUtil.openOrCreateDirectChat(contacts.getUsername());
-                                contacts.setTicket(null);
+                            WebWXSendMsgResponse webWXSendMsgResponse = null;
+                            try {
+                                webWXSendMsgResponse = MessageTools.addFriend(contacts.getUsername(), contacts.getTicket());
+                                if (webWXSendMsgResponse.getBaseResponse().getRet() == 0) {
+                                    Core.getMemberMap().put(contacts.getUsername(),contacts);
+                                    ChatUtil.openOrCreateDirectChat(contacts.getUsername());
+                                    contacts.setTicket(null);
+                                }
+                            } catch (IOException | InterruptedException ex) {
+                                log.error(ex);
                             }
+
+
                         }
                     });
 

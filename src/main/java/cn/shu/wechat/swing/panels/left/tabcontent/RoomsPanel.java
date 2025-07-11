@@ -14,9 +14,11 @@ import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.swing.panels.left.TabOperationPanel;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
+import lombok.extern.log4j.Log4j2;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 左侧聊天列表
  * Created by 舒新胜 on 17-5-30.
  */
+@Log4j2
 public class RoomsPanel extends ParentAvailablePanel {
     private static RoomsPanel context;
 
@@ -130,7 +133,13 @@ public class RoomsPanel extends ParentAvailablePanel {
         //更新聊天列表未读数量
         hasReadCount(roomId);
         //发送消息已读通知
-        ExecutorServiceUtil.getGlobalExecutorService().execute(() -> MessageTools.sendStatusNotify(roomId));
+        ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
+            try {
+                MessageTools.sendStatusNotify(roomId);
+            } catch (IOException | InterruptedException e) {
+               log.error(e.getMessage());
+            }
+        });
     }
     /**
      * 添加房间

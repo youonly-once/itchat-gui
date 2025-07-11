@@ -22,12 +22,13 @@ import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
+
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
@@ -336,7 +337,11 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                     final long relay = sleep == 0 ? 2 * 60 * 1000 : sleep * 1000;
                     ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
                         SleepUtils.sleep(relay);
-                        MessageTools.sendRevokeMsgByUserId(msg.getToUserName(), msg.getMsgId(), msg.getNewMsgId() + "");
+                        try {
+                            MessageTools.sendRevokeMsgByUserId(msg.getToUserName(), msg.getMsgId(), msg.getNewMsgId() + "");
+                        } catch (IOException | InterruptedException e) {
+                            log.error(e.getMessage());
+                        }
                     });
                 }
             } catch (Exception e) {
@@ -379,8 +384,8 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                     message.setToUsername(msg.getToUserName());
                 }
             }
-        } catch (NullPointerException | IOException e) {
-            e.printStackTrace();
+        } catch (NullPointerException e) {
+            log.error(e.getMessage());
         }
         return messages;
     }
@@ -393,7 +398,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
      * @return
      * @throws IOException
      */
-    private List<Message> autoReply(String text, AddMsgList msg) throws IOException {
+    private List<Message> autoReply(String text, AddMsgList msg)  {
         try {
 
             String result = Ollama.chatWithHistory(msg.getFromUserName(),text);
@@ -410,8 +415,13 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
 
         } catch (Exception e) {
             log.error(e.getMessage());
-            return handleTuLingMsg(TuLingUtil.robotMsgTuling(text), msg);
+            try {
+                return handleTuLingMsg(TuLingUtil.robotMsgTuling(text), msg);
+            } catch (InterruptedException | IOException ex) {
+                log.error(ex.getMessage());
+            }
         }
+        return Collections.emptyList();
     }
 
     /**
@@ -428,9 +438,6 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             if (autoChatUserNameList.contains(to)) {
                 DownloadManager.awaitDownloadTimeOut(msgFilePath);
                 String result = Ollama.chatWithHistory(msg.getFromUserName(), Paths.get(msgFilePath));
-                if(StringUtils.isEmpty(result)){
-                    return null;
-                }
                 return Collections.singletonList(Message.builder()
                         .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                         .toUsername(msg.getFromUserName())
@@ -438,16 +445,13 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             } else if (autoChatWithPersonal && !msg.isGroupMsg()) {
                 DownloadManager.awaitDownloadTimeOut(msgFilePath);
                 String result = Ollama.chatWithHistory(msg.getFromUserName(),Paths.get(msgFilePath));
-                if(StringUtils.isEmpty(result)){
-                    return null;
-                }
                 return Collections.singletonList(Message.builder()
                         .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                         .toUsername(msg.getFromUserName())
                         .content(result).build());
             }
-        } catch (NullPointerException e) {
-            e.printStackTrace();
+        } catch (NullPointerException | IOException e) {
+            log.error(e.getMessage());
         }
         return null;
     }
@@ -751,9 +755,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             if (autoChatUserNameList.contains(to)) {
                 DownloadManager.awaitDownloadTimeOut(msgFilePath);
                 String result = Ollama.chatWithHistory(msg.getFromUserName(), Paths.get(msgFilePath));
-                if(StringUtils.isEmpty(result)){
-                    return null;
-                }
+
                 return Collections.singletonList(Message.builder()
                         .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                         .toUsername(msg.getFromUserName())
@@ -761,16 +763,13 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             } else if (autoChatWithPersonal && !msg.isGroupMsg()) {
                 DownloadManager.awaitDownloadTimeOut(msgFilePath);
                 String result = Ollama.chatWithHistory(msg.getFromUserName(),Paths.get(msgFilePath));
-                if(StringUtils.isEmpty(result)){
-                    return null;
-                }
                 return Collections.singletonList(Message.builder()
                         .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                         .toUsername(msg.getFromUserName())
                         .content(result).build());
             }
-        } catch (NullPointerException e) {
-            e.printStackTrace();
+        } catch (NullPointerException | IOException e) {
+            log.error(e.getMessage());
         }
         return null;
     }

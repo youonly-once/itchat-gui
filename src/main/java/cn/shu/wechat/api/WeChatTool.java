@@ -9,16 +9,14 @@ import cn.shu.wechat.core.Core;
 import cn.shu.wechat.constant.WxURLEnum;
 import cn.shu.wechat.utils.HttpUtil;
 import lombok.extern.log4j.Log4j2;
-import org.apache.http.Consts;
-import org.apache.http.HttpEntity;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
+
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 
 /**
  * 微信工具类
@@ -193,16 +191,17 @@ public final class WeChatTool {
     public static void webWXLogOut() {
         String url = String.format(WxURLEnum.WEB_WX_LOGOUT.getUrl(),
                 Core.getLoginResultData().getUrl());
-        List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
-        params.add(new BasicNameValuePair("redirect", "1"));
-        params.add(new BasicNameValuePair("type", "1"));
-        params.add(new BasicNameValuePair("skey", (String) Core.getLoginResultData().getBaseRequest().getSKey()));
+        HashMap<String, String> params = new HashMap<>();
+        params.put("redirect", "1");
+        params.put("type", "1");
+        params.put("skey", Core.getLoginResultData().getBaseRequest().getSKey());
+        String s = null;
         try {
-            HttpEntity entity = HttpUtil.doGet(url, params, false, null);
-            String text = EntityUtils.toString(entity, Consts.UTF_8);
-        } catch (Exception e) {
-            log.debug(e.getMessage());
+            s = HttpUtil.doGet(url, params, null, false, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        } catch (IOException | InterruptedException e) {
+            log.warn("退出信息:{}",e.getMessage());
         }
+        log.info("退出信息:{}",s);
     }
 
     /**

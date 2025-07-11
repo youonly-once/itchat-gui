@@ -42,7 +42,7 @@ public interface WxReqParamsConstant {
         UUID("uuid", ""),
         TIP("tip", "1"),
         R("r", ""),
-        _("_", "");
+        LINE("_", "");
 
         private final String para;
         private final String value;
@@ -95,7 +95,7 @@ public interface WxReqParamsConstant {
         APP_ID("appid", "wx782c26e4c19acffb"),
         FUN("fun", "new"),
         LANG("lang", "zh_CN"),
-        _("_", "时间戳");
+        LINE("_", "时间戳");
 
         private final String para;
         private final String value;
@@ -121,7 +121,7 @@ public interface WxReqParamsConstant {
         UIN("uin", ""),
         DEVICE_ID("deviceid", ""),
         SYNC_KEY("synckey", ""),
-        _("_", ""),
+        LINE("_", ""),
         ;
         private final String para;
         private final String value;

@@ -5,6 +5,7 @@ import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.LoginInfo;
+import cn.shu.wechat.exception.WebWXException;
 import cn.shu.wechat.mapper.LoginInfoMapper;
 import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.components.Colors;
@@ -322,10 +323,8 @@ public final class LoginFrame extends JFrame {
             loginInfo.setUin(Core.getLoginResultData().getBaseRequest().getWxUin());
             SpringContextHolder.getBean(LoginInfoMapper.class).insert(loginInfo);
 
-            if (!loginService.webWxInit()) {
-                showMessage(" 微信初始化异常");
-                WeChatStater.restartApplication();
-            }
+            loginService.webWxInit();
+
             wechatConfiguration.setBasePath(wechatConfiguration.getBasePath() + File.separator + MD5Util.MD5(Core.getNickName())+ File.separator);
 
 
@@ -364,7 +363,11 @@ public final class LoginFrame extends JFrame {
 
                     ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
                         log.info("获取群好友及群好友列表");
-                        loginService.WebWxBatchGetContact();
+                        try {
+                            loginService.WebWxBatchGetContact();
+                        } catch (IOException | InterruptedException e) {
+                            log.error(e.getMessage());
+                        }
                         Core.setCompare(true);
                         if (dHImg) {
                             downloadHeadImage();
@@ -375,8 +378,8 @@ public final class LoginFrame extends JFrame {
 
 
         } catch (Exception e) {
-            e.printStackTrace();
             log.error(e.getMessage());
+            showMessage(e.getMessage());
         }
     }
 
@@ -386,7 +389,12 @@ public final class LoginFrame extends JFrame {
     private void getUUID() {
         while (true) {
             log.info("1. 获取微信UUID");
-            String uuid = loginService.getUuid();
+            String uuid = null;
+            try {
+                uuid = loginService.getUuid();
+            } catch (IOException | WebWXException | InterruptedException e) {
+                log.error(e.getMessage());
+            }
             if (uuid != null) {
                 break;
             }
@@ -434,10 +442,11 @@ public final class LoginFrame extends JFrame {
         log.info("11. 下载联系人头像");
         long time = System.currentTimeMillis();
         Core.getMemberMap().forEach((key, value) -> {
-            ExecutorServiceUtil.getHeadImageDownloadExecutorService().submit(new Runnable() {
-                @Override
-                public void run() {
+            ExecutorServiceUtil.getHeadImageDownloadExecutorService().submit(() -> {
+                try {
                     Core.getContactHeadImgPath().put(value.getUsername(), DownloadTools.downloadBigHeadImg(value.getHeadimgurl(), value.getUsername()));
+                } catch (IOException | InterruptedException e) {
+                   log.error(e.getMessage());
                 }
             });
 
@@ -450,7 +459,7 @@ public final class LoginFrame extends JFrame {
                 log.warn("线程池关闭失败！");
             }
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            log.error(e.getMessage());
         }
 
         log.info("11. 下载联系人头像完成，耗时{}秒", (System.currentTimeMillis() - time) / 1000);

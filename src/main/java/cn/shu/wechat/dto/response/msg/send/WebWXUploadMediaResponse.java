@@ -14,15 +14,20 @@ public class WebWXUploadMediaResponse {
      */
     private BaseResponse BaseResponse;
     private String MediaId;
-    private int StartPos;
+    private long StartPos;
     private int CDNThumbImgHeight;
     private int CDNThumbImgWidth;
+    private String Signature;
+    private String AESKey;
     private String EncryFileName;
 
     @Data
-    private static class BaseResponse {
+    public static class BaseResponse {
         private int Ret;
         private String ErrMsg;
 
+    }
+    public boolean isSuccess() {
+        return BaseResponse != null && BaseResponse.Ret==0;
     }
 }

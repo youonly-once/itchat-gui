@@ -5,9 +5,10 @@ import cn.shu.wechat.dto.request.tuling.*;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @作者 舒新胜
@@ -26,7 +27,7 @@ public class TuLingUtil {
      * @throws NullPointerException
      * @throws JSONException
      */
-    public static TuLingResponseBean robotMsgTuling(String msg) throws IOException, NullPointerException, JSONException {
+    public static TuLingResponseBean robotMsgTuling(String msg) throws IOException, NullPointerException, JSONException, InterruptedException {
 
 
         TuLingRequestBean tuLingRequestBean = TuLingRequestBean.builder()
@@ -50,9 +51,7 @@ public class TuLingUtil {
                         .apiKey("f6446c50c3a24c0c85fded541c8613a7")
                         .userId("324129").build()).build();
         String data = JSON.toJSONString(tuLingRequestBean);
-        // HttpEntity httpEntity = ;
-        String result = EntityUtils.toString(HttpUtil.doPost(requestUrl, data));
-        // String result = HttpUtil.sendPost(requestUrl, data);
+        String result = HttpUtil.doPost(requestUrl, data, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         result = result.replaceAll("\"values\":\\{\"(url|image|video|new|voice)\":", "\"values\":{\"text\":");
         return JSON.parseObject(result, TuLingResponseBean.class);
     }
@@ -67,9 +66,9 @@ public class TuLingUtil {
      * @throws NullPointerException
      * @throws JSONException
      */
-    public static String robotMsgQYK(String msg) throws IOException, NullPointerException, JSONException {
+    public static String robotMsgQYK(String msg) throws IOException, NullPointerException, JSONException, InterruptedException {
         String url = "http://api.qingyunke.com/api.php?key=free&appid=0&msg=" + msg;
-        String result = EntityUtils.toString(HttpUtil.doPost(requestUrl, ""));
+        String result = HttpUtil.doPost(url, "", HttpResponse.BodyHandlers.ofString());
         JSONObject jsonObject = JSON.parseObject(result);
         return jsonObject.getString("content");
 
