@@ -40,6 +40,17 @@ public class MultipartBodyPublisher {
         return this;
     }
 
+    public MultipartBodyPublisher addFile(String name, byte[] bytes, String mimeType, String fileName) throws IOException {
+        String fileHeader = "--" + BOUNDARY + LINE_FEED +
+                "Content-Disposition: form-data; name=\"" + name + "\"; filename=\"" + fileName + "\"" + LINE_FEED +
+                "Content-Type: " + mimeType + LINE_FEED + LINE_FEED;
+
+        parts.add(fileHeader.getBytes(StandardCharsets.UTF_8));
+        parts.add(bytes);
+        parts.add(LINE_FEED.getBytes(StandardCharsets.UTF_8));
+        return this;
+    }
+
     public HttpRequest.BodyPublisher build() {
         String endBoundary = "--" + BOUNDARY + "--" + LINE_FEED;
         parts.add(endBoundary.getBytes(StandardCharsets.UTF_8));

@@ -8,29 +8,25 @@ import cn.shu.wechat.dto.request.msg.url.WXMsgUrl;
 import cn.shu.wechat.dto.response.sync.AddMsgList;
 import cn.shu.wechat.utils.DateUtils;
 import cn.shu.wechat.utils.HttpUtil;
-import cn.shu.wechat.utils.MD5Util;
 import cn.shu.wechat.utils.SpringContextHolder;
-import com.alibaba.fastjson.JSON;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
-import java.net.URI;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static cn.shu.wechat.utils.HttpUtil.getProgressBytesBodyHandler;
 
@@ -222,20 +218,14 @@ public class DownloadTools {
         return downloadHeadImg(url,userName);
 
     }
+
     /**
-     * 下载头像
-     *
-     * @param url 头像地址全路径
-     * @param userName    用户名
-     * @return 下载成功头像保存路径
-     * 下载失败 ""
+     * 根据用户名生成头像保存路径
+     * @param userName
+     * @return
+     * @throws IOException
      */
-    private static String downloadHeadImg(String url, String userName) throws IOException, InterruptedException {
-        byte[] bytes = HttpUtil.doGet(url, null, null, false, HttpResponse.BodyHandlers.ofByteArray());
-        //计算远端文件md5
-        String md5Str = MD5Util.getMD5(bytes);
-
-
+    public static Path generateHeadDownLoadPath(String userName) throws IOException {
         //创建本地文件
         String remarkNameByUserName = ContactsTools.getContactDisplayNameByUserName(userName);
         if (userName.startsWith("@@")) {
@@ -248,29 +238,27 @@ public class DownloadTools {
 
 
         Path saveDir = Paths.get(WECHAT_CONFIGURATION.getBasePath(), "headimg", remarkNameByUserName);
-        Path savePath = saveDir.resolve(md5Str + ".jpg");
-
-        try {
-            if (Files.notExists(saveDir)) {
-                Files.createDirectories(saveDir);
-            }
-            //头像文件已存在，md5及大小相等
-            if (bytes != null && Files.exists(savePath) && Files.size(savePath) == bytes.length) {
-                return savePath.toString();
-            }
-
-            // 写文件，使用try-with-resources保证关闭
-            try (OutputStream out = Files.newOutputStream(savePath)) {
-                if (bytes != null) {
-                    out.write(bytes);
-                }
-                out.flush();
-            }
-        } catch (IOException e) {
-            log.error(e.getMessage());
+        Path savePath = saveDir.resolve(UUID.randomUUID().toString().replace("-", "") + ".jpg");
+        if (Files.notExists(saveDir.getParent())) {
+            Files.createDirectories(saveDir);
         }
+        return savePath;
+    }
 
-        return savePath.toString();
+    /**
+     * 下载头像
+     *
+     * @param url      头像地址全路径
+     * @param userName 用户名
+     * @return 下载成功头像保存路径
+     * 下载失败 ""
+     */
+    private static String downloadHeadImg(String url, String userName) throws IOException, InterruptedException {
+
+        Path path = HttpUtil.doGet(url, null, null, false, HttpResponse.BodyHandlers.ofFile(generateHeadDownLoadPath(userName)));
+
+
+        return path.toString();
     }
 
     /**

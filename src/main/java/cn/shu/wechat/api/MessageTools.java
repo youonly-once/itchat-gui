@@ -22,14 +22,13 @@ import com.alibaba.fastjson.JSONObject;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -64,59 +63,59 @@ public class MessageTools {
     /**
      * 根据指定类型发送消息
      *
-     * @param messages    消息列表
+     * @param messages 消息列表
      * @param callback 文件上传进度回调
      */
     public static WebWXSendMsgResponse sendMsgByUserId(List<Message> messages, UploadTaskCallback callback) {
-        if (messages == null){
+        if (messages == null) {
             return WebWXSendMsgResponse.error("messages is null");
         }
         WebWXSendMsgResponse sendMsgResponse = null;
         for (Message message : messages) {
             try {
 
-                    String toUserName = message.getToUsername();
-                    if (StringUtils.isEmpty(toUserName)) {
-                        log.error("消息接收者为空：{}", message);
-                        return WebWXSendMsgResponse.error("toUserName is null");
+                String toUserName = message.getToUsername();
+                if (StringUtils.isEmpty(toUserName)) {
+                    log.error("消息接收者为空：{}", message);
+                    return WebWXSendMsgResponse.error("toUserName is null");
 
-                    }
+                }
 
-                        String content = XmlStreamUtil.formatXml(message.getContent());
-                        WxRespConstant.WXReceiveMsgCodeEnum byCode = WxRespConstant.WXReceiveMsgCodeEnum.getByCode(message.getMsgType());
-                        switch (byCode) {
-                            case MSGTYPE_IMAGE:
-                                sendMsgResponse = sendPicMsgByUserId(toUserName, message.getFilePath(), content, callback);
-                                break;
-                            case MSGTYPE_TEXT:
-                                sendMsgResponse = sendTextMsgByUserId(content, toUserName);
-                                break;
-                            case MSGTYPE_VIDEO:
-                                sendMsgResponse = sendVideoMsgByUserId(toUserName, message.getFilePath(), content, callback);
-                                break;
-                            case MSGTYPE_MAP:
-                                sendMsgResponse = sendMapMsgByUserId(toUserName, content);
-                                break;
-                            case MSGTYPE_EMOTICON:
-                                sendMsgResponse = sendEmotionMsgByUserId(toUserName, message.getFilePath(), content);
-                                break;
-                            case MSGTYPE_SHARECARD:
-                                sendMsgResponse = sendCardMsgByUserId(toUserName, content);
-                                break;
-                            default:
-                                //其他消息发送文件
-                                sendMsgResponse = sendAppMsgByUserId(toUserName, message.getFilePath(), content, callback);
-                        }
-                        log.info(LogUtil.printToMeg(byCode.getDesc(), toUserName, StringUtils.isEmpty(message.getFilePath()) ? content : message.getFilePath()));
-                        if (sendMsgResponse == null) {
-                            log.error("发送消息失败：{}", message);
-                            return WebWXSendMsgResponse.error("null");
-                        } else if (sendMsgResponse.getBaseResponse().getRet() != 0) {
-                            log.error("发送消息失败：{},{}", sendMsgResponse.getBaseResponse().getErrMsg(), message);
-                            return sendMsgResponse;
-                        }
-                        //存储数据库
-                         storeMsgToDB(message, sendMsgResponse, toUserName);
+                String content = XmlStreamUtil.formatXml(message.getContent());
+                WxRespConstant.WXReceiveMsgCodeEnum byCode = WxRespConstant.WXReceiveMsgCodeEnum.getByCode(message.getMsgType());
+                switch (byCode) {
+                    case MSGTYPE_IMAGE:
+                        sendMsgResponse = sendPicMsgByUserId(toUserName, message.getFilePath(), content, callback);
+                        break;
+                    case MSGTYPE_TEXT:
+                        sendMsgResponse = sendTextMsgByUserId(content, toUserName);
+                        break;
+                    case MSGTYPE_VIDEO:
+                        sendMsgResponse = sendVideoMsgByUserId(toUserName, message.getFilePath(), content, callback);
+                        break;
+                    case MSGTYPE_MAP:
+                        sendMsgResponse = sendMapMsgByUserId(toUserName, content);
+                        break;
+                    case MSGTYPE_EMOTICON:
+                        sendMsgResponse = sendEmotionMsgByUserId(toUserName, message.getFilePath(), content);
+                        break;
+                    case MSGTYPE_SHARECARD:
+                        sendMsgResponse = sendCardMsgByUserId(toUserName, content);
+                        break;
+                    default:
+                        //其他消息发送文件
+                        sendMsgResponse = sendAppMsgByUserId(toUserName, message.getFilePath(), content, callback);
+                }
+                log.info(LogUtil.printToMeg(byCode.getDesc(), toUserName, StringUtils.isEmpty(message.getFilePath()) ? content : message.getFilePath()));
+                if (sendMsgResponse == null) {
+                    log.error("发送消息失败：{}", message);
+                    return WebWXSendMsgResponse.error("null");
+                } else if (sendMsgResponse.getBaseResponse().getRet() != 0) {
+                    log.error("发送消息失败：{},{}", sendMsgResponse.getBaseResponse().getErrMsg(), message);
+                    return sendMsgResponse;
+                }
+                //存储数据库
+                storeMsgToDB(message, sendMsgResponse, toUserName);
 
 
             } catch (Exception e) {
@@ -132,7 +131,7 @@ public class MessageTools {
     /**
      * 根据指定类型发送消息
      *
-     * @param message    消息列表
+     * @param message 消息列表
      */
     public static WebWXSendMsgResponse sendMsgByUserId(Message message) {
         ArrayList<Message> messages = new ArrayList<>();
@@ -143,7 +142,8 @@ public class MessageTools {
 
     /**
      * 根据指定类型发送消息
-     * @param message 消息列表
+     *
+     * @param message  消息列表
      * @param callback 发送进度回调
      * @return
      */
@@ -192,6 +192,7 @@ public class MessageTools {
         }
         return new ArrayList<>();
     }
+
     /**
      * 保存发送的消息到数据库
      *
@@ -202,34 +203,37 @@ public class MessageTools {
     private static List<Message> storeMsgToDB(Message message, WebWXSendMsgResponse sendMsgResponse, String toUserName) {
         ArrayList<Message> messages = new ArrayList<>();
         messages.add(message);
-        return storeMsgToDB(messages,sendMsgResponse,toUserName);
+        return storeMsgToDB(messages, sendMsgResponse, toUserName);
     }
+
     /**
      * 根据指定类型发送消息
      *
-     * @param messages   消息列表
+     * @param messages 消息列表
      */
     public static WebWXSendMsgResponse sendMsgByUserId(List<Message> messages) {
-        return sendMsgByUserId(messages,null);
+        return sendMsgByUserId(messages, null);
     }
 
     /**
      * @param filePath     文件路径
      * @param fromUserName 该消息发送者
      * @param toUserName   消息接收者
-     * @param callback 上传进度回调
+     * @param callback     上传进度回调
      * @return {@link WebWXSendMsgResponse}
      */
     private static WebWXUploadMediaResponse webWxUploadMedia(String filePath, String fromUserName, String toUserName, UploadTaskCallback callback) throws WebWXException, IOException, InterruptedException {
 
         //一次上传的文件最大1M
-        long singleFileMaxSize = 1*1024*1024;
+        long singleFileMaxSize = 1 * 1024 * 1024;
         File file = new File(filePath);
         //等待另一线程的下载该资源完成
         //如果是上传之前下载或正在下载的资源，则等待下载完成
+        long t = System.currentTimeMillis();
         if (DownloadManager.containsTask(filePath)) {
             DownloadManager.awaitDownload(filePath, 10 * 60 * 1000L);
         }
+        System.out.print(String.valueOf(System.currentTimeMillis() - t));
         if (!file.exists()) {
             throw new WebWXException("待上传文件不存在：" + filePath);
         }
@@ -266,13 +270,12 @@ public class MessageTools {
 //        if (file.length() > maxFileSize) {
 //            //throw new WebWXException("不能上传大于25M的文件" );
 //        }
-        int fileId = fileCount++;
         String fileMime = MimeTypeUtil.getMimeByPath(file.getAbsolutePath());
-        if (fileMime ==null){
-            fileMime ="application";
+        if (fileMime == null) {
+            fileMime = "application";
         }
         String lastModifyFileDate = new SimpleDateFormat("yyyy MM dd HH:mm:ss").format(file.lastModified());
-        String passTicket = (String)  Core.getLoginResultData().getPassTicket();
+        String passTicket = Core.getLoginResultData().getPassTicket();
         if (StringUtils.isEmpty(passTicket)) {
             passTicket = "undefined";
         }
@@ -316,20 +319,33 @@ public class MessageTools {
 
             //大于1M发送方式
             //最后一个分片上传后返回msgid
-            ArrayList<String> partFilePathList = FileSplitAndMergeUtil.splitFile1(file.getAbsolutePath());
-            try {
-                WebWXUploadMediaResponse checkResponse = MessageTools.webWXCheckUpload(md5, filePath, fileSize, fromUserName, toUserName);
-                if(checkResponse == null || !checkResponse.isSuccess()) {
-                    throw new WebWXException("checkResponse is null");
-                }
-                if (StringUtils.isEmpty(checkResponse.getMediaId())){
+
+            WebWXUploadMediaResponse checkResponse = MessageTools.webWXCheckUpload(md5, filePath, fileSize, fromUserName, toUserName);
+            if (checkResponse == null || !checkResponse.isSuccess()) {
+                throw new WebWXException("checkResponse is null");
+            }
+
+            if (StringUtils.isEmpty(checkResponse.getMediaId())) {
+                paramMap.put("AESKey", checkResponse.getAESKey());
+                paramMap.put("Signature", checkResponse.getSignature());
+                int chunkSize = 2 * 512 * 1024;
+                int totalChunks = (int) Math.ceil((double) fileSize / chunkSize);
+
+                try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
                     //微信服务器无该文件
 
-                    paramMap.put("AESKey",checkResponse.getAESKey());
-                    paramMap.put("Signature",checkResponse.getSignature());
-                    for (int i = 0; i < partFilePathList.size(); i++) {
+
+                    byte[] buffer = new byte[chunkSize];
+                    for (int i = 0; i < totalChunks; i++) {
+                        int readLen;
+                        raf.seek((long) i * chunkSize);
+                        readLen = raf.read(buffer);
+                        byte[] actualBytes = (readLen == buffer.length) ? buffer : Arrays.copyOf(buffer, readLen);
+                        if (readLen == 0) {
+                            throw new WebWXException("第 " + i + " 片读取失败，长度为 0");
+                        }
                         MultipartBodyPublisher multipart = new MultipartBodyPublisher()
-                                .addText("id", String.format("WU_FILE_%d", fileId))
+                                .addText("id", String.format("WU_FILE_%d", i))
                                 .addText("name", filePath)
                                 .addText("type", fileMime)
                                 .addText("lastModifieDate", lastModifyFileDate)
@@ -338,9 +354,9 @@ public class MessageTools {
                                 .addText("uploadmediarequest", JSON.toJSONString(paramMap))
                                 .addText("webwx_data_ticket", webWXDataTicket)
                                 .addText("pass_ticket", passTicket)
-                                .addText("chunks", String.valueOf(partFilePathList.size()))
+                                .addText("chunks", String.valueOf(totalChunks))
                                 .addText("chunk", String.valueOf(i))
-                                .addFile("filename", Path.of(partFilePathList.get(i)), fileMime, filePath);
+                                .addFile("filename", actualBytes, fileMime, filePath);
                         webWXUploadMediaResponse = HttpUtil.doPostFile(url, multipart, HttpUtil.getJsonEntityBodyHandler(WebWXUploadMediaResponse.class));
 
                         if (webWXUploadMediaResponse == null || !webWXUploadMediaResponse.isSuccess()) {
@@ -348,22 +364,20 @@ public class MessageTools {
                         }
 
                         if (callback != null) {
-                            callback.onTaskSuccess(i + 1, partFilePathList.size() + 1);
+                            callback.onTaskSuccess(i, totalChunks);
                         }
 
                     }
                     webWXUploadMediaResponse.setSignature(checkResponse.getSignature());
                     webWXUploadMediaResponse.setAESKey(checkResponse.getAESKey());
-                }else{
-                    BeanUtils.copyProperties(checkResponse, webWXUploadMediaResponse);
-                    //微信服务器存在该文件
-                    webWXUploadMediaResponse.setStartPos(fileSize);
                 }
-
-            }finally {
-                //删除分片文件
-                FileSplitAndMergeUtil.deletePartFile(partFilePathList);
+            } else {
+                BeanUtils.copyProperties(checkResponse, webWXUploadMediaResponse);
+                //微信服务器存在该文件
+                webWXUploadMediaResponse.setStartPos(fileSize);
             }
+
+
         }
 
         if (webWXUploadMediaResponse == null
@@ -383,7 +397,7 @@ public class MessageTools {
      * @date 2017年5月4日 下午11:17:38
      */
     private static WebWXSendMsgResponse sendTextMsgByUserId(String content, String toUserName) throws IOException, InterruptedException {
-        String url = String.format(WxURLEnum.WEB_WX_SEND_MSG.getUrl(),  Core.getLoginResultData().getUrl());
+        String url = String.format(WxURLEnum.WEB_WX_SEND_MSG.getUrl(), Core.getLoginResultData().getUrl());
         WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
         WebWXSendingMsg textMsg = new WebWXSendingTextMsg();
         textMsg.Content = content;
@@ -391,6 +405,7 @@ public class MessageTools {
         msgRequest.Msg = textMsg;
         return sendMsg(msgRequest, url);
     }
+
     /**
      * 根据UserName发送地图消息
      *
@@ -400,8 +415,8 @@ public class MessageTools {
      * @author SXS
      * @date 2021年9月26日 下午14:18:38
      */
-    private static WebWXSendMsgResponse sendMapMsgByUserId(String toUserName,String content) throws IOException, InterruptedException {
-        String url = String.format(WxURLEnum.WEB_WX_SEND_MSG.getUrl(),  Core.getLoginResultData().getUrl());
+    private static WebWXSendMsgResponse sendMapMsgByUserId(String toUserName, String content) throws IOException, InterruptedException {
+        String url = String.format(WxURLEnum.WEB_WX_SEND_MSG.getUrl(), Core.getLoginResultData().getUrl());
         WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
         WebWXSendingMsg textMsg = new WebWXSendingMapMsg();
         textMsg.Content = content;
@@ -409,6 +424,7 @@ public class MessageTools {
         msgRequest.Msg = textMsg;
         return sendMsg(msgRequest, url);
     }
+
     /**
      * 根据UserName发送名片消息
      *
@@ -419,7 +435,7 @@ public class MessageTools {
      * @date 2017年5月4日 下午11:17:38
      */
     private static WebWXSendMsgResponse sendCardMsgByUserId(String toUserName, String content) throws IOException, InterruptedException {
-        String url = String.format(WxURLEnum.WEB_WX_SEND_MSG.getUrl(),  Core.getLoginResultData().getUrl());
+        String url = String.format(WxURLEnum.WEB_WX_SEND_MSG.getUrl(), Core.getLoginResultData().getUrl());
         WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
         WebWXSendingCardMsg textMsg = new WebWXSendingCardMsg();
         textMsg.Content = content;
@@ -444,15 +460,15 @@ public class MessageTools {
      * @author SXS
      * @date 2017年5月7日 下午10:34:24
      */
-    private static WebWXSendMsgResponse sendPicMsgByUserId(String userId, String filePath, String content,UploadTaskCallback callback) throws WebWXException, IOException, InterruptedException {
+    private static WebWXSendMsgResponse sendPicMsgByUserId(String userId, String filePath, String content, UploadTaskCallback callback) throws WebWXException, IOException, InterruptedException {
         String mediaId = "";
         if (StringUtils.isEmpty(content) || !content.startsWith("@")) {
             WebWXUploadMediaResponse resp = webWxUploadMedia(filePath, Core.getUserName(), userId, callback);
             mediaId = resp.getMediaId();
             content = "";
         }
-        String url = String.format(WxURLEnum.WEB_WX_SEND_PIC_MSG.getUrl(),  Core.getLoginResultData().getUrl(),
-                 Core.getLoginResultData().getPassTicket());
+        String url = String.format(WxURLEnum.WEB_WX_SEND_PIC_MSG.getUrl(), Core.getLoginResultData().getUrl(),
+                Core.getLoginResultData().getPassTicket());
 
         WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
         WebWXSendingPicMsg textMsg = new WebWXSendingPicMsg();
@@ -461,8 +477,8 @@ public class MessageTools {
         textMsg.Content = content;
         msgRequest.Msg = textMsg;
         WebWXSendMsgResponse webWXSendMsgResponse = sendMsg(msgRequest, url);
-        if (callback!=null){
-            callback.onTaskSuccess(100,100);
+        if (callback != null) {
+            callback.onTaskSuccess(100, 100);
         }
 
         return webWXSendMsgResponse;
@@ -484,7 +500,7 @@ public class MessageTools {
      */
     private static WebWXSendMsgResponse sendEmotionMsgByUserId(String userId, String filePath, String content) throws WebWXException, IOException, InterruptedException {
 
-        String url = String.format(WxURLEnum.WEB_WX_SEND_EMOTION_MSG.getUrl(),  Core.getLoginResultData().getUrl());
+        String url = String.format(WxURLEnum.WEB_WX_SEND_EMOTION_MSG.getUrl(), Core.getLoginResultData().getUrl());
 
         WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
         WebWXSendingEmotionMsg textMsg = new WebWXSendingEmotionMsg();
@@ -526,7 +542,7 @@ public class MessageTools {
 
         String url = String.format(WxURLEnum.WEB_WX_REVOKE_MSG.getUrl()
                 , Core.getLoginResultData().getUrl()
-        ,Core.getLoginResultData().getPassTicket());
+                , Core.getLoginResultData().getPassTicket());
 
         WebWXSendingRevokeMsg webWXSendingRevokeMsg = new WebWXSendingRevokeMsg();
         webWXSendingRevokeMsg.ClientMsgId = clientMsgId;
@@ -559,7 +575,7 @@ public class MessageTools {
             mediaId = resp.getMediaId();
             content = "";
         }
-        String url = String.format(WxURLEnum.WEB_WX_SEND_VIDEO_MSG.getUrl(),  Core.getLoginResultData().getUrl(),
+        String url = String.format(WxURLEnum.WEB_WX_SEND_VIDEO_MSG.getUrl(), Core.getLoginResultData().getUrl(),
                 Core.getLoginResultData().getPassTicket());
         WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
         WebWXSendingVideoMsg textMsg = new WebWXSendingVideoMsg();
@@ -569,8 +585,8 @@ public class MessageTools {
         msgRequest.Msg = textMsg;
         msgRequest.BaseRequest = Core.getLoginResultData().getBaseRequest();
         WebWXSendMsgResponse webWXSendMsgResponse = sendMsg(msgRequest, url);
-        if (callback!=null){
-            callback.onTaskSuccess(100,100);
+        if (callback != null) {
+            callback.onTaskSuccess(100, 100);
         }
         return webWXSendMsgResponse;
 
@@ -590,8 +606,8 @@ public class MessageTools {
      * @date 2017年5月10日 上午12:21:28
      */
     private static WebWXSendMsgResponse sendAppMsgByUserId(String userId, String filePath, String content, UploadTaskCallback callback) throws IOException, WebWXException, InterruptedException {
-        String url = String.format(WxURLEnum.WEB_WX_SEND_APP_MSG.getUrl(),  Core.getLoginResultData().getUrl(),
-                 Core.getLoginResultData().getPassTicket());
+        String url = String.format(WxURLEnum.WEB_WX_SEND_APP_MSG.getUrl(), Core.getLoginResultData().getUrl(),
+                Core.getLoginResultData().getPassTicket());
         WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
         WebWXSendingAppMsg textMsg = new WebWXSendingAppMsg();
         if (StringUtils.isEmpty(content)) {
@@ -610,11 +626,11 @@ public class MessageTools {
                     "<type>6</type>" +
                     "<content></content>" +
                     "<url></url>" +
-                    "<lowurl></lowurl>"+
-                     "<appattach>" +
-                        "<totallen>" + totallen + "</totallen>" +
-                        "<attachid>" + attachid + "</attachid>" +
-                        "<fileext>" + fileext + "</fileext>" +
+                    "<lowurl></lowurl>" +
+                    "<appattach>" +
+                    "<totallen>" + totallen + "</totallen>" +
+                    "<attachid>" + attachid + "</attachid>" +
+                    "<fileext>" + fileext + "</fileext>" +
                     "</appattach>" +
                     "<extinfo></extinfo>" +
                     "</appmsg>";
@@ -645,36 +661,37 @@ public class MessageTools {
         msgRequest.Msg = textMsg;
         msgRequest.BaseRequest = Core.getLoginResultData().getBaseRequest();
         WebWXSendMsgResponse webWXSendMsgResponse = sendMsg(msgRequest, url);
-        if (callback!=null){
-            callback.onTaskSuccess(100,100);
+        if (callback != null) {
+            callback.onTaskSuccess(100, 100);
         }
         return webWXSendMsgResponse;
     }
+
     /**
      * 发送APP消息
      *
-     * @param userId   消息接收者UserName
+     * @param userId                   消息接收者UserName
      * @param webWXUploadMediaResponse 上传文件信息
      * @return {@link WebWXSendMsgResponse}
      * @author SXS
      * @date 2017年5月10日 上午12:21:28
      */
-    private static WebWXSendMsgResponse sendAppMsgByUserId(String userId, WebWXUploadMediaResponse webWXUploadMediaResponse,String filePath) throws IOException, InterruptedException {
-        String url = String.format(WxURLEnum.WEB_WX_SEND_APP_MSG.getUrl(),  Core.getLoginResultData().getUrl(),
-                 Core.getLoginResultData().getPassTicket());
-            String title = new File(filePath).getName();
-            String fileext = title.split("\\.")[1];
-            if (fileext == null) {
-                fileext = "";
-            }
-            long totallen = webWXUploadMediaResponse.getStartPos();
-            String attachid = webWXUploadMediaResponse.getMediaId();
-            String   content = "<appmsg appid='wxeb7ec651dd0aefa9' sdkver=''>" +
-                    "<title>" + title + "</title><des></des><action></action><type>6</type><content></content><url></url><lowurl></lowurl>"
-                    + "<appattach><totallen>" + totallen + "</totallen>" +
-                    "<attachid>" + attachid + "</attachid>" +
-                    "<fileext>" + fileext + "</fileext>" +
-                    "</appattach><extinfo></extinfo></appmsg>";
+    private static WebWXSendMsgResponse sendAppMsgByUserId(String userId, WebWXUploadMediaResponse webWXUploadMediaResponse, String filePath) throws IOException, InterruptedException {
+        String url = String.format(WxURLEnum.WEB_WX_SEND_APP_MSG.getUrl(), Core.getLoginResultData().getUrl(),
+                Core.getLoginResultData().getPassTicket());
+        String title = new File(filePath).getName();
+        String fileext = title.split("\\.")[1];
+        if (fileext == null) {
+            fileext = "";
+        }
+        long totallen = webWXUploadMediaResponse.getStartPos();
+        String attachid = webWXUploadMediaResponse.getMediaId();
+        String content = "<appmsg appid='wxeb7ec651dd0aefa9' sdkver=''>" +
+                "<title>" + title + "</title><des></des><action></action><type>6</type><content></content><url></url><lowurl></lowurl>"
+                + "<appattach><totallen>" + totallen + "</totallen>" +
+                "<attachid>" + attachid + "</attachid>" +
+                "<fileext>" + fileext + "</fileext>" +
+                "</appattach><extinfo></extinfo></appmsg>";
         WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
         WebWXSendingAppMsg textMsg = new WebWXSendingAppMsg();
         textMsg.ToUserName = userId;
@@ -686,37 +703,38 @@ public class MessageTools {
     /**
      * 发送状态通知
      *
-     * @param toUserName   消息接收者UserName
+     * @param toUserName 消息接收者UserName
      * @return {@link WebWXSendMsgResponse}
      * @author SXS
      * @date 2017年5月10日 上午12:21:28
      */
     public static WebWXSendMsgResponse sendStatusNotify(String toUserName) throws IOException, InterruptedException {
-        String url = String.format(WxURLEnum.WEB_WX_SEND_NOTIFY_MSG.getUrl(),  Core.getLoginResultData().getUrl());
+        String url = String.format(WxURLEnum.WEB_WX_SEND_NOTIFY_MSG.getUrl(), Core.getLoginResultData().getUrl());
         WebWXSendingNotifyMsg webWXSendingNotifyMsg = new WebWXSendingNotifyMsg();
         webWXSendingNotifyMsg.Code = 1;
         webWXSendingNotifyMsg.FromUserName = Core.getUserName();
-        webWXSendingNotifyMsg.ToUserName =toUserName;
+        webWXSendingNotifyMsg.ToUserName = toUserName;
         String paramStr = JSON.toJSONString(webWXSendingNotifyMsg);
 
 
         return HttpUtil.doPost(url, paramStr, HttpUtil.getJsonEntityBodyHandler(WebWXSendMsgResponse.class));
 
     }
+
     /**
      * 被动添加好友
      *
      * @param userName 用户名
-     * @param ticket  ticket
+     * @param ticket   ticket
      * @date 2017年6月29日 下午10:08:43
      */
-    public static WebWXSendMsgResponse addFriend(String userName,String ticket) throws IOException, InterruptedException {
+    public static WebWXSendMsgResponse addFriend(String userName, String ticket) throws IOException, InterruptedException {
 
         // 接受好友请求
         int status = WxReqParamsConstant.VerifyFriendEnum.ACCEPT.getCode();
 
 
-        String url = String.format(WxURLEnum.WEB_WX_VERIFYUSER.getUrl(),  Core.getLoginResultData().getUrl(),
+        String url = String.format(WxURLEnum.WEB_WX_VERIFYUSER.getUrl(), Core.getLoginResultData().getUrl(),
                 System.currentTimeMillis() / 3158L, Core.getLoginResultData().getPassTicket());
 
         List<Map<String, Object>> verifyUserList = new ArrayList<Map<String, Object>>();
@@ -741,19 +759,20 @@ public class MessageTools {
         String paramStr = JSON.toJSONString(body);
         WebWXSendMsgResponse webWXSendMsgResponse = HttpUtil.doPost(url, paramStr, HttpUtil.getJsonEntityBodyHandler(WebWXSendMsgResponse.class));
         log.info("自动添加好友：" + webWXSendMsgResponse);
-        return  webWXSendMsgResponse;
-
+        return webWXSendMsgResponse;
 
 
     }
+
     /**
      * 修改联系人备注
-     * @param userName 用户id
+     *
+     * @param userName   用户id
      * @param remarkName 备注名称
      * @return 参数
      */
-    public static WebWXSendMsgResponse modifyRemarkName(String userName ,String remarkName) throws IOException, InterruptedException {
-        String url = String.format(WxURLEnum.WEB_WX_REMARKNAME.getUrl(),  Core.getLoginResultData().getUrl());
+    public static WebWXSendMsgResponse modifyRemarkName(String userName, String remarkName) throws IOException, InterruptedException {
+        String url = String.format(WxURLEnum.WEB_WX_REMARKNAME.getUrl(), Core.getLoginResultData().getUrl());
         WebWXSendMsgRequest msgRequest = new WebWXSendMsgRequest();
         WebWXModifyRemarkNameMsg msg = new WebWXModifyRemarkNameMsg();
         msg.CmdId = 2;
@@ -762,6 +781,7 @@ public class MessageTools {
         msgRequest.Msg = msg;
         return sendMsg(msgRequest, url);
     }
+
     /**
      * 发送消息
      *
@@ -774,7 +794,7 @@ public class MessageTools {
         webWXSendMsgRequest.BaseRequest = Core.getLoginResultData().getBaseRequest();
         String paramStr = JSON.toJSONString(webWXSendMsgRequest);
 
-        return HttpUtil.doPost(url, paramStr,HttpUtil.getJsonEntityBodyHandler(WebWXSendMsgResponse.class));
+        return HttpUtil.doPost(url, paramStr, HttpUtil.getJsonEntityBodyHandler(WebWXSendMsgResponse.class));
     }
 
 
@@ -834,7 +854,7 @@ public class MessageTools {
         return map;
     }
 
-    public static WebWXUploadMediaResponse webWXCheckUpload(String md5,String fileName,long fileSize,String fromUserName,String toUserName) throws IOException, InterruptedException {
+    public static WebWXUploadMediaResponse webWXCheckUpload(String md5, String fileName, long fileSize, String fromUserName, String toUserName) throws IOException, InterruptedException {
         JSONObject body = new JSONObject();
         body.put("BaseRequest", Core.getLoginResultData().getBaseRequest());
         body.put("FileMd5", md5);
@@ -847,7 +867,7 @@ public class MessageTools {
 
         String paramStr = JSON.toJSONString(body);
         String url = String.format(WxURLEnum.WEB_WX_CHECK_UPLOAD_MSG.getUrl(), Core.getLoginResultData().getPassTicket());
-        return HttpUtil.doPost(url, paramStr,HttpUtil.getJsonEntityBodyHandler(WebWXUploadMediaResponse.class));
+        return HttpUtil.doPost(url, paramStr, HttpUtil.getJsonEntityBodyHandler(WebWXUploadMediaResponse.class));
 
     }
 
