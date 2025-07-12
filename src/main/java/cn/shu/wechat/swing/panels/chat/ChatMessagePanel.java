@@ -277,13 +277,8 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                 File selectedFile = fileChooser.getSelectedFile();
                 if (selectedFile != null) {
                     String path = selectedFile.getAbsolutePath();
-                    if (new File(path).length() > MessageTools.maxFileSize) {
-                        JOptionPane.showMessageDialog(MainFrame.getContext(), "只能上传20M以内文件", "文件太大", JOptionPane.ERROR_MESSAGE);
-                    } else {
-                        sendFileMessage(path);
-                        showSendingMessage();
-                    }
-
+                    sendFileMessage(path);
+                    showSendingMessage();
                 }
 
                 super.mouseClicked(e);

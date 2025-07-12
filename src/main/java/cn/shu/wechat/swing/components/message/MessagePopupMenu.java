@@ -2,12 +2,13 @@ package cn.shu.wechat.swing.components.message;
 
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.constant.WxRespConstant;
-import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.dto.response.msg.send.WebWXSendMsgResponse;
 import cn.shu.wechat.entity.Message;
+import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCMenuItemUI;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
+import cn.shu.wechat.swing.frames.ForwardMsgDialog;
 import cn.shu.wechat.swing.utils.ChatUtil;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 import cn.shu.wechat.swing.utils.FileUtil;
@@ -54,9 +55,14 @@ public class MessagePopupMenu extends JPopupMenu {
                         }
                         break;
                     }
+                    case MSGTYPE_VIDEO: {
+                        TagJLayeredPane videoPanel = (TagJLayeredPane) getInvoker();
+                        Object obj = videoPanel.getTag();
+                        break;
+                    }
+
                     case MSGTYPE_IMAGE:
                     case MSGTYPE_EMOTICON:
-                    case MSGTYPE_VIDEO:
                     case MSGTYPE_VOICE:
                     case MSGTYPE_APP: {
                         MessageImageLabel imageLabel = (MessageImageLabel) getInvoker();
@@ -94,6 +100,11 @@ public class MessagePopupMenu extends JPopupMenu {
                         obj = textArea.getTag();
                         break;
                     }
+                    case MSGTYPE_VIDEO: {
+                        TagJLayeredPane videoPanel = (TagJLayeredPane) getInvoker();
+                        obj = videoPanel.getTag();
+                        break;
+                    }
                     case MSGTYPE_EMOTICON:
                     case MSGTYPE_IMAGE: {
                         MessageImageLabel imageLabel = (MessageImageLabel) getInvoker();
@@ -116,7 +127,37 @@ public class MessagePopupMenu extends JPopupMenu {
         forwardItem.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("转发");
+                Object obj = null;
+                switch (messageType) {
+                    case MSGTYPE_TEXT: {
+                        SizeAutoAdjustTextArea textArea = (SizeAutoAdjustTextArea) getInvoker();
+                        obj = textArea.getTag();
+                        break;
+                    }
+                    case MSGTYPE_VIDEO: {
+                        TagJLayeredPane videoPanel = (TagJLayeredPane) getInvoker();
+                        obj = videoPanel.getTag();
+                        break;
+                    }
+
+                    case MSGTYPE_EMOTICON:
+                    case MSGTYPE_VOICE:
+                    case MSGTYPE_IMAGE: {
+                        MessageImageLabel imageLabel = (MessageImageLabel) getInvoker();
+                        obj = imageLabel.getTag();
+                        break;
+                    }
+                    case MSGTYPE_APP: {
+                        TagPanel attachmentPanel = (TagPanel) getInvoker();
+                        obj = attachmentPanel.getTag();
+                        break;
+                    }
+                    default:
+                }
+                if (obj == null) return;
+                Message item = (Message) obj;
+                ForwardMsgDialog dialog = new ForwardMsgDialog(null, true, item);
+                dialog.setVisible(true);
             }
         });
         revokeItem.setUI(new RCMenuItemUI());

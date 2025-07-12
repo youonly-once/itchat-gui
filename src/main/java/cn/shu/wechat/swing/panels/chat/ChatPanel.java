@@ -54,61 +54,40 @@ public class ChatPanel extends JPanel {
     }
 
     private void initData() {
+        ChatPanel.this.getTitlePanel().showStatusLabel("加载中...");
         //消息发送者信息
         contacts = ContactsTools.getContactByUserName(roomId);
         if (contacts == null) {
             log.error("未知联系人：{}", roomId);
         }
-        //加载群成员
-        if (roomId.startsWith("@@")) {
-            loadMemberList();
-        } else {
-            // 更新房间标题
-            updateRoomTitle();
-        }
-    }
+        new SwingWorker<Object, Object>() {
 
-    /**
-     * 加载群成员
-     */
-    private void loadMemberList() {
-
-        //加载群成员
-        if (contacts.getMemberlist() == null || contacts.getMemberlist().isEmpty()) {
-            ChatPanel.this.getTitlePanel().showStatusLabel("加载中...");
-            new SwingWorker<Object, Object>() {
-
-                @Override
-                protected Object doInBackground() throws Exception {
-
-                    LoginService bean = SpringContextHolder.getBean(LoginService.class);
-                    bean.WebWxBatchGetContact(roomId);
-                    return null;
-                }
-
-                @Override
-                protected void done() {
-                    super.done();
+            @Override
+            protected Object doInBackground() throws Exception {
+                if (ContactsTools.isRoomContact(roomId)) {
+                    if (contacts.getMemberlist() == null || contacts.getMemberlist().isEmpty()) {
+                        LoginService bean = SpringContextHolder.getBean(LoginService.class);
+                        bean.WebWxBatchGetContact(roomId);
+                    }
                     contacts = Core.getMemberMap().get(roomId);
                     ArrayList<String> list = new ArrayList<>();
-                    for (Contacts contacts1 : contacts.getMemberlist()) {
+                    contacts.getMemberlist().parallelStream().forEach(contacts1 -> {
                         list.add(ContactsTools.getMemberDisplayNameOfGroup(roomId, contacts1.getUsername()));
-                    }
+                    });
                     chatMessagePanel.setRoomMembers(list);
-
-                    updateRoomTitle();
-                    ChatPanel.this.getTitlePanel().hideStatusLabel();
                 }
-            }.execute();
-        } else {
-            ArrayList<String> list = new ArrayList<>();
-            for (Contacts contacts1 : contacts.getMemberlist()) {
-                list.add(ContactsTools.getMemberDisplayNameOfGroup(roomId, contacts1.getUsername()));
+                return null;
             }
-            chatMessagePanel.setRoomMembers(list);
-            updateRoomTitle();
-        }
+
+            @Override
+            protected void done() {
+                super.done();
+                updateRoomTitle();
+                ChatPanel.this.getTitlePanel().hideStatusLabel();
+            }
+        }.execute();
     }
+
 
     /**
      * 更新房间标题

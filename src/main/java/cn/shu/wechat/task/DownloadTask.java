@@ -4,7 +4,10 @@ import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.constant.DownloadStatus;
 import cn.shu.wechat.constant.DownloadType;
 import cn.shu.wechat.dto.response.sync.AddMsgList;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 import java.net.http.HttpResponse;

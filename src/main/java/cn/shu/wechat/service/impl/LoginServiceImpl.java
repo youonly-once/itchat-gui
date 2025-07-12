@@ -1,6 +1,5 @@
 package cn.shu.wechat.service.impl;
 
-import cn.shu.WeChatStater;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.constant.StorageLoginInfoEnum;
@@ -498,7 +497,7 @@ public class LoginServiceImpl implements LoginService {
                         case LOGIN_OTHERWHERE:{
                             log.warn(syncCheckRetCodeEnum.getType());
                             //重启客户端
-                            WeChatStater.restartApplication();
+                            //WeChatStater.restartApplication();
                             break;
                         }
                         case TICKET_ERROR:

@@ -55,6 +55,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
@@ -533,11 +534,25 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
         BlockingQueue<Long> progress = DownloadManager.getProcessLinkedBlockingDeque(item.getFilePath());
         new SwingWorker<Object, Long>() {
+            long p;
             @Override
             protected Object doInBackground() throws Exception {
                 //已下载字节数
-                long p;
-                while ((p = progress.take()) != -100L) {
+                while (true) {
+                    List<Long> batch = new ArrayList<>();
+                    // 先阻塞式获取一个，确保有数据
+                    batch.add(progress.take());
+                    // 总共最多获取10个
+                    progress.drainTo(batch, 9);
+                    p = batch.getLast();
+                    if (p == 0) {
+                        //完成
+                        break;
+                    }
+                    if (p == -1) {
+                        //失败
+                        break;
+                    }
                     publish(p);
                 }
                 return null;
@@ -545,7 +560,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
             @Override
             protected void process(List<Long> chunks) {
-                Long loadedSize = chunks.get(0);
+                Long loadedSize = chunks.getFirst();
                 int progress = (int) (((loadedSize * 1.0f) / item.getFileSize()) * 100);
                 if (progress>=100){
                     holder.progressBar.setValue(100);
@@ -559,9 +574,14 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             @Override
             protected void done() {
                 super.done();
-                holder.progressBar.setValue(100);
-                holder.progressBar.setVisible(false);
-                holder.sizeLabel.setText(FileCache.fileSizeString(item.getFileSize()));
+                if (p == -1) {
+                    holder.progressBar.setVisible(false);
+                    holder.sizeLabel.setText("下载失败");
+                } else {
+                    holder.progressBar.setValue(100);
+                    holder.progressBar.setVisible(false);
+                    holder.sizeLabel.setText(FileCache.fileSizeString(item.getFileSize()));
+                }
 
             }
         }.execute();

@@ -13,7 +13,6 @@ import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.service.IMsgHandlerFace;
-import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
@@ -214,18 +213,14 @@ public class MsgCenter {
      */
     private void downloadFile(AddMsgList msg, String filename, String ext) {
 
-        //ConcurrentHashMap<String, Boolean> fileDownloadStatus = DownloadTools.FILE_DOWNLOAD_STATUS;
         //下载资源文件
         String path = DownloadTools.getDownloadFilePath(msg, filename, ext);
         msg.setFilePath(path);
 
-       // fileDownloadStatus.put(path, false);
-       // DownloadTools.FILE_DOWNLOAD_PROCESS.put(path,new LinkedBlockingDeque<Long>());
         DownloadTask<AddMsgList> downloadTask = new DownloadTask<>(msg, null);
         downloadTask.setType(DownloadType.FN);
         downloadTask.setTaskId(path);
         DownloadManager.submit(downloadTask);
-        //ExecutorServiceUtil.getGlobalExecutorService().execute(() -> DownloadTools.getDownloadFn(msg));
 
 
     }
@@ -235,8 +230,6 @@ public class MsgCenter {
      */
     private void downloadThumImg(AddMsgList msg, String filename, String ext) {
         String pathSlave = DownloadTools.getDownloadThumImgPath(msg, filename, ext);
-       // ConcurrentHashMap<String, Boolean> fileDownloadStatus = DownloadTools.FILE_DOWNLOAD_STATUS;
-        //fileDownloadStatus.put(pathSlave, false);
         msg.setSlavePath(pathSlave);
 
         DownloadTask<String> downloadTask = new DownloadTask<>(msg.getNewMsgId(), pathSlave, null);
@@ -244,7 +237,6 @@ public class MsgCenter {
         downloadTask.setTaskId(pathSlave);
         DownloadManager.submit(downloadTask);
 
-        //ExecutorServiceUtil.getGlobalExecutorService().execute(() -> DownloadTools.downloadFileByMsgId(msg.getNewMsgId(), pathSlave));
     }
 
     /**
@@ -569,7 +561,7 @@ public class MsgCenter {
                 try {
                     map = XmlStreamUtil.toMap(msg.getContent());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error(e.getMessage());
                 }
                 msg.setContentMap(map);
                 Object desc = map.get("msg.appmsg.des");

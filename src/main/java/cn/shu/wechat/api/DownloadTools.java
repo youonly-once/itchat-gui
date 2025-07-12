@@ -16,13 +16,12 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -60,51 +59,81 @@ public class DownloadTools {
         WxRespConstant.WXReceiveMsgCodeEnum msgTypeEnum = WxRespConstant.WXReceiveMsgCodeEnum.getByCode(msg.getMsgType());
 
         String url;
-        HttpResponse.BodyHandler<Void> voidBodyHandler = getProgressBytesBodyHandler(process, msg.getFilePath());
+        HttpResponse.BodyHandler<InputStream> voidBodyHandler = HttpResponse.BodyHandlers.ofInputStream();
+        InputStream inputStream = null;
         switch (msgTypeEnum) {
             case MSGTYPE_IMAGE:
                 url = String.format(WxURLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String) Core.getLoginResultData().getUrl());
-                 downloadEntityByMsgID(
+                inputStream = downloadEntityByMsgID(
                         url,String.valueOf(msg.getNewMsgId())
                         ,null,headerMap, voidBodyHandler);
                 break;
             case MSGTYPE_EMOTICON:
                 url = String.format(WxURLEnum.WEB_WX_GET_MSG_IMG.getUrl(), (String)Core.getLoginResultData().getUrl());
-                 downloadEntityByMsgID(url,String.valueOf(msg.getNewMsgId()), WXMsgUrl.BIG_TYPE,headerMap, voidBodyHandler);
+                inputStream = downloadEntityByMsgID(url, String.valueOf(msg.getNewMsgId()), WXMsgUrl.BIG_TYPE, headerMap, voidBodyHandler);
                 break;
             case MSGTYPE_VOICE:
                 url = String.format(WxURLEnum.WEB_WX_GET_VOICE.getUrl(), (String)Core.getLoginResultData().getUrl());
-                 downloadEntityByMsgID(
+                inputStream = downloadEntityByMsgID(
                         url,String.valueOf(msg.getNewMsgId())
                         ,null,headerMap, voidBodyHandler);
                 break;
             case MSGTYPE_VIDEO:
                 headerMap.put("Range", "bytes=0-");
                 url = String.format(WxURLEnum.WEB_WX_GET_VIEDO.getUrl(), (String)Core.getLoginResultData().getUrl());
-                downloadEntityByMsgID(
+                inputStream = downloadEntityByMsgID(
                         url,String.valueOf(msg.getNewMsgId())
                         ,null,headerMap, voidBodyHandler);
                 break;
             case MSGTYPE_APP:
-               // headerMap.put("Range", "bytes=0-");
                 url = String.format(WxURLEnum.WEB_WX_GET_MEDIA.getUrl(), (String)  Core.getLoginResultData().getFileUrl());
                 params.put("sender", msg.getFromUserName());
                 params.put("mediaid", msg.getMediaId());
                 params.put("filename", msg.getFileName());
-               // params.add(new BasicNameValuePair("msgid", String.valueOf(msg.getNewMsgId())));
-               // params.add(new BasicNameValuePair("skey", (String)  Core.getLoginResultData().getBaseRequest().getSKey()));
-                HttpUtil.doGet(url, params, headerMap,true, voidBodyHandler);
+                inputStream = HttpUtil.doGet(url, params, headerMap, true, voidBodyHandler);
                 break;
             case MSGTYPE_MAP:
                 url = msg.getContent().substring(msg.getContent().indexOf(":<br/>") + ":<br/>".length());
                 url = WxURLEnum.BASE_URL.getUrl() + url;
-                HttpUtil.doGet(url, null, null,false, voidBodyHandler);
+                inputStream = HttpUtil.doGet(url, null, null, false, voidBodyHandler);
                 break;
             default:
                 break;
         }
+
+        if (inputStream != null) {
+            inputStreamToFile(inputStream, msg.getFilePath(), process);
+        }
+
+
     }
 
+    private static String inputStreamToFile(InputStream inputStream, String destPath, BlockingQueue<Long> process) throws IOException {
+        Path path = Path.of(destPath);
+        Files.createDirectories(path.getParent());
+        try (
+                OutputStream out = Files.newOutputStream(
+                        path,
+                        StandardOpenOption.CREATE,
+                        StandardOpenOption.TRUNCATE_EXISTING
+                )
+        ) {
+            byte[] buffer = new byte[1024 * 1024];
+            long totalBytes = 0;
+            int bytesRead;
+
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                out.write(buffer, 0, bytesRead);
+                totalBytes += bytesRead;
+                if (process != null) {
+                    process.offer(totalBytes); // 推送已下载字节数
+                }
+            }
+            process.offer(0L);
+
+        }
+        return destPath;
+    }
     /**
      * 下载缩略图
      *
@@ -128,41 +157,7 @@ public class DownloadTools {
      * @param entity
      * @param path
      */
-//    private static void entity2File(HttpEntity entity, String path, BlockingQueue<Long> progress) throws Exception {
-//        if (entity == null) {
-//            throw new Exception("response entity is null：" + path);
-//        }
-//
-//        File file = new File(path);
-//        if (!file.exists()) {
-//            File parentFile = file.getParentFile();
-//            if (!parentFile.exists()) {
-//                if (!parentFile.mkdirs()) {
-//                    log.warn("创建目录失败：{}", parentFile.getAbsolutePath());
-//                    }
-//                }
-//                if (!file.createNewFile()) {
-//                    log.warn("创建文件失败：{}", path);
-//                }
-//
-//            }
-//            try (InputStream in = entity.getContent();
-//                 OutputStream out = Files.newOutputStream(file.toPath())) {
-//
-//                int size = 1024 * 1024;
-//                byte[] data = new byte[size];
-//                int readLen = 0;
-//                long readed = 0;
-//                while ((readLen = in.read(data, 0, size)) > 0) {
-//                    out.write(data, 0, readLen);
-//                    readed = readed + readLen;
-//                    progress.offer(readed);
-//                }
-//                out.flush();
-//                progress.offer(-100L);
-//            }
-//
-//    }
+
     /**
      * entity to image
      * @param entity entity

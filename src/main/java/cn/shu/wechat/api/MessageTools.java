@@ -30,7 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Path;
-import java.text.SimpleDateFormat;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.*;
@@ -46,14 +46,6 @@ import java.util.*;
 @Component
 
 public class MessageTools {
-    /**
-     * 微信上传最大文件大小
-     */
-    public static final long maxFileSize = 1024 * 1024 * 25;
-    /**
-     * 本次登录以来上传文件的数量
-     */
-    private static int fileCount = 0;
 
     /**
      * 消息Mapper
@@ -215,6 +207,9 @@ public class MessageTools {
         return sendMsgByUserId(messages, null);
     }
 
+    public static String generateClientMsgId() {
+        return System.currentTimeMillis() + String.valueOf(new Random().nextLong()).substring(0, 4);
+    }
     /**
      * @param filePath     文件路径
      * @param fromUserName 该消息发送者
@@ -225,115 +220,76 @@ public class MessageTools {
     private static WebWXUploadMediaResponse webWxUploadMedia(String filePath, String fromUserName, String toUserName, UploadTaskCallback callback) throws WebWXException, IOException, InterruptedException {
 
         //一次上传的文件最大1M
-        long singleFileMaxSize = 1 * 1024 * 1024;
+        long singleFileMaxSize = 1024 * 1024;
         File file = new File(filePath);
-        //等待另一线程的下载该资源完成
+
         //如果是上传之前下载或正在下载的资源，则等待下载完成
-        long t = System.currentTimeMillis();
         if (DownloadManager.containsTask(filePath)) {
             DownloadManager.awaitDownload(filePath, 10 * 60 * 1000L);
         }
-        System.out.print(String.valueOf(System.currentTimeMillis() - t));
         if (!file.exists()) {
             throw new WebWXException("待上传文件不存在：" + filePath);
         }
-        long fileSize = file.length();
-        if (fileSize <= 0) {
-            throw new WebWXException("文件大小为：" + fileSize + "," + filePath);
-        }
         String fileType = WeChatTool.getFileType(file);
 
-        //大于20M不能发送需要压缩
-//        if (fileSize > maxFileSize) {
-//
-//            switch (fileType) {
-//                case "video":
-//                    //视频超过1M，则压缩到1M
-//                    int bitRate = 800000;
-//                    String name = file.getName();
-//                    while (fileSize > maxFileSize) {
-//                        file = MediaUtil.compressionVideo(file, "/compression/" + name + ".mp4", bitRate);
-//                        fileSize = file.length();
-//                        bitRate = (bitRate / 2);
-//                    }
-//                    break;
-//                case "pic":
-//                    //图片超过1M，则压缩到1M
-//                    file = MediaUtil.compressImage(file, maxFileSize);
-//                    break;
-//                default:
-//                    //其它文件压缩成zip
-//                    break;
-//
-//            }
-//        }
-//        if (file.length() > maxFileSize) {
-//            //throw new WebWXException("不能上传大于25M的文件" );
-//        }
         String fileMime = MimeTypeUtil.getMimeByPath(file.getAbsolutePath());
         if (fileMime == null) {
             fileMime = "application";
         }
-        String lastModifyFileDate = new SimpleDateFormat("yyyy MM dd HH:mm:ss").format(file.lastModified());
-        String passTicket = Core.getLoginResultData().getPassTicket();
-        if (StringUtils.isEmpty(passTicket)) {
-            passTicket = "undefined";
-        }
-        String md5 = MD5Util.getMD5(file);
-        String clientMediaId = System.currentTimeMillis() + String.valueOf(new Random().nextLong()).substring(0, 4);
-        String webWXDataTicket = HttpUtil.getCookie("webwx_data_ticket");
+        long fileSize = file.length();
         Map<String, Object> paramMap = new HashMap<>();
+
         paramMap.put("UploadType", 2);
         paramMap.put("BaseRequest", Core.getLoginResultData().getBaseRequest());
-        paramMap.put("ClientMediaId", clientMediaId);
-        paramMap.put("TotalLen", file.length());
+        paramMap.put("ClientMediaId", generateClientMsgId());
+        paramMap.put("TotalLen", fileSize);
         paramMap.put("StartPos", 0);
-        paramMap.put("DataLen", file.length());
+        paramMap.put("DataLen", fileSize);
         paramMap.put("MediaType", 4);
         paramMap.put("FromUserName", fromUserName);
         paramMap.put("ToUserName", toUserName);
-        paramMap.put("FileMd5", md5);
+
         String url = String.format(WxURLEnum.WEB_WX_UPLOAD_MEDIA.getUrl(), Core.getLoginResultData().getFileUrl());
         WebWXUploadMediaResponse webWXUploadMediaResponse = new WebWXUploadMediaResponse();
         if (file.length() <= singleFileMaxSize) {
             //小于1M发送方式
             MultipartBodyPublisher multipart = new MultipartBodyPublisher()
-                    .addText("id", "WU_FILE_0")
                     .addText("name", filePath)
                     .addText("type", fileMime)
                     .addText("lastModifieDate", LocalDateTime.now().toString())
                     .addText("size", String.valueOf(fileSize))
                     .addText("mediatype", fileType) // 你自己的类型
                     .addText("uploadmediarequest", JSON.toJSONString(paramMap))
-                    .addText("webwx_data_ticket", webWXDataTicket)
-                    .addText("pass_ticket", passTicket)
+                    .addText("webwx_data_ticket", HttpUtil.getCookie("webwx_data_ticket"))
+                    .addText("pass_ticket", Core.getLoginResultData().getPassTicket())
+                    .addText("id", "WU_FILE_0")
                     .addFile("filename", Path.of(filePath), fileMime, filePath);
-
-
             webWXUploadMediaResponse = HttpUtil.doPostFile(url, multipart, HttpUtil.getJsonEntityBodyHandler(WebWXUploadMediaResponse.class));
             if (callback != null) {
                 callback.onTaskSuccess(99, 100);
             }
-
         } else {
-
             //大于1M发送方式
-            //最后一个分片上传后返回msgid
-
+            //最后一个分片上传后返回Msgid
+            //检查服务器是否存在该文件
+            String md5 = null;
+            try {
+                md5 = MD5Util.fastMD5(file);
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
+            }
             WebWXUploadMediaResponse checkResponse = MessageTools.webWXCheckUpload(md5, filePath, fileSize, fromUserName, toUserName);
             if (checkResponse == null || !checkResponse.isSuccess()) {
                 throw new WebWXException("checkResponse is null");
             }
-
+            //微信服务器无该文件
             if (StringUtils.isEmpty(checkResponse.getMediaId())) {
                 paramMap.put("AESKey", checkResponse.getAESKey());
                 paramMap.put("Signature", checkResponse.getSignature());
-                int chunkSize = 2 * 512 * 1024;
+                paramMap.put("FileMd5", md5);
+                int chunkSize = 512 * 1024;//官方512kb
                 int totalChunks = (int) Math.ceil((double) fileSize / chunkSize);
-
                 try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
-                    //微信服务器无该文件
-
 
                     byte[] buffer = new byte[chunkSize];
                     for (int i = 0; i < totalChunks; i++) {
@@ -348,15 +304,16 @@ public class MessageTools {
                                 .addText("id", String.format("WU_FILE_%d", i))
                                 .addText("name", filePath)
                                 .addText("type", fileMime)
-                                .addText("lastModifieDate", lastModifyFileDate)
+                                .addText("lastModifieDate", LocalDateTime.now().toString())
                                 .addText("size", String.valueOf(fileSize))
                                 .addText("mediatype", fileType)
                                 .addText("uploadmediarequest", JSON.toJSONString(paramMap))
-                                .addText("webwx_data_ticket", webWXDataTicket)
-                                .addText("pass_ticket", passTicket)
+                                .addText("webwx_data_ticket", HttpUtil.getCookie("webwx_data_ticket"))
+                                .addText("pass_ticket", Core.getLoginResultData().getPassTicket())
                                 .addText("chunks", String.valueOf(totalChunks))
                                 .addText("chunk", String.valueOf(i))
-                                .addFile("filename", actualBytes, fileMime, filePath);
+                                .addFile("filename", actualBytes, fileMime, filePath)
+                                .addText("chunks", String.valueOf(totalChunks));
                         webWXUploadMediaResponse = HttpUtil.doPostFile(url, multipart, HttpUtil.getJsonEntityBodyHandler(WebWXUploadMediaResponse.class));
 
                         if (webWXUploadMediaResponse == null || !webWXUploadMediaResponse.isSuccess()) {
@@ -372,8 +329,8 @@ public class MessageTools {
                     webWXUploadMediaResponse.setAESKey(checkResponse.getAESKey());
                 }
             } else {
-                BeanUtils.copyProperties(checkResponse, webWXUploadMediaResponse);
                 //微信服务器存在该文件
+                BeanUtils.copyProperties(checkResponse, webWXUploadMediaResponse);
                 webWXUploadMediaResponse.setStartPos(fileSize);
             }
 
@@ -637,6 +594,7 @@ public class MessageTools {
 
             textMsg.Signature = webWXUploadMediaResponse.getSignature();
         } else {
+            //发送服务器上的文件 通过attachid
             Map<String, Object> stringObjectMap = XmlStreamUtil.toMap(content);
             Object attachid_ = stringObjectMap.get("msg.appmsg.appattach.attachid");
             Object totallen = stringObjectMap.get("msg.appmsg.appattach.totallen");
@@ -871,7 +829,4 @@ public class MessageTools {
 
     }
 
-    public static void main(String[] args) {
-        System.out.println(MD5Util.getMD5(new File("C:\\Users\\11307\\Desktop\\charles-proxy-5.0.1-win-x86_64.appx")));
-    }
 }

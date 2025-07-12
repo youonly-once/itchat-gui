@@ -5,39 +5,48 @@ import java.net.http.HttpRequest;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class MultipartBodyPublisher {
     private static final char[] MULTIPART_CHARS = "-_1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
     private final String BOUNDARY = "12A3DA64D65";
     private static final String LINE_FEED = "\r\n";
-    private final List<byte[]> parts = new ArrayList<>();
+    private final byte[] endBoundary = ("--" + BOUNDARY + "--" + LINE_FEED).getBytes(StandardCharsets.UTF_8);
 
+    private final Map<String, byte[]> parts = new LinkedHashMap<>();
     public String getBoundary() {
         return BOUNDARY;
+    }
+
+    public static byte[] concatThree(byte[] a, byte[] b, byte[] c) {
+        byte[] result = new byte[a.length + b.length + c.length];
+        System.arraycopy(a, 0, result, 0, a.length);
+        System.arraycopy(b, 0, result, a.length, b.length);
+        System.arraycopy(c, 0, result, a.length + b.length, c.length);
+        return result;
+    }
+
+    public static byte[] concatBytes(byte[] a, byte[] b) {
+        byte[] result = new byte[a.length + b.length];
+        System.arraycopy(a, 0, result, 0, a.length);
+        System.arraycopy(b, 0, result, a.length, b.length);
+        return result;
     }
 
     public MultipartBodyPublisher addText(String name, String value) {
         String part = "--" + BOUNDARY + LINE_FEED +
                 "Content-Disposition: form-data; name=\"" + name + "\"" + LINE_FEED +
-                //"Content-Type: text/plain; charset=UTF-8" + LINE_FEED +
                 LINE_FEED +
                 value + LINE_FEED;
-        parts.add(part.getBytes(StandardCharsets.UTF_8));
+        parts.put(name, part.getBytes(StandardCharsets.UTF_8));
         return this;
     }
 
     public MultipartBodyPublisher addFile( String name,Path file, String mimeType, String fileName) throws IOException {
-        String fileHeader = "--" + BOUNDARY + LINE_FEED +
-                "Content-Disposition: form-data; name=\""+name+"\"; filename=\"" + fileName + "\"" + LINE_FEED +
-                "Content-Type: " + mimeType + LINE_FEED + LINE_FEED;
-
-        parts.add(fileHeader.getBytes(StandardCharsets.UTF_8));
-        parts.add(Files.readAllBytes(file));
-        parts.add(LINE_FEED.getBytes(StandardCharsets.UTF_8));
-        return this;
+        return addFile(name, Files.readAllBytes(file), mimeType, fileName);
     }
 
     public MultipartBodyPublisher addFile(String name, byte[] bytes, String mimeType, String fileName) throws IOException {
@@ -45,22 +54,20 @@ public class MultipartBodyPublisher {
                 "Content-Disposition: form-data; name=\"" + name + "\"; filename=\"" + fileName + "\"" + LINE_FEED +
                 "Content-Type: " + mimeType + LINE_FEED + LINE_FEED;
 
-        parts.add(fileHeader.getBytes(StandardCharsets.UTF_8));
-        parts.add(bytes);
-        parts.add(LINE_FEED.getBytes(StandardCharsets.UTF_8));
+        parts.put("fileHeader", fileHeader.getBytes(StandardCharsets.UTF_8));
+        parts.put(name, bytes);
+        parts.put("end", LINE_FEED.getBytes(StandardCharsets.UTF_8));
         return this;
     }
 
     public HttpRequest.BodyPublisher build() {
-        String endBoundary = "--" + BOUNDARY + "--" + LINE_FEED;
-        parts.add(endBoundary.getBytes(StandardCharsets.UTF_8));
 
         //不能用 HttpRequest.BodyPublishers.ofByteArrays(parts) //上传文件返回数据为空 状态码为412
-
-        return HttpRequest.BodyPublishers.ofByteArray(mergeParts(parts));
+        parts.put("endBoundary", endBoundary);
+        return HttpRequest.BodyPublishers.ofByteArray(mergeParts(parts.values()));
     }
 
-    private byte[] mergeParts(List<byte[]> parts) {
+    private byte[] mergeParts(Collection<byte[]> parts) {
         // 1. 计算总长度
         int totalLength = 0;
         for (byte[] part : parts) {

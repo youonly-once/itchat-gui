@@ -17,7 +17,6 @@ public class ChatMessageViewerPanel extends ParentAvailablePanel {
         super(parent);
 
         initComponents();
-        setListeners();
         initView();
     }
 
@@ -32,33 +31,11 @@ public class ChatMessageViewerPanel extends ParentAvailablePanel {
 
     }
 
-    private void setListeners() {
-        /*listView.addMouseListener(new AbstractMouseListener(){
 
-            @Override
-            public void mouseClicked(MouseEvent e)
-            {
-                RoomMembersPanel.getContext().setVisible(false);
-                super.mouseClicked(e);
-            }
-        });*/
-    }
 
     private void initView() {
         this.setLayout(new BorderLayout());
         add(listView, BorderLayout.CENTER);
-        /*listView.repaint();
-        listView.setVisible(true);*/
-
-
-        /*addComponentListener(new ComponentAdapter()
-        {
-            @Override
-            public void componentResized(ComponentEvent e)
-            {
-                listView.repaint();
-            }
-        });*/
     }
 
     public RCListView getMessageListView() {

@@ -14,6 +14,7 @@ import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.swing.panels.left.TabOperationPanel;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 import javax.swing.*;
@@ -46,6 +47,7 @@ public class RoomsPanel extends ParentAvailablePanel {
     /**
      * 当前聊天列表
      */
+    @Getter
     private final List<RoomItem> roomItemList = new ArrayList<>();
 
 
@@ -127,11 +129,17 @@ public class RoomsPanel extends ParentAvailablePanel {
      * @param roomId 房间id
      */
     public void enterRoom(String roomId) {
-        //切换显示层
-        ChatPanelContainer.getContext().createAndShow(roomId);
-        ChatPanelContainer.getContext().show(roomId);
-        //更新聊天列表未读数量
-        hasReadCount(roomId);
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                //切换显示层
+                ChatPanelContainer.getContext().createAndShow(roomId);
+                ChatPanelContainer.getContext().show(roomId);
+                //更新聊天列表未读数量
+                hasReadCount(roomId);
+            }
+        });
+
         //发送消息已读通知
         ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
             try {
@@ -277,16 +285,33 @@ public class RoomsPanel extends ParentAvailablePanel {
      * @param roomId  房间id
      */
     public void hasReadCount(String roomId) {
-        for (int i = 0; i < roomItemList.size(); i++) {
-            RoomItem item = roomItemList.get(i);
-            if (item.getRoomId().equals(roomId)) {
-                updateUnreadTotalCount(-item.getUnreadCount());
-                item.setUnreadCount(0);
-                item.setHasNewMsg(false);
-                roomItemsListView.notifyItemChanged(i);
-                break;
+
+        new SwingWorker<Object, Object>() {
+            Integer pos = null;
+
+            @Override
+            protected Object doInBackground() throws Exception {
+                for (int i = 0; i < roomItemList.size(); i++) {
+                    RoomItem item = roomItemList.get(i);
+                    if (item.getRoomId().equals(roomId)) {
+                        updateUnreadTotalCount(-item.getUnreadCount());
+                        item.setUnreadCount(0);
+                        item.setHasNewMsg(false);
+                        pos = i;
+                        break;
+                    }
+                }
+                return null;
             }
-        }
+
+            @Override
+            protected void done() {
+                if (pos != null) {
+                    roomItemsListView.notifyItemChanged(pos);
+                }
+            }
+        }.execute();
+
     }
 
     /**
