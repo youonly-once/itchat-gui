@@ -92,7 +92,7 @@ public class MainOperationPopupMenu extends JPopupMenu {
      * 弹出创建群聊窗口
      */
     private void showCreateGroupDialog() {
-        CreateGroupDialog dialog = new CreateGroupDialog(null, true);
+        CreateGroupDialog dialog = new CreateGroupDialog(MainFrame.getContext(), true);
         dialog.setVisible(true);
 
     }

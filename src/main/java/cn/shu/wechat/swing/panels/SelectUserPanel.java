@@ -9,6 +9,9 @@ import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.swing.components.RCListView;
 import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
+import cn.shu.wechat.swing.panels.search.ForwardSearchResultPanel;
+import cn.shu.wechat.swing.panels.search.SearchCardLayoutPanel;
+import cn.shu.wechat.swing.panels.search.SearchPanel;
 import cn.shu.wechat.swing.utils.IconUtil;
 
 import javax.swing.*;
@@ -23,16 +26,20 @@ import java.util.List;
  */
 public class SelectUserPanel extends JPanel {
     private JPanel leftPanel;
+    public static final String SEARCH = "SEARCH";
     private JPanel rightPanel;
-    private RCListView selectUserListView;
-    private RCListView selectedUserListView;
-
+    public static final String RECENT_CONTACTS = "CONTACTS";
+    private final CardLayout cardLayout = new CardLayout();
     /*private JPanel buttonPanel;
     private JButton cancelButton;
     private JButton okButton;*/
-
-    private int width;
-    private int height;
+    private final int width;
+    private RCListView selectUserListView;
+    private RCListView selectedUserListView;
+    private final int height;
+    private ForwardSearchResultPanel leftResultPanel;
+    private SearchCardLayoutPanel leftCardPanel;
+    private SearchPanel searchPanel;
 
     private List<SelectUserData> leftUserList;
     /**
@@ -52,6 +59,7 @@ public class SelectUserPanel extends JPanel {
 
         initComponents();
         initView();
+        // setListeners();
     }
 
 
@@ -62,10 +70,18 @@ public class SelectUserPanel extends JPanel {
         leftPanel = new JPanel();
         leftPanel.setPreferredSize(new Dimension(width / 2 - 1, height - 10));
         leftPanel.setBorder(new RCBorder(RCBorder.RIGHT, Colors.LIGHT_GRAY));
+
+
         rightPanel = new JPanel();
         rightPanel.setPreferredSize(new Dimension(width / 2 - 1, height - 10));
 
+        leftCardPanel = new SearchCardLayoutPanel(this, RECENT_CONTACTS, RECENT_CONTACTS);
 
+        leftResultPanel = new ForwardSearchResultPanel(leftCardPanel, SEARCH);
+        leftResultPanel.setPreferredSize(new Dimension(width / 2 - 1, height - 10));
+        leftResultPanel.setBorder(new RCBorder(RCBorder.RIGHT, Colors.LIGHT_GRAY));
+
+        searchPanel = new SearchPanel(this, leftResultPanel);
         // 选择用户列表
         selectUserListView = new RCListView();
 
@@ -111,12 +127,36 @@ public class SelectUserPanel extends JPanel {
     }
 
     private void initView() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 10));
-        panel.add(leftPanel);
-        panel.add(rightPanel);
-        add(panel);
 
+// 中部面板，包含左/右两个子面板
+        JPanel contentPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 10));
+        leftCardPanel.add(leftPanel, RECENT_CONTACTS);
+        leftCardPanel.add(leftResultPanel, SEARCH);
+        contentPanel.add(leftCardPanel);
+        contentPanel.add(rightPanel);
+
+// 左面板布局
+
+        leftPanel.setLayout(new GridBagLayout());
+        leftPanel.add(selectUserListView,
+                new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 1).setInsets(0, 0, 5, 0));
+
+// 原右面板布局
+        rightPanel.setLayout(new GridBagLayout());
+        rightPanel.add(selectedUserListView,
+                new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 1));
+
+
+// 最外层主面板，使用 BorderLayout
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        searchPanel.setPreferredSize(new Dimension(100, 50));
+
+        //mainPanel.setPreferredSize(new Dimension(width / 2 - 1, height - 10));
+        mainPanel.add(searchPanel, BorderLayout.NORTH);
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
+
+// 添加到 JFrame 或父容器
+        this.add(mainPanel);
 
         leftPanel.setLayout(new GridBagLayout());
         leftPanel.add(selectUserListView, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 1).setInsets(0, 0, 5, 0));
@@ -130,7 +170,7 @@ public class SelectUserPanel extends JPanel {
      *
      * @param username
      */
-    private void selectUser(String username) {
+    public void selectUser(String username) {
         for (SelectUserData item : leftUserList) {
             if (item.getUserName().equals(username)) {
                 selectedUserList.add(item);
@@ -140,7 +180,14 @@ public class SelectUserPanel extends JPanel {
         }
     }
 
-    private boolean unSelectUser(String username) {
+    public void selectUser(SelectUserData item) {
+
+        selectedUserList.add(item);
+        selectedUserListView.notifyDataSetChanged(false);
+
+    }
+
+    public boolean unSelectUser(String username) {
         Iterator<SelectUserData> itemIterator = selectedUserList.iterator();
         boolean dataChanged = false;
         while (itemIterator.hasNext()) {

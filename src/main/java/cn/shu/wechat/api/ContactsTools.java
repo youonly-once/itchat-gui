@@ -411,6 +411,10 @@ public class ContactsTools {
             compareContacts(oldGroup, newGroup);
             List<Contacts> oldMemberList = oldGroup.getMemberlist();
             List<Contacts> newMemberList = newGroup.getMemberlist();
+            if (oldMemberList.isEmpty() || newMemberList.isEmpty()) {
+                log.warn(oldMemberList.isEmpty() ? "oldMemberList is empty." : "newMemberList is empty.");
+                return;
+            }
             String groupName = ContactsTools.getContactDisplayNameByUserName(oldGroup.getUsername());
 
             //新旧集合交集 判断更新的内容

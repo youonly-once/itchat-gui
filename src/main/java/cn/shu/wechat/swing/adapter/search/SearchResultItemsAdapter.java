@@ -4,35 +4,27 @@ import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.adapter.BaseAdapter;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.constant.SearchResultType;
-import cn.shu.wechat.swing.db.model.FileAttachment;
 import cn.shu.wechat.swing.db.model.Message;
 import cn.shu.wechat.swing.db.model.Room;
 import cn.shu.wechat.swing.entity.SearchResultItem;
 import cn.shu.wechat.swing.helper.AttachmentIconHelper;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
-import cn.shu.wechat.swing.panels.*;
+import cn.shu.wechat.swing.panels.RightPanel;
+import cn.shu.wechat.swing.panels.UserInfoPanel;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
-import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
-import cn.shu.wechat.swing.panels.left.tabcontent.LeftTabContentPanel;
-import cn.shu.wechat.swing.panels.left.SearchPanel;
 import cn.shu.wechat.swing.panels.left.TabOperationPanel;
+import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.swing.utils.*;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 搜索结果适配器
@@ -399,8 +391,8 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
     }*/
 
     private void clearSearchText() {
-        LeftTabContentPanel.getContext().showPanel(LeftTabContentPanel.CHAT);
-        SearchPanel.getContext().clearSearchText();
+        //LeftTabContentPanel.getContext().showPanel(LeftTabContentPanel.CHAT);
+        //SearchPanel.getContext().clearSearchText();
     }
 
     /**

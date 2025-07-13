@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
@@ -139,10 +140,26 @@ public class HttpUtil {
         return doGet(url, params, headers, true,bodyHandler);
     }
 
+    public static <R> R doGet(String url, Map<String, String> params, HttpResponse.BodyHandler<R> bodyHandler) throws IOException, InterruptedException {
+        return doGet(url, params, null, true, bodyHandler);
+    }
+
+    public static <R> R doGet(String url, Map<String, String> params, Map<String, String> headers, boolean allowRedirect, HttpResponse.BodyHandler<R> bodyHandler) throws IOException, InterruptedException {
+        return doGet(url, params, headers, allowRedirect, bodyHandler, null);
+    }
+
+    public static <R> R doGet(String url, Map<String, String> params, boolean allowRedirect, HttpResponse.BodyHandler<R> bodyHandler) throws IOException, InterruptedException {
+        return doGet(url, params, null, allowRedirect, bodyHandler, null);
+    }
+
+    public static <R> R doGet(String url, Map<String, String> params, boolean allowRedirect, HttpResponse.BodyHandler<R> bodyHandler, Long timeOut) throws IOException, InterruptedException {
+        return doGet(url, params, null, allowRedirect, bodyHandler, timeOut);
+    }
+
     /**
      * 执行 GET 请求（支持重定向控制）
      */
-    public static<R> R doGet(String url, Map<String, String> params, Map<String, String> headers, boolean allowRedirect, HttpResponse.BodyHandler<R> bodyHandler) throws IOException, InterruptedException {
+    public static <R> R doGet(String url, Map<String, String> params, Map<String, String> headers, boolean allowRedirect, HttpResponse.BodyHandler<R> bodyHandler, Long timeOut) throws IOException, InterruptedException {
 
             String paramStr = (params != null && !params.isEmpty()) ?
                     params.entrySet().stream()
@@ -157,6 +174,9 @@ public class HttpUtil {
             HttpRequest.Builder builder = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .GET();
+        if (timeOut != null) {
+            builder.timeout(Duration.ofMillis(timeOut));
+        }
 
             if (headers != null) {
                 headers.forEach(builder::header);

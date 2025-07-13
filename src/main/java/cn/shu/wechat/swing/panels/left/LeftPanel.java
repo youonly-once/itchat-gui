@@ -2,10 +2,14 @@ package cn.shu.wechat.swing.panels.left;
 
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
+import cn.shu.wechat.swing.panels.left.tabcontent.CollectionsPanel;
+import cn.shu.wechat.swing.panels.left.tabcontent.ContactsPanel;
 import cn.shu.wechat.swing.panels.left.tabcontent.LeftTabContentPanel;
+import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
+import cn.shu.wechat.swing.panels.search.ContactsSearchResultPanel;
+import cn.shu.wechat.swing.panels.search.SearchPanel;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 
 /**
@@ -29,6 +33,16 @@ public class LeftPanel extends JPanel {
      */
     private LeftTabContentPanel leftTabContentPanel;
 
+    public static final String CHAT = "CHAT";
+    public static final String CONTACTS = "CONTACTS";
+    public static final String COLLECTIONS = "COLLECTIONS";
+    public static final String SEARCH = "SEARCH";
+    private RoomsPanel roomsPanel;
+    private ContactsPanel contactsPanel;
+    private CollectionsPanel collectionPanel;
+    private ContactsSearchResultPanel searchResultPanel;
+
+
     public LeftPanel() {
 
         initComponents();
@@ -36,18 +50,34 @@ public class LeftPanel extends JPanel {
     }
 
     private void initComponents() {
-        myInfoPanel = new MyInfoPanel(this);
 
-        searchPanel = new SearchPanel(this);
+        //群panel
+        roomsPanel = new RoomsPanel(this);
+        //联系人
+        contactsPanel = new ContactsPanel(this);
+        //收藏panel
+        collectionPanel = new CollectionsPanel(this);
+
+        myInfoPanel = new MyInfoPanel(this);
 
         mainOperationPanel = new TabOperationPanel(this);
 
-        leftTabContentPanel = new LeftTabContentPanel(this);
+        leftTabContentPanel = new LeftTabContentPanel(this, CHAT, CHAT);
+
+        //搜索结果panel
+        searchResultPanel = new ContactsSearchResultPanel(leftTabContentPanel, SEARCH);
+
+        searchPanel = new SearchPanel(this, searchResultPanel);
     }
 
     private void initView() {
         this.setBackground(Colors.WINDOW_BACKGROUND);
         this.setLayout(new GridBagLayout());
+
+        leftTabContentPanel.add(roomsPanel, CHAT);
+        leftTabContentPanel.add(contactsPanel, CONTACTS);
+        leftTabContentPanel.add(collectionPanel, COLLECTIONS);
+        leftTabContentPanel.add(searchResultPanel, SEARCH);
 
         add(myInfoPanel, new GBC(0, 0).setAnchor(GBC.CENTER).setFill(GBC.BOTH).setWeight(1, 10).setInsets(0,0,0,0));
         add(searchPanel, new GBC(0, 1).setAnchor(GBC.CENTER).setFill(GBC.BOTH).setWeight(1, 2).setInsets(0,0,0,0));

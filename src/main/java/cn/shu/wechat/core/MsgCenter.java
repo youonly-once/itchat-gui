@@ -661,6 +661,7 @@ public class MsgCenter {
                         }.execute();
                         break;
                     }
+                    case ENTER_SESSION:
                     case READED:
                         //=============用户在其他平台消息已读的通知=============
                         //更新聊天列表未读数量

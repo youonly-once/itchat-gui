@@ -6,7 +6,6 @@ import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.swing.label.CornerMarkJLabel;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.swing.panels.RightPanel;
-import cn.shu.wechat.swing.panels.left.tabcontent.LeftTabContentPanel;
 import cn.shu.wechat.swing.utils.IconUtil;
 
 import javax.swing.*;
@@ -111,13 +110,13 @@ public class TabOperationPanel extends ParentAvailablePanel {
             chatLabel.setIcon(chatIconNormal);
             contactsLabel.setIcon(contactIconActive);
             meLable.setIcon(meIconNormal);
-            parent.getListPanel().showPanel(LeftTabContentPanel.CONTACTS);
+            parent.getListPanel().showPanel(LeftPanel.CONTACTS);
             RightPanel.getContext().show(RightPanel.USER_INFO);
         } else if (e.getComponent() == meLable) {
             chatLabel.setIcon(chatIconNormal);
             contactsLabel.setIcon(contactIconNormal);
             meLable.setIcon(meIconActive);
-            parent.getListPanel().showPanel(LeftTabContentPanel.COLLECTIONS);
+            parent.getListPanel().showPanel(LeftPanel.COLLECTIONS);
         }
     }
 
@@ -128,7 +127,7 @@ public class TabOperationPanel extends ParentAvailablePanel {
         chatLabel.setIcon(chatIconActive);
         contactsLabel.setIcon(contactIconNormal);
         meLable.setIcon(meIconNormal);
-        parent.getListPanel().showPanel(LeftTabContentPanel.CHAT);
+        parent.getListPanel().showPanel(LeftPanel.CHAT);
         RightPanel.getContext().show(RightPanel.CHAT_ROOM);
     }
 
@@ -137,7 +136,7 @@ public class TabOperationPanel extends ParentAvailablePanel {
         @Override
         public void mouseClicked(MouseEvent e) {
             // 搜索框内容清空
-            SearchPanel.getContext().clearSearchText();
+            // SearchPanel.getContext().clearSearchText();
             switchOperationPanel(e);
         }
 

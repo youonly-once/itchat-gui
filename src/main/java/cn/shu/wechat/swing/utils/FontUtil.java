@@ -12,7 +12,7 @@ public class FontUtil {
     static {
         if (OSUtil.getOsType() == OSUtil.Windows) {
             //SansSerif
-            iconFont = new Font("SansSerif", Font.PLAIN, 14);
+            iconFont = new Font("微软雅黑", Font.PLAIN, 14);
             font=iconFont;
             //font = new Font("微软雅黑", Font.PLAIN, 14);
         } else {

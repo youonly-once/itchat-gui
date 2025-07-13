@@ -3,12 +3,11 @@ package cn.shu;
 import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.frames.LoginFrame;
-import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
+import lombok.Getter;
 import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -35,6 +34,7 @@ import java.util.concurrent.CountDownLatch;
 @EnableAsync
 
 public class WeChatStater {
+    @Getter
     private static ConfigurableApplicationContext context;
     private static final CountDownLatch countDownLatch = new CountDownLatch(1);
 //    public static void main(String[] args) {
@@ -62,7 +62,26 @@ public class WeChatStater {
 //        }
 //    }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException, FontFormatException {
+        // 启用抗锯齿
+        System.setProperty("awt.useSystemAAFontSettings", "on");
+        System.setProperty("swing.aatext", "true");
+
+
+        try {
+            // 使用系统 LookAndFeel，避免 Metal
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+
+            // 字体优化
+//            Font font = new Font("Microsoft YaHei", Font.PLAIN, 14);
+//            UIManager.put("Label.font", font);
+//            UIManager.put("Button.font", font);
+//            UIManager.put("TextField.font", font);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         context = new SpringApplicationBuilder(WeChatStater.class)
                        .headless(false)
                         .run();

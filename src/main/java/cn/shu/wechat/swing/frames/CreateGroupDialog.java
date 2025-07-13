@@ -1,8 +1,6 @@
 package cn.shu.wechat.swing.frames;
 
-import cn.shu.WeChatStater;
 import cn.shu.wechat.api.ContactsTools;
-import cn.shu.wechat.constant.WxConstant;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.dto.response.WxCreateRoomResp;
 import cn.shu.wechat.entity.Contacts;
@@ -11,9 +9,10 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCButton;
 import cn.shu.wechat.swing.components.RCTextField;
-import cn.shu.wechat.swing.db.model.ContactsUser;
+import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.panels.SelectUserPanel;
+import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.swing.utils.ChatUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
@@ -24,7 +23,6 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -62,9 +60,9 @@ public class CreateGroupDialog extends JDialog {
     }
 
     private void initData() {
-        for (Contacts con : Core.getContactMap().values()) {
-            userList.add(new SelectUserData(con.getUsername(),
-                    ContactsTools.getContactDisplayNameByUserName(con.getUsername()),
+        for (RoomItem con : RoomsPanel.getContext().getRoomItemList()) {
+            userList.add(new SelectUserData(con.getRoomId(),
+                    ContactsTools.getContactDisplayNameByUserName(con.getRoomId()),
                     false));
         }
         selectUserPanel = new SelectUserPanel(DIALOG_WIDTH, DIALOG_HEIGHT - 100, userList);

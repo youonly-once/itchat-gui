@@ -865,7 +865,7 @@ public class LoginServiceImpl implements LoginService {
         params.put(WxReqParamsConstant.SyncCheckParaEnum.SYNC_KEY.para(), Core.getLoginResultData().getSyncKey());
         params.put (WxReqParamsConstant.SyncCheckParaEnum.LINE.para(), String.valueOf(System.currentTimeMillis()));
         SleepUtils.sleep(7);
-        String result = HttpUtil.doGet(url, params, null,true, HttpResponse.BodyHandlers.ofString());
+        String result = HttpUtil.doGet(url, params, true, HttpResponse.BodyHandlers.ofString(), 30 * 1000L);
 
         String regEx = "window.synccheck=\\{retcode:\"(\\d+)\",selector:\"(\\d+)\"\\}";
         Matcher matcher = CommonTools.getMatcher(regEx, result);

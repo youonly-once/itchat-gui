@@ -7,12 +7,14 @@ import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.CharacterParser;
 import cn.shu.wechat.swing.utils.IconUtil;
+import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 /**
  * Created by 舒新胜 on 17-5-30.
@@ -23,6 +25,7 @@ public class SelectUserItemsAdapter extends BaseAdapter<SelectUserItemViewHolder
     private List<SelectUserData> userList;
     private final List<SelectUserItemViewHolder> viewHolders = new ArrayList<>();
     Map<Integer, String> positionMap = new HashMap<>();
+    @Setter
     private AbstractMouseListener mouseListener;
 
     public SelectUserItemsAdapter(List<SelectUserData> userList) {
@@ -35,7 +38,7 @@ public class SelectUserItemsAdapter extends BaseAdapter<SelectUserItemViewHolder
         this.userList = userList;
 
         if (userList != null) {
-            processData();
+            //processData();
         }
     }
 
@@ -52,13 +55,16 @@ public class SelectUserItemsAdapter extends BaseAdapter<SelectUserItemViewHolder
 
     @Override
     public HeaderViewHolder onCreateHeaderViewHolder(int viewType, int position) {
-        for (int pos : positionMap.keySet()) {
-            if (pos == position) {
-                String ch = positionMap.get(pos);
-
-                return new ContactsHeaderViewHolder(ch.toUpperCase());
-            }
+        if (position == 0) {
+            return new ContactsHeaderViewHolder("最近聊天");
         }
+//        for (int pos : positionMap.keySet()) {
+//            if (pos == position) {
+//                String ch = positionMap.get(pos);
+//
+//                return new ContactsHeaderViewHolder(ch.toUpperCase());
+//            }
+//        }
 
         return null;
     }
@@ -98,7 +104,9 @@ public class SelectUserItemsAdapter extends BaseAdapter<SelectUserItemViewHolder
         viewHolder.addMouseListener(mouseListener);
     }
 
-
+    /**
+     * 按姓名首字母排序
+     */
     private void processData() {
         userList.sort((o1, o2) -> {
             String tc = CharacterParser.getSelling(o1.getDisplayName().toUpperCase());
@@ -118,7 +126,4 @@ public class SelectUserItemsAdapter extends BaseAdapter<SelectUserItemViewHolder
         }
     }
 
-    public void setMouseListener(AbstractMouseListener mouseListener) {
-        this.mouseListener = mouseListener;
-    }
 }

@@ -9,6 +9,7 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCMenuItemUI;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
 import cn.shu.wechat.swing.frames.ForwardMsgDialog;
+import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.ChatUtil;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 import cn.shu.wechat.swing.utils.FileUtil;
@@ -156,7 +157,7 @@ public class MessagePopupMenu extends JPopupMenu {
                 }
                 if (obj == null) return;
                 Message item = (Message) obj;
-                ForwardMsgDialog dialog = new ForwardMsgDialog(null, true, item);
+                ForwardMsgDialog dialog = new ForwardMsgDialog(MainFrame.getContext(), true, item);
                 dialog.setVisible(true);
             }
         });

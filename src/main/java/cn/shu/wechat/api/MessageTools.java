@@ -289,6 +289,7 @@ public class MessageTools {
                 paramMap.put("FileMd5", md5);
                 int chunkSize = 512 * 1024;//官方512kb
                 int totalChunks = (int) Math.ceil((double) fileSize / chunkSize);
+                int retry = 0;
                 try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 
                     byte[] buffer = new byte[chunkSize];
@@ -317,6 +318,12 @@ public class MessageTools {
                         webWXUploadMediaResponse = HttpUtil.doPostFile(url, multipart, HttpUtil.getJsonEntityBodyHandler(WebWXUploadMediaResponse.class));
 
                         if (webWXUploadMediaResponse == null || !webWXUploadMediaResponse.isSuccess()) {
+                            if (retry++ < 3) {
+                                //重试当前块
+                                log.warn("上传文件块失败：{},{},{}", i, filePath, webWXUploadMediaResponse);
+                                i--;
+                                continue;
+                            }
                             throw new WebWXException("上传失败：response is null.");
                         }
 

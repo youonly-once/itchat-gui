@@ -1,7 +1,7 @@
 package cn.shu.wechat.swing.panels.left.tabcontent;
 
 import cn.shu.wechat.swing.components.Colors;
-import cn.shu.wechat.swing.panels.*;
+import cn.shu.wechat.swing.panels.search.SearchCardLayoutPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,52 +9,28 @@ import java.awt.*;
 /**
  * Created by 舒新胜 on 17-5-30.
  */
-public class LeftTabContentPanel extends ParentAvailablePanel {
+public class LeftTabContentPanel extends SearchCardLayoutPanel {
     private static LeftTabContentPanel context;
-    private RoomsPanel roomsPanel;
-    private ContactsPanel contactsPanel;
-    private CollectionsPanel collectionPanel;
-    private SearchResultPanel searchResultPanel;
-
-    public static final String CHAT = "CHAT";
-    public static final String CONTACTS = "CONTACTS";
-    public static final String COLLECTIONS = "COLLECTIONS";
-    public static final String SEARCH = "SEARCH";
-
-    private String previousTab = CHAT;
-    private String currentTab = CHAT;
 
     private final CardLayout cardLayout = new CardLayout();
 
 
-    public LeftTabContentPanel(JPanel parent) {
-        super(parent);
+    public LeftTabContentPanel(JPanel parent, String previousTab, String currentTab) {
+        super(parent, previousTab, currentTab);
         context = this;
-
         initComponents();
         initView();
     }
 
 
     private void initComponents() {
-        //群panel
-        roomsPanel = new RoomsPanel(this);
-        //联系人
-        contactsPanel = new ContactsPanel(this);
-        //收藏panel
-        collectionPanel = new CollectionsPanel(this);
-        //搜索结果panel
-        searchResultPanel = new SearchResultPanel(this);
+
 
     }
 
     private void initView() {
         this.setLayout(cardLayout);
         setBackground(Colors.WINDOW_BACKGROUND);
-        add(roomsPanel, CHAT);
-        add(contactsPanel, CONTACTS);
-        add(collectionPanel, COLLECTIONS);
-        add(searchResultPanel, SEARCH);
     }
 
     /**
@@ -64,7 +40,7 @@ public class LeftTabContentPanel extends ParentAvailablePanel {
      */
     public void showPanel(String who) {
         previousTab = currentTab;
-        if (!who.equals(SEARCH)) {
+        if (!who.equals("SEARCH")) {
             currentTab = who;
         }
         cardLayout.show(this, who);
