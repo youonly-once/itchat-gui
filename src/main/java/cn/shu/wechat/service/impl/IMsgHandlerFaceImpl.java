@@ -1,7 +1,6 @@
 package cn.shu.wechat.service.impl;
 
 import cn.shu.wechat.api.ContactsTools;
-import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.constant.TulLingResultType;
@@ -25,9 +24,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -544,7 +541,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             }
             case MSGTYPE_IMAGE: {
                 message = Message.builder()
-                        .content("【" + fromNickName + " " + createTime + " " + "】撤回的图片(发送中...)：")
+                        .content("【" + fromNickName + " " + createTime + " " + "】撤回的图片：")
                         .msgType(WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
                         .toUsername(msg.getFromUserName())
                         .build();
@@ -569,7 +566,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 break;
             case MSGTYPE_VOICE:
                 message = Message.builder()
-                        .content("【" + fromNickName + " " + createTime + " " + "】撤回的语音(发送中...)：")
+                        .content("【" + fromNickName + " " + createTime + " " + "】撤回的语音：")
                         .msgType(WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
                         .toUsername(msg.getFromUserName())
                         .build();
@@ -582,7 +579,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 break;
             case MSGTYPE_VIDEO:
                 message = Message.builder()
-                        .content("【" + fromNickName + " " + createTime + " " + "】撤回的视频(发送中...)：")
+                        .content("【" + fromNickName + " " + createTime + " " + "】撤回的视频：")
                         .msgType(WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
                         .toUsername(msg.getFromUserName())
                         .build();

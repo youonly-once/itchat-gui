@@ -14,6 +14,7 @@ import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -21,12 +22,12 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.Timer;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by 舒新胜 on 17-5-29.
@@ -37,20 +38,23 @@ public class SearchPanel extends ParentAvailablePanel {
     private RCSearchTextField searchTextField;
     private boolean setSearchMessageOrFileListener = false;
     /**
+     * 防抖
+     */
+    private final SearchDebounce debounce = new SearchDebounce(100);
+    private SwingWorker<Object, Object> swingWorker;
+
+    /**
      * 设置的搜索返回结果上线
      */
     private final int resultSize = 20;
-    private final List<SearchResultItem> searchResultItemList = new ArrayList<>();
+
     private final AtomicInteger searchVer = new AtomicInteger();
 
     /**
      * 展示搜索结果的Panel
      */
     private final SearchResultPanel searchResultPanel;
-    /**
-     * 搜索到的数量
-     */
-    private final AtomicInteger searchCount = new AtomicInteger();
+
 
     public SearchPanel(JPanel parent, SearchResultPanel searchResultPanel) {
         super(parent);
@@ -126,32 +130,35 @@ public class SearchPanel extends ParentAvailablePanel {
      * 搜索
      */
     private void search() {
-        final String key = searchTextField.getText();
-        if (key == null || key.isEmpty()) {
+        final String keyword = searchTextField.getText();
+        if (StringUtils.isEmpty(keyword)) {
             searchResultPanel.showPreviousTab();
             return;
         }
-
+        //展示搜索结果panel
         searchResultPanel.showSelf();
-        new SwingWorker<Object, Object>() {
-            private List<SearchResultItem> data;
-            final int finalI = searchVer.incrementAndGet();
+        if (swingWorker != null && !swingWorker.isDone()) {
+            log.info("正在取消上一个搜索任务");
+            // 请求中断
+            swingWorker.cancel(true);
+        }
+        swingWorker = new SwingWorker<>() {
+            //当前搜索版本
+            final int currentVersion = searchVer.incrementAndGet();
+            private List<SearchResultItem> data = new ArrayList<>();
+
             @Override
             protected Object doInBackground() throws Exception {
-                //TODO 会创建大量 SearchResultItem对象 导致FUllGC卡顿
-                if (finalI >= searchVer.get()) {
-                    searchCount.set(0);
-                    searchUserOrRoom(key, finalI);
-                    if (searchResultItemList.isEmpty()||searchCount.get()<=0){
-                        return null;
-                    }
-                    try {
-                        data = searchResultItemList.subList(0, Math.min(searchResultItemList.size(),searchCount.get()));
-                    }catch (Exception e){
-                        e.printStackTrace();
-                    }
-                }else{
-                    log.warn("当前：" + key + "（" + finalI + ")" + "===" + searchVer.get() + "-版本号异常停止更新");
+                if (outdatedVersionAndInterrupted(currentVersion)) {
+                    return null;
+                }
+                data = new ArrayList<>();
+                data.add(new SearchResultItem("searchAndListMessage", "搜索 \"" + keyword + "\" 相关消息", SearchResultType.SEARCH_MESSAGE));
+                data.add(new SearchResultItem("searchFile", "搜索 \"" + keyword + "\" 相关文件", SearchResultType.SEARCH_FILE));
+                searchUserOrRoom(keyword, currentVersion, data);
+
+                if (outdatedVersionAndInterrupted(currentVersion)) {
+                    return null;
                 }
 
                 return null;
@@ -159,22 +166,19 @@ public class SearchPanel extends ParentAvailablePanel {
 
             @Override
             protected void done() {
-                if (finalI <searchVer.get()) {
-                    log.warn("当前：" + key + "（" + finalI + ")" + "===" + searchVer.get() + "-版本号异常停止更新");
+                if (outdatedVersionAndInterrupted(currentVersion)) {
                     return;
                 }
-                if (data==null ){
-                    data = new ArrayList<>();
-                }
-                data.add(0,new SearchResultItem("searchAndListMessage", "搜索 \"" + key + "\" 相关消息", SearchResultType.SEARCH_MESSAGE));
-                data.add(0,new SearchResultItem("searchFile", "搜索 \"" + key + "\" 相关文件", SearchResultType.SEARCH_FILE));
+
                 //渲染搜索结果Panel
                 searchResultPanel.setData(data);
-                searchResultPanel.setKeyWord(key);
+                searchResultPanel.setKeyWord(keyword);
                 searchResultPanel.notifyDataSetChanged(false);
                 searchResultPanel.getTipLabel().setVisible(false);
             }
-        }.execute();
+        };
+        //延迟调用 防抖
+        debounce.debounce(swingWorker);
     }
 
     /**
@@ -190,12 +194,10 @@ public class SearchPanel extends ParentAvailablePanel {
      * @param key 关键词
      * @param version 搜索版本 本次搜索未完成时另一次搜索开始，此时通过版本号终止本次搜索
      */
-    private void searchUserOrRoom(String key,int version) {
+    private void searchUserOrRoom(String key, int version, List<SearchResultItem> data) {
 
         //搜索通讯录
-        searchContacts(key,version);
-        // 搜索房间
-        // searchChannel(key,version);
+        searchContacts(key, version, data);
 
         if (!setSearchMessageOrFileListener) {
             // 查找消息、文件
@@ -288,109 +290,81 @@ public class SearchPanel extends ParentAvailablePanel {
     }
 
     /**
-     * 搜索房间
-     *
-     * @param key
-     * @return
+     * 搜索通讯录
+     * @param keyWord 关键词
+     * @param version 搜索版本 本次搜索未完成时另一次搜索开始，此时通过版本号终止本次搜索
      */
-    private void searchChannel(String key,int version) {
-        List<SearchResultItem> retList = new ArrayList<>();
-        Set<String> recentContacts = Core.getRecentContacts();
-        // long start = System.currentTimeMillis();
-        SearchResultItem item;
-        try {
-            for (String userId : recentContacts) {
-                if (version!=searchVer.get()){
-                    log.error("版本号不对，终止");
+    private void searchContacts(String keyWord, int version, List<SearchResultItem> data) {
+        Map<String, Contacts> memberMap = Core.getMemberMap();
+        //当前已经搜索到的数量
+        AtomicInteger currentSearchCount = new AtomicInteger();
+            for (Map.Entry<String, Contacts> entry : memberMap.entrySet()) {
+                if (outdatedVersionAndInterrupted(version)) {
                     break;
                 }
-                Contacts recentContact = Core.getMemberMap().get(userId);
-                String remark = recentContact.getRemarkname();
-                String nick = recentContact.getNickname();
-                if (remark.contains(key)||nick.contains(key)) {
-                    int i = searchCount.getAndIncrement();
-                    if (i >= resultSize+1){
-                        log.warn("已达搜索条数上限10");
-                        return;
-                    }
-                    if (searchResultItemList.size() > i) {
-                        item = searchResultItemList.get(i);
-                        if (item == null){
-                            item = new SearchResultItem();
-                            searchResultItemList.add(item);
-                        }
-                    } else {
-                        item = new SearchResultItem();
-                        searchResultItemList.add(item);
-                    }
-                    item.setTag(userId);
-                    item.setType(SearchResultType.ROOM.CODE);
-                    item.setId(userId);
-                    if (remark.contains(key)) {
-                        item.setName(remark);
-                    } else if (nick.contains(key)) {
-                        item.setName(nick);
-                    }
+                Contacts contact = entry.getValue();
+                Stream.of(contact.getRemarkname(),
+                                contact.getNickname(),
+                                contact.getDisplayname())
+                        .filter(field -> field != null && field.contains(keyWord))
+                        .findFirst()
+                        .ifPresent(match -> {
+                            SearchResultItem item = new SearchResultItem();
+                            currentSearchCount.incrementAndGet();
+                            data.add(item);
+                            item.setType(SearchResultType.CONTACTS.CODE);
+                            item.setId(entry.getKey());
+                            item.setTag(entry.getKey());
+                            item.setName(match);
+                        });
+                if (currentSearchCount.get() >= resultSize) {
+                    log.warn("已达搜索条数上限" + resultSize);
+                    break;
                 }
             }
-        } catch (Exception e) {
-            log.warn(e.getMessage());
-        }
-
     }
 
     /**
-     * 搜索通讯录
-     * @param key 关键词
-     * @param version 搜索版本 本次搜索未完成时另一次搜索开始，此时通过版本号终止本次搜索
+     * 判断版本号是否过时以及线程是否终止
+     *
+     * @param version 当前版本号
+     * @return
      */
-    private void searchContacts(String key,int version) {
-        Map<String, Contacts> memberMap = Core.getMemberMap();
-        SearchResultItem item = null;
-        try {
-            for (Map.Entry<String, Contacts> entry : memberMap.entrySet()) {
-                if (version!=searchVer.get()){
-                    log.error("版本号不对，终止");
-                    break;
-                }
-                Contacts recentContact = entry.getValue();
-                String remark = recentContact.getRemarkname();
-                String nick = recentContact.getNickname();
-                String displayname = recentContact.getDisplayname();
-                if ((remark!=null && remark.contains(key))
-                        ||(nick!=null && nick.contains(key))
-                        || (displayname!=null && displayname.contains(key))){
-                    int i = searchCount.get();
-                    if (i >= resultSize){
-                        log.warn("已达搜索条数上限" + resultSize);
-                        return;
-                    }
-                    searchCount.incrementAndGet();
-                    if (searchResultItemList.size()>i) {
-                        item = searchResultItemList.get(i);
-                        if (item == null){
-                            item = new SearchResultItem();
-                            searchResultItemList.add(item);
-                        }
-                    }else{
-                        item = new SearchResultItem();
-                        searchResultItemList.add(item);
-                    }
-                    item.setType(SearchResultType.CONTACTS.CODE);
-                    item.setId(entry.getKey());
-                    item.setTag(entry.getKey());
-                    if (remark!=null && remark.contains(key)) {
-                        item.setName(remark);
-                    } else if (nick!=null && nick.contains(key)) {
-                        item.setName(nick);
-                    } else if (displayname!=null && displayname.contains(key)) {
-                        item.setName(displayname);
-                    }
-                }
+    private boolean outdatedVersionAndInterrupted(int version) {
+        if (version != searchVer.get()) {
+            log.error("版本号不对，终止");
+            return true;
+        }
+        if (Thread.interrupted()) {
+            log.error("线程被interrupt");
+            return true;
+        }
+        return false;
+    }
 
+    public static class SearchDebounce {
+        private final int delayMs;
+        private Timer timer;
+
+        public SearchDebounce(int delayMs) {
+            this.delayMs = delayMs;
+        }
+
+        /**
+         * 每次调用都会重置定时器，延迟 delayMs 后执行 task
+         */
+        public synchronized <T, V> void debounce(SwingWorker<T, V> task) {
+            if (timer != null) {
+                timer.cancel();
             }
-        } catch (Exception e) {
-            log.warn(e.getMessage());
+            timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    task.execute();
+                }
+            }, delayMs);
         }
     }
+
 }

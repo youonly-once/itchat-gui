@@ -432,6 +432,10 @@ public class ContactsTools {
             // 新增的用户
             Set<String> addedIds = new HashSet<>(newKeys);
             addedIds.removeAll(oldKeys);
+            if (addedIds.size() > 10) {
+                log.error("入群用户{}个，误报！", addedIds);
+                return;
+            }
             for (String addedId : addedIds) {
                 String name = ContactsTools.getMemberDisplayNameOfGroup(newMap.get(addedId), addedId);
                 ArrayList<Message> messages = new ArrayList<>();
@@ -444,6 +448,10 @@ public class ContactsTools {
             // 删除的用户
             Set<String> removedIds = new HashSet<>(oldKeys);
             removedIds.removeAll(newKeys);
+            if (removedIds.size() > 10) {
+                log.error("退群用户{}个，误报！", removedIds);
+                return;
+            }
             for (String removeId : removedIds) {
                 String name = ContactsTools.getMemberDisplayNameOfGroup(oldMap.get(removeId), removeId);
                 ArrayList<Message> messages = new ArrayList<>();
