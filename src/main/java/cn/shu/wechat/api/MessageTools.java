@@ -221,15 +221,17 @@ public class MessageTools {
 
         //一次上传的文件最大1M
         long singleFileMaxSize = 1024 * 1024;
-        File file = new File(filePath);
+
 
         //如果是上传之前下载或正在下载的资源，则等待下载完成
         if (DownloadManager.containsTask(filePath)) {
             DownloadManager.awaitDownload(filePath, 10 * 60 * 1000L);
         }
+        File file = new File(filePath);
         if (!file.exists()) {
             throw new WebWXException("待上传文件不存在：" + filePath);
         }
+
         String fileType = WeChatTool.getFileType(file);
 
         String fileMime = MimeTypeUtil.getMimeByPath(file.getAbsolutePath());

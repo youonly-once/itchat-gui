@@ -182,12 +182,13 @@ public class DownloadTask<R> implements Callable<R> {
                 throw new Exception("result is null!");
             }
             status = DownloadStatus.SUCCESS;
-            log.info("资源下载完成：{}", this);
+            log.info("资源下载完成({})：{}", type.getDescription(), this);
             return (R) result;
 
         } catch (Exception e) {
             status = DownloadStatus.FAIL;
-            log.error("下载文件失败：{},{}", this.toString(), e.toString());
+
+            log.error("下载文件失败({})：{},{}", type.getDescription(), this.toString(), e.toString());
         }
         return null;
     }
@@ -195,7 +196,17 @@ public class DownloadTask<R> implements Callable<R> {
     @Override
     public String toString() {
         return "DownloadTask{" +
-                "taskId='" + taskId + '\'' +
+                ", relativeUrl='" + relativeUrl + '\'' +
+                ", taskId='" + taskId + '\'' +
+                ", url='" + url + '\'' +
+                ", destPath='" + destPath + '\'' +
+                ", userName='" + userName + '\'' +
+                ", type=" + type +
+                ", msgId='" + msgId + '\'' +
+                ", status=" + status +
+                ", result=" + result +
+                ", msg=" + msg +
+                ", resourceType='" + resourceType + '\'' +
                 '}';
     }
 }

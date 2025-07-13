@@ -28,6 +28,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 
@@ -446,7 +448,9 @@ public class LoginServiceImpl implements LoginService {
                     }
                     msgIds.add(msg.getMsgId());
                     ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
-                        msgCenter.handleNewMsg(msg);
+                        //=============加载群成员==============
+                        Contacts contacts = loadUserInfo(msg);
+                        msgCenter.handleNewMsg(msg, contacts);
                     });
                 }
                 //联系人修改
@@ -468,11 +472,60 @@ public class LoginServiceImpl implements LoginService {
                 log.info("未知消息：{}", webWxSyncMsg);
                 break;
             default:
+                log.error("未知消息：{}", webWxSyncMsg);
                 break;
 
         }
     }
 
+    /**
+     * 第一次收到群消息 加载群成员详细细腻
+     *
+     * @param msg 消息
+     */
+    private Contacts loadUserInfo(AddMsgList msg) {
+
+        String userName = msg.getFromUserName();
+        if (userName.equals(Core.getUserName())) {
+            userName = msg.getToUserName();
+        }
+        if ("@placeholder_foldgroup".equals(userName)) {
+            log.warn("折叠的群聊！");
+            return null;
+        }
+        Contacts contacts = Core.getMemberMap().get(userName);
+        if (contacts == null) {
+            log.error("用户不存在！{}", userName);
+            try {
+                //TODO 如果定时任务也在执行 会不会冲突？
+                this.WebWxBatchGetContact(userName);
+            } catch (IOException | InterruptedException e) {
+                log.error(e.getMessage());
+            }
+            contacts = Core.getMemberMap().get(userName);
+        }
+        if (userName.startsWith("@@")
+                && !StringUtils.isEmpty(msg.getMemberName()) &&
+                !Core.getMemberMap().containsKey(msg.getMemberName())) {
+            //群成员非好友时，获取群成员的详细信息
+            if (!Core.getMemberMap().containsKey(userName)
+                    || CollectionUtils.isEmpty(contacts.getMemberlist())
+                    || StringUtils.isEmpty(contacts.getMemberlist().getFirst().getHeadimgurl())) {
+                //使用头像地址来判断是否获取过成员详细信息
+                List<Contacts> contactsList = null;
+                try {
+
+                    log.error("群用户或者群成员信息不完整！{}", userName);
+                    contactsList = this.WebWxBatchGetContact(userName);
+                    contacts.setMemberlist(contactsList);
+                } catch (IOException | InterruptedException e) {
+                    log.error(e.getMessage());
+                }
+
+            }
+        }
+        return contacts;
+    }
     @Override
     public void startReceiving() {
         Core.setAlive(true);
@@ -509,6 +562,8 @@ public class LoginServiceImpl implements LoginService {
                             Core.setAlive(false);
                             break;
                         }
+                        default:
+                            log.error("未知消息：{}", syncCheckResp);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

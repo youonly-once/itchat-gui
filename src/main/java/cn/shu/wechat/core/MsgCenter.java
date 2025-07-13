@@ -24,7 +24,6 @@ import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -167,46 +166,7 @@ public class MsgCenter {
 
     }
 
-    /**
-     * 第一次收到群消息 加载群成员详细细腻
-     *
-     * @param msg 消息
-     */
-    private Contacts loadUserInfo(AddMsgList msg) {
 
-        String userName = msg.getFromUserName();
-        if (userName.equals(Core.getUserName())) {
-            userName = msg.getToUserName();
-        }
-        Contacts contacts = Core.getMemberMap().get(userName);
-        if (contacts == null) {
-//            try {
-//                loginService.WebWxBatchGetContact(userName);
-//            } catch (IOException | InterruptedException e) {
-//                log.error(e.getMessage());
-//            }
-//            contacts = Core.getMemberMap().get(userName);
-        }
-        if (userName.startsWith("@@")
-                && !StringUtils.isEmpty(msg.getMemberName()) &&
-                !Core.getMemberMap().containsKey(msg.getMemberName())) {
-            //群成员非好友时，获取群成员的详细信息
-            if (!Core.getMemberMap().containsKey(userName)
-                    || CollectionUtils.isEmpty(contacts.getMemberlist())
-                    || StringUtils.isEmpty(contacts.getMemberlist().get(0).getHeadimgurl())) {
-                //使用头像地址来判断是否获取过成员详细信息
-//                List<Contacts> contactsList = null;
-//                try {
-//                    contactsList = loginService.WebWxBatchGetContact(userName);
-//                    contacts.setMemberlist(contactsList);
-//                } catch (IOException | InterruptedException e) {
-//                    log.error(e.getMessage());
-//                }
-
-            }
-        }
-        return contacts;
-    }
 
     /**
      * 下载文件
@@ -459,7 +419,7 @@ public class MsgCenter {
      * @author ShuXinSheng
      * @date 2017年4月23日 下午2:30:48
      */
-    public void handleNewMsg(AddMsgList msg) {
+    public void handleNewMsg(AddMsgList msg, Contacts contacts) {
         //消息类型封装
         WxRespConstant.WXReceiveMsgCodeEnum msgType = WxRespConstant.WXReceiveMsgCodeEnum.getByCode(msg.getMsgType());
         //=============地图消息，特殊处理=============
@@ -473,8 +433,6 @@ public class MsgCenter {
 
 
         msg.setType(msgType);
-        //=============加载群成员==============
-        Contacts contacts = loadUserInfo(msg);
 
         //=============打印日志==============
         String logStr = LogUtil.printFromMeg(msg, msgType.getDesc());
