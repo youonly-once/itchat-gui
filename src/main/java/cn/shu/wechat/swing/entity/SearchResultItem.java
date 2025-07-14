@@ -35,6 +35,8 @@ public class SearchResultItem implements Comparable<SearchResultItem> {
 
     private String tag;
 
+    private int score;
+
     public SearchResultItem(String id, String name, SearchResultType type) {
         this.id = id;
         this.name = name;

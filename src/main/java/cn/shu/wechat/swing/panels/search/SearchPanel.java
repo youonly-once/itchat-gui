@@ -13,8 +13,10 @@ import cn.shu.wechat.swing.entity.SearchResultItem;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
+import com.github.promeg.pinyinhelper.Pinyin;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.similarity.LevenshteinDistance;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -54,6 +56,10 @@ public class SearchPanel extends ParentAvailablePanel {
      * 展示搜索结果的Panel
      */
     private final SearchResultPanel searchResultPanel;
+
+    private final LevenshteinDistance levenshtein = new LevenshteinDistance();
+
+    private static final int MAX_RESULT = 20;
 
 
     public SearchPanel(JPanel parent, SearchResultPanel searchResultPanel) {
@@ -296,32 +302,33 @@ public class SearchPanel extends ParentAvailablePanel {
      */
     private void searchContacts(String keyWord, int version, List<SearchResultItem> data) {
         Map<String, Contacts> memberMap = Core.getMemberMap();
-        //当前已经搜索到的数量
-        AtomicInteger currentSearchCount = new AtomicInteger();
-            for (Map.Entry<String, Contacts> entry : memberMap.entrySet()) {
-                if (outdatedVersionAndInterrupted(version)) {
-                    break;
-                }
-                Contacts contact = entry.getValue();
-                Stream.of(contact.getRemarkname(),
-                                contact.getNickname(),
-                                contact.getDisplayname())
-                        .filter(field -> field != null && field.contains(keyWord))
-                        .findFirst()
-                        .ifPresent(match -> {
-                            SearchResultItem item = new SearchResultItem();
-                            currentSearchCount.incrementAndGet();
-                            data.add(item);
-                            item.setType(SearchResultType.CONTACTS.CODE);
-                            item.setId(entry.getKey());
-                            item.setTag(entry.getKey());
-                            item.setName(match);
-                        });
-                if (currentSearchCount.get() >= resultSize) {
-                    log.warn("已达搜索条数上限" + resultSize);
-                    break;
-                }
-            }
+
+
+        List<SearchResultItem> results = memberMap.entrySet().stream()
+                .takeWhile(entry -> !outdatedVersionAndInterrupted(version))
+                .map(entry -> {
+                    Contacts contact = entry.getValue();
+                    // 计算匹配分数
+                    String match = Stream.of(contact.getRemarkname(), contact.getNickname(), contact.getDisplayname())
+                            .filter(Objects::nonNull)
+                            .filter(field -> field.toLowerCase().contains(keyWord))
+                            .findAny()
+                            .orElse(null);
+                    if (match == null) return null;
+
+                    SearchResultItem item = new SearchResultItem();
+                    item.setType(SearchResultType.CONTACTS.CODE);
+                    item.setId(entry.getKey());
+                    item.setTag(entry.getKey());
+                    item.setName(match);
+                    return item;
+                })
+                .filter(Objects::nonNull)
+                .sorted(Comparator.comparingInt(SearchResultItem::getScore).reversed())
+                .limit(MAX_RESULT)
+                .toList();
+
+        data.addAll(results);
     }
 
     /**
@@ -332,11 +339,16 @@ public class SearchPanel extends ParentAvailablePanel {
      */
     private boolean outdatedVersionAndInterrupted(int version) {
         if (version != searchVer.get()) {
-            log.error("版本号不对，终止");
+            log.warn("版本号不对，终止，{}！={}", version, searchVer.get());
+            //return true;
+        }
+        if (swingWorker.isCancelled()) {
+            log.warn("线程被Cancelled");
             return true;
         }
-        if (Thread.interrupted()) {
-            log.error("线程被interrupt");
+        if (Thread.currentThread().isInterrupted()) {
+            //这个好像不生效
+            log.warn("线程被Interrupted");
             return true;
         }
         return false;
@@ -364,6 +376,83 @@ public class SearchPanel extends ParentAvailablePanel {
                     task.execute();
                 }
             }, delayMs);
+        }
+    }
+
+    /**
+     * 转换字符串为拼音全拼，非汉字保持原样（用TinyPinyin）
+     */
+    private String toPinyin(String input) {
+        return Pinyin.toPinyin(input, "").toLowerCase();
+    }
+
+    /**
+     * 转换字符串为拼音首字母简写
+     */
+    private String toInitial(String input) {
+        StringBuilder sb = new StringBuilder();
+        for (char c : input.toCharArray()) {
+            if (Character.isWhitespace(c)) continue;
+            if (c >= 'a' && c <= 'z') {
+                sb.append(c);
+            } else {
+                String p = Pinyin.toPinyin(String.valueOf(c), "");
+                if (!p.isEmpty()) sb.append(p.charAt(0));
+                else sb.append(c);
+            }
+        }
+        return sb.toString().toLowerCase();
+    }
+
+    private int calculateScore(Contacts contact, String keyWordLower, String keyWordPinyin, String keyWordInitial) {
+        int maxScore = 0;
+        for (FieldData fd : List.of(
+                new FieldData(contact.getRemarkname(), contact.getRemarkpyquanpin(), 30),
+                new FieldData(contact.getNickname(), contact.getPyquanpin(), 20),
+                new FieldData(contact.getDisplayname(), contact.getPyquanpin(), 10))) {
+            String field = fd.text;
+            String pinyin = fd.pinyin;
+            if (field == null) continue;
+
+            String fieldLower = field.toLowerCase();
+            int score = 0;
+
+            // 基础规则匹配
+            if (fieldLower.equals(keyWordLower)) score = 100;
+            else if (fieldLower.startsWith(keyWordLower)) score = 80;
+            else if (fieldLower.contains(keyWordLower)) score = 50;
+
+            // 拼音匹配（直接用已有拼音字段）
+            if (pinyin != null) {
+                String pinyinLower = pinyin.toLowerCase();
+                if (pinyinLower.contains(keyWordPinyin)) score = Math.max(score, 40);
+                if (pinyinLower.startsWith(keyWordInitial)) score = Math.max(score, 30);
+            }
+
+            // 模糊匹配（编辑距离）
+            int distance = levenshtein.apply(keyWordLower, fieldLower);
+            if (distance >= 0 && distance <= 2) {
+                int fuzzyScore = 20 + (2 - distance) * 10;
+                score = Math.max(score, fuzzyScore);
+            }
+
+            // 字段优先级加权
+            score += fd.weight;
+
+            maxScore = Math.max(maxScore, score);
+        }
+        return maxScore;
+    }
+
+    private static class FieldData {
+        final String text;
+        final String pinyin;
+        final int weight;
+
+        FieldData(String text, String pinyin, int weight) {
+            this.text = text;
+            this.pinyin = pinyin;
+            this.weight = weight;
         }
     }
 

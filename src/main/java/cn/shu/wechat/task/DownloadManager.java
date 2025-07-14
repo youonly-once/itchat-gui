@@ -22,7 +22,7 @@ public class DownloadManager {
     });
 
     static {
-        cleanerScheduler.scheduleAtFixedRate(DownloadManager::cleanFinishedTasks, 1, 1, TimeUnit.MINUTES);
+        cleanerScheduler.scheduleAtFixedRate(DownloadManager::cleanFinishedTasks, 1, 5, TimeUnit.MINUTES);
     }
 
     /**

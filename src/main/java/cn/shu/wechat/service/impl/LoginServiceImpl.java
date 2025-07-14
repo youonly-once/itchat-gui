@@ -29,6 +29,7 @@ import com.alibaba.fastjson.JSONObject;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
@@ -719,8 +720,11 @@ public class LoginServiceImpl implements LoginService {
         paramMap.put("List", list);
         paramMap.put("BaseRequest", Core.getLoginResultData().getBaseRequest());
 
-
             JSONObject obj = HttpUtil.doPost(url, JSON.toJSONString(paramMap),HttpUtil.getJsonEntityBodyHandler(JSONObject.class));
+            if (obj.getJSONObject("BaseResponse").getInteger("Ret")!=0){
+                log.error("获取群信息失败：{}",obj.getJSONObject("BaseResponse"));
+                return Lists.newArrayList();
+            }
             //群列表
             JSONArray contactList = obj.getJSONArray("ContactList");
             for (int i = 0; i < contactList.size(); i++) {
