@@ -129,16 +129,11 @@ public class RoomsPanel extends ParentAvailablePanel {
      * @param roomId 房间id
      */
     public void enterRoom(String roomId) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                //切换显示层
-                ChatPanelContainer.getContext().createAndShow(roomId);
-                ChatPanelContainer.getContext().show(roomId);
-                //更新聊天列表未读数量
-                hasReadCount(roomId);
-            }
-        });
+        //切换显示层
+        ChatPanelContainer.getContext().createAndShow(roomId);
+        ChatPanelContainer.getContext().show(roomId);
+        //更新聊天列表未读数量
+        hasReadCount(roomId);
 
         //发送消息已读通知
         ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {

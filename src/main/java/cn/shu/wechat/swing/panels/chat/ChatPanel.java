@@ -119,9 +119,17 @@ public class ChatPanel extends JPanel {
 
         this.setBackground(Colors.FONT_WHITE);
         this.setLayout(new BorderLayout());
-        add(titlePanel, BorderLayout.NORTH);
-        add(chatMembersPanel, BorderLayout.EAST);
+
+        JPanel northPanel = new JPanel();
+        northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.Y_AXIS));
+        northPanel.add(titlePanel);
+        northPanel.add(chatMembersPanel);
+
+        add(northPanel, BorderLayout.NORTH);
         add(chatMessagePanel, BorderLayout.CENTER);
+
+        // 默认隐藏成员面板
+        chatMembersPanel.setVisible(false);
     }
 
 

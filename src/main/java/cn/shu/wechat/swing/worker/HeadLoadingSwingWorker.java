@@ -122,8 +122,10 @@ public class HeadLoadingSwingWorker extends SwingWorker<Object, Object> {
      */
     @Override
     protected void done() {
-        if (avatarLabel!=null && avatar!=null)  {
-            avatarLabel.setIcon(avatar);
+        if (avatar != null) {
+            if (avatarLabel != null) {
+                avatarLabel.setIcon(avatar);
+            }
             if (onAvatarReady != null) {
                 onAvatarReady.accept(avatar);
             }

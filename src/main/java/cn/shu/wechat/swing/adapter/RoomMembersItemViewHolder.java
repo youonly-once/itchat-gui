@@ -1,6 +1,5 @@
 package cn.shu.wechat.swing.adapter;
 
-
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.swing.utils.FontUtil;
@@ -20,25 +19,30 @@ public class RoomMembersItemViewHolder extends ViewHolder {
     }
 
     private void initView() {
-        setPreferredSize(new Dimension(40, 55));
+        setPreferredSize(new Dimension(40, 70));
         setBackground(Colors.WINDOW_BACKGROUND_LIGHT);
         setBorder(new RCBorder(RCBorder.BOTTOM, new Color(235, 235, 235)));
         setOpaque(true);
 
-        // 名字
-        roomName = new JLabel();
-        roomName.setFont(FontUtil.getDefaultFont(13));
+        // 设置 roomName 样式
+        roomName.setFont(FontUtil.getDefaultFont(12));
         roomName.setForeground(Colors.FONT_BLACK);
+        roomName.setHorizontalAlignment(SwingConstants.CENTER);
 
-        /*setLayout(new GridBagLayout());
-        add(avatar, new GBC(0, 0).setWeight(1, 1).setFill(GBC.BOTH).setInsets(0,5,0,0).setAnchor(GBC.CENTER));
-        add(username, new GBC(1, 0).setWeight(10, 1).setFill(GBC.BOTH).setInsets(0,0,0,5));*/
-
+        // 设置 layout
         setLayout(new FlowLayout(FlowLayout.LEFT, 10, 6));
-        JPanel avatarPanel = new JPanel();
-        avatarPanel.add(avatar);
-        add(avatar);
-        add(roomName);
-    }
 
+        // 创建垂直排列的头像+名称面板
+        JPanel avatarPanel = new JPanel();
+        avatarPanel.setLayout(new BoxLayout(avatarPanel, BoxLayout.Y_AXIS));
+        avatarPanel.setOpaque(false); // 保持透明
+        avatar.setAlignmentX(Component.CENTER_ALIGNMENT);
+        roomName.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        avatarPanel.add(avatar);
+        avatarPanel.add(Box.createVerticalStrut(3)); // 间距
+        avatarPanel.add(roomName);
+
+        add(avatarPanel);
+    }
 }

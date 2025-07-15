@@ -6,11 +6,12 @@ import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
-import cn.shu.wechat.swing.panels.chat.ChatPanel;
 import cn.shu.wechat.swing.panels.chat.ChatMembersPanel;
+import cn.shu.wechat.swing.panels.chat.ChatPanel;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.OSUtil;
+import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,6 +21,7 @@ import java.awt.event.*;
  * Created by 舒新胜 on 17-5-30.
  */
 public class TitlePanel extends ParentAvailablePanel {
+    @Getter
     private static TitlePanel context;
 
     private JPanel titlePanel;
@@ -256,10 +258,6 @@ public class TitlePanel extends ParentAvailablePanel {
         titlePanel.add(titleLabel, new GBC(0, 0).setFill(GBC.BOTH).setWeight(300, 1).setInsets(margin, margin, 0, 0));
         titlePanel.add(statusLabel, new GBC(1, 0).setFill(GBC.BOTH).setWeight(800, 1).setInsets(margin, margin, 0, 0));
         titlePanel.add(roomInfoButton, new GBC(2, 0).setFill(GBC.BOTH).setWeight(1, 1).setInsets(margin, 0, 0, margin));
-    }
-
-    public static TitlePanel getContext() {
-        return context;
     }
 
 

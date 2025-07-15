@@ -10,6 +10,7 @@ import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCListView;
 import cn.shu.wechat.swing.entity.ContactsItem;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
+import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Created by 舒新胜 on 17-5-30.
  */
 public class ContactsPanel extends ParentAvailablePanel {
+    @Getter
     private static ContactsPanel context;
 
     private RCListView contactsListView;
@@ -148,10 +150,6 @@ public class ContactsPanel extends ParentAvailablePanel {
         ContactsItem contactsItem = contactsItemList.get(pos);
         contactsItem.setAvatar(image);
         contactsListView.notifyItemChanged(pos);
-    }
-
-    public static ContactsPanel getContext() {
-        return context;
     }
 
 

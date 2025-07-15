@@ -7,6 +7,9 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.UserInfoPopup;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.swing.worker.HeadLoadingSwingWorker;
+import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,7 +25,9 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
     private final List<Contacts> members;
     private final List<RoomMembersItemViewHolder> viewHolders = new ArrayList<>();
 
+    @Setter
     private MouseAdapter addMemberButtonMouseListener;
+    @Setter
     private MouseAdapter removeMemberButtonMouseListener;
     /**
      * 当前选中的viewHolder
@@ -37,6 +42,13 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
         return new RoomMembersItemViewHolder();
     }
 
+    public void setRoomName(JLabel roomName, String name) {
+        String displayName = name;
+        if (name != null && name.length() > 3) {
+            displayName = name.substring(0, 3) + "…";
+        }
+        roomName.setText("<html><div style='text-align:center;'>" + displayName + "</div></html>");
+    }
     @Override
     public void onBindViewHolder(RoomMembersItemViewHolder viewHolder, int position) {
         Contacts contacts = members.get(position);
@@ -44,7 +56,7 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
         if ("添加成员".equals(contacts.getDisplayname())) {
             viewHolder.setCursor(new Cursor(Cursor.HAND_CURSOR));
             String name = contacts.getDisplayname();
-            viewHolder.roomName.setText(name);
+            setRoomName(viewHolder.roomName, name);
             ImageIcon imageIcon = IconUtil.getIcon(this,"/image/add_member.png");
             imageIcon.setImage(imageIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH));
             viewHolder.avatar.setIcon(imageIcon);
@@ -74,7 +86,7 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
         } else if ("删除成员".equals(contacts.getDisplayname())) {
             viewHolder.setCursor(new Cursor(Cursor.HAND_CURSOR));
             String name = contacts.getDisplayname();
-            viewHolder.roomName.setText(name);
+            setRoomName(viewHolder.roomName, name);
             ImageIcon imageIcon = IconUtil.getIcon(this,"/image/delete_member.png");
             imageIcon.setImage(imageIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH));
             viewHolder.avatar.setIcon(imageIcon);
@@ -102,11 +114,13 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
         } else {
             String userName = contacts.getUsername();
             String name = ContactsTools.getMemberDisplayNameOfGroup(contacts,userName);
-            if (contacts.getAvatarIcon() != null){
-                viewHolder.avatar.setIcon(contacts.getAvatarIcon());
+            if (StringUtils.isEmpty(contacts.getGroupName())) {
+                //非群成员头像
+                new HeadLoadingSwingWorker(viewHolder.avatar, userName).loadAvatar();
+            } else {
+                new HeadLoadingSwingWorker(viewHolder.avatar, contacts.getGroupName(), userName).loadAvatar();
             }
-            viewHolder.roomName.setText(name);
-
+            setRoomName(viewHolder.roomName, name);
             if (!name.equals(Core.getNickName())) {
                 //TODO 重复添加事件了
                 viewHolder.addMouseListener(new AbstractMouseListener() {
@@ -156,11 +170,4 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
         return members.size();
     }
 
-    public void setAddMemberButtonMouseListener(MouseAdapter addMemberButtonMouseListener) {
-        this.addMemberButtonMouseListener = addMemberButtonMouseListener;
-    }
-
-    public void setRemoveMemberButtonMouseListener(MouseAdapter removeMemberButtonMouseListener) {
-        this.removeMemberButtonMouseListener = removeMemberButtonMouseListener;
-    }
 }
