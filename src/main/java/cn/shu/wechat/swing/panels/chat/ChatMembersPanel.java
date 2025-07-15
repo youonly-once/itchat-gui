@@ -15,6 +15,8 @@ import cn.shu.wechat.swing.frames.AddOrRemoveMemberDialog;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
+import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.swing.worker.HeadLoadingSwingWorker;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.extern.log4j.Log4j2;
@@ -222,38 +224,17 @@ public class ChatMembersPanel extends ParentAvailablePanel {
      * 更新头像
      */
     private void updateAvatar() {
-        ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
-            @Override
-            public void run() {
-                //下载头像
-                for (int i = 0; i < members.size(); i++) {
-                    Contacts contacts = members.get(i);
-                    int finali = i;
-                    new SwingWorker<Object, Object>() {
 
-                        private ImageIcon memberAvatar;
+        //下载头像
+        for (int i = 0; i < members.size(); i++) {
+            Contacts contacts = members.get(i);
+            int finalI = i;
 
-                        @Override
-                        protected Object doInBackground() throws Exception {
-                            //下载头像
-                            if (contacts.getUsername() == null) {
-                                return null;
-                            }
-                            memberAvatar = AvatarUtil.createOrLoadMemberAvatar(roomId, contacts.getUsername());
-                            return null;
-                        }
+            new HeadLoadingSwingWorker(null,roomId, contacts.getUsername()).onAvatarReady(imageIcon -> {
+                updateAvatar(finalI, imageIcon);
+            }).loadAvatar();
 
-                        @Override
-                        protected void done() {
-                            //更新头像
-                            if (memberAvatar != null) {
-                                updateAvatar(finali, memberAvatar);
-                            }
-                        }
-                    }.execute();
-                }
-            }
-        });
+        }
 
     }
 

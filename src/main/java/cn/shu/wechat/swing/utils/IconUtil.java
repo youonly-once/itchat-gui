@@ -46,7 +46,11 @@ public class IconUtil {
     }
 
     public static ImageIcon getIcon(Object context, String path, int width, int height) {
-        ImageIcon rawIcon = ICON_CACHE.get(path);
+        String key = path ;
+        if (width > 0 && height > 0) {
+             key = path + width + height;
+        }
+        ImageIcon rawIcon = ICON_CACHE.get(key);
         if (rawIcon == null) {
             URL url = context.getClass().getResource(path);
             if (url == null) {
@@ -60,7 +64,7 @@ public class IconUtil {
                 return new ImageIcon(scaledImage);
             }
 
-            ICON_CACHE.put(path, rawIcon);
+            ICON_CACHE.put(key, rawIcon);
         }
 
         return rawIcon;

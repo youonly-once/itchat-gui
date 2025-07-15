@@ -9,8 +9,8 @@ import cn.shu.wechat.swing.entity.ContactsItem;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.panels.RightPanel;
 import cn.shu.wechat.swing.panels.UserInfoPanel;
-import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
+import cn.shu.wechat.swing.worker.HeadLoadingSwingWorker;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
@@ -108,7 +108,7 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
 
         ContactsItem item = contactsItems.get(position);
 
-        AvatarUtil.loadAvatar(item.getId(),viewHolder.avatar);
+        new HeadLoadingSwingWorker(viewHolder.avatar,item.getId()).loadAvatar();
 
         viewHolder.roomName.setText(item.getDisplayName());
         if (viewHolder.mouseListener!=null){

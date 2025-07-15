@@ -33,6 +33,7 @@ import cn.shu.wechat.swing.helper.AttachmentIconHelper;
 import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
 import cn.shu.wechat.swing.panels.chat.ChatMessagePanel;
 import cn.shu.wechat.swing.utils.*;
+import cn.shu.wechat.swing.worker.HeadLoadingSwingWorker;
 import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.task.DownloadTask;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
@@ -265,40 +266,35 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         if (item.isRevoke()){
             viewHolder.revoke.setVisible(true);
         }
-        if (viewHolder instanceof MessageSystemMessageViewHolder) {
-            processSystemMessage(viewHolder, item);
-        } else if (viewHolder instanceof MessageRightTextViewHolder) {
-            processRightTextMessage(viewHolder, item);
-        } else if (viewHolder instanceof MessageLeftTextViewHolder) {
-            processLeftTextMessage(viewHolder, item);
-        } else if (viewHolder instanceof MessageRightImageViewHolder) {
-            processRightImageMessage(viewHolder, item);
-        } else if (viewHolder instanceof MessageLeftVideoViewHolder) {
-            processLeftVideoMessage(viewHolder, item);
-        } else if (viewHolder instanceof MessageRightVideoViewHolder) {
-            processRightVideoMessage(viewHolder, item);
-        } else if (viewHolder instanceof MessageLeftVoiceViewHolder) {
-            processLeftVoiceMessage(viewHolder, item);
-        } else if (viewHolder instanceof MessageRightVoiceViewHolder) {
-            processRightVoiceMessage(viewHolder, item);
-        } else if (viewHolder instanceof MessageLeftImageViewHolder) {
-            processLeftImageMessage(viewHolder, item);
-        } else if (viewHolder instanceof MessageRightAttachmentViewHolder) {
-            processRightAttachmentMessage(viewHolder, item);
-        } else if (viewHolder instanceof MessageLeftAttachmentViewHolder) {
-            processLeftAttachmentMessage(viewHolder, item);
-        } else if (viewHolder instanceof MessageRightLinkOfAppViewHolder) {
-            processRightLinkMessage(viewHolder, item);
-        } else if (viewHolder instanceof MessageLeftLinkOfAppViewHolder) {
-            processLeftLinkMessage(viewHolder, item);
-        } else if (viewHolder instanceof MessageRightProgramOfAppViewHolder) {
-            processRightProgramOfAppMessage(viewHolder, item);
-        } else if (viewHolder instanceof MessageLeftProgramOfAppViewHolder) {
-            processLeftProgramOfAppMessage(viewHolder, item);
-        } else if (viewHolder instanceof MessageRightContactsCardOfAppViewHolder) {
-            processRightContactsCardOfAppMessage(viewHolder, item);
-        } else if (viewHolder instanceof MessageLeftContactsCardOfAppViewHolder) {
-            processLeftContactsCardOfAppMessage(viewHolder, item);
+        switch (viewHolder) {
+            case MessageSystemMessageViewHolder messageSystemMessageViewHolder ->
+                    processSystemMessage(viewHolder, item);
+            case MessageRightTextViewHolder messageRightTextViewHolder -> processRightTextMessage(viewHolder, item);
+            case MessageLeftTextViewHolder messageLeftTextViewHolder -> processLeftTextMessage(viewHolder, item);
+            case MessageRightImageViewHolder messageRightImageViewHolder -> processRightImageMessage(viewHolder, item);
+            case MessageLeftVideoViewHolder messageLeftVideoViewHolder -> processLeftVideoMessage(viewHolder, item);
+            case MessageRightVideoViewHolder messageRightVideoViewHolder -> processRightVideoMessage(viewHolder, item);
+            case MessageLeftVoiceViewHolder messageLeftVoiceViewHolder -> processLeftVoiceMessage(viewHolder, item);
+            case MessageRightVoiceViewHolder messageRightVoiceViewHolder -> processRightVoiceMessage(viewHolder, item);
+            case MessageLeftImageViewHolder messageLeftImageViewHolder -> processLeftImageMessage(viewHolder, item);
+            case MessageRightAttachmentViewHolder messageRightAttachmentViewHolder ->
+                    processRightAttachmentMessage(viewHolder, item);
+            case MessageLeftAttachmentViewHolder messageLeftAttachmentViewHolder ->
+                    processLeftAttachmentMessage(viewHolder, item);
+            case MessageRightLinkOfAppViewHolder messageRightLinkOfAppViewHolder ->
+                    processRightLinkMessage(viewHolder, item);
+            case MessageLeftLinkOfAppViewHolder messageLeftLinkOfAppViewHolder ->
+                    processLeftLinkMessage(viewHolder, item);
+            case MessageRightProgramOfAppViewHolder messageRightProgramOfAppViewHolder ->
+                    processRightProgramOfAppMessage(viewHolder, item);
+            case MessageLeftProgramOfAppViewHolder messageLeftProgramOfAppViewHolder ->
+                    processLeftProgramOfAppMessage(viewHolder, item);
+            case MessageRightContactsCardOfAppViewHolder messageRightContactsCardOfAppViewHolder ->
+                    processRightContactsCardOfAppMessage(viewHolder, item);
+            case MessageLeftContactsCardOfAppViewHolder messageLeftContactsCardOfAppViewHolder ->
+                    processLeftContactsCardOfAppMessage(viewHolder, item);
+            default -> {
+            }
         }
     }
 
@@ -1297,39 +1293,13 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             roomId = item.getToUsername();
         }
 
-        if (holder.avatar != null) {
-            ImageIcon icon = null;
-            if (AvatarUtil.avatarExists(senderId)){
-                //已存在图片缓存
-                if (roomId.startsWith("@@")){
-                    icon = AvatarUtil.createOrLoadMemberAvatar(roomId,senderId);
+        if (holder.avatar!=null){
+            if (roomId.equals(senderId)) {
+                new HeadLoadingSwingWorker(holder.avatar,roomId).loadAvatar();
+            }else{
+                new HeadLoadingSwingWorker(holder.avatar,roomId,senderId).loadAvatar();
 
-                }else {
-                    icon = AvatarUtil.createOrLoadUserAvatar(senderId);
-                }
-                holder.avatar.setIcon(icon);
-            }else {
-                //异步从网络加载
-                String finalRoomId = roomId;
-                new SwingWorker<Object,Object>(){
-                    ImageIcon icon = null;
-                    @Override
-                    protected Object doInBackground() throws Exception {
-                        if (finalRoomId.startsWith("@@")){
-                            icon = AvatarUtil.createOrLoadMemberAvatar(finalRoomId,senderId);
-
-                        }else {
-                            icon = AvatarUtil.createOrLoadUserAvatar(senderId);
-                        }
-                        return null;
-                    }
-                    @Override
-                    protected void done() {
-                        holder.avatar.setIcon(icon);
-                    }
-                }.execute();
             }
-
             bindAvatarAction(holder.avatar, item,senderId,roomId);
         }
 

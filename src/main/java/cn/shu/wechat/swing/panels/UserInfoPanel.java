@@ -9,8 +9,10 @@ import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.ChatUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.swing.worker.HeadLoadingSwingWorker;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.swing.*;
@@ -41,6 +43,7 @@ public class UserInfoPanel extends ParentAvailablePanel {
 
     private volatile String currUserId;
 
+    @Getter
     private static UserInfoPanel context;
     public UserInfoPanel(JPanel parent) {
         super(parent);
@@ -50,33 +53,10 @@ public class UserInfoPanel extends ParentAvailablePanel {
         setListeners();
         setContacts(Core.getUserSelf());
     }
-    public static UserInfoPanel getContext() {
-        return context;
-    }
+
     public void setContacts(Contacts contacts){
         currUserId = contacts.getUsername();
-        avatarLabel.setIcon(IconUtil.getIcon(this,"/image/image_loading.gif"));
-        new SwingWorker<Object,Object>(){
-            Image orLoadBigAvatar = null;
-            private final String userId = contacts.getUsername();
-            @Override
-            protected Object doInBackground() throws Exception {
-                orLoadBigAvatar = AvatarUtil.createOrLoadBigAvatar(contacts);
-                if (orLoadBigAvatar != null){
-                    orLoadBigAvatar = orLoadBigAvatar.getScaledInstance(200,200,Image.SCALE_SMOOTH);
-                }
-
-                return null;
-            }
-
-            @Override
-            protected void done() {
-                if (orLoadBigAvatar!=null && userId.equals(currUserId)){
-                    avatarLabel.setIcon(new ImageIcon(orLoadBigAvatar));
-                }
-                super.done();
-            }
-        }.execute();
+        new HeadLoadingSwingWorker(avatarLabel,contacts).big(200,200).loadAvatar();
         if (contacts.getSex() == null){
             sexLabel.setIcon(null);
         }else{

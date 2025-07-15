@@ -4,9 +4,9 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
-import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.CharacterParser;
 import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.swing.worker.HeadLoadingSwingWorker;
 import lombok.Setter;
 
 import javax.swing.*;
@@ -89,8 +89,7 @@ public class SelectUserItemsAdapter extends BaseAdapter<SelectUserItemViewHolder
     public void onBindViewHolder(SelectUserItemViewHolder viewHolder, int position) {
         viewHolders.add(position, viewHolder);
         String name = userList.get(position).getDisplayName();
-
-        AvatarUtil.loadAvatar(userList.get(position).getUserName(),viewHolder.avatar);
+        new HeadLoadingSwingWorker(viewHolder.avatar,userList.get(position).getUserName()).loadAvatar();
         viewHolder.username = userList.get(position).getUserName();
         // 名字
         viewHolder.disPlayNameLabel.setText(name);

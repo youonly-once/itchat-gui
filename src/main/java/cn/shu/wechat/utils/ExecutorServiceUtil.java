@@ -17,41 +17,27 @@ public class ExecutorServiceUtil {
      * 核心线程 0，临时线程最大
      * 线程执行完任务立即销毁
      */
+
     @Getter
-    private final static ExecutorService headImageDownloadExecutorService = new ThreadPoolExecutor(
-            0
-            , Integer.MAX_VALUE
-            , 0
-            , TimeUnit.MICROSECONDS
-            , new SynchronousQueue<>()
-            , new MyThreadFactory("HeadImgDownloadPool-Thread-", false, Thread.NORM_PRIORITY)
-    );
+    private static final ExecutorService headImageDownloadExecutorService =
+            Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("HeadImgDownloadPool-VirtualThread-", 0).factory());
+
+
 
     /**
      * 全局线程池
      */
     @Getter
-    private final static ExecutorService globalExecutorService = new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors() *2
-            , Integer.MAX_VALUE
-            , 0L
-            , TimeUnit.SECONDS
-            , new SynchronousQueue<>()
-            , new MyThreadFactory("GlobalPool-Thread-", false, 6)
-    );
+    private static final ExecutorService globalExecutorService =
+            Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("GlobalPool-VirtualThread-", 0).factory());
 
     /**
      * 接收消息线程池
      */
     @Getter
-    private final static ExecutorService receivingExecutorService = new ThreadPoolExecutor(
-            1
-            , 10
-            , 0L
-            , TimeUnit.SECONDS
-            , new SynchronousQueue<>()
-            , new MyThreadFactory("Receiving-Thread-", false, 6)
-    );
+    private static final ExecutorService receivingExecutorService =
+            Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("Receiving-VirtualThread-", 0).factory());
+
 
     static class MyThreadFactory implements ThreadFactory {
         private final AtomicInteger integer = new AtomicInteger();

@@ -57,19 +57,12 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
     @Override
     public int getItemViewType(int position) {
         SearchResultType byCode = SearchResultType.getByCode(searchResultItems.get(position).getType());
-        switch (byCode) {
-            case SEARCH_MESSAGE:
-            case SEARCH_FILE:
-            case CONTACTS:
-            case ROOM:
-                return VIEW_TYPE_CONTACTS_ROOM;
-            case FILE:
-                return VIEW_TYPE_FILE;
-            case MESSAGE:
-                return VIEW_TYPE_MESSAGE;
-            default:
-                throw new RuntimeException("ViewType 不正确");
-        }
+        return switch (byCode) {
+            case SEARCH_MESSAGE, SEARCH_FILE, CONTACTS, ROOM -> VIEW_TYPE_CONTACTS_ROOM;
+            case FILE -> VIEW_TYPE_FILE;
+            case MESSAGE -> VIEW_TYPE_MESSAGE;
+            default -> throw new RuntimeException("ViewType 不正确");
+        };
     }
 
 

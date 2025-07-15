@@ -59,8 +59,8 @@ public final class AvatarUtil {
     private static final String CUSTOM_AVATAR_CACHE_ROOT;
     private static final int DEFAULT_AVATAR = 0;
     private static final int CUSTOM_AVATAR = 1;
-    private static final int NORMAL_AVATAR_SIZE = 40;
-    private static final int BIG_AVATAR_SIZE = 200;
+    public static final int NORMAL_AVATAR_SIZE = 40;
+    public static final int BIG_AVATAR_SIZE = 200;
 
     /**
      * 小头像缓存 userName,ImageIcon
@@ -102,55 +102,6 @@ public final class AvatarUtil {
         return dir.getAbsolutePath();
     }
 
-    /**
-     * 创建群头像
-     *
-     * @param userName 房间id
-     * @return 头像
-     */
-    public static ImageIcon createOrLoadGroupAvatar(String userName) {   //获取群成员
-
-        //获取内存中的群头像
-        ImageIcon avatarIcon = avatarCache.get(userName);
-        Image avatar;
-        // 如果在内存中的缓存不存在
-        if (avatarIcon == null) {
-            //获取网络图片
-            Contacts contacts = Core.getMemberMap().get(userName);
-            DownloadTask<Image> downloadTask = new DownloadTask<>();
-            downloadTask.setRelativeUrl(contacts.getHeadimgurl());
-            downloadTask.setTaskId(contacts.getHeadimgurl());
-            downloadTask.setType(DownloadType.ByRelativeUrl);
-            avatar = DownloadManager.submitAwait(downloadTask);
-            if (avatar == null) {
-                //获取缓存在磁盘的头像
-                avatar = getCachedImageAvatar(userName);
-
-                // 硬盘中无缓存
-                if (avatar == null) {
-                    // 如果尚未从服务器获取群成员，则获取默认群组头像
-                    if (contacts.getMemberlist() == null || contacts.getMemberlist().isEmpty()) {
-                        //获取 ##.png头像
-                        String sign = "##";
-                        avatar = getCachedImageAvatar(sign);
-                        // 默认群组头像不存在，则生成
-                        if (avatar == null) {
-                            log.info("创建群组默认头像 : {}", userName);
-                            avatar = createAvatar(ContactsTools.getContactDisplayNameByUserName(userName),NORMAL_AVATAR_SIZE,NORMAL_AVATAR_SIZE);
-                        }
-                    } else {
-                        List<Contacts> memberList = contacts.getMemberlist();
-                        // 有群成员，根据群成员的头像合成群头像
-                        log.info("创建群组个性头像 : {}", userName);
-                        avatar = createGroupAvatar(userName, memberList);
-                    }
-                }
-            }
-
-            avatarIcon = AvatarUtil.putUserAvatarCache(userName, avatar);
-        }
-        return avatarIcon;
-    }
 
     /**
      * 获取 小 模糊头像
@@ -461,100 +412,9 @@ public final class AvatarUtil {
         return colorArr[position];
     }
 
-    public static void saveAvatar(ImageIcon image, String username) {
-        saveAvatar(image, username, CUSTOM_AVATAR);
-    }
-
-    private static void saveAvatar(ImageIcon image, String username, int type) {
-        String path = "";
-        if (type == DEFAULT_AVATAR) {
-            path = AVATAR_CACHE_ROOT + "/" + username + ".png";
-        } else if (type == CUSTOM_AVATAR) {
-            path = CUSTOM_AVATAR_CACHE_ROOT + "/" + username + ".png";
-        } else {
-            throw new RuntimeException("类型不存在");
-        }
-
-        File avatarPath = new File(path);
-
-        try {
-            if (image != null) {
-                BufferedImage bufferedImage = ImageUtil.setRadius(image.getImage(), image.getIconWidth(), image.getIconHeight(), 35);
-                ImageIO.write(bufferedImage, "png", avatarPath);
-            } else {
-                throw new RuntimeException("头像保存失败，数据为空");
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 获取缓存在磁盘的用户头像
-     *
-     * @param username 用户名
-     * @return 头像
-     */
-    private static Image getCachedImageAvatar(String username) {
-
-        if (customAvatarExist(username)) {
-            //缓存在磁盘的自定义的用户头像
-            String path = CUSTOM_AVATAR_CACHE_ROOT + "/" + username + ".png";
-
-            return readImage(path);
-        } else if (defaultAvatarExist(username)) {
-            //缓存在磁盘的默认用户头像
-            String path = AVATAR_CACHE_ROOT + "/" + username + ".png";
-            return readImage(path);
-        } else {
-            return null;
-        }
-    }
-
-    private static BufferedImage readImage(String path) {
-        try {
-            return ImageIO.read(new File(path));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
 
 
-    public static boolean customAvatarExist(String username) {
-        String path = CUSTOM_AVATAR_CACHE_ROOT + "/" + username + ".png";
-        File file = new File(path);
-        return file.exists();
-    }
 
-    public static boolean defaultAvatarExist(String username) {
-        String path = AVATAR_CACHE_ROOT + "/" + username + ".png";
-        File file = new File(path);
-        return file.exists();
-    }
-
-    public static void deleteCustomAvatar(String username) {
-        String path = CUSTOM_AVATAR_CACHE_ROOT + "/" + username + ".png";
-
-        File file = new File(path);
-        if (file.exists()) {
-            file.delete();
-        }
-    }
-
-    public static void deleteGroupAvatar(String groupName) {
-        String path = AVATAR_CACHE_ROOT + "/" + groupName + ".png";
-        File file = new File(path);
-        if (file.exists()) {
-            file.delete();
-        }
-    }
-
-    /**
-     *
-     */
     /**
      * 创建群头像
      *
@@ -842,27 +702,4 @@ public final class AvatarUtil {
         return rectangles;
     }
 
-    /**
-     * 后台加载头像
-     * @param userName 用户名
-     * @param avatar 头像标签
-     */
-    public static void loadAvatar(String userName,JLabel avatar){
-        // 头像
-        new SwingWorker<Object,Object>(){
-            ImageIcon orLoadAvatar = null;
-            @Override
-            protected Object doInBackground() throws Exception {
-                orLoadAvatar = AvatarUtil.createOrLoadUserAvatar(userName);
-                return null;
-            }
-
-            @Override
-            protected void done() {
-                if (orLoadAvatar != null){
-                    avatar.setIcon(orLoadAvatar);
-                }
-            }
-        }.execute();
-    }
 }

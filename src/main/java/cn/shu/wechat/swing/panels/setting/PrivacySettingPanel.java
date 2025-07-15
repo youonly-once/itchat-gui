@@ -8,6 +8,7 @@ import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
+import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,6 +25,7 @@ import java.awt.event.MouseEvent;
  * @date 13/12/2021
  */
 public class PrivacySettingPanel extends JPanel {
+    @Getter
     private static PrivacySettingPanel context;
     private JCheckBox isFuzzUpAvatar;
     private RCButton okButton;
@@ -47,7 +49,7 @@ public class PrivacySettingPanel extends JPanel {
         isFuzzUpAvatar.setFont(FontUtil.getDefaultFont(14));
         isFuzzUpAvatar.setForeground(Colors.FONT_BLACK);
         isFuzzUpAvatar.setMargin(new Insets(0, 15, 0, 0));
-        
+
         okButton = new RCButton("确认修改", Colors.MAIN_COLOR, Colors.MAIN_COLOR_DARKER, Colors.MAIN_COLOR_DARKER);
         okButton.setPreferredSize(new Dimension(100, 35));
 
@@ -90,8 +92,4 @@ public class PrivacySettingPanel extends JPanel {
     }
 
 
-
-    public static PrivacySettingPanel getContext() {
-        return context;
-    }
 }

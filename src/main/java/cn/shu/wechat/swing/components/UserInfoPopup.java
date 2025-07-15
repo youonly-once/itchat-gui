@@ -11,6 +11,7 @@ import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.ChatUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.swing.worker.HeadLoadingSwingWorker;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import lombok.extern.log4j.Log4j2;
 
@@ -19,7 +20,6 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 /**
@@ -89,24 +89,9 @@ public class UserInfoPopup extends JPopupMenu {
         }
 
 
-        avatarLabel.setIcon(IconUtil.getIcon(this,"/image/image_loading.gif"));
-        //异步加载头像
-        new SwingWorker<Object,Object>() {
-            Image orLoadBigAvatar ;
-            @Override
-            protected Object doInBackground() throws Exception {
-                orLoadBigAvatar = AvatarUtil.createOrLoadBigAvatar(contacts);
-                return null;
-            }
-            @Override
-            protected void done() {
-                if (orLoadBigAvatar!=null){
-                    orLoadBigAvatar = orLoadBigAvatar.getScaledInstance(220,220,Image.SCALE_SMOOTH);
-                    avatarLabel.setIcon(new ImageIcon(orLoadBigAvatar));
-                }
 
-            }
-        }.execute();
+        new HeadLoadingSwingWorker(avatarLabel,contacts).big(220,220).loadAvatar();
+
         remarkNameLabel.setText("备注："+contacts.getRemarkname());
         signatureLabel.setText("签名："+contacts.getSignature());
         signatureLabel.setToolTipText(contacts.getSignature());

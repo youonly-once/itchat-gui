@@ -5,10 +5,10 @@ import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
-import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.TimeUtil;
+import cn.shu.wechat.swing.worker.HeadLoadingSwingWorker;
 
 import javax.swing.*;
 import java.awt.*;
@@ -71,7 +71,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
         RoomItem roomItem = roomItems.get(position);
         viewHolder.setTag(roomItem.getRoomId());
         viewHolder.roomName.setText(roomItem.getName());
-        AvatarUtil.loadAvatar(roomItem.getRoomId(),viewHolder.avatar);
+        new HeadLoadingSwingWorker(viewHolder.avatar,roomItem.getRoomId()).loadAvatar();
         // 消息
         viewHolder.brief.setText(roomItem.getLastMessage());
         if (roomItem.getLastMessage() != null && roomItem.getLastMessage().length() > 15) {
