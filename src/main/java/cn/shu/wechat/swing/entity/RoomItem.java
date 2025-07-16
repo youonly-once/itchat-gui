@@ -18,6 +18,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RoomItem implements Comparable<RoomItem> {
+
+    private boolean atMe;
+
+    /**
+     * 当前房间对应的联系人
+     */
+    private Contacts contacts;
+
     /**
      * 房间id 对应微信用户的UserName以@开头或@@
      */
@@ -75,6 +83,7 @@ public class RoomItem implements Comparable<RoomItem> {
         return o.getLocalDateTime().compareTo(this.getLocalDateTime());
     }
     public RoomItem (Contacts contacts,String latestMsg, int msgCount,Boolean hasNewMsg){
+        setContacts(contacts);
         setRoomId(contacts.getUsername());
         setLocalDateTime(LocalDateTime.now());
         setName(ContactsTools.getContactDisplayNameByUserName(contacts.getUsername()));

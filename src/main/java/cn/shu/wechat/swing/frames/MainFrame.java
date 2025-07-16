@@ -6,7 +6,6 @@ import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.panels.RightPanel;
 import cn.shu.wechat.swing.panels.left.LeftPanel;
-import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
@@ -19,11 +18,6 @@ import javax.sound.sampled.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.locks.LockSupport;
 
@@ -54,6 +48,7 @@ public class MainFrame extends JFrame {
     private LockFrame lockFrame;
 
 
+    @Getter
     private static MainFrame context;
 
     /**
@@ -88,7 +83,7 @@ public class MainFrame extends JFrame {
         initComponents();
         initView();
         initResource();
-        initTrayFlashingThread();
+        //initTrayFlashingThread();
     }
 
     private void initResource() {
@@ -277,20 +272,12 @@ public class MainFrame extends JFrame {
      * 设置任务栏图标闪动
      */
     public synchronized void setTrayFlashing(boolean flashing) {
-        trayFlashing = flashing;
-        if (flashing) {
-            LockSupport.unpark(trayFlashingThread);
-        }
+        SwingUtilities.invokeLater(() -> {
+            if (Taskbar.isTaskbarSupported() && Taskbar.getTaskbar().isSupported(Taskbar.Feature.USER_ATTENTION)) {
+                Taskbar.getTaskbar().requestUserAttention(flashing, false);
+            }
+        });
 
-    }
-
-    public boolean isTrayFlashing() {
-        return trayFlashing;
-    }
-
-
-    public static MainFrame getContext() {
-        return context;
     }
 
 

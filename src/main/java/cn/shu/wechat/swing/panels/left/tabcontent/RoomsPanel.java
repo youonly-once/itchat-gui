@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Log4j2
 public class RoomsPanel extends ParentAvailablePanel {
+    @Getter
     private static RoomsPanel context;
 
 
@@ -129,6 +130,10 @@ public class RoomsPanel extends ParentAvailablePanel {
      * @param roomId 房间id
      */
     public void enterRoom(String roomId) {
+        //进入房间后 "有人@我"标识消失
+        roomItemList.stream().filter(e->e.getRoomId().equals(roomId)).findFirst().ifPresent(e->{
+            e.setAtMe(false);
+        });
         //切换显示层
         ChatPanelContainer.getContext().createAndShow(roomId);
         ChatPanelContainer.getContext().show(roomId);
@@ -168,7 +173,7 @@ public class RoomsPanel extends ParentAvailablePanel {
      * @param item 房间Item
      */
     private void addRoom(RoomItem item) {
-        roomItemList.add(0, item);
+        roomItemList.addFirst(item);
         roomItemsListView.notifyDataSetChanged(false);
         roomItemsListView.scrollToPosition(0);
     }
@@ -415,10 +420,6 @@ public class RoomsPanel extends ParentAvailablePanel {
 
     public void scrollToPosition(int point){
         roomItemsListView.scrollToPosition(point);
-    }
-
-    public static RoomsPanel getContext() {
-        return context;
     }
 
 }

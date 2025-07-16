@@ -9,7 +9,9 @@ public enum DownloadType {
     ByRelativeUrl("相对地址下载头像资源", "ByRelativeUrl"),
     RESOURCE_BY_USERNAME("消息ID下载资源", "resource_by_username"),
     ImgByMsgID("消息ID下载图像", "ImgByMsgID"),
-    ImgByteByMsgID("消息ID下载图像Bytes", "ImgByteByMsgID");
+    ImgByteByMsgID("消息ID下载图像Bytes", "ImgByteByMsgID"),
+    GetContacts("获取用户", "GetContacts"),
+    GetBatchContacts("获取群成员", "GetBatchContacts");
 
 
     private final String description;

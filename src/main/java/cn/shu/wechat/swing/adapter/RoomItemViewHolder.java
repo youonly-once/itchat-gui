@@ -5,6 +5,7 @@ import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
+import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,7 +24,11 @@ public class RoomItemViewHolder extends ViewHolder {
     public JLabel unreadCount = new JLabel();
     public JLabel mutePoint = new JLabel();
     public JPanel timeUnread = new JPanel();
+    public JPanel atAndBrief = new JPanel();
+    //有人@我
+    public JLabel atMe = new JLabel("【有人@我】");
     public static final int HEIGHT = 64;
+    @Setter
     private Object tag;
     protected RoomItemsAdapter.RoomItemAbstractMouseListener mouseListener;
     public RoomItemViewHolder() {
@@ -48,10 +53,17 @@ public class RoomItemViewHolder extends ViewHolder {
         brief.setForeground(Colors.FONT_GRAY);
         brief.setFont(FontUtil.getDefaultFont(12));
 
+        atAndBrief.setLayout(new GridBagLayout());
+        atAndBrief.setBackground(Colors.WINDOW_BACKGROUND);
+        atMe.setVisible(false);
+        atMe.setForeground(Color.RED);
+
+        atAndBrief.add(atMe,new GBC(0, 0).setWeight(2, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0));
+        atAndBrief.add(brief,new GBC(1, 0).setWeight(100, 1).setFill(GBC.BOTH).setInsets(5, 5, 0, 0));
         nameBrief.setLayout(new BorderLayout());
         nameBrief.setBackground(Colors.WINDOW_BACKGROUND);
         nameBrief.add(roomName, BorderLayout.NORTH);
-        nameBrief.add(brief, BorderLayout.CENTER);
+        nameBrief.add(atAndBrief, BorderLayout.CENTER);
 
         time.setForeground(Colors.FONT_GRAY);
         time.setFont(FontUtil.getDefaultFont(12));
@@ -88,11 +100,4 @@ public class RoomItemViewHolder extends ViewHolder {
     }
 
 
-    public Object getTag() {
-        return tag;
-    }
-
-    public void setTag(Object tag) {
-        this.tag = tag;
-    }
 }

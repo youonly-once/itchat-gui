@@ -4,11 +4,14 @@ import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.constant.DownloadStatus;
 import cn.shu.wechat.constant.DownloadType;
 import cn.shu.wechat.dto.response.sync.AddMsgList;
+import cn.shu.wechat.service.impl.LoginServiceImpl;
+import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 
 import java.net.http.HttpResponse;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -99,6 +102,11 @@ public class DownloadTask<R> implements Callable<R> {
     private AddMsgList msg;
 
     /**
+     * 消息体对象（适用于 FN 类型下载）
+     */
+    private String groupName;
+
+    /**
      * 资源类型（如图片、视频等）
      */
     @Getter
@@ -172,6 +180,19 @@ public class DownloadTask<R> implements Callable<R> {
                 case ImgByteByMsgID:
                     this.result = (R) DownloadTools.downloadImgEntityByMsgID(String.valueOf(msgId), resourceType, HttpResponse.BodyHandlers.ofByteArray());
                     break;
+                case GetContacts:
+                    LoginServiceImpl loginService = SpringContextHolder.getBean(LoginServiceImpl.class);
+                     loginService.webWxGetContact();
+                    break;
+                case GetBatchContacts: {
+                    loginService = SpringContextHolder.getBean(LoginServiceImpl.class);
+                    if (StringUtils.isNotEmpty(groupName)){
+                        this.result = (R) loginService.WebWxBatchGetContact(groupName);
+                    }else{
+                        loginService.WebWxBatchGetContact();
+                    }
+                    break;
+                }
                 default:
                     throw new IllegalArgumentException("未知下载类型: " + type);
             }
