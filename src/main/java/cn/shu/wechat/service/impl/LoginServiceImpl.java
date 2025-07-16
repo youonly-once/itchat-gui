@@ -2,10 +2,7 @@ package cn.shu.wechat.service.impl;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
-import cn.shu.wechat.constant.StorageLoginInfoEnum;
-import cn.shu.wechat.constant.WxReqParamsConstant;
-import cn.shu.wechat.constant.WxRespConstant;
-import cn.shu.wechat.constant.WxURLEnum;
+import cn.shu.wechat.constant.*;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.core.MsgCenter;
 import cn.shu.wechat.dto.request.*;
@@ -19,6 +16,8 @@ import cn.shu.wechat.exception.WebWXException;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.utils.AvatarUtil;
+import cn.shu.wechat.task.DownloadManager;
+import cn.shu.wechat.task.DownloadTask;
 import cn.shu.wechat.utils.CommonTools;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.HttpUtil;
@@ -29,7 +28,7 @@ import com.alibaba.fastjson.JSONObject;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.compress.utils.Lists;
+import org.apache.commons.compress.utils.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
@@ -42,7 +41,6 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -81,17 +79,6 @@ public class LoginServiceImpl implements LoginService {
             return WxRespConstant.CheckLoginResultCodeEnum.getByCode(Integer.parseInt(matcher.group(1)));
         } else {
             throw new Exception("获取二维码扫描状态码失败！");
-        }
-    }
-
-    public static void main(String[] args) {
-        String url = "window.redirect_uri=\"https://wx2.qq.com/cgi-bin/mmwebwx-bin/webwxnewloginpage?ticket=A8XCLb3mURiL7HSW-Hwoqd3b@qrticket_0&uuid=wdhd2iiUGQ==&lang=zh_CN&scan=1685067009\"";
-        Pattern pattern = Pattern.compile("(https?://[^/]+)");
-        Matcher matcher = pattern.matcher(url);
-
-        if (matcher.find()) {
-            String protocol = matcher.group(1);
-            System.out.println("Protocol: " + protocol);
         }
     }
 
@@ -479,53 +466,12 @@ public class LoginServiceImpl implements LoginService {
         }
     }
 
-    /**
-     * 第一次收到群消息 加载群成员详细细腻
-     *
-     * @param msg 消息
-     */
-    private Contacts loadUserInfo(AddMsgList msg) {
-
-        String userName = msg.getFromUserName();
-        if (userName.equals(Core.getUserName())) {
-            userName = msg.getToUserName();
+    public static <T> List<List<T>> splitIntoGroups(List<T> input, int groupSize) {
+        List<List<T>> result = new ArrayList<>();
+        for (int i = 0; i < input.size(); i += groupSize) {
+            result.add(input.subList(i, Math.min(i + groupSize, input.size())));
         }
-        if ("@placeholder_foldgroup".equals(userName)) {
-            log.warn("折叠的群聊！");
-            return null;
-        }
-        Contacts contacts = Core.getMemberMap().get(userName);
-        if (contacts == null) {
-            log.error("用户不存在！{}", userName);
-            try {
-                //TODO 如果定时任务也在执行 会不会冲突？
-                this.WebWxBatchGetContact(userName);
-            } catch (IOException | InterruptedException e) {
-                log.error(e.getMessage());
-            }
-            contacts = Core.getMemberMap().get(userName);
-        }
-        if (userName.startsWith("@@")
-                && !StringUtils.isEmpty(msg.getMemberName()) &&
-                !Core.getMemberMap().containsKey(msg.getMemberName())) {
-            //群成员非好友时，获取群成员的详细信息
-            if (!Core.getMemberMap().containsKey(userName)
-                    || CollectionUtils.isEmpty(contacts.getMemberlist())
-                    || StringUtils.isEmpty(contacts.getMemberlist().getFirst().getHeadimgurl())) {
-                //使用头像地址来判断是否获取过成员详细信息
-                List<Contacts> contactsList = null;
-                try {
-
-                    log.error("群用户或者群成员信息不完整！{}", userName);
-                    contactsList = this.WebWxBatchGetContact(userName);
-                    contacts.setMemberlist(contactsList);
-                } catch (IOException | InterruptedException e) {
-                    log.error(e.getMessage());
-                }
-
-            }
-        }
-        return contacts;
+        return result;
     }
     @Override
     public void startReceiving() {
@@ -577,51 +523,49 @@ public class LoginServiceImpl implements LoginService {
         ExecutorServiceUtil.getReceivingExecutorService().execute(runnable);
     }
 
-    @Override
-    public void webWxGetContact() throws IOException, InterruptedException {
-        String url = String.format(WxURLEnum.WEB_WX_GET_CONTACT.getUrl(),
-                Core.getLoginResultData().getUrl());
+    /**
+     * 第一次收到群消息 加载群成员详细细腻
+     *
+     * @param msg 消息
+     */
+    private Contacts loadUserInfo(AddMsgList msg) {
 
-            JSONObject fullFriendsJsonList = HttpUtil.doPost(url, JSON.toJSONString(Core.getLoginResultData().getBaseRequest()),HttpUtil.getJsonEntityBodyHandler(JSONObject.class));
-            // 查看seq是否为0，0表示好友列表已全部获取完毕，若大于0，则表示好友列表未获取完毕，当前的字节数（断点续传）
-            long seq = 0;
-            long currentTime = 0L;
-        HashMap<String, String> params = new HashMap<>();
-        if (fullFriendsJsonList.get("Seq") != null) {
-                seq = fullFriendsJsonList.getLong("Seq");
-                currentTime = System.currentTimeMillis();
+        String userName = msg.getFromUserName();
+        if (userName.equals(Core.getUserName())) {
+            userName = msg.getToUserName();
+        }
+        if ("@placeholder_foldgroup".equals(userName)) {
+            log.warn("折叠的群聊！");
+            return null;
+        }
+        Contacts contacts = Core.getMemberMap().get(userName);
+//        if (contacts == null) {
+//            log.error("用户不存在！{}", userName);
+//            try {
+//                this.WebWxBatchGetContact(userName);
+//            } catch (IOException | InterruptedException e) {
+//                log.error(e.getMessage());
+//            }
+//            contacts = Core.getMemberMap().get(userName);
+//        }
+        if (ContactsTools.isRoomContact(userName)
+                && !StringUtils.isEmpty(msg.getMemberName()) &&
+                !Core.getMemberMap().containsKey(msg.getMemberName())) {
+            //群成员非好友时，获取群成员的详细信息
+            if (!Core.getMemberMap().containsKey(userName)
+                    || CollectionUtils.isEmpty(contacts.getMemberlist())
+                    || StringUtils.isEmpty(contacts.getMemberlist().getFirst().getHeadimgurl())) {
+                //使用头像地址来判断是否获取过成员详细信息
+
+                log.error("群用户或者群成员信息不完整！{}", userName);
+                DownloadTask<Void> objectDownloadTask = new DownloadTask<>();
+                objectDownloadTask.setTaskId("WebWxBatchGetContact:" + userName);
+                objectDownloadTask.setType(DownloadType.GetBatchContacts);
+                DownloadManager.submit(objectDownloadTask);
+                return Core.getMemberMap().get(userName);
             }
-            JSONArray member = fullFriendsJsonList.getJSONArray(StorageLoginInfoEnum.MemberList.getKey());
-            // 循环获取seq直到为0，即获取全部好友列表
-            // ==0：好友获取完毕
-            // >0：好友未获取完毕，此时seq为已获取的字节数
-            while (seq > 0) {
-                // 设置seq传参
-                params.put("r", String.valueOf(currentTime));
-                params.put("seq", String.valueOf(seq));
-
-                fullFriendsJsonList = HttpUtil.doGet(url, params, null,false, HttpUtil.getJsonEntityBodyHandler(JSONObject.class));
-
-                if (fullFriendsJsonList.get("Seq") != null) {
-                    seq = fullFriendsJsonList.getLong("Seq");
-                    currentTime = System.currentTimeMillis();
-                }
-
-                // 累加好友列表
-                member.addAll(fullFriendsJsonList.getJSONArray(StorageLoginInfoEnum.MemberList.getKey()));
-            }
-            member.parallelStream().forEach(value -> {
-
-                JSONObject o = (JSONObject) value;
-                Contacts contacts = JSON.parseObject(JSON.toJSONString(o), Contacts.class);
-                addContacts(contacts);
-            });
-            if (!Core.getMemberMap().containsKey("filehelper")) {
-                Core.getMemberMap().put("filehelper",
-                        Contacts.builder().username("filehelper").displayname("文件传输助手")
-                                .type(Contacts.ContactsType.ORDINARY_USER).build());
-            }
-
+        }
+        return contacts;
     }
 
     /**
@@ -667,101 +611,125 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public void WebWxBatchGetContact() throws IOException, InterruptedException {
+    public void webWxGetContact() throws IOException, InterruptedException {
+        String url = String.format(WxURLEnum.WEB_WX_GET_CONTACT.getUrl(),
+                Core.getLoginResultData().getUrl());
+
+            JSONObject fullFriendsJsonList = HttpUtil.doPost(url, JSON.toJSONString(Core.getLoginResultData().getBaseRequest()),HttpUtil.getJsonEntityBodyHandler(JSONObject.class));
+            // 查看seq是否为0，0表示好友列表已全部获取完毕，若大于0，则表示好友列表未获取完毕，当前的字节数（断点续传）
+            long seq = 0;
+            long currentTime = 0L;
+        HashMap<String, String> params = new HashMap<>();
+        if (fullFriendsJsonList.get("Seq") != null) {
+                seq = fullFriendsJsonList.getLong("Seq");
+                currentTime = System.currentTimeMillis();
+            }
+            JSONArray member = fullFriendsJsonList.getJSONArray(StorageLoginInfoEnum.MemberList.getKey());
+            // 循环获取seq直到为0，即获取全部好友列表
+            // ==0：好友获取完毕
+            // >0：好友未获取完毕，此时seq为已获取的字节数
+            while (seq > 0) {
+                // 设置seq传参
+                params.put("r", String.valueOf(currentTime));
+                params.put("seq", String.valueOf(seq));
+
+                fullFriendsJsonList = HttpUtil.doGet(url, params, null,false, HttpUtil.getJsonEntityBodyHandler(JSONObject.class));
+
+                if (fullFriendsJsonList.get("Seq") != null) {
+                    seq = fullFriendsJsonList.getLong("Seq");
+                    currentTime = System.currentTimeMillis();
+                }
+
+                // 累加好友列表
+                member.addAll(fullFriendsJsonList.getJSONArray(StorageLoginInfoEnum.MemberList.getKey()));
+            }
+        member.forEach(value -> {
+
+                JSONObject o = (JSONObject) value;
+                Contacts contacts = JSON.parseObject(JSON.toJSONString(o), Contacts.class);
+                addContacts(contacts);
+            });
+            if (!Core.getMemberMap().containsKey("filehelper")) {
+                Core.getMemberMap().put("filehelper",
+                        Contacts.builder().username("filehelper").displayname("文件传输助手")
+                                .type(Contacts.ContactsType.ORDINARY_USER).build());
+            }
+        Core.getGroupIdSet().addAll(Core.getGroupMap().keySet());
+
+    }
+
+    @Override
+    public void WebWxBatchGetContact(Set<String> groupName) throws IOException, InterruptedException {
         String url = String.format(WxURLEnum.WEB_WX_BATCH_GET_CONTACT.getUrl(),
                 Core.getLoginResultData().getUrl(), new Date().getTime(),
                 Core.getLoginResultData().getPassTicket());
-        Map<String, Object> paramMap = new HashMap<>();
-        Core.getGroupIdSet().addAll(Core.getGroupMap().keySet());
-        paramMap.put("Count", Core.getGroupIdSet().size());
-        List<Map<String, String>> list = Core.getGroupIdSet().parallelStream().map(s -> {
-            HashMap<String, String> map = new HashMap<String, String>(2);
+
+
+        List<Map<String, String>> queryList = groupName.stream().map(s -> {
+            HashMap<String, String> map = new HashMap<String, String>();
             map.put("UserName", s);
             map.put("EncryChatRoomId", "");
             return map;
         }).collect(Collectors.toList());
-        paramMap.put("List", list);
+
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("Count", groupName.size());
+        paramMap.put("List", queryList);
         paramMap.put("BaseRequest",Core.getLoginResultData().getBaseRequest());
 
+        JSONObject obj = HttpUtil.doPost(url, JSON.toJSONString(paramMap), HttpUtil.getJsonEntityBodyHandler(JSONObject.class));
+        if (obj.getJSONObject("BaseResponse").getInteger("Ret") != 0) {
+            log.error("获取群信息失败：{}", obj.getJSONObject("BaseResponse"));
+            return;
+        }
+        //群列表
+        obj.getJSONArray("ContactList").forEach(groupObject -> {
 
-            JSONObject obj =  HttpUtil.doPost(url, JSON.toJSONString(paramMap),HttpUtil.getJsonEntityBodyHandler(JSONObject.class));
-            //群列表
-            obj.getJSONArray("ContactList").parallelStream().forEach(groupObject -> {
                 // 群好友
                 Contacts group = JSON.parseObject(JSON.toJSONString(groupObject), Contacts.class);
                 String userName = group.getUsername();
                 if (ContactsTools.isRoomContact(userName)) {
+                    try {
+                        JSONArray memberArray = WebWxBatchGetContactGroupMemberDetail(group);
+                        List<Contacts> memberList = JSON.parseArray(JSON.toJSONString(memberArray), Contacts.class);
+                        group.setMemberlist(memberList);
+                    } catch (Exception e) {
+                        log.error("获取群成员信息失败：{}", groupObject);
+                    }
+
                     //以上接口返回的成员属性不全，以下的接口获取群成员详细属性
-                    JSONArray memberArray = WebWxBatchGetContactDetail(group);
-                    List<Contacts> memberList = JSON.parseArray(JSON.toJSONString(memberArray), Contacts.class);
-                    group.setMemberlist(memberList);
                     Core.getMemberMap().put(userName, group);
                     Core.getGroupMap().put(userName, group);
                 }
-            });
+
+        });
 
 
     }
 
     @Override
-    public List<Contacts> WebWxBatchGetContact(String groupName) throws IOException, InterruptedException {
-
-        log.info("加载群成员开始：" + groupName);
-        String url = String.format(WxURLEnum.WEB_WX_BATCH_GET_CONTACT.getUrl(),
-                Core.getLoginResultData().getUrl(), new Date().getTime(),
-                Core.getLoginResultData().getPassTicket());
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("Count", 1);
-        List<Map<String, String>> list = new ArrayList<Map<String, String>>(1);
-        HashMap<String, String> map = new HashMap<String, String>(2);
-        map.put("UserName", groupName);
-        map.put("EncryChatRoomId", "");
-        list.add(map);
-        paramMap.put("List", list);
-        paramMap.put("BaseRequest", Core.getLoginResultData().getBaseRequest());
-
-            JSONObject obj = HttpUtil.doPost(url, JSON.toJSONString(paramMap),HttpUtil.getJsonEntityBodyHandler(JSONObject.class));
-            if (obj.getJSONObject("BaseResponse").getInteger("Ret")!=0){
-                log.error("获取群信息失败：{}",obj.getJSONObject("BaseResponse"));
-                return Lists.newArrayList();
-            }
-            //群列表
-            JSONArray contactList = obj.getJSONArray("ContactList");
-            for (int i = 0; i < contactList.size(); i++) {
-                // 群好友
-                JSONObject groupObject = contactList.getJSONObject(i);
-                Contacts group = JSON.parseObject(JSON.toJSONString(groupObject), Contacts.class);
-                group.setType(Contacts.ContactsType.GROUP_USER);
-                String userName = group.getUsername();
-                Core.getMemberMap().put(userName, group);
-                if (userName.startsWith("@@")) {
-                    //以上接口返回的成员属性不全，以下的接口获取群成员详细属性
-                    JSONArray memberArray = WebWxBatchGetContactDetail(group);
-                    List<Contacts> memberList = JSON.parseArray(JSON.toJSONString(memberArray), Contacts.class);
-                    group.setMemberlist(memberList);
-                    Core.getGroupMap().put(userName, group);
-                    Core.getMemberMap().put(userName, group);
-                    log.info("加载群成员结束：" + Core.getMemberMap().get(groupName).getMemberlist().size());
-                    return memberList;
-                }
-            }
-
-
-        log.info("加载群成员结束：0");
-        return new ArrayList<>();
+    public void WebWxBatchGetContact() throws IOException, InterruptedException {
+        WebWxBatchGetContact(Core.getGroupIdSet());
     }
 
     @Override
-    public JSONArray WebWxBatchGetContactDetail(Contacts group) {
+    public void WebWxBatchGetContact(String groupName) throws IOException, InterruptedException {
+        WebWxBatchGetContact(Sets.newHashSet(groupName));
+    }
+
+    /**
+     * 获取每个群的群成员详细信息
+     *
+     * @param group 群对象
+     * @return
+     */
+    @Override
+    public JSONArray WebWxBatchGetContactGroupMemberDetail(Contacts group) {
+
         String url = String.format(WxURLEnum.WEB_WX_BATCH_GET_CONTACT.getUrl(),
                 Core.getLoginResultData().getUrl(), System.currentTimeMillis(),
                 Core.getLoginResultData().getPassTicket());
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("BaseRequest",Core.getLoginResultData().getBaseRequest());
-        //保存获取的群成员详细信息
-        ArrayList<Contacts> groupContactsList = new ArrayList<>();
-        JSONArray memberArray = new JSONArray();
-        //保存需要获取详细资料的群成员username
+
         List<Map<String, String>> list = new ArrayList<Map<String, String>>(group.getMemberlist().size());
         for (Contacts o : group.getMemberlist()) {
             //遍历群成员
@@ -770,31 +738,24 @@ public class LoginServiceImpl implements LoginService {
             map.put("EncryChatRoomId", group.getUsername());
             list.add(map);
         }
-        if (list.isEmpty()) {
-            return memberArray;
-        }
-        //每次请求50个
-        int ceil = (int) (Math.ceil((list.size() / 50.0)));
 
-        for (int i = 0; i < ceil; i++) {
-            List<Map<String, String>> subList = null;
-            if (i < ceil - 1) {
-                subList = list.subList(i * 50, i * 50 + 50);
-            } else {
-                subList = list.subList(i * 50, list.size());
-            }
-            paramMap.put("Count", subList.size());
-            paramMap.put("List", subList);
-
+        return splitIntoGroups(list, 50).parallelStream().map(subList -> {
             try {
-                JSONObject obj = HttpUtil.doPost(url, JSON.toJSONString(paramMap),HttpUtil.getJsonEntityBodyHandler(JSONObject.class));
-                JSONArray contactListArray = obj.getJSONArray("ContactList");
-                memberArray.addAll(contactListArray);
+                Map<String, Object> paramMap = new HashMap<>();
+                paramMap.put("BaseRequest", Core.getLoginResultData().getBaseRequest());
+                paramMap.put("Count", subList.size());
+                paramMap.put("List", subList);
+                JSONObject obj = HttpUtil.doPost(url, JSON.toJSONString(paramMap), HttpUtil.getJsonEntityBodyHandler(JSONObject.class));
+                if (obj.getJSONObject("BaseResponse").getInteger("Ret") != 0) {
+                    log.error("获取群信息失败：{}，{}", group.getNickname(), obj.getJSONObject("BaseResponse"));
+                    throw new RuntimeException("获取群信息失败：" + group.getNickname() + ":" + obj.getJSONObject("BaseResponse"));
+                }
+                return obj.getJSONArray("ContactList");
             } catch (IOException | InterruptedException e) {
-                log.error(e.getMessage());
+                throw new RuntimeException(e);
             }
-        }
-        return memberArray;
+
+        }).flatMap(Collection::stream).collect(Collectors.toCollection(JSONArray::new));
 
     }
 

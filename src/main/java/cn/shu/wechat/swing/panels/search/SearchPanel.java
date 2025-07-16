@@ -29,7 +29,6 @@ import java.util.Timer;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by 舒新胜 on 17-5-29.
@@ -303,24 +302,71 @@ public class SearchPanel extends ParentAvailablePanel {
     private void searchContacts(String keyWord, int version, List<SearchResultItem> data) {
         Map<String, Contacts> memberMap = Core.getMemberMap();
 
-
+        String pinyin = toPinyin(keyWord);
+        String toInitial = toInitial(keyWord);
         List<SearchResultItem> results = memberMap.entrySet().stream()
                 .takeWhile(entry -> !outdatedVersionAndInterrupted(version))
                 .map(entry -> {
                     Contacts contact = entry.getValue();
                     // 计算匹配分数
-                    String match = Stream.of(contact.getRemarkname(), contact.getNickname(), contact.getDisplayname())
-                            .filter(Objects::nonNull)
-                            .filter(field -> field.toLowerCase().contains(keyWord))
-                            .findAny()
-                            .orElse(null);
+                    int score = 0;
+
+                    String remarkName = contact.getRemarkname();
+                    String nickname = contact.getNickname();
+                    String displayname = contact.getDisplayname();
+
+                    String match = null;
+
+                    if (contact.getPyinitial().contains(toInitial)) {
+                        match = contact.getNickname();
+                        score = score + 1;
+                    }
+                    if (contact.getPyquanpin().contains(pinyin)) {
+                        match = contact.getNickname();
+                        score = score + 2;
+                    }
+                    if (StringUtils.isNotEmpty(contact.getRemarkname()) && toPinyin(contact.getRemarkname()).contains(pinyin)) {
+                        match = contact.getRemarkname();
+                        score = score + 3;
+                    }
+                    if (StringUtils.isNotEmpty(contact.getRemarkname()) && toInitial(contact.getRemarkname()).contains(toInitial)) {
+                        match = contact.getRemarkname();
+                        score = score + 2;
+                    }
+
+                    if (StringUtils.isNotEmpty(displayname) && displayname.toLowerCase().contains(keyWord)) {
+                        score = score + 1;
+                        match = displayname;
+                    }
+                    if (StringUtils.isNotEmpty(nickname) && nickname.toLowerCase().contains(keyWord)) {
+                        match = nickname;
+                        score = score + 2;
+                    }
+                    if (StringUtils.isNotEmpty(remarkName) && remarkName.toLowerCase().contains(keyWord)) {
+                        match = remarkName;
+                        score = score + 3;
+                    }
+
+
+//                    String match = Stream.of(contact.getRemarkname(), contact.getNickname(), contact.getDisplayname())
+//                            .filter(StringUtils::isNotEmpty)
+//                            .filter(field -> field.toLowerCase().contains(keyWord))
+//                            .findAny()
+//                            .orElse(null);
+                    //if (match == null) {
+
+
                     if (match == null) return null;
+                    //}
+
+
 
                     SearchResultItem item = new SearchResultItem();
                     item.setType(SearchResultType.CONTACTS.CODE);
                     item.setId(entry.getKey());
                     item.setTag(entry.getKey());
                     item.setName(match);
+                    item.setScore(score);
                     return item;
                 })
                 .filter(Objects::nonNull)
@@ -404,54 +450,93 @@ public class SearchPanel extends ParentAvailablePanel {
         return sb.toString().toLowerCase();
     }
 
+    /**
+     * 计算联系人与关键字之间的匹配得分。
+     *
+     * @param contact        联系人对象
+     * @param keyWordLower   小写的原始关键字
+     * @param keyWordPinyin  关键字的拼音全拼
+     * @param keyWordInitial 关键字的拼音首字母
+     * @return 匹配得分，数值越高匹配度越高
+     */
     private int calculateScore(Contacts contact, String keyWordLower, String keyWordPinyin, String keyWordInitial) {
         int maxScore = 0;
-        for (FieldData fd : List.of(
-                new FieldData(contact.getRemarkname(), contact.getRemarkpyquanpin(), 30),
-                new FieldData(contact.getNickname(), contact.getPyquanpin(), 20),
-                new FieldData(contact.getDisplayname(), contact.getPyquanpin(), 10))) {
-            String field = fd.text;
-            String pinyin = fd.pinyin;
-            if (field == null) continue;
 
-            String fieldLower = field.toLowerCase();
+        List<FieldData> fields = List.of(
+                new FieldData(contact.getRemarkname(), contact.getRemarkpyquanpin(), contact.getRemarkpyinitial(), 30),
+                new FieldData(contact.getNickname(), contact.getPyquanpin(), contact.getPyquanpin(), 20),
+                new FieldData(contact.getDisplayname(), contact.getPyquanpin(), contact.getPyquanpin(), 10)
+        );
+
+        for (FieldData fieldData : fields) {
+            String field = fieldData.text;
+            String pinyin = fieldData.pinyin;
+            String initial = fieldData.initial;
+
+            if (StringUtils.isEmpty(field)) continue;
+
             int score = 0;
+            String fieldLower = field.toLowerCase();
 
-            // 基础规则匹配
-            if (fieldLower.equals(keyWordLower)) score = 100;
-            else if (fieldLower.startsWith(keyWordLower)) score = 80;
-            else if (fieldLower.contains(keyWordLower)) score = 50;
-
-            // 拼音匹配（直接用已有拼音字段）
-            if (pinyin != null) {
-                String pinyinLower = pinyin.toLowerCase();
-                if (pinyinLower.contains(keyWordPinyin)) score = Math.max(score, 40);
-                if (pinyinLower.startsWith(keyWordInitial)) score = Math.max(score, 30);
+            // === 1. 原文匹配 ===
+            if (fieldLower.equals(keyWordLower)) {
+                score = 100;
+            } else if (fieldLower.startsWith(keyWordLower)) {
+                score = 80;
+            } else if (fieldLower.contains(keyWordLower)) {
+                score = 60;
             }
 
-            // 模糊匹配（编辑距离）
+            // === 2. 拼音全拼匹配 ===
+            if (StringUtils.isNotEmpty(pinyin)) {
+                String pinyinLower = pinyin.toLowerCase();
+                if (pinyinLower.equals(keyWordPinyin)) {
+                    score = Math.max(score, 70);
+                } else if (pinyinLower.startsWith(keyWordPinyin)) {
+                    score = Math.max(score, 50);
+                } else if (pinyinLower.contains(keyWordPinyin)) {
+                    score = Math.max(score, 40);
+                }
+            }
+
+            // === 3. 拼音首字母简拼匹配 ===
+            if (StringUtils.isNotEmpty(initial)) {
+                String initialLower = initial.toLowerCase();
+                if (initialLower.equals(keyWordInitial)) {
+                    score = Math.max(score, 60);
+                } else if (initialLower.startsWith(keyWordInitial)) {
+                    score = Math.max(score, 45);
+                } else if (initialLower.contains(keyWordInitial)) {
+                    score = Math.max(score, 35);
+                }
+            }
+
+            // === 4. 编辑距离模糊匹配（英文名常见）===
             int distance = levenshtein.apply(keyWordLower, fieldLower);
             if (distance >= 0 && distance <= 2) {
-                int fuzzyScore = 20 + (2 - distance) * 10;
+                int fuzzyScore = 30 - distance * 10;
                 score = Math.max(score, fuzzyScore);
             }
 
-            // 字段优先级加权
-            score += fd.weight;
+            // === 5. 字段权重加成 ===
+            score += fieldData.weight;
 
             maxScore = Math.max(maxScore, score);
         }
+
         return maxScore;
     }
 
     private static class FieldData {
-        final String text;
-        final String pinyin;
-        final int weight;
+        final String text;     // 原始文本字段
+        final String pinyin;   // 全拼，如 zhangsan
+        final String initial;  // 拼音首字母，如 zs
+        final int weight;      // 字段权重
 
-        FieldData(String text, String pinyin, int weight) {
+        public FieldData(String text, String pinyin, String initial, int weight) {
             this.text = text;
             this.pinyin = pinyin;
+            this.initial = initial;
             this.weight = weight;
         }
     }

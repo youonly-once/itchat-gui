@@ -3,6 +3,7 @@ package cn.shu.wechat.utils;
 import cn.shu.wechat.entity.Contacts;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,13 +39,15 @@ public class JSONObjectUtil {
             //是否相同
             boolean equals = oldV.equals(newV);
             if ("HeadImgUrl".equals(entry.getKey()) || "headimgurl".equals(entry.getKey())) {
-                Matcher matcherNew = pattern.matcher(newV);
-                Matcher matcherOld = pattern.matcher(oldV);
-                if (matcherNew.find() && matcherOld.find()) {
-                    //头像相同
-                    String groupNew = matcherNew.group(1);
-                    String groupOld = matcherOld.group(1);
-                    equals = groupNew.equals(groupOld);
+                if (StringUtils.isNotEmpty(newV) && StringUtils.isNotEmpty(oldV)) {
+                    Matcher matcherNew = pattern.matcher(newV);
+                    Matcher matcherOld = pattern.matcher(oldV);
+                    if (matcherNew.find() && matcherOld.find()) {
+                        //头像相同
+                        String groupNew = matcherNew.group(1);
+                        String groupOld = matcherOld.group(1);
+                        equals = groupNew.equals(groupOld);
+                    }
                 }
             }
             if ("memberlist".equals(entry.getKey()) || "MemberList".equals(entry.getKey())) {

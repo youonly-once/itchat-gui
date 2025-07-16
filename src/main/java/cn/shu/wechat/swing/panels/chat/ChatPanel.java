@@ -1,19 +1,19 @@
 package cn.shu.wechat.swing.panels.chat;
 
 import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.constant.DownloadType;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.entity.Message;
-import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.panels.TitlePanel;
-import cn.shu.wechat.utils.SpringContextHolder;
+import cn.shu.wechat.task.DownloadManager;
+import cn.shu.wechat.task.DownloadTask;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 
 /**
  * Created by 舒新胜 on 17-5-29.
@@ -66,15 +66,19 @@ public class ChatPanel extends JPanel {
             protected Object doInBackground() throws Exception {
                 if (ContactsTools.isRoomContact(roomId)) {
                     if (contacts.getMemberlist() == null || contacts.getMemberlist().isEmpty()) {
-                        LoginService bean = SpringContextHolder.getBean(LoginService.class);
-                        bean.WebWxBatchGetContact(roomId);
+                        DownloadTask<Void> objectDownloadTask = new DownloadTask<>();
+                        objectDownloadTask.setTaskId("WebWxBatchGetContact:" + roomId);
+                        objectDownloadTask.setType(DownloadType.GetBatchContacts);
+                        objectDownloadTask.setGroupName(roomId);
+                        DownloadManager.submitAwait(objectDownloadTask);
                     }
                     contacts = Core.getMemberMap().get(roomId);
-                    ArrayList<String> list = new ArrayList<>();
-                    contacts.getMemberlist().parallelStream().forEach(contacts1 -> {
-                        list.add(ContactsTools.getMemberDisplayNameOfGroup(roomId, contacts1.getUsername()));
-                    });
-                    chatMessagePanel.setRoomMembers(list);
+
+                    chatMessagePanel.setRoomMembers(contacts.getMemberlist()
+                            .stream()
+                            .map(contacts1 -> ContactsTools.getMemberDisplayNameOfGroup(roomId, contacts1.getUsername()))
+                            .toList()
+                    );
                 }
                 return null;
             }

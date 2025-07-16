@@ -1,12 +1,13 @@
 package cn.shu.wechat.task;
 
 import cn.shu.wechat.constant.DownloadStatus;
+import cn.shu.wechat.constant.DownloadType;
+import cn.shu.wechat.core.Core;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 下载管理器（线程池驱动）
@@ -21,31 +22,20 @@ public class DownloadManager {
         return t;
     });
 
+    private final static ScheduledExecutorService updateContactsScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+        Thread t = new Thread(r, "Contacts-Updater");
+        t.setDaemon(true); // 设置为守护线程
+        return t;
+    });
+    private static final ExecutorService workerPool =
+            Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("Download--VirtualThread-", 0).factory());
+
     static {
         cleanerScheduler.scheduleAtFixedRate(DownloadManager::cleanFinishedTasks, 1, 5, TimeUnit.MINUTES);
+        updateContactsScheduler.scheduleAtFixedRate(DownloadManager::updateContactsInfo, 1, 1, TimeUnit.MINUTES);
     }
 
-    /**
-     * 下载任务执行线程池：
-     * - 核心线程数为 CPU 核心数
-     * - 最大线程数为 核心数 * 5（可根据并发量调整）
-     * - 使用 SynchronousQueue：不缓存任务，任务必须直接交付给线程执行
-     * - 拒绝策略为 AbortPolicy：任务无法提交时抛出异常
-     */
-    private final static ExecutorService workerPool = new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors(),                          // 核心线程数
-            Runtime.getRuntime().availableProcessors() * 4,                      // 最大线程数
-            0L, TimeUnit.MILLISECONDS,                                           // 空闲线程立即释放
-            new SynchronousQueue<>(),                                            // 不缓存任务，直接交付
-            new ThreadFactory() {                                                // 自定义线程命名
-                private final AtomicInteger index = new AtomicInteger(1);
 
-                public Thread newThread(Runnable r) {
-                    return new Thread(r, "DownloadWorker-" + index.getAndIncrement());
-                }
-            },
-            new ThreadPoolExecutor.AbortPolicy()                                 // 提交失败时抛出异常
-    );
 
     /**
      * 当前所有下载任务的缓存映射，key 为任务 ID，value 为任务实例
@@ -118,8 +108,20 @@ public class DownloadManager {
      */
     public static <R> R submitAwait(DownloadTask<R> task, long timeout, TimeUnit unit) {
         if (taskMap.containsKey(task.getTaskId())) {
-            log.error("任务已存在: " + task.getTaskId());
-            throw new IllegalArgumentException("任务已存在: " + task.getTaskId());
+            DownloadTask<R> downloadTask = taskMap.get(task.getTaskId());
+            if (downloadTask.getStatus() == DownloadStatus.FAIL) {
+                taskMap.remove(task.getTaskId());
+            } else if (downloadTask.getStatus() == DownloadStatus.WAITING || downloadTask.getStatus() == DownloadStatus.RUNNING) {
+                if (downloadTask.getFuture() == null) {
+                    awaitDownload(task.getTaskId());
+                    return (R) task.getResult();
+                }
+                try {
+                    return downloadTask.getFuture().get();
+                } catch (InterruptedException | ExecutionException e) {
+                    log.error(e.getMessage());
+                }
+            }
         }
         taskMap.put(task.getTaskId(), task);
         Future<R> submit = workerPool.submit(task);
@@ -226,6 +228,26 @@ public class DownloadManager {
         int after = taskMap.size();
         if (before != after) {
             log.info("定时清理下载任务：共清理 {} 条，剩余任务 {} 条", (before - after), after);
+        }
+    }
+
+    private static void updateContactsInfo() {
+        if (Core.isAlive()) {
+            long l = System.currentTimeMillis();
+
+            DownloadTask<Void> task1 = new DownloadTask<>();
+            task1.setTaskId("webWxGetContact");
+            task1.setType(DownloadType.GetContacts);
+            submitAwait(task1);
+
+
+            DownloadTask<Void> task2 = new DownloadTask<>();
+            task2.setTaskId("WebWxBatchGetContact");
+            task2.setType(DownloadType.GetBatchContacts);
+            submitAwait(task2);
+
+            log.info("获取联系人，耗时：{}（秒）", (System.currentTimeMillis() - l) / 1000);
+
         }
     }
 

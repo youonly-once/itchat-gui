@@ -3,6 +3,7 @@ package cn.shu.wechat.swing.frames;
 import cn.shu.WeChatStater;
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
+import cn.shu.wechat.constant.DownloadType;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.LoginInfo;
 import cn.shu.wechat.exception.WebWXException;
@@ -19,6 +20,8 @@ import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.OSUtil;
+import cn.shu.wechat.task.DownloadManager;
+import cn.shu.wechat.task.DownloadTask;
 import cn.shu.wechat.utils.*;
 import com.melloware.jintellitype.HotkeyListener;
 import com.melloware.jintellitype.JIntellitype;
@@ -350,7 +353,10 @@ public final class LoginFrame extends JFrame {
                 @Override
                 protected Object doInBackground() throws Exception {
                     log.info("获取联系人信息");
-                    loginService.webWxGetContact();
+                    DownloadTask<Void> objectDownloadTask = new DownloadTask<>();
+                    objectDownloadTask.setTaskId("webWxGetContact");
+                    objectDownloadTask.setType(DownloadType.GetContacts);
+                    DownloadManager.submitAwait(objectDownloadTask);
                     return null;
                 }
 
@@ -361,13 +367,15 @@ public final class LoginFrame extends JFrame {
                     loginService.startReceiving();
                     ContactsPanel.getContext().notifyDataSetChanged();
 
+
                     ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
+
                         log.info("获取群好友及群好友列表");
-                        try {
-                            loginService.WebWxBatchGetContact();
-                        } catch (IOException | InterruptedException e) {
-                            log.error(e.getMessage());
-                        }
+                        DownloadTask<Void> objectDownloadTask = new DownloadTask<>();
+                        objectDownloadTask.setTaskId("WebWxBatchGetContact");
+                        objectDownloadTask.setType(DownloadType.GetBatchContacts);
+                        DownloadManager.submitAwait(objectDownloadTask);
+
                         Core.setCompare(true);
                         if (dHImg) {
                             downloadHeadImage();

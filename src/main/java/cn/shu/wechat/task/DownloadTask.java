@@ -104,6 +104,8 @@ public class DownloadTask<R> implements Callable<R> {
     /**
      * 消息体对象（适用于 FN 类型下载）
      */
+    @Getter
+    @Setter
     private String groupName;
 
     /**
@@ -183,11 +185,12 @@ public class DownloadTask<R> implements Callable<R> {
                 case GetContacts:
                     LoginServiceImpl loginService = SpringContextHolder.getBean(LoginServiceImpl.class);
                      loginService.webWxGetContact();
+                    this.result = (R) "";
                     break;
                 case GetBatchContacts: {
                     loginService = SpringContextHolder.getBean(LoginServiceImpl.class);
                     if (StringUtils.isNotEmpty(groupName)){
-                        this.result = (R) loginService.WebWxBatchGetContact(groupName);
+                        loginService.WebWxBatchGetContact(groupName);
                     }else{
                         loginService.WebWxBatchGetContact();
                     }
@@ -199,7 +202,9 @@ public class DownloadTask<R> implements Callable<R> {
             if (callback != null) {
                 callback.accept(this);
             }
-            if (result == null) {
+            if (result == null
+                    && type != DownloadType.GetContacts
+                    && type != DownloadType.GetBatchContacts) {
                 throw new Exception("result is null!");
             }
             status = DownloadStatus.SUCCESS;

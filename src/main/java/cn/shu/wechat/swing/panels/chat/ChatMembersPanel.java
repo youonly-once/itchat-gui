@@ -1,9 +1,9 @@
 package cn.shu.wechat.swing.panels.chat;
 
 import cn.shu.wechat.api.ContactsTools;
+import cn.shu.wechat.constant.DownloadType;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.Contacts;
-import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.adapter.RoomMembersAdapter;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
@@ -14,7 +14,8 @@ import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.frames.AddOrRemoveMemberDialog;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
-import cn.shu.wechat.utils.SpringContextHolder;
+import cn.shu.wechat.task.DownloadManager;
+import cn.shu.wechat.task.DownloadTask;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -119,8 +120,12 @@ public class ChatMembersPanel extends ParentAvailablePanel {
 
             @Override
             protected Object doInBackground() throws Exception {
-                LoginService bean = SpringContextHolder.getBean(LoginService.class);
-                memberlist = bean.WebWxBatchGetContact(roomId);
+                DownloadTask<Void> objectDownloadTask = new DownloadTask<>();
+                objectDownloadTask.setTaskId("WebWxBatchGetContact:" + roomId);
+                objectDownloadTask.setType(DownloadType.GetBatchContacts);
+                objectDownloadTask.setGroupName(roomId);
+                DownloadManager.submitAwait(objectDownloadTask);
+                memberlist = Core.getMemberMap().get(roomId).getMemberlist();
                 return null;
             }
 

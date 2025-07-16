@@ -463,10 +463,17 @@ public class ContactsTools {
             }
             //交集
             oldKeys.removeAll(removedIds);
-            for (String commonKey : oldKeys) {
-                compareGroupMember(oldMap.get(commonKey), newMap.get(commonKey), oldGroup);
-            }
+            List<Message> messageList = oldKeys.stream()
+                    .map(commonKey -> compareGroupMember(oldMap.get(commonKey), newMap.get(commonKey), oldGroup))
+                    .filter(Objects::nonNull)
+                    .toList();
 
+            if (messageList.size() > 10) {
+                //群成员信息变化
+                log.error("群成员信息变化数量：{}", messageList.size());
+                return;
+            }
+            MessageTools.sendMsgByUserId(messageList);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -482,14 +489,14 @@ public class ContactsTools {
      * @param newMember 新值
      * @param oldGroup  旧群
      */
-    private static void compareGroupMember(Contacts oldMember, Contacts newMember, Contacts oldGroup) {
+    private static Message compareGroupMember(Contacts oldMember, Contacts newMember, Contacts oldGroup) {
         if (oldMember == null) {
-            return;
+            return null;
         }
         //TODO 更改一次头像  有二次seq都不一样，导致重发
         Map<String, Map<String, String>> differenceMap = JSONObjectUtil.getDifferenceMap(oldMember, newMember);
         if (differenceMap.isEmpty()) {
-            return;
+            return null;
         }
         //待发消息列表
         String differenceStr = differenceMapToString(differenceMap);
@@ -497,18 +504,16 @@ public class ContactsTools {
         String memberDisplayNameOfGroup = ContactsTools.getMemberDisplayNameOfGroupObj(oldGroup, oldMember.getUsername());
         //获取群昵称
         String groupName = ContactsTools.getContactDisplayNameByUserName(oldGroup);
-        ArrayList<Message> messages = new ArrayList<>();
-         messages.add(Message.builder().content("群成员信息更改" + "：【" + groupName + "】" + "（" + memberDisplayNameOfGroup + "）属性更新：" + differenceStr)
+
+        Message message = Message.builder().content("群成员信息更改" + "：【" + groupName + "】" + "（" + memberDisplayNameOfGroup + "）属性更新：" + differenceStr)
                 .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                 .toUsername("filehelper")
-                .build());
+                .build();
         log.info("群成员信息更改" + "：【" + groupName + "】" + "（" + memberDisplayNameOfGroup + "）属性更新：" + differenceStr);
         //差异存到数据库
+        store(differenceMap, oldMember, List.of(message));
 
-        store(differenceMap, oldMember, messages);
-        MessageTools.sendMsgByUserId(messages);
-
-
+        return message;
     }
 
     /**

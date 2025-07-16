@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONArray;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 登陆服务接口
@@ -93,6 +94,8 @@ public interface LoginService {
      */
     void webWxGetContact() throws IOException, InterruptedException;
 
+    void WebWxBatchGetContact(Set<String> groupName) throws IOException, InterruptedException;
+
     /**
      * 批量获取群成员信息
      *
@@ -111,7 +114,7 @@ public interface LoginService {
      * 获取群成员信息
      * @param groupName 群名
      */
-    List<Contacts> WebWxBatchGetContact(String groupName) throws IOException, InterruptedException;
+    void WebWxBatchGetContact(String groupName) throws IOException, InterruptedException;
 
     /**
      * 批量获取群成员详细信息
@@ -122,6 +125,6 @@ public interface LoginService {
      * @return 群成员数组
      * @date 2017年6月22日 下午11:24:35
      */
-    JSONArray WebWxBatchGetContactDetail(Contacts group);
+    JSONArray WebWxBatchGetContactGroupMemberDetail(Contacts group);
 
 }
