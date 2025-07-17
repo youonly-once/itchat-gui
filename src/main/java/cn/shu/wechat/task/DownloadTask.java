@@ -214,7 +214,7 @@ public class DownloadTask<R> implements Callable<R> {
         } catch (Exception e) {
             status = DownloadStatus.FAIL;
 
-            log.error("下载文件失败({})：{},{}", type.getDescription(), this.toString(), e.toString());
+            log.error("下载文件失败({})：{},{}", type.getDescription(), this.toString(), e.getMessage(),e);
         }
         return null;
     }

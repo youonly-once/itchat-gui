@@ -608,9 +608,7 @@ public class LoginServiceImpl implements LoginService {
 
         if ((contacts.getVerifyflag() & 8) != 0) {
             // 公众号/服务号
-            if (!Core.getMemberMap().containsKey(userName)) {
-                log.info("新增公众号/服务号：{}", nickName);
-            }
+
             contacts.setType(Contacts.ContactsType.PUBLIC_USER);
         } else if (config.getSpecialUser().contains(userName)) {
             // 特殊账号
