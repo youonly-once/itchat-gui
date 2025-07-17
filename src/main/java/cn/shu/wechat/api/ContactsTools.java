@@ -462,20 +462,20 @@ public class ContactsTools {
                 MessageTools.sendMsgByUserId(messages);
             }
             //交集
-            oldKeys.removeAll(removedIds);
-            List<Message> messageList = oldKeys.stream()
-                    .map(commonKey -> compareGroupMember(oldMap.get(commonKey), newMap.get(commonKey), oldGroup))
-                    .filter(Objects::nonNull)
-                    .toList();
-
-            if (messageList.size() > 10) {
-                //群成员信息变化
-                log.error("群成员信息变化数量：{}", messageList.size());
-                return;
-            }
-            MessageTools.sendMsgByUserId(messageList);
+            //oldKeys.removeAll(removedIds);
+//            List<Message> messageList = oldKeys.stream()
+//                    .map(commonKey -> compareGroupMember(oldMap.get(commonKey), newMap.get(commonKey), oldGroup))
+//                    .filter(Objects::nonNull)
+//                    .toList();
+//
+//            if (messageList.size() > 10) {
+//                //群成员信息变化
+//                log.error("群成员信息变化数量：{}", messageList.size());
+//                return;
+//            }
+//            MessageTools.sendMsgByUserId(messageList);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
 
 

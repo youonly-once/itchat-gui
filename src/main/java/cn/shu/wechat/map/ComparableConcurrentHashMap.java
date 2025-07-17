@@ -15,7 +15,13 @@ public class ComparableConcurrentHashMap<K, V> extends ConcurrentHashMap<K, V> {
     public V put(K key, V newVal) {
         V old = get(key);
         if (old instanceof Contacts && Core.isCompare()) {
-            //ContactsTools.compare((Contacts) old, (Contacts) newVal);
+            switch (((Contacts) old).getType()){
+                case GROUP_USER, ORDINARY_USER -> {
+                    ContactsTools.compare((Contacts) old, (Contacts) newVal);
+                }
+
+            }
+
         }
         return super.put(key, newVal);
     }

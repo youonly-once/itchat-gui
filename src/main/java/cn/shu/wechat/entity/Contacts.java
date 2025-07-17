@@ -139,7 +139,7 @@ public class Contacts {
             this.desc = desc;
         }
     }
-    private ContactsType type = ContactsType.ORDINARY_USER;
+    private ContactsType type;
     /**
      * 是否为联系人(false则为群成员)
      */

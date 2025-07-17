@@ -605,10 +605,6 @@ public class LoginServiceImpl implements LoginService {
         contacts.setIscontacts(true);
         String userName = contacts.getUsername();
         String nickName = contacts.getNickname();
-        //保存之前的群信息 方便compare
-        if (Core.getMemberMap().containsKey(contacts.getUsername())) {
-            contacts.setMemberlist(Core.getMemberMap().get(contacts.getUsername()).getMemberlist());
-        }
 
         if ((contacts.getVerifyflag() & 8) != 0) {
             // 公众号/服务号
@@ -618,15 +614,11 @@ public class LoginServiceImpl implements LoginService {
             contacts.setType(Contacts.ContactsType.PUBLIC_USER);
         } else if (config.getSpecialUser().contains(userName)) {
             // 特殊账号
-            if (!Core.getMemberMap().containsKey(userName)) {
-                log.info("新增特殊账号：{}", nickName);
-            }
+
             contacts.setType(Contacts.ContactsType.SPECIAL_USER);
         } else if (userName.startsWith("@@")) {
             // 群聊
-            if (!Core.getMemberMap().containsKey(userName)) {
-                log.info("新增群聊：{}", nickName);
-            }
+
             contacts.setType(Contacts.ContactsType.GROUP_USER);
         } else {
             contacts.setType(Contacts.ContactsType.ORDINARY_USER);
@@ -675,9 +667,8 @@ public class LoginServiceImpl implements LoginService {
                 addContacts(contacts);
             });
             if (!Core.getMemberMap().containsKey("filehelper")) {
-                Core.getMemberMap().put("filehelper",
-                        Contacts.builder().username("filehelper").displayname("文件传输助手")
-                                .type(Contacts.ContactsType.ORDINARY_USER).build());
+                addContacts(Contacts.builder().username("filehelper").displayname("文件传输助手")
+                        .type(Contacts.ContactsType.ORDINARY_USER).build());
             }
 
 
@@ -754,7 +745,7 @@ public class LoginServiceImpl implements LoginService {
                         group.setMemberlist( Core.getMemberMap().get(userName).getMemberlist());
 
                     }
-                    Core.getMemberMap().put(userName, group);
+                    addContacts(group);
                 }
 
         });
