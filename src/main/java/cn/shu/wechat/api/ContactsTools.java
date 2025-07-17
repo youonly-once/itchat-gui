@@ -226,6 +226,28 @@ public class ContactsTools {
     }
 
     /**
+     * 查找用户属于哪个群
+     *
+     * @param userName
+     * @return
+     */
+
+    public static Contacts getGroupOfMember(String userName) {
+        if (StringUtils.isEmpty(userName)) {
+            return null;
+        }
+        if (Core.getUserName().equals(userName)) {
+            return Core.getUserSelf();
+        }
+        return Core.getMemberMap().values().stream()
+                .filter(e -> e.getType() == Contacts.ContactsType.GROUP_USER)
+                .filter(e ->
+                        e.getMemberlist().stream().anyMatch(e1 -> e1.getUsername().equals(userName))
+                ).limit(1).findAny().orElse(null);
+
+    }
+
+    /**
      * 获取群成员
      *
      * @param group    群

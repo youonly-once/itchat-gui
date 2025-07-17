@@ -6,6 +6,7 @@ import cn.shu.wechat.constant.WxURLEnum;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.dto.request.msg.url.WXMsgUrl;
 import cn.shu.wechat.dto.response.sync.AddMsgList;
+import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.utils.DateUtils;
 import cn.shu.wechat.utils.HttpUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
@@ -221,20 +222,32 @@ public class DownloadTools {
      * @throws IOException
      */
     public static Path generateHeadDownLoadPath(String userName) throws IOException {
-        //创建本地文件
-        String remarkNameByUserName = ContactsTools.getContactDisplayNameByUserName(userName);
-        if (userName.startsWith("@@")) {
+        //判断是群成员还是好友
+        String remarkNameByUserName = userName;
+        String groupName = "";
+
+        if (Core.getMemberMap().containsKey(userName)) {
+            //好友
             remarkNameByUserName = ContactsTools.getContactDisplayNameByUserName(userName);
+        } else {
+            Contacts groupOfMember = ContactsTools.getGroupOfMember(userName);
+            if (groupOfMember != null) {
+                //群成员
+                groupName = ContactsTools.getContactDisplayNameByUserName(groupOfMember.getUsername());
+                remarkNameByUserName = ContactsTools.getMemberDisplayNameOfGroupObj(groupOfMember, userName);
+            }
+
         }
+
         if (StringUtils.isEmpty(remarkNameByUserName)) {
             remarkNameByUserName = userName;
         }
         remarkNameByUserName = DownloadTools.replace(remarkNameByUserName);
 
 
-        Path saveDir = Paths.get(WECHAT_CONFIGURATION.getBasePath(), "headimg", remarkNameByUserName);
+        Path saveDir = Paths.get(WECHAT_CONFIGURATION.getBasePath(), "headimg", groupName, remarkNameByUserName);
         Path savePath = saveDir.resolve(UUID.randomUUID().toString().replace("-", "") + ".jpg");
-        if (Files.notExists(saveDir.getParent())) {
+        if (Files.notExists(saveDir)) {
             Files.createDirectories(saveDir);
         }
         return savePath;

@@ -115,6 +115,12 @@ public class DownloadTask<R> implements Callable<R> {
     @Setter
     private String resourceType;
 
+    private final long beginTime;
+    private long endTime;
+
+    {
+        beginTime = System.currentTimeMillis();
+    }
     // 构造函数们（支持不同场景）
 
     public DownloadTask(AddMsgList msg, Consumer<DownloadTask<R>> callback) {
@@ -185,7 +191,6 @@ public class DownloadTask<R> implements Callable<R> {
                 case GetContacts:
                     LoginServiceImpl loginService = SpringContextHolder.getBean(LoginServiceImpl.class);
                      loginService.webWxGetContact();
-                    this.result = (R) "";
                     break;
                 case GetBatchContacts: {
                     loginService = SpringContextHolder.getBean(LoginServiceImpl.class);
@@ -207,14 +212,15 @@ public class DownloadTask<R> implements Callable<R> {
                     && type != DownloadType.GetBatchContacts) {
                 throw new Exception("result is null!");
             }
+            endTime = System.currentTimeMillis();
             status = DownloadStatus.SUCCESS;
-            log.info("资源下载完成({})：{}", type.getDescription(), this);
+            log.info("资源下载完成({})({}ms)：{}", type.getDescription(), endTime - beginTime, this);
             return (R) result;
 
         } catch (Exception e) {
+            endTime = System.currentTimeMillis();
             status = DownloadStatus.FAIL;
-
-            log.error("下载文件失败({})：{},{}", type.getDescription(), this.toString(), e.getMessage(),e);
+            log.error("下载文件失败({})({}ms)：{},{}", type.getDescription(), endTime - beginTime, this.toString(), e.getMessage(), e);
         }
         return null;
     }

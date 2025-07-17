@@ -2,7 +2,6 @@ package cn.shu.wechat.task;
 
 import cn.shu.wechat.constant.DownloadStatus;
 import cn.shu.wechat.constant.DownloadType;
-import cn.shu.wechat.core.Core;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.Map;
@@ -33,8 +32,8 @@ public class DownloadManager {
     static {
         cleanerScheduler.scheduleWithFixedDelay(DownloadManager::cleanFinishedTasks, 1, 5, TimeUnit.MINUTES);
         updateContactsScheduler.scheduleWithFixedDelay(DownloadManager::updateContactsInfo, 1, 1, TimeUnit.MINUTES);
+        updateContactsScheduler.scheduleWithFixedDelay(DownloadManager::updateContactsInfo1, 1, 5, TimeUnit.MINUTES);
     }
-
 
 
     /**
@@ -107,7 +106,7 @@ public class DownloadManager {
     public static <R> R submitNewAwait(DownloadTask<R> task) {
         if (taskMap.containsKey(task.getTaskId())) {
             DownloadTask<R> downloadTask = taskMap.get(task.getTaskId());
-           if (downloadTask.getStatus() == DownloadStatus.WAITING || downloadTask.getStatus() == DownloadStatus.RUNNING) {
+            if (downloadTask.getStatus() == DownloadStatus.WAITING || downloadTask.getStatus() == DownloadStatus.RUNNING) {
                 if (downloadTask.getFuture() == null) {
                     awaitDownload(task.getTaskId());
                     return (R) task.getResult();
@@ -117,7 +116,7 @@ public class DownloadManager {
                 } catch (InterruptedException | ExecutionException e) {
                     log.error(e.getMessage());
                 }
-           }
+            }
         }
         taskMap.put(task.getTaskId(), task);
         Future<R> future = workerPool.submit(task);
@@ -265,23 +264,31 @@ public class DownloadManager {
     }
 
     private static void updateContactsInfo() {
-        if (Core.isAlive()) {
-            long l = System.currentTimeMillis();
 
-            DownloadTask<Void> task1 = new DownloadTask<>();
-            task1.setTaskId("webWxGetContact");
-            task1.setType(DownloadType.GetContacts);
-            submitNewAwait(task1);
+        long l = System.currentTimeMillis();
+
+        DownloadTask<Void> task1 = new DownloadTask<>();
+        task1.setTaskId("webWxGetContact");
+        task1.setType(DownloadType.GetContacts);
+        submitNewAwait(task1);
+
+        log.info("获取普通联系人，耗时：{}（秒）", (System.currentTimeMillis() - l) / 1000);
 
 
-            DownloadTask<Void> task2 = new DownloadTask<>();
-            task2.setTaskId("WebWxBatchGetContact");
-            task2.setType(DownloadType.GetBatchContacts);
-            submitNewAwait(task2);
+    }
 
-            log.info("获取联系人，耗时：{}（秒）", (System.currentTimeMillis() - l) / 1000);
+    private static void updateContactsInfo1() {
 
-        }
+        long l = System.currentTimeMillis();
+
+        DownloadTask<Void> task2 = new DownloadTask<>();
+        task2.setTaskId("WebWxBatchGetContact");
+        task2.setType(DownloadType.GetBatchContacts);
+        submitNewAwait(task2);
+
+        log.info("获取群联系人，耗时：{}（秒）", (System.currentTimeMillis() - l) / 1000);
+
+
     }
 
 }

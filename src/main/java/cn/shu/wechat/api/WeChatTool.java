@@ -5,11 +5,10 @@
 
 package cn.shu.wechat.api;
 
-import cn.shu.wechat.core.Core;
 import cn.shu.wechat.constant.WxURLEnum;
+import cn.shu.wechat.core.Core;
 import cn.shu.wechat.utils.HttpUtil;
 import lombok.extern.log4j.Log4j2;
-
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -245,13 +244,5 @@ public final class WeChatTool {
         }
     }*/
 
-    /**
-     * 获取微信在线状态
-     *
-     * @return {@code true} 在线  {@code false} 离线
-     * @date 2017年6月16日 上午12:47:46
-     */
-    public static boolean getWechatStatus() {
-        return Core.isAlive();
-    }
+
 }

@@ -38,10 +38,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
@@ -167,7 +165,6 @@ public class LoginServiceImpl implements LoginService {
                         String redirectUrl = processQRScanInfo(result);
                         doLogin(redirectUrl);
                         isLogin = true;
-                        Core.setAlive(true);
                         callBack.CallBack(codeEnum.getMsg());
                         break while1;
                     }
@@ -354,7 +351,6 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public void webWxInit() throws IOException, InterruptedException {
-        Core.setAlive(true);
         Core.setLastNormalRetCodeTime(System.currentTimeMillis());
         // 组装请求URL和参数
         String url = String.format(WxURLEnum.INIT_URL.getUrl(),
@@ -481,9 +477,8 @@ public class LoginServiceImpl implements LoginService {
     }
     @Override
     public void startReceiving() {
-        Core.setAlive(true);
         Runnable runnable = () -> {
-            while (Core.isAlive()) {
+            while (true) {
                 try {
 
                     //检测是否有新消息
@@ -512,15 +507,13 @@ public class LoginServiceImpl implements LoginService {
                         case LOGIN_ENV_ERROR:
                         case TOO_OFEN: {
                             log.error(syncCheckRetCodeEnum.getType());
-                            Core.setAlive(false);
                             break;
                         }
                         default:
                             log.error("未知消息：{}", syncCheckResp);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    log.error("消息同步错误：{}", e.getMessage());
+                    log.error("消息同步错误：{}", e.getMessage(), e);
                     SleepUtils.sleep(1000);
                 }
 
@@ -731,6 +724,9 @@ public class LoginServiceImpl implements LoginService {
                     try {
                         JSONArray memberArray = WebWxBatchGetContactGroupMemberDetail(group);
                         List<Contacts> memberList = JSON.parseArray(JSON.toJSONString(memberArray), Contacts.class);
+                        for (Contacts contacts : memberList) {
+                            contacts.setGroupName(userName);
+                        }
                         if (!memberList.isEmpty()) {
                             group.setMemberlist(memberList);
                         }

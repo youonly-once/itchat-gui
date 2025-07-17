@@ -5,7 +5,6 @@ import cn.shu.wechat.map.ComparableConcurrentHashMap;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.awt.*;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,10 +22,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @Setter
 public class Core {
 
-    /**
-     * 在线状态
-     */
-    @Getter @Setter static private volatile boolean alive = false;
 
     /**
      * 本次登录用户唯一标识
@@ -49,12 +44,6 @@ public class Core {
 
     @Getter @Setter static private Map<String, Contacts> memberMap = new ComparableConcurrentHashMap<>(700);
 
-
-    /**
-     * 用户头像
-     */
-    @Getter @Setter
-    static private Map<String, Image> userHeadImage = new ConcurrentHashMap<>(1024);
 
 
     /**

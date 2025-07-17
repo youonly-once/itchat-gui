@@ -310,10 +310,7 @@ public final class LoginFrame extends JFrame {
                 }
             });
             refreshCodeBt.setVisible(false);
-            //登录失败
-            if (!Core.isAlive()) {
-                return;
-            }
+
 
             showMessage("登陆成功，微信初始化...");
             //保存登录信息
@@ -454,7 +451,7 @@ public final class LoginFrame extends JFrame {
                 try {
                     Core.getContactHeadImgPath().put(value.getUsername(), DownloadTools.downloadBigHeadImg(value.getHeadimgurl(), value.getUsername()));
                 } catch (IOException | InterruptedException e) {
-                   log.error(e.getMessage());
+                    log.error(e.getMessage(), e);
                 }
             });
 
@@ -467,7 +464,7 @@ public final class LoginFrame extends JFrame {
                 log.warn("线程池关闭失败！");
             }
         } catch (InterruptedException e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
         }
 
         log.info("11. 下载联系人头像完成，耗时{}秒", (System.currentTimeMillis() - time) / 1000);
