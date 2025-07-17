@@ -38,8 +38,10 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
@@ -65,6 +67,10 @@ public class LoginServiceImpl implements LoginService {
 
 
     private final Set<String> msgIds = new HashSet<>();
+
+    private volatile boolean WebWxBatchGetContactExcept;
+
+    private Timer timer ;
 
     /**
      * 检查登陆状态
@@ -534,38 +540,61 @@ public class LoginServiceImpl implements LoginService {
         if (userName.equals(Core.getUserName())) {
             userName = msg.getToUserName();
         }
-        if ("@placeholder_foldgroup".equals(userName)) {
-            log.warn("折叠的群聊！");
-            return null;
-        }
-        Contacts contacts = Core.getMemberMap().get(userName);
-//        if (contacts == null) {
-//            log.error("用户不存在！{}", userName);
-//            try {
-//                this.WebWxBatchGetContact(userName);
-//            } catch (IOException | InterruptedException e) {
-//                log.error(e.getMessage());
-//            }
-//            contacts = Core.getMemberMap().get(userName);
-//        }
-        if (ContactsTools.isRoomContact(userName)
-                && !StringUtils.isEmpty(msg.getMemberName()) &&
-                !Core.getMemberMap().containsKey(msg.getMemberName())) {
-            //群成员非好友时，获取群成员的详细信息
-            if (!Core.getMemberMap().containsKey(userName)
-                    || CollectionUtils.isEmpty(contacts.getMemberlist())
-                    || StringUtils.isEmpty(contacts.getMemberlist().getFirst().getHeadimgurl())) {
-                //使用头像地址来判断是否获取过成员详细信息
-
-                log.error("群用户或者群成员信息不完整！{}", userName);
-                DownloadTask<Void> objectDownloadTask = new DownloadTask<>();
-                objectDownloadTask.setTaskId("WebWxBatchGetContact:" + userName);
-                objectDownloadTask.setType(DownloadType.GetBatchContacts);
-                DownloadManager.submit(objectDownloadTask);
-                return Core.getMemberMap().get(userName);
+        synchronized (userName.intern()) {
+            if ("@placeholder_foldgroup".equals(userName)) {
+                log.warn("折叠的群聊！");
+                return null;
             }
+            Contacts contacts = Core.getMemberMap().get(userName);
+            if (contacts != null && contacts.isMutualCreate()) {
+                //手动创建的
+                contacts = null;
+            }
+            if (contacts == null) {
+                log.error("用户不存在！{}", userName);
+
+                if (ContactsTools.isRoomContact(userName)) {
+                    DownloadTask<Void> task2 = new DownloadTask<>();
+                    task2.setTaskId("WebWxBatchGetContact:" + userName);
+                    task2.setUserName(userName);
+                    task2.setType(DownloadType.GetBatchContacts);
+                    DownloadManager.submitAwait(task2);
+                } else {
+                    DownloadTask<Void> task1 = new DownloadTask<>();
+                    task1.setTaskId("webWxGetContact");
+                    task1.setType(DownloadType.GetContacts);
+                    DownloadManager.submitAwait(task1);
+                }
+
+
+                contacts = Core.getMemberMap().get(userName);
+            } else if (ContactsTools.isRoomContact(userName)
+                    && !StringUtils.isEmpty(msg.getMemberName()) &&
+                    !Core.getMemberMap().containsKey(msg.getMemberName())) {
+                //群成员非好友时，获取群成员的详细信息
+                if (!Core.getMemberMap().containsKey(userName)
+                        || CollectionUtils.isEmpty(contacts.getMemberlist())
+                        || StringUtils.isEmpty(contacts.getMemberlist().getFirst().getHeadimgurl())) {
+                    //使用头像地址来判断是否获取过成员详细信息
+
+                    log.error("群用户或者群成员信息不完整！{}", userName);
+                    DownloadTask<Void> objectDownloadTask = new DownloadTask<>();
+                    objectDownloadTask.setTaskId("WebWxBatchGetContact:" + userName);
+                    objectDownloadTask.setType(DownloadType.GetBatchContacts);
+                    DownloadManager.submit(objectDownloadTask);
+                    return Core.getMemberMap().get(userName);
+                }
+            }
+            if (contacts == null) {
+                contacts = new Contacts();
+                contacts.setUsername(userName);
+                contacts.setNickname("未知");
+                contacts.setMutualCreate(true);
+                Core.getMemberMap().put(userName, contacts);
+                log.error("未知联系人消息{}", msg);
+            }
+            return contacts;
         }
-        return contacts;
     }
 
     /**
@@ -580,34 +609,30 @@ public class LoginServiceImpl implements LoginService {
         if (Core.getMemberMap().containsKey(contacts.getUsername())) {
             contacts.setMemberlist(Core.getMemberMap().get(contacts.getUsername()).getMemberlist());
         }
-        Core.getMemberMap().put(userName, contacts);
 
         if ((contacts.getVerifyflag() & 8) != 0) {
             // 公众号/服务号
-            if (!Core.getPublicUsersMap().containsKey(userName)) {
+            if (!Core.getMemberMap().containsKey(userName)) {
                 log.info("新增公众号/服务号：{}", nickName);
             }
-            Core.getPublicUsersMap().put(userName, contacts);
             contacts.setType(Contacts.ContactsType.PUBLIC_USER);
         } else if (config.getSpecialUser().contains(userName)) {
             // 特殊账号
-            if (!Core.getSpecialUsersMap().containsKey(userName)) {
+            if (!Core.getMemberMap().containsKey(userName)) {
                 log.info("新增特殊账号：{}", nickName);
             }
-            Core.getSpecialUsersMap().put(userName, contacts);
             contacts.setType(Contacts.ContactsType.SPECIAL_USER);
         } else if (userName.startsWith("@@")) {
             // 群聊
-            if (!Core.getGroupIdSet().contains(userName)) {
+            if (!Core.getMemberMap().containsKey(userName)) {
                 log.info("新增群聊：{}", nickName);
-                Core.getGroupIdSet().add(userName);
             }
             contacts.setType(Contacts.ContactsType.GROUP_USER);
         } else {
             contacts.setType(Contacts.ContactsType.ORDINARY_USER);
             // 普通联系人
-            Core.getContactMap().put(userName, contacts);
         }
+        Core.getMemberMap().put(userName, contacts);
     }
 
     @Override
@@ -654,12 +679,36 @@ public class LoginServiceImpl implements LoginService {
                         Contacts.builder().username("filehelper").displayname("文件传输助手")
                                 .type(Contacts.ContactsType.ORDINARY_USER).build());
             }
-        Core.getGroupIdSet().addAll(Core.getGroupMap().keySet());
+
 
     }
 
     @Override
     public void WebWxBatchGetContact(Set<String> groupName) throws IOException, InterruptedException {
+        if (WebWxBatchGetContactExcept) {
+            if (timer != null) {
+                log.error("微信异常信息，暂时停止访问");
+                return;
+
+            }
+        }
+        synchronized (this) {
+            if (WebWxBatchGetContactExcept) {
+                if (timer != null) {
+                    return;
+                }
+                timer = new Timer();
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        WebWxBatchGetContactExcept = false;
+                    }
+                }, 1000 * 60 * 30);
+                log.error("微信异常信息，暂时停止访问");
+                return;
+            }
+        }
+
         String url = String.format(WxURLEnum.WEB_WX_BATCH_GET_CONTACT.getUrl(),
                 Core.getLoginResultData().getUrl(), new Date().getTime(),
                 Core.getLoginResultData().getPassTicket());
@@ -680,6 +729,7 @@ public class LoginServiceImpl implements LoginService {
         JSONObject obj = HttpUtil.doPost(url, JSON.toJSONString(paramMap), HttpUtil.getJsonEntityBodyHandler(JSONObject.class));
         if (obj.getJSONObject("BaseResponse").getInteger("Ret") != 0) {
             log.error("获取群信息失败：{}", obj.getJSONObject("BaseResponse"));
+            WebWxBatchGetContactExcept = true;
             return;
         }
         //群列表
@@ -692,14 +742,19 @@ public class LoginServiceImpl implements LoginService {
                     try {
                         JSONArray memberArray = WebWxBatchGetContactGroupMemberDetail(group);
                         List<Contacts> memberList = JSON.parseArray(JSON.toJSONString(memberArray), Contacts.class);
-                        group.setMemberlist(memberList);
+                        if (!memberList.isEmpty()) {
+                            group.setMemberlist(memberList);
+                        }
                     } catch (Exception e) {
                         log.error("获取群成员信息失败：{}", groupObject);
                     }
 
                     //以上接口返回的成员属性不全，以下的接口获取群成员详细属性
+                    if (group.getMemberlist().isEmpty()){
+                        group.setMemberlist( Core.getMemberMap().get(userName).getMemberlist());
+
+                    }
                     Core.getMemberMap().put(userName, group);
-                    Core.getGroupMap().put(userName, group);
                 }
 
         });
@@ -709,7 +764,7 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public void WebWxBatchGetContact() throws IOException, InterruptedException {
-        WebWxBatchGetContact(Core.getGroupIdSet());
+        WebWxBatchGetContact(Core.getMemberMap().keySet().stream().filter(ContactsTools::isRoomContact).collect(Collectors.toSet()));
     }
 
     @Override

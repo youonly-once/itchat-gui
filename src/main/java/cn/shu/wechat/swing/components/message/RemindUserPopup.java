@@ -2,6 +2,7 @@ package cn.shu.wechat.swing.components.message;
 
 import cn.shu.wechat.swing.adapter.ViewHolder;
 import cn.shu.wechat.swing.utils.AvatarUtil;
+import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,6 +14,7 @@ import java.util.List;
  * Created by 舒新胜 on 21/06/2017.
  */
 public class RemindUserPopup extends JPopupMenu {
+    @Setter
     private List<String> users;
     private String roomId = "";
     private UserSelectedCallBack selectedCallBack;
@@ -39,10 +41,6 @@ public class RemindUserPopup extends JPopupMenu {
 
     public void reset() {
         this.roomId = "";
-    }
-
-    public void setUsers(List<String> users) {
-        this.users = users;
     }
 
     private void initComponents() {

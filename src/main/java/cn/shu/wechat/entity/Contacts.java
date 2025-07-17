@@ -2,10 +2,7 @@ package cn.shu.wechat.entity;
 
 import cn.afterturn.easypoi.excel.annotation.Excel;
 import com.alibaba.fastjson.annotation.JSONField;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.swing.*;
 import java.util.List;
@@ -120,6 +117,10 @@ public class Contacts {
 
     @Excel(name="ticket")
     private String ticket;
+
+    @Getter
+    @Setter
+    private boolean mutualCreate;
 
 
     /**

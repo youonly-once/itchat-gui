@@ -31,8 +31,8 @@ public class DownloadManager {
             Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("Download--VirtualThread-", 0).factory());
 
     static {
-        cleanerScheduler.scheduleAtFixedRate(DownloadManager::cleanFinishedTasks, 1, 5, TimeUnit.MINUTES);
-        updateContactsScheduler.scheduleAtFixedRate(DownloadManager::updateContactsInfo, 1, 1, TimeUnit.MINUTES);
+        cleanerScheduler.scheduleWithFixedDelay(DownloadManager::cleanFinishedTasks, 1, 5, TimeUnit.MINUTES);
+        updateContactsScheduler.scheduleWithFixedDelay(DownloadManager::updateContactsInfo, 1, 1, TimeUnit.MINUTES);
     }
 
 
@@ -85,6 +85,39 @@ public class DownloadManager {
                     log.error(e.getMessage());
                 }
             }
+        }
+        taskMap.put(task.getTaskId(), task);
+        Future<R> future = workerPool.submit(task);
+        task.setFuture(future);
+        try {
+            return future.get(); // 阻塞等待执行完成
+        } catch (InterruptedException | ExecutionException e) {
+            log.error(e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * 如果当前没有相同任务执行  提交新任务
+     *
+     * @param task 下载任务
+     * @param <R>  结果类型
+     * @return 下载结果，失败或中断时返回 null
+     */
+    public static <R> R submitNewAwait(DownloadTask<R> task) {
+        if (taskMap.containsKey(task.getTaskId())) {
+            DownloadTask<R> downloadTask = taskMap.get(task.getTaskId());
+           if (downloadTask.getStatus() == DownloadStatus.WAITING || downloadTask.getStatus() == DownloadStatus.RUNNING) {
+                if (downloadTask.getFuture() == null) {
+                    awaitDownload(task.getTaskId());
+                    return (R) task.getResult();
+                }
+                try {
+                    return downloadTask.getFuture().get();
+                } catch (InterruptedException | ExecutionException e) {
+                    log.error(e.getMessage());
+                }
+           }
         }
         taskMap.put(task.getTaskId(), task);
         Future<R> future = workerPool.submit(task);
@@ -238,13 +271,13 @@ public class DownloadManager {
             DownloadTask<Void> task1 = new DownloadTask<>();
             task1.setTaskId("webWxGetContact");
             task1.setType(DownloadType.GetContacts);
-            submitAwait(task1);
+            submitNewAwait(task1);
 
 
             DownloadTask<Void> task2 = new DownloadTask<>();
             task2.setTaskId("WebWxBatchGetContact");
             task2.setType(DownloadType.GetBatchContacts);
-            submitAwait(task2);
+            submitNewAwait(task2);
 
             log.info("获取联系人，耗时：{}（秒）", (System.currentTimeMillis() - l) / 1000);
 

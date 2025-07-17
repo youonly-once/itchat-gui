@@ -47,34 +47,7 @@ public class Core {
      * 好友+群聊+公众号+特殊账号
      */
 
-    @Getter @Setter static private Map<String, Contacts> memberMap = new ConcurrentHashMap<>(1024);
-
-
-    /**
-     * 好友
-     */
-    @Getter
-    @Setter
-    static private Map<String, Contacts> contactMap = new ComparableConcurrentHashMap<>(1024);
-
-    /**
-     * 群
-     */
-    @Getter
-    @Setter
-    static private Map<String, Contacts> groupMap = new ComparableConcurrentHashMap<>(32);
-
-    /**
-     * 公众号／服务号
-     */
-    @Getter @Setter
-    static private Map<String, Contacts> publicUsersMap = new ConcurrentHashMap<>(64);
-
-    /**
-     * 特殊账号
-     */
-    @Getter @Setter
-    static private Map<String, Contacts> specialUsersMap = new ConcurrentHashMap<>(0);
+    @Getter @Setter static private Map<String, Contacts> memberMap = new ComparableConcurrentHashMap<>(700);
 
 
     /**
@@ -82,11 +55,6 @@ public class Core {
      */
     @Getter @Setter
     static private Map<String, Image> userHeadImage = new ConcurrentHashMap<>(1024);
-    /**
-     * 群ID列表
-     */
-    @Getter @Setter
-    static private Set<String> groupIdSet = new CopyOnWriteArraySet<>();
 
 
     /**

@@ -29,6 +29,7 @@ import java.util.Timer;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by 舒新胜 on 17-5-29.
@@ -301,73 +302,83 @@ public class SearchPanel extends ParentAvailablePanel {
      */
     private void searchContacts(String keyWord, int version, List<SearchResultItem> data) {
         Map<String, Contacts> memberMap = Core.getMemberMap();
+        String keyWordLower = keyWord.toLowerCase();
+        String keyWordPinyin = toPinyin(keyWord);
+        String keyWordInitial = toInitial(keyWord);
 
-        String pinyin = toPinyin(keyWord);
-        String toInitial = toInitial(keyWord);
         List<SearchResultItem> results = memberMap.entrySet().stream()
                 .takeWhile(entry -> !outdatedVersionAndInterrupted(version))
                 .map(entry -> {
                     Contacts contact = entry.getValue();
-                    // 计算匹配分数
-                    int score = 0;
+                    try {
+                        int score = 0;
+                        String matchField = null;
 
-                    String remarkName = contact.getRemarkname();
-                    String nickname = contact.getNickname();
-                    String displayname = contact.getDisplayname();
+                        String remarkName = contact.getRemarkname();
+                        String nickname = contact.getNickname();
+                        String displayname = contact.getDisplayname();
 
-                    String match = null;
+                        // 拼音/首字母匹配
+                        if (StringUtils.isNotEmpty(contact.getPyinitial()) && contact.getPyinitial().contains(keyWordInitial)) {
+                            score += 1;
+                            matchField = nickname;
+                        }
+                        if (StringUtils.isNotEmpty(contact.getPyquanpin()) && contact.getPyquanpin().contains(keyWordPinyin)) {
+                            score += 2;
+                            matchField = nickname;
+                        }
 
-                    if (contact.getPyinitial().contains(toInitial)) {
-                        match = contact.getNickname();
-                        score = score + 1;
+                        // 备注名拼音匹配
+                        if (StringUtils.isNotEmpty(remarkName)) {
+                            if (toPinyin(remarkName).contains(keyWordPinyin)) {
+                                score += 3;
+                                matchField = remarkName;
+                            }
+                            if (toInitial(remarkName).contains(keyWordInitial)) {
+                                score += 2;
+                                matchField = remarkName;
+                            }
+                            if (remarkName.toLowerCase().contains(keyWordLower)) {
+                                score += 3;
+                                matchField = remarkName;
+                            }
+                        }
+
+                        // 原始字段包含关键词
+                        if (StringUtils.isNotEmpty(displayname) && displayname.toLowerCase().contains(keyWordLower)) {
+                            score += 1;
+                            matchField = displayname;
+                        }
+                        if (StringUtils.isNotEmpty(nickname) && nickname.toLowerCase().contains(keyWordLower)) {
+                            score += 2;
+                            matchField = nickname;
+                        }
+
+
+                        // 无匹配则返回 null
+                        if (score == 0) return null;
+
+                        if (StringUtils.isNotEmpty(remarkName)){
+                            matchField = remarkName;
+                        }else if (StringUtils.isNotEmpty(displayname)){
+                            matchField = displayname;
+                        }else if (StringUtils.isNotEmpty(nickname)){
+                            matchField = nickname;
+                        }
+
+
+                        // 构建结果项
+                        SearchResultItem item = new SearchResultItem();
+                        item.setType(SearchResultType.CONTACTS.CODE);
+                        item.setId(entry.getKey());
+                        item.setTag(entry.getKey());
+                        item.setName(matchField);
+                        item.setScore(score);
+                        return item;
+                    } catch (Exception e) {
+                        log.error("搜索联系人异常：{}", e.getMessage(), e);
+                        return null;
                     }
-                    if (contact.getPyquanpin().contains(pinyin)) {
-                        match = contact.getNickname();
-                        score = score + 2;
-                    }
-                    if (StringUtils.isNotEmpty(contact.getRemarkname()) && toPinyin(contact.getRemarkname()).contains(pinyin)) {
-                        match = contact.getRemarkname();
-                        score = score + 3;
-                    }
-                    if (StringUtils.isNotEmpty(contact.getRemarkname()) && toInitial(contact.getRemarkname()).contains(toInitial)) {
-                        match = contact.getRemarkname();
-                        score = score + 2;
-                    }
-
-                    if (StringUtils.isNotEmpty(displayname) && displayname.toLowerCase().contains(keyWord)) {
-                        score = score + 1;
-                        match = displayname;
-                    }
-                    if (StringUtils.isNotEmpty(nickname) && nickname.toLowerCase().contains(keyWord)) {
-                        match = nickname;
-                        score = score + 2;
-                    }
-                    if (StringUtils.isNotEmpty(remarkName) && remarkName.toLowerCase().contains(keyWord)) {
-                        match = remarkName;
-                        score = score + 3;
-                    }
-
-
-//                    String match = Stream.of(contact.getRemarkname(), contact.getNickname(), contact.getDisplayname())
-//                            .filter(StringUtils::isNotEmpty)
-//                            .filter(field -> field.toLowerCase().contains(keyWord))
-//                            .findAny()
-//                            .orElse(null);
-                    //if (match == null) {
-
-
-                    if (match == null) return null;
-                    //}
-
-
-
-                    SearchResultItem item = new SearchResultItem();
-                    item.setType(SearchResultType.CONTACTS.CODE);
-                    item.setId(entry.getKey());
-                    item.setTag(entry.getKey());
-                    item.setName(match);
-                    item.setScore(score);
-                    return item;
                 })
                 .filter(Objects::nonNull)
                 .sorted(Comparator.comparingInt(SearchResultItem::getScore).reversed())
@@ -376,7 +387,6 @@ public class SearchPanel extends ParentAvailablePanel {
 
         data.addAll(results);
     }
-
     /**
      * 判断版本号是否过时以及线程是否终止
      *
@@ -386,7 +396,7 @@ public class SearchPanel extends ParentAvailablePanel {
     private boolean outdatedVersionAndInterrupted(int version) {
         if (version != searchVer.get()) {
             log.warn("版本号不对，终止，{}！={}", version, searchVer.get());
-            //return true;
+            return true;
         }
         if (swingWorker.isCancelled()) {
             log.warn("线程被Cancelled");

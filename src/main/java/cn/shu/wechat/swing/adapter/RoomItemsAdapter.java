@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.adapter;
 
+import cn.afterturn.easypoi.cache.manager.IFileLoader;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.Contacts;
@@ -72,18 +73,23 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
     public void onBindViewHolder(RoomItemViewHolder viewHolder, int position) {
         RoomItem roomItem = roomItems.get(position);
         viewHolder.setTag(roomItem.getRoomId());
-        viewHolder.roomName.setText(roomItem.getName());
+        Contacts contacts = Core.getMemberMap().get(roomItem.getRoomId());
+        if (contacts != null){
+            viewHolder.roomName.setText(ContactsTools.getContactDisplayNameByUserName(contacts));
+        }else {
+            viewHolder.roomName.setText(roomItem.getName());
+        }
         new HeadLoadingSwingWorker(viewHolder.avatar,roomItem.getRoomId()).loadAvatar();
 
         //如果是 群 判断是否有人@我
-        Contacts contacts = roomItem.getContacts();
+        //Contacts contacts = roomItem.getContacts();
         if (contacts!=null && ContactsTools.isRoomContact(contacts)){
             if ((StringUtils.isNotEmpty(Core.getUserSelf().getRemarkname()) && roomItem.getLastMessage().contains("@"+Core.getUserSelf().getRemarkname()))
                     || roomItem.getLastMessage().contains("@所有人")
             ||(StringUtils.isNotEmpty(Core.getNickName()) &&  roomItem.getLastMessage().contains("@"+Core.getNickName()))){
                 viewHolder.atMe.setVisible(true);
                 roomItem.setAtMe(true);
-            }else {
+            }else if (contacts.getMemberlist()!=null){
                 contacts.getMemberlist().stream().filter(e -> e.getUsername().equals(Core.getUserName())).findAny().ifPresent(e -> {
                     if (StringUtils.isNotEmpty(e.getDisplayname()) && roomItem.getLastMessage().contains( "@" + e.getDisplayname())) {
                         viewHolder.atMe.setVisible(true);

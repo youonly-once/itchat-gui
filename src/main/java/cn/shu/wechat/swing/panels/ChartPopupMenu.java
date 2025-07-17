@@ -101,7 +101,7 @@ public class ChartPopupMenu extends JPopupMenu {
             String username = ContactsTools.getContactDisplayNameByUserName(roomId);
             username = DownloadTools.replace(username);
             if (ContactsTools.isRoomContact(roomId)) {
-                sheets = ExcelExportUtil.exportExcel(exportParams, Contacts.class, Core.getGroupMap().get(roomId).getMemberlist());
+                sheets = ExcelExportUtil.exportExcel(exportParams, Contacts.class, Core.getMemberMap().get(roomId).getMemberlist());
             } else {
                 sheets = ExcelExportUtil.exportExcel(exportParams, Contacts.class, Core.getMemberMap().values());
             }

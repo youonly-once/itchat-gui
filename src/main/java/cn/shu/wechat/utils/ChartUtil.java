@@ -184,7 +184,7 @@ public final class ChartUtil {
      */
     public Optional<JFreeChart> makeMineContactsAttrPieChart(String attrName, int width, int height) {
         String title = attrName + "分布图";
-        Optional<DefaultPieDataset<String>> dataPieSet = getPieChatDatasetByWXContactsAttr(Core.getContactMap().values(), attrName);
+        Optional<DefaultPieDataset<String>> dataPieSet = getPieChatDatasetByWXContactsAttr(Core.getMemberMap().values(), attrName);
         return dataPieSet.flatMap(stringDefaultPieDataset -> createValidityComparePimChar(stringDefaultPieDataset, title));
     }
 

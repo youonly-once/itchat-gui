@@ -387,11 +387,6 @@ public class MsgCenter {
         log.info("联系人修改");
         if (contacts != null) {
             Core.getMemberMap().put(contacts.getUsername(), contacts);
-            if (ContactsTools.isRoomContact(contacts)) {
-                Core.getGroupMap().put(contacts.getUsername(), contacts);
-            } else {
-                Core.getContactMap().put(contacts.getUsername(), contacts);
-            }
         }
 
     }

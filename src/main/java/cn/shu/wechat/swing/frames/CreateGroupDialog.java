@@ -156,7 +156,7 @@ public class CreateGroupDialog extends JDialog {
                 protected Object doInBackground() throws Exception {
                    wxCreateRoomResp = SpringContextHolder.getBean(LoginService.class).webWxCreateRoom(
                             selectUserPanel.getSelectedUser().stream()
-                                    .map(O -> Core.getContactMap().get(O.getUserName())
+                                    .map(O -> Core.getMemberMap().get(O.getUserName())
                                     ).collect(Collectors.toList()));
                     return null;
                 }
@@ -168,8 +168,6 @@ public class CreateGroupDialog extends JDialog {
                         Contacts group = Contacts.builder().username(wxCreateRoomResp.getChatRoomName())
                                 .memberlist(wxCreateRoomResp.getMemberList()).build();
                         Core.getMemberMap().put(wxCreateRoomResp.getChatRoomName(),group);
-                        Core.getGroupIdSet().add(wxCreateRoomResp.getChatRoomName());
-                        Core.getGroupMap().put(wxCreateRoomResp.getChatRoomName(),group);
 
                         ChatUtil.openOrCreateDirectChat(wxCreateRoomResp.getChatRoomName());
                         CreateGroupDialog.context.dispose();
