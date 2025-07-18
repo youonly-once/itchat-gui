@@ -564,6 +564,9 @@ public class LoginServiceImpl implements LoginService {
             }
 
             contacts = Core.getMemberMap().get(userName);
+            if (contacts != null ) {
+                log.error("获取成功：{},{}", userName, contacts);
+            }
         } else if (ContactsTools.isRoomContact(userName)
                 && StringUtils.isNotEmpty(msg.getMemberName())) {
             //群成员发的消息
@@ -572,7 +575,7 @@ public class LoginServiceImpl implements LoginService {
 
                 contacts = Core.getMemberMap().get(msg.getMemberName());
                 if (ContactsTools.getMemberOfGroup(userName,msg.getMemberName()) == null && contacts != null) {
-                    log.error("群用户或者群成员信息不完整，添加好友进去{}", userName);
+                    log.error("群用户或者群成员信息不完整，添加好友进去{}", contacts);
                     Core.getMemberMap().get(userName).getMemberlist().add(contacts);
                 }
 
@@ -586,7 +589,10 @@ public class LoginServiceImpl implements LoginService {
                 objectDownloadTask.setGroupName(userName);
                 objectDownloadTask.setType(DownloadType.GetBatchContacts);
                 DownloadManager.submitAwait(objectDownloadTask);
-                return Core.getMemberMap().get(userName);
+                contacts =  Core.getMemberMap().get(userName);
+                if (contacts != null ) {
+                    log.error("获取成功：{},{}", userName, contacts);
+                }
             }
         }
         if (contacts == null) {
