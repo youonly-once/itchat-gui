@@ -62,9 +62,10 @@ public class DownloadTask<R> implements Callable<R> {
     @Getter
     @Setter
     protected String userName;
+
     @Getter(value = AccessLevel.PROTECTED)
     @Setter(value = AccessLevel.PROTECTED)
-    private Future<R> future;
+    private volatile Future<R> future;
 
     /**
      * 下载类型（由上层设置）
@@ -94,7 +95,7 @@ public class DownloadTask<R> implements Callable<R> {
      * 下载结果，支持泛型返回
      */
     @Getter
-    private R result;
+    private volatile R result;
 
     /**
      * 消息体对象（适用于 FN 类型下载）
@@ -102,7 +103,7 @@ public class DownloadTask<R> implements Callable<R> {
     private AddMsgList msg;
 
     /**
-     * 消息体对象（适用于 FN 类型下载）
+     * 获取群成员
      */
     @Getter
     @Setter

@@ -386,7 +386,7 @@ public class MsgCenter {
     public void handleModContact(Contacts contacts) {
         log.info("联系人修改");
         if (contacts != null) {
-            Core.getMemberMap().put(contacts.getUsername(), contacts);
+            ContactsTools.addContacts(contacts);
         }
 
     }
@@ -424,7 +424,7 @@ public class MsgCenter {
             msgType = WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_MAP;
         }
         //=============群消息处理=============
-        groupMsgFormat(msg);
+        //groupMsgFormat(msg);
 
 
         msg.setType(msgType);

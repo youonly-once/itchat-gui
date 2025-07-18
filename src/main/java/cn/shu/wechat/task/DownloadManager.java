@@ -48,77 +48,82 @@ public class DownloadManager {
      * @param <R>  结果类型
      */
     public static <R> void submit(DownloadTask<R> task) {
-        if (taskMap.containsKey(task.getTaskId())) {
-            DownloadTask<R> downloadTask = taskMap.get(task.getTaskId());
-            if (downloadTask.getStatus() == DownloadStatus.FAIL) {
+        DownloadTask<R> existing = taskMap.putIfAbsent(task.getTaskId(), task);
+        if (existing != null) {
+            if (existing.getStatus() == DownloadStatus.FAIL) {
                 taskMap.remove(task.getTaskId());
-            } else if (downloadTask.getStatus() == DownloadStatus.WAITING || downloadTask.getStatus() == DownloadStatus.RUNNING) {
+            } else if (existing.getStatus() == DownloadStatus.WAITING || existing.getStatus() == DownloadStatus.RUNNING) {
                 return;
             }
         }
-        taskMap.put(task.getTaskId(), task);
         Future<R> submit = workerPool.submit(task);// 异步执行
         task.setFuture(submit);
     }
 
     /**
-     * 同步提交下载任务，阻塞等待执行完成
+     * 同步提交任务，带超时控制
      *
-     * @param task 下载任务
-     * @param <R>  结果类型
-     * @return 下载结果，失败或中断时返回 null
+     * @param task    下载任务
+     * @param timeout 最大等待时间
+     * @param unit    时间单位
+     * @param <R>     返回结果类型
+     * @return 下载结果，超时或失败时返回 null
      */
-    public static <R> R submitAwait(DownloadTask<R> task) {
-        if (taskMap.containsKey(task.getTaskId())) {
-            DownloadTask<R> downloadTask = taskMap.get(task.getTaskId());
-            if (downloadTask.getStatus() == DownloadStatus.FAIL) {
+    public static <R> R submitAwait(DownloadTask<R> task, long timeout, TimeUnit unit) {
+        // 原子注册任务：避免重复提交
+        //如果 key（即 task.getTaskId()）不存在于 map 中，则将 task 插入 map，并返回 null；
+        //如果 key 已经存在，则不覆盖原有值，直接返回原有的 value。
+        DownloadTask<R> existing = taskMap.putIfAbsent(task.getTaskId(), task);
+
+        if (existing!=null) {
+            //存在已有任务
+            if (existing.getStatus() == DownloadStatus.FAIL) {
                 taskMap.remove(task.getTaskId());
-            } else if (downloadTask.getStatus() == DownloadStatus.WAITING || downloadTask.getStatus() == DownloadStatus.RUNNING) {
-                if (downloadTask.getFuture() == null) {
+            } else if (existing.getStatus() == DownloadStatus.WAITING || existing.getStatus() == DownloadStatus.RUNNING) {
+                if (existing.getFuture() == null) {
                     awaitDownload(task.getTaskId());
                     return (R) task.getResult();
                 }
                 try {
-                    return downloadTask.getFuture().get();
+                    return existing.getFuture().get();
                 } catch (InterruptedException | ExecutionException e) {
                     log.error(e.getMessage());
                 }
             }
-        }
-        taskMap.put(task.getTaskId(), task);
-        Future<R> future = workerPool.submit(task);
-        task.setFuture(future);
-        try {
-            return future.get(); // 阻塞等待执行完成
-        } catch (InterruptedException | ExecutionException e) {
-            log.error(e.getMessage());
+        }else {
+            Future<R> future = workerPool.submit(task);
+            task.setFuture(future);
+            try {
+                return future.get(timeout,unit);
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                log.error(e.getMessage(),e);
+            }
         }
         return null;
     }
 
     /**
-     * 如果当前没有相同任务执行  提交新任务
+     * 如果当前没有相同任务正在执行(无论之前任务是否成功)  则提交新任务
      *
      * @param task 下载任务
      * @param <R>  结果类型
      * @return 下载结果，失败或中断时返回 null
      */
     public static <R> R submitNewAwait(DownloadTask<R> task) {
-        if (taskMap.containsKey(task.getTaskId())) {
-            DownloadTask<R> downloadTask = taskMap.get(task.getTaskId());
-            if (downloadTask.getStatus() == DownloadStatus.WAITING || downloadTask.getStatus() == DownloadStatus.RUNNING) {
-                if (downloadTask.getFuture() == null) {
+        DownloadTask<R> existing = taskMap.putIfAbsent(task.getTaskId(), task);
+        if (existing != null) {
+            if (existing.getStatus() == DownloadStatus.WAITING || existing.getStatus() == DownloadStatus.RUNNING) {
+                if (existing.getFuture() == null) {
                     awaitDownload(task.getTaskId());
                     return (R) task.getResult();
                 }
                 try {
-                    return downloadTask.getFuture().get();
+                    return existing.getFuture().get();
                 } catch (InterruptedException | ExecutionException e) {
                     log.error(e.getMessage());
                 }
             }
         }
-        taskMap.put(task.getTaskId(), task);
         Future<R> future = workerPool.submit(task);
         task.setFuture(future);
         try {
@@ -133,37 +138,11 @@ public class DownloadManager {
      * 同步提交任务，带超时控制
      *
      * @param task    下载任务
-     * @param timeout 最大等待时间
-     * @param unit    时间单位
      * @param <R>     返回结果类型
      * @return 下载结果，超时或失败时返回 null
      */
-    public static <R> R submitAwait(DownloadTask<R> task, long timeout, TimeUnit unit) {
-        if (taskMap.containsKey(task.getTaskId())) {
-            DownloadTask<R> downloadTask = taskMap.get(task.getTaskId());
-            if (downloadTask.getStatus() == DownloadStatus.FAIL) {
-                taskMap.remove(task.getTaskId());
-            } else if (downloadTask.getStatus() == DownloadStatus.WAITING || downloadTask.getStatus() == DownloadStatus.RUNNING) {
-                if (downloadTask.getFuture() == null) {
-                    awaitDownload(task.getTaskId());
-                    return (R) task.getResult();
-                }
-                try {
-                    return downloadTask.getFuture().get();
-                } catch (InterruptedException | ExecutionException e) {
-                    log.error(e.getMessage());
-                }
-            }
-        }
-        taskMap.put(task.getTaskId(), task);
-        Future<R> submit = workerPool.submit(task);
-        task.setFuture(submit);
-        try {
-            return submit.get(timeout, unit); // 带超时时间阻塞
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            log.error(e.getMessage());
-        }
-        return null;
+    public static <R> R submitAwait(DownloadTask<R> task) {
+        return submitAwait(task, Long.MAX_VALUE, TimeUnit.DAYS);
     }
 
     /**

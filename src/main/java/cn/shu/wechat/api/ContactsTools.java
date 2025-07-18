@@ -1,6 +1,7 @@
 package cn.shu.wechat.api;
 
 
+import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.constant.DownloadType;
 import cn.shu.wechat.constant.WxConstant;
 import cn.shu.wechat.constant.WxReqParamsConstant;
@@ -15,8 +16,10 @@ import cn.shu.wechat.task.DownloadTask;
 import cn.shu.wechat.utils.CommonTools;
 import cn.shu.wechat.utils.JSONObjectUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
+import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -33,7 +36,7 @@ import java.util.stream.Collectors;
 @Log4j2
 public class ContactsTools {
 
-
+    private static final WechatConfiguration configuration = SpringContextHolder.getBean(WechatConfiguration.class);
     /**
      * 根据用户名获取用户信息
      *
@@ -640,7 +643,7 @@ public class ContactsTools {
             }
         }
         try {
-            SpringContextHolder.getBean(AttrHistoryMapper.class).batchInsert(attrHistories);
+            cn.shu.wechat.utils.SpringContextHolder.getBean(AttrHistoryMapper.class).batchInsert(attrHistories);
         } catch (Exception e) {
             log.warn(e.getMessage());
         }
@@ -684,6 +687,34 @@ public class ContactsTools {
         } else {
             compareContacts(oldV, newV);
         }
+    }
+
+    /**
+     * 添加联系人
+     */
+    public static void addContacts(Contacts contacts) {
+
+        contacts.setIscontacts(true);
+        String userName = contacts.getUsername();
+        String nickName = contacts.getNickname();
+
+        if (contacts.getVerifyflag()!=null && (contacts.getVerifyflag() & 8) != 0) {
+            // 公众号/服务号
+
+            contacts.setType(Contacts.ContactsType.PUBLIC_USER);
+        } else if (configuration.getSpecialUser().contains(userName)) {
+            // 特殊账号
+
+            contacts.setType(Contacts.ContactsType.SPECIAL_USER);
+        } else if (userName.startsWith("@@")) {
+            // 群聊
+
+            contacts.setType(Contacts.ContactsType.GROUP_USER);
+        } else {
+            contacts.setType(Contacts.ContactsType.ORDINARY_USER);
+            // 普通联系人
+        }
+        Core.getMemberMap().put(userName, contacts);
     }
 
 }

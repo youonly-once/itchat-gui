@@ -167,7 +167,8 @@ public class CreateGroupDialog extends JDialog {
                             && StringUtils.isNotEmpty(wxCreateRoomResp.getChatRoomName())){
                         Contacts group = Contacts.builder().username(wxCreateRoomResp.getChatRoomName())
                                 .memberlist(wxCreateRoomResp.getMemberList()).build();
-                        Core.getMemberMap().put(wxCreateRoomResp.getChatRoomName(),group);
+
+                        ContactsTools.addContacts(group);
 
                         ChatUtil.openOrCreateDirectChat(wxCreateRoomResp.getChatRoomName());
                         CreateGroupDialog.context.dispose();

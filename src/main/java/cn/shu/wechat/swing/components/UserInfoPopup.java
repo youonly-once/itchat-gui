@@ -178,7 +178,7 @@ public class UserInfoPopup extends JPopupMenu {
                             try {
                                 webWXSendMsgResponse = MessageTools.addFriend(contacts.getUsername(), contacts.getTicket());
                                 if (webWXSendMsgResponse.getBaseResponse().getRet() == 0) {
-                                    Core.getMemberMap().put(contacts.getUsername(),contacts);
+                                    //Core.getMemberMap().put(contacts.getUsername(),contacts);
                                     ChatUtil.openOrCreateDirectChat(contacts.getUsername());
                                     contacts.setTicket(null);
                                 }

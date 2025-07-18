@@ -14,7 +14,7 @@ public class ComparableConcurrentHashMap<K, V> extends ConcurrentHashMap<K, V> {
     @Override
     public V put(K key, V newVal) {
         V old = get(key);
-        if (newVal instanceof Contacts && Core.isCompare()) {
+        if (old != null && newVal instanceof Contacts && Core.isCompare()) {
             if (((Contacts) newVal).getType() == null) {
                 System.out.println(((Contacts) newVal));
             }
