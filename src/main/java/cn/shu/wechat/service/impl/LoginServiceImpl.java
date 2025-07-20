@@ -583,7 +583,7 @@ public class LoginServiceImpl implements LoginService {
                     || ContactsTools.getMemberOfGroup(userName,msg.getMemberName()) == null) {
                 //群成员非好友 且 群里面没有该用户信息 则加载群成员数据
 
-                log.error("群用户或者群成员信息不完整！{}", userName);
+                log.error("群用户或者群成员信息不完整！{}，{}", contacts.getMemberlist(),userName);
                 DownloadTask<Void> objectDownloadTask = new DownloadTask<>();
                 objectDownloadTask.setTaskId("WebWxBatchGetContact:" + userName);
                 objectDownloadTask.setGroupName(userName);
