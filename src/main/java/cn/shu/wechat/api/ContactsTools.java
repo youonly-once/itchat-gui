@@ -595,7 +595,7 @@ public class ContactsTools {
                     downloadTaskOld.setRelativeUrl(stringStringEntry.getKey());
                     downloadTaskOld.setType(DownloadType.HEAD_IMAGE_BIG);
                     downloadTaskOld.setUserName(oldV.getUsername());
-                    downloadTaskOld.setTaskId(stringStringEntry.getValue()+oldV.getUsername());
+                    downloadTaskOld.setTaskId(stringStringEntry.getKey()+oldV.getUsername());
                     oldHeadPath = DownloadManager.submitAwait(downloadTaskOld,1000*60*5, TimeUnit.MILLISECONDS);
 
                     DownloadTask<String> downloadTask = new DownloadTask<>();
@@ -606,7 +606,7 @@ public class ContactsTools {
                     String newHeadPath = DownloadManager.submitAwait(downloadTask,1000*60*5, TimeUnit.MILLISECONDS);
 
                     if (newHeadPath != null) {
-                        Core.getContactHeadImgPath().put(oldV.getUsername(), newHeadPath);
+                        //Core.getContactHeadImgPath().put(oldV.getUsername(), newHeadPath);
                         //刷新头像
                         AvatarUtil.putUserAvatarCache(oldV.getUsername(), newHeadPath);
                     }
