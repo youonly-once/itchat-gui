@@ -360,8 +360,7 @@ public final class LoginFrame extends JFrame {
                 @Override
                 protected void done() {
 
-                    log.info(" 开始接收消息");
-                    loginService.startReceiving();
+
                     ContactsPanel.getContext().notifyDataSetChanged();
 
 
@@ -372,6 +371,9 @@ public final class LoginFrame extends JFrame {
                         objectDownloadTask.setTaskId("WebWxBatchGetContact");
                         objectDownloadTask.setType(DownloadType.GetBatchContacts);
                         DownloadManager.submitAwait(objectDownloadTask);
+
+                        log.info(" 开始接收消息");
+                        loginService.startReceiving();
 
                         Core.setCompare(true);
                         if (dHImg) {

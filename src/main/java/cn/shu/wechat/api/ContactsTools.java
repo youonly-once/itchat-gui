@@ -591,6 +591,13 @@ public class ContactsTools {
                     String oldHeadPath = Core.getContactHeadImgPath().get(oldV.getUsername());
 
 
+                    DownloadTask<String> downloadTaskOld = new DownloadTask<>();
+                    downloadTaskOld.setRelativeUrl(stringStringEntry.getKey());
+                    downloadTaskOld.setType(DownloadType.HEAD_IMAGE_BIG);
+                    downloadTaskOld.setUserName(oldV.getUsername());
+                    downloadTaskOld.setTaskId(stringStringEntry.getValue()+oldV.getUsername());
+                    oldHeadPath = DownloadManager.submitAwait(downloadTaskOld,1000*60*5, TimeUnit.MILLISECONDS);
+
                     DownloadTask<String> downloadTask = new DownloadTask<>();
                     downloadTask.setRelativeUrl(stringStringEntry.getValue());
                     downloadTask.setType(DownloadType.HEAD_IMAGE_BIG);

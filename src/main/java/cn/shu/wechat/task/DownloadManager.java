@@ -82,9 +82,12 @@ public class DownloadManager {
             } else if (existing.getStatus() == DownloadStatus.WAITING || existing.getStatus() == DownloadStatus.RUNNING) {
                 if (existing.getFuture() == null) {
                     awaitDownload(task.getTaskId());
+                    log.error("轮询等待中：{}", existing);
                     return (R) task.getResult();
                 }
                 try {
+
+                    log.error("getFuture等待中：{}", existing);
                     return existing.getFuture().get();
                 } catch (InterruptedException | ExecutionException e) {
                     log.error(e.getMessage());

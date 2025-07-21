@@ -112,7 +112,7 @@ public class MessageTools {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                log.error("发送消息失败：{}", e.getMessage());
+                log.error("发送消息失败：{}", e.getMessage(),e);
                 return WebWXSendMsgResponse.error(e.getMessage());
 
             }

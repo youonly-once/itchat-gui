@@ -229,17 +229,20 @@ public class DownloadTask<R> implements Callable<R> {
     @Override
     public String toString() {
         return "DownloadTask{" +
-                ", relativeUrl='" + relativeUrl + '\'' +
                 ", taskId='" + taskId + '\'' +
+                ", status=" + status +
+                ", result=" + result +
+                ", relativeUrl='" + relativeUrl + '\'' +
                 ", url='" + url + '\'' +
                 ", destPath='" + destPath + '\'' +
                 ", userName='" + userName + '\'' +
                 ", type=" + type +
                 ", msgId='" + msgId + '\'' +
-                ", status=" + status +
-                ", result=" + result +
                 ", msg=" + msg +
+                ", groupName='" + groupName + '\'' +
                 ", resourceType='" + resourceType + '\'' +
+                ", beginTime=" + beginTime +
+                ", endTime=" + endTime +
                 '}';
     }
 }
