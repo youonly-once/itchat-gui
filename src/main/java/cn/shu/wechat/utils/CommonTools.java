@@ -260,4 +260,8 @@ public class CommonTools {
         // StringEscapeUtils.unescapeHtml4(d.getString(k)));
 
     }
+
+    public static void main(String[] args) {
+        System.out.println(134217731 & 0x02);
+    }
 }

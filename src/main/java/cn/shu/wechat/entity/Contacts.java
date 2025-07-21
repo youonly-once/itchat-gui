@@ -67,7 +67,7 @@ public class Contacts {
     private Double unifriend;
 
     @Excel(name="contactflag")
-    private Double contactflag;
+    private int contactflag;
 
     //@ExcelCollection(name="群成员")
     private List<Contacts> memberlist;

@@ -16,10 +16,8 @@ import cn.shu.wechat.task.DownloadTask;
 import cn.shu.wechat.utils.CommonTools;
 import cn.shu.wechat.utils.JSONObjectUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
-import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -82,9 +80,12 @@ public class ContactsTools {
      * @return 备注
      */
     public static String getContactDisplayNameByUserName(Contacts contacts) {
-        String remarkNameByPersonUserName = getContactRemarkNameByUserName(contacts);
-        if (StringUtils.isNotEmpty(remarkNameByPersonUserName)) {
-            return remarkNameByPersonUserName;
+        String name = getContactRemarkNameByUserName(contacts);
+        if (StringUtils.isNotEmpty(name)) {
+            return name;
+        }
+        if (StringUtils.isNotEmpty(contacts.getDisplayname())) {
+            return contacts.getDisplayname();
         }
         String nickNameByPersonUserName = getContactNickNameByUserName(contacts);
         if (StringUtils.isNotEmpty(nickNameByPersonUserName)) {
@@ -384,7 +385,7 @@ public class ContactsTools {
             return (contacts.getStatues() == null||
                     contacts.getStatues().intValue()== WxConstant.ChatRoomMute.CHATROOM_NOTIFY_CLOSE.CODE);
         }else{
-            return ((contacts.getContactflag().intValue() & WxConstant.ContactFlag.CONTACTFLAG_NOTIFYCLOSECONTACT.CODE)>0);
+            return ((contacts.getContactflag() & WxConstant.ContactFlag.CONTACTFLAG_NOTIFYCLOSECONTACT.CODE) > 0);
         }
 
 
@@ -585,18 +586,9 @@ public class ContactsTools {
         ArrayList<AttrHistory> attrHistories = new ArrayList<>();
         for (Map.Entry<String, Map<String, String>> stringMapEntry : differenceMap.entrySet()) {
             for (Map.Entry<String, String> stringStringEntry : stringMapEntry.getValue().entrySet()) {
-                if (stringMapEntry.getKey().equals("HeadImgUrl")
-                        || stringMapEntry.getKey().equals("头像更换")
-                        || stringMapEntry.getKey().equals("headimgurl")) {
+                if (stringMapEntry.getKey().equalsIgnoreCase("headimgurl")
+                        || stringMapEntry.getKey().equals("头像更换")) {
                     String oldHeadPath = Core.getContactHeadImgPath().get(oldV.getUsername());
-
-
-                    DownloadTask<String> downloadTaskOld = new DownloadTask<>();
-                    downloadTaskOld.setRelativeUrl(stringStringEntry.getKey());
-                    downloadTaskOld.setType(DownloadType.HEAD_IMAGE_BIG);
-                    downloadTaskOld.setUserName(oldV.getUsername());
-                    downloadTaskOld.setTaskId(stringStringEntry.getKey()+oldV.getUsername());
-                    oldHeadPath = DownloadManager.submitAwait(downloadTaskOld,1000*60*5, TimeUnit.MILLISECONDS);
 
                     DownloadTask<String> downloadTask = new DownloadTask<>();
                     downloadTask.setRelativeUrl(stringStringEntry.getValue());
@@ -605,22 +597,23 @@ public class ContactsTools {
                     downloadTask.setTaskId(stringStringEntry.getValue()+oldV.getUsername());
                     String newHeadPath = DownloadManager.submitAwait(downloadTask,1000*60*5, TimeUnit.MILLISECONDS);
 
-                    if (newHeadPath != null) {
-                        //Core.getContactHeadImgPath().put(oldV.getUsername(), newHeadPath);
-                        //刷新头像
-                        AvatarUtil.putUserAvatarCache(oldV.getUsername(), newHeadPath);
-                    }
                     //更换头像需要发送图片
                     //更换前
                     messages.add(Message.builder()
                             .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.PIC.getCode())
                             .toUsername("filehelper")
                             .filePath(oldHeadPath).build());
-                    //更换后
-                    messages.add(Message.builder()
-                            .toUsername("filehelper")
-                            .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.PIC.getCode())
-                            .filePath(newHeadPath).build());
+                    if (newHeadPath != null) {
+                        Core.getContactHeadImgPath().put(oldV.getUsername(), newHeadPath);
+                        //刷新头像
+                        AvatarUtil.putUserAvatarCache(oldV.getUsername(), newHeadPath);
+                        //更换后
+                        messages.add(Message.builder()
+                                .toUsername("filehelper")
+                                .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.PIC.getCode())
+                                .filePath(newHeadPath).build());
+                    }
+
 
                     AttrHistory build = AttrHistory.builder()
                             .attr(stringMapEntry.getKey())
@@ -670,7 +663,7 @@ public class ContactsTools {
                     return firstMapEntry.getValue().entrySet().stream().map(
                             secondMapEntry -> {
                                 StringBuilder str = new StringBuilder();
-                                if (key.equals("头像更换") || key.equals("HeadImgUrl") || key.equals("headimgurl")) {
+                                if (key.equals("头像更换") || key.equalsIgnoreCase("headimgurl")) {
                                     str.append("\n【").append(key).append("】更换前后如下");
                                 } else {
                                     str.append("\n【").append(key).append("】(\"").append(secondMapEntry.getKey()).append("\" -> \"").append(secondMapEntry.getValue()).append("\")");

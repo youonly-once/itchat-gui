@@ -1,7 +1,6 @@
 package cn.shu.wechat.service.impl;
 
 import cn.shu.wechat.api.ContactsTools;
-import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.constant.*;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.core.MsgCenter;
@@ -382,8 +381,9 @@ public class LoginServiceImpl implements LoginService {
             //初始化列表的联系人
             //最近聊天的联系人
 
-            Set<String> recentContacts = Core.getRecentContacts();
-            for (Contacts contacts : wxInitResponse.getContactList()) {
+        Set<String> recentContacts = Core.getRecentContacts();
+        Core.setWxInitResponse(wxInitResponse);
+        for (Contacts contacts : wxInitResponse.getContactList()) {
                 //下载头像
                 ExecutorServiceUtil.getHeadImageDownloadExecutorService().submit(() -> {
                     AvatarUtil.createOrLoadUserAvatar(contacts.getUsername());
@@ -658,6 +658,7 @@ public class LoginServiceImpl implements LoginService {
 
 
     }
+
 
     @Override
     public void WebWxBatchGetContact(Set<String> groupName) throws IOException, InterruptedException {

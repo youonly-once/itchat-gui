@@ -1,5 +1,6 @@
 package cn.shu.wechat.core;
 
+import cn.shu.wechat.dto.response.wxinit.WxInitResponse;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.map.ComparableConcurrentHashMap;
 import lombok.Getter;
@@ -58,6 +59,7 @@ public class Core {
     /**
      * 所有好友最新头像路径
      * 多线程下载 用安全ConcurrentHashMap
+     * 提取下载用户头像，用户更新后可知道其之前的头像
      */
     @Getter @Setter
     static private Map<String, String> contactHeadImgPath = new ConcurrentHashMap<>();
@@ -99,6 +101,10 @@ public class Core {
     @Getter
     @Setter
     static private boolean compare;
+
+    @Getter
+    @Setter
+    static private WxInitResponse wxInitResponse;
 
 
 }

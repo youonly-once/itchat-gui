@@ -83,6 +83,7 @@ public class RoomItem implements Comparable<RoomItem> {
         return o.getLocalDateTime().compareTo(this.getLocalDateTime());
     }
     public RoomItem (Contacts contacts,String latestMsg, int msgCount,Boolean hasNewMsg){
+        if (contacts == null) return;
         setContacts(contacts);
         setRoomId(contacts.getUsername());
         setLocalDateTime(LocalDateTime.now());

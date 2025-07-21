@@ -12,15 +12,12 @@ import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
-import org.apache.commons.lang3.StringUtils;
+import cn.shu.wechat.swing.worker.HeadLoadingSwingWorker;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
-import java.io.IOException;
 
 /**
  * Created by 舒新胜 on 17-5-29.
@@ -49,19 +46,9 @@ public class MyInfoPanel extends ParentAvailablePanel {
 
 
         Contacts userSelf = Core.getUserSelf();
-        String headImage = Core.getContactHeadImgPath().get(userSelf.getUsername());
-        avatar = new JLabel();
-        if (StringUtils.isEmpty(headImage)) {
-            avatar.setIcon(AvatarUtil.createOrLoadUserAvatar(userSelf.getUsername()));
-        } else {
-            try {
-                avatar.setIcon(new ImageIcon(ImageIO.read(new File(headImage)).getScaledInstance(50, 50, Image.SCALE_SMOOTH)));
-            } catch (IOException e) {
-                avatar.setIcon(AvatarUtil.createOrLoadUserAvatar(userSelf.getNickname()));
-                e.printStackTrace();
-            }
 
-        }
+        avatar = new JLabel();
+        new HeadLoadingSwingWorker(avatar, userSelf).loadAvatar();
 
         avatar.setPreferredSize(new Dimension(50, 50));
         avatar.setCursor(new Cursor(Cursor.HAND_CURSOR));

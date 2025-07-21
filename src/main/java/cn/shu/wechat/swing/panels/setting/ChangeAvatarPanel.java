@@ -70,8 +70,8 @@ public class ChangeAvatarPanel extends JPanel {
 
     private void initComponents() {
         // TODO 大头像
-         ImageIcon avatar = AvatarUtil.createOrLoadUserAvatar(Core.getUserSelf().getUsername());
-         imageLabel = new ImageAdjustLabel(imageMaxWidth, imageMaxHeight, avatar.getImage());
+        Image avatar = AvatarUtil.createOrLoadBigAvatar(Core.getUserSelf());
+        imageLabel = new ImageAdjustLabel(imageMaxWidth, imageMaxHeight, avatar);
         imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
         imageLabel.setPreferredSize(new Dimension(360, 200));
         //imageLabel.setBorder(new LineBorder(Colors.ITEM_SELECTED_LIGHT));

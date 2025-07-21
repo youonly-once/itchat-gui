@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
  * @创建时间 2/3/2021 12:11 PM
  */
 public class JSONObjectUtil {
-    private static Pattern pattern = Pattern.compile(".+\\?seq=(\\d+).+");
+    private static final Pattern pattern = Pattern.compile(".+\\?seq=(\\d+).+");
     /**
      * 返回二个JSONObject的差异
      *
@@ -28,17 +28,17 @@ public class JSONObjectUtil {
     public static Map<String, Map<String, String>> getDifferenceMap(JSONObject oldO, JSONObject newO) {
         Map<String, Map<String, String>> difference = new HashMap<>(1);
         for (Map.Entry<String, Object> entry : oldO.entrySet()) {
-            if (entry.getKey().toLowerCase().equals("pyinitial")){
+            if (entry.getKey().equalsIgnoreCase("pyinitial")) {
                 continue;
             }
-            if (entry.getKey().toLowerCase().equals("pyquanpin")){
+            if (entry.getKey().equalsIgnoreCase("pyquanpin")) {
                 continue;
             }
             String newV = newO.getString(entry.getKey());
             String oldV = entry.getValue() == null ? "" : entry.getValue().toString();
             //是否相同
             boolean equals = oldV.equals(newV);
-            if ("HeadImgUrl".equals(entry.getKey()) || "headimgurl".equals(entry.getKey())) {
+            if ("HeadImgUrl".equalsIgnoreCase(entry.getKey())) {
                 if (StringUtils.isNotEmpty(newV) && StringUtils.isNotEmpty(oldV)) {
                     Matcher matcherNew = pattern.matcher(newV);
                     Matcher matcherOld = pattern.matcher(oldV);
@@ -50,13 +50,13 @@ public class JSONObjectUtil {
                     }
                 }
             }
-            if ("memberlist".equals(entry.getKey()) || "MemberList".equals(entry.getKey())) {
+            if ("memberlist".equalsIgnoreCase(entry.getKey())) {
                 equals = true;
             }
-            if ("remarkpyinitial".equals(entry.getKey())) {
+            if ("remarkpyinitial".equalsIgnoreCase(entry.getKey())) {
                 equals = true;
             }
-            if ("remarkpyquanpin".equals(entry.getKey())) {
+            if ("remarkpyquanpin".equalsIgnoreCase(entry.getKey())) {
                 equals = true;
             }
             if (!equals) {

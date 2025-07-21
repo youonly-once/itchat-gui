@@ -42,9 +42,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.Base64;
 import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -360,7 +359,15 @@ public final class LoginFrame extends JFrame {
                 @Override
                 protected void done() {
 
-
+                    SwingUtilities.invokeLater(() -> {
+                        List<RoomItem> roomItems = Arrays.stream(Core.getWxInitResponse().getChatSet().split(","))
+                                .filter(e -> !Core.getRecentContacts().contains(e))
+                                .map(userId -> Core.getMemberMap().get(userId))
+                                .filter(Objects::nonNull)
+                                .map(e -> new RoomItem(e, "", 0, false))
+                                .collect(Collectors.toList());
+                        RoomsPanel.getContext().addRoom(roomItems);
+                    });
                     ContactsPanel.getContext().notifyDataSetChanged();
 
 
