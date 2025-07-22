@@ -67,7 +67,9 @@ public class ChatMessageEditorPanel extends ParentAvailablePanel {
     public ChatMessageEditorPanel(JPanel parent, String roomId) {
         super(parent);
         this.roomId = roomId;
+
         initComponents();
+
         initView();
         setListeners();
 
@@ -152,6 +154,7 @@ public class ChatMessageEditorPanel extends ParentAvailablePanel {
         sendButton.setToolTipText("Enter发送消息，Ctrl+Enter换行");
 
         chatEditorPopupMenu = new ChatEditorPopupMenu();
+
 
         messageEditorExpressionPopup = new MessageEditorExpressionPopup();
     }

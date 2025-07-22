@@ -1,14 +1,18 @@
 package cn.shu.wechat.swing.utils;
 
+import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.swing.panels.RightPanel;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
-import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.swing.panels.left.TabOperationPanel;
+import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @作者 舒新胜
@@ -29,7 +33,9 @@ public final class ChatUtil {
             //创建一层聊天面板
             ChatPanelContainer.getContext().createAndShow(userId);
             //房间不存在，创建左侧聊天房
+
             createDirectChat(userId);
+
         } else {
             ChatPanelContainer.getContext().createAndShow(userId);
             //房间列表激活 //TODO有问题
@@ -75,9 +81,30 @@ public final class ChatUtil {
                   ChatPanelContainer.get(roomId).addMessageToEnd(message);
                 }
             //新增或选择聊天列表
-            RoomsPanel.getContext().addRoomOrOpenRoom(roomId, lastMsg, count,isMute,hasNewMsg);
+            RoomsPanel.getContext().addRoomOrOpenRoom(roomId, lastMsg, count, isMute, hasNewMsg, isAtMe(roomId, lastMsg));
 
         });
+    }
+
+    public static Boolean isAtMe(String roomId, String lastMsg) {
+        //如果是 群 判断是否有人@我
+        //Contacts contacts = roomItem.getContacts();
+        AtomicBoolean isAtMe = new AtomicBoolean(false);
+        Contacts contacts = Core.getMemberMap().get(roomId);
+        if (contacts != null && ContactsTools.isRoomContact(contacts)) {
+            if ((StringUtils.isNotEmpty(Core.getUserSelf().getRemarkname()) && lastMsg.contains("@" + Core.getUserSelf().getRemarkname()))
+                    || lastMsg.contains("@所有人")
+                    || (StringUtils.isNotEmpty(Core.getNickName()) && lastMsg.contains("@" + Core.getNickName()))) {
+                return true;
+            } else if (contacts.getMemberlist() != null) {
+                contacts.getMemberlist().stream().filter(e -> e.getUsername().equals(Core.getUserName())).findAny().ifPresent(e -> {
+                    if (StringUtils.isNotEmpty(e.getDisplayname()) && lastMsg.contains("@" + e.getDisplayname())) {
+                        isAtMe.set(true);
+                    }
+                });
+            }
+        }
+        return isAtMe.get() ? true : null;
     }
 
     /**

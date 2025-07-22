@@ -131,8 +131,8 @@ public class ChatMessagePanel extends ParentAvailablePanel {
         if (StringUtils.isEmpty(roomId)) {
             throw new NullPointerException("roomid can not be null.");
         }
-        messageViewHolderCacheHelper = new MessageViewHolderCacheHelper();
 
+        messageViewHolderCacheHelper = new MessageViewHolderCacheHelper();
         initComponents();
         initView();
         setListeners();
@@ -141,11 +141,17 @@ public class ChatMessagePanel extends ParentAvailablePanel {
     private void initComponents() {
 
         chatMessageViewerPanel = new ChatMessageViewerPanel(this);
+
+
         chatMessageViewerPanel.setBorder(new RCBorder(RCBorder.BOTTOM, Colors.LIGHT_GRAY));
+
         adapter = new MessageAdapter(this,messageItems, chatMessageViewerPanel.getMessageListView(), messageViewHolderCacheHelper);
+
+
         chatMessageViewerPanel.getMessageListView().setAdapter(adapter);
 
         chatMessageEditorPanel = new ChatMessageEditorPanel(this, roomId);
+
         chatMessageEditorPanel.setPreferredSize(new Dimension(MainFrame.DEFAULT_WIDTH, MainFrame.DEFAULT_WIDTH / 4));
     }
 

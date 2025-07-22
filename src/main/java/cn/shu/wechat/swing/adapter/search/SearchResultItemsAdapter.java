@@ -411,7 +411,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
 
     private void enterRoom(String roomId) {
         //添加房间
-        RoomsPanel.getContext().addRoomOrOpenRoom(roomId,"",0,null,false);
+        RoomsPanel.getContext().addRoomOrOpenRoom(roomId, "", 0, null, false, false);
         TabOperationPanel.getContext().switchToChatLabel();
         //添加聊天房
          ChatPanelContainer.getContext().createAndShow(roomId);

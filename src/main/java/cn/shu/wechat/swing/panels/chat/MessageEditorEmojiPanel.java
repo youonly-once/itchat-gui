@@ -2,20 +2,14 @@ package cn.shu.wechat.swing.panels.chat;
 
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.listener.ExpressionListener;
-import cn.shu.wechat.swing.panels.chat.MessageEditorExpressionItemPanel;
 import cn.shu.wechat.swing.utils.EmojiUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
-import org.apache.commons.compress.utils.Lists;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by 舒新胜 on 04/07/2017.
@@ -60,7 +54,8 @@ public class MessageEditorEmojiPanel extends JPanel {
             }
         };
 
-
+        long l = System.currentTimeMillis();
+        //TODO 耗时
         String iconPath = "/emoji/wechat_emoji/";
         for (int i = 0; i < EmojiUtil.wechatEmojiList.size(); i++) {
             String code = EmojiUtil.wechatEmojiList.get(i);
@@ -69,6 +64,7 @@ public class MessageEditorEmojiPanel extends JPanel {
             panel.addMouseListener(listener);
             add(panel);
         }
+        System.out.println(System.currentTimeMillis() - l);
 
     }
 

@@ -1,14 +1,10 @@
 package cn.shu.wechat.swing.panels.chat;
 
 import cn.shu.wechat.api.ContactsTools;
-import cn.shu.wechat.constant.DownloadType;
-import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.panels.TitlePanel;
-import cn.shu.wechat.task.DownloadManager;
-import cn.shu.wechat.task.DownloadTask;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
@@ -60,36 +56,36 @@ public class ChatPanel extends JPanel {
         if (contacts == null) {
             log.error("未知联系人：{}", roomId);
         }
-        new SwingWorker<Object, Object>() {
-
-            @Override
-            protected Object doInBackground() throws Exception {
-                if (ContactsTools.isRoomContact(roomId)) {
-                    if (contacts.getMemberlist() == null || contacts.getMemberlist().isEmpty()) {
-                        DownloadTask<Void> objectDownloadTask = new DownloadTask<>();
-                        objectDownloadTask.setTaskId("WebWxBatchGetContact:" + roomId);
-                        objectDownloadTask.setType(DownloadType.GetBatchContacts);
-                        objectDownloadTask.setGroupName(roomId);
-                        DownloadManager.submitAwait(objectDownloadTask);
-                    }
-                    contacts = Core.getMemberMap().get(roomId);
-
-                    chatMessagePanel.setRoomMembers(contacts.getMemberlist()
-                            .stream()
-                            .map(contacts1 -> ContactsTools.getMemberDisplayNameOfGroup(roomId, contacts1.getUsername()))
-                            .toList()
-                    );
-                }
-                return null;
-            }
-
-            @Override
-            protected void done() {
-                super.done();
-                updateRoomTitle();
-                ChatPanel.this.getTitlePanel().hideStatusLabel();
-            }
-        }.execute();
+//        new SwingWorker<Object, Object>() {
+//
+//            @Override
+//            protected Object doInBackground() throws Exception {
+//                if (ContactsTools.isRoomContact(roomId)) {
+//                    if (contacts.getMemberlist() == null || contacts.getMemberlist().isEmpty()) {
+//                        DownloadTask<Void> objectDownloadTask = new DownloadTask<>();
+//                        objectDownloadTask.setTaskId("WebWxBatchGetContact:" + roomId);
+//                        objectDownloadTask.setType(DownloadType.GetBatchContacts);
+//                        objectDownloadTask.setGroupName(roomId);
+//                        DownloadManager.submitAwait(objectDownloadTask);
+//                    }
+//                    contacts = Core.getMemberMap().get(roomId);
+//
+//                    chatMessagePanel.setRoomMembers(contacts.getMemberlist()
+//                            .stream()
+//                            .map(contacts1 -> ContactsTools.getMemberDisplayNameOfGroup(roomId, contacts1.getUsername()))
+//                            .toList()
+//                    );
+//                }
+//                return null;
+//            }
+//
+//            @Override
+//            protected void done() {
+//                super.done();
+//                updateRoomTitle();
+//                ChatPanel.this.getTitlePanel().hideStatusLabel();
+//            }
+//        }.execute();
     }
 
 

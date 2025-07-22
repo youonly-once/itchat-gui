@@ -156,9 +156,11 @@ public class RoomsPanel extends ParentAvailablePanel {
      * @param latestMsg 最近的一条消息
      * @param hasNewMsg 是否有未读消息 ，当房间为免打扰房间时newReadCount不计数，此时通过hasNewMsg判断
      */
-    private void addRoom(String roomId, String latestMsg, int newReadCount,Boolean hasNewMsg) {
+    private void addRoom(String roomId, String latestMsg, int newReadCount, Boolean hasNewMsg, Boolean atMe) {
         Contacts contacts = Core.getMemberMap().get(roomId);
-        addRoom(new RoomItem(contacts, latestMsg, newReadCount,hasNewMsg));
+        RoomItem roomItem = new RoomItem(contacts, latestMsg, newReadCount, hasNewMsg);
+        roomItem.setAtMe(atMe);
+        addRoom(roomItem);
     }
     /**
      * 添加房间
@@ -166,7 +168,7 @@ public class RoomsPanel extends ParentAvailablePanel {
      * @param roomId 联系人ID
      */
     public void addRoom(String roomId) {
-        addRoom(roomId, "", 0,false);
+        addRoom(roomId, "", 0, false, false);
     }
     /**
      * 添加房间
@@ -186,17 +188,17 @@ public class RoomsPanel extends ParentAvailablePanel {
      * @param isMute 是否免打扰
      * @param hasNewMsg 是否有未读消息 ，当房间为免打扰房间时newReadCount不计数，此时通过hasNewMsg判断
      */
-    public void addRoomOrOpenRoom(String roomId, String latestMsg, int newReadCount, Boolean isMute, boolean hasNewMsg) {
+    public void addRoomOrOpenRoom(String roomId, String latestMsg, int newReadCount, Boolean isMute, boolean hasNewMsg, Boolean atMe) {
 
         //更新聊天列表
         Set<String> recentContacts = Core.getRecentContacts();
         if (!recentContacts.contains(roomId)) {
             //添加新房间并制定
-            addRoom(roomId, latestMsg, newReadCount,hasNewMsg);
+            addRoom(roomId, latestMsg, newReadCount, hasNewMsg, atMe);
             recentContacts.add(roomId);
         } else {
             //更新消息 置顶
-           updateRoomItem(roomId, newReadCount, latestMsg, LocalDateTime.now(),isMute,hasNewMsg);
+            updateRoomItem(roomId, newReadCount, latestMsg, LocalDateTime.now(), isMute, hasNewMsg, atMe);
         }
     }
 
@@ -316,6 +318,20 @@ public class RoomsPanel extends ParentAvailablePanel {
 
     /**
      * 更新指定房间信息
+     *
+     * @param roomId       房间id
+     * @param newReadCount 新消息数量
+     * @param lastMsg      最近的一条消息
+     * @param time         时间
+     * @param isMute       是否免打扰
+     * @param hasNewMsg    是否有未读消息 ，当房间为免打扰房间时newReadCount不计数，此时通过hasNewMsg判断
+     */
+    public void updateRoomItem(String roomId, int newReadCount, String lastMsg, LocalDateTime time, Boolean isMute, Boolean hasNewMsg) {
+        updateRoomItem(roomId, newReadCount, lastMsg, time, isMute, hasNewMsg, false);
+
+    }
+    /**
+     * 更新指定房间信息
      * @param roomId 房间id
      * @param newReadCount 新消息数量
      * @param lastMsg 最近的一条消息
@@ -323,7 +339,7 @@ public class RoomsPanel extends ParentAvailablePanel {
      * @param isMute 是否免打扰
      * @param hasNewMsg 是否有未读消息 ，当房间为免打扰房间时newReadCount不计数，此时通过hasNewMsg判断
      */
-    public void updateRoomItem(String roomId, int newReadCount, String lastMsg, LocalDateTime time, Boolean isMute, Boolean hasNewMsg) {
+    public void updateRoomItem(String roomId, int newReadCount, String lastMsg, LocalDateTime time, Boolean isMute, Boolean hasNewMsg,Boolean atMe) {
         if (roomId == null || roomId.isEmpty()) {
             notifyDataSetChanged(true);
             return;
@@ -348,9 +364,12 @@ public class RoomsPanel extends ParentAvailablePanel {
                  if(hasNewMsg!=null){
                      item.setHasNewMsg(hasNewMsg);
                  }
+                if (atMe != null) {
+                    item.setAtMe(atMe);
+                }
                 //最新消息移到首行
                 if (i != 0) {
-                    roomItemList.add(0, roomItemList.remove(i));
+                    roomItemList.addFirst(roomItemList.remove(i));
                     //重绘整个列表
                     roomItemsListView.notifyDataSetChanged(false);
 
@@ -412,6 +431,7 @@ public class RoomsPanel extends ParentAvailablePanel {
         holder.setBackground(color);
         holder.nameBrief.setBackground(color);
         holder.timeUnread.setBackground(color);
+        holder.atAndBrief.setBackground(color);
     }
 
     public void scrollPoint(int point){
