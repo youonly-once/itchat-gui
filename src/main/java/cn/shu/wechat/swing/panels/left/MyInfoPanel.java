@@ -48,7 +48,7 @@ public class MyInfoPanel extends ParentAvailablePanel {
         Contacts userSelf = Core.getUserSelf();
 
         avatar = new JLabel();
-        new HeadLoadingSwingWorker(avatar, userSelf).loadAvatar();
+        new HeadLoadingSwingWorker(avatar, userSelf.getUsername()).loadAvatar();
 
         avatar.setPreferredSize(new Dimension(50, 50));
         avatar.setCursor(new Cursor(Cursor.HAND_CURSOR));

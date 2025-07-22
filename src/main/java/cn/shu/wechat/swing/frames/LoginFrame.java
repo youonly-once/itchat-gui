@@ -366,6 +366,9 @@ public final class LoginFrame extends JFrame {
                                 .filter(Objects::nonNull)
                                 .map(e -> new RoomItem(e, "", 0, false))
                                 .collect(Collectors.toList());
+                        for (RoomItem roomItem : roomItems) {
+                            Core.getRecentContacts().add(roomItem.getRoomId());
+                        }
                         RoomsPanel.getContext().addRoom(roomItems);
                     });
                     ContactsPanel.getContext().notifyDataSetChanged();
