@@ -56,15 +56,6 @@ public class MessageEditorEmojiPanel extends JPanel {
         };
 
 
-//        String iconPath = "/emoji/wechat_emoji/";
-//        for (int i = 0; i < EmojiUtil.wechatEmojiList.size(); i++) {
-//            String code = EmojiUtil.wechatEmojiList.get(i);
-//            ImageIcon icon = IconUtil.getIcon(this, iconPath + (2*i + 4) + ".png",22,22);
-//            JLabel panel = new MessageEditorExpressionItemLabel(code, icon, code);
-//            panel.addMouseListener(listener);
-//            add(panel);
-//        }
-
         SwingWorker<Void, JLabel> worker = new SwingWorker<Void, JLabel>() {
             @Override
             protected Void doInBackground() {

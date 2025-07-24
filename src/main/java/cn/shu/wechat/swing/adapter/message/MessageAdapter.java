@@ -69,7 +69,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     private final RCListView listView;
     private final AttachmentIconHelper attachmentIconHelper = new AttachmentIconHelper();
     private final ImageCache imageCache;
-
+    private Player player = null;
     private final MessagePopupMenu popupMenu = new MessagePopupMenu();
     private final ChatMessagePanel parent;
 
@@ -650,6 +650,13 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
     }
 
+    private void closePlayer(MessageVoiceViewHolder holder) {
+        if (player != null) {
+            player.close();
+            player = null;
+            holder.durationText.stop();
+        }
+    }
     /**
      * 处理语音消息
      *
@@ -673,21 +680,12 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
         //播放语音
         holder.messageBubble.addMouseListener(new MessageMouseListener() {
-            private void closePlayer() {
-                if (player != null) {
-                    player.close();
-                    player = null;
-                    holder.durationText.stop();
-                }
-            }
-
-            private Player player = null;
 
             @Override
             public void mouseReleased(MouseEvent e) {
 
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    closePlayer();
+                    closePlayer(holder);
                     String voicePath = item.getFilePath();
                     File file = new File(voicePath);
                     if (!file.exists()) {
@@ -702,6 +700,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                         RCProgressBar progressBar = holder.progressBar;
                         progressBar.setVisible(true);
                         progressBar.setMaximum(Integer.parseInt( String.valueOf(item.getVoiceLength())));
+
                         //刷新进度条
                         new SwingWorker<Object, Integer>() {
                             @Override
@@ -727,14 +726,13 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
                             @Override
                             protected void process(List<Integer> chunks) {
-                                Integer integer = chunks.get(chunks.size() - 1);
+                                Integer integer = chunks.getLast();
                                 progressBar.setValue(integer);
-                                super.process(chunks);
                             }
 
                             @Override
                             protected void done() {
-                                closePlayer();
+                                closePlayer(holder);
                                 progressBar.setValue(0);
                                 progressBar.setVisible(false);
                             }
