@@ -211,15 +211,14 @@ public class MsgCenter {
         }
         //################聊天面板消息处理###########3333
         //未读消息数量
-        Integer msgUnReadCount = null;
+        int msgUnReadCount = 1;
         //消息预览文本
         String previewLastMsg = "";
-        //是否播放音乐
-        boolean isPlaySound;
+
         //是否闪烁任务栏图标
-        boolean isFlashingTray;
+        boolean isFlashingTray =true;
         //是否消息有新消息
-        Boolean newMsgLabel = null;
+        boolean newMsgLabel = true;
         //新增消息列表
         String userName = msg.getFromUserName();
 
@@ -228,39 +227,22 @@ public class MsgCenter {
             if (Core.getUserName().equals(msg.getMemberName())) {
                 //自己在群里发的消息
                 msgUnReadCount = 0;
-                isPlaySound = false;
                 isFlashingTray = false;
                 newMsgLabel  = false;
-                previewLastMsg = Core.getNickName() + ": "+message.getPlaintext();
+                previewLastMsg = "我: "+message.getPlaintext();
             } else {
                 //其他人在群里发的消息
                 if (isCurrRoom(message)) {
                     msgUnReadCount = 0;
-                    isPlaySound = true;
-                    isFlashingTray = false;
+                    isFlashingTray = !MainFrame.getContext().isActive();
                     newMsgLabel  = false;
-                } else if(ContactsTools.isMute(contacts)){
-                    msgUnReadCount = 0;
-                    isPlaySound = false;
-                    isFlashingTray = false;
-                    newMsgLabel = true;
-                } else{
-                    isPlaySound = true;
-                    isFlashingTray = true;
-                    msgUnReadCount = 1;
-                    newMsgLabel = true;
-                }
-                if (isCurrRoom(message) && ContactsTools.isMute(contacts)){
-                    isPlaySound = false;
                 }
                 previewLastMsg = ContactsTools.getMemberDisplayNameOfGroup(userName, msg.getMemberName()) + ": "+message.getPlaintext();
             }
         } else{
             //自己的消息，默认已读
             if (userName.equals(Core.getUserName())) {
-
                 msgUnReadCount = 0;
-                isPlaySound = false;
                 isFlashingTray = false;
                 newMsgLabel =false;
                 previewLastMsg =  message.getPlaintext();
@@ -270,32 +252,23 @@ public class MsgCenter {
                 //其他人的消息
                 if (isCurrRoom(message)) {
                     msgUnReadCount = 0;
-                    isPlaySound = true;
-                    isFlashingTray = false;
+                    isFlashingTray = !MainFrame.getContext().isActive();
                     newMsgLabel  = false;
-                } else if(ContactsTools.isMute(contacts)){
-                    msgUnReadCount = 0;
-                    isPlaySound = false;
-                    isFlashingTray = false;
-                    newMsgLabel = true;
-                } else{
-                    isPlaySound = true;
-                    isFlashingTray = true;
-                    msgUnReadCount = 1;
-                    newMsgLabel = true;
-                }
-                if (isCurrRoom(message) && ContactsTools.isMute(contacts)){
-                    isPlaySound = false;
                 }
                 previewLastMsg =  message.getPlaintext();
             }
 
         }
+        if (Boolean.TRUE.equals(ChatUtil.isAtMe(userName, previewLastMsg))){
+            isFlashingTray = true;
+        }
+        if(ContactsTools.isMute(contacts)){
+            msgUnReadCount = 0;
+            isFlashingTray = false;
+        }
 
         if (isFlashingTray){
             MainFrame.getContext().setTrayFlashing(true);
-        }
-        if (isPlaySound){
             MainFrame.getContext().playMessageSound();
         }
         RoomsPanel.updateUnreadTotalCount(msgUnReadCount);

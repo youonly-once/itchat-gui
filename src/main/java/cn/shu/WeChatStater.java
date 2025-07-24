@@ -83,7 +83,7 @@ public class WeChatStater {
         }
 
         context = new SpringApplicationBuilder(WeChatStater.class)
-                       .headless(false)
+                       .headless(true)
                         .run();
         LoginFrame loginFrame = new LoginFrame();
         loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

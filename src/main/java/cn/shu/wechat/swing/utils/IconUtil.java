@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.utils;
 
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.concurrent.Computable;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -12,6 +13,8 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 图标缓存工具类
@@ -24,18 +27,9 @@ public class IconUtil {
      * 图标缓存
      * key：图标名相对路径
      */
-    private static final Map<String, ImageIcon> ICON_CACHE =
-            Collections.synchronizedMap(new LinkedHashMap<String, ImageIcon>(128, 0.75f, true) {
-                protected boolean removeEldestEntry(Map.Entry<String, ImageIcon> eldest) {
-                    return size() > 500; // 最多缓存 100 张图标
-                }
-            });
-    private static final Map<String, BufferedImage> BUFFERED_IMAGE_CACHE =
-            Collections.synchronizedMap(new LinkedHashMap<String, BufferedImage>(128, 0.75f, true) {
-                protected boolean removeEldestEntry(Map.Entry<String, BufferedImage> eldest) {
-                    return size() > 20; // 最多缓存 10 张图标
-                }
-            });
+    private static final Map<String, CompletableFuture<ImageIcon>> ICON_CACHE = new ConcurrentHashMap<>();
+
+    private static final Map<String, CompletableFuture<BufferedImage>> BUFFERED_IMAGE_CACHE = new ConcurrentHashMap<>();
 
     public static ImageIcon getIcon(Object context, String path) {
         return getIcon(context, path, -1, -1);
@@ -46,80 +40,109 @@ public class IconUtil {
     }
 
     public static ImageIcon getIcon(Object context, String path, int width, int height) {
-        String key = path ;
-        if (width > 0 && height > 0) {
-             key = path + width + height;
+        String key = width > 0 && height > 0 ? String.format("%s@%dx%d", path, width, height) : path;
+
+        try {
+            CompletableFuture<ImageIcon> future = ICON_CACHE.computeIfAbsent(key, e -> {
+
+                return CompletableFuture.supplyAsync(() -> {
+
+                    URL url = context.getClass().getResource(path);
+                    if (url == null) {
+                        log.error("Icon resource not found: {}", path);
+                        return null;
+                    }
+                    ImageIcon rawIcon = new ImageIcon(url);
+
+                    if (width > 0 && height > 0) {
+                        Image scaledImage = rawIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+                        rawIcon = new ImageIcon(scaledImage);
+                    }
+                    return rawIcon;
+                }).whenComplete((result, ex) -> {
+                    // 结果为null或发生异常时，从缓存移除，允许后续重试
+                    if (ex != null) {
+                        log.error("图标缓存获取失败：{}", key, ex);
+                        ICON_CACHE.remove(key);
+                    }else if (result == null) {
+                        log.error("图标缓存获取失败，result is null：{}", key);
+                        ICON_CACHE.remove(key);
+                    }
+                });
+
+            });
+            return future.get();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            ICON_CACHE.remove(key);
+            return null;
         }
-        ImageIcon rawIcon = ICON_CACHE.get(key);
-        if (rawIcon == null) {
-            URL url = context.getClass().getResource(path);
-            if (url == null) {
-                return null;
-            }
-            rawIcon = new ImageIcon(url);
 
-            if (width > 0 && height > 0) {
-                // 返回一个新的缩放副本，不影响缓存
-                Image scaledImage = rawIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
-                return new ImageIcon(scaledImage);
-            }
-
-            ICON_CACHE.put(key, rawIcon);
-        }
-
-        return rawIcon;
     }
 
     public static BufferedImage getBufferedImage(Object context, String path) {
-        BufferedImage bufferedImage = BUFFERED_IMAGE_CACHE.get(path);
-        if (bufferedImage == null) {
-            URL url = context.getClass().getResource(path);
-            if (url == null) {
-                return null;
-            }
-            try {
-                bufferedImage = ImageIO.read(url);
-                BUFFERED_IMAGE_CACHE.put(path, bufferedImage);
-            } catch (IOException e) {
-                log.error(e.getMessage());
-            }
 
+
+        try {
+            CompletableFuture<BufferedImage> future = BUFFERED_IMAGE_CACHE.computeIfAbsent(path, key -> CompletableFuture.supplyAsync(() -> {
+
+                URL url = context.getClass().getResource(path);
+                if (url == null) {
+                    log.error("Icon resource not found: {}", path);
+                    return null;
+                }
+                try {
+                    return ImageIO.read(url);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }).whenComplete((result, ex) -> {
+                // 结果为null或发生异常时，从缓存移除，允许后续重试
+                if (ex != null) {
+                    log.error("图标缓存获取失败：{}", path, ex);
+                    BUFFERED_IMAGE_CACHE.remove(path);
+                }else if (result == null) {
+                    log.error("图标缓存获取失败，result is null：{}", path);
+                    BUFFERED_IMAGE_CACHE.remove(path);
+                }
+            }));
+            return future.get();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            BUFFERED_IMAGE_CACHE.remove(path);
+            return null;
         }
-        return bufferedImage;
+
     }
 
     public static BufferedImage getBufferedImage(String path) {
-        BufferedImage bufferedImage = BUFFERED_IMAGE_CACHE.get(path);
-        if (bufferedImage !=null){
-            return bufferedImage;
-        }
+
+
         try {
-            bufferedImage = ImageIO.read(new File(path));
-            if (bufferedImage != null) {
-                BUFFERED_IMAGE_CACHE.put(path, bufferedImage);
-            }
-        } catch (IOException e) {
-            log.error(e.getMessage());
+            CompletableFuture<BufferedImage> future = BUFFERED_IMAGE_CACHE.computeIfAbsent(path, key -> CompletableFuture.supplyAsync(() -> {
+
+                try {
+                    return ImageIO.read(new File(path));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }).whenComplete((result, ex) -> {
+                // 结果为null或发生异常时，从缓存移除，允许后续重试
+                if (ex != null) {
+                    log.error("图标缓存获取失败：{}", path, ex);
+                    BUFFERED_IMAGE_CACHE.remove(path);
+                }else if (result == null) {
+                    log.error("图标缓存获取失败，result is null：{}", path);
+                    BUFFERED_IMAGE_CACHE.remove(path);
+                }
+            }));
+            return future.get();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            BUFFERED_IMAGE_CACHE.remove(path);
+            return null;
         }
 
-        return bufferedImage;
-    }
-
-    public static BufferedImage getBufferedImageByUrl(String url) {
-        BufferedImage bufferedImage = BUFFERED_IMAGE_CACHE.get(url);
-        if (bufferedImage !=null){
-            return bufferedImage;
-        }
-        try {
-            bufferedImage = ImageIO.read(new URL(url));
-            if (bufferedImage != null) {
-                BUFFERED_IMAGE_CACHE.put(url, bufferedImage);
-            }
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-
-        return bufferedImage;
     }
 
 

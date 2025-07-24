@@ -395,7 +395,7 @@ public final class LoginFrame extends JFrame {
 
 
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
             showMessage(e.getMessage());
         }
     }

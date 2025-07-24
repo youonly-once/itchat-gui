@@ -21,7 +21,7 @@ public class MessageEditorExpressionPopup extends JPopupMenu {
 
     private JPanel emojiTabPanel;
     private JLabel emojiTabLabel;
-    private static final MessageEditorEmojiPanel messageEditorEmojiPanel = new MessageEditorEmojiPanel();
+    private MessageEditorEmojiPanel messageEditorEmojiPanel;
 
 
     private CardLayout cardLayout;
@@ -47,6 +47,10 @@ public class MessageEditorExpressionPopup extends JPopupMenu {
         emojiTabPanel = new JPanel();
         emojiTabLabel = new JLabel();
         emojiTabLabel.setIcon(IconUtil.getIcon(this, "/image/smile.png", 23, 23));
+
+        //if (messageEditorEmojiPanel == null) {
+            messageEditorEmojiPanel = new MessageEditorEmojiPanel();
+       // }
 
 
         setBackground(Colors.WINDOW_BACKGROUND);

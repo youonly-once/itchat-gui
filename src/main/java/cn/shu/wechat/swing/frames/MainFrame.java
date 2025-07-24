@@ -13,6 +13,8 @@ import cn.shu.wechat.swing.utils.OSUtil;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.SleepUtils;
 import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.sound.sampled.*;
 import javax.swing.*;
@@ -24,6 +26,7 @@ import java.util.concurrent.locks.LockSupport;
 /**
  * Created by 舒新胜 on 17-5-28.
  */
+@Log4j2
 @Getter
 public class MainFrame extends JFrame {
     public final static int DEFAULT_WIDTH = 900;
@@ -83,7 +86,7 @@ public class MainFrame extends JFrame {
         initComponents();
         initView();
         initResource();
-        //initTrayFlashingThread();
+        initTrayFlashingThread();
     }
 
     private void initResource() {
@@ -91,7 +94,7 @@ public class MainFrame extends JFrame {
             try {
                 initTray();
             } catch (AWTException e) {
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             }
             initMessageSound();
         });
@@ -146,7 +149,7 @@ public class MainFrame extends JFrame {
             sourceDataLine.close();
             audioInputStream.close();
         } catch (Exception e) {
-            e.printStackTrace();
+           log.error(e.getMessage(), e);
         }
 
     }
@@ -247,22 +250,25 @@ public class MainFrame extends JFrame {
      * 初始化任务栏图标闪烁 线程
      */
     private void initTrayFlashingThread() {
-
-
-        ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
-            @Override
-            public void run() {
-                trayFlashingThread = Thread.currentThread();
-                trayFlashingThread.setName("TrayFlashingThread");
-                while (true) {
+        ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
+            trayFlashingThread = Thread.currentThread();
+            trayFlashingThread.setName("TrayFlashingThread");
+            while (true) {
+                try {
                     if (!trayFlashing) {
                         LockSupport.park();
+                        // 线程被唤醒后继续循环
+                        continue;
                     }
-                    trayIcon.setImage(emptyTrayIcon);
+                    // 在 EDT 安全更新托盘图标为“空”
+                    SwingUtilities.invokeLater(() -> trayIcon.setImage(emptyTrayIcon));
                     SleepUtils.sleep(500);
 
-                    trayIcon.setImage(normalTrayIcon);
+                    // 在 EDT 安全更新托盘图标为“正常”
+                    SwingUtilities.invokeLater(() -> trayIcon.setImage(normalTrayIcon));
                     SleepUtils.sleep(500);
+                }catch (Exception e){
+                    log.error(e.getMessage(),e);
                 }
             }
         });
@@ -272,12 +278,24 @@ public class MainFrame extends JFrame {
      * 设置任务栏图标闪动
      */
     public synchronized void setTrayFlashing(boolean flashing) {
-        SwingUtilities.invokeLater(() -> {
-            if (Taskbar.isTaskbarSupported() && Taskbar.getTaskbar().isSupported(Taskbar.Feature.USER_ATTENTION)) {
-                Taskbar.getTaskbar().requestUserAttention(flashing, false);
-            }
-        });
 
+        trayFlashing = flashing;
+
+        if (trayFlashing) {
+            //唤醒线程 闪烁
+            if (trayFlashingThread !=null) {
+                LockSupport.unpark(trayFlashingThread);
+            }
+
+            SwingUtilities.invokeLater(() -> {
+                if (SystemTray.isSupported()) {
+                    //任务栏提示
+                    trayIcon.displayMessage("新消息", "您有一条新消息，请查收", TrayIcon.MessageType.INFO);
+                }
+            });
+
+
+        }
     }
 
 
@@ -315,7 +333,7 @@ public class MainFrame extends JFrame {
             try {
                 UIManager.setLookAndFeel(windows);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error(e.getMessage(),e);
             }
         }
 
@@ -323,7 +341,6 @@ public class MainFrame extends JFrame {
 
 
         add(leftPanel, BorderLayout.WEST);
-        //add(rightPanel, BorderLayout.CENTER);
         add(rightPanel, BorderLayout.CENTER);
         setLocationRelativeTo(null);
     }

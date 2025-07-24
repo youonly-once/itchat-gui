@@ -565,7 +565,7 @@ public class LoginServiceImpl implements LoginService {
 
             contacts = Core.getMemberMap().get(userName);
             if (contacts != null ) {
-                log.error("获取成功：{},{}", userName, contacts);
+                log.info("获取成功：{},{}", userName, contacts);
             }
         } else if (ContactsTools.isRoomContact(userName)
                 && StringUtils.isNotEmpty(msg.getMemberName())) {
@@ -591,10 +591,10 @@ public class LoginServiceImpl implements LoginService {
                 DownloadManager.submitAwait(objectDownloadTask);
                 contacts =  Core.getMemberMap().get(userName);
                 if (contacts != null && ContactsTools.getMemberOfGroup(userName,msg.getMemberName())!=null) {
-                    log.error("获取成功：{},{}", userName, contacts);
+                    log.info("获取成功：{},{}", userName, contacts);
                 }
                 if (ContactsTools.getMemberOfGroup(userName,msg.getMemberName())!=null) {
-                    log.error("成员获取成功：{},{}", userName, contacts);
+                    log.info("成员获取成功：{},{}", userName, contacts);
                 }
             }
         }

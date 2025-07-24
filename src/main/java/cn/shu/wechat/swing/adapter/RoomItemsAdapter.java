@@ -80,7 +80,10 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
         new HeadLoadingSwingWorker(viewHolder.avatar,roomItem.getRoomId()).loadAvatar();
 
         //如果没有点开房间查看消息 即使新消息来了 也要展示有人@我
-        viewHolder.atMe.setVisible(roomItem.isAtMe());
+        if (roomItem.getAtMe()!=null){
+            viewHolder.atMe.setVisible(roomItem.getAtMe());
+        }
+
 
 
         // 消息

@@ -87,7 +87,7 @@ public class DownloadManager {
                 }
                 try {
 
-                    log.error("getFuture等待中：{}", existing);
+                    log.error("轮询等待中：{}", existing);
                     return existing.getFuture().get();
                 } catch (InterruptedException | ExecutionException e) {
                     log.error(e.getMessage());

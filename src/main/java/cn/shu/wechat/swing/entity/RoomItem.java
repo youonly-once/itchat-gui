@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class RoomItem implements Comparable<RoomItem> {
 
-    private boolean atMe;
+    private Boolean atMe;
 
     /**
      * 当前房间对应的联系人

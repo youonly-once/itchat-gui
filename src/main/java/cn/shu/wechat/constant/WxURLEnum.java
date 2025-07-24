@@ -38,7 +38,9 @@ public enum WxURLEnum {
     WEB_WX_SEND_EMOTION_MSG("%s/webwxsendemoticon?fun=sys", "表情消息"),
     WEB_WX_SEND_APP_MSG("%s/webwxsendappmsg?fun=async&f=json&pass_ticket=%s", "APP消息"),
     WEB_WX_SEND_NOTIFY_MSG("%s/webwxstatusnotify?lang=zh_CN", "状态通知"),
-    WEB_WX_CHECK_UPLOAD_MSG("https://wx2.qq.com/cgi-bin/mmwebwx-bin/webwxcheckupload?lang=zh_CN&pass_ticket=%s","预上传检查");
+    WEB_WX_CHECK_UPLOAD_MSG("https://wx2.qq.com/cgi-bin/mmwebwx-bin/webwxcheckupload?lang=zh_CN&pass_ticket=%s","预上传检查"),
+    WEB_WX_UPDATE_CHAT_ROOM("https://wx2.qq.com/cgi-bin/mmwebwx-bin/webwxupdatechatroom?fun=addmember","预上传检查");
+
 
     private String url;
     private String msg;
