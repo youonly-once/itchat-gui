@@ -31,13 +31,16 @@ import cn.shu.wechat.swing.frames.ImageViewerFrame;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.helper.AttachmentIconHelper;
 import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
+import cn.shu.wechat.swing.media.Mp3Player;
 import cn.shu.wechat.swing.panels.chat.ChatMessagePanel;
 import cn.shu.wechat.swing.utils.*;
 import cn.shu.wechat.swing.worker.HeadLoadingSwingWorker;
 import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.task.DownloadTask;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
+import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.Player;
+import javazoom.jl.player.advanced.PlaybackEvent;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
@@ -47,10 +50,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -69,7 +69,9 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     private final RCListView listView;
     private final AttachmentIconHelper attachmentIconHelper = new AttachmentIconHelper();
     private final ImageCache imageCache;
-    private Player player = null;
+    private Mp3Player player = new Mp3Player();
+    private volatile String currVoice = null;
+    private volatile boolean voicePlay;
     private final MessagePopupMenu popupMenu = new MessagePopupMenu();
     private final ChatMessagePanel parent;
 
@@ -650,13 +652,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
     }
 
-    private void closePlayer(MessageVoiceViewHolder holder) {
-        if (player != null) {
-            player.close();
-            player = null;
-            holder.durationText.stop();
-        }
-    }
     /**
      * 处理语音消息
      *
@@ -685,7 +680,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             public void mouseReleased(MouseEvent e) {
 
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    closePlayer(holder);
+
                     String voicePath = item.getFilePath();
                     File file = new File(voicePath);
                     if (!file.exists()) {
@@ -696,49 +691,41 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                             JOptionPane.showMessageDialog(null, "下载失败", "打开失败", JOptionPane.ERROR_MESSAGE);
                         }
                     } else {
-                        holder.removeUnreadPoint();
-                        RCProgressBar progressBar = holder.progressBar;
-                        progressBar.setVisible(true);
-                        progressBar.setMaximum(Integer.parseInt( String.valueOf(item.getVoiceLength())));
+                        try {
+                            player.play(voicePath, new Mp3Player.VoicePlaybackListener() {
+                                @Override
+                                public void playbackPosition(int position) {
+                                    SwingUtilities.invokeLater(() -> {
+                                        holder.progressBar.setValue(position);
+                                    });
+                                }
 
-                        //刷新进度条
-                        new SwingWorker<Object, Integer>() {
-                            @Override
-                            protected Object doInBackground() throws Exception {
-                                player = new Player(new BufferedInputStream(new FileInputStream(file)));
-                                //新线程更新进度条
-                                ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        while (player != null) {
-                                            if (player.isComplete()) {
-                                                publish(Integer.parseInt( String.valueOf(item.getVoiceLength())));
-                                                break;
-                                            } else {
-                                                publish(player.getPosition());
-                                            }
-                                        }
-                                    }
-                                });
-                                player.play();
-                                return null;
-                            }
+                                @Override
+                                public void playbackStarted(PlaybackEvent evt) {
+                                    SwingUtilities.invokeLater(() -> {
+                                        holder.removeUnreadPoint();
+                                        RCProgressBar progressBar = holder.progressBar;
+                                        progressBar.setVisible(true);
+                                        progressBar.setMaximum(Integer.parseInt( String.valueOf(item.getVoiceLength())));
+                                        holder.durationText.start();
+                                    });
 
-                            @Override
-                            protected void process(List<Integer> chunks) {
-                                Integer integer = chunks.getLast();
-                                progressBar.setValue(integer);
-                            }
+                                }
 
-                            @Override
-                            protected void done() {
-                                closePlayer(holder);
-                                progressBar.setValue(0);
-                                progressBar.setVisible(false);
-                            }
-                        }.execute();
-                        //倒计时
-                        holder.durationText.start();
+                                @Override
+                                public void playbackFinished(PlaybackEvent evt) {
+                                    SwingUtilities.invokeLater(() -> {
+                                        holder.progressBar.setValue(Math.toIntExact(item.getVoiceLength()));
+                                        holder.durationText.stop();
+                                        holder.progressBar.setValue(0);
+                                        holder.progressBar.setVisible(false);
+                                    });
+                                }
+                            });
+                        } catch (JavaLayerException | FileNotFoundException ex) {
+                            log.error(ex.getMessage(),e);
+                            JOptionPane.showMessageDialog(null, ex.getMessage(), "播放失败", JOptionPane.ERROR_MESSAGE);
+                        }
 
                     }
 
