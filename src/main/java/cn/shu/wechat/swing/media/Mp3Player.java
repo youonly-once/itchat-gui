@@ -2,92 +2,104 @@ package cn.shu.wechat.swing.media;
 
 import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.Player;
-import javazoom.jl.player.advanced.AdvancedPlayer;
-import javazoom.jl.player.advanced.PlaybackEvent;
 import javazoom.jl.player.advanced.PlaybackListener;
 import lombok.extern.log4j.Log4j2;
-import lombok.extern.slf4j.Slf4j;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 @Log4j2
 public class Mp3Player  {
-    private volatile Player advancedPlayer;
-    private volatile String filePath;
-    private volatile VoicePlaybackListener listener;
-    private volatile Thread playerThread;
-
+    private final ScheduledExecutorService executor =
+            Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual().factory());
+    private Player advancedPlayer;
+    private String filePath;
+    private VoicePlaybackListener listener;
+    private Thread playerThread;
+    private volatile boolean stopped;
+    private volatile ScheduledFuture<?> monitorFuture;
 
     public void play(String filePath,VoicePlaybackListener listener) throws JavaLayerException, FileNotFoundException {
+
         if (filePath .equals(this.filePath)) {
             //点击的正在播放的语音 则停止
             if (advancedPlayer != null) {
                 advancedPlayer.close();
             }
-            if (playerThread!=null){
-                playerThread.interrupt();
-            }
-            listener.playbackFinished(null);
             return;
         }
+
+        //停掉正在播放的线程
         if (advancedPlayer != null) {
             advancedPlayer.close();
-            if (playerThread!=null){
-                playerThread.interrupt();
+        }
+        //等待之前的播放停止
+        // 等待之前的播放线程停止（非 busy 等待）
+        if (playerThread != null) {
+            try {
+                playerThread.join(); // 优于 sleep + while
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.warn("Interrupted while waiting for previous player thread to finish.");
             }
         }
 
-        clear();
         // 播放完自动清除状态
-        listener.playbackFinished(null);
         this.listener = listener;
         this.filePath = filePath;
-        FileInputStream fis = new FileInputStream(filePath);
-        BufferedInputStream bis = new BufferedInputStream(fis);
-        advancedPlayer = new Player(bis);
-        playerThread = new Thread(() -> {
-            try (fis; bis) {
-                listener.playbackStarted(null);
+
+
+        playerThread = Thread.ofVirtual().start(() -> {
+
+            try (FileInputStream fis = new FileInputStream(filePath); BufferedInputStream bis = new BufferedInputStream(fis)) {
+                advancedPlayer = new Player(bis);
+                listener.playbackStarted();
+                stopped = false;
+                //确保当前线程启动后再启动监听线程
+                // 启动监听任务：播放位置轮询
+
+                monitorFuture = executor.scheduleAtFixedRate(() -> {
+                    if (stopped || advancedPlayer == null || advancedPlayer.isComplete()) {
+                        if (monitorFuture != null && !monitorFuture.isCancelled()) {
+                            monitorFuture.cancel(true);
+                        }
+                        return;
+                    }
+                    listener.playbackPosition(advancedPlayer.getPosition());
+                }, 0, 100, TimeUnit.MILLISECONDS);
+
                 advancedPlayer.play();
 
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             } finally {
                 clear();
-                // 播放完自动清除状态
-                listener.playbackFinished(null);
             }
         });
-         new Thread(() -> {
-             while (playerThread!=null && playerThread.isAlive()) {
-                if (advancedPlayer != null && !advancedPlayer.isComplete()){
-                    listener.playbackPosition(advancedPlayer.getPosition());
-                }else{
-                     listener.playbackFinished(null);
-                }
-             }
-        }).start();
-
-        playerThread.start();
 
     }
 
-    public void setPlayBackListener(VoicePlaybackListener listener) {
-
-        this.listener = listener;
-    }
-    public void stop() {
-
-    }
     private void clear() {
-        advancedPlayer = null;
-        playerThread = null;
+        stopped = true;
+        if (this.listener != null) {
+            this.listener.playbackFinished();
+        }
         filePath = null;
+        playerThread = null;
+        advancedPlayer = null;
+        listener = null;
     }
 
     public abstract static class VoicePlaybackListener extends PlaybackListener {
-        public void playbackPosition(int position) {
+        public abstract void playbackPosition(int position);
 
-        }
+        public abstract void playbackStarted();
+
+        public abstract void playbackFinished();
     }
 }

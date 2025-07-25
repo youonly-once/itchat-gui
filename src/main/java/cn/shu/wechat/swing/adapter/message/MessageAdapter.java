@@ -37,10 +37,7 @@ import cn.shu.wechat.swing.utils.*;
 import cn.shu.wechat.swing.worker.HeadLoadingSwingWorker;
 import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.task.DownloadTask;
-import cn.shu.wechat.utils.ExecutorServiceUtil;
 import javazoom.jl.decoder.JavaLayerException;
-import javazoom.jl.player.Player;
-import javazoom.jl.player.advanced.PlaybackEvent;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
@@ -50,7 +47,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -701,7 +700,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                                 }
 
                                 @Override
-                                public void playbackStarted(PlaybackEvent evt) {
+                                public void playbackStarted() {
                                     SwingUtilities.invokeLater(() -> {
                                         holder.removeUnreadPoint();
                                         RCProgressBar progressBar = holder.progressBar;
@@ -713,7 +712,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                                 }
 
                                 @Override
-                                public void playbackFinished(PlaybackEvent evt) {
+                                public void playbackFinished() {
                                     SwingUtilities.invokeLater(() -> {
                                         holder.progressBar.setValue(Math.toIntExact(item.getVoiceLength()));
                                         holder.durationText.stop();
