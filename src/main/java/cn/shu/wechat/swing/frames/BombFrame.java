@@ -4,7 +4,6 @@ import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.constant.WxRespConstant;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.Message;
-import cn.shu.wechat.utils.DateUtils;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.SleepUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -65,7 +64,7 @@ public class BombFrame extends JFrame {
                             Message message = Message.builder().isSend(false)
                                     .content(content.getText())
                                     .plaintext(content.getText())
-                                    .createTime(DateUtils.getCurrDateString(DateUtils.YYYY_MM_DD_HH_MM_SS))
+                                    .createTime(LocalDateTime.now())
                                     .fromUsername(Core.getUserName())
                                     .toUsername(roomId)
                                     .msgType(WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())

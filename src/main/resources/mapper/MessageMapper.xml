@@ -9,7 +9,7 @@
     <result column="msg_type" jdbcType="INTEGER" property="msgType" />
     <result column="app_msg_type" jdbcType="INTEGER" property="appMsgType" />
     <result column="msg_desc" jdbcType="VARCHAR" property="msgDesc" />
-    <result column="create_time" jdbcType="VARCHAR" property="createTime" />
+    <result column="create_time" jdbcType="VARCHAR" property="createTime" typeHandler="cn.shu.wechat.typehandler.LocalDateTimeTextHandler"/>
     <result column="plaintext" jdbcType="LONGVARCHAR" property="plaintext" />
     <result column="content" jdbcType="LONGVARCHAR" property="content" />
     <result column="file_path" jdbcType="VARCHAR" property="filePath" />
@@ -30,8 +30,29 @@
     <result column="img_height" jdbcType="INTEGER" property="imgHeight" />
     <result column="img_width" jdbcType="INTEGER" property="imgWidth" />
     <result column="voice_length" jdbcType="BIGINT" property="voiceLength" />
-    <result column="file_size" jdbcType="BIGINT" property="fileSize" />
-    <result column="file_name" jdbcType="BIGINT" property="fileName" />
+    <result column="deleted" jdbcType="BOOLEAN" property="deleted"/>
+    <result column="ori_content" jdbcType="VARCHAR" property="oriContent"/>
+    <result column="message_time" jdbcType="VARCHAR" property="messageTime" typeHandler="cn.shu.wechat.typehandler.LocalDateTimeTextHandler"/>
+    <result column="desc" jdbcType="VARCHAR" property="desc"/>
+    <result column="url" jdbcType="VARCHAR" property="url"/>
+    <result column="title" jdbcType="VARCHAR" property="title"/>
+    <result column="thumb_url" jdbcType="VARCHAR" property="thumbUrl"/>
+    <result column="source_icon_url" jdbcType="VARCHAR" property="sourceIconUrl"/>
+    <result column="source_name" jdbcType="VARCHAR" property="sourceName"/>
+    <result column="content_map" jdbcType="VARCHAR" property="contentMap" typeHandler="cn.shu.wechat.typehandler.MapToJsonTypeHandler"/>
+    <result column="is_revoke" jdbcType="BOOLEAN" property="isRevoke"/>
+    <result column="plain_name" jdbcType="VARCHAR" property="plainName"/>
+    <result column="progress" jdbcType="INTEGER" property="progress"/>
+    <result column="is_need_to_resend" jdbcType="BOOLEAN" property="isNeedToResend"/>
+    <result column="contacts_user_name" jdbcType="VARCHAR" property="contactsUserName"/>
+    <result column="contacts_nick_name" jdbcType="VARCHAR" property="contactsNickName"/>
+    <result column="contacts_id" jdbcType="VARCHAR" property="contactsId"/>
+    <result column="contacts_sex" jdbcType="TINYINT" property="contactsSex"/>
+    <result column="contacts_province" jdbcType="VARCHAR" property="contactsProvince"/>
+    <result column="contacts_city" jdbcType="VARCHAR" property="contactsCity"/>
+    <result column="contacts_head_img_url" jdbcType="VARCHAR" property="contactsHeadImgUrl"/>
+    <result column="contacts_ticket" jdbcType="VARCHAR" property="contactsTicket"/>
+
   </resultMap>
   <sql id="Example_Where_Clause">
     <!--@mbg.generated-->
@@ -95,11 +116,56 @@
   </sql>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, msg_id, msg_type, app_msg_type, msg_desc, create_time, plaintext, content, file_path, 
-    msg_json, from_username, from_remarkname, from_nickname, from_member_of_group_username, 
-    from_member_of_group_nickname, from_member_of_group_displayname, to_username, to_remarkname, 
-    to_nickname, is_send, slave_path, response, play_length, img_height, img_width, voice_length,file_size,
-    file_name
+    id,
+    msg_id,
+    msg_type,
+    app_msg_type,
+    msg_desc,
+    create_time,
+    plaintext,
+    content,
+    file_path,
+    msg_json,
+    from_username,
+    from_remarkname,
+    from_nickname,
+    from_member_of_group_username,
+    from_member_of_group_nickname,
+    from_member_of_group_displayname,
+    to_username,
+    to_remarkname,
+    to_nickname,
+    is_send,
+    slave_path,
+    response,
+    play_length,
+    img_height,
+    img_width,
+    voice_length,
+    file_size,
+    file_name,
+    ori_content,
+    deleted,
+    plain_name,
+    message_time,
+    is_revoke,
+    desc,
+    url,
+    title,
+    thumb_url,
+    source_icon_url,
+    source_name,
+    content_map,
+    progress,
+    is_need_to_resend,
+    contacts_user_name,
+    contacts_nick_name,
+    contacts_id,
+    contacts_sex,
+    contacts_province,
+    contacts_city,
+    contacts_head_img_url,
+    contacts_ticket
   </sql>
 
   <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
@@ -115,32 +181,32 @@
     where id = #{id,jdbcType=CHAR}
   </delete>
 
-  <insert id="insert" parameterType="cn.shu.wechat.entity.Message">
-    <!--@mbg.generated-->
-    insert into message (id, msg_id, msg_type, 
-      app_msg_type, msg_desc, create_time, 
-      plaintext, content, file_path, 
-      msg_json, from_username, from_remarkname, 
-      from_nickname, from_member_of_group_username, 
-      from_member_of_group_nickname, from_member_of_group_displayname, 
-      to_username, to_remarkname, to_nickname, 
-      is_send, slave_path, response, 
-      play_length, img_height, img_width, 
-      voice_length,file_size,file_name)
-    values (#{id,jdbcType=CHAR}, #{msgId,jdbcType=VARCHAR}, #{msgType,jdbcType=INTEGER}, 
-      #{appMsgType,jdbcType=INTEGER}, #{msgDesc,jdbcType=VARCHAR}, #{createTime,jdbcType=VARCHAR},
-      #{plaintext,jdbcType=LONGVARCHAR}, #{content,jdbcType=LONGVARCHAR}, #{filePath,jdbcType=VARCHAR}, 
-      #{msgJson,jdbcType=LONGVARCHAR}, #{fromUsername,jdbcType=VARCHAR}, #{fromRemarkname,jdbcType=VARCHAR}, 
-      #{fromNickname,jdbcType=VARCHAR}, #{fromMemberOfGroupUsername,jdbcType=VARCHAR}, 
-      #{fromMemberOfGroupNickname,jdbcType=VARCHAR}, #{fromMemberOfGroupDisplayname,jdbcType=VARCHAR}, 
-      #{toUsername,jdbcType=VARCHAR}, #{toRemarkname,jdbcType=VARCHAR}, #{toNickname,jdbcType=VARCHAR}, 
-      #{isSend,jdbcType=BOOLEAN}, #{slavePath,jdbcType=VARCHAR}, #{response,jdbcType=VARCHAR}, 
-      #{playLength,jdbcType=BIGINT}, #{imgHeight,jdbcType=INTEGER}, #{imgWidth,jdbcType=INTEGER}, 
-      #{voiceLength,jdbcType=BIGINT},
-      #{fileSize,jdbcType=BIGINT},
-      #{fileName,jdbcType=VARCHAR}
-      )
-  </insert>
+<!--  <insert id="insert" parameterType="cn.shu.wechat.entity.Message">-->
+<!--    &lt;!&ndash;@mbg.generated&ndash;&gt;-->
+<!--    insert into message (id, msg_id, msg_type, -->
+<!--      app_msg_type, msg_desc, create_time, -->
+<!--      plaintext, content, file_path, -->
+<!--      msg_json, from_username, from_remarkname, -->
+<!--      from_nickname, from_member_of_group_username, -->
+<!--      from_member_of_group_nickname, from_member_of_group_displayname, -->
+<!--      to_username, to_remarkname, to_nickname, -->
+<!--      is_send, slave_path, response, -->
+<!--      play_length, img_height, img_width, -->
+<!--      voice_length,file_size,file_name)-->
+<!--    values (#{id,jdbcType=CHAR}, #{msgId,jdbcType=VARCHAR}, #{msgType,jdbcType=INTEGER}, -->
+<!--      #{appMsgType,jdbcType=INTEGER}, #{msgDesc,jdbcType=VARCHAR}, #{createTime,jdbcType=VARCHAR},-->
+<!--      #{plaintext,jdbcType=LONGVARCHAR}, #{content,jdbcType=LONGVARCHAR}, #{filePath,jdbcType=VARCHAR}, -->
+<!--      #{msgJson,jdbcType=LONGVARCHAR}, #{fromUsername,jdbcType=VARCHAR}, #{fromRemarkname,jdbcType=VARCHAR}, -->
+<!--      #{fromNickname,jdbcType=VARCHAR}, #{fromMemberOfGroupUsername,jdbcType=VARCHAR}, -->
+<!--      #{fromMemberOfGroupNickname,jdbcType=VARCHAR}, #{fromMemberOfGroupDisplayname,jdbcType=VARCHAR}, -->
+<!--      #{toUsername,jdbcType=VARCHAR}, #{toRemarkname,jdbcType=VARCHAR}, #{toNickname,jdbcType=VARCHAR}, -->
+<!--      #{isSend,jdbcType=BOOLEAN}, #{slavePath,jdbcType=VARCHAR}, #{response,jdbcType=VARCHAR}, -->
+<!--      #{playLength,jdbcType=BIGINT}, #{imgHeight,jdbcType=INTEGER}, #{imgWidth,jdbcType=INTEGER}, -->
+<!--      #{voiceLength,jdbcType=BIGINT},-->
+<!--      #{fileSize,jdbcType=BIGINT},-->
+<!--      #{fileName,jdbcType=VARCHAR}-->
+<!--      )-->
+<!--  </insert>-->
   <insert id="insertSelective" parameterType="cn.shu.wechat.entity.Message">
     <!--@mbg.generated-->
     insert into message
@@ -676,24 +742,66 @@
   <insert id="batchInsert" parameterType="map">
     <!--@mbg.generated-->
     insert into message
-    (id, msg_id, msg_type, app_msg_type, msg_desc, create_time, plaintext, content, file_path, 
-      msg_json, from_username, from_remarkname, from_nickname, from_member_of_group_username, 
-      from_member_of_group_nickname, from_member_of_group_displayname, to_username, to_remarkname, 
-      to_nickname, is_send, slave_path, response, play_length, img_height, img_width, 
-      voice_length,file_size,file_name)
+    (id, msg_id, msg_type, app_msg_type, msg_desc, create_time, plaintext, content, file_path,
+    msg_json, from_username, from_remarkname, from_nickname, from_member_of_group_username,
+    from_member_of_group_nickname, from_member_of_group_displayname, to_username, to_remarkname,
+    to_nickname, is_send, slave_path, response, play_length, img_height, img_width,
+    voice_length, file_size, file_name, ori_content, deleted, plain_name, message_time,
+    is_revoke, desc, url, title, thumb_url, source_icon_url, source_name, content_map,
+    progress, is_need_to_resend, contacts_user_name, contacts_nick_name, contacts_id,
+    contacts_sex, contacts_province, contacts_city, contacts_head_img_url, contacts_ticket)
     values
     <foreach collection="list" item="item" separator=",">
-      (#{item.id,jdbcType=CHAR}, #{item.msgId,jdbcType=VARCHAR}, #{item.msgType,jdbcType=INTEGER}, 
-        #{item.appMsgType,jdbcType=INTEGER}, #{item.msgDesc,jdbcType=VARCHAR}, #{item.createTime,jdbcType=TIMESTAMP}, 
-        #{item.plaintext,jdbcType=LONGVARCHAR}, #{item.content,jdbcType=LONGVARCHAR}, #{item.filePath,jdbcType=VARCHAR}, 
-        #{item.msgJson,jdbcType=LONGVARCHAR}, #{item.fromUsername,jdbcType=VARCHAR}, #{item.fromRemarkname,jdbcType=VARCHAR}, 
-        #{item.fromNickname,jdbcType=VARCHAR}, #{item.fromMemberOfGroupUsername,jdbcType=VARCHAR}, 
-        #{item.fromMemberOfGroupNickname,jdbcType=VARCHAR}, #{item.fromMemberOfGroupDisplayname,jdbcType=VARCHAR}, 
-        #{item.toUsername,jdbcType=VARCHAR}, #{item.toRemarkname,jdbcType=VARCHAR}, #{item.toNickname,jdbcType=VARCHAR}, 
-        #{item.isSend,jdbcType=BOOLEAN}, #{item.slavePath,jdbcType=VARCHAR}, #{item.response,jdbcType=VARCHAR}, 
-        #{item.playLength,jdbcType=BIGINT}, #{item.imgHeight,jdbcType=INTEGER}, #{item.imgWidth,jdbcType=INTEGER}, 
-        #{item.voiceLength,jdbcType=BIGINT}, #{item.fileSize,jdbcType=BIGINT},
-          #{item.fileName,jdbcType=VARCHAR})
+      (       #{item.id, jdbcType=VARCHAR},
+      #{item.msgId, jdbcType=VARCHAR},
+      #{item.msgType, jdbcType=INTEGER},
+      #{item.appMsgType, jdbcType=INTEGER},
+      #{item.msgDesc, jdbcType=VARCHAR},
+      #{item.createTime, jdbcType=VARCHAR,typeHandler=cn.shu.wechat.typehandler.LocalDateTimeTextHandler}, <!-- SQLite TEXT 存储 -->
+      #{item.plaintext, jdbcType=LONGVARCHAR},
+      #{item.content, jdbcType=LONGVARCHAR},
+      #{item.filePath, jdbcType=VARCHAR},
+      #{item.msgJson, jdbcType=LONGVARCHAR},
+      #{item.fromUsername, jdbcType=VARCHAR},
+      #{item.fromRemarkname, jdbcType=VARCHAR},
+      #{item.fromNickname, jdbcType=VARCHAR},
+      #{item.fromMemberOfGroupUsername, jdbcType=VARCHAR},
+      #{item.fromMemberOfGroupNickname, jdbcType=VARCHAR},
+      #{item.fromMemberOfGroupDisplayname, jdbcType=VARCHAR},
+      #{item.toUsername, jdbcType=VARCHAR},
+      #{item.toRemarkname, jdbcType=VARCHAR},
+      #{item.toNickname, jdbcType=VARCHAR},
+      #{item.isSend, jdbcType=INTEGER},
+      #{item.slavePath, jdbcType=VARCHAR},
+      #{item.response, jdbcType=VARCHAR},
+      #{item.playLength, jdbcType=INTEGER},
+      #{item.imgHeight, jdbcType=INTEGER},
+      #{item.imgWidth, jdbcType=INTEGER},
+      #{item.voiceLength, jdbcType=INTEGER},
+      #{item.fileSize, jdbcType=INTEGER},
+      #{item.fileName, jdbcType=VARCHAR},
+      #{item.oriContent, jdbcType=VARCHAR},
+      #{item.deleted, jdbcType=INTEGER},
+      #{item.plainName, jdbcType=VARCHAR},
+      #{item.messageTime, jdbcType=VARCHAR,typeHandler=cn.shu.wechat.typehandler.LocalDateTimeTextHandler},
+      #{item.isRevoke, jdbcType=INTEGER},
+      #{item.desc, jdbcType=LONGVARCHAR},
+      #{item.url, jdbcType=VARCHAR},
+      #{item.title, jdbcType=VARCHAR},
+      #{item.thumbUrl, jdbcType=VARCHAR},
+      #{item.sourceIconUrl, jdbcType=VARCHAR},
+      #{item.sourceName, jdbcType=VARCHAR},
+      #{item.contentMap, jdbcType=LONGVARCHAR,typeHandler=cn.shu.wechat.typehandler.MapToJsonTypeHandler},
+      #{item.progress, jdbcType=INTEGER},
+      #{item.isNeedToResend, jdbcType=INTEGER},
+      #{item.contactsUserName, jdbcType=VARCHAR},
+      #{item.contactsNickName, jdbcType=VARCHAR},
+      #{item.contactsId, jdbcType=VARCHAR},
+      #{item.contactsSex, jdbcType=INTEGER},
+      #{item.contactsProvince, jdbcType=VARCHAR},
+      #{item.contactsCity, jdbcType=VARCHAR},
+      #{item.contactsHeadImgUrl, jdbcType=VARCHAR},
+      #{item.contactsTicket, jdbcType=VARCHAR})
     </foreach>
   </insert>
   <insert id="insertOrUpdate" parameterType="cn.shu.wechat.entity.Message">
@@ -1003,14 +1111,14 @@
       from message
       where from_username = #{userName,jdbcType=VARCHAR}
       or to_username = #{userName,jdbcType=VARCHAR}
- <!--     <if test="remarkName!=null and  remarkName!=''">
+      <if test="remarkName!=null and  remarkName!=''">
         or to_remarkname = #{remarkName,jdbcType=VARCHAR}
         or from_remarkname = #{remarkName,jdbcType=VARCHAR}
       </if>
       <if test="nickName!=null and  nickName!=''">
         or to_nickname = #{nickName,jdbcType=VARCHAR}
         or from_nickname = #{nickName,jdbcType=VARCHAR}
-      </if>-->
+      </if>
 
       order by create_time desc
       limit #{start},#{end}

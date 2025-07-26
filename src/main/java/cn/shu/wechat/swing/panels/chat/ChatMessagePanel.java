@@ -9,7 +9,6 @@ import cn.shu.wechat.dto.response.msg.send.WebWXSendMsgResponse;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.mapper.MessageMapper;
-import cn.shu.wechat.swing.adapter.ViewHolder;
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.adapter.message.MessageAdapter;
 import cn.shu.wechat.swing.adapter.message.app.MessageRightAttachmentViewHolder;
@@ -32,7 +31,6 @@ import cn.shu.wechat.swing.utils.FileCache;
 import cn.shu.wechat.swing.utils.ImageUtil;
 import cn.shu.wechat.swing.utils.MimeTypeUtil;
 import cn.shu.wechat.task.DownloadManager;
-import cn.shu.wechat.utils.DateUtils;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.MediaUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
@@ -109,7 +107,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
     /**
      * 每次加载的消息条数
      */
-    private static final int PAGE_LENGTH = 10;
+    private static final int PAGE_LENGTH = 5;
 
     /**
      * @" 用户列表
@@ -166,52 +164,69 @@ public class ChatMessagePanel extends ParentAvailablePanel {
 
     private void setListeners() {
         //暂时不加载历史消息，无意义
-        /*chatMessageViewerPanel.getMessageListView().setScrollToTopListener(new RCListView.ScrollToTopListener() {
-            @Override
-            public void onScrollToTop() {
-                // 当滚动到顶部时，继续拿前面的消息
-                if (isLoadHis) {
-                    return;
-                }
-                if (roomId != null) {
-                    isLoadHis = true;
-                    ((ChatPanel) ChatMessagePanel.this.getParentPanel()).getTitlePanel().showStatusLabel("加载中...");
+        chatMessageViewerPanel.getMessageListView().setScrollToTopListener(() -> {
+            // 当滚动到顶部时，继续拿前面的消息
+            if (isLoadHis) {
+                return;
+            }
+            if (roomId != null) {
+                isLoadHis = true;
+                ((ChatPanel) ChatMessagePanel.this.getParentPanel()).getTitlePanel().showStatusLabel("加载中...");
 
-                    new SwingWorker<Object, Object>() {
-                        List<Message> messageList = null;
+                new SwingWorker<>() {
+                    List<Message> messageList = null;
 
-                        @Override
-                        protected Object doInBackground() {
+                    @Override
+                    protected Object doInBackground() {
+                        try {
                             MessageMapper mapper = SpringContextHolder.getBean(MessageMapper.class);
                             Contacts contacts = Core.getMemberMap().get(roomId);
                             String remarkName = ContactsTools.getContactRemarkNameByUserName(contacts);
                             String nickName = ContactsTools.getContactNickNameByUserName(contacts);
-                            messageList = mapper.selectByPage(messageItems.size(), messageItems.size() + PAGE_LENGTH, roomId, remarkName, nickName);
-                            messageItems.addAll(messageList);
-                            return null;
-                        }
-
-                        @Override
-                        protected void done() {
-                            try {
-
-                                if (messageList != null && !messageList.isEmpty()) {
-                                    //TODO 顺序有问题
-                                    chatMessageViewerPanel.getMessageListView().notifyItemRangeInserted(0, messageList.size());
+                            messageList = mapper.selectByPage(messageItems.size(), PAGE_LENGTH, roomId, remarkName, nickName);
+                            for (Message message : messageList) {
+                                if (message.getIsSend()) {
+                                    message.setFromUsername(Core.getUserName());
+                                    message.setToUsername(roomId);
+                                    if (ContactsTools.isRoomContact(roomId)) {
+                                        message.setFromMemberOfGroupUsername(Core.getUserName());
+                                    }
+                                } else {
+                                    message.setFromUsername(roomId);
+                                    message.setToUsername(Core.getUserName());
+                                    if (ContactsTools.isRoomContact(roomId)) {
+                                        List<Contacts> members = Core.getMemberMap().get(roomId).getMemberlist();
+                                        ContactsTools.findGroupMember(members, message).ifPresent(member ->
+                                                message.setFromMemberOfGroupUsername(member.getUsername())
+                                        );
+                                    }
                                 }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            } finally {
-                                isLoadHis = false;
-                                ((ChatPanel) ChatMessagePanel.this.getParentPanel()).getTitlePanel().hideStatusLabel();
+                            }
+                            messageList = messageList.reversed();
+                        } catch (Exception e) {
+                            log.error(e.getMessage(), e);
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    protected void done() {
+                        try {
+                            if (messageList != null && !messageList.isEmpty()) {
+                                messageItems.addAll(0, messageList);
+                                chatMessageViewerPanel.getMessageListView().notifyItemRangeInsertedHead(0, messageList.size());
                             }
 
+                        } finally {
+                            isLoadHis = false;
+                            ((ChatPanel) ChatMessagePanel.this.getParentPanel()).getTitlePanel().hideStatusLabel();
                         }
-                    }.execute();
-                }
+
+                    }
+                }.execute();
             }
         });
-*/
+
         JTextPane editor = chatMessageEditorPanel.getEditor();
         Document document = editor.getDocument();
 
@@ -535,20 +550,13 @@ public class ChatMessagePanel extends ParentAvailablePanel {
      */
     public void notifyDataSetChanged() {
         chatMessageViewerPanel.getMessageListView().setVisible(false);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                // 重置ViewHolder缓存
-                messageViewHolderCacheHelper.reset();
+        messageItems.clear();
+        //TODO 不应该在这个线程
+        chatMessageViewerPanel.setVisible(true);
+        chatMessageEditorPanel.setVisible(true);
+        chatMessageViewerPanel.getMessageListView().setVisible(true);
 
-                messageItems.clear();
-                chatMessageViewerPanel.setVisible(true);
-                chatMessageEditorPanel.setVisible(true);
-                chatMessageViewerPanel.getMessageListView().setVisible(true);
-
-                TitlePanel.getContext().hideRoomMembersPanel();
-            }
-        }).start();
+        TitlePanel.getContext().hideRoomMembersPanel();
     }
 
 
@@ -557,9 +565,9 @@ public class ChatMessagePanel extends ParentAvailablePanel {
      *
      * @param messageItem 消息
      */
-    public ViewHolder addMessageToEnd(Message messageItem) {
+    public BaseMessageViewHolder addMessageToEnd(Message messageItem) {
         this.messageItems.add(messageItem);
-        ViewHolder holder = chatMessageViewerPanel.getMessageListView().notifyItemInserted(messageItems.size() - 1, true);
+        BaseMessageViewHolder holder = chatMessageViewerPanel.getMessageListView().notifyItemInserted(messageItems.size() - 1, true);
         // 只有当滚动条在最底部最，新消到来后才自动滚动到底部
         JScrollBar scrollBar = chatMessageViewerPanel.getMessageListView().getVerticalScrollBar();
         if (scrollBar.getValue() == (scrollBar.getModel().getMaximum() - scrollBar.getModel().getExtent())) {
@@ -574,7 +582,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
      *
      * @param lastMessage 消息
      */
-    public void updateMessage(ViewHolder viewHolder, Message lastMessage) {
+    public void updateMessage(BaseMessageViewHolder viewHolder, Message lastMessage) {
         // 已有消息更新状态
         int pos = findMessagePositionInViewReverse(lastMessage.getId());
         if (pos > -1) {
@@ -606,7 +614,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                 .id(msgId)
                 .content(content)
                 .plaintext(content)
-                .createTime(DateUtils.getCurrDateString(DateUtils.YYYY_MM_DD_HH_MM_SS))
+                .createTime(LocalDateTime.now())
                 .fromUsername(Core.getUserName())
                 .toUsername(roomId)
                 .msgType(WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
@@ -618,7 +626,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                 .isNeedToResend(false)
                 .build();
         //绘制消息项
-        ViewHolder viewHolder = addMessageToEnd(message);
+        BaseMessageViewHolder viewHolder = addMessageToEnd(message);
         new SwingWorker<WebWXSendMsgResponse, WebWXSendMsgResponse>() {
             private WebWXSendMsgResponse wxSendMsgResponse;
 
@@ -670,7 +678,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                 .id(msgId)
                 .content(code)
                 .plaintext(code)
-                .createTime(DateUtils.getCurrDateString(DateUtils.YYYY_MM_DD_HH_MM_SS))
+                .createTime(LocalDateTime.now())
                 .fromUsername(Core.getUserName())
                 .toUsername(roomId)
                 .msgType(WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_IMAGE.getCode())
@@ -686,7 +694,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                 .isNeedToResend(false)
                 .build();
 
-        ViewHolder viewHolder = addMessageToEnd(messageView);
+        BaseMessageViewHolder viewHolder = addMessageToEnd(messageView);
         new SwingWorker<WebWXSendMsgResponse, WebWXSendMsgResponse>() {
             private WebWXSendMsgResponse wxSendMsgResponse;
 
@@ -697,7 +705,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                         .id(msgId)
                         .content(code)
                         .plaintext(code)
-                        .createTime(DateUtils.getCurrDateString(DateUtils.YYYY_MM_DD_HH_MM_SS))
+                        .createTime(LocalDateTime.now())
                         .fromUsername(Core.getUserName())
                         .toUsername(roomId)
                         .msgType(WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
@@ -838,7 +846,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
         message.setFromUsername(Core.getUserName());
         message.setMessageTime(LocalDateTime.now());
         //添加消息 到面板
-        ViewHolder viewHolder = addMessageToEnd(message);
+        BaseMessageViewHolder viewHolder = addMessageToEnd(message);
 
         Message finalMessage = message;
         WxRespConstant.WXReceiveMsgCodeEnum finalMsgType = msgType;

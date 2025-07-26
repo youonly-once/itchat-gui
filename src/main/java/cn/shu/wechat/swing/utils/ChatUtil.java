@@ -11,6 +11,7 @@ import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -58,7 +59,9 @@ public final class ChatUtil {
         Core.getRecentContacts().add(userId);
     }
 
-
+    public static void main(String[] args) {
+        System.out.println(LocalDateTime.now());
+    }
     /**
      * 新消息处理
      *
@@ -73,7 +76,6 @@ public final class ChatUtil {
             //刷新消息
             if (message != null) {
                 message.setProgress(100);
-                message.setIsSend(true);
                 //新消息来了后创建房间
                 //创建房间的时候会从数据库加载历史消息，由于这次的消息已经写入了数据库，所以不用再添加了
 

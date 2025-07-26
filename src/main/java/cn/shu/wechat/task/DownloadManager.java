@@ -267,7 +267,7 @@ public class DownloadManager {
         task2.setTaskId("WebWxBatchGetContact");
         task2.setType(DownloadType.GetBatchContacts);
         submitNewAwait(task2);
-
+        //ContactsPanel.getContext().notifyDataSetChanged();
         log.info("获取群联系人，耗时：{}（秒）", (System.currentTimeMillis() - l) / 1000);
 
 

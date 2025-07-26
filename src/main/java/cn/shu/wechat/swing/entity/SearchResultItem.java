@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.time.LocalDateTime;
+
 /**
  * 搜索结果条目
  *
@@ -31,7 +33,7 @@ public class SearchResultItem implements Comparable<SearchResultItem> {
     /**
      * 时间
      */
-    private String dateTime;
+    private LocalDateTime dateTime;
 
     private String tag;
 
@@ -43,7 +45,8 @@ public class SearchResultItem implements Comparable<SearchResultItem> {
         this.type = type.CODE;
         this.tag = id;
     }
-    public SearchResultItem(String id, String name, SearchResultType type,String dateTime,String tag) {
+
+    public SearchResultItem(String id, String name, SearchResultType type, LocalDateTime dateTime, String tag) {
         this.id = id;
         this.name = name;
         this.type = type.CODE;

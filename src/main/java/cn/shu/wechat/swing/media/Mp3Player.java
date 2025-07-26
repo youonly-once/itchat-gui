@@ -2,7 +2,6 @@ package cn.shu.wechat.swing.media;
 
 import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.Player;
-import javazoom.jl.player.advanced.PlaybackListener;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.BufferedInputStream;
@@ -22,6 +21,7 @@ public class Mp3Player  {
     private VoicePlaybackListener listener;
     private Thread playerThread;
     private volatile boolean stopped;
+    //一定要加 volatile
     private volatile ScheduledFuture<?> monitorFuture;
 
     public void play(String filePath,VoicePlaybackListener listener) throws JavaLayerException, FileNotFoundException {
@@ -62,7 +62,7 @@ public class Mp3Player  {
                 stopped = false;
                 //确保当前线程启动后再启动监听线程
                 // 启动监听任务：播放位置轮询
-
+                // AtomicInteger prePos = new AtomicInteger();
                 monitorFuture = executor.scheduleAtFixedRate(() -> {
                     if (stopped || advancedPlayer == null || advancedPlayer.isComplete()) {
                         if (monitorFuture != null && !monitorFuture.isCancelled()) {
@@ -70,7 +70,11 @@ public class Mp3Player  {
                         }
                         return;
                     }
+                    System.out.println(Thread.currentThread().getId());
+                    //if (prePos.get()!=advancedPlayer.getPosition()){
+                    // prePos.set(advancedPlayer.getPosition());
                     listener.playbackPosition(advancedPlayer.getPosition());
+                    // }
                 }, 0, 100, TimeUnit.MILLISECONDS);
 
                 advancedPlayer.play();
@@ -90,16 +94,8 @@ public class Mp3Player  {
             this.listener.playbackFinished();
         }
         filePath = null;
-        playerThread = null;
-        advancedPlayer = null;
         listener = null;
     }
 
-    public abstract static class VoicePlaybackListener extends PlaybackListener {
-        public abstract void playbackPosition(int position);
 
-        public abstract void playbackStarted();
-
-        public abstract void playbackFinished();
-    }
 }

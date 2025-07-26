@@ -16,7 +16,10 @@ import cn.shu.wechat.swing.utils.ImageUtil;
 import cn.shu.wechat.swing.utils.MimeTypeUtil;
 import cn.shu.wechat.swing.utils.MultipartBodyPublisher;
 import cn.shu.wechat.task.DownloadManager;
-import cn.shu.wechat.utils.*;
+import cn.shu.wechat.utils.HttpUtil;
+import cn.shu.wechat.utils.LogUtil;
+import cn.shu.wechat.utils.MD5Util;
+import cn.shu.wechat.utils.XmlStreamUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import jakarta.annotation.Resource;
@@ -163,7 +166,7 @@ public class MessageTools {
                 message.setAppMsgType(0);
             }
             message.setMsgId(sendMsgResponse.getMsgID());
-            message.setCreateTime(DateUtils.getCurrDateString(DateUtils.YYYY_MM_DD_HH_MM_SS));
+            message.setCreateTime(LocalDateTime.now());
             message.setFromNickname(Core.getNickName());
             message.setFromRemarkname(Core.getNickName());
             message.setFromUsername(Core.getUserName());

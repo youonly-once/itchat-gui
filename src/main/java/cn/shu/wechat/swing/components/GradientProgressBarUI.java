@@ -28,7 +28,7 @@ public class GradientProgressBarUI extends BasicProgressBarUI {
         int amountFull = getAmountFull(b, barRectWidth, barRectHeight);
         //已完成的进度
 
-        graphics2d.setColor(Color.WHITE);
+        graphics2d.setColor(Colors.WINDOW_BACKGROUND);
         graphics2d.fillRoundRect(0, 0, width - 1, height, arcSize,
                 arcSize);
         //绘制JProgressBar的背景

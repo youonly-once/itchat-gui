@@ -2,6 +2,7 @@ package cn.shu.wechat.swing.panels;
 
 import cn.shu.wechat.swing.adapter.SelectUserItemViewHolder;
 import cn.shu.wechat.swing.adapter.SelectUserItemsAdapter;
+import cn.shu.wechat.swing.adapter.SelectedUserItemViewHolder;
 import cn.shu.wechat.swing.adapter.SelectedUserItemsAdapter;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
@@ -34,8 +35,8 @@ public class SelectUserPanel extends JPanel {
     private JButton cancelButton;
     private JButton okButton;*/
     private final int width;
-    private RCListView selectUserListView;
-    private RCListView selectedUserListView;
+    private RCListView<SelectedUserItemViewHolder> selectUserListView;
+    private RCListView<SelectedUserItemViewHolder> selectedUserListView;
     private final int height;
     private ForwardSearchResultPanel leftResultPanel;
     private SearchCardLayoutPanel leftCardPanel;
@@ -106,18 +107,15 @@ public class SelectUserPanel extends JPanel {
         selectUserListView.setAdapter(selectUserItemsAdapter);
 
         // 已选中用户列表
-        selectedUserListView = new RCListView();
+        selectedUserListView = new RCListView<>();
         selectedUserItemsAdapter = new SelectedUserItemsAdapter(selectedUserList);
-        selectedUserItemsAdapter.setItemRemoveListener(new SelectedUserItemsAdapter.ItemRemoveListener() {
-            @Override
-            public void onRemove(String username) {
-                if (unSelectUser(username)) {
-                    for (Component holder : selectUserListView.getItems()) {
-                        SelectUserItemViewHolder viewHolder = (SelectUserItemViewHolder) holder;
-                        if (viewHolder.username.equals(username)) {
-                            viewHolder.icon.setIcon(uncheckIcon);
-                            break;
-                        }
+        selectedUserItemsAdapter.setItemRemoveListener(username -> {
+            if (unSelectUser(username)) {
+                for (Component holder : selectUserListView.getItems()) {
+                    SelectUserItemViewHolder viewHolder = (SelectUserItemViewHolder) holder;
+                    if (viewHolder.username.equals(username)) {
+                        viewHolder.icon.setIcon(uncheckIcon);
+                        break;
                     }
                 }
             }

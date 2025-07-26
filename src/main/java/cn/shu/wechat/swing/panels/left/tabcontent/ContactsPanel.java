@@ -10,6 +10,7 @@ import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCListView;
 import cn.shu.wechat.swing.entity.ContactsItem;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
 import lombok.Getter;
 
 import javax.swing.*;
@@ -85,7 +86,7 @@ public class ContactsPanel extends ParentAvailablePanel {
     /**
      * 初始化数据，加载所有联系人到List中
      */
-    private void initData() {
+    public void initData() {
 
         contactsItemList.clear();
         for (Map.Entry<String, Contacts> entry : Core.getMemberMap().entrySet()) {
@@ -93,7 +94,6 @@ public class ContactsPanel extends ParentAvailablePanel {
             ContactsItem item = ContactsItem.builder()
                     .id(entry.getKey())
                     .displayName(ContactsTools.getContactDisplayNameByUserName(entry.getKey()))
-                    //.avatar()
                     .type(value.getType())
                     .build();
             contactsItemList.add(item);
@@ -106,22 +106,22 @@ public class ContactsPanel extends ParentAvailablePanel {
      * 联系人数据刷新
      */
     public void notifyDataSetChanged() {
-        new SwingWorker<Object,Object>(){
-
+        ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
             @Override
-            protected Object doInBackground() throws Exception {
+            public void run() {
                 initData();
                 loadedCount.set(0);
                 ((ContactsItemsAdapter) contactsListView.getAdapter()).processData();
-                return null;
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        int count = Math.min(initialCount, contactsItemList.size());
+                        contactsListView.notifyItemAppend(loadedCount.getAndAdd(count), count);
+                    }
+                });
             }
+        });
 
-            @Override
-            protected void done() {
-                int count = Math.min(initialCount,contactsItemList.size());
-                contactsListView.notifyItemAppend(loadedCount.getAndAdd(count),count);
-            }
-        }.execute();
 
     }
 

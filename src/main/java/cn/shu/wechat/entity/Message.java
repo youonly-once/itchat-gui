@@ -1,6 +1,10 @@
 package cn.shu.wechat.entity;
 
+import cn.shu.wechat.typehandler.LocalDateTimeTextHandler;
+import cn.shu.wechat.typehandler.MapToJsonTypeHandler;
+import com.alibaba.fastjson.annotation.JSONField;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,18 +24,23 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Message implements Comparable<Message>{
+
+    @TableId
     private String id;
 
     private String msgId;
+
     @TableField(exist = false)
     private boolean isGroup;
+
     private Integer msgType;
 
     private Integer appMsgType;
 
     private String msgDesc;
 
-    private String createTime;
+    @TableField(value = "create_time", typeHandler = LocalDateTimeTextHandler.class)
+    private LocalDateTime createTime;
 
     private String plaintext;
 
@@ -85,7 +94,9 @@ public class Message implements Comparable<Message>{
      * 视频缩略图
      */
     @TableField(exist = false)
-    private BufferedImage videoPic;
+    @JSONField(serialize = false)
+    private transient BufferedImage videoPic;
+
 
     /**
      * 消息发送结果
@@ -116,51 +127,55 @@ public class Message implements Comparable<Message>{
     /**
      * 消息时间
      */
-    @TableField(exist = false)
+    @TableField(value = "message_time", typeHandler = LocalDateTimeTextHandler.class)
     private LocalDateTime messageTime;
-    @TableField(exist = false)
+
+
     private String desc ;
-    @TableField(exist = false)
+
     private String url ;
-    @TableField(exist = false)
+
+
     private String title;
-    @TableField(exist = false)
+
     private String thumbUrl ;
-    @TableField(exist = false)
+
     private String sourceIconUrl ;
-    @TableField(exist = false)
+
+
     private  String sourceName ;
     /**
      * content map
      */
-    @TableField(exist = false)
+    @TableField(typeHandler = MapToJsonTypeHandler.class)
     private Map<String, Object> contentMap;
-    @TableField(exist = false)
+
+
     private boolean isRevoke;
-    @TableField(exist = false)
+
     private String plainName;
-    @TableField(exist = false)
+
     private int progress = 100;
-    @TableField(exist = false)
+
     private boolean isNeedToResend;
 
     //联系人卡片消息
 
-    @TableField(exist = false)
+
     private String contactsUserName;
-    @TableField(exist = false)
+
     private String contactsNickName;
-    @TableField(exist = false)
+
     private String contactsId;
-    @TableField(exist = false)
+
     private Byte contactsSex;
-    @TableField(exist = false)
+
     private String contactsProvince;
-    @TableField(exist = false)
+
     private String contactsCity;
-    @TableField(exist = false)
+
     private String contactsHeadImgUrl;
-    @TableField(exist = false)
+
     private String contactsTicket;
     @Override
     public int compareTo(Message o) {

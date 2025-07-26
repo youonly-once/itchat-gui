@@ -20,7 +20,10 @@ import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.swing.utils.ChatUtil;
 import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.task.DownloadTask;
-import cn.shu.wechat.utils.*;
+import cn.shu.wechat.utils.CommonTools;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
+import cn.shu.wechat.utils.LogUtil;
+import cn.shu.wechat.utils.XmlStreamUtil;
 import com.alibaba.fastjson.JSON;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
@@ -314,7 +317,7 @@ public class MsgCenter {
                 .plaintext(msg.getPlainText() == null ? msg.getContent() : msg.getPlainText())
                 .content(msg.getContent())
                 .filePath(msg.getFilePath())
-                .createTime(DateUtils.getCurrDateString(DateUtils.YYYY_MM_DD_HH_MM_SS))
+                .createTime(LocalDateTime.now())
                 .fromNickname(isFromSelf ? Core.getNickName() : ContactsTools.getContactNickNameByUserName(msg.getFromUserName()))
                 .fromRemarkname(isFromSelf ? Core.getNickName() : ContactsTools.getContactRemarkNameByUserName(msg.getFromUserName()))
                 .fromUsername(msg.getFromUserName())

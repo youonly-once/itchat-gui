@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 
@@ -528,7 +529,8 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
 
         String realMsgContent = oldMessage.getContent();
         String filePath = oldMessage.getFilePath();
-        String createTime = oldMessage.getCreateTime().substring(10);
+
+        String createTime = oldMessage.getCreateTime().format(DateTimeFormatter.ofPattern(DateUtils.YYYY_MM_DD_HH_MM_SS)).substring(10);
         switch (WxRespConstant.WXReceiveMsgCodeEnum.getByCode(oldMessage.getMsgType())) {
             case MSGTYPE_TEXT: {
                 message = Message.builder()

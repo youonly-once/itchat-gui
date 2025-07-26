@@ -15,6 +15,7 @@ import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.swing.panels.left.TabOperationPanel;
 import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.swing.utils.*;
+import cn.shu.wechat.utils.DateUtils;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 
 import javax.swing.*;
@@ -23,6 +24,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.lang.ref.WeakReference;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -144,7 +146,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
         attachmentTypeIcon.setImage(attachmentTypeIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH));
         holder.avatar.setIcon(attachmentTypeIcon);
         holder.name.setKeyWord(keyWord);
-        holder.dateTime.setText(item.getDateTime());
+        holder.dateTime.setText(item.getDateTime().format(DateTimeFormatter.ofPattern(DateUtils.YYYY_MM_DD_HH_MM_SS)));
         String filename = item.getName();
         if (item.getName().length() > 20) {
             String suffix = filename.substring(filename.lastIndexOf("."));

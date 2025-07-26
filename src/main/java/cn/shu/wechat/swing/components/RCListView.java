@@ -3,6 +3,8 @@ package cn.shu.wechat.swing.components;
 import cn.shu.wechat.swing.adapter.BaseAdapter;
 import cn.shu.wechat.swing.adapter.HeaderViewHolder;
 import cn.shu.wechat.swing.adapter.ViewHolder;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,8 +16,9 @@ import java.util.Map;
 /**
  * Created by 舒新胜 on 17-5-30.
  */
-public class RCListView extends JScrollPane {
-    private BaseAdapter adapter;
+public class RCListView<T extends ViewHolder> extends JScrollPane {
+    private BaseAdapter<T> adapter;
+    @Getter
     private JPanel contentPanel;
     private int vGap;
     private int hGap;
@@ -26,8 +29,10 @@ public class RCListView extends JScrollPane {
     private ScrollUI scrollUI;
 
     // 监听滚动到顶部事件
+    @Setter
     private ScrollToTopListener scrollToTopListener;
     // 滚动事件
+    @Setter
     private ScrollListener scrollListener;
     private boolean scrollBarPressed = false;
     private int lastScrollValue = -1;
@@ -206,10 +211,11 @@ public class RCListView extends JScrollPane {
                 contentPanel.add(headerViewHolder);
                 rectangleList.add(headerViewHolder.getBounds());
             }
-            ViewHolder holder = adapter.onCreateViewHolder(viewType, 0,i);
+            T holder = adapter.onCreateViewHolder(viewType, 0, i);
             adapter.onBindViewHolder(holder, i);
             contentPanel.add(holder);
         }
+
     }
 
     public BaseAdapter getAdapter() {
@@ -278,14 +284,28 @@ public class RCListView extends JScrollPane {
      * @param startPosition
      * @param count
      */
-    public void notifyItemRangeInserted(int startPosition, int count) {
+    public void notifyItemRangeInsertedHead(int startPosition, int count) {
+        JViewport viewport = this.getViewport();
 
+// 1. 记录当前视口位置（以像素为单位）
+        Point viewPosBefore = viewport.getViewPosition();
+        int heightBefore = viewport.getViewSize().height;
+        //从下往上
         for (int i = count - 1; i >= startPosition; i--) {
             int viewType = adapter.getItemViewType(i);
-            ViewHolder holder = adapter.onCreateViewHolder(viewType, 0,i);
+            int subViewType = adapter.getItemSubViewType(i);
+            T holder = adapter.onCreateViewHolder(viewType, subViewType, i);
+
             adapter.onBindViewHolder(holder, i);
             contentPanel.add(holder, startPosition);
         }
+
+        contentPanel.revalidate();
+        SwingUtilities.invokeLater(() -> {
+            int heightAfter = viewport.getPreferredSize().height;
+            int delta = heightAfter - heightBefore;
+            viewport.setViewPosition(new Point(viewPosBefore.x, viewPosBefore.y + delta));
+        });
     }
 
     /**
@@ -305,7 +325,7 @@ public class RCListView extends JScrollPane {
             }
 
             int viewType = adapter.getItemViewType(i);
-            ViewHolder holder = adapter.onCreateViewHolder(viewType,0,i);
+            T holder = adapter.onCreateViewHolder(viewType, 0, i);
             adapter.onBindViewHolder(holder, i);
             contentPanel.add(holder, -1);
 
@@ -334,7 +354,7 @@ public class RCListView extends JScrollPane {
             }
         }
 
-        ViewHolder holder = (ViewHolder) getItem(position + i);
+        T holder = (T) getItem(position + i);
         if (holder instanceof HeaderViewHolder) {
             adapter.onBindHeaderViewHolder((HeaderViewHolder) holder, position);
         } else {
@@ -349,7 +369,7 @@ public class RCListView extends JScrollPane {
      *
      * @param position 元素位置  不包括map的位置
      */
-    public void notifyItemChanged(ViewHolder viewHolder, int position) {
+    public void notifyItemChanged(T viewHolder, int position) {
 
         Map<Integer, String> positionMap = adapter.getPositionMap();
         int i = 0;
@@ -373,33 +393,35 @@ public class RCListView extends JScrollPane {
         return contentPanel.getComponent(n);
     }
 
-    public JPanel getContentPanel() {
-        return contentPanel;
-    }
 
-
-    public void setScrollToTopListener(ScrollToTopListener listener) {
-        this.scrollToTopListener = listener;
-    }
-
-    public void setScrollListener(ScrollListener listener) {
-        this.scrollListener = listener;
-    }
-
-    public ViewHolder notifyItemInserted(int position, boolean end) {
+    public T notifyItemInserted(int position, boolean end) {
         int viewType = adapter.getItemViewType(position);
         int subViewType = adapter.getItemSubViewType(position);
-        ViewHolder holder = adapter.onCreateViewHolder(viewType,subViewType, position);
-        try {
-            adapter.onBindViewHolder(holder, position);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        T holder = adapter.onCreateViewHolder(viewType, subViewType, position);
+
+        adapter.onBindViewHolder(holder, position);
+
         position = end ? -1 : position;
         //如果之前的数据添加失败 数据项和panel组件数量对不上，这时添加到末尾
         position = Math.min(contentPanel.getComponentCount(), position);
+
+        JViewport viewport = this.getViewport();
+
+// 1. 记录当前视口位置（以像素为单位）
+        Point viewPosBefore = viewport.getViewPosition();
+        int heightBefore = viewport.getViewSize().height;
+
         contentPanel.add(holder, position);
         contentPanel.revalidate();
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                int heightAfter = viewport.getPreferredSize().height;
+                int delta = heightAfter - heightBefore;
+                viewport.setViewPosition(new Point(viewPosBefore.x, viewPosBefore.y + delta));
+            }
+        });
+
         return holder;
     }
 

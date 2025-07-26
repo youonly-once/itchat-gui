@@ -29,7 +29,6 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
      */
     private final List<ContactsItem> contactsItems;
 
-    private  int count = 0;
     /**
      * 所有联系人Holders
      */
