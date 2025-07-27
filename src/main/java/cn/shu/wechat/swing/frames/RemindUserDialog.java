@@ -1,23 +1,14 @@
 package cn.shu.wechat.swing.frames;
 
-import cn.shu.wechat.api.ContactsTools;
-import cn.shu.wechat.api.MessageTools;
-import cn.shu.wechat.core.Core;
-import cn.shu.wechat.dto.response.msg.send.WebWXSendMsgResponse;
-import cn.shu.wechat.entity.Message;
+import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCButton;
 import cn.shu.wechat.swing.components.RCTextField;
-import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.panels.SelectUserPanel;
-import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
-import cn.shu.wechat.swing.utils.ChatUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
-import cn.shu.wechat.utils.ExecutorServiceUtil;
 import lombok.Getter;
-import org.springframework.beans.BeanUtils;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -25,20 +16,23 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
 
 
 /**
  * Created by 舒新胜 on 07/06/2017.
  */
-public class ForwardMsgDialog extends JDialog {
+public class RemindUserDialog extends JDialog {
     public static final int DIALOG_WIDTH = 580;
     public static final int DIALOG_HEIGHT = 500;
     @Getter
-    private static ForwardMsgDialog context;
+    private static RemindUserDialog context;
+    //初始列表
     private final List<SelectUserData> userList = new ArrayList<>();
-    private final Message message;
+    //待搜索列表
+    private final Collection<Contacts> searchList = new ArrayList<>();
     private JPanel editorPanel;
     private RCTextField groupNameTextField;
     private SelectUserPanel selectUserPanel;
@@ -47,25 +41,25 @@ public class ForwardMsgDialog extends JDialog {
     private JButton okButton;
 
 
-    public ForwardMsgDialog(Frame owner, boolean modal, Message message) {
+    public RemindUserDialog(Frame owner, boolean modal) {
         super(owner, modal);
         context = this;
-        this.message = message;
         initComponents();
-        initData();
-
         initView();
-        setListeners();
     }
 
-    private void initData() {
-        for (RoomItem con : RoomsPanel.getContext().getRoomItemList()) {
-            userList.add(new SelectUserData(con.getRoomId(),
-                    ContactsTools.getContactDisplayNameByUserName(con.getRoomId()),
-                    false));
-        }
-        selectUserPanel = new SelectUserPanel(DIALOG_WIDTH, DIALOG_HEIGHT - 100, userList, Core.getMemberMap().values());
 
+    public void addData(Collection<String> defaultList, Collection<Contacts> contactsList) {
+        userList.clear();
+        searchList.clear();
+        for (String con : defaultList) {
+            SelectUserData selectUserData = new SelectUserData(con,
+                    con,
+                    false);
+            userList.add(selectUserData);
+        }
+        searchList.addAll(contactsList);
+        selectUserPanel.update();
     }
 
     private void initComponents() {
@@ -103,8 +97,10 @@ public class ForwardMsgDialog extends JDialog {
         cancelButton = new RCButton("取消");
         cancelButton.setForeground(Colors.FONT_BLACK);
 
-        okButton = new RCButton("转发", Colors.MAIN_COLOR, Colors.MAIN_COLOR_DARKER, Colors.MAIN_COLOR_DARKER);
+        okButton = new RCButton("@", Colors.MAIN_COLOR, Colors.MAIN_COLOR_DARKER, Colors.MAIN_COLOR_DARKER);
         okButton.setBackground(Colors.PROGRESS_BAR_START);
+
+        selectUserPanel = new SelectUserPanel(DIALOG_WIDTH, DIALOG_HEIGHT - 100, userList, searchList);
     }
 
     private void initView() {
@@ -120,7 +116,8 @@ public class ForwardMsgDialog extends JDialog {
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    private void setListeners() {
+
+    public void setListeners(Consumer<List<SelectUserData>> consumer) {
         cancelButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -134,52 +131,19 @@ public class ForwardMsgDialog extends JDialog {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (okButton.isEnabled()) {
-                    ForwardMsgDialog.context.dispose();
-                    forwardMsg();
-                }
+                    okButton.setEnabled(false);
+                    cancelButton.setEnabled(false);
+                    consumer.accept(selectUserPanel.getSelectedUser());
 
+                    okButton.setEnabled(true);
+                    okButton.setText("@");
+                    cancelButton.setEnabled(true);
+                    RemindUserDialog.context.dispose();
+                }
                 super.mouseClicked(e);
             }
         });
     }
-
-    private void forwardMsg() {
-        ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
-            @Override
-            public void run() {
-                WebWXSendMsgResponse wxCreateRoomResp;
-                List<SelectUserData> successList = new ArrayList<>();
-                for (SelectUserData selectUserData : selectUserPanel.getSelectedUser()) {
-                    Message newMsg = new Message();
-                    BeanUtils.copyProperties(message, newMsg);
-                    newMsg.setFromUsername(Core.getUserName());
-                    newMsg.setToUsername(selectUserData.getUserName());
-                    newMsg.setId(MessageTools.randomMessageId());
-
-                    wxCreateRoomResp = MessageTools.sendMsgByUserId(newMsg);
-                    if (wxCreateRoomResp != null && wxCreateRoomResp.getBaseResponse().getRet() == 0
-                    ) {
-                        successList.add(selectUserData);
-                        ChatUtil.addNewMsg(newMsg, selectUserData.getUserName(),
-                                newMsg.getPlaintext(), 0, true, false);
-                    } else {
-                        WebWXSendMsgResponse finalWxCreateRoomResp = wxCreateRoomResp;
-                        SwingUtilities.invokeLater(() -> {
-                            if (finalWxCreateRoomResp == null || finalWxCreateRoomResp.getBaseResponse().getRet() != 0) {
-                                String collected = selectUserPanel.getSelectedUser().stream().filter(e -> !successList.contains(e)).map(SelectUserData::getDisplayName).collect(Collectors.joining(","));
-                                JOptionPane.showMessageDialog(MainFrame.getContext(), collected, "转发失败", JOptionPane.ERROR_MESSAGE);
-
-                            }
-                        });
-                        break;
-                    }
-                }
-
-            }
-        });
-
-    }
-
 
 
 }

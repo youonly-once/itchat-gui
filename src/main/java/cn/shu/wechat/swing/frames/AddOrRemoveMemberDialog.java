@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.frames;
 
+import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCButton;
@@ -59,7 +60,7 @@ public class AddOrRemoveMemberDialog extends JDialog {
 
         getRootPane().setBorder(new LineBorder(Colors.LIGHT_GRAY));
 
-        selectUserPanel = new SelectUserPanel(DIALOG_WIDTH, DIALOG_HEIGHT - 100, userList);
+        selectUserPanel = new SelectUserPanel(DIALOG_WIDTH, DIALOG_HEIGHT - 100, userList, Core.getMemberMap().values());
 
         // 输入面板
         editorPanel = new JPanel();

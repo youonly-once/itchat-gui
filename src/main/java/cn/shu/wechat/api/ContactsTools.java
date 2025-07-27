@@ -22,9 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 微信联系人工具，如获好友昵称、备注等
@@ -720,14 +718,13 @@ public class ContactsTools {
     }
 
     public static Optional<Contacts> findGroupMember(List<Contacts> members, Message message) {
-        return Stream.of(
-                        (Predicate<Contacts>) m -> m.getRemarkname().equals(message.getFromRemarkname()),
-                        m -> m.getDisplayname().equals(message.getFromMemberOfGroupDisplayname()),
-                        m -> m.getNickname().equals(message.getFromMemberOfGroupNickname())
-                )
-                .map(predicate -> members.stream().filter(predicate).findFirst())
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .findFirst();
+        for (Contacts m : members) {
+            if (Objects.equals(m.getRemarkname(), message.getFromRemarkname()) ||
+                    Objects.equals(m.getDisplayname(), message.getFromMemberOfGroupDisplayname()) ||
+                    Objects.equals(m.getNickname(), message.getFromMemberOfGroupNickname())) {
+                return Optional.of(m);
+            }
+        }
+        return Optional.empty();
     }
 }

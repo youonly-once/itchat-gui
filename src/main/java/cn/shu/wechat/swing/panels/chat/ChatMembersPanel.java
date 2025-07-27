@@ -5,6 +5,7 @@ import cn.shu.wechat.constant.DownloadType;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.swing.adapter.RoomMembersAdapter;
+import cn.shu.wechat.swing.adapter.RoomMembersItemViewHolder;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCButton;
@@ -37,7 +38,7 @@ public class ChatMembersPanel extends ParentAvailablePanel {
     /**
      * list
      */
-    private final RCListView listView = new RCListView();
+    private final RCListView<RoomMembersItemViewHolder, RoomMembersAdapter> listView = new RCListView();
     /**
      * 操作面板
      */

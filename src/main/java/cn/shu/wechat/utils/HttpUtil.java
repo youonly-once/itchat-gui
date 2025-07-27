@@ -20,7 +20,6 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 
 /**
@@ -173,15 +172,23 @@ public class HttpUtil {
      */
     public static <R> R doGet(String url, Map<String, String> params, Map<String, String> headers, boolean allowRedirect, HttpResponse.BodyHandler<R> bodyHandler, Long timeOut) throws IOException, InterruptedException {
 
-            String paramStr = (params != null && !params.isEmpty()) ?
-                    params.entrySet().stream()
-                            .map(e -> URLEncoder.encode(e.getKey(), StandardCharsets.UTF_8) + "=" +
-                                    URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8))
-                            .collect(Collectors.joining("&")) : "";
-
-            if (!paramStr.isEmpty()) {
-                url += url.contains("?") ? "&" + paramStr : "?" + paramStr;
+        StringBuilder sb = new StringBuilder();
+        if (params != null && !params.isEmpty()) {
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                if (!sb.isEmpty()) {
+                    sb.append('&');
+                }
+                sb.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8));
+                sb.append('=');
+                sb.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
             }
+        }
+
+        String paramStr = sb.toString();
+
+        if (!paramStr.isEmpty()) {
+            url += url.contains("?") ? "&" + paramStr : "?" + paramStr;
+        }
 
             HttpRequest.Builder builder = HttpRequest.newBuilder()
                     .uri(URI.create(url))

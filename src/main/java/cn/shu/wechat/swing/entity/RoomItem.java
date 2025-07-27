@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * 消息列表中显示的房间(聊天)条目
@@ -82,7 +83,8 @@ public class RoomItem implements Comparable<RoomItem> {
         // 忽略结果为0的情况，两个item必有先后，没有相同
         return o.getLocalDateTime().compareTo(this.getLocalDateTime());
     }
-    public RoomItem (Contacts contacts,String latestMsg, int msgCount,Boolean hasNewMsg){
+
+    public RoomItem(Contacts contacts, String latestMsg, int msgCount, Boolean hasNewMsg) {
         if (contacts == null) return;
         setContacts(contacts);
         setRoomId(contacts.getUsername());
@@ -96,5 +98,17 @@ public class RoomItem implements Comparable<RoomItem> {
         setMute(ContactsTools.isMute(contacts));
         setUnreadCount(msgCount);
         setHasNewMsg(hasNewMsg);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        RoomItem roomItem = (RoomItem) o;
+        return Objects.equals(roomId, roomItem.roomId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(roomId);
     }
 }

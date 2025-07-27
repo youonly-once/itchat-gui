@@ -1,10 +1,9 @@
 package cn.shu.wechat.swing.utils;
 
-import java.text.SimpleDateFormat;
-import java.time.*;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.temporal.ChronoUnit;
 
 /**
  * Created by 舒新胜 on 28/04/2017.
@@ -41,32 +40,35 @@ public class TimeUtil {
      */
     public static String diff(LocalDateTime messageLocalDateTime, boolean detail) {
         LocalDateTime currentLocalDateTime = LocalDateTime.now();
-
-        Duration duration = Duration.between(messageLocalDateTime, currentLocalDateTime);
-        Period period = Period.between(messageLocalDateTime.toLocalDate(), currentLocalDateTime.toLocalDate());
-
         //当前时间和消息时间相差天数
-        long diffDay = duration.toDays();
+        long diffDay = ChronoUnit.DAYS.between(messageLocalDateTime.toLocalDate(), currentLocalDateTime.toLocalDate());
         //是否为同一年
-        boolean sameYear = (period.getYears() == 0);
+        boolean sameYear = (currentLocalDateTime.getYear() - messageLocalDateTime.getYear() == 0);
 
         String ret;
-        if (sameYear && diffDay < 1) {
+        if (diffDay < 1) {
             //1天内的消息 时间显示时分秒
             return messageLocalDateTime.format(DateTimeFormatter.ofPattern("HH:mm"));
-        } else if (sameYear && diffDay < 2) {
+        } else if (diffDay < 2) {
             if (detail) {
                 return messageLocalDateTime.format(DateTimeFormatter.ofPattern("昨天 HH:mm"));
             } else {
-                return "昨天"/* + daySimpleDateFormat.format(new Date(timestamp))*/;
+                return "昨天";
             }
-        } else if (sameYear && diffDay < 8) {
+        } else if (diffDay < 3) {
+            if (detail) {
+                return messageLocalDateTime.format(DateTimeFormatter.ofPattern("前天 HH:mm"));
+            } else {
+                return "前天";
+            }
+        } else if (diffDay < 8) {
+            //周
             if (detail) {
                 return messageLocalDateTime.getDayOfWeek().toString() + messageLocalDateTime.format(DateTimeFormatter.ofPattern(" HH:mm"));
             } else {
-                return  messageLocalDateTime.getDayOfWeek().toString()/* + " " + daySimpleDateFormat.format(new Date(timestamp))*/;
+                return messageLocalDateTime.getDayOfWeek().toString();
             }
-        } else if (sameYear && diffDay < 366) {
+        } else if (sameYear) {
             if (detail) {
                 return messageLocalDateTime.format(DateTimeFormatter.ofPattern("MM-dd HH:mm"));
             } else {

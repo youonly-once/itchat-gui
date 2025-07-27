@@ -35,15 +35,15 @@ public class RoomsPanel extends ParentAvailablePanel {
     @Getter
     private static RoomsPanel context;
 
-
     /**
      * 未读消息总数
      */
     private static final AtomicInteger UNREAD_TOTAL_COUNT = new AtomicInteger(0);
+
     /**
      * 聊天列表视图数据
      */
-    private RCListView roomItemsListView;
+    private RCListView<RoomItemViewHolder, RoomItemsAdapter> roomItemsListView;
 
     /**
      * 当前聊天列表
@@ -59,42 +59,26 @@ public class RoomsPanel extends ParentAvailablePanel {
         initComponents();
         initView();
         initData();
-        roomItemsListView.setAdapter(new RoomItemsAdapter(roomItemList));
     }
 
-
-    /**
-     * 消息已读数量
-     *
-     * @param count 本次已读
-     */
     public static void updateUnreadTotalCount(int count) {
-        if (count == 0) return;
-
-        int total = UNREAD_TOTAL_COUNT.addAndGet(count);
-        if (total < 0) {
-            UNREAD_TOTAL_COUNT.set(0);
-            total = 0;
-        }
-
-        if (total > 0) {
-            updateUnreadUI(String.valueOf(total));
-        } else {
-            UNREAD_TOTAL_COUNT.set(0); // double ensure
-            updateUnreadUI("");
-            MainFrame.getContext().setTrayFlashing(false);
-        }
-    }
-
-    private static void updateUnreadUI(String cornerText) {
         SwingUtilities.invokeLater(() -> {
+            UNREAD_TOTAL_COUNT.addAndGet(count);
+            String cornerText = "";
+
+            if (UNREAD_TOTAL_COUNT.get() > 0) {
+                cornerText = String.valueOf(UNREAD_TOTAL_COUNT.get());
+            } else {
+                MainFrame.getContext().setTrayFlashing(false);
+            }
+
             TabOperationPanel.getContext().getChatLabel().setCornerText(cornerText);
             TabOperationPanel.getContext().repaint();
         });
     }
 
     private void initComponents() {
-        roomItemsListView = new RCListView();
+        roomItemsListView = new RCListView<>();
         roomItemsListView.getVerticalScrollBar().setUnitIncrement(RoomItemViewHolder.HEIGHT / 3);
         roomItemsListView.setScrollBarColor(Colors.SCROLL_BAR_TRACK_LIGHT, Colors.WINDOW_BACKGROUND);
     }
@@ -104,26 +88,14 @@ public class RoomsPanel extends ParentAvailablePanel {
         setBackground(Colors.WINDOW_BACKGROUND);
         roomItemsListView.setContentPanelBackground(Colors.WINDOW_BACKGROUND);
         add(roomItemsListView, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 1));
-        //add(scrollPane, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 1));
+        roomItemsListView.setAdapter(new RoomItemsAdapter(roomItemList));
     }
 
     private void initData() {
-        roomItemList.clear();
-        //从核心类加载房间列表
-/*        Set<Contacts> recentContacts = Core.getRecentContacts();
-        for (Contacts recentContact : recentContacts) {
-            RoomItem item = new RoomItem();
-            item.setRoomId(recentContact.getUsername());
-            item.setTimestamp(System.currentTimeMillis());
-            item.setName(ContactsTools.getContactDisplayNameByUserName(recentContact.getUsername()));
-            item.setLastMessage("");
-            item.setUnreadCount(0);
-            item.setGroup(recentContact.getUsername().startsWith("@@"));
-            item.setHeadImgPath(recentContact.getHeadimgurl());
-            item.setRefreshHead(true);
-            roomItemList.add(item);
-        }*/
+
+
     }
+
     /**
      * 进入房间
      *
@@ -131,21 +103,24 @@ public class RoomsPanel extends ParentAvailablePanel {
      */
     public void enterRoom(String roomId) {
         //进入房间后 "有人@我"标识消失
-        roomItemList.stream().filter(e->e.getRoomId().equals(roomId)).findFirst().ifPresent(e->{
-            e.setAtMe(false);
-        });
+        for (RoomItem roomItem : roomItemList) {
+            if (roomItem.getRoomId().equals(roomId)) {
+                roomItem.setAtMe(false);
+                break;
+            }
+        }
         //切换显示层
         ChatPanelContainer.getContext().createAndShow(roomId);
         ChatPanelContainer.getContext().show(roomId);
         //更新聊天列表未读数量
-        hasReadCount(roomId);
+        hasRead(roomId);
 
         //发送消息已读通知
         ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
             try {
                 MessageTools.sendStatusNotify(roomId);
             } catch (IOException | InterruptedException e) {
-               log.error(e.getMessage());
+                log.error(e.getMessage(), e);
             }
         });
     }
@@ -156,25 +131,25 @@ public class RoomsPanel extends ParentAvailablePanel {
      * @param latestMsg 最近的一条消息
      * @param hasNewMsg 是否有未读消息 ，当房间为免打扰房间时newReadCount不计数，此时通过hasNewMsg判断
      */
-    private void addRoom(String roomId, String latestMsg, int newReadCount, Boolean hasNewMsg, Boolean atMe) {
+    private void addRoomFirst(String roomId, String latestMsg, int newReadCount, Boolean hasNewMsg, Boolean atMe) {
         Contacts contacts = Core.getMemberMap().get(roomId);
         RoomItem roomItem = new RoomItem(contacts, latestMsg, newReadCount, hasNewMsg);
         roomItem.setAtMe(atMe);
-        addRoom(roomItem);
+        addRoomFirst(roomItem);
     }
     /**
      * 添加房间
      *
      * @param roomId 联系人ID
      */
-    public void addRoom(String roomId) {
-        addRoom(roomId, "", 0, false, false);
+    public void addRoomFirst(String roomId) {
+        addRoomFirst(roomId, "", 0, false, false);
     }
     /**
      * 添加房间
      * @param item 房间Item
      */
-    private void addRoom(RoomItem item) {
+    private void addRoomFirst(RoomItem item) {
         roomItemList.addFirst(item);
         roomItemsListView.notifyDataSetChanged(false);
         roomItemsListView.scrollToPosition(0);
@@ -188,13 +163,13 @@ public class RoomsPanel extends ParentAvailablePanel {
      * @param isMute 是否免打扰
      * @param hasNewMsg 是否有未读消息 ，当房间为免打扰房间时newReadCount不计数，此时通过hasNewMsg判断
      */
-    public void addRoomOrOpenRoom(String roomId, String latestMsg, int newReadCount, Boolean isMute, boolean hasNewMsg, Boolean atMe) {
+    public void addRoomOrUpdateRoom(String roomId, String latestMsg, int newReadCount, Boolean isMute, boolean hasNewMsg, Boolean atMe) {
 
         //更新聊天列表
         Set<String> recentContacts = Core.getRecentContacts();
         if (!recentContacts.contains(roomId)) {
             //添加新房间并制定
-            addRoom(roomId, latestMsg, newReadCount, hasNewMsg, atMe);
+            addRoomFirst(roomId, latestMsg, newReadCount, hasNewMsg, atMe);
             recentContacts.add(roomId);
         } else {
             //更新消息 置顶
@@ -222,25 +197,6 @@ public class RoomsPanel extends ParentAvailablePanel {
     }
 
 
-    /**
-     * 更新房间未读消息数
-     *
-     * @param roomId      房间id
-     * @param newReadCount 新消息数量
-     */
-    public void updateUnreadCount(String roomId, int newReadCount) {
-        for (int i = 0; i < roomItemList.size(); i++) {
-            RoomItem item = roomItemList.get(i);
-            if (item.getRoomId().equals(roomId)) {
-                //找到对应房间
-                if (newReadCount>0) {
-                    item.setUnreadCount(item.getUnreadCount() + newReadCount);
-                }
-                roomItemsListView.notifyItemChanged(i);
-                break;
-            }
-        }
-    }
     /**
      * 删除房间
      * @param pos 位置
@@ -286,33 +242,27 @@ public class RoomsPanel extends ParentAvailablePanel {
      *
      * @param roomId  房间id
      */
-    public void hasReadCount(String roomId) {
-
-        new SwingWorker<Object, Object>() {
-            Integer pos = null;
-
+    public void hasRead(String roomId) {
+        ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
             @Override
-            protected Object doInBackground() throws Exception {
+            public void run() {
+                //TODO 如果另一个线程添加了房间 这里的索引可能不正确
+                //TODO 最好的方式是使用对象更新
                 for (int i = 0; i < roomItemList.size(); i++) {
                     RoomItem item = roomItemList.get(i);
                     if (item.getRoomId().equals(roomId)) {
                         updateUnreadTotalCount(-item.getUnreadCount());
                         item.setUnreadCount(0);
                         item.setHasNewMsg(false);
-                        pos = i;
+                        int finalI = i;
+                        SwingUtilities.invokeLater(() -> {
+                            roomItemsListView.notifyItemChanged(finalI);
+                        });
                         break;
                     }
                 }
-                return null;
             }
-
-            @Override
-            protected void done() {
-                if (pos != null) {
-                    roomItemsListView.notifyItemChanged(pos);
-                }
-            }
-        }.execute();
+        });
 
     }
 

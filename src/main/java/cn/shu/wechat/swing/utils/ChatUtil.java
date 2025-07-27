@@ -55,7 +55,7 @@ public final class ChatUtil {
      * @param userId
      */
     public static void createDirectChat(String userId) {
-        RoomsPanel.getContext().addRoom(userId);
+        RoomsPanel.getContext().addRoomFirst(userId);
         Core.getRecentContacts().add(userId);
     }
 
@@ -83,7 +83,7 @@ public final class ChatUtil {
                   ChatPanelContainer.get(roomId).addMessageToEnd(message);
                 }
             //新增或选择聊天列表
-            RoomsPanel.getContext().addRoomOrOpenRoom(roomId, lastMsg, count, isMute, hasNewMsg, isAtMe(roomId, lastMsg));
+            RoomsPanel.getContext().addRoomOrUpdateRoom(roomId, lastMsg, count, isMute, hasNewMsg, isAtMe(roomId, lastMsg));
 
         });
     }

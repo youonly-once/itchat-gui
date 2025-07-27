@@ -16,8 +16,8 @@ import java.util.Map;
 /**
  * Created by 舒新胜 on 17-5-30.
  */
-public class RCListView<T extends ViewHolder> extends JScrollPane {
-    private BaseAdapter<T> adapter;
+public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends JScrollPane {
+    private M adapter;
     @Getter
     private JPanel contentPanel;
     private int vGap;
@@ -222,7 +222,7 @@ public class RCListView<T extends ViewHolder> extends JScrollPane {
         return adapter;
     }
 
-    public void setAdapter(BaseAdapter adapter) {
+    public void setAdapter(M adapter) {
         this.adapter = adapter;
 
         fillComponents();
@@ -278,6 +278,10 @@ public class RCListView<T extends ViewHolder> extends JScrollPane {
 
     }
 
+    public void removeComponent(int pos) {
+        contentPanel.remove(pos);
+        contentPanel.revalidate();
+    }
     /**
      * 重绘指定区间内的元素
      *
@@ -436,12 +440,12 @@ public class RCListView<T extends ViewHolder> extends JScrollPane {
      *
      * @return
      */
-    public List<Component> getItems() {
+    public List<T> getItems() {
         Component[] components = contentPanel.getComponents();
-        List<Component> viewHolders = new ArrayList<>();
+        List<T> viewHolders = new ArrayList<>();
         for (Component com : components) {
             if (!(com instanceof HeaderViewHolder)) {
-                viewHolders.add(com);
+                viewHolders.add((T) com);
             }
         }
 

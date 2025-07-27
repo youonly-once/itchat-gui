@@ -65,7 +65,7 @@ public class CreateGroupDialog extends JDialog {
                     ContactsTools.getContactDisplayNameByUserName(con.getRoomId()),
                     false));
         }
-        selectUserPanel = new SelectUserPanel(DIALOG_WIDTH, DIALOG_HEIGHT - 100, userList);
+        selectUserPanel = new SelectUserPanel(DIALOG_WIDTH, DIALOG_HEIGHT - 100, userList, Core.getMemberMap().values());
 
     }
 

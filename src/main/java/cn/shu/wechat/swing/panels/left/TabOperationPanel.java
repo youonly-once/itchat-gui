@@ -7,6 +7,7 @@ import cn.shu.wechat.swing.label.CornerMarkJLabel;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.swing.panels.RightPanel;
 import cn.shu.wechat.swing.utils.IconUtil;
+import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,10 +32,8 @@ public class TabOperationPanel extends ParentAvailablePanel {
     private ImageIcon contactIconActive;
     private ImageIcon meIconNormal;
     private ImageIcon meIconActive;
-    public static TabOperationPanel getContext() {
-        return context;
-    }
 
+    @Getter
     private static TabOperationPanel context;
     private LeftPanel parent;
 

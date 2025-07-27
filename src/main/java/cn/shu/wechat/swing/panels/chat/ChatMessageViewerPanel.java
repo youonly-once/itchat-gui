@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.panels.chat;
 
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
+import cn.shu.wechat.swing.adapter.message.MessageAdapter;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCListView;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
@@ -12,7 +13,7 @@ import java.awt.*;
  * Created by 舒新胜 on 17-5-30.
  */
 public class ChatMessageViewerPanel extends ParentAvailablePanel {
-    private RCListView<BaseMessageViewHolder> listView;
+    private RCListView<BaseMessageViewHolder, MessageAdapter> listView;
 
     public ChatMessageViewerPanel(JPanel parent) {
         super(parent);
@@ -39,7 +40,7 @@ public class ChatMessageViewerPanel extends ParentAvailablePanel {
         add(listView, BorderLayout.CENTER);
     }
 
-    public RCListView<BaseMessageViewHolder> getMessageListView() {
+    public RCListView<BaseMessageViewHolder, MessageAdapter> getMessageListView() {
         return listView;
     }
 }

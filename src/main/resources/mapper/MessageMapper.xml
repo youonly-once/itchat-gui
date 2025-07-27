@@ -1120,7 +1120,7 @@
         or from_nickname = #{nickName,jdbcType=VARCHAR}
       </if>
 
-      order by create_time desc
+      order by message_time desc
       limit #{start},#{end}
     </select>
 

@@ -27,7 +27,7 @@ public class ContactsPanel extends ParentAvailablePanel {
     @Getter
     private static ContactsPanel context;
 
-    private RCListView contactsListView;
+    private RCListView<ContactsItemViewHolder, ContactsItemsAdapter> contactsListView;
     private final List<ContactsItem> contactsItemList = new ArrayList<>();
     /**
      * 每次加载的联系人数量
@@ -50,7 +50,7 @@ public class ContactsPanel extends ParentAvailablePanel {
 
 
     private void initComponents() {
-        contactsListView = new RCListView();
+        contactsListView = new RCListView<>();
     }
 
     private void initView() {
@@ -59,26 +59,23 @@ public class ContactsPanel extends ParentAvailablePanel {
         contactsListView.setScrollBarColor(Colors.SCROLL_BAR_TRACK_LIGHT,Colors.WINDOW_BACKGROUND);
         contactsListView.getVerticalScrollBar().setUnitIncrement(ContactsItemViewHolder.HEIGHT);
         //滑轮滚动逐步加载
-        contactsListView.setScrollListener(new RCListView.ScrollListener() {
-            @Override
-            public void onScroll(int currValue,int maxValue) {
-                int visibleAmount = contactsListView.getVerticalScrollBar().getVisibleAmount();
+        contactsListView.setScrollListener((currValue, maxValue) -> {
+            int visibleAmount = contactsListView.getVerticalScrollBar().getVisibleAmount();
 
-                int count = initialCount;
-                if (loadedCount.get()+count >= contactsItemList.size()){
-                    count = contactsItemList.size() - loadedCount.get();
-                }
-                if (count <= 0){
-                    return;
-                }
-                //到底了
-                if (currValue + visibleAmount + contactsListView.getVerticalScrollBar().getUnitIncrement() >= maxValue){
-                    contactsListView.notifyItemAppend(loadedCount.getAndAdd(count),count);
-                    contactsListView.getVerticalScrollBar().setValue(currValue-50);
-                }
-
-
+            int count = initialCount;
+            if (loadedCount.get() + count >= contactsItemList.size()) {
+                count = contactsItemList.size() - loadedCount.get();
             }
+            if (count <= 0) {
+                return;
+            }
+            //到底了
+            if (currValue + visibleAmount + contactsListView.getVerticalScrollBar().getUnitIncrement() >= maxValue) {
+                contactsListView.notifyItemAppend(loadedCount.getAndAdd(count), count);
+                contactsListView.getVerticalScrollBar().setValue(currValue - 50);
+            }
+
+
         });
         add(contactsListView, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 1));
     }
@@ -106,50 +103,17 @@ public class ContactsPanel extends ParentAvailablePanel {
      * 联系人数据刷新
      */
     public void notifyDataSetChanged() {
-        ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
-            @Override
-            public void run() {
-                initData();
-                loadedCount.set(0);
-                ((ContactsItemsAdapter) contactsListView.getAdapter()).processData();
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        int count = Math.min(initialCount, contactsItemList.size());
-                        contactsListView.notifyItemAppend(loadedCount.getAndAdd(count), count);
-                    }
-                });
-            }
+        ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
+            initData();
+            loadedCount.set(0);
+            ((ContactsItemsAdapter) contactsListView.getAdapter()).processData();
+            SwingUtilities.invokeLater(() -> {
+                int count = Math.min(initialCount, contactsItemList.size());
+                contactsListView.notifyItemAppend(loadedCount.getAndAdd(count), count);
+            });
         });
 
 
-    }
-
-
-
-    /**
-     * 更新联系人头像
-     * @param contactId 联系人id
-     * @param image 联系人头像
-     */
-    public void updateAvatar(String contactId, ImageIcon image) {
-        for (int i = 0; i < contactsItemList.size(); i++) {
-            ContactsItem contactsItem = contactsItemList.get(i);
-            if (contactsItem.getId().equals(contactId)){
-                updateAvatar(i,image);
-            }
-        }
-    }
-
-    /**
-     * 更新联系人头像
-     * @param pos 联系人位置
-     * @param image 联系人头像
-     */
-    public void updateAvatar(int pos, ImageIcon image) {
-        ContactsItem contactsItem = contactsItemList.get(pos);
-        contactsItem.setAvatar(image);
-        contactsListView.notifyItemChanged(pos);
     }
 
 

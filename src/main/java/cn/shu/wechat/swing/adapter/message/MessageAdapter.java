@@ -67,7 +67,7 @@ import java.util.concurrent.BlockingQueue;
 @Log4j2
 public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     private final List<Message> messageItems;
-    private final RCListView<BaseMessageViewHolder> listView;
+    private final RCListView<BaseMessageViewHolder, MessageAdapter> listView;
     private final AttachmentIconHelper attachmentIconHelper = new AttachmentIconHelper();
     private final ImageCache imageCache;
     private final Mp3Player player = new Mp3Player();
@@ -77,7 +77,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
     MessageViewHolderCacheHelper messageViewHolderCacheHelper;
 
-    public MessageAdapter(ChatMessagePanel parent, List<Message> messageItems, RCListView<BaseMessageViewHolder> listView, MessageViewHolderCacheHelper messageViewHolderCacheHelper) {
+    public MessageAdapter(ChatMessagePanel parent, List<Message> messageItems, RCListView<BaseMessageViewHolder, MessageAdapter> listView, MessageViewHolderCacheHelper messageViewHolderCacheHelper) {
         this.messageItems = messageItems;
         this.listView = listView;
         this.parent = parent;

@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.panels.left;
 
+import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.panels.left.tabcontent.CollectionsPanel;
@@ -67,7 +68,7 @@ public class LeftPanel extends JPanel {
         //搜索结果panel
         searchResultPanel = new ContactsSearchResultPanel(leftTabContentPanel, SEARCH);
 
-        searchPanel = new SearchPanel(this, searchResultPanel);
+        searchPanel = new SearchPanel(this, searchResultPanel, Core.getMemberMap().values());
     }
 
     private void initView() {

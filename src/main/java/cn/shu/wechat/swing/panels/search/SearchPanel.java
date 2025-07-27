@@ -1,6 +1,5 @@
 package cn.shu.wechat.swing.panels.search;
 
-import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.mapper.MessageMapper;
@@ -29,7 +28,6 @@ import java.util.Timer;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by 舒新胜 on 17-5-29.
@@ -61,10 +59,15 @@ public class SearchPanel extends ParentAvailablePanel {
 
     private static final int MAX_RESULT = 20;
 
+    /**
+     * 待搜索列表
+     */
+    private final Collection<Contacts> searchList;
 
-    public SearchPanel(JPanel parent, SearchResultPanel searchResultPanel) {
+    public SearchPanel(JPanel parent, SearchResultPanel searchResultPanel, Collection<Contacts> searchList) {
         super(parent);
         this.searchResultPanel = searchResultPanel;
+        this.searchList = searchList;
         initComponent();
         initView();
         setListeners();
@@ -301,15 +304,14 @@ public class SearchPanel extends ParentAvailablePanel {
      * @param version 搜索版本 本次搜索未完成时另一次搜索开始，此时通过版本号终止本次搜索
      */
     private void searchContacts(String keyWord, int version, List<SearchResultItem> data) {
-        Map<String, Contacts> memberMap = Core.getMemberMap();
+        ;
         String keyWordLower = keyWord.toLowerCase();
         String keyWordPinyin = toPinyin(keyWord);
         String keyWordInitial = toInitial(keyWord);
 
-        List<SearchResultItem> results = memberMap.entrySet().stream()
-                .takeWhile(entry -> !outdatedVersionAndInterrupted(version))
-                .map(entry -> {
-                    Contacts contact = entry.getValue();
+        List<SearchResultItem> results = searchList.stream()
+                .takeWhile(contact -> !outdatedVersionAndInterrupted(version))
+                .map(contact -> {
                     try {
                         int score = 0;
                         String matchField = null;
@@ -370,8 +372,8 @@ public class SearchPanel extends ParentAvailablePanel {
                         // 构建结果项
                         SearchResultItem item = new SearchResultItem();
                         item.setType(SearchResultType.CONTACTS.CODE);
-                        item.setId(entry.getKey());
-                        item.setTag(entry.getKey());
+                        item.setId(contact.getUsername());
+                        item.setTag(contact.getUsername());
                         item.setName(matchField);
                         item.setScore(score);
                         return item;
@@ -409,6 +411,7 @@ public class SearchPanel extends ParentAvailablePanel {
         }
         return false;
     }
+
 
     public static class SearchDebounce {
         private final int delayMs;

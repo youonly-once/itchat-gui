@@ -39,7 +39,6 @@ import java.net.http.HttpResponse;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
@@ -349,8 +348,7 @@ public class LoginServiceImpl implements LoginService {
     public BufferedImage getQR() throws IOException, InterruptedException {
         String qrUrl = WxURLEnum.QRCODE_URL.getUrl() + Core.getUuid();
 
-        BufferedImage image = ImageIO.read(HttpUtil.doGet(qrUrl, null, null,true, HttpResponse.BodyHandlers.ofInputStream()));
-        return image;
+        return ImageIO.read(HttpUtil.doGet(qrUrl, null, null, true, HttpResponse.BodyHandlers.ofInputStream()));
 
     }
 
@@ -691,12 +689,13 @@ public class LoginServiceImpl implements LoginService {
                 Core.getLoginResultData().getPassTicket());
 
 
-        List<Map<String, String>> queryList = groupName.stream().map(s -> {
-            HashMap<String, String> map = new HashMap<String, String>();
+        List<Map<String, String>> queryList = new ArrayList<>(groupName.size());
+        for (String s : groupName) {
+            Map<String, String> map = new HashMap<>(2); // 预设容量
             map.put("UserName", s);
             map.put("EncryChatRoomId", "");
-            return map;
-        }).collect(Collectors.toList());
+            queryList.add(map);
+        }
 
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("Count", groupName.size());
@@ -718,7 +717,10 @@ public class LoginServiceImpl implements LoginService {
                 String userName = group.getUsername();
                 if (ContactsTools.isRoomContact(userName)) {
                     try {
-                        Map<String, Contacts> oldMemberList = group.getMemberlist().stream().collect(Collectors.toMap(Contacts::getUsername, Function.identity()));
+                        Map<String, Contacts> oldMemberList = new HashMap<>();
+                        for (Contacts c : group.getMemberlist()) {
+                            oldMemberList.put(c.getUsername(), c); // 后值覆盖前值
+                        }
                         //详情接口不返回DisplayName
                         JSONArray memberArray = WebWxBatchGetContactGroupMemberDetail(group);
                         List<Contacts> memberList = JSON.parseArray(JSON.toJSONString(memberArray), Contacts.class);

@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.panels;
 
+import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.swing.adapter.SelectUserItemViewHolder;
 import cn.shu.wechat.swing.adapter.SelectUserItemsAdapter;
 import cn.shu.wechat.swing.adapter.SelectedUserItemViewHolder;
@@ -14,11 +15,13 @@ import cn.shu.wechat.swing.panels.search.ForwardSearchResultPanel;
 import cn.shu.wechat.swing.panels.search.SearchCardLayoutPanel;
 import cn.shu.wechat.swing.panels.search.SearchPanel;
 import cn.shu.wechat.swing.utils.IconUtil;
+import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -35,13 +38,15 @@ public class SelectUserPanel extends JPanel {
     private JButton cancelButton;
     private JButton okButton;*/
     private final int width;
-    private RCListView<SelectedUserItemViewHolder> selectUserListView;
-    private RCListView<SelectedUserItemViewHolder> selectedUserListView;
+    private RCListView<SelectUserItemViewHolder, SelectUserItemsAdapter> selectUserListView;
+    private RCListView<SelectedUserItemViewHolder, SelectedUserItemsAdapter> selectedUserListView;
     private final int height;
     private ForwardSearchResultPanel leftResultPanel;
     private SearchCardLayoutPanel leftCardPanel;
     private SearchPanel searchPanel;
 
+    @Setter
+    private Collection<Contacts> searchList;
     private List<SelectUserData> leftUserList;
     /**
      * 已选择的用户列表
@@ -53,14 +58,18 @@ public class SelectUserPanel extends JPanel {
     private ImageIcon uncheckIcon;
 
 
-    public SelectUserPanel(int width, int height, List<SelectUserData> leftUserList) {
+    public SelectUserPanel(int width, int height, List<SelectUserData> leftUserList, Collection<Contacts> searchList) {
         this.width = width;
         this.height = height;
         this.leftUserList = leftUserList;
-
+        this.searchList = searchList;
         initComponents();
         initView();
-        // setListeners();
+    }
+
+
+    public void update() {
+        selectUserListView.notifyDataSetChanged(false);
     }
 
 
@@ -78,13 +87,13 @@ public class SelectUserPanel extends JPanel {
 
         leftCardPanel = new SearchCardLayoutPanel(this, RECENT_CONTACTS, RECENT_CONTACTS);
 
-        leftResultPanel = new ForwardSearchResultPanel(leftCardPanel, SEARCH);
+        leftResultPanel = new ForwardSearchResultPanel(leftCardPanel, SEARCH, leftUserList);
         leftResultPanel.setPreferredSize(new Dimension(width / 2 - 1, height - 10));
         leftResultPanel.setBorder(new RCBorder(RCBorder.RIGHT, Colors.LIGHT_GRAY));
 
-        searchPanel = new SearchPanel(this, leftResultPanel);
+        searchPanel = new SearchPanel(this, leftResultPanel, searchList);
         // 选择用户列表
-        selectUserListView = new RCListView();
+        selectUserListView = new RCListView<>();
 
         selectUserItemsAdapter = new SelectUserItemsAdapter(leftUserList);
         selectUserItemsAdapter.setMouseListener(new AbstractMouseListener() {
@@ -111,8 +120,7 @@ public class SelectUserPanel extends JPanel {
         selectedUserItemsAdapter = new SelectedUserItemsAdapter(selectedUserList);
         selectedUserItemsAdapter.setItemRemoveListener(username -> {
             if (unSelectUser(username)) {
-                for (Component holder : selectUserListView.getItems()) {
-                    SelectUserItemViewHolder viewHolder = (SelectUserItemViewHolder) holder;
+                for (SelectUserItemViewHolder viewHolder : selectUserListView.getItems()) {
                     if (viewHolder.username.equals(username)) {
                         viewHolder.icon.setIcon(uncheckIcon);
                         break;
@@ -213,4 +221,5 @@ public class SelectUserPanel extends JPanel {
         selectUserItemsAdapter.setUserList(leftUserList);
         selectUserListView.notifyDataSetChanged(false);
     }
+
 }

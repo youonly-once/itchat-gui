@@ -409,14 +409,16 @@ public class MsgCenter {
         String logStr = LogUtil.printFromMeg(msg, msgType.getDesc());
         //=============如果是当前房间 发送已读通知==============
         if (msg.getFromUserName().equals(ChatPanelContainer.getCurrRoomId())) {
-            ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
-                try {
-                    MessageTools.sendStatusNotify(msg.getFromUserName());
-                } catch (IOException | InterruptedException e) {
-                    log.warn(e.getMessage());
-                    throw new RuntimeException(e);
-                }
-            });
+            if (MainFrame.getContext().isActive()) {
+                ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
+                    try {
+                        MessageTools.sendStatusNotify(msg.getFromUserName());
+                    } catch (IOException | InterruptedException e) {
+                        log.warn(e.getMessage());
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
         }
         log.info(logStr);
 
@@ -594,7 +596,7 @@ public class MsgCenter {
                     case READED:
                         //=============用户在其他平台消息已读的通知=============
                         //更新聊天列表未读数量
-                        RoomsPanel.getContext().hasReadCount(msg.getToUserName());
+                        RoomsPanel.getContext().hasRead(msg.getToUserName());
                         return;
 
                     default:

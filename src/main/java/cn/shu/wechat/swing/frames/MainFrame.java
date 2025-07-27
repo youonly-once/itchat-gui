@@ -14,7 +14,6 @@ import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.SleepUtils;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
-import lombok.extern.slf4j.Slf4j;
 
 import javax.sound.sampled.*;
 import javax.swing.*;
@@ -277,25 +276,25 @@ public class MainFrame extends JFrame {
     /**
      * 设置任务栏图标闪动
      */
-    public synchronized void setTrayFlashing(boolean flashing) {
+    public void setTrayFlashing(boolean flashing) {
+        SwingUtilities.invokeLater(() -> {
+            trayFlashing = flashing;
 
-        trayFlashing = flashing;
+            if (trayFlashing) {
+                //唤醒线程 闪烁
+                if (trayFlashingThread != null) {
+                    LockSupport.unpark(trayFlashingThread);
+                }
 
-        if (trayFlashing) {
-            //唤醒线程 闪烁
-            if (trayFlashingThread !=null) {
-                LockSupport.unpark(trayFlashingThread);
-            }
 
-            SwingUtilities.invokeLater(() -> {
                 if (SystemTray.isSupported()) {
                     //任务栏提示
                     trayIcon.displayMessage("新消息", "您有一条新消息，请查收", TrayIcon.MessageType.INFO);
                 }
-            });
 
 
-        }
+            }
+        });
     }
 
 

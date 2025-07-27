@@ -16,13 +16,12 @@ import cn.shu.wechat.swing.utils.IconUtil;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ForwardSearchResultPanel extends SearchResultPanel {
-    private RCListView selectUserListView;
+    private RCListView<SelectUserItemViewHolder, SelectUserItemsAdapter> selectUserListView;
 
-    private List<SelectUserData> leftUserList = new ArrayList<>();
+    private List<SelectUserData> leftUserList;
 
     private SelectUserItemsAdapter selectUserItemsAdapter;
 
@@ -30,8 +29,9 @@ public class ForwardSearchResultPanel extends SearchResultPanel {
     private ImageIcon uncheckIcon;
 
 
-    public ForwardSearchResultPanel(JPanel parent, String selfName) {
+    public ForwardSearchResultPanel(JPanel parent, String selfName, List<SelectUserData> leftUserList) {
         super(parent, selfName);
+        this.leftUserList = leftUserList;
         initComponents();
         initView();
     }

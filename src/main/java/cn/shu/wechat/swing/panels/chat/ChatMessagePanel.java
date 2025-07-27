@@ -18,8 +18,9 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.swing.components.message.FileEditorThumbnail;
-import cn.shu.wechat.swing.components.message.RemindUserPopup;
+import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.frames.MainFrame;
+import cn.shu.wechat.swing.frames.RemindUserDialog;
 import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
 import cn.shu.wechat.swing.listener.ExpressionListener;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
@@ -34,6 +35,8 @@ import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.MediaUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.util.StringUtils;
 
@@ -51,10 +54,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Timer;
+import java.util.*;
 
 /**
  * 右侧聊天面板
@@ -68,14 +71,10 @@ public class ChatMessagePanel extends ParentAvailablePanel {
      */
     private ChatMessageViewerPanel chatMessageViewerPanel;
 
-    public ChatMessageEditorPanel getMessageEditorPanel() {
-        return chatMessageEditorPanel;
-    }
-
     /**
-     * 消息输入框
+     *  用户列表
      */
-    private ChatMessageEditorPanel chatMessageEditorPanel;
+    private final RemindUserDialog remindUserDialog = new RemindUserDialog(MainFrame.getContext(), true);
 
     /**
      * 消息列表
@@ -92,27 +91,27 @@ public class ChatMessagePanel extends ParentAvailablePanel {
      * 当前房间id
      */
     private final String roomId;
-
-
-    public void setRoomMembers(List<String> roomMembers) {
-        this.roomMembers = roomMembers;
-    }
-
     /**
-     * 房间的用户 username列表
+     * 保留最近发消息的5个人 @列表展示
      */
-    private List<String> roomMembers = new ArrayList<>();
+    private final Map<String, String> recentSenderUser = new LinkedHashMap<>(16, 0.75f, true) {
+
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
+            return size() > 10;
+        }
+    };
 
 
     /**
      * 每次加载的消息条数
      */
     private static final int PAGE_LENGTH = 5;
-
     /**
-     * @" 用户列表
+     * 消息输入框
      */
-    private final RemindUserPopup remindUserPopup = new RemindUserPopup();
+    @Getter
+    private ChatMessageEditorPanel chatMessageEditorPanel;
     private final MessageViewHolderCacheHelper messageViewHolderCacheHelper;
 
 
@@ -121,19 +120,66 @@ public class ChatMessagePanel extends ParentAvailablePanel {
     private final Queue<String> shareAttachmentUploadQueue = new ArrayDeque<>(MAX_SHARE_ATTACHMENT_UPLOAD_COUNT);
 
     private volatile boolean isLoadHis = false;
+    /**
+     * 房间的用户 username列表
+     */
+    @Setter
+    private List<String> roomMembers = new ArrayList<>();
 
     public ChatMessagePanel(JPanel parent, String roomId) {
 
         super(parent);
         this.roomId = roomId;
-        if (StringUtils.isEmpty(roomId)) {
-            throw new NullPointerException("roomid can not be null.");
+        if (org.apache.commons.lang3.StringUtils.isEmpty(roomId)) {
+            throw new NullPointerException("RoomId can not be null.");
         }
-
         messageViewHolderCacheHelper = new MessageViewHolderCacheHelper();
         initComponents();
         initView();
         setListeners();
+    }
+
+    /**
+     * 使用默认程序打开文件
+     *
+     * @param path
+     */
+    public static void openFileWithDefaultApplication(String path) {
+        ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (DownloadManager.containsTask(path)) {
+                        if (DownloadManager.getStatus(path) == DownloadStatus.SUCCESS) {
+                            Desktop.getDesktop().open(new File(path));
+                        } else if (DownloadManager.getStatus(path) == DownloadStatus.RUNNING || DownloadManager.getStatus(path) == DownloadStatus.WAITING) {
+                            JOptionPane.showMessageDialog(null, "下载中", "打开失败", JOptionPane.ERROR_MESSAGE);
+                        } else if (DownloadManager.getStatus(path) == DownloadStatus.FAIL) {
+                            JOptionPane.showMessageDialog(null, "下载失败", "打开失败", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } else {
+                        Desktop.getDesktop().open(new File(path));
+                    }
+
+                } catch (IOException e1) {
+                    JOptionPane.showMessageDialog(null, "文件打开失败，没有找到关联的应用程序", "打开失败", JOptionPane.ERROR_MESSAGE);
+                    log.error(e1.getMessage(), e1);
+                } catch (IllegalArgumentException e2) {
+                    JOptionPane.showMessageDialog(null, "文件已被删除", "打开失败", JOptionPane.ERROR_MESSAGE);
+                    log.error(e2.getMessage(), e2);
+                }
+
+
+            }
+        });
+    }
+
+
+    private void initView() {
+        this.setLayout(new GridBagLayout());
+        add(chatMessageViewerPanel, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 4));
+        add(chatMessageEditorPanel, new GBC(0, 1).setFill(GBC.BOTH).setWeight(1, 1));
+
     }
 
     private void initComponents() {
@@ -151,172 +197,24 @@ public class ChatMessagePanel extends ParentAvailablePanel {
         chatMessageEditorPanel = new ChatMessageEditorPanel(this, roomId);
 
         chatMessageEditorPanel.setPreferredSize(new Dimension(MainFrame.DEFAULT_WIDTH, MainFrame.DEFAULT_WIDTH / 4));
-    }
+        Timer timer = new Timer();
 
-
-    private void initView() {
-        this.setLayout(new GridBagLayout());
-        add(chatMessageViewerPanel, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 4));
-        add(chatMessageEditorPanel, new GBC(0, 1).setFill(GBC.BOTH).setWeight(1, 1));
-
-    }
-
-
-    private void setListeners() {
-        //暂时不加载历史消息，无意义
-        chatMessageViewerPanel.getMessageListView().setScrollToTopListener(() -> {
-            // 当滚动到顶部时，继续拿前面的消息
-            if (isLoadHis) {
-                return;
-            }
-            if (roomId != null) {
-                isLoadHis = true;
-                ((ChatPanel) ChatMessagePanel.this.getParentPanel()).getTitlePanel().showStatusLabel("加载中...");
-
-                new SwingWorker<>() {
-                    List<Message> messageList = null;
-
-                    @Override
-                    protected Object doInBackground() {
-                        try {
-                            MessageMapper mapper = SpringContextHolder.getBean(MessageMapper.class);
-                            Contacts contacts = Core.getMemberMap().get(roomId);
-                            String remarkName = ContactsTools.getContactRemarkNameByUserName(contacts);
-                            String nickName = ContactsTools.getContactNickNameByUserName(contacts);
-                            messageList = mapper.selectByPage(messageItems.size(), PAGE_LENGTH, roomId, remarkName, nickName);
-                            for (Message message : messageList) {
-                                if (message.getIsSend()) {
-                                    message.setFromUsername(Core.getUserName());
-                                    message.setToUsername(roomId);
-                                    if (ContactsTools.isRoomContact(roomId)) {
-                                        message.setFromMemberOfGroupUsername(Core.getUserName());
-                                    }
-                                } else {
-                                    message.setFromUsername(roomId);
-                                    message.setToUsername(Core.getUserName());
-                                    if (ContactsTools.isRoomContact(roomId)) {
-                                        List<Contacts> members = Core.getMemberMap().get(roomId).getMemberlist();
-                                        ContactsTools.findGroupMember(members, message).ifPresent(member ->
-                                                message.setFromMemberOfGroupUsername(member.getUsername())
-                                        );
-                                    }
-                                }
-                            }
-                            messageList = messageList.reversed();
-                        } catch (Exception e) {
-                            log.error(e.getMessage(), e);
-                        }
-                        return null;
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                SwingUtilities.invokeLater(() -> {
+                    if (messageItems.size() > 10 && !MainFrame.getContext().isActive()
+                            && chatMessageViewerPanel.getMessageListView().getVerticalScrollBar().getValue()
+                            == chatMessageViewerPanel.getMessageListView().getVerticalScrollBar().getMaximum()) {
+                        messageItems.removeFirst();
+                        chatMessageViewerPanel.getMessageListView().removeComponent(0);
                     }
+                });
 
-                    @Override
-                    protected void done() {
-                        try {
-                            if (messageList != null && !messageList.isEmpty()) {
-                                messageItems.addAll(0, messageList);
-                                chatMessageViewerPanel.getMessageListView().notifyItemRangeInsertedHead(0, messageList.size());
-                            }
 
-                        } finally {
-                            isLoadHis = false;
-                            ((ChatPanel) ChatMessagePanel.this.getParentPanel()).getTitlePanel().hideStatusLabel();
-                        }
-
-                    }
-                }.execute();
             }
-        });
+        }, 60000, 60000);
 
-        JTextPane editor = chatMessageEditorPanel.getEditor();
-        Document document = editor.getDocument();
-
-        editor.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                // CTRL + 回车换行
-                if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    try {
-                        document.insertString(editor.getCaretPosition(), "\n", null);
-                    } catch (BadLocationException e1) {
-                        e1.printStackTrace();
-                    }
-                }
-
-                // 回车发送消息
-                else if (!e.isControlDown() && e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    sendMessage();
-                    e.consume();
-                }
-
-                // 输入@，弹出选择用户菜单
-                else if (e.getKeyChar() == '@') {
-                    Point point = editor.getCaret().getMagicCaretPosition();
-                    point = point == null ? new Point(10, 0) : point;
-                    List<String> users = exceptSelfFromRoomMember();
-                    users.add(0, "all");
-                    remindUserPopup.setUsers(users);
-                    remindUserPopup.show((Component) e.getSource(), point.x, point.y, roomId);
-                }
-
-                // 输入退格键，删除最后一个@user
-                else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-                    String str = editor.getText();
-                    if (str.matches(".*@\\w+\\s")) {
-                        try {
-                            int startPos = str.lastIndexOf("@");
-                            String rmStr = str.substring(startPos);
-                            editor.getDocument().remove(startPos + 1, rmStr.length() - 1);
-                        } catch (BadLocationException e1) {
-                            e1.printStackTrace();
-                        }
-                    }
-                }
-            }
-
-        });
-
-        remindUserPopup.setSelectedCallBack(new RemindUserPopup.UserSelectedCallBack() {
-            @Override
-            public void onSelected(String username) {
-                JTextPane editor = chatMessageEditorPanel.getEditor();
-                editor.replaceSelection(username + " ");
-            }
-        });
-
-        // 发送按钮
-        chatMessageEditorPanel.getSendButton().addActionListener(e -> sendMessage());
-
-        // 上传文件按钮
-        chatMessageEditorPanel.getUploadFileLabel().addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setDialogTitle("请选择上传文件或图片");
-                fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-
-                fileChooser.showDialog(MainFrame.getContext(), "上传");
-                File selectedFile = fileChooser.getSelectedFile();
-                if (selectedFile != null) {
-                    String path = selectedFile.getAbsolutePath();
-                    sendFileMessage(path);
-                    showSendingMessage();
-                }
-
-                super.mouseClicked(e);
-            }
-        });
-
-        // 插入表情
-        chatMessageEditorPanel.setExpressionListener(new ExpressionListener() {
-            @Override
-            public void onSelected(String code) {
-                editor.replaceSelection(code);
-            }
-            @Override
-            public void onSelected(Icon icon) {
-                editor.insertIcon(icon);
-            }
-        });
     }
 
 
@@ -486,15 +384,6 @@ public class ChatMessagePanel extends ParentAvailablePanel {
         }
     }
 
-    /**
-     * @return
-     */
-    private List<String> exceptSelfFromRoomMember() {
-        List<String> users = new ArrayList<>(roomMembers);
-        users.remove(Core.getUserSelf().getUsername());
-        return users;
-    }
-
 
     /**
      * 从数据库加载本地历史消息
@@ -526,23 +415,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
 
     }
 
-    /**
-     * 更新数据库中的房间未读消息数，以及房间列表中的未读消息数
-     *
-     * @param count 消息数量
-     */
-    private void updateUnreadCount(int count) {
-        //   room = roomService.findById(roomId);
-        if (count < 0) {
-            System.out.println(count);
-        }
-  /*      room.setUnreadCount(count);
-        room.setTotalReadCount(room.getMsgSum());*/
-        // roomService.update(room);
 
-        // 通知UI更新未读消息数
-        RoomsPanel.getContext().updateUnreadCount(roomId, count);
-    }
 
 
     /**
@@ -559,21 +432,164 @@ public class ChatMessagePanel extends ParentAvailablePanel {
         TitlePanel.getContext().hideRoomMembersPanel();
     }
 
+    private void setListeners() {
+        //暂时不加载历史消息，无意义
+        chatMessageViewerPanel.getMessageListView().setScrollToTopListener(() -> {
+            // 当滚动到顶部时，继续拿前面的消息
+            if (isLoadHis) {
+                return;
+            }
+                isLoadHis = true;
+                ((ChatPanel) ChatMessagePanel.this.getParentPanel()).getTitlePanel().showStatusLabel("加载中...");
 
-    /**
-     * 添加一条消息到消息列表最后
-     *
-     * @param messageItem 消息
-     */
-    public BaseMessageViewHolder addMessageToEnd(Message messageItem) {
-        this.messageItems.add(messageItem);
-        BaseMessageViewHolder holder = chatMessageViewerPanel.getMessageListView().notifyItemInserted(messageItems.size() - 1, true);
-        // 只有当滚动条在最底部最，新消到来后才自动滚动到底部
-        JScrollBar scrollBar = chatMessageViewerPanel.getMessageListView().getVerticalScrollBar();
-        if (scrollBar.getValue() == (scrollBar.getModel().getMaximum() - scrollBar.getModel().getExtent())) {
-            chatMessageViewerPanel.getMessageListView().setAutoScrollToBottom();
-        }
-        return holder;
+            ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
+                try {
+                    MessageMapper mapper = SpringContextHolder.getBean(MessageMapper.class);
+                    Contacts contacts = Core.getMemberMap().get(roomId);
+                    String remarkName = ContactsTools.getContactRemarkNameByUserName(contacts);
+                    String nickName = ContactsTools.getContactNickNameByUserName(contacts);
+                    List<Message> messageList = mapper.selectByPage(messageItems.size(), PAGE_LENGTH, roomId, remarkName, nickName);
+                    for (Message message : messageList) {
+                        if (message.getIsSend()) {
+                            message.setFromUsername(Core.getUserName());
+                            message.setToUsername(roomId);
+                            if (ContactsTools.isRoomContact(roomId)) {
+                                message.setFromMemberOfGroupUsername(Core.getUserName());
+                            }
+                        } else {
+                            message.setFromUsername(roomId);
+                            message.setToUsername(Core.getUserName());
+                            if (ContactsTools.isRoomContact(roomId)) {
+                                List<Contacts> members = Core.getMemberMap().get(roomId).getMemberlist();
+                                ContactsTools.findGroupMember(members, message).ifPresent(member ->
+                                        message.setFromMemberOfGroupUsername(member.getUsername())
+                                );
+                            }
+                        }
+                    }
+                    messageList = messageList.reversed();
+                    List<Message> finalMessageList = messageList;
+                    SwingUtilities.invokeLater(() -> {
+                        try {
+                            if (finalMessageList != null && !finalMessageList.isEmpty()) {
+                                messageItems.addAll(0, finalMessageList);
+                                chatMessageViewerPanel.getMessageListView().notifyItemRangeInsertedHead(0, finalMessageList.size());
+                            }
+
+                        } finally {
+                            isLoadHis = false;
+                            ((ChatPanel) ChatMessagePanel.this.getParentPanel()).getTitlePanel().hideStatusLabel();
+                        }
+                    });
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                    }
+            });
+
+        });
+
+        JTextPane editor = chatMessageEditorPanel.getEditor();
+        Document document = editor.getDocument();
+
+        editor.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                // CTRL + 回车换行
+                if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    try {
+                        document.insertString(editor.getCaretPosition(), "\n", null);
+                    } catch (BadLocationException e1) {
+                        log.error(e1.getMessage(), e);
+                    }
+                }
+
+                // 回车发送消息
+                else if (!e.isControlDown() && e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    sendMessage();
+                    e.consume();
+                }
+
+                // 输入@，弹出选择用户菜单
+                else if (e.getKeyChar() == '@' && ContactsTools.isRoomContact(roomId)) {
+                    Collection<String> values = recentSenderUser.values();
+                    List<Contacts> memberlist = Core.getMemberMap().get(roomId)
+                            .getMemberlist();
+                    if (values.isEmpty() && !memberlist.isEmpty()) {
+                        values = memberlist.subList(0, Math.min(5, memberlist.size()))
+                                .stream().map(ContactsTools::getContactDisplayNameByUserName).toList();
+                    }
+                    remindUserDialog.addData(values, memberlist);
+                    remindUserDialog.setVisible(true);
+                }
+
+                // 输入退格键，删除最后一个@user
+                else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+                    String str = editor.getText();
+                    if (str.matches(".*@\\w+\\s")) {
+                        try {
+                            int startPos = str.lastIndexOf("@");
+                            String rmStr = str.substring(startPos);
+                            editor.getDocument().remove(startPos + 1, rmStr.length() - 1);
+                        } catch (BadLocationException e1) {
+                            log.error(e1.getMessage(), e);
+                        }
+                    }
+                }
+            }
+
+        });
+
+        remindUserDialog.setListeners(usernames -> {
+            ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
+                @Override
+                public void run() {
+                    StringBuilder sb = new StringBuilder();
+                    for (SelectUserData username : usernames) {
+                        sb.append("@").append(username.getDisplayName()).append(" ");
+                    }
+                    String at = sb.substring(1);
+                    SwingUtilities.invokeLater(() -> editor.replaceSelection(at));
+                }
+            });
+
+
+
+        });
+
+        // 发送按钮
+        chatMessageEditorPanel.getSendButton().addActionListener(e -> sendMessage());
+
+        // 上传文件按钮
+        chatMessageEditorPanel.getUploadFileLabel().addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setDialogTitle("请选择上传文件或图片");
+                fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+
+                fileChooser.showDialog(MainFrame.getContext(), "上传");
+                File selectedFile = fileChooser.getSelectedFile();
+                if (selectedFile != null) {
+                    String path = selectedFile.getAbsolutePath();
+                    sendFileMessage(path);
+                    showSendingMessage();
+                }
+
+                super.mouseClicked(e);
+            }
+        });
+
+        // 插入表情
+        chatMessageEditorPanel.setExpressionListener(new ExpressionListener() {
+            @Override
+            public void onSelected(String code) {
+                editor.replaceSelection(code);
+            }
+            @Override
+            public void onSelected(Icon icon) {
+                editor.insertIcon(icon);
+            }
+        });
     }
 
 
@@ -940,17 +956,6 @@ public class ChatMessagePanel extends ParentAvailablePanel {
 
     }
 
-    private BaseMessageViewHolder getViewHolderByPosition(int position) {
-        if (position < 0) {
-            return null;
-        }
-
-        try {
-            return (BaseMessageViewHolder) chatMessageViewerPanel.getMessageListView().getItem(position);
-        } catch (Exception e) {
-            return null;
-        }
-    }
 
     public static void openFile(String filePath) {
         if (filePath == null) {
@@ -961,126 +966,28 @@ public class ChatMessagePanel extends ParentAvailablePanel {
     }
 
     /**
-     * 打开文件，如果文件不存在，则下载
+     * 添加一条消息到消息列表最后
      *
-     * @param messageId 数据库主键 消息id
+     * @param messageItem 消息
      */
-    public static void downloadOrOpenFile(String messageId) {
-        MessageMapper messageMapper = SpringContextHolder.getBean(MessageMapper.class);
-        Message message = messageMapper.selectByPrimaryKey(messageId);
-
-        openFile(message.getFilePath());
-    }
-
-    /*  *//**
-     * 下载文件
-     *
-     * @param fileAttachment
-     * @param messageId
-     *//*
-    private void downloadFile(FileAttachment fileAttachment, String messageId) {
-        final DownloadTask task = new DownloadTask(new HttpUtil.ProgressListener() {
-            @Override
-            public void onProgress(int progress) {
-                int pos = findMessagePositionInViewReverse(messageId);
-                MessageAttachmentViewHolder holder = (MessageAttachmentViewHolder) getViewHolderByPosition(pos);
-
-                if (pos < 0 || holder == null) {
-                    return;
-                }
-
-                if (progress >= 0 && progress < 100) {
-                    if (holder.sizeLabel.isVisible()) {
-                        holder.sizeLabel.setVisible(false);
-                    }
-                    if (!holder.progressBar.isVisible()) {
-                        holder.progressBar.setVisible(true);
-                    }
-
-                    holder.progressBar.setValue(progress);
-                } else if (progress >= 100) {
-                    holder.progressBar.setVisible(false);
-                    holder.sizeLabel.setVisible(true);
-                }
-            }
-        });
-
-        task.setListener(new HttpResponseListener<byte[]>() {
-            @Override
-            public void onSuccess(byte[] data) {
-                //System.out.println(data);
-                String path = fileCache.cacheFile(fileAttachment.getId(), fileAttachment.getTitle(), data);
-
-                int pos = findMessagePositionInViewReverse(messageId);
-                MessageAttachmentViewHolder holder = (MessageAttachmentViewHolder) getViewHolderByPosition(pos);
-
-                if (pos < 0 || holder == null) {
-                    return;
-                }
-                if (path == null) {
-                    holder.sizeLabel.setVisible(true);
-                    holder.sizeLabel.setText("文件获取失败");
-                    holder.progressBar.setVisible(false);
-                } else {
-                    holder.sizeLabel.setVisible(true);
-                    System.out.println("文件已缓存在 " + path);
-                    holder.sizeLabel.setText(fileCache.fileSizeString(path));
-                }
-            }
-
-            @Override
-            public void onFailed() {
-                int pos = findMessagePositionInViewReverse(messageId);
-                MessageAttachmentViewHolder holder = (MessageAttachmentViewHolder) getViewHolderByPosition(pos);
-                holder.sizeLabel.setVisible(true);
-                holder.sizeLabel.setText("文件获取失败");
-                holder.progressBar.setVisible(false);
-            }
-        });
-
-        //String url = Launcher.HOSTNAME + fileAttachment.getLink() + "?rc_uid=" + Core.getUserSelf().getUsername() + "&rc_token=" + currentUser.getAuthToken();
-        // task.execute(url);
-    }*/
-
-    /**
-     * 使用默认程序打开文件
-     *
-     * @param path
-     */
-    public static void openFileWithDefaultApplication(String path) {
-        ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (DownloadManager.containsTask(path)) {
-                        if (DownloadManager.getStatus(path) == DownloadStatus.SUCCESS) {
-                            Desktop.getDesktop().open(new File(path));
-                        } else if (DownloadManager.getStatus(path) == DownloadStatus.RUNNING || DownloadManager.getStatus(path) == DownloadStatus.WAITING) {
-                            JOptionPane.showMessageDialog(null, "下载中", "打开失败", JOptionPane.ERROR_MESSAGE);
-                        } else if (DownloadManager.getStatus(path) == DownloadStatus.FAIL) {
-                            JOptionPane.showMessageDialog(null, "下载失败", "打开失败", JOptionPane.ERROR_MESSAGE);
-                        }
-                    } else {
-                        Desktop.getDesktop().open(new File(path));
-                    }
-
-                } catch (IOException e1) {
-                    JOptionPane.showMessageDialog(null, "文件打开失败，没有找到关联的应用程序", "打开失败", JOptionPane.ERROR_MESSAGE);
-                    e1.printStackTrace();
-                } catch (IllegalArgumentException e2) {
-                    JOptionPane.showMessageDialog(null, "文件已被删除", "打开失败", JOptionPane.ERROR_MESSAGE);
-                }
-
-
-            }
-        });
+    public BaseMessageViewHolder addMessageToEnd(Message messageItem) {
+        if (messageItem.isGroup()) {
+            recentSenderUser.put(messageItem.getFromMemberOfGroupUsername(), messageItem.getFromMemberOfGroupNickname());
+        }
+        this.messageItems.add(messageItem);
+        BaseMessageViewHolder holder = chatMessageViewerPanel.getMessageListView().notifyItemInserted(messageItems.size() - 1, true);
+        // 只有当滚动条在最底部最，新消到来后才自动滚动到底部
+        JScrollBar scrollBar = chatMessageViewerPanel.getMessageListView().getVerticalScrollBar();
+        if (scrollBar.getValue() == (scrollBar.getModel().getMaximum() - scrollBar.getModel().getExtent())) {
+            chatMessageViewerPanel.getMessageListView().setAutoScrollToBottom();
+        }
+        return holder;
     }
 
 
     /**
      * 删除消息
      *
-     * @param messageId
      */
     public void deleteMessage(String messageId) {
         int pos = findMessagePositionInViewReverse(messageId);

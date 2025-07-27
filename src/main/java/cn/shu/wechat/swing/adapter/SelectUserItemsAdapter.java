@@ -44,7 +44,7 @@ public class SelectUserItemsAdapter extends BaseAdapter<SelectUserItemViewHolder
 
     @Override
     public int getCount() {
-        return userList.size();
+        return userList == null ? 0 : userList.size();
     }
 
     @Override

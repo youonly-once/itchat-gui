@@ -203,7 +203,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 Status build = Status.builder().name(to)
                         .autoStatus((short) 1).build();
                 statusMapper.insertOrUpdateSelectiveForSqlite(build);
-                ChatPanelContainer.get(toUserName).getChatMessagePanel().getMessageEditorPanel().setUndoAndAutoLabel();
+                ChatPanelContainer.get(toUserName).getChatMessagePanel().getChatMessageEditorPanel().setUndoAndAutoLabel();
 
                 messages.add(Message.builder().msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                         .content("已开启【" + remarkNameByGroupUserName + "】自动回复功能")
@@ -216,7 +216,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                build = Status.builder().name(to)
                         .autoStatus((short) 2).build();
                 statusMapper.insertOrUpdateSelectiveForSqlite(build);
-                ChatPanelContainer.get(toUserName).getChatMessagePanel().getMessageEditorPanel().setUndoAndAutoLabel();
+                ChatPanelContainer.get(toUserName).getChatMessagePanel().getChatMessageEditorPanel().setUndoAndAutoLabel();
                 messages.add(Message.builder().msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                         .content("已关闭【" + remarkNameByGroupUserName + "】自动回复功能")
                         .toUsername(toUserName).build());
@@ -228,7 +228,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 build = Status.builder().name(to)
                         .undoStatus((short) 1).build();
                 statusMapper.insertOrUpdateSelectiveForSqlite(build);
-                ChatPanelContainer.get(toUserName).getChatMessagePanel().getMessageEditorPanel().setUndoAndAutoLabel();
+                ChatPanelContainer.get(toUserName).getChatMessagePanel().getChatMessageEditorPanel().setUndoAndAutoLabel();
 
                 messages.add(Message.builder().msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                         .content("已开启【" + remarkNameByGroupUserName + "】防撤回功能")
@@ -242,7 +242,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 statusMapper.insertOrUpdateSelectiveForSqlite(build);
                 //群消息
                 nonPreventUndoMsgUserName.add(to);
-                ChatPanelContainer.get(toUserName).getChatMessagePanel().getMessageEditorPanel().setUndoAndAutoLabel();
+                ChatPanelContainer.get(toUserName).getChatMessagePanel().getChatMessageEditorPanel().setUndoAndAutoLabel();
 
                 messages.add(Message.builder().msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                         .content("已关闭【" + remarkNameByGroupUserName + "】防撤回功能")
