@@ -229,14 +229,12 @@ public class MsgCenter {
             //群消息
             if (Core.getUserName().equals(msg.getMemberName())) {
                 //自己在群里发的消息
-                msgUnReadCount = 0;
                 isFlashingTray = false;
                 newMsgLabel  = false;
                 previewLastMsg = "我: "+message.getPlaintext();
             } else {
                 //其他人在群里发的消息
                 if (isCurrRoom(message)) {
-                    msgUnReadCount = MainFrame.getContext().isActive()?0:1;
                     isFlashingTray = !MainFrame.getContext().isActive();
                     newMsgLabel  = false;
                 }
@@ -245,7 +243,6 @@ public class MsgCenter {
         } else{
             //自己的消息，默认已读
             if (userName.equals(Core.getUserName())) {
-                msgUnReadCount = 0;
                 isFlashingTray = false;
                 newMsgLabel =false;
                 previewLastMsg =  message.getPlaintext();
@@ -254,7 +251,6 @@ public class MsgCenter {
             } else {
                 //其他人的消息
                 if (isCurrRoom(message)) {
-                    msgUnReadCount = MainFrame.getContext().isActive()?0:1;
                     isFlashingTray = !MainFrame.getContext().isActive();
                     newMsgLabel  = false;
                 }
@@ -267,13 +263,14 @@ public class MsgCenter {
         }
         if(ContactsTools.isMute(contacts)|| contacts.getType().equals(Contacts.ContactsType.PUBLIC_USER)
                 || contacts.getType().equals(Contacts.ContactsType.SPECIAL_USER)){
-            msgUnReadCount = 0;
             isFlashingTray = false;
         }
 
         if (isFlashingTray){
             MainFrame.getContext().setTrayFlashing(true);
             MainFrame.getContext().playMessageSound();
+        }else{
+            msgUnReadCount = 0;
         }
 
 
