@@ -568,10 +568,10 @@ public class LoginServiceImpl implements LoginService {
             if (Core.getMemberMap().containsKey(msg.getMemberName())){
                 //群成员是我的好友，群信息没有当前成员则添加进去
 
-                contacts = Core.getMemberMap().get(msg.getMemberName());
-                if (ContactsTools.getMemberOfGroup(userName,msg.getMemberName()) == null && contacts != null) {
-                    log.error("群用户或者群成员信息不完整，添加好友进去{}", contacts);
-                    Core.getMemberMap().get(userName).getMemberlist().add(contacts);
+                if (ContactsTools.getMemberOfGroup(userName,msg.getMemberName()) == null ) {
+                    Contacts memberContacts = Core.getMemberMap().get(msg.getMemberName());
+                    log.error("群用户或者群成员信息不完整，添加好友进去{}", memberContacts);
+                    Core.getMemberMap().get(userName).getMemberlist().add(memberContacts);
                 }
 
             }else if (CollectionUtils.isEmpty(contacts.getMemberlist())

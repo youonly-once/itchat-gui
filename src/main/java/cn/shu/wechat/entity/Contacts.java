@@ -40,10 +40,10 @@ public class Contacts {
     private String city;
 
     @Excel(name="chatroomid")
-    private Double chatroomid;
+    private Integer chatroomid;
 
     @Excel(name="attrstatus")
-    private Double attrstatus;
+    private Integer attrstatus;
 
     /**
      * 等于0消息免打扰 1正常
@@ -64,32 +64,32 @@ public class Contacts {
     private Integer verifyflag;
 
     @Excel(name="unifriend")
-    private Double unifriend;
+    private Integer unifriend;
 
     @Excel(name="contactflag")
     private int contactflag;
 
-    //@ExcelCollection(name="群成员")
+
     private List<Contacts> memberlist;
 
     @Excel(name="starfriend")
-    private Double starfriend;
+    private Integer starfriend;
 
     @Excel(name="headimgurl")
     private String headimgurl;
 
     @Excel(name="appaccountflag")
-    private Double appaccountflag;
+    private Integer appaccountflag;
 
     @Excel(name="membercount")
-    private Double membercount;
+    private Integer membercount;
 
     @Excel(name="remarkpyinitial")
     private String remarkpyinitial;
 
 
     @Excel(name="snsflag")
-    private Double snsflag;
+    private Integer snsflag;
 
     @Excel(name="alias")
     private String alias;
@@ -98,19 +98,19 @@ public class Contacts {
     private String keyword;
 
     @Excel(name="hideinputbarflag")
-    private Double hideinputbarflag;
+    private Integer hideinputbarflag;
 
     @Excel(name="remarkpyquanpin")
     private String remarkpyquanpin;
 
     @Excel(name="uin")
-    private Double uin;
+    private Integer uin;
 
     @Excel(name="owneruin")
-    private Double owneruin;
+    private Integer owneruin;
 
     @Excel(name="isowner")
-    private Double isowner;
+    private Integer isowner;
 
     @Excel(name="pyinitial")
     private String pyinitial;
@@ -156,6 +156,7 @@ public class Contacts {
      */
     @JSONField(serialize = false)
     private String groupName;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
