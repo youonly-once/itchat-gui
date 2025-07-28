@@ -49,7 +49,7 @@ public class Contacts {
      * 等于0消息免打扰 1正常
      */
     @Excel(name="statues")
-    private Double statues;
+    private Integer statues;
 
     @Excel(name="pyquanpin")
     private String pyquanpin;

@@ -236,7 +236,7 @@ public class MsgCenter {
             } else {
                 //其他人在群里发的消息
                 if (isCurrRoom(message)) {
-                    msgUnReadCount = 0;
+                    msgUnReadCount = MainFrame.getContext().isActive()?0:1;
                     isFlashingTray = !MainFrame.getContext().isActive();
                     newMsgLabel  = false;
                 }
@@ -254,7 +254,7 @@ public class MsgCenter {
             } else {
                 //其他人的消息
                 if (isCurrRoom(message)) {
-                    msgUnReadCount = 0;
+                    msgUnReadCount = MainFrame.getContext().isActive()?0:1;
                     isFlashingTray = !MainFrame.getContext().isActive();
                     newMsgLabel  = false;
                 }
@@ -265,7 +265,8 @@ public class MsgCenter {
         if (Boolean.TRUE.equals(ChatUtil.isAtMe(userName, previewLastMsg))){
             isFlashingTray = true;
         }
-        if(ContactsTools.isMute(contacts)){
+        if(ContactsTools.isMute(contacts)|| contacts.getType().equals(Contacts.ContactsType.PUBLIC_USER)
+                || contacts.getType().equals(Contacts.ContactsType.SPECIAL_USER)){
             msgUnReadCount = 0;
             isFlashingTray = false;
         }
@@ -274,10 +275,14 @@ public class MsgCenter {
             MainFrame.getContext().setTrayFlashing(true);
             MainFrame.getContext().playMessageSound();
         }
-        RoomsPanel.updateUnreadTotalCount(msgUnReadCount);
+
 
         //添加一条新消息
         ChatUtil.addNewMsg(message, userName, previewLastMsg, msgUnReadCount,ContactsTools.isMute(contacts),newMsgLabel);
+        if (msgUnReadCount != 0){
+
+            RoomsPanel.getContext().updateUnreadTotalCount();
+        }
 
     }
 

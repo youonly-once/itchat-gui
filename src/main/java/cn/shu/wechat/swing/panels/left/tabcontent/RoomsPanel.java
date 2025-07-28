@@ -36,11 +36,6 @@ public class RoomsPanel extends ParentAvailablePanel {
     private static RoomsPanel context;
 
     /**
-     * 未读消息总数
-     */
-    private static final AtomicInteger UNREAD_TOTAL_COUNT = new AtomicInteger(0);
-
-    /**
      * 聊天列表视图数据
      */
     private RCListView<RoomItemViewHolder, RoomItemsAdapter> roomItemsListView;
@@ -61,20 +56,23 @@ public class RoomsPanel extends ParentAvailablePanel {
         initData();
     }
 
-    public static void updateUnreadTotalCount(int count) {
-        SwingUtilities.invokeLater(() -> {
-            UNREAD_TOTAL_COUNT.addAndGet(count);
-            String cornerText = "";
 
-            if (UNREAD_TOTAL_COUNT.get() > 0) {
-                cornerText = String.valueOf(UNREAD_TOTAL_COUNT.get());
-            } else {
-                MainFrame.getContext().setTrayFlashing(false);
-            }
+    public void updateUnreadTotalCount() {
+        int count = 0;
+        for (RoomItem item : roomItemList) {
+            count += item.getUnreadCount();
+        }
+        updateUnreadTotalCount(count);
+    }
 
-            TabOperationPanel.getContext().getChatLabel().setCornerText(cornerText);
-            TabOperationPanel.getContext().repaint();
-        });
+    public void updateUnreadTotalCount(int count) {
+        if (count > 0) {
+            TabOperationPanel.getContext().getChatLabel().setCornerText(String.valueOf(count));
+        }else{
+            TabOperationPanel.getContext().getChatLabel().setCornerText(null);
+        }
+        TabOperationPanel.getContext().repaint();
+
     }
 
     private void initComponents() {
@@ -243,28 +241,27 @@ public class RoomsPanel extends ParentAvailablePanel {
      * @param roomId  房间id
      */
     public void hasRead(String roomId) {
-        ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
-            @Override
-            public void run() {
-                //TODO 如果另一个线程添加了房间 这里的索引可能不正确
-                //TODO 最好的方式是使用对象更新
-                for (int i = 0; i < roomItemList.size(); i++) {
-                    RoomItem item = roomItemList.get(i);
-                    if (item.getRoomId().equals(roomId)) {
-                        updateUnreadTotalCount(-item.getUnreadCount());
-                        item.setUnreadCount(0);
-                        item.setHasNewMsg(false);
-                        int finalI = i;
-                        SwingUtilities.invokeLater(() -> {
-                            roomItemsListView.notifyItemChanged(finalI);
-                        });
-                        break;
-                    }
-                }
-            }
-        });
-
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(() -> updateRoomReadStatus(roomId));
+        } else {
+            updateRoomReadStatus(roomId);
+        }
     }
+
+    private void updateRoomReadStatus(String roomId) {
+        int count = 0;
+        for (int i = 0; i < roomItemList.size(); i++) {
+            RoomItem item = roomItemList.get(i);
+            if (item.getRoomId().equals(roomId)) {
+                item.setUnreadCount(0);
+                item.setHasNewMsg(false);
+                roomItemsListView.notifyItemChanged(i);
+            }
+            count += item.getUnreadCount();
+        }
+        updateUnreadTotalCount(count);
+    }
+
 
     /**
      * 更新指定房间信息

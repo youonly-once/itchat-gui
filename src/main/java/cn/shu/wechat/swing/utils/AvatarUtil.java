@@ -156,6 +156,9 @@ public final class AvatarUtil {
                             downloadTask.setType(DownloadType.RESOURCE_BY_USERNAME);
                         }
                         Image avatar = DownloadManager.submitAwait(downloadTask);
+                        if (avatar == null) {
+                            return null;
+                        }
                         try {
                             return getIconByImage( avatar);
                         } catch (IOException e) {

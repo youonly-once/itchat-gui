@@ -807,7 +807,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 public void run() {
                     //等待下载完成
                     final String slaveImgPath = item.getSlavePath();
-                    DownloadManager.awaitDownload(slaveImgPath,1000*60*5);
+                    DownloadManager.awaitDownload(slaveImgPath,1000*60*2);
                     File file = new File(slaveImgPath);
                     try {
                         ImageIcon imageIcon = new ImageIcon(ImageIO.read(file));
@@ -870,7 +870,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             @Override
             public void run() {
                 //阻塞
-                DownloadManager.awaitDownload(finalPath,1000*60*5);
+                DownloadManager.awaitDownload(finalPath,1000*60*2);
                 File file = new File(finalPath);
 
                 SwingUtilities.invokeLater(new Runnable() {
@@ -896,52 +896,41 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                             @Override
                             public void mouseClicked(MouseEvent e) {
                                 File file = new File(item.getFilePath());
-                                new SwingWorker<Object, BufferedImage>() {
-                                    @Override
-                                    protected Object doInBackground() throws Exception {
-                                        //阻塞
-                                        DownloadManager.awaitDownloadTimeOut(item.getFilePath());
-                                        if (ImageUtil.isGIF(item.getFilePath())) {
-                                            ChatMessagePanel.openFile(item.getFilePath());
-                                        } else {
-                                            if (file.exists() && file.length() <= 1024 * 1024) {
-                                                BufferedImage read = ImageIO.read(new File(item.getFilePath()));
-                                                publish(read);
-                                            } else {
-                                                ChatMessagePanel.openFile(item.getFilePath());
+                                if (ImageUtil.isGIF(item.getFilePath())) {
+                                    ChatMessagePanel.openFile(item.getFilePath());
+                                } else {
+                                    if (file.exists() && file.length() <= 1024 * 1024) {
+                                        //小图片 用自带图片查看器
+                                        try {
+                                            BufferedImage read = ImageIO.read(new File(item.getFilePath()));
+                                            ImageViewerFrame frame = ImageViewerFrame.getInstance();
+                                            frame.setVisible(false);
+                                            frame.setImage(read);
+                                            frame.toFront();
+
+                                            // 1. 如果最小化了，则恢复
+                                            if ((frame.getExtendedState() & JFrame.ICONIFIED) == JFrame.ICONIFIED) {
+                                                frame.setExtendedState(JFrame.NORMAL);
                                             }
+                                            frame.setVisible(true);
+                                        } catch (IOException ex) {
+                                            log.error(ex.getMessage(), ex);
                                         }
-
-                                        return null;
+                                    } else {
+                                        ChatMessagePanel.openFile(item.getFilePath());
                                     }
+                                }
 
-                                    @Override
-                                    protected void process(List<BufferedImage> chunks) {
-                                        BufferedImage read = chunks.get(chunks.size() - 1);
-                                        if (read == null) {
-                                            JOptionPane.showMessageDialog(MainFrame.getContext(), "图片下载中...", "文件不存在", JOptionPane.WARNING_MESSAGE);
-                                            return;
-                                        }
-                                        ImageViewerFrame instance = ImageViewerFrame.getInstance();
-                                        instance.setImage(read);
-
-                                        instance.toFront();
-                                        instance.setVisible(true);
-                                    }
-
-                                }.execute();
                                 super.mouseClicked(e);
                             }
                         });
                     }
                 });
 
-            }
-        });
+        };
 
-
+    });
     }
-
 
     /**
      * 处理 我发送的文本消息

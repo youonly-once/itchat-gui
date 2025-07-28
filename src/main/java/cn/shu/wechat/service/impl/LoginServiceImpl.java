@@ -426,10 +426,14 @@ public class LoginServiceImpl implements LoginService {
         //消息同步
         //JSONObject msgObj = webWxSync();
         WebWxSyncResp webWxSyncMsg = webWxSync();
-
         switch (WxRespConstant.SyncCheckSelectorEnum.getByCode(selector)) {
-            case NORMAL:
+            case ENTER_OR_LEAVE_CHAT:
+                webWxSync();
                 break;
+            case A:
+            default:
+                log.error("消息类型：{},{}",selector,webWxSyncMsg);
+            case NORMAL:
             case MOD_CONTACT:
             case ADD_OR_DEL_CONTACT:
             case NEW_MSG:
@@ -449,26 +453,19 @@ public class LoginServiceImpl implements LoginService {
                     });
                 }
                 //联系人修改
-                ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
+                if (!webWxSyncMsg.getModContactList().isEmpty()) {
+                    ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
 
-                    msgCenter.handleModContact(webWxSyncMsg.getModContactList());
-                });
-                    for (Contacts contacts : webWxSyncMsg.getDelContactList()) {
+                        msgCenter.handleModContact(webWxSyncMsg.getModContactList());
+                    });
+                }
+                for (Contacts contacts : webWxSyncMsg.getDelContactList()) {
                     log.info("联系人删除：{}", contacts);
                 }
 
                 break;
 
-            case ENTER_OR_LEAVE_CHAT:
-                webWxSync();
-                break;
 
-            case A:
-                log.info("未知消息：{}", webWxSyncMsg);
-                break;
-            default:
-                log.error("未知消息：{}", webWxSyncMsg);
-                break;
 
         }
     }
