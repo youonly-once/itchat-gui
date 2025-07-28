@@ -56,7 +56,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Queue;
-import java.util.Timer;
 import java.util.*;
 
 /**
@@ -106,7 +105,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
     /**
      * 每次加载的消息条数
      */
-    private static final int PAGE_LENGTH = 5;
+    private static final int PAGE_LENGTH = 10;
     /**
      * 消息输入框
      */
@@ -197,23 +196,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
         chatMessageEditorPanel = new ChatMessageEditorPanel(this, roomId);
 
         chatMessageEditorPanel.setPreferredSize(new Dimension(MainFrame.DEFAULT_WIDTH, MainFrame.DEFAULT_WIDTH / 4));
-        Timer timer = new Timer();
 
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                SwingUtilities.invokeLater(() -> {
-                    if (messageItems.size() > 10 && !MainFrame.getContext().isActive()
-                            && chatMessageViewerPanel.getMessageListView().getVerticalScrollBar().getValue()
-                            == chatMessageViewerPanel.getMessageListView().getVerticalScrollBar().getMaximum()) {
-                        messageItems.removeFirst();
-                        chatMessageViewerPanel.getMessageListView().removeComponent(0);
-                    }
-                });
-
-
-            }
-        }, 60000, 60000);
 
     }
 
@@ -1005,4 +988,15 @@ public class ChatMessagePanel extends ParentAvailablePanel {
         chatMessageEditorPanel.getEditor().requestFocus();
     }
 
+    public void clearMsgItem() {
+        SwingUtilities.invokeLater(() -> {
+            if (messageItems.size() > PAGE_LENGTH) {
+                if (!MainFrame.getContext().isActive() ||
+                        (MainFrame.getContext().isActive() && !ChatPanelContainer.getCurrRoomId().equals(roomId))) {
+                    messageItems.subList(0, messageItems.size() - PAGE_LENGTH).clear();
+                    chatMessageViewerPanel.getMessageListView().removeComponent(0, messageItems.size() - PAGE_LENGTH);
+                }
+            }
+        });
+    }
 }

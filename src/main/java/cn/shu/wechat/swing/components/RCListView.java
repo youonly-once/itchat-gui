@@ -282,6 +282,13 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
         contentPanel.remove(pos);
         contentPanel.revalidate();
     }
+
+    public void removeComponent(int start, int end) {
+        for (int i = start; i < end; i++) {
+            contentPanel.remove(i);
+        }
+        contentPanel.revalidate();
+    }
     /**
      * 重绘指定区间内的元素
      *

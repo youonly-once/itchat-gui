@@ -146,4 +146,7 @@ public class ChatPanel extends JPanel {
         chatMessagePanel.addMessageToEnd(message);
     }
 
+    public void clearMsgItem() {
+        chatMessagePanel.clearMsgItem();
+    }
 }

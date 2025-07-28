@@ -2,10 +2,13 @@ package cn.shu.wechat.swing.panels.chat;
 
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.swing.panels.TipPanel;
+import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.LinkedHashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * 聊天房容器
@@ -17,15 +20,11 @@ public class ChatPanelContainer extends ParentAvailablePanel {
     private CardLayout cardLayout;
 
     private final static LinkedHashMap<String, ChatPanel> cards = new LinkedHashMap<>(5);
-    public static String  getCurrRoomId() {
-        return currRoomId;
-    }
 
+    @Getter
     private static String currRoomId;
-    public static ChatPanelContainer getContext() {
-        return context;
-    }
 
+    @Getter
     private static ChatPanelContainer context;
     public ChatPanelContainer(JPanel parent) {
         super(parent);
@@ -40,6 +39,19 @@ public class ChatPanelContainer extends ParentAvailablePanel {
     private void init(){
         cardLayout = new CardLayout();
         this.setLayout(cardLayout);
+
+        java.util.Timer timer = new Timer();
+
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                for (ChatPanel value : cards.values()) {
+                    value.clearMsgItem();
+                }
+
+            }
+        }, 1000 * 60 * 10, 1000 * 60 * 5);
+
     }
 
     /**

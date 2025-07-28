@@ -381,9 +381,13 @@ public class ContactsTools {
      * @return {@code false} 免打扰
      */
     public static boolean isMute(Contacts contacts){
-        if (isRoomContact(contacts.getUsername())) {
+        if (contacts.getType().equals(Contacts.ContactsType.PUBLIC_USER)
+                || contacts.getType().equals(Contacts.ContactsType.SPECIAL_USER)) {
+            return true;
+        } else if (isRoomContact(contacts.getUsername())) {
             return (contacts.getStatues() == null||
-                    contacts.getStatues() == WxConstant.ChatRoomMute.CHATROOM_NOTIFY_CLOSE.CODE);
+                    contacts.getStatues() == WxConstant.ChatRoomMute.CHATROOM_NOTIFY_CLOSE.CODE
+            );
         }else{
             return ((contacts.getContactflag() & WxConstant.ContactFlag.CONTACTFLAG_NOTIFYCLOSECONTACT.CODE) > 0);
         }

@@ -43,7 +43,7 @@ public class Contacts {
     private Integer chatroomid;
 
     @Excel(name="attrstatus")
-    private Integer attrstatus;
+    private Long attrstatus;
 
     /**
      * 等于0消息免打扰 1正常
@@ -67,7 +67,7 @@ public class Contacts {
     private Integer unifriend;
 
     @Excel(name="contactflag")
-    private int contactflag;
+    private Integer contactflag;
 
 
     private List<Contacts> memberlist;
@@ -104,7 +104,7 @@ public class Contacts {
     private String remarkpyquanpin;
 
     @Excel(name="uin")
-    private Integer uin;
+    private Long uin;
 
     @Excel(name="owneruin")
     private Integer owneruin;

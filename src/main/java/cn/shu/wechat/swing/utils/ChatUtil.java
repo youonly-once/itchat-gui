@@ -85,6 +85,7 @@ public final class ChatUtil {
             //新增或选择聊天列表
             RoomsPanel.getContext().addRoomOrUpdateRoom(roomId, lastMsg, count, isMute, hasNewMsg, isAtMe(roomId, lastMsg));
 
+            RoomsPanel.getContext().updateUnreadTotalCount();
         });
     }
 

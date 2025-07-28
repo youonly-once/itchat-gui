@@ -24,7 +24,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 左侧聊天列表
@@ -70,6 +69,7 @@ public class RoomsPanel extends ParentAvailablePanel {
             TabOperationPanel.getContext().getChatLabel().setCornerText(String.valueOf(count));
         }else{
             TabOperationPanel.getContext().getChatLabel().setCornerText(null);
+            MainFrame.getContext().setTrayFlashing(false);
         }
         TabOperationPanel.getContext().repaint();
 
