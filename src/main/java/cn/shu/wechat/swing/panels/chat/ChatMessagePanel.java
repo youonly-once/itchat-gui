@@ -993,8 +993,10 @@ public class ChatMessagePanel extends ParentAvailablePanel {
             if (messageItems.size() > PAGE_LENGTH) {
                 if (!MainFrame.getContext().isActive() ||
                         (MainFrame.getContext().isActive() && !ChatPanelContainer.getCurrRoomId().equals(roomId))) {
-                    messageItems.subList(0, messageItems.size() - PAGE_LENGTH).clear();
-                    chatMessageViewerPanel.getMessageListView().removeComponent(0, messageItems.size() - PAGE_LENGTH);
+                    int count = messageItems.size() - PAGE_LENGTH;
+                    log.info("清理消息项：{} for {}", count,roomId);
+                    messageItems.subList(0, count).clear();
+                    chatMessageViewerPanel.getMessageListView().notifyItemRemoved(0, count);
                 }
             }
         });

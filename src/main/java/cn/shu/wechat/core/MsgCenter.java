@@ -15,6 +15,7 @@ import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.service.IMsgHandlerFace;
 import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.frames.MainFrame;
+import cn.shu.wechat.swing.media.SoundPlayer;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.swing.utils.ChatUtil;
@@ -213,73 +214,70 @@ public class MsgCenter {
             return;
         }
         //################聊天面板消息处理###########3333
-        //未读消息数量(显示未°消息数量)
+        //未读消息数量
         int msgUnReadCount = 1;
-
         //消息预览文本
         String previewLastMsg = "";
 
         //是否闪烁任务栏图标
         boolean isFlashingTray =true;
-
-        //是否消息有新消息(小红圆点)
+        //是否消息有新消息
         boolean newMsgLabel = true;
-
         //新增消息列表
         String userName = msg.getFromUserName();
 
-        if (ContactsTools.isRoomContact(userName)) {
+        if (userName.startsWith("@@")) {
             //群消息
             if (Core.getUserName().equals(msg.getMemberName())) {
                 //自己在群里发的消息
+                msgUnReadCount = 0;
                 isFlashingTray = false;
-                newMsgLabel = false;
+                newMsgLabel  = false;
                 previewLastMsg = "我: "+message.getPlaintext();
             } else {
                 //其他人在群里发的消息
                 if (isCurrRoom(message)) {
+                    msgUnReadCount = 0;
                     isFlashingTray = !MainFrame.getContext().isActive();
+                    newMsgLabel  = false;
                 }
                 previewLastMsg = ContactsTools.getMemberDisplayNameOfGroup(userName, msg.getMemberName()) + ": "+message.getPlaintext();
-                newMsgLabel = false;
             }
         } else{
             //自己的消息，默认已读
             if (userName.equals(Core.getUserName())) {
+                msgUnReadCount = 0;
                 isFlashingTray = false;
+                newMsgLabel =false;
                 previewLastMsg =  message.getPlaintext();
                 userName = msg.getToUserName();
 
             } else {
                 //其他人的消息
                 if (isCurrRoom(message)) {
+                    msgUnReadCount = 0;
                     isFlashingTray = !MainFrame.getContext().isActive();
+                    newMsgLabel  = false;
                 }
                 previewLastMsg =  message.getPlaintext();
             }
 
         }
-
-        if (ContactsTools.isMute(contacts)) {
-            isFlashingTray = false;
-            newMsgLabel = !isCurrRoom(message) || !MainFrame.getContext().isActive();
-        }
-
         if (Boolean.TRUE.equals(ChatUtil.isAtMe(userName, previewLastMsg))){
             isFlashingTray = true;
+        }
+        if(ContactsTools.isMute(contacts)){
+            msgUnReadCount = 0;
+            isFlashingTray = false;
         }
 
         if (isFlashingTray){
             MainFrame.getContext().setTrayFlashing(true);
-            MainFrame.getContext().playMessageSound();
-        }else{
-            msgUnReadCount = 0;
         }
-
+        RoomsPanel.getContext().updateUnreadTotalCount(msgUnReadCount);
 
         //添加一条新消息
         ChatUtil.addNewMsg(message, userName, previewLastMsg, msgUnReadCount,ContactsTools.isMute(contacts),newMsgLabel);
-
 
     }
 
@@ -411,16 +409,14 @@ public class MsgCenter {
         String logStr = LogUtil.printFromMeg(msg, msgType.getDesc());
         //=============如果是当前房间 发送已读通知==============
         if (msg.getFromUserName().equals(ChatPanelContainer.getCurrRoomId())) {
-            if (MainFrame.getContext().isActive()) {
-                ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
-                    try {
-                        MessageTools.sendStatusNotify(msg.getFromUserName());
-                    } catch (IOException | InterruptedException e) {
-                        log.warn(e.getMessage());
-                        throw new RuntimeException(e);
-                    }
-                });
-            }
+            ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
+                try {
+                    MessageTools.sendStatusNotify(msg.getFromUserName());
+                } catch (IOException | InterruptedException e) {
+                    log.warn(e.getMessage());
+                    throw new RuntimeException(e);
+                }
+            });
         }
         log.info(logStr);
 
