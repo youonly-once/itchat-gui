@@ -208,7 +208,6 @@ public class RoomsPanel extends ParentAvailablePanel {
         ChatPanelContainer.getContext().removeCard(roomId);
         roomItemList.remove(pos);
         roomItemsListView.notifyDataSetChanged(false);
-        roomItemsListView.scrollToPosition(0);
 
     }
 

@@ -21,8 +21,6 @@ import java.awt.event.*;
  * Created by 舒新胜 on 17-5-30.
  */
 public class TitlePanel extends ParentAvailablePanel {
-    @Getter
-    private static TitlePanel context;
 
     private JPanel titlePanel;
     private JTextArea titleLabel;
@@ -45,7 +43,6 @@ public class TitlePanel extends ParentAvailablePanel {
 
     public TitlePanel(JPanel parent) {
         super(parent);
-        context = this;
 
         initComponents();
         setListeners();

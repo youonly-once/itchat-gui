@@ -21,30 +21,45 @@ import java.util.Map;
 public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends JScrollPane {
     @Getter
     private M adapter;
+
     @Getter
     private JPanel contentPanel;
-    private int vGap;
-    private int hGap;
-    private List<Rectangle> rectangleList = new ArrayList<>();
+
+    private final int vGap;
+
+    private final int hGap;
+
+    private final List<Rectangle> rectangleList = new ArrayList<>();
+
     boolean scrollToBottom = false;
+
     private AdjustmentListener adjustmentListener;
+
     private MouseAdapter mouseAdapter;
+
     private ScrollUI scrollUI;
 
     // 监听滚动到顶部事件
     @Setter
     private ScrollToTopListener scrollToTopListener;
+
     // 滚动事件
     @Setter
     private ScrollListener scrollListener;
+
     private boolean scrollBarPressed = false;
+
     private int lastScrollValue = -1;
 
     private static int lastItemCount = 0;
+
     private MouseAdapter scrollMouseListener;
+
     private boolean scrollAttachMouseListener = false;
+
     private boolean messageLoading = false;
-    private long lastWeelTime = 0;
+
+    private long lastWheelTime = 0;
 
     public RCListView() {
         this(0, 0);
@@ -106,7 +121,21 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
     }
 
     private void initComponents() {
-        contentPanel = new JPanel();
+        contentPanel = new JPanel(){
+            @Override
+            public void remove(int index) {
+                adapter.removeAllListenersRecursively(getItem(index));
+                super.remove(index);
+            }
+
+            @Override
+            public void removeAll() {
+                for (Component component : getComponents()) {
+                    adapter.removeAllListenersRecursively(component);
+                }
+                super.removeAll();
+            }
+        };
         //用VerticalFlowLayout有问题，显示的房间数和实际不符
         contentPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, hGap, vGap, true, false));
         //contentPanel.setLayout(new GridLayout(0,1,hGap,vGap));
@@ -159,8 +188,8 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
                 // 如果两次鼠标滚轮间隔小于1秒，则忽略
-                if (System.currentTimeMillis() - lastWeelTime < 1000) {
-                    lastWeelTime = System.currentTimeMillis();
+                if (System.currentTimeMillis() - lastWheelTime < 1000) {
+                    lastWheelTime = System.currentTimeMillis();
                     return;
                 }
 
@@ -178,7 +207,7 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
 
                 scrollToBottom = false;
 
-                lastWeelTime = System.currentTimeMillis();
+                lastWheelTime = System.currentTimeMillis();
 
                 super.mouseWheelMoved(e);
             }
@@ -429,20 +458,23 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
     }
 
     public void notifyItemRemoved(int start, int end) {
-        if (start < 0 || end > contentPanel.getComponentCount() || start >= end) {
+        if (start < 0  || start >= end) {
             log.error("参数非法");
             return; // 参数非法，避免异常
         }
-
+        end = Math.min(end ,contentPanel.getComponentCount());
         int count = end - start;
         for (int i = 0; i < count; i++) {
             // 每次都移除start位置，组件自动前移
             contentPanel.remove(start);
+
         }
 
         contentPanel.revalidate();
         contentPanel.repaint();
     }
+
+
 
 
     public Component getItem(int n) {

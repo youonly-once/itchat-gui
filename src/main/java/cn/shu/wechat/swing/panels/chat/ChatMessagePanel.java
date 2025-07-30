@@ -105,7 +105,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
     /**
      * 每次加载的消息条数
      */
-    private static final int PAGE_LENGTH = 10;
+    private final int PAGE_LENGTH = 50;
     /**
      * 消息输入框
      */
@@ -114,7 +114,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
     private final MessageViewHolderCacheHelper messageViewHolderCacheHelper;
 
 
-    private static final int MAX_SHARE_ATTACHMENT_UPLOAD_COUNT = 1024;
+    private final int MAX_SHARE_ATTACHMENT_UPLOAD_COUNT = 1024;
 
     private final Queue<String> shareAttachmentUploadQueue = new ArrayDeque<>(MAX_SHARE_ATTACHMENT_UPLOAD_COUNT);
 
@@ -412,7 +412,6 @@ public class ChatMessagePanel extends ParentAvailablePanel {
         chatMessageEditorPanel.setVisible(true);
         chatMessageViewerPanel.getMessageListView().setVisible(true);
 
-        TitlePanel.getContext().hideRoomMembersPanel();
     }
 
     private void setListeners() {
@@ -990,13 +989,21 @@ public class ChatMessagePanel extends ParentAvailablePanel {
 
     public void clearMsgItem() {
         SwingUtilities.invokeLater(() -> {
-            if (messageItems.size() > PAGE_LENGTH) {
-                if (!MainFrame.getContext().isActive() ||
-                        (MainFrame.getContext().isActive() && !ChatPanelContainer.getCurrRoomId().equals(roomId))) {
+
+            if (!MainFrame.getContext().isActive() ||
+                    (MainFrame.getContext().isActive() && !ChatPanelContainer.getCurrRoomId().equals(roomId))) {
+                if (messageItems.size() > PAGE_LENGTH) {
                     int count = messageItems.size() - PAGE_LENGTH;
-                    log.info("清理消息项：{} for {}", count,roomId);
-                    messageItems.subList(0, count).clear();
+                        log.info("清理消息项：{} for {}", count,ContactsTools.getContactDisplayNameByUserName(roomId));
+                        messageItems.subList(0, count).clear();
+                        chatMessageViewerPanel.getMessageListView().notifyItemRemoved(0, count);
+
+                }
+                if (chatMessageViewerPanel.getMessageListView().getContentPanel().getComponentCount() > PAGE_LENGTH) {
+                    int count = chatMessageViewerPanel.getMessageListView().getContentPanel().getComponentCount() - PAGE_LENGTH;
+                    log.info("清理消息项(component)：{} for {}", count,ContactsTools.getContactDisplayNameByUserName(roomId));
                     chatMessageViewerPanel.getMessageListView().notifyItemRemoved(0, count);
+
                 }
             }
         });

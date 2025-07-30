@@ -22,10 +22,6 @@ public class RoomItem implements Comparable<RoomItem> {
 
     private Boolean atMe;
 
-    /**
-     * 当前房间对应的联系人
-     */
-    private Contacts contacts;
 
     /**
      * 房间id 对应微信用户的UserName以@开头或@@
@@ -86,7 +82,6 @@ public class RoomItem implements Comparable<RoomItem> {
 
     public RoomItem(Contacts contacts, String latestMsg, int msgCount, Boolean hasNewMsg) {
         if (contacts == null) return;
-        setContacts(contacts);
         setRoomId(contacts.getUsername());
         setLocalDateTime(LocalDateTime.now());
         setName(ContactsTools.getContactDisplayNameByUserName(contacts.getUsername()));
