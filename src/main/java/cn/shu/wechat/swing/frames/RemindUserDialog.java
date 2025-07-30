@@ -27,8 +27,7 @@ import java.util.function.Consumer;
 public class RemindUserDialog extends JDialog {
     public static final int DIALOG_WIDTH = 580;
     public static final int DIALOG_HEIGHT = 500;
-    @Getter
-    private static RemindUserDialog context;
+
     //初始列表
     private final List<SelectUserData> userList = new ArrayList<>();
     //待搜索列表
@@ -43,7 +42,6 @@ public class RemindUserDialog extends JDialog {
 
     public RemindUserDialog(Frame owner, boolean modal) {
         super(owner, modal);
-        context = this;
         initComponents();
         initView();
     }
@@ -138,7 +136,7 @@ public class RemindUserDialog extends JDialog {
                     okButton.setEnabled(true);
                     okButton.setText("@");
                     cancelButton.setEnabled(true);
-                    RemindUserDialog.context.dispose();
+                    RemindUserDialog.this.dispose();
                 }
                 super.mouseClicked(e);
             }

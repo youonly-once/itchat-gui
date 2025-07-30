@@ -4,6 +4,7 @@ package cn.shu.wechat.swing.frames;
 import cn.shu.wechat.api.WeChatTool;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.components.Colors;
+import cn.shu.wechat.swing.media.SoundPlayer;
 import cn.shu.wechat.swing.panels.RightPanel;
 import cn.shu.wechat.swing.panels.left.LeftPanel;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
@@ -33,6 +34,8 @@ public class MainFrame extends JFrame {
     public final static int LEFT_PANEL_WIDTH = 300;
     public int currentWindowWidth = DEFAULT_WIDTH;
     public int currentWindowHeight = DEFAULT_HEIGHT;
+    private static final long NOTIFY_INTERVAL_MS = 10_000; // 提示最小间隔：10秒
+    private static volatile long lastNotifyTime = 0;
     /**
      * 主窗口左面板
      */
@@ -95,61 +98,7 @@ public class MainFrame extends JFrame {
             } catch (AWTException e) {
                 log.error(e.getMessage(), e);
             }
-            initMessageSound();
         });
-
-    }
-
-    /**
-     * 消息到来的时候提示音
-     */
-    private void initMessageSound() {
-
-
-    }
-
-    /**
-     * 播放消息提示间
-     */
-    public void playMessageSound() {
-
-        try {
-
-            // 创建音频输入流
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(
-                    Objects.requireNonNull(MainFrame.class.getResourceAsStream("/wav/msg.wav")));
-
-            // 获取音频格式
-            AudioFormat audioFormat = audioInputStream.getFormat();
-
-            // 创建数据行信息对象
-            DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
-
-            // 打开数据行
-            SourceDataLine sourceDataLine = (SourceDataLine) AudioSystem.getLine(info);
-            sourceDataLine.open(audioFormat);
-
-            // 启动数据行
-            sourceDataLine.start();
-
-            // 缓冲区大小
-            int bufferSize = 4096;
-            byte[] buffer = new byte[bufferSize];
-
-            int bytesRead = 0;
-
-            // 从音频输入流读取数据到缓冲区，并写入数据行进行播放
-            while ((bytesRead = audioInputStream.read(buffer)) != -1) {
-                sourceDataLine.write(buffer, 0, bytesRead);
-            }
-
-            // 停止数据行
-            sourceDataLine.drain();
-            sourceDataLine.close();
-            audioInputStream.close();
-        } catch (Exception e) {
-           log.error(e.getMessage(), e);
-        }
 
     }
 
@@ -277,6 +226,9 @@ public class MainFrame extends JFrame {
      * 设置任务栏图标闪动
      */
     public void setTrayFlashing(boolean flashing) {
+        if (flashing) {
+            SoundPlayer.playMessageSound();
+        }
         SwingUtilities.invokeLater(() -> {
             trayFlashing = flashing;
 
@@ -288,8 +240,11 @@ public class MainFrame extends JFrame {
 
 
                 if (SystemTray.isSupported()) {
-                    //任务栏提示
-                    trayIcon.displayMessage("新消息", "您有一条新消息，请查收", TrayIcon.MessageType.INFO);
+                    long now = System.currentTimeMillis();
+                    if (now - lastNotifyTime >= NOTIFY_INTERVAL_MS) {
+                        trayIcon.displayMessage("新消息", "您有一条新消息，请查收", TrayIcon.MessageType.INFO);
+                        lastNotifyTime = now;
+                    }
                 }
 
 

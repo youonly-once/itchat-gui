@@ -5,6 +5,7 @@ import cn.shu.wechat.swing.adapter.HeaderViewHolder;
 import cn.shu.wechat.swing.adapter.ViewHolder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,32 +17,49 @@ import java.util.Map;
 /**
  * Created by 舒新胜 on 17-5-30.
  */
+@Log4j2
 public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends JScrollPane {
+    @Getter
     private M adapter;
+
     @Getter
     private JPanel contentPanel;
-    private int vGap;
-    private int hGap;
-    private List<Rectangle> rectangleList = new ArrayList<>();
+
+    private final int vGap;
+
+    private final int hGap;
+
+    private final List<Rectangle> rectangleList = new ArrayList<>();
+
     boolean scrollToBottom = false;
+
     private AdjustmentListener adjustmentListener;
+
     private MouseAdapter mouseAdapter;
+
     private ScrollUI scrollUI;
 
     // 监听滚动到顶部事件
     @Setter
     private ScrollToTopListener scrollToTopListener;
+
     // 滚动事件
     @Setter
     private ScrollListener scrollListener;
+
     private boolean scrollBarPressed = false;
+
     private int lastScrollValue = -1;
 
     private static int lastItemCount = 0;
+
     private MouseAdapter scrollMouseListener;
+
     private boolean scrollAttachMouseListener = false;
+
     private boolean messageLoading = false;
-    private long lastWeelTime = 0;
+
+    private long lastWheelTime = 0;
 
     public RCListView() {
         this(0, 0);
@@ -103,7 +121,21 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
     }
 
     private void initComponents() {
-        contentPanel = new JPanel();
+        contentPanel = new JPanel(){
+            @Override
+            public void remove(int index) {
+                adapter.removeAllListenersRecursively(getItem(index));
+                super.remove(index);
+            }
+
+            @Override
+            public void removeAll() {
+                for (Component component : getComponents()) {
+                    adapter.removeAllListenersRecursively(component);
+                }
+                super.removeAll();
+            }
+        };
         //用VerticalFlowLayout有问题，显示的房间数和实际不符
         contentPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, hGap, vGap, true, false));
         //contentPanel.setLayout(new GridLayout(0,1,hGap,vGap));
@@ -156,8 +188,8 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
                 // 如果两次鼠标滚轮间隔小于1秒，则忽略
-                if (System.currentTimeMillis() - lastWeelTime < 1000) {
-                    lastWeelTime = System.currentTimeMillis();
+                if (System.currentTimeMillis() - lastWheelTime < 1000) {
+                    lastWheelTime = System.currentTimeMillis();
                     return;
                 }
 
@@ -175,7 +207,7 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
 
                 scrollToBottom = false;
 
-                lastWeelTime = System.currentTimeMillis();
+                lastWheelTime = System.currentTimeMillis();
 
                 super.mouseWheelMoved(e);
             }
@@ -216,10 +248,6 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
             contentPanel.add(holder);
         }
 
-    }
-
-    public BaseAdapter getAdapter() {
-        return adapter;
     }
 
     public void setAdapter(M adapter) {
@@ -278,22 +306,13 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
 
     }
 
-    public void removeComponent(int pos) {
-        contentPanel.remove(pos);
-        contentPanel.revalidate();
-    }
 
-    public void removeComponent(int start, int end) {
-        for (int i = start; i < end; i++) {
-            contentPanel.remove(i);
-        }
-        contentPanel.revalidate();
-    }
+
     /**
      * 重绘指定区间内的元素
      *
-     * @param startPosition
-     * @param count
+     * @param startPosition 开始位置
+     * @param count 数量
      */
     public void notifyItemRangeInsertedHead(int startPosition, int count) {
         JViewport viewport = this.getViewport();
@@ -320,7 +339,7 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
     }
 
     /**
-     * 从元素集合start出开始取count个追加到UI末尾
+     * 从元素集合start处开始取count个追加到UI末尾
      * @param start 元素开始位置
      * @param count 追加数量
      */
@@ -400,9 +419,6 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
         viewHolder.repaint();
     }
 
-    public Component getItem(int n) {
-        return contentPanel.getComponent(n);
-    }
 
 
     public T notifyItemInserted(int position, boolean end) {
@@ -424,28 +440,51 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
 
         contentPanel.add(holder, position);
         contentPanel.revalidate();
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                int heightAfter = viewport.getPreferredSize().height;
-                int delta = heightAfter - heightBefore;
-                viewport.setViewPosition(new Point(viewPosBefore.x, viewPosBefore.y + delta));
-            }
+        SwingUtilities.invokeLater(() -> {
+            int heightAfter = viewport.getPreferredSize().height;
+            int delta = heightAfter - heightBefore;
+            viewport.setViewPosition(new Point(viewPosBefore.x, viewPosBefore.y + delta));
         });
 
         return holder;
     }
 
+    /**
+     * 移除某一项
+     * @param position 位置
+     */
     public void notifyItemRemoved(int position) {
-        contentPanel.remove(position);
+        notifyItemRemoved(position,position+1);
+    }
+
+    public void notifyItemRemoved(int start, int end) {
+        if (start < 0  || start >= end) {
+            log.error("参数非法");
+            return; // 参数非法，避免异常
+        }
+        end = Math.min(end ,contentPanel.getComponentCount());
+        int count = end - start;
+        for (int i = 0; i < count; i++) {
+            // 每次都移除start位置，组件自动前移
+            contentPanel.remove(start);
+
+        }
+
         contentPanel.revalidate();
         contentPanel.repaint();
+    }
+
+
+
+
+    public Component getItem(int n) {
+        return contentPanel.getComponent(n);
     }
 
     /**
      * 获取列表中所有的ViewHolder项目，不包括HeaderViewHolder
      *
-     * @return
+     * @return 所有的ViewHolder项目
      */
     public List<T> getItems() {
         Component[] components = contentPanel.getComponents();
@@ -466,11 +505,4 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
         void onScroll(int curr,int max);
     }
 
-    /**
-     * 移除
-     * @param pos 位置
-     */
-    public void removeItem(int pos){
-        contentPanel.remove(pos);
-    }
 }

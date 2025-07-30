@@ -223,6 +223,8 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
         holder.atAndBrief.setBackground(color);
     }
 
+    @Override
+    public void removeAllListenersRecursively(Component comp) {
 
-
+    }
 }

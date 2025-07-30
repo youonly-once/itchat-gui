@@ -10,6 +10,8 @@ import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCListView;
 import cn.shu.wechat.swing.entity.ContactsItem;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
+import cn.shu.wechat.swing.panels.chat.ChatPanel;
+import cn.shu.wechat.swing.panels.left.LeftPanel;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import lombok.Getter;
 
@@ -18,6 +20,8 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -78,6 +82,21 @@ public class ContactsPanel extends ParentAvailablePanel {
 
         });
         add(contactsListView, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 1));
+        java.util.Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (contactsListView.getContentPanel().getComponentCount() > initialCount && !LeftTabContentPanel.getContext().getCurrentTab().equals(LeftPanel.CONTACTS)) {
+                    SwingUtilities.invokeLater(() -> {
+                        contactsListView.notifyItemRemoved(initialCount, contactsListView.getContentPanel().getComponentCount());
+                        loadedCount.set(initialCount);
+                    });
+                }
+
+
+
+            }
+        }, 1000 * 60 * 10, 1000 * 60 * 20);
     }
 
     /**

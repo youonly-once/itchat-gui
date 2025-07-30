@@ -142,6 +142,8 @@ public class SearchPanel extends ParentAvailablePanel {
         final String keyword = searchTextField.getText();
         if (StringUtils.isEmpty(keyword)) {
             searchResultPanel.showPreviousTab();
+            searchResultPanel.setData(new ArrayList<>());
+            searchResultPanel.notifyDataSetChanged(false);
             return;
         }
         //展示搜索结果panel
@@ -184,6 +186,7 @@ public class SearchPanel extends ParentAvailablePanel {
                 searchResultPanel.setKeyWord(keyword);
                 searchResultPanel.notifyDataSetChanged(false);
                 searchResultPanel.getTipLabel().setVisible(false);
+                data.clear();
             }
         };
         //延迟调用 防抖

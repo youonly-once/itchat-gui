@@ -6,6 +6,9 @@ import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseListener;
 import java.util.LinkedHashMap;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -50,7 +53,7 @@ public class ChatPanelContainer extends ParentAvailablePanel {
                 }
 
             }
-        }, 1000 * 60 * 10, 1000 * 60 * 5);
+        }, 1000 * 60 * 10, 1000 * 60 * 20);
 
     }
 
@@ -102,7 +105,35 @@ public class ChatPanelContainer extends ParentAvailablePanel {
             return;
         }
         ChatPanel remove = cards.remove(roomId);
-        remove(remove);
+        removeAllListenersRecursively(remove);
+        this.remove(remove);
+        this.revalidate();
+        this.repaint();
+    }
+
+    public void removeAllListenersRecursively(Component comp) {
+        if (comp instanceof Container) {
+            for (Component child : ((Container) comp).getComponents()) {
+                removeAllListenersRecursively(child);
+            }
+        }
+
+        // 示例：移除常见的几种监听器（可扩展）
+        if (comp instanceof JComponent jc  ) {
+            for (MouseListener ml : jc.getMouseListeners()) {
+                jc.removeMouseListener(ml);
+            }
+            for (KeyListener kl : jc.getKeyListeners()) {
+                jc.removeKeyListener(kl);
+            }
+            for (FocusListener fl : jc.getFocusListeners()) {
+                jc.removeFocusListener(fl);
+            }
+            for (FocusListener fl : jc.getFocusListeners()) {
+                jc.removeFocusListener(fl);
+            }
+            // ... 其他类型监听器根据需要添加
+        }
     }
 
     /**

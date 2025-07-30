@@ -24,6 +24,8 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Created by 舒新胜 on 2017/6/5.
@@ -33,7 +35,7 @@ public class MessagePopupMenu extends JPopupMenu {
     private WxRespConstant.WXReceiveMsgCodeEnum messageType;
     private final JMenuItem showPathItem = new JMenuItem("文件夹");
     private final JMenuItem revokeItem = new JMenuItem("撤回");
-
+    private WeakReference<Component> lastInvokerRef = new WeakReference<>(null);
     public MessagePopupMenu() {
         initMenuItem();
     }
@@ -284,6 +286,25 @@ public class MessagePopupMenu extends JPopupMenu {
         }else{
             add(revokeItem);
         }
+        lastInvokerRef = new WeakReference<>(invoker);
         super.show(invoker, x, y);
+    }
+
+
+    @Override
+    public void setVisible(boolean b) {
+        if (!b) {
+            setInvoker(null);  // 手动解除引用
+        }
+        super.setVisible(b);
+    }
+
+    @Override
+    public Component getInvoker() {
+        Component invoker = super.getInvoker();
+        if (invoker == null) {
+            return lastInvokerRef.get();
+        }
+        return invoker;
     }
 }
