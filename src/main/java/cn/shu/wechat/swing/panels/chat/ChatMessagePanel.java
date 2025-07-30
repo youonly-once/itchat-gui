@@ -22,7 +22,6 @@ import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.frames.RemindUserDialog;
 import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
-import cn.shu.wechat.swing.listener.ExpressionListener;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.swing.panels.TitlePanel;
 import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
@@ -562,17 +561,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
             }
         });
 
-        // 插入表情
-        chatMessageEditorPanel.setExpressionListener(new ExpressionListener() {
-            @Override
-            public void onSelected(String code) {
-                editor.replaceSelection(code);
-            }
-            @Override
-            public void onSelected(Icon icon) {
-                editor.insertIcon(icon);
-            }
-        });
+
     }
 
 

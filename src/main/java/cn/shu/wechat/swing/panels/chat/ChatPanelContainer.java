@@ -74,8 +74,11 @@ public class ChatPanelContainer extends ParentAvailablePanel {
      * @param roomId 房间id
      */
     public void show(String roomId){
+        if (roomId.equals(currRoomId)) return;
+        cards.get(roomId).getChatMessagePanel().getChatMessageEditorPanel().addShareComponent();
         currRoomId = roomId;
         cardLayout.show(this,roomId);
+
     }
 
     /**
