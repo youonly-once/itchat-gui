@@ -52,7 +52,16 @@ public class ImageUtil {
      */
     public static ImageIcon preferredImageSize(ImageIcon imageIcon,int maxWidth) {
         //动态图不能使用
-        imageIcon.setImage(preferredImageSize((BufferedImage)imageIcon.getImage(),maxWidth));
+        int width = imageIcon.getIconWidth();
+        int height = imageIcon.getIconHeight();
+        Dimension scaleDimen = getScaleDimen(width, height, maxWidth);
+       // GifUtil.zoomGifBySize();
+        BufferedImage scaled = new BufferedImage(scaleDimen.width, scaleDimen.height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = scaled.createGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2d.drawImage(imageIcon.getImage(), 0, 0, scaleDimen.width, scaleDimen.height, null);
+        g2d.dispose();
+        imageIcon.setImage(scaled);
         return imageIcon;
     }
     /**
