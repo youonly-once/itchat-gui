@@ -52,11 +52,7 @@ public class ImageUtil {
      */
     public static ImageIcon preferredImageSize(ImageIcon imageIcon,int maxWidth) {
         //动态图不能使用
-        int width = imageIcon.getIconWidth();
-        int height = imageIcon.getIconHeight();
-        Dimension scaleDimen = getScaleDimen(width, height, maxWidth);
-       // GifUtil.zoomGifBySize();
-        imageIcon.setImage(imageIcon.getImage().getScaledInstance(scaleDimen.width, scaleDimen.height, Image.SCALE_SMOOTH));
+        imageIcon.setImage(preferredImageSize((BufferedImage)imageIcon.getImage(),maxWidth));
         return imageIcon;
     }
     /**
@@ -65,12 +61,17 @@ public class ImageUtil {
      * @param maxWidth
      * @return
      */
-    public static Image preferredImageSize(BufferedImage image,int maxWidth) {
+    public static BufferedImage preferredImageSize(BufferedImage image,int maxWidth) {
         //动态图不能使用
         int width = image.getWidth();
         int height = image.getHeight();
         Dimension scaleDimen = getScaleDimen(width, height, maxWidth);
-        return image.getScaledInstance(scaleDimen.width, scaleDimen.height, Image.SCALE_SMOOTH);
+        BufferedImage scaled = new BufferedImage(scaleDimen.width, scaleDimen.height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = scaled.createGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2d.drawImage(image, 0, 0, scaleDimen.width, scaleDimen.height, null);
+        g2d.dispose();
+        return scaled;
     }
 
     /**

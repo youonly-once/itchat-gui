@@ -273,8 +273,8 @@ public class MsgCenter {
 
         if (isFlashingTray){
             MainFrame.getContext().setTrayFlashing(true);
+            msgUnReadCount = 1;
         }
-        RoomsPanel.getContext().updateUnreadTotalCount(msgUnReadCount);
 
         //添加一条新消息
         ChatUtil.addNewMsg(message, userName, previewLastMsg, msgUnReadCount,ContactsTools.isMute(contacts),newMsgLabel);
@@ -408,7 +408,7 @@ public class MsgCenter {
         //=============打印日志==============
         String logStr = LogUtil.printFromMeg(msg, msgType.getDesc());
         //=============如果是当前房间 发送已读通知==============
-        if (msg.getFromUserName().equals(ChatPanelContainer.getCurrRoomId())) {
+        if (msg.getFromUserName().equals(ChatPanelContainer.getCurrRoomId()) && MainFrame.getContext().isActive()) {
             ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
                 try {
                     MessageTools.sendStatusNotify(msg.getFromUserName());

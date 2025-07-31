@@ -452,4 +452,12 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
 
         void onSearchFile();
     }
+
+    @Override
+    public void removeAllListenersRecursively(Component comp) {
+        super.removeAllListenersRecursively(comp);
+        if (comp instanceof SearchResultItemViewHolder t){
+            t.mouseListener = null;
+        }
+    }
 }

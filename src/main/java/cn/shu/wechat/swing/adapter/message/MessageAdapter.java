@@ -75,14 +75,13 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     private final MessagePopupMenu popupMenu = new MessagePopupMenu();
     private final ChatMessagePanel parent;
 
-    MessageViewHolderCacheHelper messageViewHolderCacheHelper;
+    private final MessageViewHolderCacheHelper messageViewHolderCacheHelper = MessageViewHolderCacheHelper.getMessageViewHolderCacheHelper();
 
-    public MessageAdapter(ChatMessagePanel parent, List<Message> messageItems, RCListView<BaseMessageViewHolder, MessageAdapter> listView, MessageViewHolderCacheHelper messageViewHolderCacheHelper) {
+    public MessageAdapter(ChatMessagePanel parent, List<Message> messageItems, RCListView<BaseMessageViewHolder, MessageAdapter> listView) {
         this.messageItems = messageItems;
         this.listView = listView;
         this.parent = parent;
         imageCache = new ImageCache();
-        this.messageViewHolderCacheHelper = messageViewHolderCacheHelper;
     }
 
     @Override

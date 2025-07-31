@@ -405,6 +405,18 @@ public class ImageViewerFrame extends JFrame {
             super.mouseExited(e);
         }
     }
+
+    @Override
+    public void dispose() {
+        if (image != null) {
+            image.flush();
+            image = null;
+        }
+
+        // 主动释放旧图资源
+        imageLabel.clearImage();
+        super.dispose();
+    }
 }
 
 

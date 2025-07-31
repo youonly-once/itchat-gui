@@ -15,11 +15,13 @@ import cn.shu.wechat.swing.adapter.message.video.MessageRightVideoViewHolder;
 import cn.shu.wechat.swing.adapter.message.voice.MessageLeftVoiceViewHolder;
 import cn.shu.wechat.swing.adapter.message.voice.MessageRightVoiceViewHolder;
 import cn.shu.wechat.swing.utils.ImageUtil;
+import lombok.Getter;
 
 
 public class MessageViewHolderCacheHelper {
-
-    public MessageViewHolderCacheHelper() {
+    @Getter
+    private static MessageViewHolderCacheHelper messageViewHolderCacheHelper = new MessageViewHolderCacheHelper();
+    private MessageViewHolderCacheHelper() {
 
     }
 

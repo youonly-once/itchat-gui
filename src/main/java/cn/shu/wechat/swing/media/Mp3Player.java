@@ -42,6 +42,9 @@ public class Mp3Player  {
         // 等待之前的播放线程停止（非 busy 等待）
         if (playerThread != null) {
             try {
+                if (monitorFuture != null && !monitorFuture.isCancelled()) {
+                    monitorFuture.cancel(true);
+                }
                 playerThread.join(); // 优于 sleep + while
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -63,6 +66,7 @@ public class Mp3Player  {
                 //确保当前线程启动后再启动监听线程
                 // 启动监听任务：播放位置轮询
                 // AtomicInteger prePos = new AtomicInteger();
+
                 monitorFuture = executor.scheduleAtFixedRate(() -> {
                     if (stopped || advancedPlayer == null || advancedPlayer.isComplete()) {
                         if (monitorFuture != null && !monitorFuture.isCancelled()) {
@@ -70,7 +74,7 @@ public class Mp3Player  {
                         }
                         return;
                     }
-                    System.out.println(Thread.currentThread().getId());
+                    System.out.println(Thread.currentThread().threadId());
                     //if (prePos.get()!=advancedPlayer.getPosition()){
                     // prePos.set(advancedPlayer.getPosition());
                     listener.playbackPosition(advancedPlayer.getPosition());
@@ -92,6 +96,9 @@ public class Mp3Player  {
         stopped = true;
         if (this.listener != null) {
             this.listener.playbackFinished();
+        }
+        if (monitorFuture != null && !monitorFuture.isCancelled()) {
+            monitorFuture.cancel(true);
         }
         filePath = null;
         listener = null;

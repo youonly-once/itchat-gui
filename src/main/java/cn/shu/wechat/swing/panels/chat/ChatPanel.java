@@ -9,6 +9,7 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.panels.TitlePanel;
 import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.task.DownloadTask;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
@@ -41,10 +42,6 @@ public class ChatPanel extends JPanel {
      */
     private final String roomId;
 
-    /**
-     * 用户信息
-     */
-    private Contacts contacts;
 
     public ChatPanel(String roomId) {
         this.roomId = roomId;
@@ -56,55 +53,50 @@ public class ChatPanel extends JPanel {
     private void initData() {
         ChatPanel.this.getTitlePanel().showStatusLabel("加载中...");
         //消息发送者信息
-        contacts = ContactsTools.getContactByUserName(roomId);
+        Contacts contacts = ContactsTools.getContactByUserName(roomId);
         if (contacts == null) {
             log.error("未知联系人：{}", roomId);
+            return;
         }
-        new SwingWorker<Object, Object>() {
-
-            @Override
-            protected Object doInBackground() throws Exception {
-                if (ContactsTools.isRoomContact(roomId)) {
-                    if (contacts.getMemberlist() == null || contacts.getMemberlist().isEmpty()) {
+        if (ContactsTools.isRoomContact(roomId)) {
+            if (contacts.getMemberlist() == null || contacts.getMemberlist().isEmpty()) {
+                ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
                         DownloadTask<Void> objectDownloadTask = new DownloadTask<>();
                         objectDownloadTask.setTaskId("WebWxBatchGetContact:" + roomId);
                         objectDownloadTask.setType(DownloadType.GetBatchContacts);
                         objectDownloadTask.setGroupName(roomId);
                         DownloadManager.submitAwait(objectDownloadTask);
-                    }
-                    contacts = Core.getMemberMap().get(roomId);
-
-                    chatMessagePanel.setRoomMembers(contacts.getMemberlist()
-                            .stream()
-                            .map(contacts1 -> ContactsTools.getMemberDisplayNameOfGroup(roomId, contacts1.getUsername()))
-                            .toList()
-                    );
-                }
-                return null;
-            }
-
-            @Override
-            protected void done() {
-                super.done();
+                        SwingUtilities.invokeLater(() -> {
+                            updateRoomTitle();
+                            ChatPanel.this.getTitlePanel().hideStatusLabel();
+                        });
+                });
+            }else{
+                contacts = Core.getMemberMap().get(roomId);
                 updateRoomTitle();
                 ChatPanel.this.getTitlePanel().hideStatusLabel();
             }
-        }.execute();
+        }else{
+            contacts = Core.getMemberMap().get(roomId);
+            updateRoomTitle();
+            ChatPanel.this.getTitlePanel().hideStatusLabel();
+        }
+
     }
 
 
     /**
      * 更新房间标题
      */
-    public void updateRoomTitle() {
+    private void updateRoomTitle() {
+        Contacts contacts = Core.getMemberMap().get(roomId);
         String title = ContactsTools.getContactDisplayNameByUserName(contacts.getUsername());
-        if (roomId.startsWith("@@")) {
+        if (ContactsTools.isRoomContact(roomId)) {
             if (contacts.getMemberlist() == null) {
-                title += " (0)";
+                title += " (loading)";
             } else {
                 title += " (" + (contacts.getMemberlist().size()) + ")";
             }
-
         }
         // 更新房间标/题
         titlePanel.updateRoomTitle(title);

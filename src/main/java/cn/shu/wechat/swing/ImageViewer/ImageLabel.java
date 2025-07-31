@@ -4,6 +4,7 @@ package cn.shu.wechat.swing.ImageViewer;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 
 /**
  * Created by song on 26/06/2017.
@@ -92,6 +93,17 @@ public class ImageLabel extends JLabel {
         addMouseWheelListener(listener);
         addMouseMotionListener(listener);
         addMouseListener(listener);
+    }
+    private BufferedImage getScaledImageBuffered(Image src, float scale) {
+        int w = (int) (src.getWidth(null) * scale);
+        int h = (int) (src.getHeight(null) * scale);
+
+        BufferedImage scaled = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = scaled.createGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2d.drawImage(src, 0, 0, w, h, null);
+        g2d.dispose();
+        return scaled;
     }
 
     @Override
@@ -183,6 +195,8 @@ public class ImageLabel extends JLabel {
 
 
     public void setSourceImage(Image sourceImage) {
+        // 主动释放旧图资源
+        clearImage();
         this.sourceImage = lastImage = drawImage = sourceImage;
         firstDraw = true;
     }
@@ -199,8 +213,14 @@ public class ImageLabel extends JLabel {
                 scale = 1.0F;
             }
             Image scaledImage = getScaledImage(scale);
-
+            if (lastImage != null) {
+                lastImage.flush();
+            }
             lastImage = this.drawImage;
+
+            if (drawImage != null) {
+                drawImage.flush();
+            }
             this.drawImage = scaledImage;
             scaleImage = true;
             repaint();
@@ -222,5 +242,15 @@ public class ImageLabel extends JLabel {
     public void setSourceGifImage(String sourceGifImage) {
         this.sourceGifImage = sourceGifImage;
         this.setIcon(new ImageIcon(sourceGifImage));
+    }
+
+    // 在 ImageLabel 中添加
+    public void clearImage() {
+        if (drawImage != null) drawImage.flush();
+        if (lastImage != null) lastImage.flush();
+        if (sourceImage != null) sourceImage.flush();
+        drawImage = null;
+        lastImage = null;
+        sourceImage = null;
     }
 }

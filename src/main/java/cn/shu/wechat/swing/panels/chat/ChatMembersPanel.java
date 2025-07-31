@@ -38,7 +38,7 @@ public class ChatMembersPanel extends ParentAvailablePanel {
     /**
      * list
      */
-    private final RCListView<RoomMembersItemViewHolder, RoomMembersAdapter> listView = new RCListView();
+    private final RCListView<RoomMembersItemViewHolder, RoomMembersAdapter> listView = new RCListView<>();
     /**
      * 操作面板
      */

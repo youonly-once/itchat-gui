@@ -110,7 +110,6 @@ public class ChatMessagePanel extends ParentAvailablePanel {
      */
     @Getter
     private ChatMessageEditorPanel chatMessageEditorPanel;
-    private final MessageViewHolderCacheHelper messageViewHolderCacheHelper;
 
 
     private final int MAX_SHARE_ATTACHMENT_UPLOAD_COUNT = 1024;
@@ -118,11 +117,8 @@ public class ChatMessagePanel extends ParentAvailablePanel {
     private final Queue<String> shareAttachmentUploadQueue = new ArrayDeque<>(MAX_SHARE_ATTACHMENT_UPLOAD_COUNT);
 
     private volatile boolean isLoadHis = false;
-    /**
-     * 房间的用户 username列表
-     */
-    @Setter
-    private List<String> roomMembers = new ArrayList<>();
+
+
 
     public ChatMessagePanel(JPanel parent, String roomId) {
 
@@ -131,7 +127,6 @@ public class ChatMessagePanel extends ParentAvailablePanel {
         if (org.apache.commons.lang3.StringUtils.isEmpty(roomId)) {
             throw new NullPointerException("RoomId can not be null.");
         }
-        messageViewHolderCacheHelper = new MessageViewHolderCacheHelper();
         initComponents();
         initView();
         setListeners();
@@ -187,7 +182,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
 
         chatMessageViewerPanel.setBorder(new RCBorder(RCBorder.BOTTOM, Colors.LIGHT_GRAY));
 
-        adapter = new MessageAdapter(this,messageItems, chatMessageViewerPanel.getMessageListView(), messageViewHolderCacheHelper);
+        adapter = new MessageAdapter(this,messageItems, chatMessageViewerPanel.getMessageListView());
 
 
         chatMessageViewerPanel.getMessageListView().setAdapter(adapter);
