@@ -314,13 +314,17 @@ public final class AvatarUtil {
     }
 
     public static ImageIcon getIconByImage(Image image) throws IOException {
+        // 圆角处理（假设返回一定是 BufferedImage）
+        BufferedImage rounded = ImageUtil.setRadius(image, image.getWidth(null), image.getHeight(null), 35);
 
-        image = ImageUtil.setRadius(image, ((BufferedImage) image).getWidth(), ((BufferedImage) image).getHeight(), 35)
-                    .getScaledInstance(NORMAL_AVATAR_SIZE, NORMAL_AVATAR_SIZE, Image.SCALE_SMOOTH);
+        // 创建最终缩放图像
+        BufferedImage finalImage = new BufferedImage(NORMAL_AVATAR_SIZE, NORMAL_AVATAR_SIZE, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = finalImage.createGraphics();
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.drawImage(rounded, 0, 0, NORMAL_AVATAR_SIZE, NORMAL_AVATAR_SIZE, null);
+        g2.dispose();
 
-        ImageIcon imageIcon = new ImageIcon();
-        imageIcon.setImage(image);
-        return imageIcon;
+        return new ImageIcon(finalImage);
     }
     /**
      * 添加用户头像

@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.adapter.message;
 
+import cn.afterturn.easypoi.cache.ImageCache;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.constant.DownloadStatus;
 import cn.shu.wechat.constant.DownloadType;
@@ -69,7 +70,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     private final List<Message> messageItems;
     private final RCListView<BaseMessageViewHolder, MessageAdapter> listView;
     private final AttachmentIconHelper attachmentIconHelper = new AttachmentIconHelper();
-    private final ImageCache imageCache;
     private final Mp3Player player = new Mp3Player();
 
     private final MessagePopupMenu popupMenu = new MessagePopupMenu();
@@ -81,7 +81,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         this.messageItems = messageItems;
         this.listView = listView;
         this.parent = parent;
-        imageCache = new ImageCache();
     }
 
     @Override
@@ -886,7 +885,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                         if (ImageUtil.isGIF(finalPath)) {
                             imageIcon = ImageUtil.preferredGifSize(finalPath, item.getImgWidth(), item.getImgHeight());
                         } else {
-                            imageIcon = imageCache.tryGetThumbCache(file);
+                            imageIcon = IconUtil.getIconFromFile(file);
                             ImageUtil.preferredImageSize(imageIcon);
                         }
                         imageLabel.setIcon(imageIcon);
