@@ -947,6 +947,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
         if (scrollBar.getValue() == (scrollBar.getModel().getMaximum() - scrollBar.getModel().getExtent())) {
             chatMessageViewerPanel.getMessageListView().setAutoScrollToBottom();
         }
+        RoomsPanel.getContext().hasRead(roomId);
         return holder;
     }
 
