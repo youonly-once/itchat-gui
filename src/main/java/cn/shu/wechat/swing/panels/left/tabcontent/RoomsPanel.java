@@ -226,13 +226,7 @@ public class RoomsPanel extends ParentAvailablePanel {
             }
 
         }
-        if (pos == -1){
-            return;
-        }
-        roomItemList.remove(pos);
-        roomItemsListView.notifyItemRemoved(pos);
-        ChatPanelContainer.getContext().removeCard(roomId);
-        Core.getRecentContacts().remove(roomId);
+        removeItem(pos,roomId);
     }
     /**
      * 更新房间消息为已读
