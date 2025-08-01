@@ -214,5 +214,18 @@ public class UserInfoPopup extends JPopupMenu {
         });
     }
 
-
+    @Override
+    public void setVisible(boolean visible) {
+        if (!visible) {
+            Icon icon = avatarLabel.getIcon();
+            if (icon instanceof ImageIcon) {
+                Image image = ((ImageIcon) icon).getImage();
+                if (image != null) {
+                    image.flush();  // 主动释放图像缓存
+                }
+            }
+            avatarLabel.setIcon(null);  // 解除引用，便于GC回收
+        }
+        super.setVisible(visible);
+    }
 }

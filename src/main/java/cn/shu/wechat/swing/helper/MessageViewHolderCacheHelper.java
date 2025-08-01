@@ -58,7 +58,7 @@ public class MessageViewHolderCacheHelper {
     public MessageLeftVideoViewHolder tryGetLeftVideoViewHolder(Message messageItem) {
 
         return new MessageLeftVideoViewHolder(messageItem.isGroup(),
-                ImageUtil.getScaleDimen(messageItem.getImgWidth()
+                ImageUtil.getScaleDimension(messageItem.getImgWidth()
                         , messageItem.getImgHeight()));
 
     }
@@ -66,7 +66,7 @@ public class MessageViewHolderCacheHelper {
     public MessageRightVideoViewHolder tryGetRightVideoViewHolder(Message messageItem) {
 
         return new MessageRightVideoViewHolder(
-                ImageUtil.getScaleDimen(messageItem.getImgWidth()
+                ImageUtil.getScaleDimension(messageItem.getImgWidth()
                         , messageItem.getImgHeight()));
 
     }

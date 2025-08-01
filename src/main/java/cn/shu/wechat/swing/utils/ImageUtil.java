@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.utils;
 
 import cn.shu.wechat.utils.GifUtil;
+import lombok.extern.log4j.Log4j2;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -8,13 +9,19 @@ import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.Arrays;
 
 /**
  * 图像处理工具类
  * <p>
  * Created by 舒新胜 on 2017/6/24.
  */
+@Log4j2
 public class ImageUtil {
+
+    private static final int maxWidth = 98;
+
+
     /**
      * 图片设置圆角
      *
@@ -23,46 +30,54 @@ public class ImageUtil {
      * @return
      * @throws IOException
      */
-    public static BufferedImage setRadius(Image srcImage, int width, int height, int radius) throws IOException {
-
-        if (srcImage.getWidth(null) > width || srcImage.getHeight(null) > height) {
-            // 图片过大，进行缩放
-            ImageIcon imageIcon = new ImageIcon();
-            imageIcon.setImage(srcImage.getScaledInstance(width, height, Image.SCALE_SMOOTH));
-            srcImage = imageIcon.getImage();
-        }
-
+    public static BufferedImage setRadius(Image srcImage, int width, int height, int radius) {
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D gs = image.createGraphics();
-        gs.setComposite(AlphaComposite.Src);
-        gs.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        gs.setColor(Color.WHITE);
-        gs.fill(new RoundRectangle2D.Float(0, 0, width, height, radius, radius));
-        gs.setComposite(AlphaComposite.SrcAtop);
-        gs.drawImage(srcImage, 0, 0, null);
-        gs.dispose();
+        Graphics2D g2 = image.createGraphics();
+
+        g2.setComposite(AlphaComposite.Src);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.setColor(Color.WHITE);
+        g2.fill(new RoundRectangle2D.Float(0, 0, width, height, radius, radius));
+
+        g2.setComposite(AlphaComposite.SrcAtop);
+        // 直接在绘制时缩放
+        g2.drawImage(srcImage, 0, 0, width, height, null);
+
+        g2.dispose();
         return image;
     }
 
+    private static Image getScaledImage(Image src, int width, int height, int maxWidth) {
+        Dimension scaleDimen = getScaleDimension(width, height, maxWidth);
+        if (width <= scaleDimen.width && height <= scaleDimen.height) {
+            return src; // 无需缩放
+        }
+        BufferedImage scaledImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = scaledImage.createGraphics();
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.drawImage(src, 0, 0, scaleDimen.width, scaleDimen.height, null);
+        g2.dispose();
+        return scaledImage;
+    }
+
+
     /**
      * 根据图片尺寸大小调整图片显示的大小
-     * @param imageIcon
-     * @param maxWidth
+     * @param
+     * @param
      * @return
      */
-    public static ImageIcon preferredImageSize(ImageIcon imageIcon,int maxWidth) {
+    public static void preferredImageSize(ImageIcon imageIcon, int maxWidth) {
         //动态图不能使用
         int width = imageIcon.getIconWidth();
         int height = imageIcon.getIconHeight();
-        Dimension scaleDimen = getScaleDimen(width, height, maxWidth);
-       // GifUtil.zoomGifBySize();
-        BufferedImage scaled = new BufferedImage(scaleDimen.width, scaleDimen.height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = scaled.createGraphics();
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g2d.drawImage(imageIcon.getImage(), 0, 0, scaleDimen.width, scaleDimen.height, null);
-        g2d.dispose();
-        imageIcon.setImage(scaled);
-        return imageIcon;
+        Image scaledImage = getScaledImage(imageIcon.getImage(), width, height, maxWidth);
+        Image oldImage = imageIcon.getImage();
+        if (oldImage != null) {
+            oldImage.flush(); // 主动释放
+        }
+        imageIcon.setImage(scaledImage);
     }
     /**
      * 根据图片尺寸大小调整图片显示的大小
@@ -70,17 +85,11 @@ public class ImageUtil {
      * @param maxWidth
      * @return
      */
-    public static BufferedImage preferredImageSize(BufferedImage image,int maxWidth) {
+    public static Image preferredImageSize(BufferedImage image, int maxWidth) {
         //动态图不能使用
         int width = image.getWidth();
         int height = image.getHeight();
-        Dimension scaleDimen = getScaleDimen(width, height, maxWidth);
-        BufferedImage scaled = new BufferedImage(scaleDimen.width, scaleDimen.height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = scaled.createGraphics();
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g2d.drawImage(image, 0, 0, scaleDimen.width, scaleDimen.height, null);
-        g2d.dispose();
-        return scaled;
+        return getScaledImage(image, width, height, maxWidth);
     }
 
     /**
@@ -90,16 +99,19 @@ public class ImageUtil {
      * @param maxWidth 最大宽度
      * @return 缩放后的尺寸
      */
-    public static Dimension getScaleDimen(int width,int height,int maxWidth){
-        //动态图不能使用
-        float scale = width * 1.0F / height;
-
-        // 限制图片显示大小
-        if (width > maxWidth) {
-            width = maxWidth;
-            height = (int) (width / scale);
+    public static Dimension getScaleDimension(int width, int height, int maxWidth) {
+        if (width <= 0 || height <= 0 || maxWidth <= 0) {
+            return new Dimension(1, 1); // 防止非法输入导致异常或 UI 崩溃
         }
-        return new Dimension(width,height);
+
+        if (width <= maxWidth) {
+            return new Dimension(width, height); // 不需要缩放
+        }
+
+        float aspectRatio = width / (float) height;
+        int scaledHeight = Math.max(1, Math.round(maxWidth / aspectRatio)); // 避免高度为 0
+
+        return new Dimension(maxWidth, scaledHeight);
     }
     /**
      * 获取缩放后的尺寸
@@ -107,19 +119,16 @@ public class ImageUtil {
      * @param height 高
      * @return 缩放后的尺寸
      */
-    public static Dimension getScaleDimen(int width,int height){
-        return getScaleDimen(width,height,128);
+    public static Dimension getScaleDimension(int width, int height) {
+        return getScaleDimension(width, height, maxWidth);
     }
     /**
      * 根据图片尺寸大小调整图片显示的大小
      * @param imageIcon
      * @return
      */
-    public static ImageIcon preferredImageSize(ImageIcon imageIcon) {
-        if (imageIcon == null){
-            return null;
-        }
-        return preferredImageSize(imageIcon,128);
+    public static void preferredImageSize(ImageIcon imageIcon) {
+        preferredImageSize(imageIcon, maxWidth);
     }
 
     /**
@@ -136,14 +145,16 @@ public class ImageUtil {
             return null;
         }
         try {
-            Dimension scaleDimen = getScaleDimen(w, h, 128);
-            if (scaleDimen.width ==w && scaleDimen.height == h){
+            Dimension scaleDimen = getScaleDimension(w, h, maxWidth);
+            if (scaleDimen.width <= w && scaleDimen.height <= h) {
                 return new ImageIcon(filePath);
             }
-            GifUtil.zoomGifBySize(filePath,scaleDimen.width,scaleDimen.height,filePath+".slave");
-            return new ImageIcon(filePath + ".slave");
+            String slavePath = filePath + ".slave_" + scaleDimen.width + "x" + scaleDimen.height;
+
+            GifUtil.zoomGifBySize(filePath, scaleDimen.width, scaleDimen.height, slavePath);
+            return new ImageIcon(slavePath);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             return null;
         }
     }
@@ -161,10 +172,11 @@ public class ImageUtil {
             return null;
         }
         try {
-            GifUtil.zoomGifBySize(filePath,targetW,targetH,filePath+".slave");
-            return new ImageIcon(filePath + ".slave");
+            String slavePath = filePath + ".slave_" + targetW + "x" + targetH;
+            GifUtil.zoomGifBySize(filePath, targetW, targetH, slavePath);
+            return new ImageIcon(filePath + slavePath);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             return null;
         }
     }
@@ -174,9 +186,8 @@ public class ImageUtil {
      * @return
      */
     public static ImageIcon preferredGifSize(byte[] bytes, int w, int h) {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        try {
-            Dimension scaleDimen = getScaleDimen(w, h, 128);
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+            Dimension scaleDimen = getScaleDimension(w, h, maxWidth);
             if (scaleDimen.width ==w && scaleDimen.height == h){
                 return new ImageIcon(bytes);
             }
@@ -185,60 +196,32 @@ public class ImageUtil {
             }
             return new ImageIcon(byteArrayOutputStream.toByteArray());
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             return null;
-        }finally {
-            try {
-                byteArrayOutputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
-    public static ImageIcon preferredGifSize(ImageIcon icon, int w, int h) {
-        try {
-            return preferredGifSize(convertImageIconToBytes(icon), w, h);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return icon;
-    }
-    public static byte[] convertImageIconToBytes(ImageIcon icon) throws IOException{
-        BufferedImage bufferedImage = new BufferedImage(
-                icon.getIconWidth(),
-                icon.getIconHeight(),
-                BufferedImage.TYPE_INT_ARGB
-        );
-        icon.paintIcon(null, bufferedImage.getGraphics(), 0, 0);
 
 
-        try(ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            ImageIO.write(bufferedImage, "png", baos);
-            baos.flush();
-            return baos.toByteArray();
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw e;
-        }
-
-
-    }
     /**
      * 判断是否为GIF
-     * @param path
+     * @param file
      * @return
      */
-    public static  boolean isGIF(String path ) {
-        String type = "";
-        try (InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(path))) {
-            char[] bytes = new char[20];
-            int read = inputStreamReader.read(bytes, 0, 3);
-            type = new String(bytes);
-
+    public static boolean isGIF(File file) {
+        try (FileInputStream in = new FileInputStream(file)) {
+            byte[] header = new byte[6];
+            if (in.read(header) == 6) {
+                String headStr = new String(header);
+                return isGifByHead(headStr);
+            }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
-        return type.startsWith("GIF");
+        return false;
+    }
+
+    public static boolean isGIFByFile(String path) {
+        return isGIF(new File(path));
     }
     /**
      * 判断是否为GIF
@@ -246,14 +229,18 @@ public class ImageUtil {
      * @return
      */
     public static boolean isGIF(byte[] bytes) {
-        if (bytes.length < 3) {
+        if (bytes.length < 6) {
             return false;
         }
-        String type = String.valueOf(bytes[0]) + String.valueOf(bytes[1])
-                + String.valueOf(bytes[2]);
-        return type.equals(stringToAscii("GIF"));
+        String headStr = new String(Arrays.copyOfRange(bytes, 0, 6));
+        return isGifByHead(headStr);
     }
-    public static boolean isGif(String imagePath) {
+
+    public static boolean isGifByHead(String headStr) {
+        return headStr.startsWith("GIF87a") || headStr.startsWith("GIF89a");
+    }
+
+    public static boolean isGifByFileName(String imagePath) {
 
         String suffix = "";
         int pos = imagePath.lastIndexOf(".");
@@ -264,18 +251,6 @@ public class ImageUtil {
         return suffix.equals("gif");
     }
 
-    public static String stringToAscii(String value) {
-        StringBuffer sbu = new StringBuffer();
-        char[] chars = value.toCharArray();
-        for (int i = 0; i < chars.length; i++) {
-            if (i != chars.length - 1) {
-                sbu.append((int) chars[i]);
-            } else {
-                sbu.append((int) chars[i]);
-            }
-        }
-        return sbu.toString();
-    }
 
     /**
      * 获取图片的宽高
@@ -286,10 +261,9 @@ public class ImageUtil {
     public static Dimension getImageSize(String file) {
         try {
             BufferedImage image = ImageIO.read(new File(file));
-            Dimension dimension = new Dimension(image.getWidth(), image.getHeight());
-            return dimension;
+            return new Dimension(image.getWidth(), image.getHeight());
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
 
         return new Dimension(0, 0);
@@ -304,12 +278,4 @@ public class ImageUtil {
         return suffix.equals("jpg") || suffix.equals("jpeg") || suffix.equals("png") || suffix.equals("gif");
     }
 
-    public static boolean isGIF(ImageIcon icon) {
-        try {
-            return isGIF(convertImageIconToBytes(icon));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
 }

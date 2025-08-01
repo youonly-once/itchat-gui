@@ -14,6 +14,7 @@ import java.util.concurrent.*;
  */
 @Log4j2
 public class DownloadManager {
+    private static final ConcurrentHashMap<String, CountDownLatch> latchMap = new ConcurrentHashMap<>();
 
     private final static ScheduledExecutorService cleanerScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
         Thread t = new Thread(r, "Download-Cleaner");
@@ -81,7 +82,7 @@ public class DownloadManager {
                 taskMap.remove(task.getTaskId());
             } else if (existing.getStatus() == DownloadStatus.WAITING || existing.getStatus() == DownloadStatus.RUNNING) {
                 if (existing.getFuture() == null) {
-                    awaitDownload(task.getTaskId());
+                    awaitDownloadLatch(task);
                     log.error("轮询等待中：{}", existing);
                     return (R) task.getResult();
                 }
@@ -117,7 +118,7 @@ public class DownloadManager {
         if (existing != null) {
             if (existing.getStatus() == DownloadStatus.WAITING || existing.getStatus() == DownloadStatus.RUNNING) {
                 if (existing.getFuture() == null) {
-                    awaitDownload(task.getTaskId());
+                    awaitDownloadLatch(existing);
                     return (R) task.getResult();
                 }
                 try {
@@ -195,6 +196,10 @@ public class DownloadManager {
             return;
         }
         Future<?> future = task.getFuture();
+        if (future == null) {
+            awaitDownloadLatch(task);
+            return;
+        }
         try {
             future.get(); // 阻塞等待
         } catch (InterruptedException | ExecutionException e) {
@@ -208,7 +213,7 @@ public class DownloadManager {
      * @param taskId 任务ID
      */
     public static void awaitDownloadTimeOut(String taskId) {
-        awaitDownload(taskId, 1000 * 60 * 5);
+        awaitDownload(taskId, 1000 * 60 * 1);
     }
 
     /**
@@ -225,6 +230,10 @@ public class DownloadManager {
         }
 
         Future<?> future = task.getFuture();
+        if (future == null) {
+            awaitDownloadLatch(task, timeOut);
+            return;
+        }
         try {
             future.get(timeOut, TimeUnit.MILLISECONDS); // 阻塞等待
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -244,6 +253,40 @@ public class DownloadManager {
             log.info("定时清理下载任务：共清理 {} 条，剩余任务 {} 条", (before - after), after);
         }
     }
+
+    private static void awaitDownloadLatch(DownloadTask<?> task) {
+        awaitDownloadLatch(task, 60 * 1000);
+    }
+
+    /**
+     * 在没有Future的情况下等待任务完成。
+     */
+    private static void awaitDownloadLatch(DownloadTask<?> task, long timeoutMillis) {
+        long deadline = System.currentTimeMillis() + timeoutMillis;
+
+        while (true) {
+            DownloadStatus status = task.getStatus();
+            if (status != DownloadStatus.WAITING && status != DownloadStatus.RUNNING) {
+                return;
+            }
+
+            long remaining = deadline - System.currentTimeMillis();
+            if (remaining <= 0) {
+                log.warn("等待任务超时：{}", task.getTaskId());
+                return;
+            }
+
+            try {
+                Thread.sleep(Math.min(200, remaining));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt(); // 恢复中断状态
+                log.error("等待任务时被中断：{}", task.getTaskId(), e);
+                return;
+            }
+        }
+    }
+
+
 
     private static void updateContactsInfo() {
 

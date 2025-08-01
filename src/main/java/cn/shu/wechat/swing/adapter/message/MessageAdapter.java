@@ -1,6 +1,5 @@
 package cn.shu.wechat.swing.adapter.message;
 
-import cn.afterturn.easypoi.cache.ImageCache;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.constant.DownloadStatus;
 import cn.shu.wechat.constant.DownloadType;
@@ -882,7 +881,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                             return;
                         }
                         ImageIcon imageIcon = null;
-                        if (ImageUtil.isGIF(finalPath)) {
+                        if (ImageUtil.isGIFByFile(finalPath)) {
                             imageIcon = ImageUtil.preferredGifSize(finalPath, item.getImgWidth(), item.getImgHeight());
                         } else {
                             imageIcon = IconUtil.getIconFromFile(file);
@@ -894,7 +893,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                             @Override
                             public void mouseClicked(MouseEvent e) {
                                 File file = new File(item.getFilePath());
-                                if (ImageUtil.isGIF(item.getFilePath())) {
+                                if (ImageUtil.isGIFByFile(item.getFilePath())) {
                                     ChatMessagePanel.openFile(item.getFilePath());
                                 } else {
                                     if (file.exists() && file.length() <= 1024 * 1024) {

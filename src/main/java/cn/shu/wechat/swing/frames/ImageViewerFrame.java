@@ -5,6 +5,7 @@ import cn.shu.wechat.swing.ImageViewer.ImageLabel;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCMenuItemUI;
 import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.swing.utils.ImageUtil;
 import cn.shu.wechat.swing.utils.OSUtil;
 
 import javax.imageio.ImageIO;
@@ -14,7 +15,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 
-import static cn.shu.wechat.swing.utils.ImageUtil.isGif;
 
 /**
  * Created by song on 2017/6/25.
@@ -49,7 +49,7 @@ public class ImageViewerFrame extends JFrame {
 
     private ImageViewerFrame() {
         tooKit = Toolkit.getDefaultToolkit();
-        isGif = imagePath != null && isGif(imagePath);
+        isGif = imagePath != null && ImageUtil.isGifByFileName(imagePath);
         initComponents();
         initView();
         initSize();

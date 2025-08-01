@@ -69,7 +69,7 @@ public class RCTextEditor extends JTextPane implements DropTargetListener {
 
         JLabel label = new JLabel();
         if (needToScale) {
-            if (ImageUtil.isGIF(path)){
+            if (ImageUtil.isGIFByFile(path)) {
                 icon = ImageUtil.preferredGifSizeWithTargetDimension(path,iconWidth, iconHeight);
                 icon.setDescription(path);
                 label.setIcon(icon);

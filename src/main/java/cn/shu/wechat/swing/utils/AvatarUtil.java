@@ -335,20 +335,12 @@ public final class AvatarUtil {
     public static void putUserAvatarCache(String username, Image image) {
         try {
              avatarCache.put(username, CompletableFuture.supplyAsync(() -> {
-
-                try {
-                    Image newImage = ImageUtil.setRadius(image, ((BufferedImage) image).getWidth(), ((BufferedImage) image).getHeight(), 35)
-                            .getScaledInstance(NORMAL_AVATAR_SIZE, NORMAL_AVATAR_SIZE, Image.SCALE_SMOOTH);
-
-
-                    ImageIcon imageIcon = new ImageIcon();
-                        imageIcon.setImage(newImage);
-                        return imageIcon;
-
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }).whenComplete((result, ex) -> {
+                 try {
+                     return getIconByImage(image);
+                 } catch (IOException e) {
+                     throw new RuntimeException(e);
+                 }
+             }).whenComplete((result, ex) -> {
                 // 结果为null或发生异常时，从缓存移除，允许后续重试
                 if (ex != null) {
                     log.error("更新头像缓存失败：{}", username, ex);
