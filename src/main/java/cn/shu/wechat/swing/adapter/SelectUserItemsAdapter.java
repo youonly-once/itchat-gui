@@ -4,7 +4,6 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
-import cn.shu.wechat.swing.utils.CharacterParser;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.worker.HeadLoadingSwingWorker;
 import lombok.Setter;
@@ -103,26 +102,5 @@ public class SelectUserItemsAdapter extends BaseAdapter<SelectUserItemViewHolder
         viewHolder.addMouseListener(mouseListener);
     }
 
-    /**
-     * 按姓名首字母排序
-     */
-    private void processData() {
-        userList.sort((o1, o2) -> {
-            String tc = CharacterParser.getSelling(o1.getDisplayName().toUpperCase());
-            String oc = CharacterParser.getSelling(o2.getDisplayName().toUpperCase());
-            return tc.compareTo(oc);
-        });
-
-        int index = 0;
-        String lastChara = "";
-        for (SelectUserData item : userList) {
-            String ch = CharacterParser.getSelling(item.getDisplayName()).substring(0, 1).toUpperCase();
-            if (!ch.equals(lastChara)) {
-                lastChara = ch;
-                positionMap.put(index, ch);
-            }
-            index++;
-        }
-    }
 
 }

@@ -1,5 +1,6 @@
 package cn.shu.wechat.swing.entity;
 
+import cn.shu.wechat.swing.utils.CharacterParser;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -8,8 +9,15 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
-public class SelectUserData {
+public class SelectUserData implements Comparable<SelectUserData> {
     private String userName;
     private String displayName;
     private boolean selected;
+
+    @Override
+    public int compareTo(SelectUserData o2) {
+        String tc = CharacterParser.getSelling(this.getDisplayName().toUpperCase());
+        String oc = CharacterParser.getSelling(o2.getDisplayName().toUpperCase());
+        return tc.compareTo(oc);
+    }
 }

@@ -175,7 +175,7 @@ public class IconUtil {
         }
         try {
             Dimension scaleDimen = getScaleDimension(w, h, maxWidth);
-            if (scaleDimen.width <= w && scaleDimen.height <= h) {
+            if (scaleDimen.width >= w && scaleDimen.height >= h) {
                 return new ImageIcon(filePath);
             }
             String slavePath = filePath + ".slave_" + scaleDimen.width + "x" + scaleDimen.height;

@@ -10,9 +10,9 @@ import cn.shu.wechat.swing.components.RCSearchTextField;
 import cn.shu.wechat.swing.constant.SearchResultType;
 import cn.shu.wechat.swing.entity.SearchResultItem;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
+import cn.shu.wechat.swing.utils.CharacterParser;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
-import com.github.promeg.pinyinhelper.Pinyin;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -446,7 +446,7 @@ public class SearchPanel extends ParentAvailablePanel {
      * 转换字符串为拼音全拼，非汉字保持原样（用TinyPinyin）
      */
     private String toPinyin(String input) {
-        return Pinyin.toPinyin(input, "").toLowerCase();
+        return CharacterParser.getSelling(input).toLowerCase();
     }
 
     /**
@@ -459,7 +459,7 @@ public class SearchPanel extends ParentAvailablePanel {
             if (c >= 'a' && c <= 'z') {
                 sb.append(c);
             } else {
-                String p = Pinyin.toPinyin(String.valueOf(c), "");
+                String p = CharacterParser.getSelling(String.valueOf(c));
                 if (!p.isEmpty()) sb.append(p.charAt(0));
                 else sb.append(c);
             }

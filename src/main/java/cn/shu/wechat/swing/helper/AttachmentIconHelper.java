@@ -16,7 +16,7 @@ public class AttachmentIconHelper {
     public ImageIcon getImageIcon(String filename, int width, int height) {
         String suffix = filename.substring(filename.lastIndexOf(".") + 1);
 
-        if (null == suffix || suffix.length() < 1) {
+        if (suffix.isEmpty()) {
             return unknownMimeIcon(width, height);
         } else {
             String mime = MimeTypeUtil.getMime(suffix);

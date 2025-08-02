@@ -18,12 +18,16 @@ import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.panels.left.tabcontent.ContactsPanel;
 import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
+import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.OSUtil;
 import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.task.DownloadTask;
-import cn.shu.wechat.utils.*;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
+import cn.shu.wechat.utils.MD5Util;
+import cn.shu.wechat.utils.SleepUtils;
+import cn.shu.wechat.utils.SpringContextHolder;
 import com.melloware.jintellitype.HotkeyListener;
 import com.melloware.jintellitype.JIntellitype;
 import lombok.extern.log4j.Log4j2;
@@ -455,7 +459,7 @@ public final class LoginFrame extends JFrame {
      * 下载头像
      */
     private void downloadHeadImage() {
-        ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(() -> HeadImageUtil.deleteLoseEfficacyHeadImg(wechatConfiguration.getBasePath() + "/headimg/"));
+        ExecutorServiceUtil.getHeadImageDownloadExecutorService().execute(() -> AvatarUtil.deleteLoseEfficacyHeadImg(wechatConfiguration.getBasePath() + "/headimg/"));
         statusLabel.setText("11. 下载联系人头像");
         log.info("11. 下载联系人头像");
         long time = System.currentTimeMillis();

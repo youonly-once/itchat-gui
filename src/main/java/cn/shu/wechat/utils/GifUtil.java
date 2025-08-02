@@ -2,18 +2,16 @@ package cn.shu.wechat.utils;
 
 import com.madgag.gif.fmsware.AnimatedGifEncoder;
 import com.madgag.gif.fmsware.GifDecoder;
+import lombok.extern.log4j.Log4j2;
 import net.coobird.thumbnailator.Thumbnails;
 
 import javax.imageio.*;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.io.*;
 import java.util.Iterator;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
+@Log4j2
 public class GifUtil {
 
     public static byte[] zoomImg(){
@@ -166,7 +164,12 @@ public class GifUtil {
      * @throws IOException
      */
     public static void zoomGifBySize(String imagePath,int width, int height, String outputPath) throws IOException {
-        zoomGifBySize(new FileInputStream(imagePath),width,height,new FileOutputStream(outputPath));
+
+        try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(imagePath));
+             OutputStream fileOutputStream = new BufferedOutputStream(new FileOutputStream(outputPath));) {
+            zoomGifBySize(in, width, height, fileOutputStream);
+        }
+
     }
     /**
      * GIF压缩尺寸大小
@@ -184,46 +187,28 @@ public class GifUtil {
         if (status != GifDecoder.STATUS_OK) {
             throw new IOException("read image  error!");
         }
-        // 拆分一帧一帧的压缩之后合成
         AnimatedGifEncoder encoder = new AnimatedGifEncoder();
         encoder.start(outputStream);
-        int frameCount = decoder.getFrameCount();
-        encoder.setRepeat(decoder.getLoopCount());
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(frameCount , frameCount , 0, TimeUnit.SECONDS, new SynchronousQueue<>());
-        //TODO 还是很慢
-        BufferedImage[] zoomImageList = new BufferedImage[frameCount];
-        for (int i = 0; i < frameCount; i++) {
-            final int finalI = i;
-            threadPoolExecutor.submit(new Runnable() {
-                @Override
-                public void run()  {
-                    // 设置播放延迟时间
-                    long l = System.currentTimeMillis();
-                    encoder.setDelay(decoder.getDelay(finalI));
-                    BufferedImage bufferedImage = decoder.getFrame(finalI);// 获取每帧BufferedImage流
-                    BufferedImage zoomImage = new BufferedImage(width, height, bufferedImage.getType());
-                    Image image = bufferedImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-                    Graphics gc = zoomImage.getGraphics();
-                    gc.setColor(Color.WHITE);
-                    gc.drawImage(image, 0, 0, null);
-                    zoomImageList[finalI] = zoomImage;
-                }
-            });
 
+        encoder.setRepeat(decoder.getLoopCount());
+        for (int i = 0; i < decoder.getFrameCount(); i++) {
+            encoder.setDelay(decoder.getDelay(i));  // 设置每帧延迟
+            BufferedImage bufferedImage = decoder.getFrame(i);  // 获取原始帧
+
+            try {
+                // 使用 Thumbnail 缩放每帧
+                BufferedImage scaledImage = Thumbnails.of(bufferedImage)
+                        .size(width, height)
+                        .outputQuality(1.0)
+                        .asBufferedImage();
+                encoder.addFrame(scaledImage);  // 添加帧到 encoder
+            } catch (Exception e) {
+                log.error("处理第 {} 帧失败: {}", i, e.getMessage(), e);
+                throw new RuntimeException(e);
+            }
         }
-        threadPoolExecutor.shutdown();
-        try {
-            threadPoolExecutor.awaitTermination(Long.MAX_VALUE,TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        for (BufferedImage bufferedImage : zoomImageList) {
-            encoder.addFrame(bufferedImage);
-        }
+
         encoder.finish();
-        // File outFile = new File(outputPath);
-        // BufferedImage image = ImageIO.read(outFile);
-        // ImageIO.write(image, outFile.getName(), outFile);
     }
     /**
      * 将文件转换成byte数组

@@ -4,11 +4,14 @@ import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.constant.DownloadType;
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.entity.AttrHistory;
 import cn.shu.wechat.entity.Contacts;
+import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.task.DownloadTask;
+import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 
@@ -20,6 +23,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -738,4 +742,49 @@ public final class AvatarUtil {
         return rectangles;
     }
 
+    /**
+     * 删除下载的失效头像
+     */
+    public static void deleteLoseEfficacyHeadImg(String imgPath) {
+        AttrHistoryMapper attrHistoryMapper = SpringContextHolder.getBean(AttrHistoryMapper.class);
+        List<AttrHistory> headImageList = attrHistoryMapper
+                .selectByAll(AttrHistory.builder()
+                        .attr("头像更换")
+                        .build());
+        HashSet<String> headImages = new HashSet<>();
+        for (AttrHistory attrHistory : headImageList) {
+            headImages.add(attrHistory.getNewval());
+            headImages.add(attrHistory.getOldval());
+        }
+        deleteFile(imgPath, headImages);
+        log.info("头像删除成功");
+
+    }
+
+    /**
+     * 遍历删除文件
+     *
+     * @param imgPath    目录
+     * @param headImages 不删除列表
+     */
+    private static void deleteFile(String imgPath, HashSet<String> headImages) {
+        File file = new File(imgPath);
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            if (files == null) {
+                return;
+            }
+            for (File file1 : files) {
+                if (file1.isFile()) {
+                    if (!headImages.contains(file1.getAbsolutePath())) {
+                        file1.delete();
+                    }
+
+                } else if (file1.isDirectory()) {
+                    deleteFile(file1.getAbsolutePath(), headImages);
+                }
+
+            }
+        }
+    }
 }

@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class HttpUtil {
     static {
         //复用失效连接导致的 HTTP/1.1 header parser received no bytes 将连接活跃时间缩小
-        System.setProperty("jdk.httpclient.keepalive.timeout", "10s");
+        System.setProperty("jdk.httpclient.keepalive.timeout", "10");
     }
 
     private static final CookieManager cookieManager = new CookieManager(null, CookiePolicy.ACCEPT_ALL);

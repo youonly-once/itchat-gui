@@ -19,7 +19,7 @@ public class SleepUtils {
         try {
             TimeUnit.MILLISECONDS.sleep(time);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 
