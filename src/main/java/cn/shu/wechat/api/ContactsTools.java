@@ -17,6 +17,7 @@ import cn.shu.wechat.utils.CommonTools;
 import cn.shu.wechat.utils.JSONObjectUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
@@ -731,5 +732,93 @@ public class ContactsTools {
             }
         }
         return Optional.empty();
+    }
+
+    /**
+     * 第一次收到群消息 加载群成员详细细腻
+     *
+     * @param msg 消息
+     */
+    public static <M> Contacts loadUserInfo(String fromUserName, String toUserName, String memberName, M msg) {
+        String userName = fromUserName;
+        if (userName.equals(Core.getUserName())) {
+            userName = toUserName;
+        }
+
+        if ("@placeholder_foldgroup".equals(userName)) {
+            log.warn("折叠的群聊！");
+            Contacts contacts = new Contacts();
+            contacts.setUsername(userName);
+            contacts.setNickname("折叠的群聊");
+            contacts.setMutualCreate(true);
+            return null;
+        }
+
+        Contacts contacts = Core.getMemberMap().get(userName);
+        if (contacts != null && contacts.isMutualCreate()) {
+            //手动创建的
+            contacts = null;
+        }
+        if (contacts == null) {
+            log.error("用户不存在！{}", userName);
+
+            if (ContactsTools.isRoomContact(userName)) {
+                DownloadTask<Void> task2 = new DownloadTask<>();
+                task2.setTaskId("WebWxBatchGetContact:" + userName);
+                task2.setGroupName(userName);
+                task2.setType(DownloadType.GetBatchContacts);
+                DownloadManager.submitAwait(task2);
+            } else {
+                DownloadTask<Void> task1 = new DownloadTask<>();
+                task1.setTaskId("webWxGetContact");
+                task1.setType(DownloadType.GetContacts);
+                DownloadManager.submitAwait(task1);
+            }
+
+            contacts = Core.getMemberMap().get(userName);
+            if (contacts != null) {
+                log.info("获取成功：{},{}", userName, contacts);
+            }
+        } else if (ContactsTools.isRoomContact(userName)
+                && StringUtils.isNotEmpty(memberName)) {
+            //群成员发的消息
+            if (Core.getMemberMap().containsKey(memberName)) {
+                //群成员是我的好友，群信息没有当前成员则添加进去
+
+                if (ContactsTools.getMemberOfGroup(userName, memberName) == null) {
+                    Contacts memberContacts = Core.getMemberMap().get(memberName);
+                    log.error("群用户或者群成员信息不完整，添加好友进去{}", memberContacts);
+                    Core.getMemberMap().get(userName).getMemberlist().add(memberContacts);
+                }
+
+            } else if (CollectionUtils.isEmpty(contacts.getMemberlist())
+                    || ContactsTools.getMemberOfGroup(userName, memberName) == null) {
+                //群成员非好友 且 群里面没有该用户信息 则加载群成员数据
+
+                log.error("群用户或者群成员信息不完整！{}，{}", contacts.getMemberlist().size(), userName);
+                DownloadTask<Void> objectDownloadTask = new DownloadTask<>();
+                objectDownloadTask.setTaskId("WebWxBatchGetContact:" + userName);
+                objectDownloadTask.setGroupName(userName);
+                objectDownloadTask.setType(DownloadType.GetBatchContacts);
+                DownloadManager.submitAwait(objectDownloadTask);
+                contacts = Core.getMemberMap().get(userName);
+                if (contacts != null && ContactsTools.getMemberOfGroup(userName, memberName) != null) {
+                    log.info("获取成功：{},{}", userName, contacts);
+                }
+                if (ContactsTools.getMemberOfGroup(userName, memberName) != null) {
+                    log.info("成员获取成功：{},{}", userName, contacts);
+                }
+            }
+        }
+        if (contacts == null) {
+            contacts = new Contacts();
+            contacts.setUsername(userName);
+            contacts.setNickname("未知");
+            contacts.setMutualCreate(true);
+            ContactsTools.addContacts(contacts);
+            log.error("未知联系人消息{}", msg);
+        }
+        return contacts;
+
     }
 }

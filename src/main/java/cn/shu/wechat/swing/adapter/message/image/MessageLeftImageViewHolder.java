@@ -16,7 +16,6 @@ import java.awt.*;
  * Created by 舒新胜 on 17-6-2.
  */
 public class MessageLeftImageViewHolder extends BaseMessageViewHolder {
-    public JLabel sender = new JLabel();
     //public JLabel avatar = new JLabel();
     //public JLabel size = new JLabel();
     public MessageImageLabel image = new MessageImageLabel();

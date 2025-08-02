@@ -2,10 +2,8 @@ package cn.shu.wechat.swing.adapter.message.voice;
 
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
 import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.components.message.RCLeftVoiceMessageBubble;
-import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 
@@ -20,7 +18,6 @@ import java.awt.*;
  */
 
 public class MessageLeftVoiceViewHolder extends MessageVoiceViewHolder {
-    public final SizeAutoAdjustTextArea sender = new SizeAutoAdjustTextArea((int)(MainFrame.getContext().currentWindowWidth * 0.5));
     private JLabel unreadPoint;
     public MessageLeftVoiceViewHolder(boolean isGroup) {
        super(isGroup,new RCLeftVoiceMessageBubble());

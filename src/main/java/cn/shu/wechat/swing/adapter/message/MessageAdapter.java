@@ -105,6 +105,8 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     public BaseMessageViewHolder onCreateViewHolder(int viewType,int subViewType, int position) {
         Message messageItem = messageItems.get(position);
         boolean isSelf = Core.getUserName().equals(messageItem.getFromUsername());
+        boolean isGroup = ContactsTools.isRoomContact(messageItem.getFromUsername());
+        messageItem.setGroup(true);
         switch (WxRespConstant.WXReceiveMsgCodeEnum.getByCode(viewType)) {
             case MSGTYPE_VERIFYMSG:
             case MSGTYPE_SHARECARD:{
@@ -247,33 +249,32 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         }
     }
 
-    private void processLeftProgramOfAppMessage(BaseMessageViewHolder viewHolder, Message item) {
-        MessageLeftProgramOfAppViewHolder appViewHolder = (MessageLeftProgramOfAppViewHolder) viewHolder;
-        appViewHolder.sender.setText(item.getPlainName());
+    private void processLeftProgramOfAppMessage(MessageLeftProgramOfAppViewHolder viewHolder, Message item) {
+        viewHolder.sender.setText(item.getPlainName());
         processProgramOfAppMessage(viewHolder,item);
     }
 
-    private void processRightProgramOfAppMessage(BaseMessageViewHolder viewHolder, Message item) {
+    private void processRightProgramOfAppMessage(MessageProgramOfAppViewHolder viewHolder, Message item) {
 
         processProgramOfAppMessage(viewHolder,item);
     }
-    private void processProgramOfAppMessage(BaseMessageViewHolder viewHolder, Message item){
-        MessageProgramOfAppViewHolder appViewHolder = (MessageProgramOfAppViewHolder) viewHolder;
-        appViewHolder.title.setText(item.getTitle());
-        appViewHolder.contentTitlePanel.setTag(item);
-        appViewHolder.sourceName.setText(item.getSourceName());
+
+    private void processProgramOfAppMessage(MessageProgramOfAppViewHolder viewHolder, Message item) {
+        viewHolder.title.setText(item.getTitle());
+        viewHolder.contentTitlePanel.setTag(item);
+        viewHolder.sourceName.setText(item.getSourceName());
         if (StringUtils.isNotEmpty(item.getSourceIconUrl())){
             try {
                 ImageIcon imageIcon = new ImageIcon(URI.create(item.getSourceIconUrl()).toURL());
                 IconUtil.preferredImageSize(imageIcon, 16);
-                appViewHolder.sourceIcon.setIcon(imageIcon);
+                viewHolder.sourceIcon.setIcon(imageIcon);
             } catch (MalformedURLException e) {
                 log.error(e.getMessage(), e);
             }
         }
         //加载缩略图
         if (StringUtils.isEmpty(item.getThumbUrl())){
-            appViewHolder.imageLabel.setIcon(IconUtil.getIcon(this, "/image/image_loading.gif"));
+            viewHolder.imageLabel.setIcon(IconUtil.getIcon(this, "/image/image_loading.gif"));
 
             DownloadTask<byte[]> downloadTask = new DownloadTask<>();
             downloadTask.setMsgId(item.getMsgId());
@@ -284,14 +285,14 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             downloadTask.setCallback(task -> {
                 byte[] bytes = task.getResult();
                 if (bytes != null && bytes.length > 0) {
-                    process(item, appViewHolder, bytes);
+                    process(item, viewHolder, bytes);
                 } else {
                     downloadTask.setResourceType(WXMsgUrl.SLAVE_TYPE);
                     downloadTask.setTaskId(item.getMsgId() + WXMsgUrl.SLAVE_TYPE);
                     downloadTask.setCallback(secondTask -> {
                         byte[] secondBytes = secondTask.getResult();
                         if (secondBytes != null && secondBytes.length > 0) {
-                            process(item, appViewHolder, secondBytes);
+                            process(item, viewHolder, secondBytes);
                         }
                     });
                     DownloadManager.submit(downloadTask);
@@ -302,7 +303,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
         } else if (StringUtils.isEmpty(item.getFilePath())) {
             try {
-                appViewHolder.imageLabel.setIcon(new ImageIcon(URI.create((item.getThumbUrl())).toURL()));
+                viewHolder.imageLabel.setIcon(new ImageIcon(URI.create((item.getThumbUrl())).toURL()));
             } catch (MalformedURLException e) {
                 log.error(e.getMessage(), e);
             }
@@ -312,7 +313,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 if (Files.exists(Path.of(item.getFilePath()))) {
                     ImageIcon imageIcon = new ImageIcon(item.getFilePath());
                     IconUtil.preferredImageSize(imageIcon, 200);
-                    SwingUtilities.invokeLater(() -> appViewHolder.imageLabel.setIcon(imageIcon));
+                    SwingUtilities.invokeLater(() -> viewHolder.imageLabel.setIcon(imageIcon));
                 }
             });
         }
@@ -332,7 +333,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     }
                 }
             };
-            appViewHolder.contentTitlePanel.addMouseListener(messageMouseListener);
+            viewHolder.contentTitlePanel.addMouseListener(messageMouseListener);
         }
         // 绑定右键菜单
         attachPopupMenu(viewHolder, item);
@@ -370,8 +371,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      */
     private void processLeftAttachmentMessage(MessageLeftAttachmentViewHolder holder, Message item) {
 
-
-        holder.sender.setText(item.getPlainName());
 
         updateFileDownloadProgress(holder, item);
 
@@ -554,7 +553,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      * @param item
      */
     private void processLeftImageMessage(MessageLeftImageViewHolder holder, Message item) {
-        holder.sender.setText(item.getPlainName());
+
 
         processImage(item, holder.image);
 
@@ -573,7 +572,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      */
     private void processLeftVoiceMessage(MessageLeftVoiceViewHolder holder, Message item) {
         processVoice(item, holder);
-        holder.sender.setText(item.getPlainName());
+
         attachPopupMenu(holder, item);
 
     }
@@ -680,7 +679,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      * @param item
      */
     private void processLeftVideoMessage(MessageLeftVideoViewHolder holder, Message item) {
-        holder.sender.setText(item.getPlainName());
+
 
         try {
             processVideo(item
@@ -985,7 +984,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         holder.text.setText(item.getPlaintext() == null ? "[空消息]" : item.getPlaintext());
         holder.text.setTag(item);
 
-        holder.sender.setText(item.getPlainName());
 
         listView.setScrollHiddenOnMouseLeave(holder.messageBubble);
         listView.setScrollHiddenOnMouseLeave(holder.text);
@@ -994,7 +992,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
     private void processLeftLinkMessage(MessageLeftLinkOfAppViewHolder viewHolder, Message item) {
         processLinkMessage(viewHolder, item);
-        viewHolder.sender.setText(item.getPlainName());
         attachPopupMenu(viewHolder, item);
     }
 
@@ -1005,7 +1002,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
     private void processLeftContactsCardOfAppMessage(MessageLeftContactsCardOfAppViewHolder viewHolder, Message item) {
         processContactsCardMessage(viewHolder, item);
-        viewHolder.sender.setText(item.getPlainName());
+
         attachPopupMenu(viewHolder, item);
     }
 
@@ -1172,7 +1169,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             messageTime = item.getCreateTime();
             item.setMessageTime(messageTime);
         }
-
+        holder.sender.setText(item.getPlainName());
         // 如果当前消息的时间与上条消息时间相差大于1分钟，则显示当前消息的时间
         if (preItem != null) {
 

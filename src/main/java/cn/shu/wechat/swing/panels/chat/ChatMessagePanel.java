@@ -440,7 +440,9 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                                 );
                             }
                         }
+                        ContactsTools.loadUserInfo(message.getFromUsername(), message.getToUsername(), message.getFromMemberOfGroupUsername(), message);
                     }
+
                     messageList = messageList.reversed();
                     List<Message> finalMessageList = messageList;
                     SwingUtilities.invokeLater(() -> {

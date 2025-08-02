@@ -1,9 +1,7 @@
 package cn.shu.wechat.swing.adapter.message.app;
 
 import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
 import cn.shu.wechat.swing.components.message.RCRightLinkMessageBubble;
-import cn.shu.wechat.swing.frames.MainFrame;
 
 /**
  * right ContactsCard of app
@@ -13,7 +11,6 @@ import cn.shu.wechat.swing.frames.MainFrame;
 
 
 public class MessageLeftContactsCardOfAppViewHolder extends MessageContactsCardOfAppViewHolder {
-    public final SizeAutoAdjustTextArea sender = new SizeAutoAdjustTextArea((int)(MainFrame.getContext().currentWindowWidth * 0.5));
     private final boolean isGroup ;
     public MessageLeftContactsCardOfAppViewHolder(boolean isGroup) {
         super(new RCRightLinkMessageBubble());

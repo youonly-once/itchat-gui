@@ -19,7 +19,6 @@ import java.awt.*;
  * @date 17-6-2
  */
 public class MessageLeftTextViewHolder extends BaseMessageViewHolder {
-    public SizeAutoAdjustTextArea sender ;
 
     public SizeAutoAdjustTextArea text;
     public RCLeftImageMessageBubble messageBubble = new RCLeftImageMessageBubble();
@@ -38,7 +37,6 @@ public class MessageLeftTextViewHolder extends BaseMessageViewHolder {
         int maxWidth = (int) (MainFrame.getContext().currentWindowWidth * 0.5);
         text = new SizeAutoAdjustTextArea(maxWidth);
         text.setParseUrl(true);
-        sender = new SizeAutoAdjustTextArea(maxWidth);
         time.setForeground(Colors.FONT_GRAY);
         time.setFont(FontUtil.getDefaultFont(12));
 

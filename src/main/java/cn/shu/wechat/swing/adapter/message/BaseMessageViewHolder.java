@@ -1,6 +1,8 @@
 package cn.shu.wechat.swing.adapter.message;
 
 import cn.shu.wechat.swing.adapter.ViewHolder;
+import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
+import cn.shu.wechat.swing.frames.MainFrame;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -14,7 +16,8 @@ public abstract class BaseMessageViewHolder extends ViewHolder {
     public JLabel avatar = new JLabel();
     public JLabel time = new JLabel();
     public JLabel revoke = new JLabel("已撤回");
-
+    // public JLabel sender = new JLabel();
+    public final SizeAutoAdjustTextArea sender = new SizeAutoAdjustTextArea((int) (MainFrame.getContext().currentWindowWidth * 0.5));
     public BaseMessageViewHolder() {
         revoke.setForeground(Color.GRAY);
         revoke.setVisible(false);

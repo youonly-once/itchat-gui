@@ -3,12 +3,10 @@ package cn.shu.wechat.swing.adapter.message.video;
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
 import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.components.message.RCLeftVideoMessageBubble;
 import cn.shu.wechat.swing.components.message.TagJLayeredPane;
 import cn.shu.wechat.swing.components.message.TagPanel;
-import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 
@@ -22,12 +20,6 @@ import java.io.IOException;
  */
 
 public class MessageLeftVideoViewHolder extends BaseMessageViewHolder {
-
-
-    /**
-     * 发送者
-     */
-    public final SizeAutoAdjustTextArea sender = new SizeAutoAdjustTextArea((int)(MainFrame.getContext().currentWindowWidth * 0.5));
 
     /**
      * 视频层

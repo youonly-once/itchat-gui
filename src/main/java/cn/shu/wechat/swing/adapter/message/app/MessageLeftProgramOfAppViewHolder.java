@@ -2,7 +2,6 @@ package cn.shu.wechat.swing.adapter.message.app;
 
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
 import cn.shu.wechat.swing.components.message.RCLeftAppMessageBubble;
 import cn.shu.wechat.swing.utils.FontUtil;
 
@@ -15,7 +14,6 @@ import javax.swing.border.EmptyBorder;
  * @创建时间 8/15/2021 11:58
  */
 public class MessageLeftProgramOfAppViewHolder extends MessageProgramOfAppViewHolder{
-    public final SizeAutoAdjustTextArea sender = new SizeAutoAdjustTextArea(500);
     public MessageLeftProgramOfAppViewHolder(boolean isGroup) {
         super(new RCLeftAppMessageBubble());
         initView(isGroup);

@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -144,6 +146,15 @@ public final class AvatarUtil {
                         if (WechatConfiguration.getInstance().getFuzzUpAvatar()) {
                             return getFuzzUpAvatar(user);
                         }
+                        Pattern pattern = Pattern.compile("webwxgeticon\\?[^#]*?\\bseq=(\\d+)\\b");
+                        Matcher matcher = pattern.matcher(user.getHeadimgurl());
+                        if (matcher.find()) {
+                            String seqValue = matcher.group(1); // 捕获组1是seq值
+                            if (Integer.parseInt(seqValue) == 0) {
+                                //seq为0 通常下载失败 节约资源
+                                return null;
+                            }
+                        }
                         //下载头像
                         DownloadTask<Image> downloadTask = new DownloadTask<>();
                         if (StringUtils.isNotEmpty((user.getHeadimgurl()))) {
@@ -170,7 +181,7 @@ public final class AvatarUtil {
                             log.error("头像缓存获取失败：{}", user, ex);
                             avatarCache.remove(userName);
                         }else if (result == null) {
-                            log.error("头像缓存获取失败，result is null：{}", user);
+                            log.error("头像缓存获取失败，result is null");
                             avatarCache.remove(userName);
                         }
                     });

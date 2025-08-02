@@ -13,7 +13,7 @@ import java.awt.*;
  * Created by 舒新胜 on 17-6-2.
  */
 public class MessageLeftAttachmentViewHolder extends MessageAttachmentViewHolder {
-    public JLabel sender = new JLabel();
+
     private boolean isGroup = true;
 
     public MessageLeftAttachmentViewHolder(boolean isGroup) {
