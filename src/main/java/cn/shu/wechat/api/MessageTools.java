@@ -12,7 +12,7 @@ import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.exception.WebWXException;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.swing.tasks.UploadTaskCallback;
-import cn.shu.wechat.swing.utils.ImageUtil;
+import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.MimeTypeUtil;
 import cn.shu.wechat.swing.utils.MultipartBodyPublisher;
 import cn.shu.wechat.task.DownloadManager;
@@ -771,7 +771,7 @@ public class MessageTools {
     public static Message toPicMessage(String filePath, String toUserName) {
 
         if (filePath != null) {
-            Dimension imageSize = ImageUtil.getImageSize(filePath);
+            Dimension imageSize = IconUtil.getImageSize(filePath);
             return Message.builder().msgType(WxReqParamsConstant.WXSendMsgCodeEnum.PIC.getCode())
                     .filePath(filePath)
                     .imgWidth(imageSize.width)

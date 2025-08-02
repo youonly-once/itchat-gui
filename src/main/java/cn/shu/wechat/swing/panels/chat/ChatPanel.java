@@ -135,6 +135,9 @@ public class ChatPanel extends JPanel {
      * @param message 新消息
      */
     public void addMessageToEnd(Message message) {
+        if (!roomId.equals(ChatPanelContainer.getCurrRoomId())) {
+            return;
+        }
         chatMessagePanel.addMessageToEnd(message);
     }
 

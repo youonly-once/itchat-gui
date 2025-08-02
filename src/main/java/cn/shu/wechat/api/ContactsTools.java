@@ -723,7 +723,8 @@ public class ContactsTools {
 
     public static Optional<Contacts> findGroupMember(List<Contacts> members, Message message) {
         for (Contacts m : members) {
-            if (Objects.equals(m.getRemarkname(), message.getFromRemarkname()) ||
+            if (Objects.equals(m.getUsername(), message.getFromMemberOfGroupUsername()) ||
+                    Objects.equals(m.getRemarkname(), message.getFromRemarkname()) ||
                     Objects.equals(m.getDisplayname(), message.getFromMemberOfGroupDisplayname()) ||
                     Objects.equals(m.getNickname(), message.getFromMemberOfGroupNickname())) {
                 return Optional.of(m);

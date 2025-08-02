@@ -121,11 +121,8 @@ public class ChartPopupMenu extends JPopupMenu {
         if (bufferedImageOptional.isPresent()) {
             Optional<BufferedImage> finalBufferedImageOptional = bufferedImageOptional;
             bufferedImageOptional.ifPresent(a -> {
-                ImageViewerFrame instance = ImageViewerFrame.getInstance();
-                instance.setImage(finalBufferedImageOptional.get());
-
-                instance.toFront();
-                instance.setVisible(true);
+                ImageViewerFrame frame = ImageViewerFrame.getInstance();
+                frame.topShow(finalBufferedImageOptional.get());
             });
         }
 

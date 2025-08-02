@@ -1,7 +1,6 @@
 package cn.shu.wechat.swing.panels.chat;
 
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
-import cn.shu.wechat.swing.panels.TipPanel;
 import lombok.Getter;
 
 import javax.swing.*;
@@ -33,11 +32,7 @@ public class ChatPanelContainer extends ParentAvailablePanel {
         super(parent);
         context = this;
         init();
-        TipPanel tipPanel = new TipPanel(this);
-        tipPanel.setText("未选择聊天");
-        this.add(tipPanel,"TIP");
-        cardLayout.show(this,"TIP");
-
+        createAndShow("filehelper");
     }
     private void init(){
         cardLayout = new CardLayout();
@@ -78,6 +73,12 @@ public class ChatPanelContainer extends ParentAvailablePanel {
      */
     public void show(String roomId){
         if (roomId.equals(currRoomId)) return;
+        //移出之前的Panel
+        if (currRoomId != null) {
+            removeCard(currRoomId);
+        }
+
+
         cards.get(roomId).getChatMessagePanel().getChatMessageEditorPanel().addShareComponent();
         currRoomId = roomId;
         cardLayout.show(this,roomId);
@@ -101,10 +102,17 @@ public class ChatPanelContainer extends ParentAvailablePanel {
      * @param roomId 房间ID
      */
     public void removeCard(String roomId){
+        if (isCurrentRoom(roomId)) {
+            currRoomId = null;
+        }
         if (!cards.containsKey(roomId)){
+
+            ChatMessageEditorPanel.removeShareComponent();
             return;
         }
         ChatPanel remove = cards.remove(roomId);
+        ChatMessageEditorPanel.removeShareComponent();
+
         removeAllListenersRecursively(remove);
         this.remove(remove);
         this.revalidate();
@@ -125,9 +133,6 @@ public class ChatPanelContainer extends ParentAvailablePanel {
             }
             for (KeyListener kl : jc.getKeyListeners()) {
                 jc.removeKeyListener(kl);
-            }
-            for (FocusListener fl : jc.getFocusListeners()) {
-                jc.removeFocusListener(fl);
             }
             for (FocusListener fl : jc.getFocusListeners()) {
                 jc.removeFocusListener(fl);
@@ -157,5 +162,9 @@ public class ChatPanelContainer extends ParentAvailablePanel {
      */
     public boolean exists(String roomId){
         return cards.containsKey(roomId);
+    }
+
+    public boolean isCurrentRoom(String roomId) {
+        return roomId.equals(getCurrRoomId());
     }
 }

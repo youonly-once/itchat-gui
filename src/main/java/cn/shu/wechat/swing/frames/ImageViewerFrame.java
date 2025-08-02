@@ -5,7 +5,6 @@ import cn.shu.wechat.swing.ImageViewer.ImageLabel;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCMenuItemUI;
 import cn.shu.wechat.swing.utils.IconUtil;
-import cn.shu.wechat.swing.utils.ImageUtil;
 import cn.shu.wechat.swing.utils.OSUtil;
 
 import javax.imageio.ImageIO;
@@ -49,7 +48,7 @@ public class ImageViewerFrame extends JFrame {
 
     private ImageViewerFrame() {
         tooKit = Toolkit.getDefaultToolkit();
-        isGif = imagePath != null && ImageUtil.isGifByFileName(imagePath);
+        isGif = imagePath != null && IconUtil.isGifByFileName(imagePath);
         initComponents();
         initView();
         initSize();
@@ -57,6 +56,17 @@ public class ImageViewerFrame extends JFrame {
         setListeners();
     }
 
+    public void topShow(Image read) {
+        this.setVisible(false);
+        this.setImage(read);
+        this.toFront();
+
+        // 1. 如果最小化了，则恢复
+        if ((this.getExtendedState() & JFrame.ICONIFIED) == JFrame.ICONIFIED) {
+            this.setExtendedState(JFrame.NORMAL);
+        }
+        this.setVisible(true);
+    }
     public static ImageViewerFrame getInstance() {
         return ImageViewerFrame.InstanceHolder.instance;
     }

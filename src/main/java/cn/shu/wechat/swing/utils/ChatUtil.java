@@ -79,9 +79,11 @@ public final class ChatUtil {
                 //新消息来了后创建房间
                 //创建房间的时候会从数据库加载历史消息，由于这次的消息已经写入了数据库，所以不用再添加了
 
-                  ChatPanelContainer.getContext().addPanel(roomId);
-                  ChatPanelContainer.get(roomId).addMessageToEnd(message);
+                //ChatPanelContainer.getContext().addPanel(roomId);
+                if (ChatPanelContainer.getContext().isCurrentRoom(roomId)) {
+                    ChatPanelContainer.get(roomId).addMessageToEnd(message);
                 }
+            }
             //新增或选择聊天列表
             RoomsPanel.getContext().addRoomOrUpdateRoom(roomId, lastMsg, count, isMute, hasNewMsg, isAtMe(roomId, lastMsg));
 

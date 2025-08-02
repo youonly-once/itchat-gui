@@ -109,7 +109,6 @@ public class RoomsPanel extends ParentAvailablePanel {
         }
         //切换显示层
         ChatPanelContainer.getContext().createAndShow(roomId);
-        ChatPanelContainer.getContext().show(roomId);
         //更新聊天列表未读数量
         hasRead(roomId);
 

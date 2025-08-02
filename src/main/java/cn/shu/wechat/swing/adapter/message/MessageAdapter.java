@@ -33,7 +33,10 @@ import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
 import cn.shu.wechat.swing.media.Mp3Player;
 import cn.shu.wechat.swing.media.VoicePlaybackListener;
 import cn.shu.wechat.swing.panels.chat.ChatMessagePanel;
-import cn.shu.wechat.swing.utils.*;
+import cn.shu.wechat.swing.utils.ChatUtil;
+import cn.shu.wechat.swing.utils.FileCache;
+import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.swing.utils.TimeUtil;
 import cn.shu.wechat.swing.worker.HeadLoadingSwingWorker;
 import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.task.DownloadTask;
@@ -262,7 +265,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         if (StringUtils.isNotEmpty(item.getSourceIconUrl())){
             try {
                 ImageIcon imageIcon = new ImageIcon(URI.create(item.getSourceIconUrl()).toURL());
-                ImageUtil.preferredImageSize(imageIcon, 16);
+                IconUtil.preferredImageSize(imageIcon, 16);
                 appViewHolder.sourceIcon.setIcon(imageIcon);
             } catch (MalformedURLException e) {
                 log.error(e.getMessage(), e);
@@ -308,7 +311,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 DownloadManager.awaitDownloadTimeOut(item.getFilePath());
                 if (Files.exists(Path.of(item.getFilePath()))) {
                     ImageIcon imageIcon = new ImageIcon(item.getFilePath());
-                    ImageUtil.preferredImageSize(imageIcon, 200);
+                    IconUtil.preferredImageSize(imageIcon, 200);
                     SwingUtilities.invokeLater(() -> appViewHolder.imageLabel.setIcon(imageIcon));
                 }
             });
@@ -337,11 +340,11 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
     private void process(Message item, MessageProgramOfAppViewHolder appViewHolder, byte[] secondBytes) {
         ImageIcon imageIcon = null;
-        if (ImageUtil.isGIF(secondBytes)) {
-            imageIcon = ImageUtil.preferredGifSize(secondBytes, item.getImgWidth(), item.getImgHeight());
+        if (IconUtil.isGIF(secondBytes)) {
+            imageIcon = IconUtil.preferredGifSize(secondBytes, item.getImgWidth(), item.getImgHeight());
         } else {
             imageIcon = new ImageIcon(secondBytes);
-            ImageUtil.preferredImageSize(imageIcon, 200);
+            IconUtil.preferredImageSize(imageIcon, 200);
         }
         if (imageIcon != null) {
             ImageIcon finalImageIcon = imageIcon;
@@ -808,7 +811,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     File file = new File(slaveImgPath);
                     try {
                         ImageIcon imageIcon = new ImageIcon(ImageIO.read(file));
-                        ImageUtil.preferredImageSize(imageIcon);
+                        IconUtil.preferredImageSize(imageIcon);
                         SwingUtilities.invokeLater(() -> {
                             slaveImgLabel.setIcon(imageIcon);
                         });
@@ -869,31 +872,32 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 //阻塞
                 DownloadManager.awaitDownload(finalPath,1000*60*2);
                 File file = new File(finalPath);
+                ImageIcon imageIcon = null;
+                if (file.length() > 0) {
+                    if (IconUtil.isGIFByFile(finalPath)) {
+                        imageIcon = IconUtil.preferredGifSize(finalPath, item.getImgWidth(), item.getImgHeight());
+                    } else {
+                        imageIcon = IconUtil.getIconFromFile(file);
+                        IconUtil.preferredImageSize(imageIcon);
+                    }
+                }
 
+                ImageIcon finalImageIcon = imageIcon;
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-
-
-                        if (file.length() == 0) {
+                        if (finalImageIcon == null) {
                             imageLabel.setIcon(null);
                             imageLabel.setText("[不支持的表情消息，请在手机上查看]");
                             return;
                         }
-                        ImageIcon imageIcon = null;
-                        if (ImageUtil.isGIFByFile(finalPath)) {
-                            imageIcon = ImageUtil.preferredGifSize(finalPath, item.getImgWidth(), item.getImgHeight());
-                        } else {
-                            imageIcon = IconUtil.getIconFromFile(file);
-                            ImageUtil.preferredImageSize(imageIcon);
-                        }
-                        imageLabel.setIcon(imageIcon);
+                        imageLabel.setIcon(finalImageIcon);
                         // 当点击图片时，使用默认程序打开图片
                         imageLabel.addMouseListener(new MessageMouseListener() {
                             @Override
                             public void mouseClicked(MouseEvent e) {
                                 File file = new File(item.getFilePath());
-                                if (ImageUtil.isGIFByFile(item.getFilePath())) {
+                                if (IconUtil.isGIFByFile(item.getFilePath())) {
                                     ChatMessagePanel.openFile(item.getFilePath());
                                 } else {
                                     if (file.exists() && file.length() <= 1024 * 1024) {
@@ -901,15 +905,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                                         try {
                                             BufferedImage read = ImageIO.read(new File(item.getFilePath()));
                                             ImageViewerFrame frame = ImageViewerFrame.getInstance();
-                                            frame.setVisible(false);
-                                            frame.setImage(read);
-                                            frame.toFront();
-
-                                            // 1. 如果最小化了，则恢复
-                                            if ((frame.getExtendedState() & JFrame.ICONIFIED) == JFrame.ICONIFIED) {
-                                                frame.setExtendedState(JFrame.NORMAL);
-                                            }
-                                            frame.setVisible(true);
+                                            frame.topShow(read);
                                         } catch (IOException ex) {
                                             log.error(ex.getMessage(), ex);
                                         }
@@ -1033,7 +1029,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     BufferedImage image = ImageIO.read(URI.create(item.getThumbUrl()).toURL());
                     if (image != null) {
                         SwingUtilities.invokeLater(() ->
-                                cardOfAppViewHolder.icon.setIcon(new ImageIcon(ImageUtil.preferredImageSize(image, MessageLinkOfAppViewHolder.THUMB_WIDTH))));
+                                cardOfAppViewHolder.icon.setIcon(new ImageIcon(IconUtil.preferredImageSize(image, MessageLinkOfAppViewHolder.THUMB_WIDTH))));
                     }
                 } catch (IOException e) {
                     log.error(e.getMessage(), e);
@@ -1048,7 +1044,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 BufferedImage image = DownloadManager.submitAwait(downloadTask);
                 if (image!=null){
                     SwingUtilities.invokeLater(() ->
-                            cardOfAppViewHolder.icon.setIcon(new ImageIcon(ImageUtil.preferredImageSize(image, MessageLinkOfAppViewHolder.THUMB_WIDTH))));
+                            cardOfAppViewHolder.icon.setIcon(new ImageIcon(IconUtil.preferredImageSize(image, MessageLinkOfAppViewHolder.THUMB_WIDTH))));
                 }
             }
 
@@ -1104,8 +1100,9 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     try {
                         BufferedImage image = ImageIO.read(URI.create(item.getThumbUrl()).toURL());
                         if (image != null) {
+                            ImageIcon imageIcon = new ImageIcon(IconUtil.preferredImageSize(image, MessageLinkOfAppViewHolder.THUMB_WIDTH));
                             SwingUtilities.invokeLater(() -> {
-                                linkViewHolder.icon.setIcon(new ImageIcon(ImageUtil.preferredImageSize(image, MessageLinkOfAppViewHolder.THUMB_WIDTH)));
+                                linkViewHolder.icon.setIcon(imageIcon);
                                 //有图片时缩短宽度，让其与无图的Panel尽量一致
                                 linkViewHolder.desc.setColumns(16);
                             });
@@ -1123,7 +1120,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     BufferedImage image = DownloadManager.submitAwait(downloadTask);
                     if (image != null) {
                         SwingUtilities.invokeLater(() -> {
-                            linkViewHolder.icon.setIcon(new ImageIcon(ImageUtil.preferredImageSize(image, MessageLinkOfAppViewHolder.THUMB_WIDTH)));
+                            linkViewHolder.icon.setIcon(new ImageIcon(IconUtil.preferredImageSize(image, MessageLinkOfAppViewHolder.THUMB_WIDTH)));
                             //有图片时缩短宽度，让其与无图的Panel尽量一致
                             linkViewHolder.desc.setColumns(16);
                         });

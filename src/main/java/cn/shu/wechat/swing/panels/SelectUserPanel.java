@@ -222,4 +222,11 @@ public class SelectUserPanel extends JPanel {
         selectUserListView.notifyDataSetChanged(false);
     }
 
+    public void setVisible(boolean aF) {
+        if (!aF) {
+            leftUserList.clear();
+            searchList.clear();
+        }
+        super.setVisible(aF);
+    }
 }

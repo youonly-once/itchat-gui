@@ -8,7 +8,6 @@ import cn.shu.wechat.swing.components.RCTextField;
 import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.panels.SelectUserPanel;
 import cn.shu.wechat.swing.utils.FontUtil;
-import lombok.Getter;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -25,8 +24,8 @@ import java.util.function.Consumer;
  * Created by 舒新胜 on 07/06/2017.
  */
 public class RemindUserDialog extends JDialog {
-    public static final int DIALOG_WIDTH = 580;
-    public static final int DIALOG_HEIGHT = 500;
+    public final int DIALOG_WIDTH = 580;
+    public final int DIALOG_HEIGHT = 500;
 
     //初始列表
     private final List<SelectUserData> userList = new ArrayList<>();
@@ -143,5 +142,19 @@ public class RemindUserDialog extends JDialog {
         });
     }
 
+
+    public void setVisible(boolean b, JTextPane editor) {
+        if (!b) {
+            userList.clear();
+            searchList.clear();
+        }
+        this.setVisible(b);
+    }
+
+    public void dispose() {
+        userList.clear();
+        searchList.clear();
+        super.dispose();
+    }
 
 }

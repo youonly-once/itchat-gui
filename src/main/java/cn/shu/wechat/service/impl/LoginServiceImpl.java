@@ -353,7 +353,7 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public void webWxInit() throws IOException, InterruptedException {
+    public WxInitResponse webWxInit() throws IOException, InterruptedException {
         Core.setLastNormalRetCodeTime(System.currentTimeMillis());
         // 组装请求URL和参数
         String url = String.format(WxURLEnum.INIT_URL.getUrl(),
@@ -366,7 +366,7 @@ public class LoginServiceImpl implements LoginService {
         wxInitReq.setBaseRequest(Core.getLoginResultData().getBaseRequest());
             WxInitResponse wxInitResponse = HttpUtil.doPost(url, JSON.toJSONString(wxInitReq),HttpUtil.getJsonEntityBodyHandler(WxInitResponse.class));
             Contacts me = wxInitResponse.getUser();
-            ;
+
 
             Core.getLoginResultData().setInviteStartCount(wxInitResponse.getInviteStartCount());
             Core.getLoginResultData().setSyncKeyObject(wxInitResponse.getSyncKey());
@@ -380,7 +380,6 @@ public class LoginServiceImpl implements LoginService {
             //最近聊天的联系人
 
         Set<String> recentContacts = Core.getRecentContacts();
-        Core.setWxInitResponse(wxInitResponse);
         for (Contacts contacts : wxInitResponse.getContactList()) {
                 //下载头像
                 ExecutorServiceUtil.getHeadImageDownloadExecutorService().submit(() -> {
@@ -389,7 +388,7 @@ public class LoginServiceImpl implements LoginService {
                 ContactsTools.addContacts(contacts);
                 recentContacts.add(contacts.getUsername());
             }
-
+        return wxInitResponse;
     }
 
     @Override

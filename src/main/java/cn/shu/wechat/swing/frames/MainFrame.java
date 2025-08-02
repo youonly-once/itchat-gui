@@ -16,11 +16,9 @@ import cn.shu.wechat.utils.SleepUtils;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
-import javax.sound.sampled.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Objects;
 import java.util.concurrent.locks.LockSupport;
 
 /**
@@ -110,12 +108,12 @@ public class MainFrame extends JFrame {
         SystemTray systemTray = SystemTray.getSystemTray();
 
         if (OSUtil.getOsType() == OSUtil.Mac_OS) {
-            normalTrayIcon = IconUtil.getIcon(this, "/image/ic_launcher_dark.png", 20, 20).getImage();
+            normalTrayIcon = IconUtil.getBufferedImage(this, "/image/ic_launcher_dark.png", 20, 20);
         } else {
-            normalTrayIcon = IconUtil.getIcon(this, "/image/ic_launcher.png", 20, 20).getImage();
+            normalTrayIcon = IconUtil.getBufferedImage(this, "/image/ic_launcher.png", 20, 20);
         }
 
-        emptyTrayIcon = IconUtil.getIcon(this, "/image/ic_launcher_empty.png", 20, 20).getImage();
+        emptyTrayIcon = IconUtil.getBufferedImage(this, "/image/ic_launcher_empty.png", 20, 20);
 
         trayIcon = new TrayIcon(normalTrayIcon, Core.getNickName());
         trayIcon.setImageAutoSize(true);
@@ -258,7 +256,7 @@ public class MainFrame extends JFrame {
 
         // 任务栏图标
         if (OSUtil.getOsType() != OSUtil.Mac_OS) {
-            setIconImage(IconUtil.getIcon(this, "/image/ic_launcher.png").getImage());
+            setIconImage(IconUtil.getBufferedImage(this, "/image/ic_launcher.png", 20, 20));
         }
 
         UIManager.put("Label.font", FontUtil.getDefaultFont());

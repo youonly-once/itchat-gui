@@ -7,8 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.swing.*;
-
 /**
  * Created by 舒新胜 on 17-5-30.
  */
@@ -25,11 +23,6 @@ public class ContactsItem implements Comparable<ContactsItem> {
      * 姓名 可能是备注可能是昵称
      */
     private String displayName;
-
-    /**
-     * 头像
-     */
-    private ImageIcon avatar;
 
     /**
      * 联系人类型

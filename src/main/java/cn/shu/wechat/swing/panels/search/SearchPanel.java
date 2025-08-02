@@ -13,6 +13,7 @@ import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import com.github.promeg.pinyinhelper.Pinyin;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.similarity.LevenshteinDistance;
@@ -62,7 +63,8 @@ public class SearchPanel extends ParentAvailablePanel {
     /**
      * 待搜索列表
      */
-    private final Collection<Contacts> searchList;
+    @Setter
+    private Collection<Contacts> searchList;
 
     public SearchPanel(JPanel parent, SearchResultPanel searchResultPanel, Collection<Contacts> searchList) {
         super(parent);
@@ -72,7 +74,6 @@ public class SearchPanel extends ParentAvailablePanel {
         initView();
         setListeners();
     }
-
 
     private void initComponent() {
         searchTextField = new RCSearchTextField();

@@ -9,6 +9,7 @@ import cn.shu.wechat.swing.panels.left.tabcontent.LeftTabContentPanel;
 import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.swing.panels.search.ContactsSearchResultPanel;
 import cn.shu.wechat.swing.panels.search.SearchPanel;
+import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,6 +26,7 @@ public class LeftPanel extends JPanel {
     /**
      * 搜索面板
      */
+    @Getter
     private SearchPanel searchPanel;
 
     private TabOperationPanel mainOperationPanel;

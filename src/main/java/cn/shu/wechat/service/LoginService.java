@@ -1,6 +1,7 @@
 package cn.shu.wechat.service;
 
 import cn.shu.wechat.dto.response.WxCreateRoomResp;
+import cn.shu.wechat.dto.response.wxinit.WxInitResponse;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.exception.WebWXException;
 import com.alibaba.fastjson.JSONArray;
@@ -68,7 +69,7 @@ public interface LoginService {
      * @author SXS
      * @date 2017年5月13日 上午12:14:13
      */
-    void webWxInit() throws IOException, InterruptedException;
+    WxInitResponse webWxInit() throws IOException, InterruptedException;
 
     /**
      * 微信状态通知

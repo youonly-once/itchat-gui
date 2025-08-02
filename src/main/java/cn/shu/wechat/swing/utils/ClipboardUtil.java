@@ -123,7 +123,7 @@ public final class ClipboardUtil {
 
                     return files.stream()
                             .map(file -> {
-                                if (ImageUtil.isImage(file)) {
+                                if (IconUtil.isImage(file)) {
                                     return IconUtil.getIconFromFile(file);
                                 }else if (file.isFile()){
                                     return file.getAbsolutePath();

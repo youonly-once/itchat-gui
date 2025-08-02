@@ -21,21 +21,18 @@ import cn.shu.wechat.swing.components.message.FileEditorThumbnail;
 import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.frames.RemindUserDialog;
-import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
-import cn.shu.wechat.swing.panels.TitlePanel;
 import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.swing.tasks.UploadTaskCallback;
 import cn.shu.wechat.swing.utils.EmojiUtil;
 import cn.shu.wechat.swing.utils.FileCache;
-import cn.shu.wechat.swing.utils.ImageUtil;
+import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.MimeTypeUtil;
 import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.MediaUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.util.StringUtils;
 
@@ -74,6 +71,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
      */
     private final RemindUserDialog remindUserDialog = new RemindUserDialog(MainFrame.getContext(), true);
 
+
     /**
      * 消息列表
      */
@@ -104,7 +102,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
     /**
      * 每次加载的消息条数
      */
-    private final int PAGE_LENGTH = 50;
+    private final int PAGE_LENGTH = 10;
     /**
      * 消息输入框
      */
@@ -495,7 +493,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                                 .stream().map(ContactsTools::getContactDisplayNameByUserName).toList();
                     }
                     remindUserDialog.addData(values, memberlist);
-                    remindUserDialog.setVisible(true);
+                    remindUserDialog.setVisible(true, editor);
                 }
 
                 // 输入退格键，删除最后一个@user
@@ -515,21 +513,15 @@ public class ChatMessagePanel extends ParentAvailablePanel {
 
         });
 
-        remindUserDialog.setListeners(usernames -> {
-            ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
-                @Override
-                public void run() {
-                    StringBuilder sb = new StringBuilder();
-                    for (SelectUserData username : usernames) {
-                        sb.append("@").append(username.getDisplayName()).append(" ");
-                    }
-                    String at = sb.substring(1);
-                    SwingUtilities.invokeLater(() -> editor.replaceSelection(at));
+        remindUserDialog.setListeners((usernames) -> {
+            ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
+                StringBuilder sb = new StringBuilder();
+                for (SelectUserData username : usernames) {
+                    sb.append("@").append(username.getDisplayName()).append(" ");
                 }
+                String at = sb.substring(1);
+                SwingUtilities.invokeLater(() -> editor.replaceSelection(at));
             });
-
-
-
         });
 
         // 发送按钮
@@ -775,7 +767,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
 
         switch (msgType) {
             case MSGTYPE_IMAGE:
-                imageSize = ImageUtil.getImageSize(uploadFilename);
+                imageSize = IconUtil.getImageSize(uploadFilename);
                 message = Message.builder()
                         .desc(fileName)
                         .id(msgId)
@@ -939,6 +931,10 @@ public class ChatMessagePanel extends ParentAvailablePanel {
     public BaseMessageViewHolder addMessageToEnd(Message messageItem) {
         if (messageItem.isGroup()) {
             recentSenderUser.put(messageItem.getFromMemberOfGroupUsername(), messageItem.getFromMemberOfGroupNickname());
+        }
+        if (messageItems.size() > PAGE_LENGTH) {
+            this.messageItems.removeFirst();
+            chatMessageViewerPanel.getMessageListView().getContentPanel().remove(0);
         }
         this.messageItems.add(messageItem);
         BaseMessageViewHolder holder = chatMessageViewerPanel.getMessageListView().notifyItemInserted(messageItems.size() - 1, true);

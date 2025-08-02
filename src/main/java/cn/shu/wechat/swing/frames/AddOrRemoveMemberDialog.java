@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.frames;
 
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCButton;
@@ -8,6 +9,7 @@ import cn.shu.wechat.swing.components.RCTextField;
 import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.panels.SelectUserPanel;
 import cn.shu.wechat.swing.utils.FontUtil;
+import lombok.Getter;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -17,6 +19,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -30,8 +33,10 @@ public class AddOrRemoveMemberDialog extends JDialog {
     private SelectUserPanel selectUserPanel;
     private JPanel buttonPanel;
     private JButton cancelButton;
+    @Getter
     private JButton okButton;
     private List<SelectUserData> userList = new ArrayList<>();
+    private Collection<Contacts> searchList = new ArrayList<>();
     private List<SelectUserData> userListClone;
 
     public static final int DIALOG_WIDTH = 600;
@@ -42,6 +47,8 @@ public class AddOrRemoveMemberDialog extends JDialog {
         super(owner, modal);
         this.userList = userList;
         userListClone = userList;
+        //TODO
+        searchList = Core.getMemberMap().values();
 
         initComponents();
 
@@ -60,7 +67,7 @@ public class AddOrRemoveMemberDialog extends JDialog {
 
         getRootPane().setBorder(new LineBorder(Colors.LIGHT_GRAY));
 
-        selectUserPanel = new SelectUserPanel(DIALOG_WIDTH, DIALOG_HEIGHT - 100, userList, Core.getMemberMap().values());
+        selectUserPanel = new SelectUserPanel(DIALOG_WIDTH, DIALOG_HEIGHT - 100, userList, searchList);
 
         // 输入面板
         editorPanel = new JPanel();
@@ -110,8 +117,7 @@ public class AddOrRemoveMemberDialog extends JDialog {
         cancelButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                setVisible(false);
-
+                dispose();
                 super.mouseClicked(e);
             }
         });
@@ -162,9 +168,12 @@ public class AddOrRemoveMemberDialog extends JDialog {
         return selectUserPanel.getSelectedUser();
     }
 
-    public JButton getOkButton() {
-        return okButton;
+    public void setVisible(boolean aF) {
+        if (!aF) {
+            userList.clear();
+            searchList.clear();
+        }
+        super.setVisible(aF);
     }
-
 
 }

@@ -198,6 +198,11 @@ public class ChatMessageEditorPanel extends ParentAvailablePanel {
         shareTextEditor = textEditor;
     }
 
+    public static void removeShareComponent() {
+        shareRoomId = null;
+        shareTextEditor = null;
+    }
+
     private void setListeners() {
 
         textEditor.addMouseListener(new MouseAdapter() {

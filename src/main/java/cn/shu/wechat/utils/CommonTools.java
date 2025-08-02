@@ -44,7 +44,7 @@ public class CommonTools {
 					paramArr[1] = "E:\\wmx\\Map_in-depth.docx";
 					Runtime runtime = Runtime.getRuntime();
 					Process process = runtime.exec(paramArr);*/
-                        /*	exec = Runtime.getRuntime().exec("rundll32 c:\\Windows\\System32\\shimgvw.dll,ImageView_Fullscreen "+qrPath);
+                        /*	exec = Runtime.getRuntime().exec("rundll32 c:\\Windows\\System32\\shimgvw.dll,ImageView_Full "+qrPath);
                          */
                     } catch (Exception e) {
                         e.printStackTrace();

@@ -3,7 +3,7 @@ package cn.shu.wechat.swing.components;
 import cn.shu.wechat.swing.components.message.FileEditorThumbnail;
 import cn.shu.wechat.swing.frames.ImageViewerFrame;
 import cn.shu.wechat.swing.utils.ClipboardUtil;
-import cn.shu.wechat.swing.utils.ImageUtil;
+import cn.shu.wechat.swing.utils.IconUtil;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -69,8 +69,8 @@ public class RCTextEditor extends JTextPane implements DropTargetListener {
 
         JLabel label = new JLabel();
         if (needToScale) {
-            if (ImageUtil.isGIFByFile(path)) {
-                icon = ImageUtil.preferredGifSizeWithTargetDimension(path,iconWidth, iconHeight);
+            if (IconUtil.isGIFByFile(path)) {
+                icon = IconUtil.preferredGifSizeWithTargetDimension(path, iconWidth, iconHeight);
                 icon.setDescription(path);
                 label.setIcon(icon);
             }else {
@@ -92,10 +92,9 @@ public class RCTextEditor extends JTextPane implements DropTargetListener {
                 if (e.getClickCount() == 2) {
                     ImageViewerFrame frame = ImageViewerFrame.getInstance();
                     try {
-                        frame.setImage(ImageIO.read(new File(path)));
-                        frame.setVisible(true);
-                    } catch (IOException ioException) {
-                        ioException.printStackTrace();
+                        frame.topShow(ImageIO.read(new File(path)));
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
                     }
 
                 }

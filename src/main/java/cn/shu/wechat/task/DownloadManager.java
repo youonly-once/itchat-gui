@@ -2,6 +2,8 @@ package cn.shu.wechat.task;
 
 import cn.shu.wechat.constant.DownloadStatus;
 import cn.shu.wechat.constant.DownloadType;
+import cn.shu.wechat.core.Core;
+import cn.shu.wechat.swing.frames.MainFrame;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.Map;
@@ -298,7 +300,8 @@ public class DownloadManager {
         submitNewAwait(task1);
 
         log.info("获取普通联系人，耗时：{}（秒）", (System.currentTimeMillis() - l) / 1000);
-
+        //否则 SearchPanel中保存的以前的联系人信息 且不能释放
+        MainFrame.getContext().getLeftPanel().getSearchPanel().setSearchList(Core.getMemberMap().values());
 
     }
 
@@ -312,7 +315,8 @@ public class DownloadManager {
         submitNewAwait(task2);
         //ContactsPanel.getContext().notifyDataSetChanged();
         log.info("获取群联系人，耗时：{}（秒）", (System.currentTimeMillis() - l) / 1000);
-
+        //否则 SearchPanel中保存的以前的联系人信息 且不能释放
+        MainFrame.getContext().getLeftPanel().getSearchPanel().setSearchList(Core.getMemberMap().values());
 
     }
 

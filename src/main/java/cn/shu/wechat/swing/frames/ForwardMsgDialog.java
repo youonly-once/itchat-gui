@@ -4,6 +4,7 @@ import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.dto.response.msg.send.WebWXSendMsgResponse;
+import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
@@ -25,6 +26,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,6 +40,7 @@ public class ForwardMsgDialog extends JDialog {
     @Getter
     private static ForwardMsgDialog context;
     private final List<SelectUserData> userList = new ArrayList<>();
+    private final Collection<Contacts> searchList = new ArrayList<>();
     private final Message message;
     private JPanel editorPanel;
     private RCTextField groupNameTextField;
@@ -59,12 +62,15 @@ public class ForwardMsgDialog extends JDialog {
     }
 
     private void initData() {
+        userList.clear();
+        searchList.clear();
         for (RoomItem con : RoomsPanel.getContext().getRoomItemList()) {
             userList.add(new SelectUserData(con.getRoomId(),
                     ContactsTools.getContactDisplayNameByUserName(con.getRoomId()),
                     false));
         }
-        selectUserPanel = new SelectUserPanel(DIALOG_WIDTH, DIALOG_HEIGHT - 100, userList, Core.getMemberMap().values());
+        searchList.addAll(Core.getMemberMap().values());
+        selectUserPanel = new SelectUserPanel(DIALOG_WIDTH, DIALOG_HEIGHT - 100, userList, searchList);
 
     }
 
@@ -124,7 +130,7 @@ public class ForwardMsgDialog extends JDialog {
         cancelButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                setVisible(false);
+                dispose();
 
                 super.mouseClicked(e);
             }
@@ -144,42 +150,51 @@ public class ForwardMsgDialog extends JDialog {
     }
 
     private void forwardMsg() {
-        ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
-            @Override
-            public void run() {
-                WebWXSendMsgResponse wxCreateRoomResp;
-                List<SelectUserData> successList = new ArrayList<>();
-                for (SelectUserData selectUserData : selectUserPanel.getSelectedUser()) {
-                    Message newMsg = new Message();
-                    BeanUtils.copyProperties(message, newMsg);
-                    newMsg.setFromUsername(Core.getUserName());
-                    newMsg.setToUsername(selectUserData.getUserName());
-                    newMsg.setId(MessageTools.randomMessageId());
+        ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
+            WebWXSendMsgResponse wxCreateRoomResp;
+            List<SelectUserData> successList = new ArrayList<>();
+            for (SelectUserData selectUserData : selectUserPanel.getSelectedUser()) {
+                Message newMsg = new Message();
+                BeanUtils.copyProperties(message, newMsg);
+                newMsg.setFromUsername(Core.getUserName());
+                newMsg.setToUsername(selectUserData.getUserName());
+                newMsg.setId(MessageTools.randomMessageId());
 
-                    wxCreateRoomResp = MessageTools.sendMsgByUserId(newMsg);
-                    if (wxCreateRoomResp != null && wxCreateRoomResp.getBaseResponse().getRet() == 0
-                    ) {
-                        successList.add(selectUserData);
-                        ChatUtil.addNewMsg(newMsg, selectUserData.getUserName(),
-                                newMsg.getPlaintext(), 0, true, false);
-                    } else {
-                        WebWXSendMsgResponse finalWxCreateRoomResp = wxCreateRoomResp;
-                        SwingUtilities.invokeLater(() -> {
-                            if (finalWxCreateRoomResp == null || finalWxCreateRoomResp.getBaseResponse().getRet() != 0) {
-                                String collected = selectUserPanel.getSelectedUser().stream().filter(e -> !successList.contains(e)).map(SelectUserData::getDisplayName).collect(Collectors.joining(","));
-                                JOptionPane.showMessageDialog(MainFrame.getContext(), collected, "转发失败", JOptionPane.ERROR_MESSAGE);
+                wxCreateRoomResp = MessageTools.sendMsgByUserId(newMsg);
+                if (wxCreateRoomResp != null && wxCreateRoomResp.getBaseResponse().getRet() == 0
+                ) {
+                    successList.add(selectUserData);
+                    ChatUtil.addNewMsg(newMsg, selectUserData.getUserName(),
+                            newMsg.getPlaintext(), 0, true, false);
+                } else {
+                    WebWXSendMsgResponse finalWxCreateRoomResp = wxCreateRoomResp;
+                    SwingUtilities.invokeLater(() -> {
+                        if (finalWxCreateRoomResp == null || finalWxCreateRoomResp.getBaseResponse().getRet() != 0) {
+                            String collected = selectUserPanel.getSelectedUser().stream().filter(e -> !successList.contains(e)).map(SelectUserData::getDisplayName).collect(Collectors.joining(","));
+                            JOptionPane.showMessageDialog(MainFrame.getContext(), collected, "转发失败", JOptionPane.ERROR_MESSAGE);
 
-                            }
-                        });
-                        break;
-                    }
+                        }
+                    });
+                    break;
                 }
-
             }
+
         });
 
     }
 
+    public void setVisible(boolean aF) {
+        if (!aF) {
+            userList.clear();
+            searchList.clear();
+        }
+        super.setVisible(aF);
+    }
 
+    public void dispose() {
+        userList.clear();
+        searchList.clear();
+        super.dispose();
+    }
 
 }

@@ -5,6 +5,7 @@ import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.constant.DownloadType;
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.dto.response.wxinit.WxInitResponse;
 import cn.shu.wechat.entity.LoginInfo;
 import cn.shu.wechat.exception.WebWXException;
 import cn.shu.wechat.mapper.LoginInfoMapper;
@@ -322,7 +323,7 @@ public final class LoginFrame extends JFrame {
             loginInfo.setUin(Core.getLoginResultData().getBaseRequest().getWxUin());
             SpringContextHolder.getBean(LoginInfoMapper.class).insert(loginInfo);
 
-            loginService.webWxInit();
+            WxInitResponse wxInitResponse = loginService.webWxInit();
 
             wechatConfiguration.setBasePath(wechatConfiguration.getBasePath() + File.separator + MD5Util.MD5(Core.getNickName())+ File.separator);
 
@@ -360,7 +361,7 @@ public final class LoginFrame extends JFrame {
                 protected void done() {
 
                     SwingUtilities.invokeLater(() -> {
-                        List<RoomItem> roomItems = Arrays.stream(Core.getWxInitResponse().getChatSet().split(","))
+                        List<RoomItem> roomItems = Arrays.stream(wxInitResponse.getChatSet().split(","))
                                 .filter(e -> !Core.getRecentContacts().contains(e))
                                 .map(userId -> Core.getMemberMap().get(userId))
                                 .filter(Objects::nonNull)

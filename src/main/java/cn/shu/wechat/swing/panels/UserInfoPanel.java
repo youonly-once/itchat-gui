@@ -2,10 +2,8 @@ package cn.shu.wechat.swing.panels;
 
 
 import cn.shu.wechat.api.ContactsTools;
-import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.swing.components.*;
-import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.swing.utils.ChatUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
@@ -51,7 +49,6 @@ public class UserInfoPanel extends ParentAvailablePanel {
         initComponents();
         initView();
         setListeners();
-        setContacts(Core.getUserSelf());
     }
 
     public void setContacts(Contacts contacts){
@@ -183,5 +180,12 @@ public class UserInfoPanel extends ParentAvailablePanel {
         }
     }
 
-
+    @Override
+    public void setVisible(boolean aFlag) {
+        if (!aFlag) {
+            sexLabel.setIcon(null);
+            avatarLabel.setIcon(null);
+        }
+        super.setVisible(aFlag);
+    }
 }

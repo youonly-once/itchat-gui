@@ -15,7 +15,9 @@ import cn.shu.wechat.swing.panels.SelectUserPanel;
 import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.swing.utils.ChatUtil;
 import cn.shu.wechat.swing.utils.FontUtil;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
@@ -24,6 +26,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,6 +35,7 @@ import java.util.stream.Collectors;
  * Created by 舒新胜 on 07/06/2017.
  */
 public class CreateGroupDialog extends JDialog {
+    @Getter
     private static CreateGroupDialog context;
     private JPanel editorPanel;
     private RCTextField groupNameTextField;
@@ -41,6 +45,7 @@ public class CreateGroupDialog extends JDialog {
     private JButton cancelButton;
     private JButton okButton;
     private final List<SelectUserData> userList = new ArrayList<>();
+    private final Collection<Contacts> searchList = new ArrayList<>();
 
 
 
@@ -60,12 +65,15 @@ public class CreateGroupDialog extends JDialog {
     }
 
     private void initData() {
+        userList.clear();
+        searchList.clear();
         for (RoomItem con : RoomsPanel.getContext().getRoomItemList()) {
             userList.add(new SelectUserData(con.getRoomId(),
                     ContactsTools.getContactDisplayNameByUserName(con.getRoomId()),
                     false));
         }
-        selectUserPanel = new SelectUserPanel(DIALOG_WIDTH, DIALOG_HEIGHT - 100, userList, Core.getMemberMap().values());
+        searchList.addAll(Core.getMemberMap().values());
+        selectUserPanel = new SelectUserPanel(DIALOG_WIDTH, DIALOG_HEIGHT - 100, userList, searchList);
 
     }
 
@@ -112,7 +120,6 @@ public class CreateGroupDialog extends JDialog {
 
     private void initView() {
         editorPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
-      //  editorPanel.add(groupNameTextField);
 
         buttonPanel.add(cancelButton, new GBC(0, 0).setWeight(1, 1).setInsets(15, 0, 0, 0));
         buttonPanel.add(okButton, new GBC(1, 0).setWeight(1, 1));
@@ -127,7 +134,7 @@ public class CreateGroupDialog extends JDialog {
         cancelButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                setVisible(false);
+                dispose();
 
                 super.mouseClicked(e);
             }
@@ -149,95 +156,56 @@ public class CreateGroupDialog extends JDialog {
     }
 
     private void createRoom(){
-        try{
-            new SwingWorker<Object,Object>() {
-                private  WxCreateRoomResp wxCreateRoomResp;
-                @Override
-                protected Object doInBackground() throws Exception {
-                   wxCreateRoomResp = SpringContextHolder.getBean(LoginService.class).webWxCreateRoom(
-                            selectUserPanel.getSelectedUser().stream()
-                                    .map(O -> Core.getMemberMap().get(O.getUserName())
-                                    ).collect(Collectors.toList()));
-                    return null;
-                }
 
-                @Override
-                protected void done() {
-                    if (wxCreateRoomResp.getBaseResponse().getRet() ==0
-                            && StringUtils.isNotEmpty(wxCreateRoomResp.getChatRoomName())){
-                        Contacts group = Contacts.builder().username(wxCreateRoomResp.getChatRoomName())
-                                .memberlist(wxCreateRoomResp.getMemberList()).build();
 
-                        ContactsTools.addContacts(group);
+        ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
+            try {
+                WxCreateRoomResp wxCreateRoomResp = SpringContextHolder.getBean(LoginService.class).webWxCreateRoom(
+                        selectUserPanel.getSelectedUser().stream()
+                                .map(O -> Core.getMemberMap().get(O.getUserName())
+                                ).collect(Collectors.toList()));
+                if (wxCreateRoomResp.getBaseResponse().getRet() == 0
+                        && StringUtils.isNotEmpty(wxCreateRoomResp.getChatRoomName())) {
+                    Contacts group = Contacts.builder().username(wxCreateRoomResp.getChatRoomName())
+                            .memberlist(wxCreateRoomResp.getMemberList()).build();
 
+                    ContactsTools.addContacts(group);
+
+                    SwingUtilities.invokeLater(() -> {
                         ChatUtil.openOrCreateDirectChat(wxCreateRoomResp.getChatRoomName());
                         CreateGroupDialog.context.dispose();
-                    }else{
+                    });
+
+                } else {
+                    SwingUtilities.invokeLater(() -> {
                         JOptionPane.showMessageDialog(MainFrame.getContext(), wxCreateRoomResp.getBaseResponse().getErrMsg(), "创建失败", JOptionPane.ERROR_MESSAGE);
                         okButton.setEnabled(true);
                         okButton.setText("创建");
                         cancelButton.setEnabled(true);
-                    }
-                    super.done();
+                    });
                 }
-            }.execute();
-
-
-
-        }
-        catch (Exception e){
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(MainFrame.getContext(), e.getMessage(), "创建失败", JOptionPane.ERROR_MESSAGE);
-            okButton.setEnabled(true);
-            cancelButton.setEnabled(true);
-            okButton.setText("创建");
-        }
-    }
-    private void checkRoomExists(String name) {
-        if (/*roomService.findByName(name)*/ ""!= null) {
-            showRoomExistMessage(name);
-            okButton.setEnabled(true);
-        } else {
-            List<SelectUserData> list = selectUserPanel.getSelectedUser();
-            String[] usernames = new String[list.size()];
-
-            for (int i = 0; i < list.size(); i++) {
-                usernames[i] = list.get(i).getUserName();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(MainFrame.getContext(), e.getMessage(), "创建失败", JOptionPane.ERROR_MESSAGE);
+                okButton.setEnabled(true);
+                cancelButton.setEnabled(true);
+                okButton.setText("创建");
             }
 
-            //createChannelOrGroup(name, privateCheckBox.isSelected(), usernames);
+
+        });
+    }
+
+    public void setVisible(boolean aF) {
+        if (!aF) {
+            userList.clear();
+            searchList.clear();
         }
+        super.setVisible(aF);
     }
 
-    /**
-     * 创建Channel或Group
-     *
-     * @param name
-     * @param privateGroup
-     * @param usernames
-     */
-    private void createChannelOrGroup(String name, boolean privateGroup, String[] usernames) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("[");
-        for (int i = 0; i < usernames.length; i++) {
-            sb.append("\"" + usernames[i] + "\"");
-            if (i < usernames.length - 1) {
-                sb.append(",");
-            }
-        }
-        sb.append("]");
-
-        JOptionPane.showMessageDialog(MainFrame.getContext(), "创建群聊", "创建群聊", JOptionPane.INFORMATION_MESSAGE);
+    public void dispose() {
+        userList.clear();
+        searchList.clear();
+        super.dispose();
     }
-
-    public static CreateGroupDialog getContext() {
-        return context;
-    }
-
-    public void showRoomExistMessage(String roomName) {
-        JOptionPane.showMessageDialog(null, "群组\"" + roomName + "\"已存在", "群组已存在", JOptionPane.WARNING_MESSAGE);
-        groupNameTextField.setText("");
-        groupNameTextField.requestFocus();
-    }
-
 }

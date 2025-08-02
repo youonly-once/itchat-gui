@@ -315,7 +315,7 @@ public final class AvatarUtil {
 
     public static ImageIcon getIconByImage(Image image) throws IOException {
         // 圆角处理（假设返回一定是 BufferedImage）
-        BufferedImage rounded = ImageUtil.setRadius(image, image.getWidth(null), image.getHeight(null), 35);
+        BufferedImage rounded = IconUtil.setRadius(image, image.getWidth(null), image.getHeight(null), 35);
 
         // 创建最终缩放图像
         BufferedImage finalImage = new BufferedImage(NORMAL_AVATAR_SIZE, NORMAL_AVATAR_SIZE, BufferedImage.TYPE_INT_ARGB);
@@ -414,7 +414,7 @@ public final class AvatarUtil {
 
             g2d.drawString(drawString, x, strHeight);
 
-            BufferedImage roundImage = ImageUtil.setRadius(image, width, height, width/3);
+            BufferedImage roundImage = IconUtil.setRadius(image, width, height, width / 3);
 
             g2d.dispose();
 
@@ -426,7 +426,7 @@ public final class AvatarUtil {
 
         Image scaledInstance = IconUtil.getBufferedImage(MainFrame.getContext(), "/image/default_head.png");
         if (scaledInstance != null) {
-            scaledInstance  .getScaledInstance(width, height, Image.SCALE_SMOOTH);
+            IconUtil.getScaledImage(scaledInstance, NORMAL_AVATAR_SIZE, NORMAL_AVATAR_SIZE);
         }
         return scaledInstance;
     }

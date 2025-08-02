@@ -205,10 +205,8 @@ public class UserInfoPopup extends JPopupMenu {
                     JOptionPane.showMessageDialog(MainFrame.getContext(), "图片下载中...", "文件不存在", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
-                ImageViewerFrame instance = ImageViewerFrame.getInstance();
-                instance.setImage(bufferedImage);
-                instance.toFront();
-                instance.setVisible(true);
+                ImageViewerFrame frame = ImageViewerFrame.getInstance();
+                frame.topShow(bufferedImage);
                 super.mouseClicked(e);
             }
         });
