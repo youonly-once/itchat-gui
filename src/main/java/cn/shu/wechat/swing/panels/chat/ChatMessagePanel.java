@@ -82,7 +82,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
      */
     private MessageAdapter adapter;
 
-
+    private static String lastOpenDir;
     /**
      * 当前房间id
      */
@@ -536,11 +536,15 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                 JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setDialogTitle("请选择上传文件或图片");
                 fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+                if (lastOpenDir != null) {
+                    fileChooser.setCurrentDirectory(new File(lastOpenDir));
+                }
 
                 fileChooser.showDialog(MainFrame.getContext(), "上传");
                 File selectedFile = fileChooser.getSelectedFile();
                 if (selectedFile != null) {
                     String path = selectedFile.getAbsolutePath();
+                    lastOpenDir = path;
                     sendFileMessage(path);
                     showSendingMessage();
                 }
