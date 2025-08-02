@@ -3,9 +3,7 @@ package cn.shu.wechat.swing.panels.setting;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCButton;
-import cn.shu.wechat.swing.utils.FileCache;
 import cn.shu.wechat.swing.utils.IconUtil;
-import cn.shu.wechat.swing.utils.ImageCache;
 
 import javax.swing.*;
 import java.awt.*;
@@ -73,18 +71,7 @@ public class ClearCachePanel extends JPanel {
 
     private void calculateCacheSize() {
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                fileCachePath = FileCache.FILE_CACHE_ROOT_PATH;
-                imageCachePath = new ImageCache().IMAGE_CACHE_ROOT_PATH;
 
-                long size = getDirectorySize(fileCachePath);
-                size += getDirectorySize(imageCachePath);
-
-                infoLabel.setText("当前缓存占用磁盘空间：" + fileSizeString(size));
-            }
-        }).start();
     }
 
     private String fileSizeString(long size) {
