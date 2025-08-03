@@ -4,18 +4,18 @@ import cn.shu.wechat.swing.components.*;
 import cn.shu.wechat.swing.panels.*;
 import cn.shu.wechat.swing.panels.setting.*;
 import cn.shu.wechat.swing.utils.FontUtil;
+import lombok.Getter;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 
 /**
  * Created by 舒新胜 on 07/06/2017.
  */
 public class SystemConfigDialog extends JDialog {
-    private static SystemConfigDialog context;
+
     private JPanel buttonPanel;
     //private JButton cancelButton;
     private JButton okButton;
@@ -60,7 +60,6 @@ public class SystemConfigDialog extends JDialog {
 
     public SystemConfigDialog(Frame owner, boolean modal) {
         super(owner, modal);
-        context = this;
 
         initComponents();
         initData();
@@ -189,7 +188,7 @@ public class SystemConfigDialog extends JDialog {
         okButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                setVisible(false);
+                dispose();
 
                 super.mouseClicked(e);
             }
@@ -263,10 +262,6 @@ public class SystemConfigDialog extends JDialog {
     }
 
 
-    public static SystemConfigDialog getContext() {
-        return context;
-    }
-
     private void processButtonLabel(JLabel label) {
         label.setFont(FontUtil.getDefaultFont(13));
         label.setForeground(Colors.DARKER);
@@ -275,5 +270,36 @@ public class SystemConfigDialog extends JDialog {
         label.setPreferredSize(new Dimension(50, 30));
         label.setCursor(handCursor);
         label.setOpaque(true);
+    }
+
+    @Override
+    public void dispose() {
+        removeAllListenersRecursively(this);
+        super.dispose();
+    }
+
+    public void removeAllListenersRecursively(Component comp) {
+        if (comp instanceof Container) {
+            for (Component child : ((Container) comp).getComponents()) {
+                removeAllListenersRecursively(child);
+            }
+        }
+
+        // 示例：移除常见的几种监听器（可扩展）
+        if (comp instanceof JComponent jc  ) {
+            for (MouseListener ml : jc.getMouseListeners()) {
+                jc.removeMouseListener(ml);
+            }
+            for (KeyListener kl : jc.getKeyListeners()) {
+                jc.removeKeyListener(kl);
+            }
+            for (FocusListener fl : jc.getFocusListeners()) {
+                jc.removeFocusListener(fl);
+            }
+            for (FocusListener fl : jc.getFocusListeners()) {
+                jc.removeFocusListener(fl);
+            }
+            // ... 其他类型监听器根据需要添加
+        }
     }
 }

@@ -21,7 +21,6 @@ import java.awt.event.MouseEvent;
  * Created by 舒新胜 on 23/06/2017.
  */
 public class ChangePasswordPanel extends JPanel {
-    private static ChangePasswordPanel context;
     private RCPasswordField textField;
     private RCPasswordField textFieldConfirm;
     private RCButton okButton;
@@ -29,8 +28,6 @@ public class ChangePasswordPanel extends JPanel {
     private JLabel statusLabel;
 
     public ChangePasswordPanel() {
-        context = this;
-
         initComponents();
         initView();
         setListener();
@@ -156,7 +153,4 @@ public class ChangePasswordPanel extends JPanel {
         statusLabel.setVisible(true);
     }
 
-    public static ChangePasswordPanel getContext() {
-        return context;
-    }
 }

@@ -156,7 +156,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
         holder.name.setText(filename);
 
         if (item.getTag() != null && new File(item.getTag().toString()).exists()) {
-            holder.size.setText(FileCache.fileSizeString(item.getTag().toString()));
+            holder.size.setText(FileUtil.fileSizeString(item.getTag().toString()));
         }else {
             holder.size.setText("未下载");
         }

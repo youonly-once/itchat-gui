@@ -34,7 +34,7 @@ import cn.shu.wechat.swing.media.Mp3Player;
 import cn.shu.wechat.swing.media.VoicePlaybackListener;
 import cn.shu.wechat.swing.panels.chat.ChatMessagePanel;
 import cn.shu.wechat.swing.utils.ChatUtil;
-import cn.shu.wechat.swing.utils.FileCache;
+import cn.shu.wechat.swing.utils.FileUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.TimeUtil;
 import cn.shu.wechat.swing.worker.HeadLoadingSwingWorker;
@@ -312,7 +312,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 DownloadManager.awaitDownloadTimeOut(item.getFilePath());
                 if (Files.exists(Path.of(item.getFilePath()))) {
                     ImageIcon imageIcon = new ImageIcon(item.getFilePath());
-                    IconUtil.preferredImageSize(imageIcon, 200);
+                    IconUtil.preferredImageSize(imageIcon, 32);
                     SwingUtilities.invokeLater(() -> viewHolder.imageLabel.setIcon(imageIcon));
                 }
             });
@@ -345,7 +345,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             imageIcon = IconUtil.preferredGifSize(secondBytes, item.getImgWidth(), item.getImgHeight());
         } else {
             imageIcon = new ImageIcon(secondBytes);
-            IconUtil.preferredImageSize(imageIcon, 200);
+            IconUtil.preferredImageSize(imageIcon, 32);
         }
         if (imageIcon != null) {
             ImageIcon finalImageIcon = imageIcon;
@@ -424,12 +424,12 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         setAttachmentClickListener(holder, item);
         if (item.getProgress() >= 100 ) {
             if (DownloadManager.containsTask(item.getFilePath())) {
-                holder.sizeLabel.setText("0/" + FileCache.fileSizeString(item.getFileSize()));
+                holder.sizeLabel.setText("0/" + FileUtil.fileSizeString(item.getFileSize()));
             } else {
-                holder.sizeLabel.setText(FileCache.fileSizeString(item.getFileSize()));
+                holder.sizeLabel.setText(FileUtil.fileSizeString(item.getFileSize()));
             }
         }else if (item.getProgress() > 0) {
-            holder.sizeLabel.setText("0/"+FileCache.fileSizeString(item.getFileSize()));
+            holder.sizeLabel.setText("0/"+ FileUtil.fileSizeString(item.getFileSize()));
         } else {
             holder.sizeLabel.setText("等待上传...");
         }
@@ -448,7 +448,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      * @param item
      */
     private void updateFileDownloadProgress(MessageAttachmentViewHolder holder, Message item) {
-        holder.sizeLabel.setText("0/" + FileCache.fileSizeString(item.getFileSize()));
+        holder.sizeLabel.setText("0/" + FileUtil.fileSizeString(item.getFileSize()));
         String filePath = item.getFilePath();
         holder.attachmentPanel.setTag(item);
 
@@ -458,7 +458,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
         if (new File(item.getFilePath()).length() == item.getFileSize()) {
             //已经下载成功
-            holder.sizeLabel.setText(FileCache.fileSizeString(item.getFileSize()));
+            holder.sizeLabel.setText(FileUtil.fileSizeString(item.getFileSize()));
             return;
         }
 
@@ -468,7 +468,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
         holder.progressBar.setValue(1);
         holder.progressBar.setVisible(true);
-        holder.sizeLabel.setText("0/" + FileCache.fileSizeString(item.getFileSize()));
+        holder.sizeLabel.setText("0/" + FileUtil.fileSizeString(item.getFileSize()));
 
         BlockingQueue<Long> progress = DownloadManager.getProcessLinkedBlockingDeque(item.getFilePath());
         new SwingWorker<Object, Long>() {
@@ -504,7 +504,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     holder.progressBar.setValue(100);
                     holder.progressBar.setVisible(false);
                 }
-                holder.sizeLabel.setText(FileCache.fileSizeString(loadedSize)+"/"+FileCache.fileSizeString(item.getFileSize()));
+                holder.sizeLabel.setText(FileUtil.fileSizeString(loadedSize)+"/"+FileUtil.fileSizeString(item.getFileSize()));
                 holder.progressBar.setValue(progress);
                 super.process(chunks);
             }
@@ -518,7 +518,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 } else {
                     holder.progressBar.setValue(100);
                     holder.progressBar.setVisible(false);
-                    holder.sizeLabel.setText(FileCache.fileSizeString(item.getFileSize()));
+                    holder.sizeLabel.setText(FileUtil.fileSizeString(item.getFileSize()));
                 }
 
             }
@@ -535,7 +535,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    ChatMessagePanel.openFile(item.getFilePath());
+                    FileUtil.openFileWithDefaultApplication(item.getFilePath());
                 }
             }
         };
@@ -841,7 +841,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                         super.mouseReleased(e);
                         return;
                     }
-                    ChatMessagePanel.openFile(item.getFilePath());
+                    FileUtil.openFileWithDefaultApplication(item.getFilePath());
                 }
                 super.mouseReleased(e);
             }
@@ -897,7 +897,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                             public void mouseClicked(MouseEvent e) {
                                 File file = new File(item.getFilePath());
                                 if (IconUtil.isGIFByFile(item.getFilePath())) {
-                                    ChatMessagePanel.openFile(item.getFilePath());
+                                    FileUtil.openFileWithDefaultApplication(item.getFilePath());
                                 } else {
                                     if (file.exists() && file.length() <= 1024 * 1024) {
                                         //小图片 用自带图片查看器
@@ -909,7 +909,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                                             log.error(ex.getMessage(), ex);
                                         }
                                     } else {
-                                        ChatMessagePanel.openFile(item.getFilePath());
+                                        FileUtil.openFileWithDefaultApplication(item.getFilePath());
                                     }
                                 }
 
@@ -1084,6 +1084,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         linkViewHolder.contentTitlePanel.setTag(item);
         linkViewHolder.desc.setText(StringEscapeUtils.unescapeHtml4(item.getDesc()));
         linkViewHolder.title.setText(item.getTitle());
+        linkViewHolder.icon.setIcon(IconUtil.getIcon(this, "/image/image_loading.gif"));
         if (StringUtils.isEmpty(item.getSourceName())) {
             linkViewHolder.sourcePanel.setVisible(false);
         } else {

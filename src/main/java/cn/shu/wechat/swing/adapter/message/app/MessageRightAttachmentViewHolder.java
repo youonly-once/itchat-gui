@@ -2,10 +2,12 @@ package cn.shu.wechat.swing.adapter.message.app;
 
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
+import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.components.message.RCRightAttachmentMessageBubble;
 import cn.shu.wechat.swing.utils.IconUtil;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
@@ -69,13 +71,21 @@ public class MessageRightAttachmentViewHolder extends MessageAttachmentViewHolde
         messageBubble.add(attachmentPanel);
 
 
+        JPanel processBarPanel = new JPanel(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, true));
+        processBarPanel.setOpaque(false);
+       // processBarPanel.add(progressBar);
+        processBarPanel.setBorder(new EmptyBorder(0, messageBubble.getSalientPointPixel(), 0, 0));
+        processBarPanel.add(messageBubble);
+        processBarPanel.add(progressBar);
+
+
         JPanel resendAttachmentPanel = new JPanel(new BorderLayout());
         resendAttachmentPanel.setBackground(Colors.WINDOW_BACKGROUND);
         JPanel controlPanel = new JPanel(new BorderLayout(0, 0));
         controlPanel.add(resend, BorderLayout.WEST);
         controlPanel.add(revoke, BorderLayout.EAST);
         resendAttachmentPanel.add(controlPanel, BorderLayout.WEST);
-        resendAttachmentPanel.add(messageBubble, BorderLayout.CENTER);
+        resendAttachmentPanel.add(processBarPanel, BorderLayout.CENTER);
         messageAvatarPanel.setLayout(new GridBagLayout());
         messageAvatarPanel.add(resendAttachmentPanel, new GBC(1, 0).setWeight(1000, 1)
                 .setAnchor(GBC.EAST).setInsets(0, 0, 0, 5));

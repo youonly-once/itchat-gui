@@ -25,15 +25,12 @@ import java.awt.event.MouseEvent;
  * @date 13/12/2021
  */
 public class PrivacySettingPanel extends JPanel {
-    @Getter
-    private static PrivacySettingPanel context;
     private JCheckBox isFuzzUpAvatar;
     private RCButton okButton;
     private JPanel contentPanel;
     private JLabel statusLabel;
 
     public PrivacySettingPanel() {
-        context = this;
 
         initComponents();
         initView();

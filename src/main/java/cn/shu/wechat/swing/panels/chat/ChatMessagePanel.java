@@ -25,7 +25,7 @@ import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.swing.tasks.UploadTaskCallback;
 import cn.shu.wechat.swing.utils.EmojiUtil;
-import cn.shu.wechat.swing.utils.FileCache;
+import cn.shu.wechat.swing.utils.FileUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 import cn.shu.wechat.swing.utils.MimeTypeUtil;
 import cn.shu.wechat.task.DownloadManager;
@@ -34,7 +34,7 @@ import cn.shu.wechat.utils.MediaUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -114,7 +114,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
 
     private final Queue<String> shareAttachmentUploadQueue = new ArrayDeque<>(MAX_SHARE_ATTACHMENT_UPLOAD_COUNT);
 
-    private volatile boolean isLoadHis = false;
+
 
 
 
@@ -122,48 +122,13 @@ public class ChatMessagePanel extends ParentAvailablePanel {
 
         super(parent);
         this.roomId = roomId;
-        if (org.apache.commons.lang3.StringUtils.isEmpty(roomId)) {
-            throw new NullPointerException("RoomId can not be null.");
-        }
+
         initComponents();
         initView();
         setListeners();
     }
 
-    /**
-     * 使用默认程序打开文件
-     *
-     * @param path
-     */
-    public static void openFileWithDefaultApplication(String path) {
-        ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (DownloadManager.containsTask(path)) {
-                        if (DownloadManager.getStatus(path) == DownloadStatus.SUCCESS) {
-                            Desktop.getDesktop().open(new File(path));
-                        } else if (DownloadManager.getStatus(path) == DownloadStatus.RUNNING || DownloadManager.getStatus(path) == DownloadStatus.WAITING) {
-                            JOptionPane.showMessageDialog(null, "下载中", "打开失败", JOptionPane.ERROR_MESSAGE);
-                        } else if (DownloadManager.getStatus(path) == DownloadStatus.FAIL) {
-                            JOptionPane.showMessageDialog(null, "下载失败", "打开失败", JOptionPane.ERROR_MESSAGE);
-                        }
-                    } else {
-                        Desktop.getDesktop().open(new File(path));
-                    }
 
-                } catch (IOException e1) {
-                    JOptionPane.showMessageDialog(null, "文件打开失败，没有找到关联的应用程序", "打开失败", JOptionPane.ERROR_MESSAGE);
-                    log.error(e1.getMessage(), e1);
-                } catch (IllegalArgumentException e2) {
-                    JOptionPane.showMessageDialog(null, "文件已被删除", "打开失败", JOptionPane.ERROR_MESSAGE);
-                    log.error(e2.getMessage(), e2);
-                }
-
-
-            }
-        });
-    }
 
 
     private void initView() {
@@ -175,7 +140,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
 
     private void initComponents() {
 
-        chatMessageViewerPanel = new ChatMessageViewerPanel(this);
+        chatMessageViewerPanel = new ChatMessageViewerPanel(this,roomId,messageItems);
 
 
         chatMessageViewerPanel.setBorder(new RCBorder(RCBorder.BOTTOM, Colors.LIGHT_GRAY));
@@ -196,49 +161,57 @@ public class ChatMessagePanel extends ParentAvailablePanel {
     /**
      * 解析输入框中的内容并发送消息
      */
-    private void sendMessage() {
+    private void sendMessage() throws BadLocationException {
         List<Object> inputDatas = parseEditorInput();
         boolean isImageOrFile = false;
         for (Object data : inputDatas) {
-            if (data instanceof String && !"\n".equals(data)) {
-                if (StringUtils.isEmpty(data)) {
-                    continue;
-                }
+
+            switch (data) {
+                case String s->{
+                    if (StringUtils.isEmpty(s)) {
+                        continue;
+                    }
+                    if ("\n".equals(data)){
+                        continue;
+                    }
                     //文本消息
-                    sendTextMessage(data.toString());
-
-            } else if (data instanceof JLabel ) {
-                //图片消息
-                isImageOrFile = true;
-                JLabel label = (JLabel) data;
-                ImageIcon icon = (ImageIcon) label.getIcon();
-                String path = icon.getDescription();
-                if (path != null && !path.isEmpty()) {
-                    //多个图片消息添加到队列中
-                    shareAttachmentUploadQueue.add(path);
+                    sendTextMessage(s);
                 }
-                RoomsPanel.getContext().updateRoomItem(roomId, 0
-                        , "[图片]发送中..."
-                        , LocalDateTime.now(),ContactsTools.isMute(roomId),false);
-            }else if (data instanceof Icon ) {
-                //表情消息
-                ImageIcon imageIcon = (ImageIcon) data;
-                sendEmojiMessage(imageIcon);
-            }  else if (data instanceof FileEditorThumbnail) {
-                //文件消息
-                isImageOrFile = true;
-                FileEditorThumbnail component = (FileEditorThumbnail) data;
-                //多个文件消息添加到队列中
-                shareAttachmentUploadQueue.add(component.getPath());
-                RoomsPanel.getContext().updateRoomItem(roomId, 0, "[文件]发送中...", LocalDateTime.now(),ContactsTools.isMute(roomId),false);
+                case JLabel label->{
+                    //图片消息
+                    isImageOrFile = true;
+                    ImageIcon icon = (ImageIcon) label.getIcon();
+                    String path = icon.getDescription();
+                    if (StringUtils.isNotEmpty(path)) {
+                        shareAttachmentUploadQueue.add(path);
+                    }
+                    RoomsPanel.getContext().updateRoomItem(roomId, 0
+                            , "[图片]发送中..."
+                            , LocalDateTime.now(),ContactsTools.isMute(roomId),false);
+                }
+                case ImageIcon imageIcon->{
+                    sendEmojiMessage(imageIcon);
+                }
+                case FileEditorThumbnail component->{
+                    isImageOrFile = true;
+                    if (StringUtils.isNotEmpty(component.getPath())) {
+                        shareAttachmentUploadQueue.add(component.getPath());
+                    }
+                    RoomsPanel.getContext().updateRoomItem(roomId, 0, "[文件]发送中...", LocalDateTime.now(),ContactsTools.isMute(roomId),false);
 
+                }
+                default -> throw new IllegalStateException("Unexpected value: " + data);
             }
 
         }
         //上传队列中的文件
         if (isImageOrFile) {
             // 先上传第一个图片/文件
-            dequeueAndUpload();
+            String path;
+            while((path = shareAttachmentUploadQueue.poll())!=null) {
+                sendFileMessage(path);
+                path = null;
+            }
         }
         chatMessageEditorPanel.getEditor().setText("");
         RoomsPanel.getContext().scrollToPosition(0);
@@ -249,7 +222,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
      *
      * @returnj
      */
-    private List<Object> parseEditorInput() {
+    private List<Object> parseEditorInput() throws BadLocationException {
         List<Object> inputData = new ArrayList<>();
 
         Document doc = chatMessageEditorPanel.getEditor().getDocument();
@@ -264,7 +237,6 @@ public class ChatMessagePanel extends ParentAvailablePanel {
             int elemCount = root.getElementCount();
 
             for (int j = 0; j < elemCount; j++) {
-                try {
                     Element elem = root.getElement(j);
                     String elemName = elem.getName();
                     switch (elemName) {
@@ -297,14 +269,9 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                             }else{
                                 inputData.add(icon);
                             }
-
-
                             break;
                         }
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
             }
         }
 
@@ -323,8 +290,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
 
         StringBuilder currentString = null;
         for (Object element : inputList) {
-            if (element instanceof String) {
-                String str = (String) element;
+            if (element instanceof String str) {
                 if ("\n".equals(str)){
                     continue;
                 }
@@ -349,48 +315,6 @@ public class ChatMessagePanel extends ParentAvailablePanel {
 
         return mergedList;
     }
-    /**
-     * 从待上传附件队列中出队一个，并上传
-     */
-    public synchronized void dequeueAndUpload() {
-        String path = shareAttachmentUploadQueue.poll();
-        if (path != null) {
-            sendFileMessage(path);
-        }
-    }
-
-
-    /**
-     * 从数据库加载本地历史消息
-     */
-    private void loadLocalHistory() {
-        ((ChatPanel) this.getParentPanel()).getTitlePanel().showStatusLabel("加载中...");
-        //TODO 线程安全问题
-        new SwingWorker<Object, Object>() {
-
-            @Override
-            protected Object doInBackground() throws Exception {
-                MessageMapper mapper = SpringContextHolder.getBean(MessageMapper.class);
-                Contacts contacts = Core.getMemberMap().get(roomId);
-                String remarkName = ContactsTools.getContactRemarkNameByUserName(contacts);
-                String nickName = ContactsTools.getContactNickNameByUserName(contacts);
-                List<cn.shu.wechat.entity.Message> messageList = mapper.selectByPage(messageItems.size(), messageItems.size() + PAGE_LENGTH, roomId, remarkName, nickName);
-                messageItems.addAll(messageList);
-                return null;
-            }
-
-            @Override
-            protected void done() {
-                chatMessageViewerPanel.getMessageListView().notifyDataSetChanged(false);
-
-                chatMessageViewerPanel.getMessageListView().setAutoScrollToBottom();
-                ((ChatPanel) ChatMessagePanel.this.getParentPanel()).getTitlePanel().hideStatusLabel();
-            }
-        }.execute();
-
-    }
-
-
 
 
     /**
@@ -407,62 +331,6 @@ public class ChatMessagePanel extends ParentAvailablePanel {
     }
 
     private void setListeners() {
-        //暂时不加载历史消息，无意义
-        chatMessageViewerPanel.getMessageListView().setScrollToTopListener(() -> {
-            // 当滚动到顶部时，继续拿前面的消息
-            if (isLoadHis) {
-                return;
-            }
-                isLoadHis = true;
-                ((ChatPanel) ChatMessagePanel.this.getParentPanel()).getTitlePanel().showStatusLabel("加载中...");
-
-            ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
-                try {
-                    MessageMapper mapper = SpringContextHolder.getBean(MessageMapper.class);
-                    Contacts contacts = Core.getMemberMap().get(roomId);
-                    String remarkName = ContactsTools.getContactRemarkNameByUserName(contacts);
-                    String nickName = ContactsTools.getContactNickNameByUserName(contacts);
-                    List<Message> messageList = mapper.selectByPage(messageItems.size(), PAGE_LENGTH, roomId, remarkName, nickName);
-                    for (Message message : messageList) {
-                        if (message.getIsSend()) {
-                            message.setFromUsername(Core.getUserName());
-                            message.setToUsername(roomId);
-                            if (ContactsTools.isRoomContact(roomId)) {
-                                message.setFromMemberOfGroupUsername(Core.getUserName());
-                            }
-                        } else {
-                            message.setFromUsername(roomId);
-                            message.setToUsername(Core.getUserName());
-                            if (ContactsTools.isRoomContact(roomId)) {
-                                List<Contacts> members = Core.getMemberMap().get(roomId).getMemberlist();
-                                ContactsTools.findGroupMember(members, message).ifPresent(member ->
-                                        message.setFromMemberOfGroupUsername(member.getUsername())
-                                );
-                            }
-                        }
-                        ContactsTools.loadUserInfo(message.getFromUsername(), message.getToUsername(), message.getFromMemberOfGroupUsername(), message);
-                    }
-
-                    messageList = messageList.reversed();
-                    List<Message> finalMessageList = messageList;
-                    SwingUtilities.invokeLater(() -> {
-                        try {
-                            if (finalMessageList != null && !finalMessageList.isEmpty()) {
-                                messageItems.addAll(0, finalMessageList);
-                                chatMessageViewerPanel.getMessageListView().notifyItemRangeInsertedHead(0, finalMessageList.size());
-                            }
-
-                        } finally {
-                            isLoadHis = false;
-                            ((ChatPanel) ChatMessagePanel.this.getParentPanel()).getTitlePanel().hideStatusLabel();
-                        }
-                    });
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
-                    }
-            });
-
-        });
 
         JTextPane editor = chatMessageEditorPanel.getEditor();
         Document document = editor.getDocument();
@@ -481,8 +349,13 @@ public class ChatMessagePanel extends ParentAvailablePanel {
 
                 // 回车发送消息
                 else if (!e.isControlDown() && e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    sendMessage();
-                    e.consume();
+                    try {
+                        sendMessage();
+                        e.consume();
+                    } catch (BadLocationException ex) {
+                        log.error(ex.getMessage(), ex);
+                    }
+
                 }
 
                 // 输入@，弹出选择用户菜单
@@ -527,7 +400,13 @@ public class ChatMessagePanel extends ParentAvailablePanel {
         });
 
         // 发送按钮
-        chatMessageEditorPanel.getSendButton().addActionListener(e -> sendMessage());
+        chatMessageEditorPanel.getSendButton().addActionListener(e -> {
+            try {
+                sendMessage();
+            } catch (BadLocationException ex) {
+                log.error(ex.getMessage(), ex);
+            }
+        });
 
         // 上传文件按钮
         chatMessageEditorPanel.getUploadFileLabel().addMouseListener(new MouseAdapter() {
@@ -566,9 +445,6 @@ public class ChatMessagePanel extends ParentAvailablePanel {
         // 已有消息更新状态
         int pos = findMessagePositionInViewReverse(lastMessage.getId());
         if (pos > -1) {
-        /*    Message messageItem = messageItems.get(pos);
-            messageItem.setNeedToResend(!lastMessage.getIsSend());
-            messageItem.setProgress(lastMessage.get);*/
             chatMessageViewerPanel.getMessageListView().notifyItemChanged(viewHolder, pos);
         }
     }
@@ -849,9 +725,6 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                 };
                 //发送消息 等待回调
                     wxSendMsgResponse = MessageTools.sendMsgByUserId(finalMessage, callback);
-                    if (wxSendMsgResponse.getBaseResponse().getRet()==-1) {
-                        JOptionPane.showMessageDialog(null, wxSendMsgResponse.getBaseResponse().getErrMsg(), "上传失败", JOptionPane.ERROR_MESSAGE);
-                    }
                 return null;
 
             }
@@ -859,7 +732,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
             @Override
             protected void process(List<Long> chunks) {
                 Long curr = chunks.get(chunks.size() - 2);
-                Long size = chunks.get(chunks.size() - 1);
+                Long size = chunks.getLast();
                 int progress = (int) (((curr * 1.0f) / size) * 100);
                 // 上传完成
                 if (progress == 100) {
@@ -883,12 +756,12 @@ public class ChatMessagePanel extends ParentAvailablePanel {
 
                             if (progress >= 100) {
                                 holder.progressBar.setVisible(false);
-                                holder.sizeLabel.setText(FileCache.fileSizeString(uploadFilename));
+                                holder.sizeLabel.setText(FileUtil.fileSizeString(uploadFilename));
                             }else{
                                 float v = (curr * 1.0f) / size;
                                 long length = file.length();
                                 long v1 = (long)(v * length);
-                                holder.sizeLabel.setText(FileCache.fileSizeString(v1)+"/"+FileCache.fileSizeString(uploadFilename));
+                                holder.sizeLabel.setText(FileUtil.fileSizeString(v1)+"/"+FileUtil.fileSizeString(uploadFilename));
                             }
                         }
                         break;
@@ -910,6 +783,11 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                 if (wxSendMsgResponse == null
                         || wxSendMsgResponse.getBaseResponse().getRet() != 0) {
                     finalMessage.setNeedToResend(true);
+                    if (wxSendMsgResponse != null) {
+                        JOptionPane.showMessageDialog(null, wxSendMsgResponse.getBaseResponse().getErrMsg(), "上传失败", JOptionPane.ERROR_MESSAGE);
+                    }else{
+                        JOptionPane.showMessageDialog(null, "wxSendMsgResponse is null.", "上传失败", JOptionPane.ERROR_MESSAGE);
+                    }
                 } else {
                     finalMessage.setNeedToResend(false);
                 }
@@ -920,14 +798,6 @@ public class ChatMessagePanel extends ParentAvailablePanel {
 
     }
 
-
-    public static void openFile(String filePath) {
-        if (filePath == null) {
-            JOptionPane.showMessageDialog(null, "文件不存在", "打开失败", JOptionPane.ERROR_MESSAGE);
-        } else {
-            openFileWithDefaultApplication(filePath);
-        }
-    }
 
     /**
      * 添加一条消息到消息列表最后

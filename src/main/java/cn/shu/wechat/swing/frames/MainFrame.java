@@ -108,12 +108,12 @@ public class MainFrame extends JFrame {
         SystemTray systemTray = SystemTray.getSystemTray();
 
         if (OSUtil.getOsType() == OSUtil.Mac_OS) {
-            normalTrayIcon = IconUtil.getBufferedImage(this, "/image/ic_launcher_dark.png", 20, 20);
+            normalTrayIcon = IconUtil.getBufferedImage(this, "/image/ic_launcher_dark.png", 40, 40);
         } else {
-            normalTrayIcon = IconUtil.getBufferedImage(this, "/image/ic_launcher.png", 20, 20);
+            normalTrayIcon = IconUtil.getBufferedImage(this, "/image/ic_launcher.png", 40, 40);
         }
 
-        emptyTrayIcon = IconUtil.getBufferedImage(this, "/image/ic_launcher_empty.png", 20, 20);
+        emptyTrayIcon = IconUtil.getBufferedImage(this, "/image/ic_launcher_empty.png", 40, 40);
 
         trayIcon = new TrayIcon(normalTrayIcon, Core.getNickName());
         trayIcon.setImageAutoSize(true);
@@ -256,7 +256,7 @@ public class MainFrame extends JFrame {
 
         // 任务栏图标
         if (OSUtil.getOsType() != OSUtil.Mac_OS) {
-            setIconImage(IconUtil.getBufferedImage(this, "/image/ic_launcher.png", 20, 20));
+            setIconImage(IconUtil.getBufferedImage(this, "/image/ic_launcher.png", 40, 40));
         }
 
         UIManager.put("Label.font", FontUtil.getDefaultFont());

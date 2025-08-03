@@ -22,7 +22,6 @@ import java.awt.event.MouseEvent;
  * Created by 舒新胜 on 13/12/2021.
  */
 public class RobotSettingPanel extends JPanel {
-    private static RobotSettingPanel context;
     private JTextField textField;
     private JTextField textFieldConfirm;
     private RCButton okButton;
@@ -30,7 +29,6 @@ public class RobotSettingPanel extends JPanel {
     private JLabel statusLabel;
 
     public RobotSettingPanel() {
-        context = this;
 
         initComponents();
         initView();
@@ -142,7 +140,4 @@ public class RobotSettingPanel extends JPanel {
         statusLabel.setVisible(true);
     }
 
-    public static RobotSettingPanel getContext() {
-        return context;
-    }
 }

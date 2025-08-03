@@ -29,7 +29,6 @@ import java.io.IOException;
  * Created by 舒新胜 on 23/06/2017.
  */
 public class ChangeAvatarPanel extends JPanel {
-    private static ChangeAvatarPanel context;
     private ImageAdjustLabel imageLabel;
     private RCButton okButton;
     private RCButton openButton;
@@ -41,7 +40,6 @@ public class ChangeAvatarPanel extends JPanel {
     private int imageMaxHeight = 200;
 
     public ChangeAvatarPanel() {
-        context = this;
 
         initComponents();
         initView();
@@ -200,9 +198,6 @@ public class ChangeAvatarPanel extends JPanel {
         statusLabel.setVisible(true);
     }
 
-    public static ChangeAvatarPanel getContext() {
-        return context;
-    }
 }
 
 class ImageAdjustLabel extends JLabel {

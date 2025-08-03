@@ -3,6 +3,9 @@ package cn.shu.wechat.swing.panels.setting;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCButton;
+import cn.shu.wechat.swing.utils.AvatarUtil;
+import cn.shu.wechat.swing.utils.ClipboardUtil;
+import cn.shu.wechat.swing.utils.FileUtil;
 import cn.shu.wechat.swing.utils.IconUtil;
 
 import javax.swing.*;
@@ -10,7 +13,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.text.DecimalFormat;
 
 /**
  * Created by 舒新胜 on 10/07/2017.
@@ -18,8 +20,6 @@ import java.text.DecimalFormat;
 public class ClearCachePanel extends JPanel {
     private JLabel infoLabel;
     private RCButton clearButton;
-    private String fileCachePath;
-    private String imageCachePath;
 
     public ClearCachePanel() {
         initComponents();
@@ -39,17 +39,26 @@ public class ClearCachePanel extends JPanel {
                         @Override
                         public void run() {
                             try {
-                                deleteAllFiles(fileCachePath);
-                                deleteAllFiles(imageCachePath);
+                                deleteAllFiles(ClipboardUtil.CLIPBOARD_TEMP_DIR);
+                                IconUtil.destroyMapCache();
+                                AvatarUtil.invalidateAvatarCache();
+                                SwingUtilities.invokeLater(() -> {
+                                    JOptionPane.showMessageDialog(null, "(头像、Icon、剪贴板)缓存清理完成！", "提示", JOptionPane.INFORMATION_MESSAGE);
+                                    infoLabel.setText("当前缓存占用磁盘空间：0 字节");
+                                });
 
-                                clearButton.setText("缓存清理完成！");
-                                clearButton.setIcon(IconUtil.getIcon(this, "/image/check.png"));
-                                infoLabel.setText("当前缓存占用磁盘空间：0 字节");
                             } catch (Exception e) {
-                                clearButton.setText("清除失败");
+                                SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, e.getMessage(), "提示", JOptionPane.INFORMATION_MESSAGE));
                             }
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    clearButton.setText("清除.");
+                                    clearButton.setEnabled(true);
+                                    clearButton.setIcon(IconUtil.getIcon(this, "/image/check.png"));
+                                }
+                            });
 
-                            clearButton.setEnabled(true);
                         }
                     }).start();
                 }
@@ -70,65 +79,25 @@ public class ClearCachePanel extends JPanel {
     }
 
     private void calculateCacheSize() {
-
-
+        infoLabel.setText( "当前剪贴板占用磁盘空间："+FileUtil.fileSizeString(FileUtil.getDirectorySize(new File(ClipboardUtil.CLIPBOARD_TEMP_DIR))));
     }
 
-    private String fileSizeString(long size) {
-        DecimalFormat decimalFormat = new DecimalFormat("#.0");
 
-        String retString = "";
-        if (size < 1024) {
-            retString = size + " 字节";
-        } else if (size < 1024 * 1024) {
-            retString = decimalFormat.format(size * 1.0F / 1024) + " KB";
-        } else {
-            retString = decimalFormat.format(size * 1.0F / 1024 / 1024) + " MB";
-        }
-
-        return retString;
-    }
-
-    /**
-     * 获取指定文件夹的总文件大小
-     *
-     * @param fileCachePath
-     * @return
-     */
-    private long getDirectorySize(String fileCachePath) {
-        long size = 0;
-        File file = new File(fileCachePath);
-
-        if (file.exists() && file.isDirectory()) {
-            File[] files = file.listFiles();
-            for (File f : files) {
-                if (f.isDirectory()) {
-                    size += getDirectorySize(f.getAbsolutePath());
-                } else {
-                    size += f.length();
-                }
-            }
-        } else {
-            throw new RuntimeException("文件不存在或非文件夹");
-        }
-
-        return size;
-    }
 
     private void deleteAllFiles(String fileCachePath) {
         File file = new File(fileCachePath);
 
         if (file.exists() && file.isDirectory()) {
             File[] files = file.listFiles();
-            for (File f : files) {
-                if (f.isDirectory()) {
-                    deleteAllFiles(f.getAbsolutePath());
-                } else {
-                    f.delete();
+            if (files != null) {
+                for (File f : files) {
+                    if (f.isDirectory()) {
+                        deleteAllFiles(f.getAbsolutePath());
+                    } else {
+                        f.delete();
+                    }
                 }
             }
-        } else {
-            throw new RuntimeException("文件不存在或非文件夹");
         }
     }
 
@@ -139,7 +108,7 @@ public class ClearCachePanel extends JPanel {
         panel.add(clearButton, BorderLayout.CENTER);
 
         this.setLayout(new GridBagLayout());
-        add(panel, new GBC(0, 0).setAnchor(GBC.NORTH).setFill(GBC.HORIZONTAL).setInsets(-200, 0, 0, 0));
+        add(panel, new GBC(0, 0).setAnchor(GBC.NORTH).setFill(GBC.HORIZONTAL).setInsets(-1000, 0, 0, 0));
     }
 
 

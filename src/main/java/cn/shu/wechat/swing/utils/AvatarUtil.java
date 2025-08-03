@@ -80,6 +80,7 @@ public final class AvatarUtil {
 
     public static void invalidateAvatarCache(){
         avatarCache.clear();
+        bigAvatarCache.clear();
     }
 
     static {

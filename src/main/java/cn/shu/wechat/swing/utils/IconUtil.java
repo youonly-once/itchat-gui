@@ -34,6 +34,13 @@ public class IconUtil {
 
 
     /**
+     * 销毁 Map 缓存：清空并断开引用
+     */
+    public static void destroyMapCache() {
+        ICON_CACHE.clear();       // 释放 Entry 对象
+        BUFFERED_IMAGE_CACHE.clear();       // 释放 Entry 对象
+    }
+    /**
      * 图片设置圆角
      *
      * @param srcImage
@@ -340,7 +347,7 @@ public class IconUtil {
                     ImageIcon rawIcon = new ImageIcon(url);
 
                     if (width > 0 && height > 0) {
-                        Image scaledImage = rawIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+                        Image scaledImage =  getScaledImage(rawIcon.getImage(), width, height);;
                         rawIcon = new ImageIcon(scaledImage);
                     }
                     return rawIcon;
