@@ -23,6 +23,7 @@ import cn.shu.wechat.utils.XmlStreamUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import jakarta.annotation.Resource;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -37,6 +38,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 消息处理类
@@ -54,6 +56,12 @@ public class MessageTools {
      * 消息Mapper
      */
     private static MessageMapper messageMapper;
+
+    /**
+     * 文件名 true 表示暂停
+     */
+    @Getter
+    private static final Map<String,Boolean> mapPasue = new ConcurrentHashMap<>();
 
     /**
      * 根据指定类型发送消息
@@ -299,6 +307,15 @@ public class MessageTools {
 
                     byte[] buffer = new byte[chunkSize];
                     for (int i = 0; i < totalChunks; i++) {
+
+                        while (mapPasue.get(filePath)!= null && mapPasue.get(filePath)) {
+                            try {
+                                Thread.sleep(100); // 等待暂停解除
+                            } catch (InterruptedException ignored) {
+                                Thread.currentThread().interrupt();
+                            }
+                        }
+
                         int readLen;
                         raf.seek((long) i * chunkSize);
                         readLen = raf.read(buffer);

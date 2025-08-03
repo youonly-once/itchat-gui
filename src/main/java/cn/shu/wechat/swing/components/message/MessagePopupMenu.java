@@ -43,6 +43,7 @@ public class MessagePopupMenu extends JPopupMenu {
     private void initMenuItem() {
         JMenuItem copy = new JMenuItem("复制");
         JMenuItem delItem = new JMenuItem("删除");
+        JMenuItem pause = new JMenuItem("暂停");
         JMenuItem forwardItem = new JMenuItem("转发");
 
         copy.setUI(new RCMenuItemUI());
@@ -91,7 +92,36 @@ public class MessagePopupMenu extends JPopupMenu {
             }
         });
 
-
+        pause.setUI(new RCMenuItemUI());
+        pause.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Object obj = null;
+                switch (messageType) {
+                    case MSGTYPE_APP: {
+                        TagPanel attachmentPanel = (TagPanel) getInvoker();
+                        obj = attachmentPanel.getTag();
+                        break;
+                    }
+                    default:
+                }
+                Message item = (Message) obj;
+                if (item != null) {
+                    if (MessageTools.getMapPasue().containsKey(item.getFilePath())){
+                        if (MessageTools.getMapPasue().get(item.getFilePath())){
+                            MessageTools.getMapPasue().put(item.getFilePath(), false);
+                            pause.setText("暂停");
+                        }else{
+                            MessageTools.getMapPasue().put(item.getFilePath(), true);
+                            pause.setText("启动");
+                        }
+                    }else{
+                        MessageTools.getMapPasue().put(item.getFilePath(), true);
+                        pause.setText("启动");
+                    }
+                }
+            }
+        });
         delItem.setUI(new RCMenuItemUI());
         delItem.addActionListener(new AbstractAction() {
             @Override
@@ -257,6 +287,7 @@ public class MessagePopupMenu extends JPopupMenu {
         });
 
         this.add(copy);
+        this.add(pause);
         this.add(delItem);
         this.add(revokeItem);
         this.add(forwardItem);
