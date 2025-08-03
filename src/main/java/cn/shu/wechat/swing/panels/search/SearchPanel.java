@@ -1,17 +1,17 @@
 package cn.shu.wechat.swing.panels.search;
 
+import cn.shu.wechat.constant.SearchResultType;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.entity.Message;
+import cn.shu.wechat.entity.SearchResultItem;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.swing.adapter.search.SearchResultItemsAdapter;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCSearchTextField;
-import cn.shu.wechat.swing.constant.SearchResultType;
-import cn.shu.wechat.swing.entity.SearchResultItem;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
-import cn.shu.wechat.swing.utils.CharacterParser;
-import cn.shu.wechat.swing.utils.FontUtil;
+import cn.shu.wechat.utils.CharacterParser;
+import cn.shu.wechat.utils.FontUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;

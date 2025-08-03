@@ -17,11 +17,7 @@ import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.exception.WebWXException;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.service.LoginService;
-import cn.shu.wechat.swing.utils.AvatarUtil;
-import cn.shu.wechat.utils.CommonTools;
-import cn.shu.wechat.utils.ExecutorServiceUtil;
-import cn.shu.wechat.utils.HttpUtil;
-import cn.shu.wechat.utils.SleepUtils;
+import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -79,7 +75,7 @@ public class LoginServiceImpl implements LoginService {
      */
     public WxRespConstant.CheckLoginResultCodeEnum checkQRCodeScanStatus(String result) throws Exception {
         String regEx = "window.code=(\\d+)";
-        Matcher matcher = CommonTools.getMatcher(regEx, result);
+        Matcher matcher = EmojiUtil.getMatcher(regEx, result);
         if (matcher.find()) {
             return WxRespConstant.CheckLoginResultCodeEnum.getByCode(Integer.parseInt(matcher.group(1)));
         } else {
@@ -100,7 +96,7 @@ public class LoginServiceImpl implements LoginService {
         // window.redirect_uri = "https://wx2.qq.com/cgi-bin/mmwebwx-bin/webwxnewloginpage?ticket=A8XCLb3mURiL7HSW-Hwoqd3b@qrticket_0&uuid=wdhd2iiUGQ==&lang=zh_CN&scan=1685067009";
 
         String regEx = "window.redirect_uri=\"(\\S+)\";";
-        Matcher matcher = CommonTools.getMatcher(regEx, loginContent);
+        Matcher matcher = EmojiUtil.getMatcher(regEx, loginContent);
         if (matcher.find()) {
             String originalUrl = matcher.group(1);
             String url = originalUrl.substring(0, originalUrl.lastIndexOf('/'));
@@ -196,7 +192,7 @@ public class LoginServiceImpl implements LoginService {
                 callBack.CallBack(e.getMessage());
                 log.error("微信登陆异常：{}", e.getMessage());
             }
-            Thread.sleep(100);
+            SleepUtils.sleep(100);
         }
         return isLogin;
     }
@@ -233,7 +229,7 @@ public class LoginServiceImpl implements LoginService {
                 throw new Exception(msg);
             }
             //解析XML
-            Document doc = CommonTools.xmlParser(resultOfXml);
+            Document doc = XmlStreamUtil.xmlParser(resultOfXml);
             if (doc != null) {
                 Core.getLoginResultData().getBaseRequest().setSKey(
                         doc.getElementsByTagName(StorageLoginInfoEnum.skey.getKey()).item(0).getFirstChild()
@@ -289,7 +285,7 @@ public class LoginServiceImpl implements LoginService {
                 throw new Exception(msg);
             }
             //解析XML
-            Document doc = CommonTools.xmlParser(resultOfXml);
+        Document doc = XmlStreamUtil.xmlParser(resultOfXml);
             if (doc != null) {
                 Core.getLoginResultData().getBaseRequest().setSKey(
                         doc.getElementsByTagName(StorageLoginInfoEnum.skey.getKey()).item(0).getFirstChild()
@@ -319,7 +315,7 @@ public class LoginServiceImpl implements LoginService {
 
             String result = HttpUtil.doGet(WxURLEnum.UUID_URL.getUrl(), params,null,true, HttpResponse.BodyHandlers.ofString());
             String regEx = "window.QRLogin.code = (\\d+); window.QRLogin.uuid = \"(\\S+?)\";";
-            Matcher matcher = CommonTools.getMatcher(regEx, result);
+        Matcher matcher = EmojiUtil.getMatcher(regEx, result);
             if (matcher.find()) {
                 if (("200".equals(matcher.group(1)))) {
                     Core.setUuid(matcher.group(2));
@@ -721,7 +717,7 @@ public class LoginServiceImpl implements LoginService {
      */
     public String getUserAvatar(String result) {
         String regEx = "window.userAvatar\\s*=\\s*'data:img/jpg;base64,(.+)'";
-        Matcher matcher = CommonTools.getMatcher(regEx, result);
+        Matcher matcher = EmojiUtil.getMatcher(regEx, result);
         if (matcher.find()) {
             return matcher.group(1);
         }
@@ -843,7 +839,7 @@ public class LoginServiceImpl implements LoginService {
         String result = HttpUtil.doGet(url, params, true, HttpResponse.BodyHandlers.ofString(), 30 * 1000L);
 
         String regEx = "window.synccheck=\\{retcode:\"(\\d+)\",selector:\"(\\d+)\"\\}";
-        Matcher matcher = CommonTools.getMatcher(regEx, result);
+        Matcher matcher = EmojiUtil.getMatcher(regEx, result);
         if (!matcher.find()) {
             throw new WebWXException("Unexpected sync check result: " + result);
         } else {

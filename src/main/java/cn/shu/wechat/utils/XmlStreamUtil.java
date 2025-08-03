@@ -11,16 +11,11 @@ import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.xml.sax.InputSource;
 
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.io.File;
-import java.io.IOException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,4 +119,25 @@ public class XmlStreamUtil {
                 .replace("<br/>", "").replace("\t", "");
     }
 
+    /**
+     * xml解析器
+     *
+     * @param text
+     * @return
+     * @author SXS
+     * @date 2017年4月9日 下午6:24:25
+     */
+    public static org.w3c.dom.Document xmlParser(String text) {
+        org.w3c.dom.Document doc = null;
+        StringReader sr = new StringReader(text);
+        InputSource is = new InputSource(sr);
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        try {
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            doc = builder.parse(is);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return doc;
+    }
 }

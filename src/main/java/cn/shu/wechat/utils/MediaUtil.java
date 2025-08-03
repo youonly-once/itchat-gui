@@ -1,6 +1,5 @@
 package cn.shu.wechat.utils;
 
-import cn.shu.wechat.swing.utils.IconUtil;
 import lombok.extern.log4j.Log4j2;
 import net.coobird.thumbnailator.Thumbnails;
 import org.bytedeco.javacpp.avcodec;

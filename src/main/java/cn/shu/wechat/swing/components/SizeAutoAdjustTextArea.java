@@ -1,23 +1,21 @@
 package cn.shu.wechat.swing.components;
 
 import cn.shu.wechat.swing.components.message.JIMSendTextPane;
-import cn.shu.wechat.swing.utils.EmojiUtil;
-import cn.shu.wechat.swing.utils.FontUtil;
-import cn.shu.wechat.swing.utils.OSUtil;
-import com.vdurmont.emoji.EmojiParser;
+import cn.shu.wechat.utils.EmojiUtil;
+import cn.shu.wechat.utils.FontUtil;
+import cn.shu.wechat.utils.OSUtil;
 import org.springframework.util.StringUtils;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import javax.swing.text.*;
-import javax.swing.text.html.HTMLDocument;
-import javax.swing.text.html.HTMLEditorKit;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;

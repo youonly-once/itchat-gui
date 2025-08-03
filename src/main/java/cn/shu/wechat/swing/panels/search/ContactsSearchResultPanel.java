@@ -1,10 +1,10 @@
 package cn.shu.wechat.swing.panels.search;
 
+import cn.shu.wechat.entity.SearchResultItem;
 import cn.shu.wechat.swing.adapter.search.SearchResultItemsAdapter;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCListView;
-import cn.shu.wechat.swing.entity.SearchResultItem;
 import lombok.Getter;
 
 import javax.swing.*;

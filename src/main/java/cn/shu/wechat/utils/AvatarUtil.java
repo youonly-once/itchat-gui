@@ -1,4 +1,4 @@
-package cn.shu.wechat.swing.utils;
+package cn.shu.wechat.utils;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
@@ -11,7 +11,6 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.task.DownloadTask;
-import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 

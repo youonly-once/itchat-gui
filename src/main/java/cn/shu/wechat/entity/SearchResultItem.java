@@ -1,6 +1,6 @@
-package cn.shu.wechat.swing.entity;
+package cn.shu.wechat.entity;
 
-import cn.shu.wechat.swing.constant.SearchResultType;
+import cn.shu.wechat.constant.SearchResultType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;

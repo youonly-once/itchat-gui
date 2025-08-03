@@ -7,7 +7,7 @@ import cn.shu.wechat.swing.components.GradientProgressBarUI;
 import cn.shu.wechat.swing.components.RCProgressBar;
 import cn.shu.wechat.swing.components.message.RCAttachmentMessageBubble;
 import cn.shu.wechat.swing.components.message.TagPanel;
-import cn.shu.wechat.swing.utils.FontUtil;
+import cn.shu.wechat.utils.FontUtil;
 
 import javax.swing.*;
 import java.awt.*;

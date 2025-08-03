@@ -14,7 +14,7 @@ import cn.shu.wechat.swing.adapter.message.video.MessageLeftVideoViewHolder;
 import cn.shu.wechat.swing.adapter.message.video.MessageRightVideoViewHolder;
 import cn.shu.wechat.swing.adapter.message.voice.MessageLeftVoiceViewHolder;
 import cn.shu.wechat.swing.adapter.message.voice.MessageRightVoiceViewHolder;
-import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.utils.IconUtil;
 import lombok.Getter;
 
 

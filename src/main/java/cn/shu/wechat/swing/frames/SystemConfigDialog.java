@@ -1,10 +1,9 @@
 package cn.shu.wechat.swing.frames;
 
 import cn.shu.wechat.swing.components.*;
-import cn.shu.wechat.swing.panels.*;
+import cn.shu.wechat.swing.panels.MePanel;
 import cn.shu.wechat.swing.panels.setting.*;
-import cn.shu.wechat.swing.utils.FontUtil;
-import lombok.Getter;
+import cn.shu.wechat.utils.FontUtil;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;

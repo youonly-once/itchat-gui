@@ -1,7 +1,6 @@
 package cn.shu.wechat.utils;
 
 import cn.shu.wechat.configuration.WechatConfiguration;
-import cn.shu.wechat.swing.utils.MultipartBodyPublisher;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.log4j.Log4j2;
 

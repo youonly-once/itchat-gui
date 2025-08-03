@@ -3,10 +3,10 @@ package cn.shu.wechat.swing.panels.setting;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCButton;
-import cn.shu.wechat.swing.utils.AvatarUtil;
-import cn.shu.wechat.swing.utils.ClipboardUtil;
-import cn.shu.wechat.swing.utils.FileUtil;
-import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.utils.AvatarUtil;
+import cn.shu.wechat.utils.ClipboardUtil;
+import cn.shu.wechat.utils.FileUtil;
+import cn.shu.wechat.utils.IconUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -103,12 +103,12 @@ public class ClearCachePanel extends JPanel {
 
     private void initView() {
         JPanel panel = new JPanel();
-        panel.setPreferredSize(new Dimension(300, 150));
+        panel.setPreferredSize(new Dimension(300, 300));
         panel.add(infoLabel, BorderLayout.NORTH);
         panel.add(clearButton, BorderLayout.CENTER);
 
         this.setLayout(new GridBagLayout());
-        add(panel, new GBC(0, 0).setAnchor(GBC.NORTH).setFill(GBC.HORIZONTAL).setInsets(-1000, 0, 0, 0));
+        add(panel, new GBC(0, 0).setAnchor(GBC.NORTH).setFill(GBC.HORIZONTAL).setInsets(0, 0, 0, 0));
     }
 
 

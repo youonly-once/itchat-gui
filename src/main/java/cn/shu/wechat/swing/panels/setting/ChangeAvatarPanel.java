@@ -5,8 +5,8 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCButton;
 import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.frames.MainFrame;
-import cn.shu.wechat.swing.utils.AvatarUtil;
-import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.utils.AvatarUtil;
+import cn.shu.wechat.utils.IconUtil;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.imageio.ImageIO;

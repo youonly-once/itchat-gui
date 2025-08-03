@@ -177,6 +177,11 @@ public class Message implements Comparable<Message>{
     private String contactsHeadImgUrl;
 
     private String contactsTicket;
+
+    /**
+     * 发送当前消息的线程ID
+     */
+    private long threadId;
     @Override
     public int compareTo(Message o) {
         return this.getMessageTime().compareTo(o.getMessageTime());

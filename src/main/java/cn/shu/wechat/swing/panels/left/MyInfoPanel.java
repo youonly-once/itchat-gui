@@ -8,11 +8,11 @@ import cn.shu.wechat.swing.components.message.MainOperationPopupMenu;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.frames.SystemConfigDialog;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
+import cn.shu.wechat.swing.media.HeadLoadingSwingWorker;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
-import cn.shu.wechat.swing.utils.AvatarUtil;
-import cn.shu.wechat.swing.utils.FontUtil;
-import cn.shu.wechat.swing.utils.IconUtil;
-import cn.shu.wechat.swing.worker.HeadLoadingSwingWorker;
+import cn.shu.wechat.utils.AvatarUtil;
+import cn.shu.wechat.utils.FontUtil;
+import cn.shu.wechat.utils.IconUtil;
 
 import javax.swing.*;
 import java.awt.*;

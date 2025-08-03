@@ -1,9 +1,9 @@
 package cn.shu.wechat.swing.adapter;
 
-import cn.shu.wechat.swing.entity.SelectUserData;
+import cn.shu.wechat.entity.SelectUserData;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
-import cn.shu.wechat.swing.utils.AvatarUtil;
-import cn.shu.wechat.swing.utils.CharacterParser;
+import cn.shu.wechat.utils.AvatarUtil;
+import cn.shu.wechat.utils.CharacterParser;
 
 import javax.swing.*;
 import java.awt.event.MouseEvent;

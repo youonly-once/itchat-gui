@@ -10,14 +10,11 @@ import cn.shu.wechat.swing.components.RCMenuItemUI;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
 import cn.shu.wechat.swing.frames.ForwardMsgDialog;
 import cn.shu.wechat.swing.frames.MainFrame;
-import cn.shu.wechat.swing.utils.ChatUtil;
-import cn.shu.wechat.swing.utils.ClipboardUtil;
-import cn.shu.wechat.swing.utils.FileUtil;
-import cn.shu.wechat.utils.ExecutorServiceUtil;
-import cn.shu.wechat.utils.SpringContextHolder;
+import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.ThreadUtils;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -25,7 +22,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * Created by 舒新胜 on 2017/6/5.
@@ -43,7 +40,7 @@ public class MessagePopupMenu extends JPopupMenu {
     private void initMenuItem() {
         JMenuItem copy = new JMenuItem("复制");
         JMenuItem delItem = new JMenuItem("删除");
-        JMenuItem pause = new JMenuItem("暂停");
+        JMenuItem pause = new JMenuItem("启动/暂停");
         JMenuItem forwardItem = new JMenuItem("转发");
 
         copy.setUI(new RCMenuItemUI());
@@ -110,14 +107,18 @@ public class MessagePopupMenu extends JPopupMenu {
                     if (MessageTools.getMapPasue().containsKey(item.getFilePath())){
                         if (MessageTools.getMapPasue().get(item.getFilePath())){
                             MessageTools.getMapPasue().put(item.getFilePath(), false);
-                            pause.setText("暂停");
+                            Thread threadById = ThreadUtils.findThreadById(item.getThreadId());
+                            if (threadById != null) {
+                                LockSupport.unpark(threadById);
+                            }
+                            //pause.setText("暂停");
                         }else{
                             MessageTools.getMapPasue().put(item.getFilePath(), true);
-                            pause.setText("启动");
+                            //pause.setText("启动");
                         }
                     }else{
                         MessageTools.getMapPasue().put(item.getFilePath(), true);
-                        pause.setText("启动");
+                        // pause.setText("启动");
                     }
                 }
             }

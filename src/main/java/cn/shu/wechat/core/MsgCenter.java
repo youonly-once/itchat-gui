@@ -11,20 +11,15 @@ import cn.shu.wechat.dto.response.sync.AddMsgList;
 import cn.shu.wechat.dto.response.sync.RecommendInfo;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.entity.Message;
+import cn.shu.wechat.entity.RoomItem;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.service.IMsgHandlerFace;
-import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.frames.MainFrame;
-import cn.shu.wechat.swing.media.SoundPlayer;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
-import cn.shu.wechat.swing.utils.ChatUtil;
 import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.task.DownloadTask;
-import cn.shu.wechat.utils.CommonTools;
-import cn.shu.wechat.utils.ExecutorServiceUtil;
-import cn.shu.wechat.utils.LogUtil;
-import cn.shu.wechat.utils.XmlStreamUtil;
+import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
@@ -450,7 +445,7 @@ public class MsgCenter {
                 break;
             case MSGTYPE_TEXT:
                 //消息格式化
-                CommonTools.emojiFormatter(msg);
+                EmojiUtil.emojiFormatter(msg);
                 textMsgFormat(msg);
                 //文本消息
                 msg.setPlainText(msg.getContent());

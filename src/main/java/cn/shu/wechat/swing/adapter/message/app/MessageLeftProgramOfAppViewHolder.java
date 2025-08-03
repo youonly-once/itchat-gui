@@ -3,7 +3,7 @@ package cn.shu.wechat.swing.adapter.message.app;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.message.RCLeftAppMessageBubble;
-import cn.shu.wechat.swing.utils.FontUtil;
+import cn.shu.wechat.utils.FontUtil;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

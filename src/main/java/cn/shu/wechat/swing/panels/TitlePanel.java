@@ -8,10 +8,9 @@ import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.panels.chat.ChatMembersPanel;
 import cn.shu.wechat.swing.panels.chat.ChatPanel;
-import cn.shu.wechat.swing.utils.FontUtil;
-import cn.shu.wechat.swing.utils.IconUtil;
-import cn.shu.wechat.swing.utils.OSUtil;
-import lombok.Getter;
+import cn.shu.wechat.utils.FontUtil;
+import cn.shu.wechat.utils.IconUtil;
+import cn.shu.wechat.utils.OSUtil;
 
 import javax.swing.*;
 import java.awt.*;

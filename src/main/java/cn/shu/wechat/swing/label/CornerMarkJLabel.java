@@ -1,7 +1,7 @@
 package cn.shu.wechat.swing.label;
 
-import cn.shu.wechat.swing.utils.FontUtil;
-import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.utils.FontUtil;
+import cn.shu.wechat.utils.IconUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;

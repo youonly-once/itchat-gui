@@ -6,8 +6,8 @@ import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
 import cn.shu.wechat.swing.components.message.RCRightImageMessageBubble;
 import cn.shu.wechat.swing.frames.MainFrame;
-import cn.shu.wechat.swing.utils.FontUtil;
-import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.utils.FontUtil;
+import cn.shu.wechat.utils.IconUtil;
 
 import javax.swing.*;
 import java.awt.*;

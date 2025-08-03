@@ -3,15 +3,15 @@ package cn.shu.wechat.swing.adapter;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.Contacts;
+import cn.shu.wechat.entity.RoomItem;
 import cn.shu.wechat.swing.components.Colors;
-import cn.shu.wechat.swing.entity.RoomItem;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
+import cn.shu.wechat.swing.media.HeadLoadingSwingWorker;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
-import cn.shu.wechat.swing.utils.FontUtil;
-import cn.shu.wechat.swing.utils.IconUtil;
-import cn.shu.wechat.swing.utils.TimeUtil;
-import cn.shu.wechat.swing.worker.HeadLoadingSwingWorker;
+import cn.shu.wechat.utils.DateUtils;
+import cn.shu.wechat.utils.FontUtil;
+import cn.shu.wechat.utils.IconUtil;
 import lombok.Setter;
 
 import javax.swing.*;
@@ -96,7 +96,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
 
         // 时间
         if (roomItem.getLocalDateTime() != null) {
-            viewHolder.time.setText(TimeUtil.diff(roomItem.getLocalDateTime()));
+            viewHolder.time.setText(DateUtils.diff(roomItem.getLocalDateTime()));
         }
             // 未读消息数
             if (roomItem.getUnreadCount() > 0) {

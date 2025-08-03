@@ -10,10 +10,10 @@ import cn.shu.wechat.entity.AttrHistory;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
-import cn.shu.wechat.swing.utils.AvatarUtil;
 import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.task.DownloadTask;
-import cn.shu.wechat.utils.CommonTools;
+import cn.shu.wechat.utils.AvatarUtil;
+import cn.shu.wechat.utils.EmojiUtil;
 import cn.shu.wechat.utils.JSONObjectUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.extern.log4j.Log4j2;
@@ -159,7 +159,7 @@ public class ContactsTools {
         if (contactByUserName == null) {
             return null;
         }
-        return CommonTools.emojiFormatter(contactByUserName.getRemarkname());
+        return EmojiUtil.emojiFormatter(contactByUserName.getRemarkname());
     }
 
     /**
@@ -176,7 +176,7 @@ public class ContactsTools {
         if (contacts.getUsername().startsWith("@@")) {
             return getContactNickNameByUserName(contacts);
         }
-        return CommonTools.emojiFormatter(contacts.getRemarkname());
+        return EmojiUtil.emojiFormatter(contacts.getRemarkname());
     }
     /**
      * 根据用户名获取普通用户昵称
@@ -192,7 +192,7 @@ public class ContactsTools {
         if (contactByUserName == null) {
             return null;
         }
-        return CommonTools.emojiFormatter(contactByUserName.getNickname());
+        return EmojiUtil.emojiFormatter(contactByUserName.getNickname());
     }
     /**
      * 根据用户名获取普通用户昵称
@@ -204,7 +204,7 @@ public class ContactsTools {
         if (contacts == null){
             return null;
         }
-        return CommonTools.emojiFormatter(contacts.getNickname());
+        return EmojiUtil.emojiFormatter(contacts.getNickname());
     }
 
     /**
@@ -282,7 +282,7 @@ public class ContactsTools {
     public static String getMemberNickNameOfGroup(String groupName, String userName) {
         Contacts memberOfGroup = getMemberOfGroup(groupName, userName);
         return memberOfGroup != null
-                ? CommonTools.emojiFormatter(memberOfGroup.getNickname())
+                ? EmojiUtil.emojiFormatter(memberOfGroup.getNickname())
                 : null;
 
 
@@ -325,15 +325,15 @@ public class ContactsTools {
         }
             String displayName = memberOfGroup.getRemarkname();
             if (!StringUtils.isEmpty(displayName)) {
-                return CommonTools.emojiFormatter(displayName);
+                return EmojiUtil.emojiFormatter(displayName);
             }
             displayName = memberOfGroup.getDisplayname();
             if (!StringUtils.isEmpty(displayName)) {
-                return CommonTools.emojiFormatter(displayName);
+                return EmojiUtil.emojiFormatter(displayName);
             }
             displayName = memberOfGroup.getNickname();
             if (!StringUtils.isEmpty(displayName)) {
-                return CommonTools.emojiFormatter(displayName);
+                return EmojiUtil.emojiFormatter(displayName);
             }
         return userName;
     }
@@ -344,7 +344,7 @@ public class ContactsTools {
         if (contacts == null){
             return null;
         }
-        return CommonTools.emojiFormatter(contacts.getSignature());
+        return EmojiUtil.emojiFormatter(contacts.getSignature());
     }
 
 
@@ -352,7 +352,7 @@ public class ContactsTools {
         if (contacts == null){
             return null;
         }
-        return CommonTools.emojiFormatter(contacts.getSignature());
+        return EmojiUtil.emojiFormatter(contacts.getSignature());
     }
 
     /**

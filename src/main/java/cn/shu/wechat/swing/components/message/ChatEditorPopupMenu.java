@@ -3,7 +3,7 @@ package cn.shu.wechat.swing.components.message;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCMenuItemUI;
 import cn.shu.wechat.swing.components.RCTextEditor;
-import cn.shu.wechat.swing.utils.ClipboardUtil;
+import cn.shu.wechat.utils.ClipboardUtil;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;

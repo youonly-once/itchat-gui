@@ -3,14 +3,14 @@ package cn.shu.wechat.swing.adapter;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.Contacts;
+import cn.shu.wechat.entity.ContactsItem;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCBorder;
-import cn.shu.wechat.swing.entity.ContactsItem;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
+import cn.shu.wechat.swing.media.HeadLoadingSwingWorker;
 import cn.shu.wechat.swing.panels.RightPanel;
 import cn.shu.wechat.swing.panels.UserInfoPanel;
-import cn.shu.wechat.swing.utils.FontUtil;
-import cn.shu.wechat.swing.worker.HeadLoadingSwingWorker;
+import cn.shu.wechat.utils.FontUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;

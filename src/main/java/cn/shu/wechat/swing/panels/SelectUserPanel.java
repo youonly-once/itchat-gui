@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.panels;
 
 import cn.shu.wechat.entity.Contacts;
+import cn.shu.wechat.entity.SelectUserData;
 import cn.shu.wechat.swing.adapter.SelectUserItemViewHolder;
 import cn.shu.wechat.swing.adapter.SelectUserItemsAdapter;
 import cn.shu.wechat.swing.adapter.SelectedUserItemViewHolder;
@@ -9,12 +10,11 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.swing.components.RCListView;
-import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.panels.search.ForwardSearchResultPanel;
 import cn.shu.wechat.swing.panels.search.SearchCardLayoutPanel;
 import cn.shu.wechat.swing.panels.search.SearchPanel;
-import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.utils.IconUtil;
 import lombok.Setter;
 
 import javax.swing.*;

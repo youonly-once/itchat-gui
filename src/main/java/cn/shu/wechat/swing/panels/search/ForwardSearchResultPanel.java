@@ -1,17 +1,17 @@
 package cn.shu.wechat.swing.panels.search;
 
+import cn.shu.wechat.constant.SearchResultType;
+import cn.shu.wechat.entity.SearchResultItem;
+import cn.shu.wechat.entity.SelectUserData;
 import cn.shu.wechat.swing.adapter.SelectUserItemViewHolder;
 import cn.shu.wechat.swing.adapter.SelectUserItemsAdapter;
 import cn.shu.wechat.swing.adapter.search.SearchResultItemsAdapter;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCListView;
-import cn.shu.wechat.swing.constant.SearchResultType;
-import cn.shu.wechat.swing.entity.SearchResultItem;
-import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.panels.SelectUserPanel;
-import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.utils.IconUtil;
 
 import javax.swing.*;
 import java.awt.*;

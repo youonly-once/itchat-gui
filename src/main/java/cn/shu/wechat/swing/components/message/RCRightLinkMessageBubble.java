@@ -1,6 +1,6 @@
 package cn.shu.wechat.swing.components.message;
 
-import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.utils.IconUtil;
 
 import java.awt.*;
 

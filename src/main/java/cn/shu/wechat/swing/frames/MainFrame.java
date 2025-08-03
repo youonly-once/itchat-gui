@@ -7,12 +7,7 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.media.SoundPlayer;
 import cn.shu.wechat.swing.panels.RightPanel;
 import cn.shu.wechat.swing.panels.left.LeftPanel;
-import cn.shu.wechat.swing.utils.ClipboardUtil;
-import cn.shu.wechat.swing.utils.FontUtil;
-import cn.shu.wechat.swing.utils.IconUtil;
-import cn.shu.wechat.swing.utils.OSUtil;
-import cn.shu.wechat.utils.ExecutorServiceUtil;
-import cn.shu.wechat.utils.SleepUtils;
+import cn.shu.wechat.utils.*;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 

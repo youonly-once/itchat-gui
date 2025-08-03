@@ -2,13 +2,13 @@ package cn.shu.wechat.swing.frames;
 
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.Contacts;
+import cn.shu.wechat.entity.SelectUserData;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCButton;
 import cn.shu.wechat.swing.components.RCTextField;
-import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.panels.SelectUserPanel;
-import cn.shu.wechat.swing.utils.FontUtil;
+import cn.shu.wechat.utils.FontUtil;
 import lombok.Getter;
 
 import javax.swing.*;

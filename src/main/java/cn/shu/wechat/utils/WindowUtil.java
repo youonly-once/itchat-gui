@@ -1,13 +1,11 @@
-package cn.shu.wechat.swing.utils;
+package cn.shu.wechat.utils;
 
 import com.sun.jna.Native;
 import com.sun.jna.Structure;
 import com.sun.jna.win32.StdCallLibrary;
 
-import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 

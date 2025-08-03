@@ -1,4 +1,4 @@
-package cn.shu.wechat.swing.constant;
+package cn.shu.wechat.constant;
 
 /**
  * 消息类型

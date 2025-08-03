@@ -4,14 +4,13 @@ import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.constant.DownloadType;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.Contacts;
+import cn.shu.wechat.entity.SelectUserData;
 import cn.shu.wechat.swing.adapter.RoomMembersAdapter;
 import cn.shu.wechat.swing.adapter.RoomMembersItemViewHolder;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCButton;
 import cn.shu.wechat.swing.components.RCListView;
-import cn.shu.wechat.swing.db.model.ContactsUser;
-import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.frames.AddOrRemoveMemberDialog;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
@@ -256,15 +255,15 @@ public class ChatMembersPanel extends ParentAvailablePanel {
      * 选择并添加群成员
      */
     private void selectAndAddRoomMember() {
-        List<ContactsUser> contactsUsers = null;// contactsUserService.findAll();
+        // List<ContactsUser> contactsUsers = null;// contactsUserService.findAll();
         List<SelectUserData> selectUsers = new ArrayList<>();
 
-        for (ContactsUser contactsUser : contactsUsers) {
-            if (!members.contains(contactsUser.getUsername())) {
-                selectUsers.add(new SelectUserData(contactsUser.getUsername(),
-                        ContactsTools.getContactDisplayNameByUserName(contactsUser.getUsername()),false));
-            }
-        }
+//        for (ContactsUser contactsUser : contactsUsers) {
+//            if (!members.contains(contactsUser.getUsername())) {
+//                selectUsers.add(new SelectUserData(contactsUser.getUsername(),
+//                        ContactsTools.getContactDisplayNameByUserName(contactsUser.getUsername()),false));
+//            }
+//        }
         addOrRemoveMemberDialog = new AddOrRemoveMemberDialog(MainFrame.getContext(), true, selectUsers);
         addOrRemoveMemberDialog.getOkButton().setText("添加");
         addOrRemoveMemberDialog.getOkButton().addMouseListener(new MouseAdapter() {

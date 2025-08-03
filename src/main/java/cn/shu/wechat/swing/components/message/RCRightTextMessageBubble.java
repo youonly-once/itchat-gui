@@ -1,6 +1,6 @@
 package cn.shu.wechat.swing.components.message;
 
-import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.utils.IconUtil;
 
 /**
  * 右侧文本聊天气泡

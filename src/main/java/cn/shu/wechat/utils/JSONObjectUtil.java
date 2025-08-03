@@ -61,7 +61,7 @@ public class JSONObjectUtil {
             }
             if (!equals) {
                 HashMap<String, String> temp = new HashMap<>(1);
-                temp.put(CommonTools.emojiFormatter(oldV), CommonTools.emojiFormatter(newV));
+                temp.put(EmojiUtil.emojiFormatter(oldV), EmojiUtil.emojiFormatter(newV));
                 difference.put(entry.getKey(), temp);
             }
         }

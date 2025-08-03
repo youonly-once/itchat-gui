@@ -12,14 +12,8 @@ import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.exception.WebWXException;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.swing.tasks.UploadTaskCallback;
-import cn.shu.wechat.swing.utils.IconUtil;
-import cn.shu.wechat.swing.utils.MimeTypeUtil;
-import cn.shu.wechat.swing.utils.MultipartBodyPublisher;
 import cn.shu.wechat.task.DownloadManager;
-import cn.shu.wechat.utils.HttpUtil;
-import cn.shu.wechat.utils.LogUtil;
-import cn.shu.wechat.utils.MD5Util;
-import cn.shu.wechat.utils.XmlStreamUtil;
+import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import jakarta.annotation.Resource;
@@ -39,6 +33,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * 消息处理类
@@ -306,14 +302,19 @@ public class MessageTools {
                 try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
 
                     byte[] buffer = new byte[chunkSize];
+                    long maxWaitTime = 20 * 60 * 1000; // 最长等待10分钟
                     for (int i = 0; i < totalChunks; i++) {
-
+                        long start = System.currentTimeMillis();
                         while (mapPasue.get(filePath)!= null && mapPasue.get(filePath)) {
-                            try {
-                                Thread.sleep(100); // 等待暂停解除
-                            } catch (InterruptedException ignored) {
-                                Thread.currentThread().interrupt();
+                            long elapsed = System.currentTimeMillis() - start;
+                            long remaining = maxWaitTime - elapsed;
+
+                            if (remaining <= 0) {
+                                throw new RuntimeException("upload timeout");
                             }
+                            log.warn("文件下载暂停:{}", Thread.currentThread().getName());
+                            LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(remaining));
+
                         }
 
                         int readLen;

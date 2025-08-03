@@ -30,17 +30,13 @@ import cn.shu.wechat.swing.frames.ImageViewerFrame;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.helper.AttachmentIconHelper;
 import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
+import cn.shu.wechat.swing.media.HeadLoadingSwingWorker;
 import cn.shu.wechat.swing.media.Mp3Player;
 import cn.shu.wechat.swing.media.VoicePlaybackListener;
 import cn.shu.wechat.swing.panels.chat.ChatMessagePanel;
-import cn.shu.wechat.swing.utils.ChatUtil;
-import cn.shu.wechat.swing.utils.FileUtil;
-import cn.shu.wechat.swing.utils.IconUtil;
-import cn.shu.wechat.swing.utils.TimeUtil;
-import cn.shu.wechat.swing.worker.HeadLoadingSwingWorker;
 import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.task.DownloadTask;
-import cn.shu.wechat.utils.ExecutorServiceUtil;
+import cn.shu.wechat.utils.*;
 import javazoom.jl.decoder.JavaLayerException;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -1178,16 +1174,16 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 preItem.setMessageTime(item.getCreateTime());
             }
 
-            if (TimeUtil.inTheSameMinute(messageTime
+            if (DateUtils.inTheSameMinute(messageTime
                     , preItem.getMessageTime())) {
                 holder.time.setVisible(false);
             } else {
                 holder.time.setVisible(true);
-                holder.time.setText(TimeUtil.diff(messageTime, true));
+                holder.time.setText(DateUtils.diff(messageTime, true));
             }
         } else {
             holder.time.setVisible(true);
-            holder.time.setText(TimeUtil.diff(messageTime, true));
+            holder.time.setText(DateUtils.diff(messageTime, true));
         }
 
         String senderId = ContactsTools.isRoomContact(item.getFromUsername()) && !item.getFromUsername().equals(Core.getUserName()) ? item.getFromMemberOfGroupUsername()

@@ -1,8 +1,7 @@
-package cn.shu.wechat.swing.utils;
+package cn.shu.wechat.utils;
 
 import cn.shu.wechat.constant.DownloadStatus;
 import cn.shu.wechat.task.DownloadManager;
-import cn.shu.wechat.utils.ExecutorServiceUtil;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 

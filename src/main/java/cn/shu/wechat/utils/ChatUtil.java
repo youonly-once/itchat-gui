@@ -1,4 +1,4 @@
-package cn.shu.wechat.swing.utils;
+package cn.shu.wechat.utils;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.core.Core;

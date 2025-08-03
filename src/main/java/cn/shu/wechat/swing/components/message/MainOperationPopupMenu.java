@@ -7,7 +7,7 @@ import cn.shu.wechat.swing.frames.CreateGroupDialog;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.frames.SystemConfigDialog;
 import cn.shu.wechat.swing.panels.ChartPopupMenu;
-import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.utils.IconUtil;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;

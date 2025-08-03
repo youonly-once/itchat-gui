@@ -1,12 +1,11 @@
 package cn.shu.wechat.swing.adapter.search;
 
+import cn.shu.wechat.constant.SearchResultType;
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.entity.Message;
+import cn.shu.wechat.entity.SearchResultItem;
 import cn.shu.wechat.swing.adapter.BaseAdapter;
 import cn.shu.wechat.swing.components.Colors;
-import cn.shu.wechat.swing.constant.SearchResultType;
-import cn.shu.wechat.swing.db.model.Message;
-import cn.shu.wechat.swing.db.model.Room;
-import cn.shu.wechat.swing.entity.SearchResultItem;
 import cn.shu.wechat.swing.helper.AttachmentIconHelper;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.panels.RightPanel;
@@ -14,9 +13,7 @@ import cn.shu.wechat.swing.panels.UserInfoPanel;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.swing.panels.left.TabOperationPanel;
 import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
-import cn.shu.wechat.swing.utils.*;
-import cn.shu.wechat.utils.DateUtils;
-import cn.shu.wechat.utils.ExecutorServiceUtil;
+import cn.shu.wechat.utils.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -175,21 +172,21 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
      */
     private void processMessageResult(SearchResultItemViewHolder viewHolder, SearchResultItem item) {
         SearchResultMessageViewHolder holder = (SearchResultMessageViewHolder) viewHolder;
-        Room room = null;
+        //Room room = null;
 
         Message message = null;
 
-        holder.avatar.setIcon(AvatarUtil.createOrLoadUserAvatar(room.getRoomId()));
+        // holder.avatar.setIcon(AvatarUtil.createOrLoadUserAvatar(room.getRoomId()));
         holder.brief.setKeyWord(keyWord);
         holder.brief.setText(item.getName());
-        holder.roomName.setText(room.getName());
-        holder.time.setText(TimeUtil.diff(message.getLocalDateTime()));
+        // holder.roomName.setText(room.getName());
+        holder.time.setText(DateUtils.diff(message.getMessageTime()));
 
         holder.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    enterRoom(room.getRoomId());
+                    // enterRoom(room.getRoomId());
                     clearSearchText();
                 }
                 super.mouseReleased(e);

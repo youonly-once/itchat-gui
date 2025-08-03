@@ -2,7 +2,7 @@ package cn.shu.wechat.swing.frames;
 
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
-import cn.shu.wechat.swing.utils.*;
+import cn.shu.wechat.utils.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

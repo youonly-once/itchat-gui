@@ -1,6 +1,6 @@
-package cn.shu.wechat.swing.entity;
+package cn.shu.wechat.entity;
 
-import cn.shu.wechat.swing.utils.CharacterParser;
+import cn.shu.wechat.utils.CharacterParser;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

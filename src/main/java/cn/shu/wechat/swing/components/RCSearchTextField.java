@@ -1,6 +1,6 @@
 package cn.shu.wechat.swing.components;
 
-import cn.shu.wechat.swing.utils.FontUtil;
+import cn.shu.wechat.utils.FontUtil;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;

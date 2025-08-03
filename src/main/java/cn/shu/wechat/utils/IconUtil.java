@@ -1,6 +1,5 @@
-package cn.shu.wechat.swing.utils;
+package cn.shu.wechat.utils;
 
-import cn.shu.wechat.utils.GifUtil;
 import lombok.extern.log4j.Log4j2;
 
 import javax.imageio.ImageIO;

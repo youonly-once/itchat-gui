@@ -1,4 +1,4 @@
-package cn.shu.wechat.swing;
+package cn.shu.wechat.constant;
 
 /**
  * 聊天房间类型

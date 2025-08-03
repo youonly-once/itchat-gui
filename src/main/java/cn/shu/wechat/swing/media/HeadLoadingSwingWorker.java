@@ -1,9 +1,9 @@
-package cn.shu.wechat.swing.worker;
+package cn.shu.wechat.swing.media;
 
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.swing.frames.MainFrame;
-import cn.shu.wechat.swing.utils.AvatarUtil;
-import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.utils.AvatarUtil;
+import cn.shu.wechat.utils.IconUtil;
 
 import javax.swing.*;
 import java.awt.*;

@@ -2,13 +2,12 @@ package cn.shu.wechat.swing.panels.chat;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.MessageTools;
-import cn.shu.wechat.constant.DownloadStatus;
 import cn.shu.wechat.constant.WxRespConstant;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.dto.response.msg.send.WebWXSendMsgResponse;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.entity.Message;
-import cn.shu.wechat.mapper.MessageMapper;
+import cn.shu.wechat.entity.SelectUserData;
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.adapter.message.MessageAdapter;
 import cn.shu.wechat.swing.adapter.message.app.MessageRightAttachmentViewHolder;
@@ -18,20 +17,12 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.swing.components.message.FileEditorThumbnail;
-import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.frames.RemindUserDialog;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.swing.tasks.UploadTaskCallback;
-import cn.shu.wechat.swing.utils.EmojiUtil;
-import cn.shu.wechat.swing.utils.FileUtil;
-import cn.shu.wechat.swing.utils.IconUtil;
-import cn.shu.wechat.swing.utils.MimeTypeUtil;
-import cn.shu.wechat.task.DownloadManager;
-import cn.shu.wechat.utils.ExecutorServiceUtil;
-import cn.shu.wechat.utils.MediaUtil;
-import cn.shu.wechat.utils.SpringContextHolder;
+import cn.shu.wechat.utils.*;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -48,7 +39,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Queue;
@@ -724,7 +714,8 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                     }
                 };
                 //发送消息 等待回调
-                    wxSendMsgResponse = MessageTools.sendMsgByUserId(finalMessage, callback);
+                finalMessage.setThreadId(Thread.currentThread().threadId());
+                wxSendMsgResponse = MessageTools.sendMsgByUserId(finalMessage, callback);
                 return null;
 
             }
@@ -792,6 +783,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                     finalMessage.setNeedToResend(false);
                 }
                 updateMessage(viewHolder, finalMessage);
+                MessageTools.getMapPasue().remove(finalMessage.getFilePath());
             }
         }.execute();
 

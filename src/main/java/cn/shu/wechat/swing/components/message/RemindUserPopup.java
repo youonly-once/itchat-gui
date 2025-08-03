@@ -1,7 +1,7 @@
 package cn.shu.wechat.swing.components.message;
 
 import cn.shu.wechat.swing.adapter.ViewHolder;
-import cn.shu.wechat.swing.utils.AvatarUtil;
+import cn.shu.wechat.utils.AvatarUtil;
 import lombok.Setter;
 
 import javax.swing.*;

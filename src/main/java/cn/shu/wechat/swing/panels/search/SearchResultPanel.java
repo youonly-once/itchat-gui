@@ -1,8 +1,8 @@
 package cn.shu.wechat.swing.panels.search;
 
+import cn.shu.wechat.entity.SearchResultItem;
 import cn.shu.wechat.swing.adapter.search.SearchResultItemsAdapter;
 import cn.shu.wechat.swing.components.Colors;
-import cn.shu.wechat.swing.entity.SearchResultItem;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import lombok.Getter;
 

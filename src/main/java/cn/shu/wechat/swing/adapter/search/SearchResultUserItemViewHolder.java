@@ -4,7 +4,7 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.HighLightLabel;
 import cn.shu.wechat.swing.components.RCBorder;
-import cn.shu.wechat.swing.utils.FontUtil;
+import cn.shu.wechat.utils.FontUtil;
 
 import javax.swing.*;
 import java.awt.*;

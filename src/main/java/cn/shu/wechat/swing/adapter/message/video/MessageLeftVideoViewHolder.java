@@ -7,8 +7,8 @@ import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.components.message.RCLeftVideoMessageBubble;
 import cn.shu.wechat.swing.components.message.TagJLayeredPane;
 import cn.shu.wechat.swing.components.message.TagPanel;
-import cn.shu.wechat.swing.utils.FontUtil;
-import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.utils.FontUtil;
+import cn.shu.wechat.utils.IconUtil;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

@@ -5,15 +5,11 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCButton;
 import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.frames.MainFrame;
-import cn.shu.wechat.swing.utils.AvatarUtil;
-import cn.shu.wechat.swing.utils.FontUtil;
-import cn.shu.wechat.swing.utils.IconUtil;
-import lombok.Getter;
+import cn.shu.wechat.utils.AvatarUtil;
+import cn.shu.wechat.utils.FontUtil;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 

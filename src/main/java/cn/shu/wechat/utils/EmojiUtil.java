@@ -1,11 +1,16 @@
-package cn.shu.wechat.swing.utils;
+package cn.shu.wechat.utils;
+
+import cn.shu.wechat.dto.response.sync.AddMsgList;
+import com.vdurmont.emoji.EmojiParser;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 import javax.swing.*;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by 舒新胜 on 2017/7/1.
@@ -219,4 +224,65 @@ public final class EmojiUtil {
     public static boolean isRecognizableEmoji(Object context, String code) {
         return getEmoji(context, code) != null;
     }
+
+
+    public static void emojiFormatter(AddMsgList msg) {
+
+        msg.setContent(StringEscapeUtils.unescapeXml(msg.getContent()));
+        msg.setContent(emojiFormatter(msg.getContent()));
+
+    }
+
+    /**
+     * 消息格式化
+     *
+     * @author SXS
+     * @date 2017年4月23日 下午4:19:08
+     */
+    public static String emojiFormatter(String msg) {
+        if (StringUtils.isEmpty(msg)) {
+            return msg;
+        }
+        msg = msg.replace("<br/>", "\n");
+        Matcher matcher = getMatcher("<span class=\"emoji emoji(.{1,10})\"></span>", msg);
+        StringBuilder sb = new StringBuilder();
+        int lastStart = 0;
+        while (matcher.find()) {
+            String str = matcher.group(1);
+            if (str.length() == 6) {
+
+            } else if (str.length() == 10) {
+
+            } else {
+                String tmp = msg.substring(lastStart, matcher.start());
+                sb.append(tmp).append("&#x").append(str).append(";");
+                lastStart = matcher.end();
+            }
+        }
+        if (lastStart < msg.length()) {
+            sb.append(msg.substring(lastStart));
+        }
+        if (sb.length() != 0) {
+            msg = EmojiParser.parseToUnicode(sb.toString());
+        } else {
+            msg = EmojiParser.parseToUnicode(msg);
+        }
+        return msg;
+        // TODO 与emoji表情有部分兼容问题，目前暂未处理解码处理 d.put(k,
+        // StringEscapeUtils.unescapeHtml4(d.getString(k)));
+
+    }
+
+    /**
+     * 正则表达式处理工具
+     *
+     * @return
+     * @author SXS
+     * @date 2017年4月9日 上午12:27:10
+     */
+    public static Matcher getMatcher(String regEx, String text) {
+        Pattern pattern = Pattern.compile(regEx);
+        return pattern.matcher(text);
+    }
+
 }

@@ -3,25 +3,22 @@ package cn.shu.wechat.swing.panels.left.tabcontent;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.Contacts;
+import cn.shu.wechat.entity.ContactsItem;
 import cn.shu.wechat.swing.adapter.ContactsItemViewHolder;
 import cn.shu.wechat.swing.adapter.ContactsItemsAdapter;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCListView;
-import cn.shu.wechat.swing.entity.ContactsItem;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
-import cn.shu.wechat.swing.panels.chat.ChatPanel;
 import cn.shu.wechat.swing.panels.left.LeftPanel;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**

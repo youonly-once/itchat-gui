@@ -16,7 +16,6 @@ import java.util.concurrent.*;
  */
 @Log4j2
 public class DownloadManager {
-    private static final ConcurrentHashMap<String, CountDownLatch> latchMap = new ConcurrentHashMap<>();
 
     private final static ScheduledExecutorService cleanerScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
         Thread t = new Thread(r, "Download-Cleaner");
@@ -227,7 +226,6 @@ public class DownloadManager {
     public static void awaitDownload(String taskId, long timeOut) {
         DownloadTask task = taskMap.get(taskId);
         if (task == null) {
-            log.error("任务不存在，taskId=" + taskId);
             return;
         }
 

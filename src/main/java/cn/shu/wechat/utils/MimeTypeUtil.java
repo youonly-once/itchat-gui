@@ -1,4 +1,4 @@
-package cn.shu.wechat.swing.utils;
+package cn.shu.wechat.utils;
 
 import java.util.HashMap;
 import java.util.Map;

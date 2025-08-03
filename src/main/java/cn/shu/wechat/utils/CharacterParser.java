@@ -25,7 +25,7 @@
  * #                                                   #
  */
 
-package cn.shu.wechat.swing.utils;
+package cn.shu.wechat.utils;
 
 /**
  * Created by jiang on 15/12/11.
@@ -157,6 +157,6 @@ public final class CharacterParser {
     }
 
     public String getSpelling() {
-        return this.getSelling(this.getResource());
+        return getSelling(this.getResource());
     }
 }

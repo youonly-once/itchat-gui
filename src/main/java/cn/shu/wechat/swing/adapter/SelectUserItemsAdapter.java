@@ -1,11 +1,11 @@
 package cn.shu.wechat.swing.adapter;
 
+import cn.shu.wechat.entity.SelectUserData;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCBorder;
-import cn.shu.wechat.swing.entity.SelectUserData;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
-import cn.shu.wechat.swing.utils.IconUtil;
-import cn.shu.wechat.swing.worker.HeadLoadingSwingWorker;
+import cn.shu.wechat.swing.media.HeadLoadingSwingWorker;
+import cn.shu.wechat.utils.IconUtil;
 import lombok.Setter;
 
 import javax.swing.*;

@@ -2,8 +2,8 @@ package cn.shu.wechat.swing.components;
 
 import cn.shu.wechat.swing.components.message.FileEditorThumbnail;
 import cn.shu.wechat.swing.frames.ImageViewerFrame;
-import cn.shu.wechat.swing.utils.ClipboardUtil;
-import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.utils.ClipboardUtil;
+import cn.shu.wechat.utils.IconUtil;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

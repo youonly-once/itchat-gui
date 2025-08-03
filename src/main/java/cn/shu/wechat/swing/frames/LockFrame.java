@@ -3,22 +3,13 @@ package cn.shu.wechat.swing.frames;
 
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.HintTextFieldUI;
-import cn.shu.wechat.swing.panels.TitlePanel;
-import cn.shu.wechat.swing.utils.FontUtil;
-import cn.shu.wechat.swing.utils.IconUtil;
-import cn.shu.wechat.swing.utils.OSUtil;
+import cn.shu.wechat.utils.FontUtil;
+import cn.shu.wechat.utils.IconUtil;
+import cn.shu.wechat.utils.OSUtil;
 import lombok.Getter;
-import org.jfree.chart.title.Title;
 
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.LineBorder;
-import javax.swing.plaf.basic.BasicTextFieldUI;
-import javax.swing.text.JTextComponent;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Arrays;
 
 /**

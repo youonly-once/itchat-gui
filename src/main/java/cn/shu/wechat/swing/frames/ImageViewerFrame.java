@@ -4,8 +4,8 @@ package cn.shu.wechat.swing.frames;
 import cn.shu.wechat.swing.ImageViewer.ImageLabel;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCMenuItemUI;
-import cn.shu.wechat.swing.utils.IconUtil;
-import cn.shu.wechat.swing.utils.OSUtil;
+import cn.shu.wechat.utils.IconUtil;
+import cn.shu.wechat.utils.OSUtil;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

@@ -6,7 +6,7 @@ import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.swing.label.CornerMarkJLabel;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.swing.panels.RightPanel;
-import cn.shu.wechat.swing.utils.IconUtil;
+import cn.shu.wechat.utils.IconUtil;
 import lombok.Getter;
 
 import javax.swing.*;

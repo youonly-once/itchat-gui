@@ -1,4 +1,4 @@
-package cn.shu.wechat.swing.utils;
+package cn.shu.wechat.utils;
 
 /**
  * Created by 舒新胜 on 05/06/2017.

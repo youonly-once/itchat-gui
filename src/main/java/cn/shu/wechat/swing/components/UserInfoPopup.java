@@ -7,12 +7,8 @@ import cn.shu.wechat.dto.response.msg.send.WebWXSendMsgResponse;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.swing.frames.ImageViewerFrame;
 import cn.shu.wechat.swing.frames.MainFrame;
-import cn.shu.wechat.swing.utils.AvatarUtil;
-import cn.shu.wechat.swing.utils.ChatUtil;
-import cn.shu.wechat.swing.utils.FontUtil;
-import cn.shu.wechat.swing.utils.IconUtil;
-import cn.shu.wechat.swing.worker.HeadLoadingSwingWorker;
-import cn.shu.wechat.utils.ExecutorServiceUtil;
+import cn.shu.wechat.swing.media.HeadLoadingSwingWorker;
+import cn.shu.wechat.utils.*;
 import lombok.extern.log4j.Log4j2;
 
 import javax.swing.*;

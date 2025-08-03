@@ -1,4 +1,4 @@
-package cn.shu.wechat.swing.utils;
+package cn.shu.wechat.utils;
 
 import cn.shu.wechat.configuration.WechatConfiguration;
 import lombok.extern.log4j.Log4j2;

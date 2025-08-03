@@ -1,7 +1,7 @@
 package cn.shu.wechat.swing.helper;
 
-import cn.shu.wechat.swing.utils.IconUtil;
-import cn.shu.wechat.swing.utils.MimeTypeUtil;
+import cn.shu.wechat.utils.IconUtil;
+import cn.shu.wechat.utils.MimeTypeUtil;
 
 import javax.swing.*;
 
