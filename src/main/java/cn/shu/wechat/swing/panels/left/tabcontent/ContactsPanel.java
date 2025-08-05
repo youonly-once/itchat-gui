@@ -1,9 +1,6 @@
 package cn.shu.wechat.swing.panels.left.tabcontent;
 
-import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.entity.Contacts;
-import cn.shu.wechat.entity.ContactsItem;
 import cn.shu.wechat.swing.adapter.ContactsItemViewHolder;
 import cn.shu.wechat.swing.adapter.ContactsItemsAdapter;
 import cn.shu.wechat.swing.components.Colors;
@@ -16,9 +13,10 @@ import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
-import java.util.*;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -29,7 +27,7 @@ public class ContactsPanel extends ParentAvailablePanel {
     private static ContactsPanel context;
 
     private RCListView<ContactsItemViewHolder, ContactsItemsAdapter> contactsListView;
-    private final List<ContactsItem> contactsItemList = new ArrayList<>();
+    private final List<String> contactsItemList = new ArrayList<>();
     /**
      * 每次加载的联系人数量
      */
@@ -44,9 +42,7 @@ public class ContactsPanel extends ParentAvailablePanel {
 
         initComponents();
         initView();
-        //绑定list到Adapter
-        contactsListView.setAdapter(new ContactsItemsAdapter(contactsItemList));
-        loadedCount.set(contactsItemList.size());
+
     }
 
 
@@ -55,6 +51,9 @@ public class ContactsPanel extends ParentAvailablePanel {
     }
 
     private void initView() {
+        //绑定list到Adapter
+        contactsListView.setAdapter(new ContactsItemsAdapter(contactsItemList));
+        loadedCount.set(contactsItemList.size());
         setLayout(new GridBagLayout());
         contactsListView.setContentPanelBackground(Colors.WINDOW_BACKGROUND);
         contactsListView.setScrollBarColor(Colors.SCROLL_BAR_TRACK_LIGHT,Colors.WINDOW_BACKGROUND);
@@ -83,35 +82,34 @@ public class ContactsPanel extends ParentAvailablePanel {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                if (contactsListView.getContentPanel().getComponentCount() > initialCount && !LeftTabContentPanel.getContext().getCurrentTab().equals(LeftPanel.CONTACTS)) {
-                    SwingUtilities.invokeLater(() -> {
-                        contactsListView.notifyItemRemoved(initialCount, contactsListView.getContentPanel().getComponentCount());
-                        loadedCount.set(initialCount);
-                    });
+                if (!LeftTabContentPanel.getContext().getCurrentTab().equals(LeftPanel.CONTACTS)) {
+                    if (contactsListView.getContentPanel().getComponentCount() > initialCount && !LeftTabContentPanel.getContext().getCurrentTab().equals(LeftPanel.CONTACTS)) {
+                        SwingUtilities.invokeLater(() -> {
+                            contactsListView.notifyItemRemoved(initialCount, contactsListView.getContentPanel().getComponentCount());
+                            loadedCount.set(initialCount);
+                        });
+                    }
                 }
-
-
 
             }
         }, 1000 * 60 * 10, 1000 * 60 * 20);
+    }
+
+    @Override
+    public void setVisible(boolean aFlag) {
+        if (aFlag) {
+            initData();
+        }
+        super.setVisible(aFlag);
     }
 
     /**
      * 初始化数据，加载所有联系人到List中
      */
     public void initData() {
-
         contactsItemList.clear();
-        for (Map.Entry<String, Contacts> entry : Core.getMemberMap().entrySet()) {
-            Contacts value = entry.getValue();
-            ContactsItem item = ContactsItem.builder()
-                    .id(entry.getKey())
-                    .displayName(ContactsTools.getContactDisplayNameByUserName(entry.getKey()))
-                    .type(value.getType())
-                    .build();
-            contactsItemList.add(item);
-        }
-
+        contactsItemList.addAll(Core.getMemberMap().keySet());
+        contactsListView.getAdapter().processData();
 
     }
 
@@ -120,9 +118,8 @@ public class ContactsPanel extends ParentAvailablePanel {
      */
     public void notifyDataSetChanged() {
         ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
-            initData();
             loadedCount.set(0);
-            ((ContactsItemsAdapter) contactsListView.getAdapter()).processData();
+            initData();
             SwingUtilities.invokeLater(() -> {
                 int count = Math.min(initialCount, contactsItemList.size());
                 contactsListView.notifyItemAppend(loadedCount.getAndAdd(count), count);

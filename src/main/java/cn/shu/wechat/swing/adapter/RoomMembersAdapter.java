@@ -56,9 +56,9 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
         if ("添加成员".equals(contacts.getDisplayname())) {
             viewHolder.setCursor(new Cursor(Cursor.HAND_CURSOR));
             String name = contacts.getDisplayname();
-            setRoomName(viewHolder.roomName, name);
-            ImageIcon imageIcon = IconUtil.getIcon(this,"/image/add_member.png");
-            imageIcon.setImage(imageIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH));
+            //setRoomName(viewHolder.roomName, name);
+            viewHolder.remove(viewHolder.roomName);
+            ImageIcon imageIcon = IconUtil.getIcon(this, "/image/add_member.png", 40, 40);
             viewHolder.avatar.setIcon(imageIcon);
 
             viewHolder.addMouseListener(new AbstractMouseListener() {
@@ -86,9 +86,9 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
         } else if ("删除成员".equals(contacts.getDisplayname())) {
             viewHolder.setCursor(new Cursor(Cursor.HAND_CURSOR));
             String name = contacts.getDisplayname();
-            setRoomName(viewHolder.roomName, name);
-            ImageIcon imageIcon = IconUtil.getIcon(this,"/image/delete_member.png");
-            imageIcon.setImage(imageIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH));
+            viewHolder.remove(viewHolder.roomName);
+            //setRoomName(viewHolder.roomName, name);
+            ImageIcon imageIcon = IconUtil.getIcon(this, "/image/delete_member.png", 40, 40);
             viewHolder.avatar.setIcon(imageIcon);
 
             viewHolder.addMouseListener(new AbstractMouseListener() {

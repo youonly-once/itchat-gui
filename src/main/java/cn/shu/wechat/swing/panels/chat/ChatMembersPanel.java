@@ -102,8 +102,8 @@ public class ChatMembersPanel extends ParentAvailablePanel {
         operationPanel.add(leaveButton);
 
         setLayout(new GridBagLayout());
-        add(listView, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 1000));
-        add(operationPanel, new GBC(0, 1).setFill(GBC.BOTH).setWeight(1, 1).setInsets(10, 0, 5, 0));
+        add(listView, new GBC(0, 0).setFill(GBC.HORIZONTAL).setWeight(1, 1000).setAnchor(GridBagConstraints.NORTH));
+        add(operationPanel, new GBC(0, 1).setFill(GBC.HORIZONTAL).setWeight(1, 1).setAnchor(GridBagConstraints.SOUTH).setInsets(10, 0, 5, 0));
 
         adapter = new RoomMembersAdapter(members);
         listView.setAdapter(adapter);
@@ -150,8 +150,9 @@ public class ChatMembersPanel extends ParentAvailablePanel {
             contacts.setGroupName(roomId);
         }
 
+        members.add(Contacts.builder().displayname("添加成员").build());
+
         if (isRoomCreator()) {
-            members.add(Contacts.builder().displayname("添加成员").build());
             if (members.size() > 1) {
                 members.add(Contacts.builder().displayname("删除成员").build());
             }

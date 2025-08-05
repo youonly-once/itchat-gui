@@ -2,14 +2,11 @@ package cn.shu.wechat.swing.panels.chat;
 
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import lombok.Getter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.event.AncestorListener;
 import javax.swing.event.CaretListener;
 import java.awt.*;
-import java.awt.dnd.DropTarget;
 import java.awt.event.*;
 import java.util.LinkedHashMap;
 import java.util.Timer;
@@ -22,7 +19,7 @@ import java.util.TimerTask;
  * @创建时间 7/18/2021 11:40
  */
 public class ChatPanelContainer extends ParentAvailablePanel {
-    private static final Logger log = LogManager.getLogger(ChatPanelContainer.class);
+
     private CardLayout cardLayout;
 
     private final static LinkedHashMap<String, ChatPanel> cards = new LinkedHashMap<>(5);

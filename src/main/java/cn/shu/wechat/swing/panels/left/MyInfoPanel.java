@@ -13,6 +13,7 @@ import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.utils.AvatarUtil;
 import cn.shu.wechat.utils.FontUtil;
 import cn.shu.wechat.utils.IconUtil;
+import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,6 +24,7 @@ import java.awt.event.MouseEvent;
  * Created by 舒新胜 on 17-5-29.
  */
 public class MyInfoPanel extends ParentAvailablePanel {
+    @Getter
     private static MyInfoPanel context;
 
     private JLabel avatar;
@@ -114,7 +116,4 @@ public class MyInfoPanel extends ParentAvailablePanel {
         avatar.repaint();
     }
 
-    public static MyInfoPanel getContext() {
-        return context;
-    }
 }

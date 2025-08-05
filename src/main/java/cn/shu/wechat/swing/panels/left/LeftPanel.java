@@ -59,7 +59,7 @@ public class LeftPanel extends JPanel {
         //联系人
         contactsPanel = new ContactsPanel(this);
         //收藏panel
-        collectionPanel = new CollectionsPanel(this);
+        // collectionPanel = new CollectionsPanel(this);
 
         myInfoPanel = new MyInfoPanel(this);
 
@@ -79,7 +79,7 @@ public class LeftPanel extends JPanel {
 
         leftTabContentPanel.add(roomsPanel, CHAT);
         leftTabContentPanel.add(contactsPanel, CONTACTS);
-        leftTabContentPanel.add(collectionPanel, COLLECTIONS);
+        // leftTabContentPanel.add(collectionPanel, COLLECTIONS);
         leftTabContentPanel.add(searchResultPanel, SEARCH);
 
         add(myInfoPanel, new GBC(0, 0).setAnchor(GBC.CENTER).setFill(GBC.BOTH).setWeight(1, 10).setInsets(0,0,0,0));

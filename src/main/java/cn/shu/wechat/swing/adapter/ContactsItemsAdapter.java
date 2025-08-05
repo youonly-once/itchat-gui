@@ -3,7 +3,6 @@ package cn.shu.wechat.swing.adapter;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.Contacts;
-import cn.shu.wechat.entity.ContactsItem;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
@@ -27,7 +26,7 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
     /**
      * 当前显示的联系人列表
      */
-    private final List<ContactsItem> contactsItems;
+    private final List<String> contactsItems;
 
     /**
      * 所有联系人Holders
@@ -46,7 +45,7 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
      */
     private ContactsItemViewHolder selectedViewHolder;
 
-    public ContactsItemsAdapter(List<ContactsItem> contactsItems) {
+    public ContactsItemsAdapter(List<String> contactsItems) {
         this.contactsItems = contactsItems;
 
         if (contactsItems != null) {
@@ -105,18 +104,18 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
     @Override
     public void onBindViewHolder(ContactsItemViewHolder viewHolder, int position) {
 
-        ContactsItem item = contactsItems.get(position);
+        String username = contactsItems.get(position);
 
-        new HeadLoadingSwingWorker(viewHolder.avatar,item.getId()).loadAvatar();
+        new HeadLoadingSwingWorker(viewHolder.avatar, username).loadAvatar();
 
-        viewHolder.roomName.setText(item.getDisplayName());
+        viewHolder.roomName.setText(ContactsTools.getContactDisplayNameByUserName(username));
         if (viewHolder.mouseListener!=null){
             viewHolder.removeMouseListener(viewHolder.mouseListener);
         }
         viewHolder.mouseListener =  new AbstractMouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                UserInfoPanel.getContext().setContacts(Core.getMemberMap().get(item.getId()));
+                UserInfoPanel.getContext().setContacts(Core.getMemberMap().get(username));
                 RightPanel.getContext().show(RightPanel.USER_INFO);
 
                 setBackground(viewHolder, Colors.SCROLL_BAR_TRACK_LIGHT);
@@ -156,15 +155,15 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
         Collections.sort(contactsItems);
         int index = 0;
         String lastChara = "";
-        for (ContactsItem item : contactsItems) {
-
+        for (String username : contactsItems) {
+            Contacts item = Core.getMemberMap().get(username);
             if (item.getType()!= Contacts.ContactsType.ORDINARY_USER){
                 if (!item.getType().desc.equals(lastChara)){
                     lastChara = item.getType().desc;
                     positionMap.put(index, item.getType().desc);
                 }
             }else{
-                String selling = ContactsTools.getContactDisplayNameInitialByUserName(item.getId());
+                String selling = ContactsTools.getContactDisplayNameInitialByUserName(username);
                 if (StringUtils.isEmpty(selling)) {
                     selling = "#";
                 }
@@ -174,7 +173,6 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
                     positionMap.put(index, ch);
                 }
             }
-
 
             index++;
         }
