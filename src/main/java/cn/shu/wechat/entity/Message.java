@@ -181,6 +181,7 @@ public class Message implements Comparable<Message>{
     /**
      * 发送当前消息的线程ID
      */
+    @TableField(exist = false)
     private long threadId;
     @Override
     public int compareTo(Message o) {

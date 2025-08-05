@@ -191,11 +191,17 @@ public class ChatMessageEditorPanel extends ParentAvailablePanel {
 
     public void addShareComponent() {
         shareRoomId = roomId;
+        if (shareTextEditor != null) {
+            ChatPanelContainer.getContext().removeAllListenersRecursively(shareTextEditor);
+        }
         shareTextEditor = textEditor;
     }
 
     public static void removeShareComponent() {
         shareRoomId = null;
+        if (shareTextEditor != null) {
+            ChatPanelContainer.getContext().removeAllListenersRecursively(shareTextEditor);
+        }
         shareTextEditor = null;
     }
 

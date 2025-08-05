@@ -84,4 +84,11 @@ public class MessageEditorExpressionPopup extends JPopupMenu {
         cardLayout.show(listPanel, who);
     }
 
+    @Override
+    public void setVisible(boolean b) {
+        if (!b){
+            setInvoker(null);
+        }
+        super.setVisible(b);
+    }
 }

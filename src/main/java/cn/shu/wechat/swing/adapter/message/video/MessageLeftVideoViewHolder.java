@@ -69,8 +69,7 @@ public class MessageLeftVideoViewHolder extends BaseMessageViewHolder {
         time.setForeground(Colors.FONT_GRAY);
         time.setFont(FontUtil.getDefaultFont(12));
 
-        sender.setFont(FontUtil.getDefaultFont(12));
-        sender.setForeground(Colors.FONT_GRAY);
+
         playImgLabel.setIcon(IconUtil.getIcon(this, "/image/image_loading.gif"));
 
     }
@@ -82,6 +81,8 @@ public class MessageLeftVideoViewHolder extends BaseMessageViewHolder {
         contentTagPanel.setBackground(Colors.WINDOW_BACKGROUND);
         contentTagPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
         if (isGroup) {
+            sender.setFont(FontUtil.getDefaultFont(12));
+            sender.setForeground(Colors.FONT_GRAY);
             sender.setBorder(new EmptyBorder(0,0,5,0));
             contentTagPanel.add(sender);
         }

@@ -83,8 +83,8 @@ public class DownloadManager {
                 taskMap.remove(task.getTaskId());
             } else if (existing.getStatus() == DownloadStatus.WAITING || existing.getStatus() == DownloadStatus.RUNNING) {
                 if (existing.getFuture() == null) {
-                    awaitDownloadLatch(task);
                     log.error("轮询等待中：{}", existing);
+                    awaitDownloadLatch(task);
                     return (R) task.getResult();
                 }
                 try {
@@ -94,8 +94,12 @@ public class DownloadManager {
                 } catch (InterruptedException | ExecutionException e) {
                     log.error(e.getMessage());
                 }
+            }else{
+                log.info("任务已完成：{}", existing);
+                return (R) existing.getResult();
             }
         }else {
+            log.info("提交新任务：{}", task);
             Future<R> future = workerPool.submit(task);
             task.setFuture(future);
             try {

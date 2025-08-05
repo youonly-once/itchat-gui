@@ -3,6 +3,7 @@ package cn.shu.wechat.swing.components;
 import cn.shu.wechat.utils.FontUtil;
 
 import javax.swing.*;
+import javax.swing.event.CaretListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
@@ -14,7 +15,7 @@ import java.awt.geom.RoundRectangle2D;
 public class RCSearchTextField extends JTextField {
 
     private RoundRectangle2D.Double shape;
-
+    private final DocumentListener documentListener;
     public RCSearchTextField() {
         setBorder(null);
         setBackground(Colors.WINDOW_BACKGROUND);
@@ -22,8 +23,7 @@ public class RCSearchTextField extends JTextField {
         setCaretColor(Color.GRAY);
 
         setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-
-        getDocument().addDocumentListener(new DocumentListener() {
+         documentListener = new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
             }
@@ -40,9 +40,19 @@ public class RCSearchTextField extends JTextField {
             public void changedUpdate(DocumentEvent e) {
 
             }
-        });
+        };
+        getDocument().addDocumentListener(documentListener);
     }
-
+    @Override
+    public void removeNotify() {
+        // 清理资源
+        getDocument().removeDocumentListener(documentListener);
+        for (CaretListener caretListener : getCaretListeners()) {
+            removeCaretListener(caretListener);
+        }
+        setCaret(null);
+        super.removeNotify();
+    }
     @Override
     public boolean contains(int x, int y) {
         shape = new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 15, 15);

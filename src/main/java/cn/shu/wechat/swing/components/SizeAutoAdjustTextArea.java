@@ -4,9 +4,11 @@ import cn.shu.wechat.swing.components.message.JIMSendTextPane;
 import cn.shu.wechat.utils.EmojiUtil;
 import cn.shu.wechat.utils.FontUtil;
 import cn.shu.wechat.utils.OSUtil;
+import lombok.Setter;
 import org.springframework.util.StringUtils;
 
 import javax.swing.*;
+import javax.swing.event.CaretListener;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -32,7 +34,8 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
 
     private String emojiRegx;
     private int emojiSize = 20;
-    private  MouseAdapter mouseAdapter;
+    private MouseAdapter mouseAdapter;
+    @Setter
     private boolean parseUrl = false;
 
 
@@ -57,7 +60,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
         emojiRegx = ":.+?:";
         emojiPattern = Pattern.compile(emojiRegx);// 懒惰匹配，最小匹配
         fontMetrics = getFontMetrics(getFont());
-        setListeners();
+
     }
 
 
@@ -182,7 +185,11 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
     private void highlightUrls(String src) {
         urlList = parseUrl(src);
         urlRange = new int[urlList.size()][2];
-
+        if (!urlList.isEmpty()) {
+            setListeners();
+        }else{
+            removeMouseAdapter();
+        }
         SimpleAttributeSet bSet = new SimpleAttributeSet();
         StyleConstants.setForeground(bSet, Color.blue);
         StyleConstants.setUnderline(bSet, true);
@@ -447,37 +454,42 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
 
 
     private void setListeners() {
-        mouseAdapter = new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON1) {
-                    if (StringUtils.isEmpty(urlRange)){
-                        return;
-                    }
-                    int position = getCaretPosition();
-                    int urlIndex = 0;
-                    for (int[] range : urlRange) {
-                        if (position >= range[0] && position <= range[1]) {
-                            String url = urlList.get(urlIndex);
-                            openUrlWithDefaultBrowser(url);
+        if (mouseAdapter ==null) {
+            mouseAdapter = new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (e.getButton() == MouseEvent.BUTTON1) {
+                        if (StringUtils.isEmpty(urlRange)) {
+                            return;
                         }
+                        int position = getCaretPosition();
+                        int urlIndex = 0;
+                        for (int[] range : urlRange) {
+                            if (position >= range[0] && position <= range[1]) {
+                                String url = urlList.get(urlIndex);
+                                openUrlWithDefaultBrowser(url);
+                            }
 
-                        urlIndex++;
+                            urlIndex++;
+                        }
                     }
-                }
 
-                super.mouseClicked(e);
-            }
-        };
+                    super.mouseClicked(e);
+                }
+            };
+        }
         this.addMouseListener(mouseAdapter);
     }
     public void removeMouseAdapter() {
-        removeMouseListener(mouseAdapter);
+        if (mouseAdapter != null) {
+            removeMouseListener(mouseAdapter);
+        }
+
     }
     /**
      * 打开默认浏览器访问页面
      */
-    public static void openUrlWithDefaultBrowser(String url) {
+    public void openUrlWithDefaultBrowser(String url) {
         //启用系统默认浏览器来打开网址。
         try {
             URI uri = new URI(url);
@@ -487,15 +499,19 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
         }
     }
 
-    public boolean isParseUrl() {
-        return parseUrl;
+    @Override
+    public void removeNotify() {
+        // 清理资源
+        removeMouseAdapter();
+        for (CaretListener caretListener : getCaretListeners()) {
+            removeCaretListener(caretListener);
+        }
+        setCaret(null);
+        super.removeNotify();
     }
 
-    public void setParseUrl(boolean parseUrl) {
-        this.parseUrl = parseUrl;
-    }
 
-/*    @Override
+    /*    @Override
     public synchronized void addMouseListener(MouseListener l)
     {
         for (MouseListener listener : getMouseListeners())

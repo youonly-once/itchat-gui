@@ -2,12 +2,15 @@ package cn.shu.wechat.swing.panels.chat;
 
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import lombok.Getter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
+import javax.swing.event.AncestorListener;
+import javax.swing.event.CaretListener;
 import java.awt.*;
-import java.awt.event.FocusListener;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseListener;
+import java.awt.dnd.DropTarget;
+import java.awt.event.*;
 import java.util.LinkedHashMap;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -19,6 +22,7 @@ import java.util.TimerTask;
  * @创建时间 7/18/2021 11:40
  */
 public class ChatPanelContainer extends ParentAvailablePanel {
+    private static final Logger log = LogManager.getLogger(ChatPanelContainer.class);
     private CardLayout cardLayout;
 
     private final static LinkedHashMap<String, ChatPanel> cards = new LinkedHashMap<>(5);
@@ -81,8 +85,10 @@ public class ChatPanelContainer extends ParentAvailablePanel {
 
         cards.get(roomId).getChatMessagePanel().getChatMessageEditorPanel().addShareComponent();
         currRoomId = roomId;
-        cardLayout.show(this,roomId);
 
+        cardLayout.show(this,roomId);
+        this.revalidate();
+        this.repaint();
     }
 
     /**
@@ -93,6 +99,7 @@ public class ChatPanelContainer extends ParentAvailablePanel {
         if (!cards.containsKey(roomId)){
             addPanel(roomId);
         }
+
         show(roomId);
         return get(roomId);
     }
@@ -111,9 +118,11 @@ public class ChatPanelContainer extends ParentAvailablePanel {
             return;
         }
         ChatPanel remove = cards.remove(roomId);
+        //先循环移除监听器 否则removeShareComponent后 shareTextEditor为null 他的监听器无法移除
+        removeAllListenersRecursively(remove);
         ChatMessageEditorPanel.removeShareComponent();
 
-        removeAllListenersRecursively(remove);
+
         this.remove(remove);
         this.revalidate();
         this.repaint();
@@ -137,7 +146,27 @@ public class ChatPanelContainer extends ParentAvailablePanel {
             for (FocusListener fl : jc.getFocusListeners()) {
                 jc.removeFocusListener(fl);
             }
+
+            for (MouseMotionListener fl : jc.getMouseMotionListeners()) {
+                jc.removeMouseMotionListener(fl);
+            }
+
+            for (AncestorListener fl : jc.getAncestorListeners()) {
+                jc.removeAncestorListener(fl);
+            }
+
+            for (ComponentListener fl : jc.getComponentListeners()) {
+                jc.removeComponentListener(fl);
+            }
+
             // ... 其他类型监听器根据需要添加
+        }
+        if (comp instanceof JTextPane jc) {
+
+            for (CaretListener fl : jc.getCaretListeners()) {
+                jc.removeCaretListener(fl);
+            }
+
         }
     }
 

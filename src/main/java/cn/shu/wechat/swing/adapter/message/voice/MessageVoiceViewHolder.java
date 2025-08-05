@@ -12,6 +12,7 @@ import cn.shu.wechat.utils.FontUtil;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
+import java.awt.event.MouseListener;
 
 /**
  *
@@ -67,5 +68,13 @@ public abstract class MessageVoiceViewHolder extends BaseMessageViewHolder {
     }
     public void removeUnreadPoint(){
 
+    }
+
+    @Override
+    public void removeNotify() {
+        for (MouseListener mouseListener : messageBubble.getMouseListeners()) {
+            messageBubble.removeMouseListener(mouseListener);
+        }
+        super.removeNotify();
     }
 }

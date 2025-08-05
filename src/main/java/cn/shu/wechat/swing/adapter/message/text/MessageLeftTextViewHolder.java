@@ -40,8 +40,7 @@ public class MessageLeftTextViewHolder extends BaseMessageViewHolder {
         time.setForeground(Colors.FONT_GRAY);
         time.setFont(FontUtil.getDefaultFont(12));
 
-        sender.setFont(FontUtil.getDefaultFont(12));
-        sender.setForeground(Colors.FONT_GRAY);
+
 
         messageAvatarPanel.setBackground(Colors.WINDOW_BACKGROUND);
         timePanel.setBackground(Colors.WINDOW_BACKGROUND);
@@ -57,6 +56,8 @@ public class MessageLeftTextViewHolder extends BaseMessageViewHolder {
         senderMessagePanel.setBackground(Colors.WINDOW_BACKGROUND);
         senderMessagePanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, true));
         if (isGroup) {
+            sender.setFont(FontUtil.getDefaultFont(12));
+            sender.setForeground(Colors.FONT_GRAY);
             senderMessagePanel.add(sender);
             //群消息会显示群成员名称 这时候往上移10
             sender.setBorder(new EmptyBorder(0,messageBubble.getSalientPointPixel(),100,0));

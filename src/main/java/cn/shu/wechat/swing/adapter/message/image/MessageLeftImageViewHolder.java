@@ -40,8 +40,7 @@ public class MessageLeftImageViewHolder extends BaseMessageViewHolder {
         time.setForeground(Colors.FONT_GRAY);
         time.setFont(FontUtil.getDefaultFont(12));
 
-        sender.setFont(FontUtil.getDefaultFont(12));
-        sender.setForeground(Colors.FONT_GRAY);
+
         //sender.setVisible(false);
     }
 
@@ -53,6 +52,8 @@ public class MessageLeftImageViewHolder extends BaseMessageViewHolder {
         senderMessagePanel.setBackground(Colors.WINDOW_BACKGROUND);
         senderMessagePanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
         if (isGroup) {
+            sender.setFont(FontUtil.getDefaultFont(12));
+            sender.setForeground(Colors.FONT_GRAY);
             sender.setBorder(new EmptyBorder(0,0,5,0));
             senderMessagePanel.add(sender);
         }

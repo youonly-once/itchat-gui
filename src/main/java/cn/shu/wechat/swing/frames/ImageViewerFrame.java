@@ -427,6 +427,18 @@ public class ImageViewerFrame extends JFrame {
         imageLabel.clearImage();
         super.dispose();
     }
+    public void setVisible(boolean visible) {
+        if (!visible) {
+            if (image != null) {
+                image.flush();
+                image = null;
+            }
+
+            // 主动释放旧图资源
+            imageLabel.clearImage();
+        }
+        super.setVisible(visible);
+    }
 }
 
 

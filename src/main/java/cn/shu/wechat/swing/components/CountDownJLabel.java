@@ -19,18 +19,7 @@ import java.io.IOException;
 public class CountDownJLabel extends JLabel {
     private  String text ;
     private int count ;
-    private final Timer timer = new Timer(1000, new ActionListener() {
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            --count;
-            if (count <0){
-                stop();
-            }else{
-                CountDownJLabel.super.setText(String.valueOf(count));
-            }
-        }
-    });
+    private Timer timer;
     public CountDownJLabel(String text) {
         super(text);
         if (StringUtils.isEmpty(text)){
@@ -53,7 +42,18 @@ public class CountDownJLabel extends JLabel {
      * 开始倒计时
      */
     public void start(){
-        timer.start();
+         timer = new Timer(1000, new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                --count;
+                if (count <0){
+                    stop();
+                }else{
+                    CountDownJLabel.super.setText(String.valueOf(count));
+                }
+            }
+        });
     }
 
     /**
@@ -62,6 +62,10 @@ public class CountDownJLabel extends JLabel {
     public void stop(){
         setText(text);
         count = Integer.parseInt( this.text);
+        for (ActionListener actionListener : timer.getActionListeners()) {
+            timer.removeActionListener(actionListener);
+        }
         timer.stop();
+        timer = null;
     }
 }

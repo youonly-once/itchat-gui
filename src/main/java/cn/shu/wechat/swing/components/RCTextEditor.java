@@ -7,6 +7,8 @@ import cn.shu.wechat.utils.IconUtil;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.event.CaretListener;
+import javax.swing.text.Caret;
 import java.awt.*;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.*;
@@ -19,6 +21,8 @@ import java.io.IOException;
  * Created by 舒新胜 on 03/07/2017.
  */
 public class RCTextEditor extends JTextPane implements DropTargetListener {
+    private JLabel label;
+    private MouseAdapter mouseAdapter;
     public void paste(Object data) {
         if (data instanceof String) {
             this.replaceSelection((String) data);
@@ -67,7 +71,7 @@ public class RCTextEditor extends JTextPane implements DropTargetListener {
             needToScale = true;
         }
 
-        JLabel label = new JLabel();
+         label = new JLabel();
         if (needToScale) {
             if (IconUtil.isGIFByFile(path)) {
                 icon = IconUtil.preferredGifSizeWithTargetDimension(path, iconWidth, iconHeight);
@@ -84,8 +88,7 @@ public class RCTextEditor extends JTextPane implements DropTargetListener {
             //this.insertIcon(icon);
             label.setIcon(icon);
         }
-
-        label.addMouseListener(new MouseAdapter() {
+        mouseAdapter = new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 // 双击预览选中的图片
@@ -100,10 +103,29 @@ public class RCTextEditor extends JTextPane implements DropTargetListener {
                 }
                 super.mouseClicked(e);
             }
-        });
+        };
+        label.addMouseListener(mouseAdapter);
 
         insertComponent(label);
 
+    }
+
+    @Override
+    public void removeNotify() {
+        DropTarget dropTarget = this.getDropTarget();
+        if (dropTarget != null) {
+            dropTarget.removeDropTargetListener(this);
+        }
+
+        if (mouseAdapter != null) {
+            label.removeMouseListener(mouseAdapter);
+        }
+        for (CaretListener caretListener : getCaretListeners()) {
+            removeCaretListener(caretListener);
+        }
+        setCaret(null);
+        dropListener = null;
+        super.removeNotify();
     }
 
     @Override
@@ -136,7 +158,10 @@ public class RCTextEditor extends JTextPane implements DropTargetListener {
             Object data = ClipboardUtil.paste(transferable);
             paste(data);
         }
+
     }
+
+
     public interface DropListener{
         void drop(DropTargetDropEvent dtde);
     }

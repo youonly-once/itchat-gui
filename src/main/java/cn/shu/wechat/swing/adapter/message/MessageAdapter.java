@@ -33,6 +33,7 @@ import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
 import cn.shu.wechat.swing.media.HeadLoadingSwingWorker;
 import cn.shu.wechat.swing.media.Mp3Player;
 import cn.shu.wechat.swing.media.VoicePlaybackListener;
+import cn.shu.wechat.swing.media.VoicePlaybackListenerImpl;
 import cn.shu.wechat.swing.panels.chat.ChatMessagePanel;
 import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.task.DownloadTask;
@@ -102,7 +103,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         Message messageItem = messageItems.get(position);
         boolean isSelf = Core.getUserName().equals(messageItem.getFromUsername());
         boolean isGroup = ContactsTools.isRoomContact(messageItem.getFromUsername());
-        messageItem.setGroup(true);
+        messageItem.setGroup(isGroup);
         switch (WxRespConstant.WXReceiveMsgCodeEnum.getByCode(viewType)) {
             case MSGTYPE_VERIFYMSG:
             case MSGTYPE_SHARECARD:{
@@ -625,36 +626,8 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                         }
                     } else {
                         try {
-                            player.play(voicePath, new VoicePlaybackListener() {
-                                @Override
-                                public void playbackPosition(int position) {
-                                    SwingUtilities.invokeLater(() -> {
-                                        System.out.println(holder.progressBar);
-                                        holder.progressBar.setValue(position);
-                                    });
-                                }
-
-                                @Override
-                                public void playbackStarted() {
-                                    SwingUtilities.invokeLater(() -> {
-                                        holder.removeUnreadPoint();
-                                        RCProgressBar progressBar = holder.progressBar;
-                                        progressBar.setVisible(true);
-                                        progressBar.setMaximum(Integer.parseInt( String.valueOf(item.getVoiceLength())));
-                                        holder.durationText.start();
-                                    });
-
-                                }
-
-                                @Override
-                                public void playbackFinished() {
-                                    SwingUtilities.invokeLater(() -> {
-                                        holder.progressBar.setValue(Math.toIntExact(item.getVoiceLength()));
-                                        holder.durationText.stop();
-                                        holder.progressBar.setValue(0);
-                                    });
-                                }
-                            });
+                            //TODO 为什么 VoicePlaybackListenerImpl这个对象被作为GC ROOT不能释放
+                            player.play(voicePath, new VoicePlaybackListenerImpl(holder, Math.toIntExact(item.getVoiceLength())));
                         } catch (JavaLayerException | FileNotFoundException ex) {
                             log.error(ex.getMessage(),e);
                             JOptionPane.showMessageDialog(null, ex.getMessage(), "播放失败", JOptionPane.ERROR_MESSAGE);
@@ -1166,7 +1139,20 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             messageTime = item.getCreateTime();
             item.setMessageTime(messageTime);
         }
-        holder.sender.setText(item.getPlainName());
+        if (ContactsTools.isRoomContact(item.getFromUsername())){
+            if (StringUtils.isNotEmpty(item.getPlainName())) {
+                holder.sender.setText(item.getPlainName());
+            }else if (StringUtils.isNotEmpty(item.getFromMemberOfGroupDisplayname())){
+                holder.sender.setText(item.getFromMemberOfGroupDisplayname());
+            } else if (StringUtils.isNotEmpty(item.getFromMemberOfGroupNickname())){
+                holder.sender.setText(item.getFromMemberOfGroupNickname());
+            }else{
+                holder.sender.setText("");
+            }
+        }else{
+          //  holder.sender.setText(item.getPlainName());
+        }
+
         // 如果当前消息的时间与上条消息时间相差大于1分钟，则显示当前消息的时间
         if (preItem != null) {
 

@@ -3,6 +3,7 @@ package cn.shu.wechat.swing.components;
 import cn.shu.wechat.utils.FontUtil;
 
 import javax.swing.*;
+import javax.swing.event.CaretListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
@@ -12,16 +13,14 @@ import java.awt.*;
  */
 public class RCTextField extends JTextField {
     private String placeholder;
-
+    private DocumentListener documentListener;
 
     public RCTextField() {
         setBackground(Colors.FONT_WHITE);
         setForeground(Colors.FONT_BLACK);
         setCaretColor(Color.GRAY);
         setBorder(null);
-
-
-        getDocument().addDocumentListener(new DocumentListener() {
+         documentListener = new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
             }
@@ -38,7 +37,9 @@ public class RCTextField extends JTextField {
             public void changedUpdate(DocumentEvent e) {
 
             }
-        });
+        };
+
+        getDocument().addDocumentListener(documentListener);
     }
 
     @Override
@@ -57,7 +58,16 @@ public class RCTextField extends JTextField {
         }
 
     }
-
+    @Override
+    public void removeNotify() {
+        // 清理资源
+        getDocument().removeDocumentListener(documentListener);
+        for (CaretListener caretListener : getCaretListeners()) {
+            removeCaretListener(caretListener);
+        }
+        setCaret(null);
+        super.removeNotify();
+    }
     public String getPlaceholder() {
         return placeholder;
     }
