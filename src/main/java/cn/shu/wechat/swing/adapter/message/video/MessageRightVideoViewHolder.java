@@ -1,9 +1,7 @@
 package cn.shu.wechat.swing.adapter.message.video;
 
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
-import cn.shu.wechat.swing.components.Colors;
-import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.components.VerticalFlowLayout;
+import cn.shu.wechat.swing.components.*;
 import cn.shu.wechat.swing.components.message.RCRightVideoMessageBubble;
 import cn.shu.wechat.swing.components.message.TagJLayeredPane;
 import cn.shu.wechat.swing.components.message.TagPanel;
@@ -11,6 +9,7 @@ import cn.shu.wechat.utils.FontUtil;
 import cn.shu.wechat.utils.IconUtil;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.io.IOException;
 
@@ -19,7 +18,9 @@ import java.io.IOException;
  */
 
 public class MessageRightVideoViewHolder extends BaseMessageViewHolder {
-
+    public static int maxHeight = 120;
+    public static int maxWidth = 80;
+    public RCProgressBar progressBar = new RCProgressBar(); // 进度条
     /**
      * 视频层
      */
@@ -64,17 +65,22 @@ public class MessageRightVideoViewHolder extends BaseMessageViewHolder {
         time.setForeground(Colors.FONT_GRAY);
         time.setFont(FontUtil.getDefaultFont(12));
 
-        ImageIcon resendIcon = IconUtil.getIcon(this,"/image/resend.png");
-        resendIcon.setImage(resendIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+        ImageIcon resendIcon = IconUtil.getIcon(this,"/image/resend.png",20,20);
         resend.setIcon(resendIcon);
         resend.setVisible(false);
         resend.setToolTipText("图片发送失败，点击重新发送");
         resend.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        playImgLabel.setIcon(IconUtil.getIcon(this, "/image/image_loading.gif"));
-        ImageIcon sendingIcon = IconUtil.getIcon(this,"/image/sending.gif");
-        sendingProgress.setIcon(sendingIcon);
-        sendingProgress.setVisible(false);
+       // playImgLabel.setIcon(IconUtil.getIcon(this, "/image/image_loading.gif"));
+        //ImageIcon sendingIcon = IconUtil.getIcon(this,"/image/sending.gif");
+        //sendingProgress.setIcon(sendingIcon);
+        //sendingProgress.setVisible(false);
+
+        progressBar.setMaximum(100);
+        progressBar.setMinimum(0);
+        progressBar.setValue(0);
+        progressBar.setUI(new GradientProgressBarUI());
+        progressBar.setVisible(true);
     }
 
     private void initView() {
@@ -92,12 +98,22 @@ public class MessageRightVideoViewHolder extends BaseMessageViewHolder {
             controlPanel.add(revoke, BorderLayout.EAST);
             JPanel resendImagePanel = new JPanel(new BorderLayout());
             resendImagePanel.setOpaque(false);
-            resendImagePanel.add(videoComponent, BorderLayout.CENTER);
+
+            JPanel processBarPanel = new JPanel(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, true));
+            processBarPanel.setOpaque(false);
+            //processBarPanel.setBorder(new EmptyBorder(0, 10, 0, 0));
+            processBarPanel.add(videoComponent);
+            processBarPanel.add(progressBar);
+
+            resendImagePanel.add(processBarPanel, BorderLayout.CENTER);
             resendImagePanel.add(controlPanel, BorderLayout.WEST);
             contentTagPanel.add(resendImagePanel);
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+
+
 
 
         messageAvatarPanel.setLayout(new GridBagLayout());
@@ -137,13 +153,20 @@ public class MessageRightVideoViewHolder extends BaseMessageViewHolder {
         playImgPanel.add(playImgLabel);
         layeredPane.add(playImgPanel, 200, 0);
 
+        layeredPane.setPreferredSize(new Dimension(slaveImgWidth, slaveImgHeight));
+
         //视频时长
         timeLabel.setForeground(Color.white);
-        timeLabel.setBounds(slaveImgWidth-40, slaveImgHeight-20, 40, 20);
+        int margin = 3;
+        int timeWidth= 30;
+        int timeHeight= 10;
+        timeLabel.setBounds(slaveImgWidth-timeWidth-margin, slaveImgHeight-timeHeight-margin, timeWidth, timeHeight);
         timeLabel.setOpaque(false);
+        timeLabel.setFont(FontUtil.getDefaultFont(10));
+        timeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         layeredPane.add(timeLabel,200,0);
 
-        layeredPane.setPreferredSize(new Dimension(slaveImgWidth, slaveImgHeight));
+
         return layeredPane;
     }
 }

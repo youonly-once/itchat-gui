@@ -5,6 +5,7 @@ import cn.shu.wechat.constant.DownloadType;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.swing.frames.MainFrame;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 import java.util.Optional;
@@ -151,6 +152,9 @@ public class DownloadManager {
      * @return 下载结果，超时或失败时返回 null
      */
     public static <R> R submitAwait(DownloadTask<R> task) {
+        if (StringUtils.isEmpty(task.getTaskId())){
+            throw new RuntimeException("任务ID不能为空");
+        }
         return submitAwait(task, Long.MAX_VALUE, TimeUnit.DAYS);
     }
 

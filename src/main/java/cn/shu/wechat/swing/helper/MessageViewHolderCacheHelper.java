@@ -59,7 +59,7 @@ public class MessageViewHolderCacheHelper {
 
         return new MessageLeftVideoViewHolder(messageItem.isGroup(),
                 IconUtil.getScaleDimension(messageItem.getImgWidth()
-                        , messageItem.getImgHeight()));
+                        , messageItem.getImgHeight(),MessageRightVideoViewHolder.maxWidth,MessageRightVideoViewHolder.maxHeight));
 
     }
 
@@ -67,7 +67,7 @@ public class MessageViewHolderCacheHelper {
 
         return new MessageRightVideoViewHolder(
                 IconUtil.getScaleDimension(messageItem.getImgWidth()
-                        , messageItem.getImgHeight()));
+                        , messageItem.getImgHeight(),MessageRightVideoViewHolder.maxWidth,MessageRightVideoViewHolder.maxHeight));
 
     }
 

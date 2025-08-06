@@ -110,7 +110,7 @@ public class MessageTools {
                     log.error("发送消息失败：{}", message);
                     return WebWXSendMsgResponse.error("null");
                 } else if (sendMsgResponse.getBaseResponse().getRet() != 0) {
-                    log.error("发送消息失败：{},{}", sendMsgResponse.getBaseResponse().getErrMsg(), message);
+                    log.error("发送消息失败：{},{}", sendMsgResponse.getBaseResponse(), message);
                     return sendMsgResponse;
                 }
                 //存储数据库

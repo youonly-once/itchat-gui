@@ -18,6 +18,8 @@ import java.awt.*;
  */
 public class MessageRightImageViewHolder extends BaseMessageViewHolder {
     public MessageImageLabel image = new MessageImageLabel();
+    public static final int maxHeight = 150;
+    public static final int maxWidth = 100;
 
     public JLabel resend = new JLabel();
     public JLabel sendingProgress = new JLabel();
@@ -47,9 +49,9 @@ public class MessageRightImageViewHolder extends BaseMessageViewHolder {
         resend.setToolTipText("图片发送失败，点击重新发送");
         resend.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        ImageIcon sendingIcon = IconUtil.getIcon(this,"/image/sending.gif");
-        sendingProgress.setIcon(sendingIcon);
-        sendingProgress.setVisible(false);
+       // ImageIcon sendingIcon = IconUtil.getIcon(this,"/image/sending.gif");
+       // sendingProgress.setIcon(sendingIcon);
+       // sendingProgress.setVisible(false);
     }
 
     private void initView() {

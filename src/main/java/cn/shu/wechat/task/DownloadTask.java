@@ -5,6 +5,8 @@ import cn.shu.wechat.constant.DownloadStatus;
 import cn.shu.wechat.constant.DownloadType;
 import cn.shu.wechat.dto.response.sync.AddMsgList;
 import cn.shu.wechat.service.impl.LoginServiceImpl;
+import cn.shu.wechat.swing.frames.MainFrame;
+import cn.shu.wechat.utils.MediaUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -13,6 +15,7 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.net.http.HttpResponse;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -116,8 +119,28 @@ public class DownloadTask<R> implements Callable<R> {
     @Setter
     private String resourceType;
 
+    //************视频缩略图***************
+    @Getter
+    @Setter
+    private String videoPath;
+
+    @Getter
+    @Setter
+    private String videoPicPath;
+
+    @Getter
+    @Setter
+    private int maxHeight;
+
+    @Getter
+    @Setter
+    private int maxWidth;
+    //**********************
+
+
     private final long beginTime;
     private long endTime;
+
 
     {
         beginTime = System.currentTimeMillis();
@@ -200,6 +223,10 @@ public class DownloadTask<R> implements Callable<R> {
                     }else{
                         loginService.WebWxBatchGetContact();
                     }
+                    break;
+                }
+                case GenerateVideoPic: {
+                    this.result = (R)MediaUtil.getVideoPic(MainFrame.getContext(),new File(videoPath),new File(videoPicPath),maxWidth,maxHeight);
                     break;
                 }
                 default:

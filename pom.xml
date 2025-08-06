@@ -274,60 +274,60 @@
         <dependency>
             <groupId>org.bytedeco</groupId>
             <artifactId>javacv-platform</artifactId>
-            <version>1.4.4</version>
+            <version>1.5.10</version>
             <exclusions>
-                <!--                <exclusion>-->
-                <!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
-                <!--                    <artifactId>ffmpeg</artifactId>-->
-                <!--                </exclusion>-->
-                <!--                <exclusion>-->
-                <!--                    <groupId>org.bytedeco</groupId>-->
-                <!--                    <artifactId>javacv</artifactId>-->
-                <!--                </exclusion>-->
-                <exclusion>
-                    <groupId>org.bytedeco.javacpp-presets</groupId>
-                    <artifactId>flycapture-platform</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.bytedeco.javacpp-presets</groupId>
-                    <artifactId>libdc1394-platform</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.bytedeco.javacpp-presets</groupId>
-                    <artifactId>libfreenect-platform</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.bytedeco.javacpp-presets</groupId>
-                    <artifactId>libfreenect2-platform</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.bytedeco.javacpp-presets</groupId>
-                    <artifactId>librealsense-platform</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.bytedeco.javacpp-presets</groupId>
-                    <artifactId>videoinput-platform</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.bytedeco.javacpp-presets</groupId>
-                    <artifactId>opencv-platform</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.bytedeco.javacpp-presets</groupId>
-                    <artifactId>tesseract-platform</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.bytedeco.javacpp-presets</groupId>
-                    <artifactId>leptonica-platform</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.bytedeco.javacpp-presets</groupId>
-                    <artifactId>flandmark-platform</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.bytedeco.javacpp-presets</groupId>
-                    <artifactId>artoolkitplus-platform</artifactId>
-                </exclusion>
+<!--                <exclusion>-->
+<!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
+<!--                    <artifactId>ffmpeg</artifactId>-->
+<!--                </exclusion>-->
+<!--                                <exclusion>-->
+<!--                                    <groupId>org.bytedeco</groupId>-->
+<!--                                    <artifactId>javacv</artifactId>-->
+<!--                                </exclusion>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
+<!--                    <artifactId>flycapture-platform</artifactId>-->
+<!--                </exclusion>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
+<!--                    <artifactId>libdc1394-platform</artifactId>-->
+<!--                </exclusion>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
+<!--                    <artifactId>libfreenect-platform</artifactId>-->
+<!--                </exclusion>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
+<!--                    <artifactId>libfreenect2-platform</artifactId>-->
+<!--                </exclusion>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
+<!--                    <artifactId>librealsense-platform</artifactId>-->
+<!--                </exclusion>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
+<!--                    <artifactId>videoinput-platform</artifactId>-->
+<!--                </exclusion>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
+<!--                    <artifactId>opencv-platform</artifactId>-->
+<!--                </exclusion>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
+<!--                    <artifactId>tesseract-platform</artifactId>-->
+<!--                </exclusion>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
+<!--                    <artifactId>leptonica-platform</artifactId>-->
+<!--                </exclusion>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
+<!--                    <artifactId>flandmark-platform</artifactId>-->
+<!--                </exclusion>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
+<!--                    <artifactId>artoolkitplus-platform</artifactId>-->
+<!--                </exclusion>-->
             </exclusions>
         </dependency>
         <!--easypoi-->

@@ -2,6 +2,7 @@ package cn.shu.wechat.swing.panels.chat;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.MessageTools;
+import cn.shu.wechat.constant.DownloadType;
 import cn.shu.wechat.constant.WxRespConstant;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.dto.response.msg.send.WebWXSendMsgResponse;
@@ -22,6 +23,8 @@ import cn.shu.wechat.swing.frames.RemindUserDialog;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.swing.tasks.UploadTaskCallback;
+import cn.shu.wechat.task.DownloadManager;
+import cn.shu.wechat.task.DownloadTask;
 import cn.shu.wechat.utils.*;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -652,20 +655,38 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                         .imgHeight(imageSize.height).build();
                 break;
             case MSGTYPE_VIDEO:
-                BufferedImage videoPic = MediaUtil.getVideoPic(this, file);
+                MediaUtil.VideoInfo videoBaseInfo = MediaUtil.getVideoInfo(file);
+                int maxHeight = MessageRightVideoViewHolder.maxHeight;
+                int maxWidth = MessageRightVideoViewHolder.maxWidth;
+                Dimension scaleDimen = IconUtil.getScaleDimension(videoBaseInfo.width(), videoBaseInfo.height(), maxWidth,maxHeight);
                 message = Message.builder()
                         .slavePath(uploadFilename)
                         .filePath(uploadFilename)
                         .fileSize(file.length())
                         .id(msgId)
-                        .imgWidth(videoPic.getWidth())
-                        .imgHeight(videoPic.getHeight())
-                        .playLength(MediaUtil.getVideoDuration(file)/1000)
-                        .videoPic(videoPic)
+                        .imgWidth( scaleDimen.width)
+                        .imgHeight(scaleDimen.height)
+                        .playLength(videoBaseInfo.durationSeconds())
+                        //.videoPic(videoPic)
                         .msgType(msgType.getCode())
                         .appMsgType(fileOfAppType.getType())
                         .desc(fileName)
                         .fileName(fileName).build();
+
+                String picPath = ClipboardUtil.CLIPBOARD_TEMP_DIR + "/" + message.getId() + ".pic.png";
+                message.setSlavePath(picPath);
+
+                //异步下载
+                DownloadTask<MediaUtil.VideoInfo> downloadTask = new DownloadTask<>();
+                downloadTask.setTaskId(picPath);
+                downloadTask.setType(DownloadType.GenerateVideoPic);
+                downloadTask.setVideoPath(file.getAbsolutePath());
+                downloadTask.setMaxHeight(maxHeight);
+                downloadTask.setMaxWidth(maxWidth);
+                downloadTask.setVideoPicPath(message.getSlavePath());
+                DownloadManager.submit(downloadTask);
+
+
                 break;
             case MSGTYPE_APP:
                 message = Message.builder()
@@ -735,6 +756,12 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                         case MSGTYPE_VIDEO: {
                             MessageRightVideoViewHolder holder = (MessageRightVideoViewHolder) viewHolder;
                             holder.sendingProgress.setVisible(progress < 100);
+                            if (progress>=100){
+                                //防止抖动，设置为0隐藏
+                                holder.progressBar.setValue(0);
+                            }else{
+                                holder.progressBar.setValue(progress);
+                            }
                             break;
                         }
                         default:
@@ -742,11 +769,10 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                             MessageRightAttachmentViewHolder holder = (MessageRightAttachmentViewHolder) viewHolder;
 
                             // 隐藏"等待上传"，并显示进度条
-                            holder.progressBar.setVisible(true);
+                            holder.progressBar.setVisible(progress < 100);
                             holder.progressBar.setValue(progress);
 
                             if (progress >= 100) {
-                                holder.progressBar.setVisible(false);
                                 holder.sizeLabel.setText(FileUtil.fileSizeString(uploadFilename));
                             }else{
                                 float v = (curr * 1.0f) / size;
@@ -775,7 +801,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                         || wxSendMsgResponse.getBaseResponse().getRet() != 0) {
                     finalMessage.setNeedToResend(true);
                     if (wxSendMsgResponse != null) {
-                        JOptionPane.showMessageDialog(null, wxSendMsgResponse.getBaseResponse().getErrMsg(), "上传失败", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(null, wxSendMsgResponse.getBaseResponse().getRet(), "上传失败", JOptionPane.ERROR_MESSAGE);
                     }else{
                         JOptionPane.showMessageDialog(null, "wxSendMsgResponse is null.", "上传失败", JOptionPane.ERROR_MESSAGE);
                     }

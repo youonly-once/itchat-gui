@@ -11,7 +11,8 @@ public enum DownloadType {
     ImgByMsgID("消息ID下载图像", "ImgByMsgID"),
     ImgByteByMsgID("消息ID下载图像Bytes", "ImgByteByMsgID"),
     GetContacts("获取用户", "GetContacts"),
-    GetBatchContacts("获取群成员", "GetBatchContacts");
+    GetBatchContacts("获取群成员", "GetBatchContacts"),
+    GenerateVideoPic("生成视频缩略图", "GenerateVideoPic");
 
 
     private final String description;

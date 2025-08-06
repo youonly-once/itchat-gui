@@ -17,7 +17,6 @@ public class VoicePlaybackListenerImpl extends VoicePlaybackListener{
         @Override
         public void playbackPosition(int position) {
             SwingUtilities.invokeLater(() -> {
-                System.out.println(holder.get().progressBar);
                 holder.get().progressBar.setValue(position);
             });
         }

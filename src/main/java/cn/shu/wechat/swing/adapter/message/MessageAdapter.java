@@ -263,7 +263,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         if (StringUtils.isNotEmpty(item.getSourceIconUrl())){
             try {
                 ImageIcon imageIcon = new ImageIcon(URI.create(item.getSourceIconUrl()).toURL());
-                IconUtil.preferredImageSize(imageIcon, 16);
+                IconUtil.preferredImageSize(imageIcon, 16,16);
                 viewHolder.sourceIcon.setIcon(imageIcon);
             } catch (MalformedURLException e) {
                 log.error(e.getMessage(), e);
@@ -309,7 +309,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 DownloadManager.awaitDownloadTimeOut(item.getFilePath());
                 if (Files.exists(Path.of(item.getFilePath()))) {
                     ImageIcon imageIcon = new ImageIcon(item.getFilePath());
-                    IconUtil.preferredImageSize(imageIcon, 32);
+                    IconUtil.preferredImageSize(imageIcon, 32,32);
                     SwingUtilities.invokeLater(() -> viewHolder.imageLabel.setIcon(imageIcon));
                 }
             });
@@ -339,10 +339,10 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     private void process(Message item, MessageProgramOfAppViewHolder appViewHolder, byte[] secondBytes) {
         ImageIcon imageIcon = null;
         if (IconUtil.isGIF(secondBytes)) {
-            imageIcon = IconUtil.preferredGifSize(secondBytes, item.getImgWidth(), item.getImgHeight());
+            imageIcon = IconUtil.preferredGifSize(secondBytes, item.getImgWidth(), item.getImgHeight(),32,32);
         } else {
             imageIcon = new ImageIcon(secondBytes);
-            IconUtil.preferredImageSize(imageIcon, 32);
+            IconUtil.preferredImageSize(imageIcon, 32,32);
         }
         if (imageIcon != null) {
             ImageIcon finalImageIcon = imageIcon;
@@ -741,17 +741,18 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     /**
      * 返回时间格式化后的表示
      *
-     * @param lengthSec 秒
+     * @param totalSeconds 秒
      */
-    private static String getSecString(long lengthSec) {
-        long hour, minute;
-        hour = lengthSec / 3600;
-        minute = (lengthSec - hour * 3600) / 60;
-        lengthSec = lengthSec - hour * 300 - minute * 60;
+    public static String getSecString(long totalSeconds) {
+        long hours = totalSeconds / 3600;
+        long minutes = (totalSeconds % 3600) / 60;
+        long seconds = totalSeconds % 60;
 
-        return (hour < 10 && hour > 0 ? "0" + hour : hour) + ":"
-                + (minute < 10 && minute > 0 ? "0" + minute : minute) + ":"
-                + (lengthSec < 10 && lengthSec > 0 ? "0" + lengthSec : lengthSec);
+        if (hours > 0) {
+            return String.format("%d:%02d:%02d", hours, minutes, seconds);
+        } else {
+            return String.format("%d:%02d", minutes, seconds);
+        }
     }
 
     /**
@@ -763,11 +764,17 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     private void processVideo(Message item, JLabel timeLabel, JLabel playImgLabel, JLabel slaveImgLabel, JComponent videoComponent) throws IOException {
         //#############判断缩略图是否下载完成#########################
 
-        timeLabel.setText(getSecString(item.getPlayLength()));
+
         if (item.getVideoPic()!=null){
             //存在视频缩略图
             slaveImgLabel.setIcon(new ImageIcon(item.getVideoPic()));
-            playImgLabel.setIcon(IconUtil.getIcon(this, "/image/play48.png"));
+            //缩放后的图像宽高
+            Dimension scaleDimension = IconUtil.getScaleDimension(item.getImgWidth()
+                    , item.getImgHeight(), MessageRightVideoViewHolder.maxWidth, MessageRightVideoViewHolder.maxHeight);
+            //播放按钮不能高于图像宽高
+            ImageIcon icon = IconUtil.getIcon(this, "/image/play48.png");
+            IconUtil.preferredImageSize(icon,scaleDimension.width-10,scaleDimension.height-10);
+            playImgLabel.setIcon(icon);
         }else {
             slaveImgLabel.setIcon(IconUtil.getIcon(this, "/image/image_loading.gif"));
             ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
@@ -776,21 +783,29 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     //等待下载完成
                     final String slaveImgPath = item.getSlavePath();
                     DownloadManager.awaitDownload(slaveImgPath,1000*60*2);
+                    timeLabel.setText(getSecString(item.getPlayLength()));
                     File file = new File(slaveImgPath);
                     try {
-                        ImageIcon imageIcon = new ImageIcon(ImageIO.read(file));
-                        IconUtil.preferredImageSize(imageIcon);
+                        Image scaledImageByHeight = IconUtil.getScaledImageByMax(ImageIO.read(file),MessageRightVideoViewHolder.maxWidth, MessageRightVideoViewHolder.maxHeight);
+                        ImageIcon imageIcon = new ImageIcon(scaledImageByHeight);
+                        IconUtil.preferredImageSize(imageIcon,MessageRightVideoViewHolder.maxWidth, MessageRightVideoViewHolder.maxHeight);
                         SwingUtilities.invokeLater(() -> {
                             slaveImgLabel.setIcon(imageIcon);
                         });
                     } catch (IOException e) {
                         log.error(e.getMessage(), e);
                     }
+
+
+                    //缩放后的图像宽高
+                    Dimension scaleDimension = IconUtil.getScaleDimension(item.getImgWidth()
+                            , item.getImgHeight(), MessageRightVideoViewHolder.maxWidth, MessageRightVideoViewHolder.maxHeight);
+                    //播放按钮不能高于图像宽高
                     ImageIcon playImg = IconUtil.getIcon(this, "/image/play48.png");
+                    IconUtil.preferredImageSize(playImg,scaleDimension.width-10,scaleDimension.height-10);
+
                     SwingUtilities.invokeLater(() -> {
-                        if (playImg != null) {
-                            playImgLabel.setIcon(playImg);
-                        }
+                        playImgLabel.setIcon(playImg);
                     });
 
 
@@ -843,10 +858,10 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 ImageIcon imageIcon = null;
                 if (file.length() > 0) {
                     if (IconUtil.isGIFByFile(finalPath)) {
-                        imageIcon = IconUtil.preferredGifSize(finalPath, item.getImgWidth(), item.getImgHeight());
+                        imageIcon = IconUtil.preferredGifSize(finalPath, item.getImgWidth(), item.getImgHeight(),MessageRightImageViewHolder.maxWidth,MessageRightImageViewHolder.maxHeight);
                     } else {
                         imageIcon = IconUtil.getIconFromFile(file);
-                        IconUtil.preferredImageSize(imageIcon);
+                        IconUtil.preferredImageSize(imageIcon,MessageRightImageViewHolder.maxWidth,MessageRightImageViewHolder.maxHeight);
                     }
                 }
 
@@ -994,8 +1009,10 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 try {
                     BufferedImage image = ImageIO.read(URI.create(item.getThumbUrl()).toURL());
                     if (image != null) {
+                        ImageIcon imageIcon = new ImageIcon(IconUtil.preferredImageSize(image, MessageLinkOfAppViewHolder.THUMB_WIDTH, MessageLinkOfAppViewHolder.THUMB_HEIGHT));
                         SwingUtilities.invokeLater(() ->
-                                cardOfAppViewHolder.icon.setIcon(new ImageIcon(IconUtil.preferredImageSize(image, MessageLinkOfAppViewHolder.THUMB_WIDTH))));
+                                cardOfAppViewHolder.icon.setIcon(imageIcon));
+
                     }
                 } catch (IOException e) {
                     log.error(e.getMessage(), e);
@@ -1009,8 +1026,9 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 downloadTask.setType(DownloadType.ImgByMsgID);
                 BufferedImage image = DownloadManager.submitAwait(downloadTask);
                 if (image!=null){
+                    ImageIcon imageIcon = new ImageIcon(IconUtil.preferredImageSize(image, MessageLinkOfAppViewHolder.THUMB_WIDTH, MessageLinkOfAppViewHolder.THUMB_HEIGHT));
                     SwingUtilities.invokeLater(() ->
-                            cardOfAppViewHolder.icon.setIcon(new ImageIcon(IconUtil.preferredImageSize(image, MessageLinkOfAppViewHolder.THUMB_WIDTH))));
+                            cardOfAppViewHolder.icon.setIcon(imageIcon));
                 }
             }
 
@@ -1067,7 +1085,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     try {
                         BufferedImage image = ImageIO.read(URI.create(item.getThumbUrl()).toURL());
                         if (image != null) {
-                            ImageIcon imageIcon = new ImageIcon(IconUtil.preferredImageSize(image, MessageLinkOfAppViewHolder.THUMB_WIDTH));
+                            ImageIcon imageIcon = new ImageIcon(IconUtil.preferredImageSize(image, MessageLinkOfAppViewHolder.THUMB_WIDTH,MessageLinkOfAppViewHolder.THUMB_HEIGHT));
                             SwingUtilities.invokeLater(() -> {
                                 linkViewHolder.icon.setIcon(imageIcon);
                                 //有图片时缩短宽度，让其与无图的Panel尽量一致
@@ -1087,7 +1105,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     BufferedImage image = DownloadManager.submitAwait(downloadTask);
                     if (image != null) {
                         SwingUtilities.invokeLater(() -> {
-                            linkViewHolder.icon.setIcon(new ImageIcon(IconUtil.preferredImageSize(image, MessageLinkOfAppViewHolder.THUMB_WIDTH)));
+                            linkViewHolder.icon.setIcon(new ImageIcon(IconUtil.preferredImageSize(image, MessageLinkOfAppViewHolder.THUMB_WIDTH,MessageLinkOfAppViewHolder.THUMB_HEIGHT)));
                             //有图片时缩短宽度，让其与无图的Panel尽量一致
                             linkViewHolder.desc.setColumns(16);
                         });

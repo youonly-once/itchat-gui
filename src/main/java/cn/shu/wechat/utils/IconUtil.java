@@ -3,6 +3,8 @@ package cn.shu.wechat.utils;
 import lombok.extern.log4j.Log4j2;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
@@ -10,6 +12,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,8 +31,6 @@ public class IconUtil {
     private static final Map<String, CompletableFuture<ImageIcon>> ICON_CACHE = new ConcurrentHashMap<>();
 
     private static final Map<String, CompletableFuture<BufferedImage>> BUFFERED_IMAGE_CACHE = new ConcurrentHashMap<>();
-
-    private static final int maxWidth = 98;
 
 
     /**
@@ -66,8 +67,17 @@ public class IconUtil {
         return image;
     }
 
-    private static Image getScaledImage(Image src, int width, int height, int maxWidth) {
-        Dimension scaleDimen = getScaleDimension(width, height, maxWidth);
+    public static Image getScaledImageByMax(Image src, int maxWidth,int maxHeight) {
+        int width = src.getWidth(null);
+        int height = src.getHeight(null);
+       return getScaledImage(src, width, height, maxWidth,maxHeight);
+    }
+
+
+
+
+    public static Image getScaledImage(Image src, int width, int height, int maxWidth,int maxHeight) {
+        Dimension scaleDimen = getScaleDimension(src.getWidth(null), src.getHeight(null), maxWidth,maxHeight);
         if (width <= scaleDimen.width && height <= scaleDimen.height) {
             return src; // 无需缩放
         }
@@ -99,11 +109,11 @@ public class IconUtil {
      * @param
      * @return
      */
-    public static void preferredImageSize(ImageIcon imageIcon, int maxWidth) {
+    public static void preferredImageSize(ImageIcon imageIcon, int maxWidth,int maxHeight) {
         //动态图不能使用
         int width = imageIcon.getIconWidth();
         int height = imageIcon.getIconHeight();
-        Image scaledImage = getScaledImage(imageIcon.getImage(), width, height, maxWidth);
+        Image scaledImage = getScaledImage(imageIcon.getImage(), width, height, maxWidth,maxHeight);
         imageIcon.setImage(scaledImage);
     }
 
@@ -114,11 +124,11 @@ public class IconUtil {
      * @param maxWidth
      * @return
      */
-    public static Image preferredImageSize(BufferedImage image, int maxWidth) {
+    public static Image preferredImageSize(BufferedImage image, int maxWidth,int maxHeight) {
         //动态图不能使用
         int width = image.getWidth();
         int height = image.getHeight();
-        return getScaledImage(image, width, height, maxWidth);
+        return getScaledImage(image, width, height, maxWidth,maxHeight);
     }
 
     /**
@@ -129,40 +139,37 @@ public class IconUtil {
      * @param maxWidth 最大宽度
      * @return 缩放后的尺寸
      */
-    public static Dimension getScaleDimension(int width, int height, int maxWidth) {
-        if (width <= 0 || height <= 0 || maxWidth <= 0) {
+    public static Dimension getScaleDimension(int width, int height, int maxWidth,int maxHeight) {
+        if (width <= 0 || height <= 0 || maxWidth <= 0 || maxHeight <= 0) {
             return new Dimension(1, 1); // 防止非法输入导致异常或 UI 崩溃
         }
 
-        if (width <= maxWidth) {
-            return new Dimension(width, height); // 不需要缩放
-        }
+        float widthRatio = maxWidth / (float) width;
+        float heightRatio = maxHeight / (float) height;
+        float scale = Math.min(widthRatio, heightRatio); // 选择更小的缩放因子以适应最大边界
 
-        float aspectRatio = width / (float) height;
-        int scaledHeight = Math.max(1, Math.round(maxWidth / aspectRatio)); // 避免高度为 0
+        int scaledWidth = Math.max(1, Math.round(width * scale));
+        int scaledHeight = Math.max(1, Math.round(height * scale));
 
-        return new Dimension(maxWidth, scaledHeight);
+        return new Dimension(scaledWidth, scaledHeight);
     }
 
-    /**
-     * 获取缩放后的尺寸
-     *
-     * @param width  宽
-     * @param height 高
-     * @return 缩放后的尺寸
-     */
-    public static Dimension getScaleDimension(int width, int height) {
-        return getScaleDimension(width, height, maxWidth);
-    }
+
 
     /**
      * 根据图片尺寸大小调整图片显示的大小
      *
-     * @param imageIcon
+     * @param filePath
      * @return
      */
-    public static void preferredImageSize(ImageIcon imageIcon) {
-        preferredImageSize(imageIcon, maxWidth);
+    public static ImageIcon preferredGifSize(String filePath, int w, int h,int maxWidth,int maxHeight) {
+
+        Dimension scaleDimen = getScaleDimension(w, h, maxWidth,maxHeight);
+        if (scaleDimen.width >= w && scaleDimen.height >= h) {
+            return new ImageIcon(filePath);
+        }
+       return preferredGifSize(filePath, scaleDimen.width, scaleDimen.height, maxWidth, maxHeight);
+
     }
 
     /**
@@ -171,7 +178,7 @@ public class IconUtil {
      * @param filePath
      * @return
      */
-    public static ImageIcon preferredGifSize(String filePath, int w, int h) {
+    public static ImageIcon preferredGifSize(String filePath, int targetW, int targetH) {
         if (filePath == null || filePath.isEmpty()) {
             return null;
         }
@@ -179,35 +186,8 @@ public class IconUtil {
         if (!file.exists()) {
             return null;
         }
-        try {
-            Dimension scaleDimen = getScaleDimension(w, h, maxWidth);
-            if (scaleDimen.width >= w && scaleDimen.height >= h) {
-                return new ImageIcon(filePath);
-            }
-            String slavePath = filePath + ".slave_" + scaleDimen.width + "x" + scaleDimen.height;
 
-            GifUtil.zoomGifBySize(filePath, scaleDimen.width, scaleDimen.height, slavePath);
-            return new ImageIcon(slavePath);
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-            return null;
-        }
-    }
 
-    /**
-     * 根据图片尺寸大小调整图片显示的大小
-     *
-     * @param filePath
-     * @return
-     */
-    public static ImageIcon preferredGifSizeWithTargetDimension(String filePath, int targetW, int targetH) {
-        if (filePath == null || filePath.isEmpty()) {
-            return null;
-        }
-        File file = new File(filePath);
-        if (!file.exists()) {
-            return null;
-        }
         try {
             String slavePath = filePath + ".slave_" + targetW + "x" + targetH;
             GifUtil.zoomGifBySize(filePath, targetW, targetH, slavePath);
@@ -224,9 +204,9 @@ public class IconUtil {
      * @param bytes
      * @return
      */
-    public static ImageIcon preferredGifSize(byte[] bytes, int w, int h) {
+    public static ImageIcon preferredGifSize(byte[] bytes, int w, int h,int maxWidth,int maxHeight) {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-            Dimension scaleDimen = getScaleDimension(w, h, maxWidth);
+            Dimension scaleDimen = getScaleDimension(w, h, maxWidth,maxHeight);
             if (scaleDimen.width == w && scaleDimen.height == h) {
                 return new ImageIcon(bytes);
             }
@@ -293,21 +273,24 @@ public class IconUtil {
         return suffix.equals("gif");
     }
 
-
-    /**
-     * 获取图片的宽高
-     *
-     * @param file
-     * @return
-     */
     public static Dimension getImageSize(String file) {
-        try {
-            BufferedImage image = ImageIO.read(new File(file));
-            return new Dimension(image.getWidth(), image.getHeight());
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
 
+        try (ImageInputStream iis = ImageIO.createImageInputStream(new File(file))) {
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
+            if (readers.hasNext()) {
+                ImageReader reader = readers.next();
+                try {
+                    reader.setInput(iis);
+                    int width = reader.getWidth(0);
+                    int height = reader.getHeight(0);
+                    return new Dimension(width, height);
+                } finally {
+                    reader.dispose();
+                }
+            }
+        } catch (IOException e) {
+            log.error("Failed to read image metadata", e);
+        }
         return new Dimension(0, 0);
     }
 
