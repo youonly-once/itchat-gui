@@ -3,8 +3,6 @@ package cn.shu.wechat.typehandler;
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.ibatis.type.JdbcType;
-import org.apache.ibatis.type.MappedJdbcTypes;
-import org.apache.ibatis.type.MappedTypes;
 import org.apache.ibatis.type.TypeHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -17,8 +15,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-@MappedJdbcTypes(JdbcType.VARCHAR)
-@MappedTypes(Map.class)
 @Component
 public class MapToJsonTypeHandler implements TypeHandler<Map<String, Object>> {
 

@@ -84,6 +84,16 @@ public class GBC extends GridBagConstraints {
         return this;
     }
 
+    public GBC setGridHeight(int h) {
+        this.gridheight = h;
+        return this;
+    }
+
+    public GBC setGridWidth(int w) {
+        this.gridwidth = w;
+        return this;
+    }
+
     /*
      * sets the Ipad of this cell
      * @param Ipad distance ths spacing to use in all directions

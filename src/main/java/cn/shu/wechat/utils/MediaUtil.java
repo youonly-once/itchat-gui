@@ -24,22 +24,33 @@ import java.nio.file.Files;
 public class MediaUtil {
 
     /**
-     * 获取视频时长
+     * 获取视频时长 JDK自带的较快一点
      * @param source
      * @return
      */
-    public static  long getVideoDuration(File source){
+    public static VideoInfo getVideoInfoFast(File source) {
         MultimediaObject object = new MultimediaObject(source);
-        long duration = 0;
         try {
-            duration = object.getInfo().getDuration();
+            MultimediaInfo info = object.getInfo();
+            long duration = info.getDuration() / 1_000;
+            Integer height = info.getVideo().getSize().getHeight();
+            Integer width = info.getVideo().getSize().getWidth();
+            return new VideoInfo(
+                    width,
+                    height,
+                    duration, null, null
+            );
         } catch (EncoderException e) {
             log.error(e.getMessage(),e);
         }
-        return duration;
+        return new VideoInfo(
+                100,
+                50,
+                0, null, null
+        );
     }
 
-    public static VideoInfo getVideoInfo(File video) {
+    public static VideoInfo getVideoInfoSlow(File video) {
         try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(video)) {
             grabber.start();
             int width = grabber.getImageWidth();

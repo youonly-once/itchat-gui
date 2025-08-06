@@ -7,6 +7,7 @@ import cn.shu.wechat.swing.components.message.RCLeftImageMessageBubble;
 import cn.shu.wechat.utils.FontUtil;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
@@ -60,13 +61,14 @@ public class MessageLeftAttachmentViewHolder extends MessageAttachmentViewHolder
         timePanel.add(time);
 
         attachmentPanel.setLayout(new GridBagLayout());
-        attachmentPanel.add(attachmentIcon, new GBC(0, 0).setWeight(1, 1).setInsets(5, 5, 5, 0));
-        attachmentPanel.add(attachmentTitle, new GBC(1, 0).setWeight(100, 1).setAnchor(GBC.NORTH)
-                .setInsets(5, 8, 5, 5));
-        attachmentPanel.add(progressBar, new GBC(1, 1).setWeight(1, 1).setFill(GBC.HORIZONTAL)
-                .setAnchor(GBC.SOUTH).setInsets(-20, 100, 5, 5));
+        attachmentPanel.add(attachmentIcon, new GBC(0, 0).setWeight(1, 1).setInsets(2, 5, 0, 0)
+                .setGridHeight(2));
+        attachmentPanel.add(attachmentTitle, new GBC(0, 0).setWeight(100, 1).setAnchor(GBC.NORTH)
+                .setInsets(2, 5, 0, 5));
 
-        attachmentPanel.add(sizeLabel, new GBC(1, 1).setWeight(1, 1).setFill(GBC.HORIZONTAL).setAnchor(GBC.SOUTH).setInsets(-20, 8, 3, 0));
+        attachmentPanel.add(sizeLabel, new GBC(1, 1).setWeight(1, 1)
+                .setFill(GBC.HORIZONTAL).setAnchor(GBC.SOUTH)
+                .setInsets(2, 8, 2, 5));
 
         messageBubble.add(attachmentPanel);
 
@@ -78,7 +80,15 @@ public class MessageLeftAttachmentViewHolder extends MessageAttachmentViewHolder
         if (isGroup) {
             senderMessagePanel.add(sender);
         }
-        senderMessagePanel.add(messageBubble);
+        JPanel processBarPanel = new JPanel(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, true));
+        processBarPanel.setOpaque(false);
+        // processBarPanel.add(progressBar);
+        progressBar.setBorder(new EmptyBorder(0, messageBubble.getSalientPointPixel(), 0, 0));
+        processBarPanel.add(messageBubble);
+        processBarPanel.add(progressBar);
+
+
+        senderMessagePanel.add(processBarPanel);
         senderMessagePanel.add(revoke);
         messageAvatarPanel.setLayout(new GridBagLayout());
         messageAvatarPanel.add(avatar, new GBC(1, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 5, 0, 0));

@@ -40,7 +40,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -655,7 +654,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                         .imgHeight(imageSize.height).build();
                 break;
             case MSGTYPE_VIDEO:
-                MediaUtil.VideoInfo videoBaseInfo = MediaUtil.getVideoInfo(file);
+                MediaUtil.VideoInfo videoBaseInfo = MediaUtil.getVideoInfoFast(file);
                 int maxHeight = MessageRightVideoViewHolder.maxHeight;
                 int maxWidth = MessageRightVideoViewHolder.maxWidth;
                 Dimension scaleDimen = IconUtil.getScaleDimension(videoBaseInfo.width(), videoBaseInfo.height(), maxWidth,maxHeight);

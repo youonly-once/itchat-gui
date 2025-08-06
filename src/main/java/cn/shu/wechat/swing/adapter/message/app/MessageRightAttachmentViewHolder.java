@@ -62,19 +62,20 @@ public class MessageRightAttachmentViewHolder extends MessageAttachmentViewHolde
         timePanel.add(time);
 
         attachmentPanel.setLayout(new GridBagLayout());
-        attachmentPanel.add(attachmentIcon, new GBC(0, 0).setWeight(1, 1).setInsets(5, 5, 5, 0));
+        attachmentPanel.add(attachmentIcon, new GBC(0, 0).setWeight(1, 1)
+                .setInsets(2, 5, 5, 0)
+                .setGridHeight(2));
         attachmentPanel.add(attachmentTitle, new GBC(1, 0).setWeight(100, 1).setAnchor(GBC.NORTH)
-                .setInsets(5, 5, 0, 5));
-        attachmentPanel.add(progressBar, new GBC(1, 1).setWeight(1, 1).setFill(GBC.HORIZONTAL).setAnchor(GBC.SOUTH).setInsets(-20, 100, 5, 5));
-        attachmentPanel.add(sizeLabel, new GBC(1, 1).setWeight(1, 1).setFill(GBC.HORIZONTAL).setAnchor(GBC.SOUTH).setInsets(-20, 8, 0, 0));
+                .setInsets(2, 5, 0, 5));
+        attachmentPanel.add(sizeLabel, new GBC(1, 1).setWeight(1, 1).setFill(GBC.HORIZONTAL)
+                .setAnchor(GBC.SOUTH).setInsets(2, 8, 2, 5));
 
         messageBubble.add(attachmentPanel);
 
 
         JPanel processBarPanel = new JPanel(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, true));
         processBarPanel.setOpaque(false);
-       // processBarPanel.add(progressBar);
-        processBarPanel.setBorder(new EmptyBorder(0, messageBubble.getSalientPointPixel(), 0, 0));
+        progressBar.setBorder(new EmptyBorder(0, 0, 0, messageBubble.getSalientPointPixel()));
         processBarPanel.add(messageBubble);
         processBarPanel.add(progressBar);
 

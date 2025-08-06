@@ -275,7 +275,7 @@
             <groupId>org.bytedeco</groupId>
             <artifactId>javacv-platform</artifactId>
             <version>1.5.10</version>
-            <exclusions>
+            <!--            <exclusions>-->
 <!--                <exclusion>-->
 <!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
 <!--                    <artifactId>ffmpeg</artifactId>-->
@@ -328,7 +328,7 @@
 <!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
 <!--                    <artifactId>artoolkitplus-platform</artifactId>-->
 <!--                </exclusion>-->
-            </exclusions>
+            <!--            </exclusions>-->
         </dependency>
         <!--easypoi-->
         <dependency>
