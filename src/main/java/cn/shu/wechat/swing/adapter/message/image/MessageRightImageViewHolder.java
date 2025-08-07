@@ -59,7 +59,7 @@ public class MessageRightImageViewHolder extends BaseMessageViewHolder {
         setLayout(new BorderLayout());
         timePanel.add(time);
         if (imgSize != null) {
-            image.setSize(imgSize);
+            image.setPreferredSize(imgSize);
         }
         // 设置图标水平居中
         image.setHorizontalAlignment(SwingConstants.CENTER);

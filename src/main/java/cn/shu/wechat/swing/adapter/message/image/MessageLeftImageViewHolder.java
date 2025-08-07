@@ -50,7 +50,7 @@ public class MessageLeftImageViewHolder extends BaseMessageViewHolder {
         // 设置图标垂直居中
         image.setVerticalAlignment(SwingConstants.CENTER);
         if (imgSize != null) {
-            image.setSize(imgSize);
+            image.setPreferredSize(imgSize);
         }
         JPanel senderMessagePanel = new JPanel();
         senderMessagePanel.setBackground(Colors.WINDOW_BACKGROUND);
@@ -61,9 +61,9 @@ public class MessageLeftImageViewHolder extends BaseMessageViewHolder {
             sender.setBorder(new EmptyBorder(0,0,5,0));
             senderMessagePanel.add(sender);
         }
-        JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT,0,0));
-        controlPanel.add(image);
-        controlPanel.add(revoke);
+        JPanel controlPanel = new JPanel(new BorderLayout(0, 0));
+        controlPanel.add(image,BorderLayout.CENTER);
+        controlPanel.add(revoke,BorderLayout.EAST);
         senderMessagePanel.add(controlPanel);
         messageAvatarPanel.setLayout(new GridBagLayout());
         messageAvatarPanel.add(avatar, new GBC(1, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 5, 0, 0));
