@@ -2,6 +2,7 @@ package cn.shu.wechat.swing.panels.chat;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.MessageTools;
+import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.constant.DownloadType;
 import cn.shu.wechat.constant.WxRespConstant;
 import cn.shu.wechat.core.Core;
@@ -672,7 +673,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                         .desc(fileName)
                         .fileName(fileName).build();
 
-                String picPath = ClipboardUtil.CLIPBOARD_TEMP_DIR + "/" + message.getId() + ".pic.png";
+                String picPath = WechatConfiguration.getInstance().getBasePath() + "/slave_path/" + message.getId() + ".pic.png";
                 message.setSlavePath(picPath);
 
                 //异步下载

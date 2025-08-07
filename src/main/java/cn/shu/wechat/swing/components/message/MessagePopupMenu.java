@@ -261,11 +261,7 @@ public class MessagePopupMenu extends JPopupMenu {
                         obj = imageLabel.getTag();
                         break;
                     }
-                    case MSGTYPE_VIDEO: {
-                        TagJLayeredPane attachmentPanel = (TagJLayeredPane) getInvoker();
-                        obj = attachmentPanel.getTag();
-                        break;
-                    }
+                    case MSGTYPE_VIDEO:
                     case MSGTYPE_VOICE:
                     case MSGTYPE_APP: {
                         TagPanel attachmentPanel = (TagPanel) getInvoker();
