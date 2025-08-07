@@ -63,7 +63,7 @@ public class MessageLeftAttachmentViewHolder extends MessageAttachmentViewHolder
         attachmentPanel.setLayout(new GridBagLayout());
         attachmentPanel.add(attachmentIcon, new GBC(0, 0).setWeight(1, 1).setInsets(2, 5, 0, 0)
                 .setGridHeight(2));
-        attachmentPanel.add(attachmentTitle, new GBC(0, 0).setWeight(100, 1).setAnchor(GBC.NORTH)
+        attachmentPanel.add(attachmentTitle, new GBC(1, 0).setWeight(100, 1).setAnchor(GBC.NORTH)
                 .setInsets(2, 5, 0, 5));
 
         attachmentPanel.add(sizeLabel, new GBC(1, 1).setWeight(1, 1)

@@ -23,9 +23,11 @@ public class MessageLeftImageViewHolder extends BaseMessageViewHolder {
     private JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
     private JPanel messageAvatarPanel = new JPanel();
     private boolean isGroup = true;
+    private final Dimension imgSize;
 
-    public MessageLeftImageViewHolder(boolean isGroup) {
+    public MessageLeftImageViewHolder(boolean isGroup,Dimension imgSize) {
         this.isGroup = isGroup;
+        this.imgSize = imgSize;
         initComponents();
         initView();
     }
@@ -34,20 +36,22 @@ public class MessageLeftImageViewHolder extends BaseMessageViewHolder {
         timePanel.setBackground(Colors.WINDOW_BACKGROUND);
         messageAvatarPanel.setBackground(Colors.WINDOW_BACKGROUND);
 
-
-       // imageBubble.add(image);
-
         time.setForeground(Colors.FONT_GRAY);
         time.setFont(FontUtil.getDefaultFont(12));
 
-
-        //sender.setVisible(false);
     }
 
     private void initView() {
         setLayout(new BorderLayout());
         timePanel.add(time);
+        // 设置图标水平居中
+        image.setHorizontalAlignment(SwingConstants.CENTER);
 
+        // 设置图标垂直居中
+        image.setVerticalAlignment(SwingConstants.CENTER);
+        if (imgSize != null) {
+            image.setSize(imgSize);
+        }
         JPanel senderMessagePanel = new JPanel();
         senderMessagePanel.setBackground(Colors.WINDOW_BACKGROUND);
         senderMessagePanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));

@@ -27,8 +27,9 @@ public class MessageRightImageViewHolder extends BaseMessageViewHolder {
     public RCRightImageMessageBubble imageBubble = new RCRightImageMessageBubble();
     private final JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER,5,0));
     private final JPanel messageAvatarPanel = new JPanel();
-
-    public MessageRightImageViewHolder() {
+    private final Dimension imgSize;
+    public MessageRightImageViewHolder(Dimension imgSize) {
+        this.imgSize = imgSize;
         initComponents();
         initView();
     }
@@ -57,7 +58,14 @@ public class MessageRightImageViewHolder extends BaseMessageViewHolder {
     private void initView() {
         setLayout(new BorderLayout());
         timePanel.add(time);
+        if (imgSize != null) {
+            image.setSize(imgSize);
+        }
+        // 设置图标水平居中
+        image.setHorizontalAlignment(SwingConstants.CENTER);
 
+        // 设置图标垂直居中
+        image.setVerticalAlignment(SwingConstants.CENTER);
         JPanel resendImagePanel = new JPanel(new BorderLayout());
         resendImagePanel.setBackground(Colors.WINDOW_BACKGROUND);
         JPanel controlPanel = new JPanel(new BorderLayout(0, 0));

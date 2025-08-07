@@ -4,6 +4,7 @@ import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GradientProgressBarUI;
 import cn.shu.wechat.swing.components.RCProgressBar;
+import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.components.message.RCLeftVideoMessageBubble;
 import cn.shu.wechat.swing.components.message.TagJLayeredPane;
 import cn.shu.wechat.swing.components.message.TagPanel;
@@ -21,6 +22,8 @@ import java.io.IOException;
 public class MessageVideoViewHolder extends BaseMessageViewHolder {
     public static final int maxHeight = 120;
     public static final int maxWidth = 80;
+
+
     public final RCLeftVideoMessageBubble imageBubble = new RCLeftVideoMessageBubble();
     /**
      * 缩略图label
@@ -34,13 +37,26 @@ public class MessageVideoViewHolder extends BaseMessageViewHolder {
      * 播放时长label
      */
     public final JLabel timeLabel = new JLabel();
-    protected final TagPanel contentTagPanel = new TagPanel();
+
+
+    public final TagPanel videoProgressBarPanel = new TagPanel();
+
     protected final JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+
     protected final JPanel messageAvatarPanel = new JPanel();
+
     protected final int slaveImgWidth;
+
     protected final int slaveImgHeight;
+
     public RCProgressBar progressBar = new RCProgressBar();
-    public TagJLayeredPane videoComponent = null;
+
+    /**
+     * 撤回 加载中 重发 等状态操作 panel
+     */
+    protected JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.LEFT,0,0));
+
+
 
     /**
      * @param dimension 缩略图尺寸
@@ -59,7 +75,6 @@ public class MessageVideoViewHolder extends BaseMessageViewHolder {
         time.setForeground(Colors.FONT_GRAY);
         time.setFont(FontUtil.getDefaultFont(12));
 
-
         progressBar.setMaximum(100);
         progressBar.setMinimum(0);
         progressBar.setValue(0);
@@ -67,34 +82,54 @@ public class MessageVideoViewHolder extends BaseMessageViewHolder {
         progressBar.setVisible(true);
     }
 
+    protected void initView(){
+        videoProgressBarPanel.setBackground(Colors.WINDOW_BACKGROUND);
+        videoProgressBarPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
+
+        videoProgressBarPanel.setOpaque(false);
+        videoProgressBarPanel.add(getLayerPanel());
+        videoProgressBarPanel.add(progressBar);
+
+
+        statusPanel.add(revoke);
+
+        timePanel.add(time);
+
+        setLayout(new BorderLayout());
+        add(timePanel, BorderLayout.NORTH);
+        add(messageAvatarPanel, BorderLayout.CENTER);
+    }
+
+
     /**
      * @return 组件
-     * @throws IOException 读取文件异常
      */
     protected TagJLayeredPane getLayerPanel() {
         TagJLayeredPane layeredPane = new TagJLayeredPane();
-        JPanel imgPanel = new JPanel(new GridLayout(1, 1));
-        imgPanel.setBounds(0, 0, slaveImgWidth, slaveImgHeight);
-        imgPanel.setOpaque(false);
-        imgPanel.add(slaveImgLabel);
-        layeredPane.add(imgPanel, 200, 1);
+        layeredPane.setPreferredSize(new Dimension(slaveImgWidth, slaveImgHeight));
+        layeredPane.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        //******************缩略图
+        // 设置图标水平居中
+        slaveImgLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        // 设置图标垂直居中
+        slaveImgLabel.setVerticalAlignment(SwingConstants.CENTER);
+        slaveImgLabel.setBounds(0, 0, slaveImgWidth, slaveImgHeight);
+        slaveImgLabel.setOpaque(false);
+        layeredPane.add(slaveImgLabel, 200, 1);
 
-        //播放按钮
+        //******************播放按钮
         ImageIcon icon = IconUtil.getIcon(this, "/image/play48.png");
         int playHeight = icon.getIconHeight();
         int playWidth = icon.getIconWidth();
         int x = (slaveImgWidth - playWidth) / 2;
         int y = (slaveImgHeight - playHeight) / 2;
 
-        JPanel playImgPanel = new JPanel(new GridLayout(1, 1));
-        playImgPanel.setBounds(x, y, playWidth, playHeight);
-        playImgPanel.setOpaque(false);
-        playImgPanel.add(playImgLabel);
-        layeredPane.add(playImgPanel, 200, 0);
+        playImgLabel.setBounds(x, y, playWidth, playHeight);
+        playImgLabel.setOpaque(false);
+        layeredPane.add(playImgLabel, 300, 0);
 
-        layeredPane.setPreferredSize(new Dimension(slaveImgWidth, slaveImgHeight));
-        //视频时长
-        timeLabel.setForeground(Color.white);
+
+        //****************** 视频时长
         int margin = 3;
         int timeWidth = 30;
         int timeHeight = 10;
@@ -102,6 +137,7 @@ public class MessageVideoViewHolder extends BaseMessageViewHolder {
         timeLabel.setOpaque(false);
         timeLabel.setFont(FontUtil.getDefaultFont(10));
         timeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        timeLabel.setForeground(Color.white);
         layeredPane.add(timeLabel, 200, 0);
 
 

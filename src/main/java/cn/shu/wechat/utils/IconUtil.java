@@ -168,7 +168,7 @@ public class IconUtil {
         if (scaleDimen.width >= w && scaleDimen.height >= h) {
             return new ImageIcon(filePath);
         }
-       return preferredGifSize(filePath, scaleDimen.width, scaleDimen.height, maxWidth, maxHeight);
+       return preferredGifSize(filePath, scaleDimen.width, scaleDimen.height);
 
     }
 
@@ -191,7 +191,7 @@ public class IconUtil {
         try {
             String slavePath = filePath + ".slave_" + targetW + "x" + targetH;
             GifUtil.zoomGifBySize(filePath, targetW, targetH, slavePath);
-            return new ImageIcon(filePath + slavePath);
+            return new ImageIcon(slavePath);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             return null;
@@ -291,7 +291,7 @@ public class IconUtil {
         } catch (IOException e) {
             log.error("Failed to read image metadata", e);
         }
-        return new Dimension(0, 0);
+        return new Dimension(50, 50);
     }
 
     /**

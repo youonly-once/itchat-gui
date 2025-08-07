@@ -132,7 +132,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             case MSGTYPE_IMAGE:
             case MSGTYPE_EMOTICON: {
                 if (isSelf) {
-                    return messageViewHolderCacheHelper.tryGetRightImageViewHolder();
+                    return messageViewHolderCacheHelper.tryGetRightImageViewHolder(messageItem);
                 } else {
 
                     return messageViewHolderCacheHelper.tryGetLeftImageViewHolder(messageItem);
@@ -655,12 +655,12 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     , holder.timeLabel
                     , holder.playImgLabel
                     , holder.slaveImgLabel
-                    , holder.videoComponent);
+                    , holder.videoProgressBarPanel);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
-        holder.videoComponent.setTag(item);
-        listView.setScrollHiddenOnMouseLeave(holder.videoComponent);
+        holder.videoProgressBarPanel.setTag(item);
+        listView.setScrollHiddenOnMouseLeave(holder.videoProgressBarPanel);
         listView.setScrollHiddenOnMouseLeave(holder.imageBubble);
 
         // 绑定右键菜单
@@ -679,12 +679,12 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     , holder.timeLabel
                     , holder.playImgLabel
                     , holder.slaveImgLabel
-                    , holder.videoComponent);
+                    , holder.videoProgressBarPanel);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
-        holder.videoComponent.setTag(item);
-        listView.setScrollHiddenOnMouseLeave(holder.videoComponent);
+        holder.videoProgressBarPanel.setTag(item);
+        listView.setScrollHiddenOnMouseLeave(holder.videoProgressBarPanel);
         listView.setScrollHiddenOnMouseLeave(holder.imageBubble);
         // 判断是否显示重发按钮
         holder.resend.setVisible(item.isNeedToResend());
@@ -1277,11 +1277,11 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             case MSGTYPE_VIDEO:{
                 if (isSelf){
                     MessageRightVideoViewHolder holder = (MessageRightVideoViewHolder) viewHolder;
-                    contentComponent = holder.videoComponent;
+                    contentComponent = holder.videoProgressBarPanel;
                     messageBubble = holder.imageBubble;
                 }else {
                     MessageLeftVideoViewHolder holder = (MessageLeftVideoViewHolder) viewHolder;
-                    contentComponent = holder.videoComponent;
+                    contentComponent = holder.videoProgressBarPanel;
                     messageBubble = holder.imageBubble;
 
 

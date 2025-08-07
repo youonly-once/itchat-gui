@@ -67,7 +67,7 @@ public class ChatMessageEditorPanel extends ParentAvailablePanel {
     public ChatMessageEditorPanel(JPanel parent, String roomId) {
         super(parent);
         this.roomId = roomId;
-
+        shareRoomId = roomId;
         initComponents();
         initView();
         setListeners();

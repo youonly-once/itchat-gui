@@ -3,6 +3,7 @@ package cn.shu.wechat.swing.adapter.message.video;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.VerticalFlowLayout;
+import cn.shu.wechat.swing.components.message.TagPanel;
 import cn.shu.wechat.utils.FontUtil;
 
 import javax.swing.*;
@@ -15,7 +16,7 @@ import java.awt.*;
 
 public class MessageLeftVideoViewHolder extends MessageVideoViewHolder {
 
-    private boolean isGroup = true;
+    private final boolean isGroup;
 
 
     /**
@@ -34,43 +35,30 @@ public class MessageLeftVideoViewHolder extends MessageVideoViewHolder {
         super.initComponents();
     }
 
-    private void initView() {
-        setLayout(new BorderLayout());
-        timePanel.add(time);
+    protected void initView() {
+        super.initView();
 
-        contentTagPanel.setBackground(Colors.WINDOW_BACKGROUND);
-        contentTagPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
+        JPanel contentSender = new JPanel();
         if (isGroup) {
+            contentSender.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
             sender.setFont(FontUtil.getDefaultFont(12));
             sender.setForeground(Colors.FONT_GRAY);
             sender.setBorder(new EmptyBorder(0,0,5,0));
-            contentTagPanel.add(sender);
+            contentSender.add(videoProgressBarPanel);
+            contentSender.add(sender);
         }
-
-            videoComponent = getLayerPanel();
-            videoComponent.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT,0,0));
-
-        JPanel processBarPanel = new JPanel(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, true));
-        processBarPanel.setOpaque(false);
-        processBarPanel.add(videoComponent);
-        processBarPanel.add(progressBar);
-
-        controlPanel.add(processBarPanel);
-            controlPanel.add(revoke);
-
-
-        contentTagPanel.add(controlPanel);
+        JPanel statusContentSender = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        statusContentSender.add(contentSender);
+        statusContentSender.add(statusPanel);
 
 
         messageAvatarPanel.setLayout(new GridBagLayout());
         messageAvatarPanel.add(avatar, new GBC(1, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 5, 0, 0));
-        messageAvatarPanel.add(contentTagPanel, new GBC(2, 0)
+        messageAvatarPanel.add(statusContentSender, new GBC(2, 0)
                 .setWeight(1000, 1)
                 .setAnchor(GBC.WEST)
                 .setInsets(0, 5, 0, 0));
-        add(timePanel, BorderLayout.NORTH);
-        add(messageAvatarPanel, BorderLayout.CENTER);
+
     }
 
 }

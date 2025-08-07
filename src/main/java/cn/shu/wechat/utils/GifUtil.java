@@ -165,8 +165,10 @@ public class GifUtil {
      */
     public static void zoomGifBySize(String imagePath,int width, int height, String outputPath) throws IOException {
 
-        try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(imagePath));
-             OutputStream fileOutputStream = new BufferedOutputStream(new FileOutputStream(outputPath));) {
+        try (
+                BufferedInputStream in = new BufferedInputStream(new FileInputStream(imagePath)); OutputStream fileOutputStream = new BufferedOutputStream(new FileOutputStream(outputPath));
+             ) {
+
             zoomGifBySize(in, width, height, fileOutputStream);
         }
 
@@ -188,27 +190,32 @@ public class GifUtil {
             throw new IOException("read image  error!");
         }
         AnimatedGifEncoder encoder = new AnimatedGifEncoder();
-        encoder.start(outputStream);
+        try {
 
-        encoder.setRepeat(decoder.getLoopCount());
-        for (int i = 0; i < decoder.getFrameCount(); i++) {
-            encoder.setDelay(decoder.getDelay(i));  // 设置每帧延迟
-            BufferedImage bufferedImage = decoder.getFrame(i);  // 获取原始帧
+            encoder.start(outputStream);
 
-            try {
-                // 使用 Thumbnail 缩放每帧
-                BufferedImage scaledImage = Thumbnails.of(bufferedImage)
-                        .size(width, height)
-                        .outputQuality(1.0)
-                        .asBufferedImage();
-                encoder.addFrame(scaledImage);  // 添加帧到 encoder
-            } catch (Exception e) {
-                log.error("处理第 {} 帧失败: {}", i, e.getMessage(), e);
-                throw new RuntimeException(e);
+            encoder.setRepeat(decoder.getLoopCount());
+            for (int i = 0; i < decoder.getFrameCount(); i++) {
+                encoder.setDelay(decoder.getDelay(i));  // 设置每帧延迟
+                BufferedImage bufferedImage = decoder.getFrame(i);  // 获取原始帧
+
+
+
+                    // 使用 Thumbnail 缩放每帧
+                    BufferedImage scaledImage = Thumbnails.of(bufferedImage)
+                            .size(width, height)
+                            .outputQuality(1.0)
+                            .asBufferedImage();
+                    encoder.addFrame(scaledImage);  // 添加帧到 encoder
+
             }
+        } catch (Exception e) {
+            log.error("处理第gif帧失败: {}", e.getMessage(), e);
+            throw new RuntimeException(e);
+        }finally {
+            encoder.finish();
         }
 
-        encoder.finish();
     }
     /**
      * 将文件转换成byte数组

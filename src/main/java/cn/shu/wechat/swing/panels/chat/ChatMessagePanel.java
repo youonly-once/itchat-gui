@@ -654,7 +654,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                         .imgHeight(imageSize.height).build();
                 break;
             case MSGTYPE_VIDEO:
-                MediaUtil.VideoInfo videoBaseInfo = MediaUtil.getVideoInfoFast(file);
+                MediaUtil.VideoInfo videoBaseInfo = MediaUtil.getVideoInfoSlow(file);
                 int maxHeight = MessageRightVideoViewHolder.maxHeight;
                 int maxWidth = MessageRightVideoViewHolder.maxWidth;
                 Dimension scaleDimen = IconUtil.getScaleDimension(videoBaseInfo.width(), videoBaseInfo.height(), maxWidth,maxHeight);

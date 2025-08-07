@@ -29,6 +29,7 @@ public class MessageRightVideoViewHolder extends MessageVideoViewHolder {
 
     protected void initComponents() {
         super.initComponents();
+
         ImageIcon resendIcon = IconUtil.getIcon(this,"/image/resend.png",20,20);
         resend.setIcon(resendIcon);
         resend.setVisible(false);
@@ -36,38 +37,22 @@ public class MessageRightVideoViewHolder extends MessageVideoViewHolder {
         resend.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 
-    private void initView() {
-        setLayout(new BorderLayout());
-        timePanel.add(time);
+    protected void initView() {
+        super.initView();
 
-        contentTagPanel.setBackground(Colors.WINDOW_BACKGROUND);
-        contentTagPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
-
-            videoComponent = getLayerPanel();
-            videoComponent.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            JPanel controlPanel = new JPanel(new BorderLayout(0, 0));
-            controlPanel.add(resend, BorderLayout.WEST);
-            controlPanel.add(sendingProgress, BorderLayout.CENTER);
-            controlPanel.add(revoke, BorderLayout.EAST);
-            JPanel resendImagePanel = new JPanel(new BorderLayout());
-            resendImagePanel.setOpaque(false);
-
-            JPanel processBarPanel = new JPanel(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, true));
-            processBarPanel.setOpaque(false);
-            processBarPanel.add(videoComponent);
-            processBarPanel.add(progressBar);
-
-            resendImagePanel.add(processBarPanel, BorderLayout.CENTER);
+        statusPanel.add(resend);
+        statusPanel.add(sendingProgress);
 
 
-        resendImagePanel.add(controlPanel, BorderLayout.WEST);
+        JPanel statusContentSender = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        statusContentSender.add(statusPanel);
+        statusContentSender.add(videoProgressBarPanel);
 
-        contentTagPanel.add(resendImagePanel);
 
 
         messageAvatarPanel.setLayout(new GridBagLayout());
         messageAvatarPanel.add(avatar, new GBC(2, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 5, 0, 5));
-        messageAvatarPanel.add(contentTagPanel, new GBC(1, 0)
+        messageAvatarPanel.add(statusContentSender, new GBC(1, 0)
                 .setWeight(1000, 1)
                 .setAnchor(GBC.EAST)
                 .setInsets(0, 5, 0, 0));

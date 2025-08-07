@@ -12,15 +12,14 @@ import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.task.DownloadTask;
-import cn.shu.wechat.utils.AvatarUtil;
-import cn.shu.wechat.utils.EmojiUtil;
-import cn.shu.wechat.utils.JSONObjectUtil;
-import cn.shu.wechat.utils.SpringContextHolder;
+import cn.shu.wechat.utils.*;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -604,17 +603,23 @@ public class ContactsTools {
 
                     //更换头像需要发送图片
                     //更换前
+                    Dimension imageSize = IconUtil.getImageSize(oldHeadPath);
                     messages.add(Message.builder()
                             .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.PIC.getCode())
                             .toUsername("filehelper")
+                                    .imgHeight(imageSize.height)
+                            .imgWidth(imageSize.width)
                             .filePath(oldHeadPath).build());
                     if (newHeadPath != null) {
                         Core.getContactHeadImgPath().put(oldV.getUsername(), newHeadPath);
                         //刷新头像
                         AvatarUtil.putUserAvatarCache(oldV.getUsername(), newHeadPath);
                         //更换后
+                        imageSize = IconUtil.getImageSize(newHeadPath);
                         messages.add(Message.builder()
                                 .toUsername("filehelper")
+                                .imgHeight(imageSize.height)
+                                .imgWidth(imageSize.width)
                                 .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.PIC.getCode())
                                 .filePath(newHeadPath).build());
                     }

@@ -1,1 +1,1 @@
-java -Xverify:none -Dsun.java2d.uiScale=1.0 -Dsun.java2d.dpiaware=true -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5006 -jar -Xmx1024M ../wechat-1.0.jar
+java -Xverify:none -Dsun.java2d.uiScale=1.0 -Dsun.java2d.dpiaware=true -Djavacpp.platform=windows-x86_64 -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5006 -jar -Xmx1024M ../wechat-1.0.jar

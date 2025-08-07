@@ -12,6 +12,7 @@ import cn.shu.wechat.swing.adapter.message.text.MessageLeftTextViewHolder;
 import cn.shu.wechat.swing.adapter.message.text.MessageRightTextViewHolder;
 import cn.shu.wechat.swing.adapter.message.video.MessageLeftVideoViewHolder;
 import cn.shu.wechat.swing.adapter.message.video.MessageRightVideoViewHolder;
+import cn.shu.wechat.swing.adapter.message.video.MessageVideoViewHolder;
 import cn.shu.wechat.swing.adapter.message.voice.MessageLeftVoiceViewHolder;
 import cn.shu.wechat.swing.adapter.message.voice.MessageRightVoiceViewHolder;
 import cn.shu.wechat.utils.IconUtil;
@@ -31,9 +32,12 @@ public class MessageViewHolderCacheHelper {
 
     }
 
-    public MessageRightImageViewHolder tryGetRightImageViewHolder() {
-
-        return new MessageRightImageViewHolder();
+    public MessageRightImageViewHolder tryGetRightImageViewHolder(Message messageItem) {
+        if (messageItem.getImgWidth() == null||messageItem.getImgHeight() == null) {
+            return new MessageRightImageViewHolder(null);
+        }
+        return new MessageRightImageViewHolder(IconUtil.getScaleDimension(messageItem.getImgWidth(),messageItem.getImgHeight()
+                ,MessageRightImageViewHolder.maxWidth,MessageRightImageViewHolder.maxHeight));
 
     }
 
@@ -50,8 +54,11 @@ public class MessageViewHolderCacheHelper {
     }
 
     public MessageLeftImageViewHolder tryGetLeftImageViewHolder(Message messageItem) {
-
-        return new MessageLeftImageViewHolder(messageItem.isGroup());
+        if (messageItem.getImgWidth() == null||messageItem.getImgHeight() == null) {
+            return new MessageLeftImageViewHolder(messageItem.isGroup(),null);
+        }
+        return new MessageLeftImageViewHolder(messageItem.isGroup(),IconUtil.getScaleDimension(messageItem.getImgWidth(),messageItem.getImgHeight()
+                ,MessageRightImageViewHolder.maxWidth,MessageRightImageViewHolder.maxHeight));
 
     }
 
@@ -59,7 +66,7 @@ public class MessageViewHolderCacheHelper {
 
         return new MessageLeftVideoViewHolder(messageItem.isGroup(),
                 IconUtil.getScaleDimension(messageItem.getImgWidth()
-                        , messageItem.getImgHeight(),MessageRightVideoViewHolder.maxWidth,MessageRightVideoViewHolder.maxHeight));
+                        , messageItem.getImgHeight(), MessageVideoViewHolder.maxWidth,MessageVideoViewHolder.maxHeight));
 
     }
 
@@ -67,7 +74,7 @@ public class MessageViewHolderCacheHelper {
 
         return new MessageRightVideoViewHolder(
                 IconUtil.getScaleDimension(messageItem.getImgWidth()
-                        , messageItem.getImgHeight(),MessageRightVideoViewHolder.maxWidth,MessageRightVideoViewHolder.maxHeight));
+                        , messageItem.getImgHeight(),MessageVideoViewHolder.maxWidth,MessageVideoViewHolder.maxHeight));
 
     }
 
