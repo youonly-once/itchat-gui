@@ -138,9 +138,9 @@ public class MainFrame extends JFrame {
             }
         });
 
-        PopupMenu menu = new PopupMenu();
+        JPopupMenu menu = new JPopupMenu();
 
-        MenuItem exitItem = new MenuItem("退出");
+        JMenuItem exitItem = new JMenuItem("退出");
         exitItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -150,20 +150,30 @@ public class MainFrame extends JFrame {
             }
         });
 
-        MenuItem showItem = new MenuItem("打开微信");
+        JMenuItem showItem = new JMenuItem("打开微信");
         showItem.addActionListener(
                 e -> {
                     if (isLock)lock();
                     else unLock();
                 });
 
-        MenuItem lockItem = new MenuItem("锁屏");
+        JMenuItem lockItem = new JMenuItem("锁屏");
         lockItem.addActionListener(
                 e -> lock());
         menu.add(showItem);
         menu.add(lockItem);
         menu.add(exitItem);
-        trayIcon.setPopupMenu(menu);
+        // 监听托盘图标鼠标事件
+        trayIcon.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.isPopupTrigger()) { // 右键弹出菜单
+                    menu.setLocation(e.getX(), e.getY()-menu.getHeight()-10);
+                    menu.setInvoker(MainFrame.this);
+                    menu.setVisible(true);
+                }
+            }
+        });
         systemTray.add(trayIcon);
 
     }
