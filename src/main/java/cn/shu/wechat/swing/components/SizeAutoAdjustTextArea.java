@@ -82,12 +82,18 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
         int lineCount = parseLineCount(t);
 
         // 每一行的emoji表情信息
-        List<LineEmojiInfo> lineEmojiInfoList = parseLineEmojiInfo();
+        List<LineEmojiInfo2> lineEmojiInfoList = parseLineEmojiInfo();
 
         // 每一行的实际宽度，即插入表情后的宽度
         int[] lineWidthArr = parseLineActualWidth(lineEmojiInfoList);
 
         int lineHeight = fontMetrics.getHeight();
+
+        int ascent = fontMetrics.getAscent();
+        int descent = fontMetrics.getDescent();
+        int leading = fontMetrics.getLeading();
+
+
         int targetHeight = lineHeight * lineCount;
         int targetWidth = 20;
 
@@ -100,8 +106,11 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
             targetHeight = lineHeight;
             t = " ";
         }
-
-        int contentWidth = maxWidth - 10;
+        Insets borderInsets = this.getBorder().getBorderInsets(this);
+        Insets marginInsets = this.getMargin();
+        int contentWidth = maxWidth-
+                borderInsets.left - borderInsets.right
+                - marginInsets.left - marginInsets.right-10-20;
         // 如果最长的一行宽度超过了最大宽度，就要重新计算高度
         if (targetWidth > maxWidth) {
             targetWidth = maxWidth;
@@ -117,12 +126,11 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
         }
 
 
-        String targetText = t.replaceAll(emojiRegx, "");
-        for (String code : EmojiUtil.getWechatEmojiList()) {
-            targetText = targetText.replace(code, "");
-        }
+       // String targetText = t.replaceAll(emojiRegx, "");
+//        for (String code : EmojiUtil.getWechatEmojiList()) {
+//            targetText = targetText.replace(code, "");
+//        }
         super.setText("");
-       // super.setText(targetText);
 
         // 插入emoji表情，并计算需要增加的高度
         //Map<Integer, String> emojiPositionMap = insertEmoji(t);
@@ -149,7 +157,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
             return;
         }
 
-        int emojiExtraHeight = OSUtil.getOsType() == OSUtil.Mac_OS ? 8 : 5;
+        int emojiExtraHeight = OSUtil.getOsType() == OSUtil.Mac_OS ? 8 : 10;
         int emojiIndex = 1;
         for (int pos : emojiPositionMap.keySet()) {
             String substr = exceptEmoji.substring(0, pos + 1);
@@ -346,13 +354,13 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
      *
      * @return
      */
-    private List<LineEmojiInfo> parseLineEmojiInfo() {
-        List<LineEmojiInfo> infoList = new ArrayList<>(lineArr.length);
+    private List<LineEmojiInfo2> parseLineEmojiInfo() {
+        List<LineEmojiInfo2> infoList = new ArrayList<>(lineArr.length);
         List<String> emojiList;
-        LineEmojiInfo info;
+        LineEmojiInfo2 info;
         for (int i = 0; i < lineArr.length; i++) {
             emojiList = parseEmoji(lineArr[i]);
-            info = new LineEmojiInfo(emojiList.size(), emojiList);
+            info = new LineEmojiInfo2(emojiList.size(), emojiList);
             infoList.add(info);
         }
 
@@ -372,7 +380,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
         //微信表情
         List<String> weChatEmoji = EmojiUtil.getWechatEmojiList().stream()
                 .filter(src::contains)
-                .collect(Collectors.toList());
+                .toList();
 
         //其它表情
         Matcher emojiMatcher = emojiPattern.matcher(src);
@@ -406,7 +414,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
      * @param lineEmojiInfoList
      * @return
      */
-    private int[] parseLineActualWidth(List<LineEmojiInfo> lineEmojiInfoList) {
+    private int[] parseLineActualWidth(List<LineEmojiInfo2> lineEmojiInfoList) {
         String[] lineArrCopy = lineArr.clone();
         int[] retArr = new int[lineArrCopy.length];
 
