@@ -99,7 +99,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
 
 
         if (lineCount > 0) {
-            targetWidth = lineWidthArr[maxLengthLinePosition] ;
+            targetWidth = lineWidthArr[maxLengthLinePosition] +10;
         }
         // 输入全为\n的情况
         else {
