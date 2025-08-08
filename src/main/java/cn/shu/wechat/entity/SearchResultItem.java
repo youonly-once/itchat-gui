@@ -31,11 +31,18 @@ public class SearchResultItem implements Comparable<SearchResultItem> {
     private int type;
 
     /**
+     * 类型
+     */
+    private String key;
+
+    /**
      * 时间
      */
     private LocalDateTime dateTime;
 
     private String tag;
+
+    private String sender;
 
     private int score;
 

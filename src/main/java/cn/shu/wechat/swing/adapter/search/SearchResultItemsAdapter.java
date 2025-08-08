@@ -2,22 +2,24 @@ package cn.shu.wechat.swing.adapter.search;
 
 import cn.shu.wechat.constant.SearchResultType;
 import cn.shu.wechat.core.Core;
-import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.entity.SearchResultItem;
 import cn.shu.wechat.swing.adapter.BaseAdapter;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.helper.AttachmentIconHelper;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
+import cn.shu.wechat.swing.media.HeadLoadingSwingWorker;
 import cn.shu.wechat.swing.panels.RightPanel;
 import cn.shu.wechat.swing.panels.UserInfoPanel;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.swing.panels.left.TabOperationPanel;
 import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
-import cn.shu.wechat.utils.*;
+import cn.shu.wechat.utils.DateUtils;
+import cn.shu.wechat.utils.ExecutorServiceUtil;
+import cn.shu.wechat.utils.FileUtil;
+import cn.shu.wechat.utils.IconUtil;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -172,36 +174,57 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
      */
     private void processMessageResult(SearchResultItemViewHolder viewHolder, SearchResultItem item) {
         SearchResultMessageViewHolder holder = (SearchResultMessageViewHolder) viewHolder;
-        //Room room = null;
 
-        Message message = null;
-
-        // holder.avatar.setIcon(AvatarUtil.createOrLoadUserAvatar(room.getRoomId()));
+        new HeadLoadingSwingWorker(holder.avatar, item.getTag()).loadAvatar();
         holder.brief.setKeyWord(keyWord);
-        holder.brief.setText(item.getName());
-        // holder.roomName.setText(room.getName());
-        holder.time.setText(DateUtils.diff(message.getMessageTime()));
+        String content = item.getName();
 
-        holder.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON1) {
-                    // enterRoom(room.getRoomId());
-                    clearSearchText();
-                }
-                super.mouseReleased(e);
-            }
+        //********
+        int totalLen = 25;
+        String key = item.getKey();
+        int keyLen = key.length();
+        int pre = (totalLen - keyLen) / 2 - 3; // 给...留空间
+        if (pre < 0) pre = 0;
 
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                setBackground(holder, Colors.ITEM_SELECTED_DARK);
-            }
+        int i = content.indexOf(key);
+        if (content.length() > totalLen && i >= 0) {
+            int start = Math.max(i - pre, 0);
+            int end = Math.min(i + keyLen + pre, content.length());
 
-            @Override
-            public void mouseExited(MouseEvent e) {
-                setBackground(holder, Colors.DARK);
+            String left = content.substring(start, i);
+            String right = content.substring(i + keyLen, end);
+
+            boolean atStart = start == 0;
+            boolean atEnd = end == content.length();
+
+            if (atStart && !atEnd) {
+                // 开头不加省略号
+                content = left + key + right + "...";
+            } else if (!atStart && atEnd) {
+                // 结尾不加省略号
+                content = "..." + left + key + right;
+            } else if (!atStart) {
+                // 两边都加省略号
+                content = "..." + left + key + right + "...";
+            } else {
+                // 完全显示，不加省略号
+                content = left + key + right;
             }
-        });
+        }
+        //***************
+        if (item.getSender().length() > 7) {
+            holder.roomName.setText(item.getSender().substring(0, 7) + "...");
+        } else {
+
+            holder.roomName.setText(item.getSender());
+        }
+
+        holder.brief.setText(content);
+        holder.time.setText(item.getDateTime().format(DateTimeFormatter.ofPattern(DateUtils.YYYY_MM_DD_HH_MM_SS)));
+        holder.setToolTipText(item.getName());
+        processMouseListeners(viewHolder, item);
+
+
     }
 
     private void processMouseListeners(SearchResultItemViewHolder viewHolder, SearchResultItem item) {
@@ -219,8 +242,46 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
            viewHolder.addMouseListener(  viewHolder.mouseListener);
         }
 
-
     }
+
+    /**
+     * 处理通讯录或群组探索结果
+     *
+     * @param viewHolder
+     * @param item
+     */
+    private void processContactsOrRoomsResult(SearchResultItemViewHolder viewHolder, SearchResultItem item) {
+        SearchResultUserItemViewHolder holder = (SearchResultUserItemViewHolder) viewHolder;
+        holder.name.setKeyWord(this.keyWord);
+        holder.name.setText(item.getName());
+        SearchResultType byCode = SearchResultType.getByCode(item.getType());
+        switch (byCode) {
+            case CONTACTS:
+                new HeadLoadingSwingWorker(holder.avatar, item.getTag()).loadAvatar();
+                holder.type.setText("联系人");
+                break;
+            case ROOM:
+                new HeadLoadingSwingWorker(holder.avatar, item.getTag()).loadAvatar();
+                holder.type.setText("聊天房");
+                break;
+            case SEARCH_FILE:
+                holder.avatar.setIcon(IconUtil.getIcon(this, "/image/file_icon.png", 25, 25));
+                break;
+            case SEARCH_MESSAGE:
+                holder.avatar.setIcon(IconUtil.getIcon(this, "/image/message.png", 25, 25));
+                break;
+            case MESSAGE:
+                new HeadLoadingSwingWorker(holder.avatar, item.getTag()).loadAvatar();
+                break;
+            default:
+                throw new RuntimeException("ViewType 不正确");
+        }
+
+        processMouseListeners(viewHolder, item);
+    }
+
+    ;
+
     class SearchResultItemAbstractMouseListener extends AbstractMouseListener {
         private JPopupMenu jPopupMenu ;
         private SearchResultType type;
@@ -258,12 +319,10 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
                         if (searchMessageOrFileListener != null) {
                             searchMessageOrFileListener.onSearchMessage();
                         }
+                        break;
                     case MESSAGE:
-            /*                Room room = roomService.findById((String) ((Map) item.getTag()).get("roomId"));
-                            if (room != null)
-                            {
-                                icon.setImage(getRoomAvatar(room.getType(), room.getName()));
-                            }*/
+                        RoomsPanel.getContext().enterRoom(tag);
+                        break;
                     case FILE:{
                             downloadOrOpenFile(tag, holder);
                         break;
@@ -272,14 +331,19 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
                         throw new RuntimeException("ViewType 不正确");
                 }
             }else if (e.getButton() == MouseEvent.BUTTON3){
-                if (jPopupMenu == null){
-                    jPopupMenu = new JPopupMenu();
-                    JMenuItem jMenuItem = new JMenuItem("打开文件夹");
-                    jMenuItem.addActionListener(e1 -> ExecutorServiceUtil.getGlobalExecutorService().submit(() -> FileUtil.showAtExplorer(tag)));
-                    jPopupMenu.add(jMenuItem);
+                switch (type) {
+                    case FILE: {
+                        if (jPopupMenu == null) {
+                            jPopupMenu = new JPopupMenu();
+                            JMenuItem jMenuItem = new JMenuItem("打开文件夹");
+                            jMenuItem.addActionListener(e1 -> ExecutorServiceUtil.getGlobalExecutorService().submit(() -> FileUtil.showAtExplorer(tag)));
+                            jPopupMenu.add(jMenuItem);
+                        }
+                        jPopupMenu.show(holder, e.getX()
+                                , e.getY());
+                        break;
+                    }
                 }
-                jPopupMenu.show(holder,e.getX()
-                        ,e.getY());
             }
         }
 
@@ -294,73 +358,12 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
             setBackground(holder, Colors.WINDOW_BACKGROUND);
         }
 
-    };
-
-
-    /**
-     * 处理通讯录或群组探索结果
-     *
-     * @param viewHolder
-     * @param item
-     */
-    private void processContactsOrRoomsResult(SearchResultItemViewHolder viewHolder, SearchResultItem item) {
-        SearchResultUserItemViewHolder holder = (SearchResultUserItemViewHolder) viewHolder;
-
-        holder.name.setKeyWord(this.keyWord);
-        holder.name.setText(item.getName());
-
-
-        SearchResultType byCode = SearchResultType.getByCode(item.getType());
-        new SwingWorker<Object,Object>(){
-            ImageIcon icon = null;
-            @Override
-            protected Object doInBackground() {
-                switch (byCode) {
-                    case CONTACTS:
-                        icon = AvatarUtil.createOrLoadUserAvatar(item.getTag().toString());
-                        holder.type.setText("联系人");
-                        break;
-                    case ROOM:
-                        icon = AvatarUtil.createOrLoadUserAvatar(item.getTag().toString());
-                        holder.type.setText("聊天房");
-                        break;
-                    case SEARCH_FILE:
-                        icon.setImage(IconUtil.getIcon(this, "/image/file_icon.png").getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH));
-                        break;
-                    case SEARCH_MESSAGE:
-                        icon.setImage(IconUtil.getIcon(this, "/image/message.png").getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH));
-                    case MESSAGE:
-    /*                Room room = roomService.findById((String) ((Map) item.getTag()).get("roomId"));
-                    if (room != null)
-                    {
-                        icon.setImage(getRoomAvatar(room.getType(), room.getName()));
-                    }*/
-                        break;
-                    default:
-                        throw new RuntimeException("ViewType 不正确");
-                }
-                return null;
-            }
-
-            @Override
-            protected void done() {
-                if (icon!=null){
-                    holder.avatar.setIcon(icon);
-                }
-
-                super.done();
-            }
-        }.execute();
-
-        processMouseListeners(viewHolder, item);
     }
 
 
     /**
      * 根据房间类型获取对应的头像
      *
-     * @param type
-     * @param name
      * @return
      */
     /*private Image getRoomAvatar(String type, String name)

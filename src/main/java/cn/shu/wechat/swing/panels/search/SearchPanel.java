@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.panels.search;
 
 import cn.shu.wechat.constant.SearchResultType;
+import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.entity.SearchResultItem;
@@ -13,6 +14,7 @@ import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.utils.CharacterParser;
 import cn.shu.wechat.utils.FontUtil;
 import cn.shu.wechat.utils.SpringContextHolder;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -237,38 +239,32 @@ public class SearchPanel extends ParentAvailablePanel {
      * @param key
      */
     private void searchAndListMessage(String key) {
-       /* SearchResultPanel searchResultPanel = SearchResultPanel.getContext();
-        List<Message> messages = null; //= messageService.search(key);
+        MessageMapper messageMapper = SpringContextHolder.getBean(MessageMapper.class);
+        List<Message> messages = messageMapper.selectList(Wrappers.<Message>lambdaQuery().like(Message::getPlaintext, key)
+                .orderByDesc(Message::getPlaintext));
         List<SearchResultItem> searchResultItems = new ArrayList<>();
-
-        if (messages == null || messages.size() < 1) {
+        if (messages.isEmpty()) {
             searchResultPanel.getTipLabel().setVisible(true);
         } else {
             searchResultPanel.getTipLabel().setVisible(false);
 
             SearchResultItem item;
             for (Message msg : messages) {
-                String content = msg.getMessageContent();
-                int startPos = content.toLowerCase().indexOf(key.toLowerCase());
-                int endPos = startPos + 10;
-                //endPos = endPos > content.length() ? content.length() : endPos;
-                if (endPos > content.length()) {
-                    endPos = content.length();
-                    content = content.substring(startPos, endPos);
-                } else {
-                    content = content.substring(startPos, endPos) + "...";
-                }
+                String content = msg.getPlaintext();
 
                 item = new SearchResultItem(msg.getId(), content, SearchResultType.MESSAGE);
-                item.setTag(msg.getRoomId());
-
+                item.setDateTime(msg.getMessageTime());
+                item.setSender(msg.getFromNickname().equals(Core.getNickName()) ? msg.getToRemarkname() : msg.getFromRemarkname());
+                item.setTag(msg.getFromNickname().equals(Core.getNickName()) ? msg.getToUsername() : msg.getFromUsername());
+                item.setKey(key);
                 searchResultItems.add(item);
             }
         }
 
+        //渲染搜索结果Panel
         searchResultPanel.setData(searchResultItems);
         searchResultPanel.setKeyWord(key);
-        searchResultPanel.notifyDataSetChanged(false);*/
+        searchResultPanel.notifyDataSetChanged(false);
     }
 
     /**
@@ -297,9 +293,11 @@ public class SearchPanel extends ParentAvailablePanel {
 
         }
 
-        searchResultPanel.setKeyWord(key);
+        //渲染搜索结果Panel
         searchResultPanel.setData(searchResultItems);
+        searchResultPanel.setKeyWord(key);
         searchResultPanel.notifyDataSetChanged(false);
+        searchResultPanel.getTipLabel().setVisible(false);
     }
 
     /**

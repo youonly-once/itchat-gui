@@ -27,23 +27,23 @@ public class SearchResultMessageViewHolder extends SearchResultItemViewHolder {
     }
 
     private void initComponents() {
-        setPreferredSize(new Dimension(100, 64));
-        setBackground(Colors.DARK);
+        setPreferredSize(new Dimension(100, 65));
+        setBackground(Colors.WINDOW_BACKGROUND);
         setBorder(new RCBorder(RCBorder.BOTTOM));
         setOpaque(true);
-        setForeground(Colors.FONT_WHITE);
+        setForeground(Colors.DARK);
 
 
         roomName.setFont(FontUtil.getDefaultFont(14));
-        roomName.setForeground(Colors.FONT_WHITE);
+        roomName.setForeground(Colors.DARK);
 
-        brief.setForeground(Colors.FONT_GRAY);
+        brief.setForeground(Colors.DARK);
         brief.setFont(FontUtil.getDefaultFont(12));
 
         nameBrief.setLayout(new BorderLayout());
-        nameBrief.setBackground(Colors.DARK);
-        nameBrief.add(roomName, BorderLayout.NORTH);
-        nameBrief.add(brief, BorderLayout.CENTER);
+        setBackground(Colors.WINDOW_BACKGROUND);
+        nameBrief.add(roomName, BorderLayout.WEST);
+        nameBrief.add(time, BorderLayout.EAST);
 
         time.setForeground(Colors.FONT_GRAY);
         time.setFont(FontUtil.getDefaultFont(12));
@@ -51,9 +51,9 @@ public class SearchResultMessageViewHolder extends SearchResultItemViewHolder {
 
     private void initView() {
         setLayout(new GridBagLayout());
-        add(avatar, new GBC(0, 0).setWeight(2, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0));
-        add(nameBrief, new GBC(1, 0).setWeight(100, 1).setFill(GBC.BOTH).setInsets(5, 5, 0, 0));
-        add(time, new GBC(2, 0).setWeight(1, 1).setFill(GBC.BOTH).setInsets(5, 0, 0, 0).setAnchor(GBC.NORTH));
+        add(avatar, new GBC(0, 0).setWeight(2, 1).setFill(GBC.BOTH).setInsets(5, 5, 5, 0).setGridHeight(2));
+        add(nameBrief, new GBC(1, 0).setWeight(50, 1).setFill(GBC.BOTH).setInsets(5, 5, 0, 0));
+        add(brief, new GBC(1, 1).setWeight(50, 50).setFill(GBC.BOTH).setInsets(0, 5, 5, 0));
 
     }
 

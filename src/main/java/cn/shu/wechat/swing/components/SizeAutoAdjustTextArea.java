@@ -82,7 +82,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
         int lineCount = parseLineCount(t);
 
         // 每一行的emoji表情信息
-        List<LineEmojiInfo2> lineEmojiInfoList = parseLineEmojiInfo();
+        List<LineEmojiInfo> lineEmojiInfoList = parseLineEmojiInfo();
 
         // 每一行的实际宽度，即插入表情后的宽度
         int[] lineWidthArr = parseLineActualWidth(lineEmojiInfoList);
@@ -354,13 +354,13 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
      *
      * @return
      */
-    private List<LineEmojiInfo2> parseLineEmojiInfo() {
-        List<LineEmojiInfo2> infoList = new ArrayList<>(lineArr.length);
+    private List<LineEmojiInfo> parseLineEmojiInfo() {
+        List<LineEmojiInfo> infoList = new ArrayList<>(lineArr.length);
         List<String> emojiList;
-        LineEmojiInfo2 info;
+        LineEmojiInfo info;
         for (int i = 0; i < lineArr.length; i++) {
             emojiList = parseEmoji(lineArr[i]);
-            info = new LineEmojiInfo2(emojiList.size(), emojiList);
+            info = new LineEmojiInfo(emojiList.size(), emojiList);
             infoList.add(info);
         }
 
@@ -422,7 +422,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
      * @param lineEmojiInfoList
      * @return
      */
-    private int[] parseLineActualWidth(List<LineEmojiInfo2> lineEmojiInfoList) {
+    private int[] parseLineActualWidth(List<LineEmojiInfo> lineEmojiInfoList) {
         String[] lineArrCopy = lineArr.clone();
         int[] retArr = new int[lineArrCopy.length];
 
