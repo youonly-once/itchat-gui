@@ -99,7 +99,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
 
 
         if (lineCount > 0) {
-            targetWidth = lineWidthArr[maxLengthLinePosition] + 10;
+            targetWidth = lineWidthArr[maxLengthLinePosition] ;
         }
         // 输入全为\n的情况
         else {
@@ -377,10 +377,19 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
     private List<String> parseEmoji(String src) {
         List<String> emojiList = new ArrayList<>();
 
-        //微信表情
-        List<String> weChatEmoji = EmojiUtil.getWechatEmojiList().stream()
-                .filter(src::contains)
-                .toList();
+        String regex = "(\\[.*?\\])"; // 正则表达式匹配以 [ 开始，以 ] 结尾的字符，并使用括号 () 将其捕获为一个组
+
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(src);
+
+        while (matcher.find()) {
+            String extracted = matcher.group(1); // 获取捕获组中的内容
+            if (EmojiUtil.getWechatEmojiList().contains(extracted)) {
+                emojiList.add(extracted);
+            }
+
+        }
+
 
         //其它表情
         Matcher emojiMatcher = emojiPattern.matcher(src);
@@ -390,7 +399,6 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
                 emojiList.add(code);
             }
         }
-        emojiList.addAll(weChatEmoji);
         return emojiList;
     }
 
