@@ -1081,11 +1081,12 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
             @Override
             public void run() {
+                Dimension preferredSize = linkViewHolder.icon.getPreferredSize();
                 if (StringUtils.isNotEmpty(item.getThumbUrl())) {
                     try {
                         BufferedImage image = ImageIO.read(URI.create(item.getThumbUrl()).toURL());
                         if (image != null) {
-                            ImageIcon imageIcon = new ImageIcon(IconUtil.preferredImageSize(image, MessageLinkOfAppViewHolder.THUMB_WIDTH,MessageLinkOfAppViewHolder.THUMB_HEIGHT));
+                            ImageIcon imageIcon = new ImageIcon(IconUtil.preferredImageSize(image, preferredSize.width,preferredSize.height));
                             SwingUtilities.invokeLater(() -> {
                                 linkViewHolder.icon.setIcon(imageIcon);
                                 //有图片时缩短宽度，让其与无图的Panel尽量一致
@@ -1105,7 +1106,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     BufferedImage image = DownloadManager.submitAwait(downloadTask);
                     if (image != null) {
                         SwingUtilities.invokeLater(() -> {
-                            linkViewHolder.icon.setIcon(new ImageIcon(IconUtil.preferredImageSize(image, MessageLinkOfAppViewHolder.THUMB_WIDTH,MessageLinkOfAppViewHolder.THUMB_HEIGHT)));
+                            linkViewHolder.icon.setIcon(new ImageIcon(IconUtil.preferredImageSize(image, preferredSize.width,preferredSize.height)));
                             //有图片时缩短宽度，让其与无图的Panel尽量一致
                            // linkViewHolder.desc.setColumns(16);
                         });
