@@ -90,13 +90,13 @@ public class MessageViewHolderCacheHelper {
     public MessageLeftProgramOfAppViewHolder tryGetLeftProgramOfAppViewHolder(Message messageItem) {
 
         return new MessageLeftProgramOfAppViewHolder(messageItem.isGroup(),IconUtil.getScaleDimension(messageItem.getImgWidth(),messageItem.getImgHeight()
-                ,MessageProgramOfAppViewHolder.maxWidth, MessageProgramOfAppViewHolder.maxHeight));
+                ,MessageProgramOfAppViewHolder.maxWidth, MessageProgramOfAppViewHolder.maxHeight),messageItem.getTitle());
 
     }
 
     public MessageRightProgramOfAppViewHolder tryGetRightProgramOfAppViewHolder(Message messageItem) {
         return new MessageRightProgramOfAppViewHolder(IconUtil.getScaleDimension(messageItem.getImgWidth(),messageItem.getImgHeight()
-                ,MessageProgramOfAppViewHolder.maxWidth,MessageProgramOfAppViewHolder.maxHeight));
+                ,MessageProgramOfAppViewHolder.maxWidth,MessageProgramOfAppViewHolder.maxHeight),messageItem.getTitle() );
 
     }
 

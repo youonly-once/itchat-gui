@@ -12,8 +12,8 @@ import java.awt.*;
  */
 public class MessageRightProgramOfAppViewHolder extends MessageProgramOfAppViewHolder{
 
-    public MessageRightProgramOfAppViewHolder(Dimension imgSize) {
-        super(new RCRightAppMessageBubble(),imgSize);
+    public MessageRightProgramOfAppViewHolder(Dimension imgSize,String title) {
+        super(new RCRightAppMessageBubble(),imgSize,title);
 
         initView();
     }

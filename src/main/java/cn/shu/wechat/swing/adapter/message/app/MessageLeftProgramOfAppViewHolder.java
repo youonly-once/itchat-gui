@@ -15,8 +15,8 @@ import java.awt.*;
  * @创建时间 8/15/2021 11:58
  */
 public class MessageLeftProgramOfAppViewHolder extends MessageProgramOfAppViewHolder{
-    public MessageLeftProgramOfAppViewHolder(boolean isGroup, Dimension size) {
-        super(new RCLeftAppMessageBubble(),size);
+    public MessageLeftProgramOfAppViewHolder(boolean isGroup, Dimension size,String title) {
+        super(new RCLeftAppMessageBubble(),size,title);
         initView(isGroup);
     }
 
