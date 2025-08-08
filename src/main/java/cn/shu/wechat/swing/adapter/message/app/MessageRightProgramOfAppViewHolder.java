@@ -3,6 +3,8 @@ package cn.shu.wechat.swing.adapter.message.app;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.message.RCRightAppMessageBubble;
 
+import java.awt.*;
+
 /**
  * @作者 舒新胜
  * @项目 AutoWechat
@@ -10,8 +12,9 @@ import cn.shu.wechat.swing.components.message.RCRightAppMessageBubble;
  */
 public class MessageRightProgramOfAppViewHolder extends MessageProgramOfAppViewHolder{
 
-    public MessageRightProgramOfAppViewHolder() {
-        super(new RCRightAppMessageBubble());
+    public MessageRightProgramOfAppViewHolder(Dimension imgSize) {
+        super(new RCRightAppMessageBubble(),imgSize);
+
         initView();
     }
 

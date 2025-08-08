@@ -173,7 +173,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                    case PROGRAM:{
                       if (isSelf){
 
-                          return messageViewHolderCacheHelper.tryGetRightProgramOfAppViewHolder();
+                          return messageViewHolderCacheHelper.tryGetRightProgramOfAppViewHolder(messageItem);
                        }else {
 
                           return messageViewHolderCacheHelper.tryGetLeftProgramOfAppViewHolder(messageItem);
@@ -309,7 +309,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 DownloadManager.awaitDownloadTimeOut(item.getFilePath());
                 if (Files.exists(Path.of(item.getFilePath()))) {
                     ImageIcon imageIcon = new ImageIcon(item.getFilePath());
-                    IconUtil.preferredImageSize(imageIcon, 32,32);
+                    IconUtil.preferredImageSize(imageIcon,MessageProgramOfAppViewHolder.maxWidth,MessageProgramOfAppViewHolder.maxHeight);
                     SwingUtilities.invokeLater(() -> viewHolder.imageLabel.setIcon(imageIcon));
                 }
             });
@@ -339,10 +339,10 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     private void process(Message item, MessageProgramOfAppViewHolder appViewHolder, byte[] secondBytes) {
         ImageIcon imageIcon = null;
         if (IconUtil.isGIF(secondBytes)) {
-            imageIcon = IconUtil.preferredGifSize(secondBytes, item.getImgWidth(), item.getImgHeight(),32,32);
+            imageIcon = IconUtil.preferredGifSize(secondBytes, item.getImgWidth(), item.getImgHeight(),MessageProgramOfAppViewHolder.maxWidth,MessageProgramOfAppViewHolder.maxHeight);
         } else {
             imageIcon = new ImageIcon(secondBytes);
-            IconUtil.preferredImageSize(imageIcon, 32,32);
+            IconUtil.preferredImageSize(imageIcon,MessageProgramOfAppViewHolder.maxWidth,MessageProgramOfAppViewHolder.maxHeight);
         }
         if (imageIcon != null) {
             ImageIcon finalImageIcon = imageIcon;
@@ -1089,7 +1089,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                             SwingUtilities.invokeLater(() -> {
                                 linkViewHolder.icon.setIcon(imageIcon);
                                 //有图片时缩短宽度，让其与无图的Panel尽量一致
-                                linkViewHolder.desc.setColumns(16);
+                               // linkViewHolder.desc.setColumns(16);
                             });
                         }
                     } catch (IOException e) {
@@ -1107,7 +1107,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                         SwingUtilities.invokeLater(() -> {
                             linkViewHolder.icon.setIcon(new ImageIcon(IconUtil.preferredImageSize(image, MessageLinkOfAppViewHolder.THUMB_WIDTH,MessageLinkOfAppViewHolder.THUMB_HEIGHT)));
                             //有图片时缩短宽度，让其与无图的Panel尽量一致
-                            linkViewHolder.desc.setColumns(16);
+                           // linkViewHolder.desc.setColumns(16);
                         });
                     }
                 }

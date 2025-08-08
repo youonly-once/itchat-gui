@@ -7,6 +7,7 @@ import cn.shu.wechat.utils.FontUtil;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import java.awt.*;
 
 /**
  * @作者 舒新胜
@@ -14,8 +15,8 @@ import javax.swing.border.EmptyBorder;
  * @创建时间 8/15/2021 11:58
  */
 public class MessageLeftProgramOfAppViewHolder extends MessageProgramOfAppViewHolder{
-    public MessageLeftProgramOfAppViewHolder(boolean isGroup) {
-        super(new RCLeftAppMessageBubble());
+    public MessageLeftProgramOfAppViewHolder(boolean isGroup, Dimension size) {
+        super(new RCLeftAppMessageBubble(),size);
         initView(isGroup);
     }
 
@@ -36,21 +37,4 @@ public class MessageLeftProgramOfAppViewHolder extends MessageProgramOfAppViewHo
                 .setInsets(0, 5, 0, 0));
     }
 
-    public static void main(String[] args) {
-        JFrame jFrame = new JFrame();
-        jFrame.setSize(400,300);
-        MessageLeftProgramOfAppViewHolder holder = new MessageLeftProgramOfAppViewHolder(true);
-        holder.sender.setText("发送者");
-        holder.avatar.setIcon(new ImageIcon("E:\\JAVA\\project_idea\\AutoWeChat\\wechat\\src\\main\\resources\\image\\avatar.jpg"));
-        holder.sourceName.setText("sourceName");
-        holder.imageLabel.setIcon(new ImageIcon("E:\\JAVA\\project_idea\\AutoWeChat\\wechat\\src\\main\\resources\\image\\avatar.jpg"));
-
-        jFrame.getContentPane().add(holder);
-        jFrame.setVisible(true);
-
-        byte[] bytes = "GIF".getBytes();
-        for (byte aByte : bytes) {
-            System.out.println(aByte);
-        }
-    }
 }

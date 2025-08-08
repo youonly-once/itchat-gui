@@ -1,10 +1,7 @@
 package cn.shu.wechat.swing.helper;
 
 import cn.shu.wechat.entity.Message;
-import cn.shu.wechat.swing.adapter.message.app.MessageLeftAttachmentViewHolder;
-import cn.shu.wechat.swing.adapter.message.app.MessageLeftProgramOfAppViewHolder;
-import cn.shu.wechat.swing.adapter.message.app.MessageRightAttachmentViewHolder;
-import cn.shu.wechat.swing.adapter.message.app.MessageRightProgramOfAppViewHolder;
+import cn.shu.wechat.swing.adapter.message.app.*;
 import cn.shu.wechat.swing.adapter.message.image.MessageLeftImageViewHolder;
 import cn.shu.wechat.swing.adapter.message.image.MessageRightImageViewHolder;
 import cn.shu.wechat.swing.adapter.message.system.MessageSystemMessageViewHolder;
@@ -92,12 +89,14 @@ public class MessageViewHolderCacheHelper {
 
     public MessageLeftProgramOfAppViewHolder tryGetLeftProgramOfAppViewHolder(Message messageItem) {
 
-        return new MessageLeftProgramOfAppViewHolder(messageItem.isGroup());
+        return new MessageLeftProgramOfAppViewHolder(messageItem.isGroup(),IconUtil.getScaleDimension(messageItem.getImgWidth(),messageItem.getImgHeight()
+                ,MessageProgramOfAppViewHolder.maxWidth, MessageProgramOfAppViewHolder.maxHeight));
 
     }
 
-    public MessageRightProgramOfAppViewHolder tryGetRightProgramOfAppViewHolder() {
-        return new MessageRightProgramOfAppViewHolder();
+    public MessageRightProgramOfAppViewHolder tryGetRightProgramOfAppViewHolder(Message messageItem) {
+        return new MessageRightProgramOfAppViewHolder(IconUtil.getScaleDimension(messageItem.getImgWidth(),messageItem.getImgHeight()
+                ,MessageProgramOfAppViewHolder.maxWidth,MessageProgramOfAppViewHolder.maxHeight));
 
     }
 

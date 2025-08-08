@@ -14,7 +14,7 @@ import java.awt.event.MouseAdapter;
 
 public abstract class MessageLinkOfAppViewHolder extends MessageAppViewHolder {
 
-    public static final int THUMB_WIDTH = 32;
+    public static final int THUMB_WIDTH = 100;
     public static final int THUMB_HEIGHT = 32;
     /**
      * 链接预览图
