@@ -46,10 +46,6 @@ public class SearchPanel extends ParentAvailablePanel {
     private final SearchDebounce debounce = new SearchDebounce(100);
     private SwingWorker<Object, Object> swingWorker;
 
-    /**
-     * 设置的搜索返回结果上线
-     */
-    private final int resultSize = 20;
 
     private final AtomicInteger searchVer = new AtomicInteger();
 
