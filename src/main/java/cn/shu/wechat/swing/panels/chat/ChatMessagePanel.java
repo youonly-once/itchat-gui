@@ -284,9 +284,6 @@ public class ChatMessagePanel extends ParentAvailablePanel {
         StringBuilder currentString = null;
         for (Object element : inputList) {
             if (element instanceof String str) {
-                if ("\n".equals(str)){
-                    continue;
-                }
                 if (currentString == null) {
                     currentString = new StringBuilder(str);
                 } else {

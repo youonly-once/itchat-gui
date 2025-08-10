@@ -3,56 +3,48 @@ package cn.shu.wechat.swing.components;
 import cn.shu.wechat.swing.components.message.JIMSendTextPane;
 import cn.shu.wechat.utils.EmojiUtil;
 import cn.shu.wechat.utils.FontUtil;
-import cn.shu.wechat.utils.OSUtil;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Setter;
-import org.springframework.util.StringUtils;
 
 import javax.swing.*;
 import javax.swing.event.CaretListener;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
+import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
 /**
  * Created by 舒新胜 on 17-6-4.
  */
 public class SizeAutoAdjustTextArea extends JIMSendTextPane {
     private final FontMetrics fontMetrics;
-    private String[] lineArr;
+
     /**
      * 约束的组件最大宽度
      */
     private final int maxWidth;
-    private Object tag;
-    private Pattern emojiPattern;
 
-    private String emojiRegx;
+
+    private static final Pattern emojiPattern = Pattern.compile(":.+?:");
+
+    private static final Pattern urlPattern = Pattern.compile("(?:https?://)?(www\\.)?[\\w]+(?:\\.[\\w]+)+[\\w,\\-_/?&=#%.:]*");
+
     private int emojiSize = 20;
     private MouseAdapter mouseAdapter;
+    private static final Pattern wxEmojiPattern = Pattern.compile("(\\[.*?\\])");
     @Setter
     private boolean parseUrl = false;
-
-    private final Pattern wxEmojiPattern = Pattern.compile("(\\[.*?\\])");
+    private MouseMotionAdapter mouseMotionListener;
     // 最长一行长度
-    private int maxLengthLinePosition = 0;
-
-    // 所有的url地址
-    private List<String> urlList;
-
-
-    // 记录每个url地址的起始位置与结束位置
-    int[][] urlRange;
+    private int maxLengthLine = 0;
 
     private boolean isAllEmoji = true;
 
@@ -67,8 +59,6 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
         this.setFont(FontUtil.getDefaultFont(14));
         //setEditable(false);
 
-        emojiRegx = ":.+?:";
-        emojiPattern = Pattern.compile(emojiRegx);// 懒惰匹配，最小匹配
         fontMetrics = getFontMetrics(getFont());
         emojiSize = fontMetrics.getHeight();
 
@@ -77,64 +67,35 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
 
     @Override
     public void setText(String t) {
-        // 对emoji的Unicode编码转别名
-
-  /*      try{
-            t = EmojiParser.parseToAliases(t);
-        }catch (Exception e){
-
-        }*/
-
         if (t == null) {
             return;
         }
 
-        // 总行数
-        int lineCount = parseLineCount(t);
-        if (lineCount == 0) {
+        // 每一行的信息
+        List<Line> lineEmojiInfoList = parseLineEmojiInfo(t);
+
+        if (lineEmojiInfoList.isEmpty()) {
             return;
         }
+        int targetWidth = maxLengthLine + 7;
 
-        // 每一行的信息
-        List<Line> lineEmojiInfoList = parseLineEmojiInfo();
-
-
-        int lineHeight = fontMetrics.getHeight();
-
-        int targetHeight = lineHeight * lineCount;
-        int targetWidth = 20;
-
-        Insets borderInsets = this.getBorder().getBorderInsets(this);
-        Insets marginInsets = this.getMargin();
-
-        if (lineCount > 0) {
-            targetWidth = maxLengthLinePosition + borderInsets.left + borderInsets.right + marginInsets.left + marginInsets.right;
-        }
-
-        // 如果最长的一行宽度超过了最大宽度，就要重新计算高度
         int totalLine = 0;
+        int targetHeight = 0;
         if (targetWidth > maxWidth) {
             targetWidth = maxWidth;
-
-
-            for (Line line : lineEmojiInfoList) {
+        }
+        for (Line line : lineEmojiInfoList) {
+            if (line.getLineWidth() > maxWidth) {
                 int ret = line.getLineWidth() / maxWidth;
                 int l = ret == 0 ? ret : ret + 1;
                 totalLine += l == 0 ? 1 : l;
+                targetHeight += (line.lineHeight * l);
+            } else {
+                totalLine += 1;
+                targetHeight += (line.lineHeight);
             }
 
-            targetHeight = lineHeight * totalLine;
         }
-
-
-       // String targetText = t.replaceAll(emojiRegx, "");
-//        for (String code : EmojiUtil.getWechatEmojiList()) {
-//            targetText = targetText.replace(code, "");
-//        }
-        super.setText("");
-
-        // 插入emoji表情，并计算需要增加的高度
-        //Map<Integer, String> emojiPositionMap = insertEmoji(t);
 
         try {
             insertWechatEmoji(lineEmojiInfoList);
@@ -142,79 +103,14 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
             throw new RuntimeException(e);
         }
 
-//        String exceptEmoji = t.replaceAll("\\r\\n", "\n");
-//        for (String emoji : emojiPositionMap.values()) {
-//            exceptEmoji = exceptEmoji.replace(emoji, "\0");
-//        }
-        // int emojiCount = emojiPositionMap.size();
-
-        //全是emoji的情况
         if (isAllEmoji) {
-            int emojiCount = lineEmojiInfoList.get(0).getEmojiList().size();
-            int totalWidth = emojiCount * emojiSize;
-            targetWidth = maxLengthLinePosition;
-            targetHeight = emojiSize;
-            if (totalWidth > maxWidth) {
-                targetWidth = maxWidth;
-                int ret = totalWidth / maxWidth;
-                int l = ret == 0 ? ret : ret + 1;
-                targetHeight = l * emojiSize;
-            }
-
-            int emojiExtraHeight = 0;
-            if (totalLine > 1) {
-                int i = 0;
-                for (Line line : lineEmojiInfoList) {
-                    if (!line.getEmojiList().isEmpty()) {
-                        emojiExtraHeight += (i * 5);
-                        i++;
-                    }
-                }
-            }
-            int h = OSUtil.getOsType() == OSUtil.Mac_OS ? 0 : 3;
-            setPreferredSize(new Dimension(targetWidth, targetHeight + h + emojiExtraHeight));
-            return;
-        }
-//
-//        int emojiExtraHeight = OSUtil.getOsType() == OSUtil.Mac_OS ? 8 : 10;
-//        int emojiIndex = 1;
-//        for (int pos : emojiPositionMap.keySet()) {
-//            String substr = exceptEmoji.substring(0, pos + 1);
-//            int width = fontMetrics.stringWidth(substr) + emojiSize;
-//            if (width > maxWidth || substr.contains("\n")) {
-//                targetHeight += emojiExtraHeight;
-//                break;
-//            }
-//            emojiIndex++;
-//        }
-//        if (emojiIndex < emojiCount) {
-//            targetHeight += (emojiCount - emojiIndex) * emojiExtraHeight;
-//        }
-
-        // 如果有emoji表情，高度就要适当增加
-        int emojiExtraHeight = 0;
-        if (totalLine > 1) {
-            int i = 0;
-            for (Line line : lineEmojiInfoList) {
-                if (!line.getEmojiList().isEmpty()) {
-                    emojiExtraHeight += (i * 20);
-                    i++;
-                }
-            }
-        } else {
-            emojiExtraHeight = 2;
-        }
-
-
-        if (isAllEmoji) {
-            this.setPreferredSize(new Dimension(targetWidth, targetHeight + emojiExtraHeight));
+            this.setPreferredSize(new Dimension(targetWidth, targetHeight));
         } else {
             if (existEmoji) {
                 this.setPreferredSize(new Dimension(targetWidth, targetHeight + 2 + 5));
             } else {
                 this.setPreferredSize(new Dimension(targetWidth, targetHeight + 2));
             }
-
         }
         if (parseUrl) {
             // 解析网址
@@ -229,39 +125,27 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
      * @param src
      */
     private void highlightUrls(String src) {
-        urlList = parseUrl(src);
-        urlRange = new int[urlList.size()][2];
-        if (!urlList.isEmpty()) {
+        List<UrlInfo> urlInfos = parseUrl(src);
+        if (!urlInfos.isEmpty()) {
             setListeners();
         }else{
             removeMouseAdapter();
         }
-        SimpleAttributeSet bSet = new SimpleAttributeSet();
-        StyleConstants.setForeground(bSet, Color.blue);
-        StyleConstants.setUnderline(bSet, true);
+
         StyledDocument doc = getStyledDocument();
         doc.setCharacterAttributes(0, src.length(), getCharacterAttributes(), true);
 
-        int startIndex = 0;
-        int endIndex = 0;
-        for (int i = 0; i < urlList.size(); i++) {
-            String url = urlList.get(i);
-            startIndex = src.indexOf(url);
-            if (startIndex > -1) {
-                endIndex = startIndex + url.length();
-                doc.setCharacterAttributes(src.indexOf(url, startIndex), url.length(), bSet, false);
-
-                urlRange[i][0] = startIndex;
-                urlRange[i][1] = endIndex;
-
-                startIndex++;
-            }
+        for (UrlInfo url : urlInfos) {
+            SimpleAttributeSet bSet = new SimpleAttributeSet();
+            StyleConstants.setForeground(bSet, Color.blue);
+            StyleConstants.setUnderline(bSet, true);
+            bSet.addAttribute("url", url.getUrl());
+            doc.setCharacterAttributes(url.getStart(), url.getUrl().length(), bSet, false);
         }
     }
 
 
     private void insertWechatEmoji(List<Line> lineList) throws BadLocationException {
-
 
         StyledDocument doc = this.getStyledDocument();
 
@@ -281,14 +165,15 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
                 doc.insertString(insertPos, "\uFFFC", iconAttr);
 
                 //中间插入空格 不然多个表情会被覆盖
+                //最后一个表情不用
                 SimpleAttributeSet spaceAttr = new SimpleAttributeSet();
-                StyleConstants.setFontSize(spaceAttr, 1); // 最小字体
+                //StyleConstants.setFontSize(spaceAttr, 1); // 最小字体
                 StyleConstants.setForeground(spaceAttr, new Color(0, 0, 0, 0)); // 完全透明
-                doc.insertString(insertPos + 1, " ", spaceAttr);
+                doc.insertString(insertPos + 1, "", spaceAttr);
 
                 emojiLen += (emojiInfo.getName().length() - 1) + 1; // 每插入一个图标，占用一个字符长度
-
             }
+
         }
     }
 
@@ -297,10 +182,11 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
      *
      * @return
      */
-    private List<Line> parseLineEmojiInfo() {
+    private List<Line> parseLineEmojiInfo(String text) {
         List<Line> infoList = new ArrayList<>();
-        for (int i = 0; i < lineArr.length; i++) {
-            Line line = parseEmoji(lineArr[i]);
+        String[] split = text.split("\\n");
+        for (int i = 0; i < split.length; i++) {
+            Line line = parseEmoji(split[i]);
             line.setLineNumber(i);
             infoList.add(line);
         }
@@ -315,6 +201,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
      * @return
      */
     private Line parseEmoji(String src) {
+        boolean existEmoji = false;
         List<EmojiInfo> emojiList = new ArrayList<>();
         //不包含表情的纯文本
         String plainText = src;
@@ -348,7 +235,9 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
                 existEmoji = true;
             }
         }
-
+        if (existEmoji) {
+            this.existEmoji = true;
+        }
         int lineWidth = fontMetrics.stringWidth(plainText);
 
         if (lineWidth > 0) isAllEmoji = false;
@@ -356,78 +245,76 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
         lineWidth += emojiList.size() * emojiSize;
 
 
-        //因为在插入表情的时候插入了额外的空格，这里要添加这一部分宽度
-        String s = " ".repeat(emojiList.size());
-        lineWidth += fontMetrics.stringWidth(s);
-
-        if (lineWidth > maxLengthLinePosition) {
-            maxLengthLinePosition = lineWidth;
+        if (lineWidth > maxLengthLine) {
+            maxLengthLine = lineWidth;
         }
         return Line.builder().emojiList(emojiList)
-                .lineWidth(lineWidth).str(plainText).build();
+                .lineWidth(lineWidth)
+                .str(plainText)
+                .lineHeight(existEmoji ? fontMetrics.getHeight() + 3 : fontMetrics.getHeight())
+                .existEmoji(existEmoji)
+                .build();
     }
 
 
-    /**
-     * 分析消息文本一共有几行
-     *
-     * @param text 消息文本
-     * @return 消息的行数，以\n分隔
-     */
-    private int parseLineCount(String text) {
-        lineArr = text.split("\\n");
+    private List<UrlInfo> parseUrl(String src) {
+        List<UrlInfo> urlList = new ArrayList<>();
 
-        return lineArr.length;
-    }
-
-    private List<String> parseUrl(String src) {
-        List<String> urlList = new ArrayList<>();
-
-
-        //long start = System.currentTimeMillis();
-        String regex = "(?:https?://)?(www\\.)?[\\w]+(?:\\.[\\w]+)+[\\w,\\-_/?&=#%.:]*";
-        Pattern urlPattern = Pattern.compile(regex);
         Matcher urlMatcher = urlPattern.matcher(src);
         while (urlMatcher.find()) {
-            urlList.add(urlMatcher.group());
+            String group = urlMatcher.group();
+            int start = urlMatcher.start();  // 当前匹配起始索引
+            int end = urlMatcher.end();
+            urlList.add(UrlInfo.builder().url(group).start(start).end(end).build());
         }
-
-        //System.out.println("花费时间 ：" + (System.currentTimeMillis() - start));
-
         return urlList;
     }
 
 
     private void setListeners() {
-        if (mouseAdapter ==null) {
+
             mouseAdapter = new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     if (e.getButton() == MouseEvent.BUTTON1) {
-                        if (StringUtils.isEmpty(urlRange)) {
-                            return;
-                        }
-                        int position = getCaretPosition();
-                        int urlIndex = 0;
-                        for (int[] range : urlRange) {
-                            if (position >= range[0] && position <= range[1]) {
-                                String url = urlList.get(urlIndex);
-                                openUrlWithDefaultBrowser(url);
-                            }
+                        int pos = SizeAutoAdjustTextArea.this.viewToModel2D(e.getPoint());
+                        Element elem = SizeAutoAdjustTextArea.this.getStyledDocument().getCharacterElement(pos);
+                        AttributeSet as = elem.getAttributes();
 
-                            urlIndex++;
+                        if (StyleConstants.isUnderline(as) && Color.blue.equals(StyleConstants.getForeground(as))) {
+                            openUrlWithDefaultBrowser(as.getAttribute("url").toString());
                         }
+
                     }
 
                     super.mouseClicked(e);
                 }
             };
-        }
+
+        mouseMotionListener = new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                int pos = SizeAutoAdjustTextArea.this.viewToModel2D(e.getPoint());
+                Element elem = SizeAutoAdjustTextArea.this.getStyledDocument().getCharacterElement(pos);
+                AttributeSet as = elem.getAttributes();
+
+                if (StyleConstants.isUnderline(as) && Color.blue.equals(StyleConstants.getForeground(as))) {
+                    SizeAutoAdjustTextArea.this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                } else {
+                    SizeAutoAdjustTextArea.this.setCursor(Cursor.getDefaultCursor());
+                }
+            }
+        };
+        this.addMouseMotionListener(mouseMotionListener);
+
         this.addMouseListener(mouseAdapter);
     }
     public void removeMouseAdapter() {
         if (mouseAdapter != null) {
             removeMouseListener(mouseAdapter);
+        }
+        if (mouseMotionListener != null) {
+            removeMouseMotionListener(mouseMotionListener);
         }
 
     }
@@ -459,19 +346,29 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
     @Data
     @Builder
     static class Line {
-        List<EmojiInfo> emojiList;
-        int lineWidth;
-        int lineNumber;
-        String str;
+        private List<EmojiInfo> emojiList;
+        private int lineWidth;
+        private int lineNumber;
+        private int lineHeight;
+        private boolean existEmoji;
+        private String str;
     }
 
     @Data
     @Builder
     static
+    class UrlInfo {
+        private String url;
+        private int start;
+        private int end;
+    }
+    @Data
+    @Builder
+    static
     class EmojiInfo {
-        String name;
-        int start;
-        int end;
+        private String name;
+        private int start;
+        private int end;
     }
 
     public class CenteredImageIcon implements Icon {
