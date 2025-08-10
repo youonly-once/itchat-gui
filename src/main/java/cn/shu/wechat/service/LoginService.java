@@ -61,6 +61,8 @@ public interface LoginService {
     interface LoginCallBack{
         void CallBack(String loginInfo);
         void avatar(String avatarBase64);
+
+        void refreshCode();
     }
 
     /**

@@ -1,6 +1,5 @@
 package cn.shu.wechat.swing.frames;
 
-import cn.shu.WeChatStater;
 import cn.shu.wechat.api.DownloadTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.constant.DownloadType;
@@ -13,8 +12,6 @@ import cn.shu.wechat.mapper.LoginInfoMapper;
 import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
-import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.panels.left.tabcontent.ContactsPanel;
 import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
@@ -27,11 +24,7 @@ import lombok.extern.log4j.Log4j2;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -60,19 +53,25 @@ public final class LoginFrame extends JFrame {
      */
     private final WechatConfiguration wechatConfiguration;
 
-    private static final int WINDOW_WIDTH = 300;
-    private static final int WINDOW_HEIGHT = 450;
-
-    private JPanel controlPanel;
+    private final int WINDOW_WIDTH = 300;
+    private final int WINDOW_HEIGHT = 450;
+    private final Point origin = new Point();
+    private final Color normalBg = Color.decode("#FAFAFA");
     private JLabel closeLabel;
-    private JPanel codePanel;
     private JLabel codeLabel;
     private JLabel refreshCodeBt;
-    private SizeAutoAdjustTextArea statusLabel;
-
-    private static final Point origin = new Point();
-
-    public static volatile boolean cancelLogin;
+    private final Color hoverBg = Color.decode("#F0F0F0");
+    private final Color pressedBg = Color.decode("#E0E0E0");
+    private final Color textColor = Color.decode("#666666");
+    private final Color borderColor = Color.decode("#D9D9D9");
+    private JPanel contentPanel;
+    private JLabel titleJLabel;
+    private JLabel statusLabel;
+    private MouseAdapter refreshCodeBtMouseAdapter;
+    private AbstractMouseListener closeLabelMouseListener;
+    private MouseMotionAdapter frameMouseMotionAdapter;
+    private MouseAdapter frameMouseAdapter;
+    private volatile boolean isRefreshCode = false;
 
     public LoginFrame() {
         super("微信-舒专用版");
@@ -93,100 +92,62 @@ public final class LoginFrame extends JFrame {
         setMinimumSize(windowSize);
         setMaximumSize(windowSize);
 
-
-        controlPanel = new JPanel();
-        controlPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 10, 5));
-
-
-        closeLabel = new JLabel();
-        closeLabel.setIcon(IconUtil.getIcon(this, "/image/close.png"));
-        closeLabel.setHorizontalAlignment(JLabel.CENTER);
-        closeLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-
-        statusLabel = new SizeAutoAdjustTextArea(280);
-        statusLabel.setForeground(Colors.FONT_GRAY);
-        statusLabel.setText("正在加载二维码...");
-        statusLabel.setEditable(false);
-        statusLabel.setVisible(true);
-        StyledDocument doc = statusLabel.getStyledDocument();
-        SimpleAttributeSet center = new SimpleAttributeSet();
-        StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
-        doc.setParagraphAttributes(0, doc.getLength(), center, false);
-    }
-
-    private void initView() {
-        JPanel contentPanel = new JPanel();
+        contentPanel = new JPanel();
         contentPanel.setBorder(new LineBorder(Colors.LIGHT_GRAY));
         contentPanel.setLayout(new GridBagLayout());
+        contentPanel.setBackground(Color.WHITE);
 
-        controlPanel.add(closeLabel);
-        JPanel titleJPanel = new JPanel();
-        JLabel titleJLabel = new JLabel(WechatConfiguration.getInstance().getLoginTitle());
+        titleJLabel = new JLabel(WechatConfiguration.getInstance().getLoginTitle());
         titleJLabel.setFont(FontUtil.getDefaultFont(14, Font.BOLD));
-        titleJPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5));
-        titleJPanel.add(titleJLabel);
         if (OSUtil.getOsType() != OSUtil.Mac_OS) {
             setUndecorated(true);
-            contentPanel.add(titleJPanel, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 1).setInsets(5, 0, 0, 0));
-            contentPanel.add(controlPanel, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 1).setInsets(5, 0, 0, 0));
         }
 
-
-        JPanel centerPanel = new JPanel(new BorderLayout(0, 0));
-        centerPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
-
         codeLabel = new JLabel();
-        ImageIcon icon = IconUtil.getIcon(this, "/image/image_loading.gif");
         codeLabel.setHorizontalAlignment(JLabel.CENTER);
-        codeLabel.setIcon(icon);
-        centerPanel.add(codeLabel, BorderLayout.CENTER);
-
-        JPanel bottomPanel = new JPanel(new VerticalFlowLayout(true, false));
+        codeLabel.setIcon(IconUtil.getIcon(this, "/image/image_loading.gif"));
+        codeLabel.setPreferredSize(new Dimension(250, 250));
 
         //重新扫描按钮
         refreshCodeBt = new JLabel("刷新");
         refreshCodeBt.setHorizontalAlignment(JLabel.CENTER);
-        refreshCodeBt.setBorder(new LineBorder(Color.GRAY));
         refreshCodeBt.setPreferredSize(new Dimension(150, 40));
         refreshCodeBt.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        //refreshCodeBt.setForeground(Colors.FONT_GRAY);
         refreshCodeBt.setFont(FontUtil.getDefaultFont());
-        JPanel refreshCodeBtPanel = new JPanel();
-        refreshCodeBtPanel.add(refreshCodeBt);
-        bottomPanel.add(refreshCodeBtPanel);
-        refreshCodeBt.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                WeChatStater.restartApplication();
-//                //TODO 重新登录功能
-//
-//                new SwingWorker<Object, Object>() {
-//                    private BufferedImage qr;
-//
-//                    @Override
-//                    protected Object doInBackground() throws Exception {
-//                       // getUUID(); 刷新后的码不能登录
-//                        qr = loginService.getQR();
-//                        return null;
-//                    }
-//
-//                    @Override
-//                    protected void done() {
-//                        codeLabel.setIcon(new ImageIcon(qr.getScaledInstance(250, 250, Image.SCALE_SMOOTH)));
-//                        showMessage("请扫描二维码以登录");
-//                    }
-//                }.execute();
-                super.mouseReleased(e);
-            }
-        });
 
-        bottomPanel.add(statusLabel);
-        bottomPanel.setBorder(new EmptyBorder(0, 0, 50, 0));
-        centerPanel.add(bottomPanel, BorderLayout.SOUTH);
+        refreshCodeBt.setOpaque(true);
+        refreshCodeBt.setBackground(normalBg);
+        refreshCodeBt.setBorder(BorderFactory.createLineBorder(borderColor, 1, true));
 
-        add(contentPanel);
-        contentPanel.add(centerPanel, new GBC(0, 2).setFill(GBC.BOTH).setWeight(1, 10).setInsets(10, 10, 0, 10));
+        refreshCodeBt.setForeground(textColor);
+        refreshCodeBt.setFont(new Font("微软雅黑", Font.BOLD, 14));
+
+
+        closeLabel = new JLabel();
+        closeLabel.setIcon(IconUtil.getIcon(this, "/image/close.png"));
+        closeLabel.setHorizontalAlignment(JLabel.RIGHT);
+        closeLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+
+        statusLabel = new JLabel();
+        statusLabel.setForeground(Colors.FONT_GRAY);
+        statusLabel.setText("正在加载二维码...");
+        statusLabel.setVisible(true);
+        statusLabel.setHorizontalAlignment(SwingConstants.CENTER); // 水平居中
+        statusLabel.setVerticalAlignment(SwingConstants.CENTER);   // 垂直居中
+    }
+
+    private void initView() {
+
+
+        int padding = 5;
+        contentPanel.add(titleJLabel, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 10).setInsets(0, padding, 0, padding).setAnchor(GridBagConstraints.NORTH));
+        contentPanel.add(closeLabel, new GBC(1, 0).setFill(GBC.BOTH).setWeight(1, 1).setInsets(0, padding, 0, padding));
+        contentPanel.add(codeLabel, new GBC(0, 1).setFill(GBC.BOTH).setWeight(100, 100).setInsets(0, padding, 0, padding).setGridWidth(2));
+        contentPanel.add(refreshCodeBt, new GBC(0, 2).setFill(GBC.BOTH).setWeight(10, 1).setInsets(0, 25, 30, 25).setGridWidth(2));
+        contentPanel.add(statusLabel, new GBC(0, 3).setFill(GBC.BOTH).setWeight(1, 1).setInsets(0, padding, 30, padding).setGridWidth(2));
+
+        this.add(contentPanel);
     }
 
     /**
@@ -194,7 +155,7 @@ public final class LoginFrame extends JFrame {
      */
 
     private void setListeners() {
-        closeLabel.addMouseListener(new AbstractMouseListener() {
+        closeLabelMouseListener = new AbstractMouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 System.exit(1);
@@ -212,19 +173,20 @@ public final class LoginFrame extends JFrame {
                 closeLabel.setBackground(Colors.WINDOW_BACKGROUND);
                 super.mouseExited(e);
             }
-        });
+        };
+        closeLabel.addMouseListener(closeLabelMouseListener);
 
         if (OSUtil.getOsType() != OSUtil.Mac_OS) {
-            addMouseListener(new MouseAdapter() {
+            frameMouseAdapter = new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
                     // 当鼠标按下的时候获得窗口当前的位置
                     origin.x = e.getX();
                     origin.y = e.getY();
                 }
-            });
-
-            addMouseMotionListener(new MouseMotionAdapter() {
+            };
+            addMouseListener(frameMouseAdapter);
+            frameMouseMotionAdapter = new MouseMotionAdapter() {
                 @Override
                 public void mouseDragged(MouseEvent e) {
                     // 当鼠标拖动时获取窗口当前位置
@@ -233,12 +195,83 @@ public final class LoginFrame extends JFrame {
                     LoginFrame.this.setLocation(p.x + e.getX() - origin.x, p.y + e.getY()
                             - origin.y);
                 }
-            });
+            };
+            addMouseMotionListener(frameMouseMotionAdapter);
         }
+        refreshCodeBtMouseAdapter = new MouseAdapter() {
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                refreshCodeBt.setBackground(hoverBg);
+                refreshCodeBt.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                refreshCodeBt.setBackground(normalBg);
+                refreshCodeBt.setCursor(Cursor.getDefaultCursor());
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                refreshCodeBt.setBackground(pressedBg);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                refreshCodeBt.setBackground(hoverBg); // 回到悬停色
+                refreshCode();
+                super.mouseReleased(e);
+            }
+        };
+        refreshCodeBt.addMouseListener(refreshCodeBtMouseAdapter);
 
 
     }
 
+    private void removeListeners() {
+        if (refreshCodeBtMouseAdapter != null) {
+            refreshCodeBt.removeMouseListener(refreshCodeBtMouseAdapter);
+        }
+
+        if (closeLabelMouseListener != null) {
+            closeLabel.removeMouseListener(closeLabelMouseListener);
+        }
+
+        if (frameMouseMotionAdapter != null) {
+            this.removeMouseMotionListener(frameMouseMotionAdapter);
+        }
+
+        if (frameMouseAdapter != null) {
+            this.removeMouseListener(frameMouseAdapter);
+        }
+    }
+
+
+    private void refreshCode() {
+        if (isRefreshCode) return;
+        isRefreshCode = true;
+        SwingUtilities.invokeLater(() -> {
+            showMessage("刷新二维码...");
+        });
+        ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
+            try {
+                getUUID();
+                BufferedImage qr = loginService.getQR();
+                SwingUtilities.invokeLater(() -> {
+                    codeLabel.setIcon(new ImageIcon(IconUtil.getScaledImage(qr, 250, 250)));
+                    showMessage("请扫描二维码以登录");
+                });
+            } catch (IOException | InterruptedException ex) {
+                SwingUtilities.invokeLater(() -> {
+                    showMessage(ex.getMessage());
+                });
+            } finally {
+                isRefreshCode = false;
+            }
+
+        });
+    }
     /**
      * 打开窗体
      */
@@ -262,9 +295,6 @@ public final class LoginFrame extends JFrame {
         statusLabel.setToolTipText(message);
     }
 
-    public static void main(String[] args) {
-        System.out.println(3 &0x02);
-    }
     /**
      * 调用网页版微信登录
      *
@@ -278,16 +308,21 @@ public final class LoginFrame extends JFrame {
 
             showMessage(" 获取登陆二维码图片");
             BufferedImage qr = loginService.getQR();
-            codeLabel.setIcon(new ImageIcon(qr.getScaledInstance(250, 250, Image.SCALE_SMOOTH)));
+            codeLabel.setIcon(new ImageIcon(IconUtil.getScaledImage(qr, 250, 250)));
 
             showMessage("请使用微信扫一扫以登录");
 
             loginService.preLogin(new LoginService.LoginCallBack() {
                 @Override
-                public void CallBack(String loginInfo) {
-                    showMessage(loginInfo);
+                public void CallBack(String msg) {
+                    showMessage(msg);
                 }
 
+
+                @Override
+                public void refreshCode() {
+                    LoginFrame.this.refreshCode();
+                }
                 @Override
                 public void avatar(String avatarBase64) {
                     if (avatarBase64 == null) {
@@ -300,11 +335,11 @@ public final class LoginFrame extends JFrame {
                         codeLabel.setIcon(new ImageIcon(read));
 
                     } catch (IOException e) {
-                        log.error(e.getMessage());
-                        e.printStackTrace();
+                        log.error(e.getMessage(), e);
                     }
 
                 }
+
             });
             refreshCodeBt.setVisible(false);
 
@@ -480,5 +515,9 @@ public final class LoginFrame extends JFrame {
         log.info("11. 下载联系人头像完成，耗时{}秒", (System.currentTimeMillis() - time) / 1000);
     }
 
-
+    @Override
+    public void dispose() {
+        super.dispose();
+        removeListeners();
+    }
 }

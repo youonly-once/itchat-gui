@@ -15,7 +15,6 @@ import cn.shu.wechat.dto.response.sync.WebWxSyncResp;
 import cn.shu.wechat.dto.response.wxinit.WxInitResponse;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.exception.WebWXException;
-import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
@@ -49,12 +48,11 @@ import java.util.stream.Collectors;
 public class LoginServiceImpl implements LoginService {
 
 
-
     private final Set<String> msgIds = new HashSet<>();
-    @Resource
-    private AttrHistoryMapper attrHistoryMapper;
+
     @Resource
     private MsgCenter msgCenter;
+
     private volatile boolean WebWxBatchGetContactExcept;
 
     private Timer timer ;
@@ -79,7 +77,7 @@ public class LoginServiceImpl implements LoginService {
         if (matcher.find()) {
             return WxRespConstant.CheckLoginResultCodeEnum.getByCode(Integer.parseInt(matcher.group(1)));
         } else {
-            throw new Exception("获取二维码扫描状态码失败！");
+            throw new Exception("获取扫描状态失败！");
         }
     }
 
@@ -140,14 +138,14 @@ public class LoginServiceImpl implements LoginService {
     public boolean preLogin(LoginCallBack callBack) throws Exception {
 
         boolean isLogin = false;
-        // 组装参数和URL
-        HashMap<String, String> params = new HashMap<>();
-        params.put (WxReqParamsConstant.LoginParaEnum.LOGIN_ICON.para(), WxReqParamsConstant.LoginParaEnum.LOGIN_ICON.value());
-        params.put (WxReqParamsConstant.LoginParaEnum.UUID.para(), Core.getUuid());
-        params.put (WxReqParamsConstant.LoginParaEnum.TIP.para(), WxReqParamsConstant.LoginParaEnum.TIP.value());
 
         while1:
         while (!isLogin) {
+            // 组装参数和URL
+            HashMap<String, String> params = new HashMap<>();
+            params.put(WxReqParamsConstant.LoginParaEnum.LOGIN_ICON.para(), WxReqParamsConstant.LoginParaEnum.LOGIN_ICON.value());
+            params.put(WxReqParamsConstant.LoginParaEnum.UUID.para(), Core.getUuid());
+            params.put(WxReqParamsConstant.LoginParaEnum.TIP.para(), WxReqParamsConstant.LoginParaEnum.TIP.value());
 
             long millis = System.currentTimeMillis();
             params.put (WxReqParamsConstant.LoginParaEnum.R.para(), String.valueOf(millis / 1579L));
@@ -178,7 +176,7 @@ public class LoginServiceImpl implements LoginService {
                     case WAIT_SCAN: {
                         log.info(codeEnum.getMsg());
                         //TODO 刷新二维码
-                        callBack.CallBack(codeEnum.getMsg());
+                        callBack.refreshCode();
                         break;
                     }
                     case NONE: {
@@ -189,8 +187,9 @@ public class LoginServiceImpl implements LoginService {
                 }
 
             } catch (Exception e) {
-                callBack.CallBack(e.getMessage());
+                callBack.refreshCode();
                 log.error("微信登陆异常：{}", e.getMessage());
+                SleepUtils.sleep(100);
             }
             SleepUtils.sleep(100);
         }

@@ -77,6 +77,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
         if (lineEmojiInfoList.isEmpty()) {
             return;
         }
+        super.setText("");
         int targetWidth = maxLengthLine + 7;
 
         int totalLine = 0;
