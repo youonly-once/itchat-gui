@@ -80,20 +80,14 @@ public class MainFrame extends JFrame {
         context = this;
         initComponents();
         initView();
-        initResource();
+        try {
+            initTray();
+        } catch (AWTException e) {
+            throw new RuntimeException(e);
+        }
         initTrayFlashingThread();
     }
 
-    private void initResource() {
-        ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
-            try {
-                initTray();
-            } catch (AWTException e) {
-                log.error(e.getMessage(), e);
-            }
-        });
-
-    }
 
 
     /**
