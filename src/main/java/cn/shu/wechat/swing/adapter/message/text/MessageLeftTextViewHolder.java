@@ -4,13 +4,10 @@ import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
-import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.components.message.RCLeftImageMessageBubble;
 import cn.shu.wechat.swing.frames.MainFrame;
-import cn.shu.wechat.utils.FontUtil;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
@@ -21,9 +18,9 @@ import java.awt.*;
 public class MessageLeftTextViewHolder extends BaseMessageViewHolder {
 
     public SizeAutoAdjustTextArea text;
+
     public RCLeftImageMessageBubble messageBubble = new RCLeftImageMessageBubble();
 
-    private final JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
     private final JPanel messageAvatarPanel = new JPanel();
     private final boolean isGroup;
 
@@ -37,46 +34,41 @@ public class MessageLeftTextViewHolder extends BaseMessageViewHolder {
         int maxWidth = (int) (MainFrame.getContext().currentWindowWidth * 0.5);
         text = new SizeAutoAdjustTextArea(maxWidth);
         text.setParseUrl(true);
-        time.setForeground(Colors.FONT_GRAY);
-        time.setFont(FontUtil.getDefaultFont(12));
-
-
 
         messageAvatarPanel.setBackground(Colors.WINDOW_BACKGROUND);
-        timePanel.setBackground(Colors.WINDOW_BACKGROUND);
+
     }
 
     private void initView() {
-        setLayout(new BorderLayout());
-        timePanel.add(time);
-
+        setLayout(new GridBagLayout());
         messageBubble.add(text);
 
-        JPanel senderMessagePanel = new JPanel();
-        senderMessagePanel.setBackground(Colors.WINDOW_BACKGROUND);
-        senderMessagePanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, true));
+        add(time, new GBC(0, 0).setWeight(1, 1)
+                .setAnchor(GBC.NORTH).setInsets(0, 5, 0, 0).setGridWidth(4)
+                .setFill(GBC.HORIZONTAL));
+
+
+        add(avatar, new GBC(0, 1).setWeight(0, 1)
+                .setAnchor(GBC.NORTHWEST).setInsets(0, 5, 0, 0).setFill(GBC.NONE)
+                .setGridHeight(2));
+        int newLine = 0;
         if (isGroup) {
-            sender.setFont(FontUtil.getDefaultFont(12));
-            sender.setForeground(Colors.FONT_GRAY);
-            senderMessagePanel.add(sender);
-            //群消息会显示群成员名称 这时候往上移10
-            sender.setBorder(new EmptyBorder(0,messageBubble.getSalientPointPixel(),100,0));
+            //占位，当sender设置top为-10，而time被隐藏则sender被遮住
+            add(Box.createVerticalStrut(10), new GBC(1, 0)
+                    .setWeight(10, 100).setGridWidth(4)); // 占位行
+
+            add(sender, new GBC(1, 1).setWeight(0, 1)
+                    .setAnchor(GBC.NORTHWEST).setInsets(-10, 5, 0, 0).setFill(GBC.NONE));
+            newLine = 1;
         }
-        JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new FlowLayout(FlowLayout.LEFT,0,0));
-        contentPanel.add(messageBubble);
-        contentPanel.add(revoke);
 
-        senderMessagePanel.add(contentPanel);
-        messageAvatarPanel.setLayout(new GridBagLayout());
-        messageAvatarPanel.add(avatar, new GBC(1, 0).setWeight(1, 1)
-                .setAnchor(GBC.NORTH).setInsets(0, 5, 0, 0));
-        messageAvatarPanel.add(senderMessagePanel, new GBC(2, 0)
-                .setWeight(1000, 1)
-                .setAnchor(GBC.WEST)
+        add(messageBubble, new GBC(1, 1 + newLine).setWeight(0, 10)
+                .setAnchor(GBC.NORTHWEST).setInsets(0, 5, 0, 0).setFill(GBC.NONE));
 
-                .setInsets(0, 5, 0, 0));
-        add(timePanel, BorderLayout.NORTH);
-        add(messageAvatarPanel, BorderLayout.CENTER);
+        add(revoke, new GBC(2, 1 + newLine).setWeight(1, 1)
+                .setAnchor(GBC.WEST).setInsets(0, 5, 0, 0));
+        //占位，revoke被隐藏则messageBubble被拉伸到最右边，从而不能左对齐
+        add(Box.createHorizontalStrut(5), new GBC(3, 1 + newLine).setWeight(1, 100)); // 占位行
+
     }
 }

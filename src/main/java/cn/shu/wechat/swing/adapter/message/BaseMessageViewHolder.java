@@ -1,8 +1,10 @@
 package cn.shu.wechat.swing.adapter.message;
 
 import cn.shu.wechat.swing.adapter.ViewHolder;
+import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
 import cn.shu.wechat.swing.frames.MainFrame;
+import cn.shu.wechat.utils.FontUtil;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -22,5 +24,14 @@ public abstract class BaseMessageViewHolder extends ViewHolder {
         revoke.setForeground(Color.GRAY);
         revoke.setVisible(false);
         revoke.setBorder(new EmptyBorder(0,5,0,5));
+
+        time.setForeground(Colors.FONT_GRAY);
+        time.setFont(FontUtil.getDefaultFont(12));
+        time.setHorizontalAlignment(SwingConstants.CENTER);
+        time.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+
+        sender.setFont(FontUtil.getDefaultFont(12));
+        sender.setForeground(Colors.FONT_GRAY);
+
     }
 }

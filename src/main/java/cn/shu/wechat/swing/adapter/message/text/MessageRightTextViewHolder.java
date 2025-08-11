@@ -1,12 +1,10 @@
 package cn.shu.wechat.swing.adapter.message.text;
 
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
-import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
 import cn.shu.wechat.swing.components.message.RCRightImageMessageBubble;
 import cn.shu.wechat.swing.frames.MainFrame;
-import cn.shu.wechat.utils.FontUtil;
 import cn.shu.wechat.utils.IconUtil;
 
 import javax.swing.*;
@@ -16,19 +14,16 @@ import java.awt.*;
  * Created by 舒新胜 on 17-6-2.
  */
 public class MessageRightTextViewHolder extends BaseMessageViewHolder {
-    //public JLabel avatar = new JLabel();
-    //public JLabel size = new JLabel();
-    //public SizeAutoAdjustTextArea text;
+
     public SizeAutoAdjustTextArea text;
+
     public RCRightImageMessageBubble messageBubble = new RCRightImageMessageBubble();
-    //public RCRightTextMessageBubble text = new RCRightTextMessageBubble();
+
     // 重发按钮
     public JLabel resend = new JLabel();
     // 正在发送
     public JLabel sendingProgress = new JLabel();
 
-    private JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-    private JPanel messageAvatarPanel = new JPanel();
 
     public MessageRightTextViewHolder() {
         initComponents();
@@ -36,54 +31,67 @@ public class MessageRightTextViewHolder extends BaseMessageViewHolder {
     }
 
     private void initComponents() {
-        timePanel.setBackground(Colors.WINDOW_BACKGROUND);
-        messageAvatarPanel.setBackground(Colors.WINDOW_BACKGROUND);
 
         int maxWidth = (int) (MainFrame.getContext().currentWindowWidth * 0.5);
         text = new SizeAutoAdjustTextArea(maxWidth);
         text.setParseUrl(true);
 
-        time.setForeground(Colors.FONT_GRAY);
-        time.setFont(FontUtil.getDefaultFont(12));
-
-        ImageIcon resendIcon = IconUtil.getIcon(this,"/image/resend.png");
-        resendIcon.setImage(resendIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
-        resend.setIcon(resendIcon);
+        resend.setIcon(IconUtil.getIcon(this, "/image/resend.png", 20, 20));
         resend.setVisible(false);
         resend.setToolTipText("消息发送失败，点击重新发送");
         resend.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        ImageIcon sendingIcon = IconUtil.getIcon(this,"/image/sending.gif");
-        sendingProgress.setIcon(sendingIcon);
+        sendingProgress.setIcon(IconUtil.getIcon(this, "/image/sending.gif"));
         sendingProgress.setVisible(false);
 
-
-        text.setCaretPosition(text.getDocument().getLength());
 
     }
 
     private void initView() {
-        setLayout(new BorderLayout());
-        timePanel.add(time);
 
-        messageBubble.add(text, BorderLayout.CENTER);
+        setLayout(new GridBagLayout());
+        messageBubble.add(text);
 
-        JPanel resendTextPanel = new JPanel();
-        resendTextPanel.setBackground(Colors.WINDOW_BACKGROUND);
-        resendTextPanel.setLayout(new BorderLayout());
-        JPanel controlPanel = new JPanel(new BorderLayout(0, 0));
-        controlPanel.add(resend, BorderLayout.WEST);
-        controlPanel.add(sendingProgress, BorderLayout.CENTER);
-        controlPanel.add(revoke, BorderLayout.EAST);
-        sendingProgress.setHorizontalAlignment(SwingConstants.CENTER);
-        resendTextPanel.add(controlPanel, BorderLayout.WEST);
-        resendTextPanel.add(messageBubble, BorderLayout.CENTER);
-        messageAvatarPanel.setLayout(new GridBagLayout());
-        messageAvatarPanel.add(resendTextPanel, new GBC(1, 0).setWeight(1000, 1).setAnchor(GBC.EAST).setInsets(0, 0, 0, 5));
-        messageAvatarPanel.add(avatar, new GBC(2, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 0, 0, 5));
 
-        add(timePanel, BorderLayout.NORTH);
-        add(messageAvatarPanel, BorderLayout.CENTER);
+        add(time, new GBC(0, 0).setWeight(1, 1)
+                .setAnchor(GBC.NORTH).setInsets(0, 5, 0, 0)
+        );
+
+
+        add(resend, new GBC(0, 1)
+                .setWeight(1, 1)
+                .setFill(GBC.NONE)
+                .setAnchor(GBC.EAST)
+                .setInsets(0, 0, 0, 5));
+
+
+        add(sendingProgress, new GBC(0, 2)
+                .setWeight(1, 1)
+                .setAnchor(GBC.EAST)
+                .setInsets(0, 0, 0, 5)
+                .setFill(GBC.NONE));
+
+        add(revoke, new GBC(0, 3)
+                .setWeight(1, 1)
+                .setFill(GBC.NONE)
+                .setAnchor(GBC.EAST)
+                .setInsets(0, 0, 0, 5));
+
+
+        //占位，revoke被隐藏则messageBubble被拉伸到最左边，从而不能右对齐
+        add(Box.createHorizontalStrut(5), new GBC(0, 4).setWeight(100, 100)); // 占位行
+
+
+        add(messageBubble, new GBC(1, 1).setWeight(0, 10)
+                .setAnchor(GBC.EAST).setInsets(0, 0, 0, 5)
+                .setFill(GBC.NONE)
+                .setGridHeight(3));
+
+        add(avatar, new GBC(2, 1).setWeight(0, 1)
+                .setAnchor(GBC.EAST).setInsets(0, 0, 0, 0).setFill(GBC.NONE)
+                .setGridHeight(3));
+
+
     }
 
 }
