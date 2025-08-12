@@ -70,14 +70,12 @@ public class Mp3Player  {
                 // AtomicInteger prePos = new AtomicInteger();
 
                 monitorFuture = executor.scheduleAtFixedRate(() -> {
-                    System.out.println(advancedPlayer.isComplete());
                     if (stopped || advancedPlayer == null || advancedPlayer.isComplete()) {
                         if (monitorFuture != null && !monitorFuture.isCancelled()) {
                             monitorFuture.cancel(true);
                         }
                         return;
                     }
-                    System.out.println(Thread.currentThread().threadId());
                     //if (prePos.get()!=advancedPlayer.getPosition()){
                     // prePos.set(advancedPlayer.getPosition());
                     listener.playbackPosition(advancedPlayer.getPosition());

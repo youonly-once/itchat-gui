@@ -9,7 +9,7 @@ import java.awt.event.MouseListener;
  * Created by 舒新胜 on 27/06/2017.
  */
 public interface RCMessageBubble {
-    int SALIENT_POINT_PIXEL = 9;
+    public int SALIENT_POINT_PIXEL = 9;
     default int getSalientPointPixel(){
         return SALIENT_POINT_PIXEL;
     }

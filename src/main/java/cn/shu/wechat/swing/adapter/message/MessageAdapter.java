@@ -10,6 +10,15 @@ import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.swing.adapter.BaseAdapter;
 import cn.shu.wechat.swing.adapter.message.app.*;
+import cn.shu.wechat.swing.adapter.message.app.attachment.MessageAttachmentViewHolder;
+import cn.shu.wechat.swing.adapter.message.app.attachment.MessageLeftAttachmentViewHolder;
+import cn.shu.wechat.swing.adapter.message.app.attachment.MessageRightAttachmentViewHolder;
+import cn.shu.wechat.swing.adapter.message.app.card.MessageContactsCardOfAppViewHolder;
+import cn.shu.wechat.swing.adapter.message.app.card.MessageLeftContactsCardOfAppViewHolder;
+import cn.shu.wechat.swing.adapter.message.app.card.MessageRightContactsCardOfAppViewHolder;
+import cn.shu.wechat.swing.adapter.message.app.link.MessageLeftLinkOfAppViewHolder;
+import cn.shu.wechat.swing.adapter.message.app.link.MessageLinkOfAppViewHolder;
+import cn.shu.wechat.swing.adapter.message.app.link.MessageRightLinkOfAppViewHolder;
 import cn.shu.wechat.swing.adapter.message.image.MessageLeftImageViewHolder;
 import cn.shu.wechat.swing.adapter.message.image.MessageRightImageViewHolder;
 import cn.shu.wechat.swing.adapter.message.system.MessageSystemMessageViewHolder;
@@ -21,7 +30,6 @@ import cn.shu.wechat.swing.adapter.message.voice.MessageLeftVoiceViewHolder;
 import cn.shu.wechat.swing.adapter.message.voice.MessageRightVoiceViewHolder;
 import cn.shu.wechat.swing.adapter.message.voice.MessageVoiceViewHolder;
 import cn.shu.wechat.swing.components.RCListView;
-import cn.shu.wechat.swing.components.RCProgressBar;
 import cn.shu.wechat.swing.components.UserInfoPopup;
 import cn.shu.wechat.swing.components.message.MessageImageLabel;
 import cn.shu.wechat.swing.components.message.MessagePopupMenu;
@@ -32,7 +40,6 @@ import cn.shu.wechat.swing.helper.AttachmentIconHelper;
 import cn.shu.wechat.swing.helper.MessageViewHolderCacheHelper;
 import cn.shu.wechat.swing.media.HeadLoadingSwingWorker;
 import cn.shu.wechat.swing.media.Mp3Player;
-import cn.shu.wechat.swing.media.VoicePlaybackListener;
 import cn.shu.wechat.swing.media.VoicePlaybackListenerImpl;
 import cn.shu.wechat.swing.panels.chat.ChatMessagePanel;
 import cn.shu.wechat.task.DownloadManager;
@@ -555,7 +562,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         processImage(item, holder.image);
 
         listView.setScrollHiddenOnMouseLeave(holder.image);
-        listView.setScrollHiddenOnMouseLeave(holder.imageBubble);
 
         // 绑定右键菜单
         attachPopupMenu(holder, item);
@@ -594,7 +600,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      */
     private void processVoice(Message item, MessageVoiceViewHolder holder) {
 
-        holder.contentTagPanel.setTag(item);
+       // holder.contentTagPanel.setTag(item);
 // 设置语音时长（单位为秒，四舍五入）
         long voiceDurationSec = Math.max(1, Math.round(item.getVoiceLength() / 1000.0)); // 最少显示1秒
         holder.durationText.setText(voiceDurationSec + "");
@@ -735,7 +741,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         attachPopupMenu(holder, item);
 
         listView.setScrollHiddenOnMouseLeave(holder.image);
-        listView.setScrollHiddenOnMouseLeave(holder.imageBubble);
     }
 
     /**
@@ -855,16 +860,27 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 //阻塞
                 DownloadManager.awaitDownload(finalPath,1000*60*2);
                 File file = new File(finalPath);
+
                 ImageIcon imageIcon = null;
                 if (file.length() > 0) {
+
+                    if (item.getImgHeight()==0 || item.getImgWidth()==0) {
+                        imageIcon = IconUtil.getIconFromFile(file);
+                        item.setImgWidth(imageIcon.getIconWidth());
+                        item.setImgHeight(imageIcon.getIconHeight());
+                        imageLabel.setPreferredSize(new Dimension(imageIcon.getIconWidth(), imageIcon.getIconHeight()));
+                    }
+
                     if (IconUtil.isGIFByFile(finalPath)) {
                         imageIcon = IconUtil.preferredGifSize(finalPath, item.getImgWidth(), item.getImgHeight(),MessageRightImageViewHolder.maxWidth,MessageRightImageViewHolder.maxHeight);
                     } else {
-                        imageIcon = IconUtil.getIconFromFile(file);
+                        if (imageIcon == null) {
+                            imageIcon = IconUtil.getIconFromFile(file);
+                        }
                         IconUtil.preferredImageSize(imageIcon,MessageRightImageViewHolder.maxWidth,MessageRightImageViewHolder.maxHeight);
                     }
                 }
-
+                imageLabel.setIcon(imageIcon);
                 ImageIcon finalImageIcon = imageIcon;
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
@@ -1265,11 +1281,9 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 if (isSelf){
                     MessageRightImageViewHolder holder = (MessageRightImageViewHolder) viewHolder;
                     contentComponent = holder.image;
-                    messageBubble = holder.imageBubble;
                 }else{
                     MessageLeftImageViewHolder holder = (MessageLeftImageViewHolder) viewHolder;
                     contentComponent = holder.image;
-                    messageBubble = holder.imageBubble;
 
                 }
                 break;
@@ -1291,11 +1305,9 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             case MSGTYPE_VOICE:{
                if (isSelf){
                    MessageRightVoiceViewHolder holder = (MessageRightVoiceViewHolder) viewHolder;
-                   contentComponent = holder.contentTagPanel;
                    messageBubble = holder.messageBubble;
                 }else {
                    MessageLeftVoiceViewHolder holder = (MessageLeftVoiceViewHolder) viewHolder;
-                   contentComponent = holder.contentTagPanel;
                    messageBubble = holder.messageBubble;
 
                 }
@@ -1307,7 +1319,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     case FILE:{
                         if (isSelf){
                             MessageRightAttachmentViewHolder holder = (MessageRightAttachmentViewHolder) viewHolder;
-                            contentComponent = holder.attachmentPanel;
                             messageBubble = holder.messageBubble;
 
                             holder.attachmentTitle.addMouseListener(new MessageMouseListener() {
@@ -1321,7 +1332,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                             });
                         }else {
                             MessageLeftAttachmentViewHolder holder = (MessageLeftAttachmentViewHolder) viewHolder;
-                            contentComponent = holder.attachmentPanel;
                             messageBubble = holder.messageBubble;
 
                             holder.attachmentTitle.addMouseListener(new MessageMouseListener() {
@@ -1360,40 +1370,68 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
         JComponent finalContentComponent = contentComponent;
         RCMessageBubble finalMessageBubble = messageBubble;
-
-        contentComponent.addMouseListener(new MessageMouseListener() {
-            @Override
-            public void mouseExited(MouseEvent e) {
-                if (e.getX() > finalContentComponent.getWidth() || e.getY() > finalContentComponent.getHeight()) {
-                    finalMessageBubble.setBackgroundIcon(finalMessageBubble.getBackgroundNormalIcon());
-                }
-                super.mouseExited(e);
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                finalMessageBubble.setBackgroundIcon(finalMessageBubble.getBackgroundActiveIcon());
-                super.mouseEntered(e);
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON3) {
-                    popupMenu.show((Component) e.getSource(), e.getX(), e.getY(), item.getMsgType());
+        if (contentComponent!=null) {
+            contentComponent.addMouseListener(new MessageMouseListener() {
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    if (finalMessageBubble != null) {
+                        if (e.getX() > finalContentComponent.getWidth() || e.getY() > finalContentComponent.getHeight()) {
+                            finalMessageBubble.setBackgroundIcon(finalMessageBubble.getBackgroundNormalIcon());
+                        }
+                    }
+                    super.mouseExited(e);
                 }
 
-                super.mouseReleased(e);
-            }
-        });
-
-        messageBubble.addMouseListener(new MessageMouseListener() {
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON3) {
-                    popupMenu.show(finalContentComponent, e.getX(), e.getY(), item.getMsgType());
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    if (finalMessageBubble != null) {
+                        finalMessageBubble.setBackgroundIcon(finalMessageBubble.getBackgroundActiveIcon());
+                    }
+                    super.mouseEntered(e);
                 }
-            }
-        });
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    if (e.getButton() == MouseEvent.BUTTON3) {
+                        popupMenu.show((Component) e.getSource(), e.getX(), e.getY(), item.getMsgType());
+                    }
+
+                    super.mouseReleased(e);
+                }
+            });
+        }
+
+        if (finalMessageBubble!=null) {
+            finalMessageBubble.addMouseListener(new MessageMouseListener() {
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+
+                          //  if (e.getX() > finalContentComponent.getWidth() || e.getY() > finalContentComponent.getHeight()) {
+                                finalMessageBubble.setBackgroundIcon(finalMessageBubble.getBackgroundNormalIcon());
+                         //   }
+
+
+                    super.mouseExited(e);
+                }
+
+                @Override
+                public void mouseEntered(MouseEvent e) {
+
+                    finalMessageBubble.setBackgroundIcon(finalMessageBubble.getBackgroundActiveIcon());
+
+                    super.mouseEntered(e);
+                }
+
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    if (e.getButton() == MouseEvent.BUTTON3) {
+                        popupMenu.show(finalContentComponent, e.getX(), e.getY(), item.getMsgType());
+                    }
+                }
+            });
+        }
     }
 
 

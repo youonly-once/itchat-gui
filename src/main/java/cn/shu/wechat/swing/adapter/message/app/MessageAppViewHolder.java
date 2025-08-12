@@ -21,7 +21,6 @@ import java.awt.event.MouseAdapter;
 
 public abstract class MessageAppViewHolder extends BaseMessageViewHolder {
 
-    protected final JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
     protected final JPanel messageAvatarPanel = new JPanel();
     /**
      * APP消息标题
@@ -56,11 +55,8 @@ public abstract class MessageAppViewHolder extends BaseMessageViewHolder {
     }
 
     private void initComponents() {
-        timePanel.setBackground(Colors.WINDOW_BACKGROUND);
         messageAvatarPanel.setBackground(Colors.WINDOW_BACKGROUND);
         messageAvatarPanel.setLayout(new GridBagLayout());
-        time.setForeground(Colors.FONT_GRAY);
-        time.setFont(FontUtil.getDefaultFont(12));
         contentPanel.setBorder(new EmptyBorder(5,5,5,5));
         contentPanel.setOpaque(false);
         senderMessagePanel.setBackground(Colors.WINDOW_BACKGROUND);
@@ -75,7 +71,6 @@ public abstract class MessageAppViewHolder extends BaseMessageViewHolder {
     }
     private void initView() {
         setLayout(new BorderLayout());
-        timePanel.add(time);
 
         sourcePanel.add(sourceIcon);
         sourcePanel.add(sourceName);
@@ -109,7 +104,7 @@ public abstract class MessageAppViewHolder extends BaseMessageViewHolder {
         messageBubble.setLayout(new VerticalFlowLayout(VerticalFlowLayout.BOTTOM,5,0,true,false));
         messageBubble.add(contentTitlePanel);
         messageBubble.add(sourcePanel);
-        add(timePanel, BorderLayout.NORTH);
+        add(time, BorderLayout.NORTH);
         add(messageAvatarPanel, BorderLayout.CENTER);
     }
 }

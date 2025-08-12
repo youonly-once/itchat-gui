@@ -77,8 +77,8 @@ public class IconUtil {
 
 
     public static Image getScaledImage(Image src, int width, int height, int maxWidth,int maxHeight) {
-        Dimension scaleDimen = getScaleDimension(src.getWidth(null), src.getHeight(null), maxWidth,maxHeight);
-        if (width <= scaleDimen.width && height <= scaleDimen.height) {
+        Dimension scaleDimen = getScaleDimension(width, height, maxWidth,maxHeight);
+        if ( scaleDimen.width<=maxWidth && scaleDimen.height <= maxHeight) {
             return src; // 无需缩放
         }
         BufferedImage scaledImage = new BufferedImage(scaleDimen.width, scaleDimen.height, BufferedImage.TYPE_INT_ARGB);
@@ -141,6 +141,7 @@ public class IconUtil {
      */
     public static Dimension getScaleDimension(int width, int height, int maxWidth,int maxHeight) {
         if (width <= 0 || height <= 0 || maxWidth <= 0 || maxHeight <= 0) {
+            log.error("width <= 0 || height <= 0 || maxWidth <= 0 || maxHeight <= 0");
             return new Dimension(1, 1); // 防止非法输入导致异常或 UI 崩溃
         }
 

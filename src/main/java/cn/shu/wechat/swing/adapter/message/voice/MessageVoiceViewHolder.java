@@ -8,6 +8,7 @@ import cn.shu.wechat.swing.components.RCProgressBar;
 import cn.shu.wechat.swing.components.message.RCAttachmentMessageBubble;
 import cn.shu.wechat.swing.components.message.TagPanel;
 import cn.shu.wechat.utils.FontUtil;
+import cn.shu.wechat.utils.IconUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,27 +22,27 @@ import java.awt.event.MouseListener;
  */
 
 public abstract class MessageVoiceViewHolder extends BaseMessageViewHolder {
-    public final TagPanel contentTagPanel = new TagPanel();
-    public final CountDownJLabel durationText = new CountDownJLabel();;
+
+    public final CountDownJLabel durationText = new CountDownJLabel();
+
     public final JLabel gapText = new JLabel();
+
     protected final JLabel unitLabel = new JLabel("''");
-    protected final JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-    protected final JPanel messageAvatarPanel = new JPanel();
+
     protected final boolean isGroup;
+
     protected final JLabel voiceImgLabel = new JLabel();
+
     public final RCAttachmentMessageBubble messageBubble;
-    protected final JPanel voicePanel = new JPanel();
     /**
      *播放进度条
      */
-    public final RCProgressBar progressBar = new RCProgressBar(4);
+    public final RCProgressBar progressBar = new RCProgressBar(2);
 
     public MessageVoiceViewHolder(boolean isGroup, RCAttachmentMessageBubble messageBubble) {
         this.messageBubble = messageBubble;
         this.isGroup = isGroup;
-        initComponents();
-        initView();
-        setListeners();
+
     }
     public MessageVoiceViewHolder(RCAttachmentMessageBubble messageBubble) {
         this(false,messageBubble);
@@ -51,20 +52,22 @@ public abstract class MessageVoiceViewHolder extends BaseMessageViewHolder {
         /*durationText.addMouseListener(mouseListener);
         voiceImgLabel.addMouseListener(mouseListener);*/
     }
-    private void initComponents() {
-
-        time.setForeground(Colors.FONT_GRAY);
-        time.setFont(FontUtil.getDefaultFont(12));
-
-        messageAvatarPanel.setBackground(Colors.WINDOW_BACKGROUND);
-        timePanel.setBackground(Colors.WINDOW_BACKGROUND);
+    protected void initComponents() {
 
         progressBar.setUI(new GradientProgressBarUI());
         progressBar.setVisible(false);
+
+        voiceImgLabel.setIcon(IconUtil.getIcon(this, "/image/left_voice.png"));
     }
 
-    private void initView() {
-
+    protected void initView() {
+        setLayout(new GridBagLayout());
+        messageBubble.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        messageBubble.add(voiceImgLabel);
+        messageBubble.add(durationText);
+        messageBubble.add(unitLabel);
+        messageBubble.add(gapText);
+        setListeners();
     }
     public void removeUnreadPoint(){
 

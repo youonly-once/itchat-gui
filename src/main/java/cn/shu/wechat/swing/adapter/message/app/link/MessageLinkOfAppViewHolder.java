@@ -1,5 +1,6 @@
-package cn.shu.wechat.swing.adapter.message.app;
+package cn.shu.wechat.swing.adapter.message.app.link;
 
+import cn.shu.wechat.swing.adapter.message.app.MessageAppViewHolder;
 import cn.shu.wechat.swing.components.message.RCAttachmentMessageBubble;
 
 import javax.swing.*;

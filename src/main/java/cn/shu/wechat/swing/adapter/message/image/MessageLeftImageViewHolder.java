@@ -16,13 +16,11 @@ import java.awt.*;
  * Created by 舒新胜 on 17-6-2.
  */
 public class MessageLeftImageViewHolder extends BaseMessageViewHolder {
-    //public JLabel avatar = new JLabel();
-    //public JLabel size = new JLabel();
+
     public MessageImageLabel image = new MessageImageLabel();
-    public RCLeftImageMessageBubble imageBubble = new RCLeftImageMessageBubble();
-    private JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-    private JPanel messageAvatarPanel = new JPanel();
-    private boolean isGroup = true;
+
+    private final boolean isGroup;
+
     private final Dimension imgSize;
 
     public MessageLeftImageViewHolder(boolean isGroup,Dimension imgSize) {
@@ -33,17 +31,7 @@ public class MessageLeftImageViewHolder extends BaseMessageViewHolder {
     }
 
     private void initComponents() {
-        timePanel.setBackground(Colors.WINDOW_BACKGROUND);
-        messageAvatarPanel.setBackground(Colors.WINDOW_BACKGROUND);
 
-        time.setForeground(Colors.FONT_GRAY);
-        time.setFont(FontUtil.getDefaultFont(12));
-
-    }
-
-    private void initView() {
-        setLayout(new BorderLayout());
-        timePanel.add(time);
         // 设置图标水平居中
         image.setHorizontalAlignment(SwingConstants.CENTER);
 
@@ -52,26 +40,38 @@ public class MessageLeftImageViewHolder extends BaseMessageViewHolder {
         if (imgSize != null) {
             image.setPreferredSize(imgSize);
         }
-        JPanel senderMessagePanel = new JPanel();
-        senderMessagePanel.setBackground(Colors.WINDOW_BACKGROUND);
-        senderMessagePanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
+    }
+
+    private void initView() {
+
+        setLayout(new GridBagLayout());
+
+        add(time, new GBC(0, 0).setWeight(1, 1)
+                .setAnchor(GBC.NORTH).setInsets(0, 0, 0, 0).setGridWidth(4)
+                .setFill(GBC.HORIZONTAL));
+
+
+        add(avatar, new GBC(0, 1).setWeight(0, 1)
+                .setAnchor(GBC.NORTHWEST).setInsets(0, 5, 0, 0).setFill(GBC.NONE)
+                .setGridHeight(2));
+        int newLine = 0;
         if (isGroup) {
-            sender.setFont(FontUtil.getDefaultFont(12));
-            sender.setForeground(Colors.FONT_GRAY);
-            sender.setBorder(new EmptyBorder(0,0,5,0));
-            senderMessagePanel.add(sender);
+            //占位，当sender设置top为-10，而time被隐藏则sender被遮住
+            add(Box.createVerticalStrut(10), new GBC(1, 0)
+                    .setWeight(10, 100).setGridWidth(4)); // 占位行
+
+            add(sender, new GBC(1, 1).setWeight(0, 1)
+                    .setAnchor(GBC.NORTHWEST).setInsets(-10, 9, 0, 0).setFill(GBC.NONE));
+            newLine = 1;
         }
-        JPanel controlPanel = new JPanel(new BorderLayout(0, 0));
-        controlPanel.add(image,BorderLayout.CENTER);
-        controlPanel.add(revoke,BorderLayout.EAST);
-        senderMessagePanel.add(controlPanel);
-        messageAvatarPanel.setLayout(new GridBagLayout());
-        messageAvatarPanel.add(avatar, new GBC(1, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 5, 0, 0));
-        messageAvatarPanel.add(senderMessagePanel, new GBC(2, 0)
-                .setWeight(1000, 1)
-                .setAnchor(GBC.WEST)
-                .setInsets(0, 5, 0, 0));
-        add(timePanel, BorderLayout.NORTH);
-        add(messageAvatarPanel, BorderLayout.CENTER);
+
+        add(image, new GBC(1, 1 + newLine).setWeight(0, 10)
+                .setAnchor(GBC.CENTER).setInsets(0, 12, 0, 0).setFill(GBC.NONE));
+
+        add(revoke, new GBC(2, 1 + newLine).setWeight(1, 1)
+                .setAnchor(GBC.WEST).setInsets(0, 5, 0, 0));
+        //占位，revoke被隐藏则messageBubble被拉伸到最右边，从而不能左对齐
+        add(Box.createHorizontalStrut(5), new GBC(3, 1 + newLine).setWeight(1, 100)); // 占位行
+
     }
 }

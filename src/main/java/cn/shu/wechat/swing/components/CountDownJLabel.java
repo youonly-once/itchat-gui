@@ -54,6 +54,7 @@ public class CountDownJLabel extends JLabel {
                 }
             }
         });
+        timer.start();
     }
 
     /**

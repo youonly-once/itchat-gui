@@ -54,7 +54,7 @@ public class MessageRightTextViewHolder extends BaseMessageViewHolder {
 
 
         add(time, new GBC(0, 0).setWeight(1, 1)
-                .setAnchor(GBC.NORTH).setInsets(0, 5, 0, 0)
+                .setAnchor(GBC.NORTH).setInsets(0, 0, 0, 0)
         );
 
 
@@ -83,7 +83,7 @@ public class MessageRightTextViewHolder extends BaseMessageViewHolder {
 
 
         add(messageBubble, new GBC(1, 1).setWeight(0, 10)
-                .setAnchor(GBC.EAST).setInsets(0, 0, 0, 5)
+                .setAnchor(GBC.CENTER).setInsets(0, 0, 0, 5)
                 .setFill(GBC.NONE)
                 .setGridHeight(3));
 

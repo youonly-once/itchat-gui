@@ -1,40 +1,38 @@
-package cn.shu.wechat.swing.adapter.message.voice;
+package cn.shu.wechat.swing.adapter.message.app.attachment;
 
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.VerticalFlowLayout;
-import cn.shu.wechat.swing.components.message.RCLeftVoiceMessageBubble;
+import cn.shu.wechat.swing.components.message.RCLeftImageMessageBubble;
 import cn.shu.wechat.utils.FontUtil;
-import cn.shu.wechat.utils.IconUtil;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 
 /**
- *
- * @author 舒新胜
- * @date 17-6-2
+ * Created by 舒新胜 on 17-6-2.
  */
+public class MessageLeftAttachmentViewHolder extends MessageAttachmentViewHolder {
 
-public class MessageLeftVoiceViewHolder extends MessageVoiceViewHolder {
-    private JLabel unreadPoint;
-    public MessageLeftVoiceViewHolder(boolean isGroup) {
-       super(isGroup,new RCLeftVoiceMessageBubble());
+    private boolean isGroup = true;
+
+    public MessageLeftAttachmentViewHolder(boolean isGroup) {
+        this.isGroup = isGroup;
+
+
         initComponents();
         initView();
     }
-    protected void initComponents(){
+
+    protected void initComponents() {
+        messageBubble = new RCLeftImageMessageBubble();
         super.initComponents();
         progressBar.setBorder(new EmptyBorder(0, messageBubble.getSalientPointPixel(), 0, 0));
-
-        unreadPoint = new JLabel(IconUtil.getIcon(this, "/image/voice_redpoint.png"));
-        unreadPoint.setBorder(new EmptyBorder(0, 5, 0, 0));
     }
 
-
-
-    protected void initView(){
+    protected void initView() {
         super.initView();
 
         add(time, new GBC(0, 0).setWeight(1, 1)
@@ -43,7 +41,7 @@ public class MessageLeftVoiceViewHolder extends MessageVoiceViewHolder {
 
 
         add(avatar, new GBC(0, 1).setWeight(0, 1)
-                .setAnchor(GBC.CENTER).setInsets(0, 5, 0, 0).setFill(GBC.NONE)
+                .setAnchor(GBC.NORTHWEST).setInsets(0, 5, 0, 0).setFill(GBC.NONE)
                 .setGridHeight(2));
         int newLine = 0;
         if (isGroup) {
@@ -52,34 +50,21 @@ public class MessageLeftVoiceViewHolder extends MessageVoiceViewHolder {
                     .setWeight(10, 100).setGridWidth(4)); // 占位行
 
             add(sender, new GBC(1, 1).setWeight(0, 1)
-                    .setAnchor(GBC.WEST).setInsets(-10, 12, 0, 0).setFill(GBC.NONE));
+                    .setAnchor(GBC.NORTHWEST).setInsets(-10, 5, 0, 0).setFill(GBC.NONE));
             newLine = 1;
         }
 
         add(messageBubble, new GBC(1, 1 + newLine).setWeight(0, 10)
-                .setAnchor(GBC.WEST).setInsets(0, 5, 0, 0).setFill(GBC.NONE));
-
+                .setAnchor(GBC.NORTHWEST).setInsets(0, 5, 0, 0).setFill(GBC.NONE));
 
 
         add(progressBar, new GBC(1, 2 + newLine).setWeight(0, 10)
-                .setAnchor(GBC.CENTER).setInsets(0, 5, 0, 0).setFill(GBC.BOTH));
+                .setAnchor(GBC.NORTHWEST).setInsets(0, 5, 0, 0).setFill(GBC.BOTH));
 
-        add(unreadPoint, new GBC(2, 1 + newLine).setWeight(0, 10)
-                .setAnchor(GBC.CENTER).setInsets(0, 5, 0, 0).setFill(GBC.NONE));
-
-        add(revoke, new GBC(3, 1 + newLine).setWeight(1, 1)
+        add(revoke, new GBC(2, 1 + newLine).setWeight(1, 1)
                 .setAnchor(GBC.WEST).setInsets(0, 5, 0, 0).setGridHeight(2));
         //占位，revoke被隐藏则messageBubble被拉伸到最右边，从而不能左对齐
         add(Box.createHorizontalStrut(5), new GBC(3, 1 + newLine).setWeight(1, 100)); // 占位行
 
-
-
-
-    }
-    @Override
-    public void removeUnreadPoint(){
-        if (unreadPoint!=null){
-            this.remove(unreadPoint);
-        }
     }
 }

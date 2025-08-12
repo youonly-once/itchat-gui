@@ -27,9 +27,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
+import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.List;
 
 import static cn.shu.wechat.constant.WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_TEXT;
 
@@ -346,6 +349,7 @@ public class MsgCenter {
                 .contentMap(msg.getContentMap())
                 .messageTime(LocalDateTime.now())
                 .oriContent(msg.getOriContent())
+                .progress(100)
                 .build();
     }
 

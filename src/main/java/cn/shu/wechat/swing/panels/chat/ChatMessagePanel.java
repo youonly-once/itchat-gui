@@ -12,7 +12,7 @@ import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.entity.SelectUserData;
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.adapter.message.MessageAdapter;
-import cn.shu.wechat.swing.adapter.message.app.MessageRightAttachmentViewHolder;
+import cn.shu.wechat.swing.adapter.message.app.attachment.MessageRightAttachmentViewHolder;
 import cn.shu.wechat.swing.adapter.message.image.MessageRightImageViewHolder;
 import cn.shu.wechat.swing.adapter.message.video.MessageRightVideoViewHolder;
 import cn.shu.wechat.swing.components.Colors;

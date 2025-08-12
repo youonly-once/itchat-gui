@@ -1,4 +1,4 @@
-package cn.shu.wechat.swing.adapter.message.app;
+package cn.shu.wechat.swing.adapter.message.app.card;
 
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.message.RCRightLinkMessageBubble;

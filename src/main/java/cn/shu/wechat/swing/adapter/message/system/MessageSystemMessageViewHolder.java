@@ -2,6 +2,7 @@ package cn.shu.wechat.swing.adapter.message.system;
 
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.components.Colors;
+import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.utils.FontUtil;
 
@@ -12,7 +13,6 @@ import java.awt.*;
  * Created by 舒新胜 on 17-6-2.
  */
 public class MessageSystemMessageViewHolder extends BaseMessageViewHolder {
-    //public JLabel size = new JLabel();
     public JLabel text = new JLabel() {
 
         @Override
@@ -20,7 +20,6 @@ public class MessageSystemMessageViewHolder extends BaseMessageViewHolder {
             super.setText("<html>" + text + "</html>");
         }
     };
-    private final JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
     private JPanel textPanel;
 
     public MessageSystemMessageViewHolder() {
@@ -31,10 +30,7 @@ public class MessageSystemMessageViewHolder extends BaseMessageViewHolder {
 
     private void initComponents() {
         setBackground(Colors.WINDOW_BACKGROUND);
-        timePanel.setBackground(Colors.WINDOW_BACKGROUND);
 
-        time.setForeground(Colors.FONT_GRAY);
-        time.setFont(FontUtil.getDefaultFont(12));
         text.setHorizontalTextPosition(SwingConstants.CENTER);
         text.setFont(FontUtil.getDefaultFont(12));
         text.setForeground(new Color(248, 248, 248));
@@ -74,16 +70,18 @@ public class MessageSystemMessageViewHolder extends BaseMessageViewHolder {
         };
 
         textPanel.setFont(FontUtil.getDefaultFont(12));
+        textPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
     }
 
     private void initView() {
-        JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.CENTER, 0, 0, true, false));
-        timePanel.add(time);
+        this.setLayout(new GridBagLayout());
         textPanel.add(text);
-        contentPanel.add(timePanel);
-        contentPanel.add(textPanel);
+        add(time, new GBC(0, 0).setWeight(1, 1)
+                .setAnchor(GBC.NORTH).setInsets(0, 0, 0, 0)
+                .setFill(GBC.HORIZONTAL));
 
-        add(contentPanel);
+        add(textPanel, new GBC(0, 1).setWeight(1, 1)
+                .setAnchor(GBC.CENTER).setInsets(0, 0, 0, 0)
+                .setFill(GBC.NONE));
     }
 }

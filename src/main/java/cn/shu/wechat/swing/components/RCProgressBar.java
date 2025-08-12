@@ -8,7 +8,7 @@ import java.awt.*;
  * Created by 舒新胜 on 17-6-4.
  */
 public class RCProgressBar extends JProgressBar {
-    private int height = 6;
+    private int height = 1;
     public RCProgressBar() {
         setForeground(Colors.PROGRESS_BAR_START);
 
