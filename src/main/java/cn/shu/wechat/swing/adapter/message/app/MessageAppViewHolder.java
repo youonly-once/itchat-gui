@@ -21,18 +21,17 @@ import java.awt.event.MouseAdapter;
 
 public abstract class MessageAppViewHolder extends BaseMessageViewHolder {
 
-    protected final JPanel messageAvatarPanel = new JPanel();
+
     /**
      * APP消息标题
      */
     public final JTextArea title = new JTextArea();
 
-    protected final JPanel senderMessagePanel = new JPanel();
     /**
      * 消息内容面板 由APP消息各类子类型实现
      */
     protected final JPanel contentPanel = new JPanel(new BorderLayout());
-    public final TagPanel contentTitlePanel = new TagPanel();
+
     public final RCAttachmentMessageBubble messageBubble;
     /**
      * APP名称
@@ -55,27 +54,17 @@ public abstract class MessageAppViewHolder extends BaseMessageViewHolder {
     }
 
     private void initComponents() {
-        messageAvatarPanel.setBackground(Colors.WINDOW_BACKGROUND);
-        messageAvatarPanel.setLayout(new GridBagLayout());
         contentPanel.setBorder(new EmptyBorder(5,5,5,5));
         contentPanel.setOpaque(false);
-        senderMessagePanel.setBackground(Colors.WINDOW_BACKGROUND);
-        senderMessagePanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, true, false));
 
     }
     private void setListeners() {
         MouseAdapter listener = messageBubble.getMouseListener();
-        contentTitlePanel.addMouseListener(listener);
         title.addMouseListener(listener);
 
     }
     private void initView() {
-        setLayout(new BorderLayout());
 
-        sourcePanel.add(sourceIcon);
-        sourcePanel.add(sourceName);
-        sourcePanel.setOpaque(false);
-        sourcePanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.decode("#f2f2f2")));
         sourceName.setFont(new Font("楷体",Font.PLAIN,12));
         sourceName.setOpaque(false);
         sourceName.setForeground(Color.GRAY);
@@ -88,23 +77,13 @@ public abstract class MessageAppViewHolder extends BaseMessageViewHolder {
         title.setWrapStyleWord(true);
         title.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        contentTitlePanel.setLayout(new GridBagLayout());
-        contentTitlePanel.setOpaque(false);
-        contentTitlePanel.add(title, new GBC(0, 0)
-                .setWeight(1, 30)
-                .setFill(GridBagConstraints.BOTH)
-                .setAnchor(GBC.NORTH)
-                .setInsets(5, 0, 0, 0));
-        contentTitlePanel.add(contentPanel, new GBC(0, 1)
-                .setWeight(1, 70)
-                .setAnchor(GBC.CENTER)
-                .setFill(GridBagConstraints.BOTH)
-                .setInsets(0, 0, 0, 0));
         messageBubble.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        messageBubble.setLayout(new VerticalFlowLayout(VerticalFlowLayout.BOTTOM,5,0,true,false));
-        messageBubble.add(contentTitlePanel);
-        messageBubble.add(sourcePanel);
-        add(time, BorderLayout.NORTH);
-        add(messageAvatarPanel, BorderLayout.CENTER);
+        messageBubble.setLayout(new GridBagLayout());
+        messageBubble.add(title,        new GBC(0, 0).setGridWidth(2).setAnchor(GBC.WEST).setFill(GBC.BOTH).setFill(GBC.HORIZONTAL).setInsets(5, 5, 0, 5));
+        messageBubble.add(contentPanel,new GBC(0, 1).setGridWidth(2).setAnchor(GBC.CENTER).setFill(GBC.BOTH).setInsets(0, 0, 0, 5));
+        messageBubble.add(sourceIcon,new GBC(0, 2).setAnchor(GBC.WEST).setFill(GBC.BOTH).setInsets(5, 5, 0, 0));
+        messageBubble.add(sourceName,new GBC(1, 2).setAnchor(GBC.WEST).setFill(GBC.BOTH).setInsets(5, 0, 0, 5));
+
+
     }
 }

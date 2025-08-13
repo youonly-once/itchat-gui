@@ -26,6 +26,7 @@ public abstract class MessageLinkOfAppViewHolder extends MessageAppViewHolder {
      * 描述
      */
     public final JTextArea desc = new JTextArea();
+
     public MessageLinkOfAppViewHolder(RCAttachmentMessageBubble messageBubble) {
         super(messageBubble);
         initComponents();
@@ -50,7 +51,6 @@ public abstract class MessageLinkOfAppViewHolder extends MessageAppViewHolder {
     }
     private void setListeners() {
         MouseAdapter listener = messageBubble.getMouseListener();
-        contentTitlePanel.addMouseListener(listener);
         title.addMouseListener(listener);
         desc.addMouseListener(listener);
     }

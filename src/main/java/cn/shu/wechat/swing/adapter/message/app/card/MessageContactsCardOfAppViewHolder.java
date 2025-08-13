@@ -14,7 +14,8 @@ import java.awt.event.MouseAdapter;
  */
 
 public abstract class MessageContactsCardOfAppViewHolder extends MessageAppViewHolder {
-
+    public static final int THUMB_WIDTH = 60;
+    public static final int THUMB_HEIGHT = 60;
     /**
      * 链接预览图
      */
@@ -37,6 +38,7 @@ public abstract class MessageContactsCardOfAppViewHolder extends MessageAppViewH
         contentPanel.add(desc,BorderLayout.CENTER);
         contentPanel.add(icon,BorderLayout.EAST);
 
+        icon.setPreferredSize(new Dimension(THUMB_WIDTH, THUMB_HEIGHT));
         desc.setLineWrap(true);
         desc.setOpaque(false);
         desc.setEditable(false);
@@ -48,7 +50,6 @@ public abstract class MessageContactsCardOfAppViewHolder extends MessageAppViewH
     }
     private void setListeners() {
         MouseAdapter listener = messageBubble.getMouseListener();
-        contentTitlePanel.addMouseListener(listener);
         title.addMouseListener(listener);
         desc.addMouseListener(listener);
     }

@@ -77,10 +77,11 @@ public class IconUtil {
 
 
     public static Image getScaledImage(Image src, int width, int height, int maxWidth,int maxHeight) {
-        Dimension scaleDimen = getScaleDimension(width, height, maxWidth,maxHeight);
-        if ( scaleDimen.width<=maxWidth && scaleDimen.height <= maxHeight) {
+        if (width<=maxWidth && height<=maxHeight) {
             return src; // 无需缩放
         }
+        Dimension scaleDimen = getScaleDimension(width, height, maxWidth,maxHeight);
+
         BufferedImage scaledImage = new BufferedImage(scaleDimen.width, scaleDimen.height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = scaledImage.createGraphics();
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
@@ -164,11 +165,11 @@ public class IconUtil {
      * @return
      */
     public static ImageIcon preferredGifSize(String filePath, int w, int h,int maxWidth,int maxHeight) {
-
-        Dimension scaleDimen = getScaleDimension(w, h, maxWidth,maxHeight);
-        if (scaleDimen.width >= w && scaleDimen.height >= h) {
-            return new ImageIcon(filePath);
+        if (w<=maxWidth && h<=maxHeight) {
+            return new ImageIcon(filePath); // 无需缩放
         }
+        Dimension scaleDimen = getScaleDimension(w, h, maxWidth,maxHeight);
+
        return preferredGifSize(filePath, scaleDimen.width, scaleDimen.height);
 
     }
@@ -206,6 +207,9 @@ public class IconUtil {
      * @return
      */
     public static ImageIcon preferredGifSize(byte[] bytes, int w, int h,int maxWidth,int maxHeight) {
+        if (w<=maxWidth && h<=maxHeight) {
+            return new ImageIcon(bytes); // 无需缩放
+        }
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             Dimension scaleDimen = getScaleDimension(w, h, maxWidth,maxHeight);
             if (scaleDimen.width == w && scaleDimen.height == h) {

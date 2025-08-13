@@ -1,27 +1,28 @@
-package cn.shu.wechat.swing.adapter.message.app.card;
+package cn.shu.wechat.swing.adapter.message.app.program;
 
 import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.components.message.RCRightLinkMessageBubble;
+import cn.shu.wechat.swing.components.message.RCRightAppMessageBubble;
 
 import javax.swing.*;
 import java.awt.*;
 
 /**
- * right ContactsCard of app
- * @author 舒新胜
- * @date 2021-09-29
+ * @作者 舒新胜
+ * @项目 AutoWechat
+ * @创建时间 8/15/2021 11:58
  */
+public class MessageRightProgramOfAppViewHolder extends MessageProgramOfAppViewHolder{
 
+    public MessageRightProgramOfAppViewHolder(Dimension imgSize,String title) {
+        super(new RCRightAppMessageBubble(),imgSize,title);
 
-public class MessageRightContactsCardOfAppViewHolder extends MessageContactsCardOfAppViewHolder {
-    public MessageRightContactsCardOfAppViewHolder() {
-        super(new RCRightLinkMessageBubble());
         initView();
     }
 
     private void initView() {
 
         setLayout(new GridBagLayout());
+
 
         add(time, new GBC(0, 0).setWeight(1, 1)
                 .setAnchor(GBC.NORTH).setInsets(0, 0, 0, 0).setFill(GBC.HORIZONTAL).setGridWidth(3)
@@ -47,4 +48,5 @@ public class MessageRightContactsCardOfAppViewHolder extends MessageContactsCard
                 .setAnchor(GBC.EAST).setInsets(0, 0, 0, 0).setFill(GBC.NONE)
         );
     }
+
 }

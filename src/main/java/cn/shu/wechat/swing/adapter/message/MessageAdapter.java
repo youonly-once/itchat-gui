@@ -19,6 +19,9 @@ import cn.shu.wechat.swing.adapter.message.app.card.MessageRightContactsCardOfAp
 import cn.shu.wechat.swing.adapter.message.app.link.MessageLeftLinkOfAppViewHolder;
 import cn.shu.wechat.swing.adapter.message.app.link.MessageLinkOfAppViewHolder;
 import cn.shu.wechat.swing.adapter.message.app.link.MessageRightLinkOfAppViewHolder;
+import cn.shu.wechat.swing.adapter.message.app.program.MessageLeftProgramOfAppViewHolder;
+import cn.shu.wechat.swing.adapter.message.app.program.MessageProgramOfAppViewHolder;
+import cn.shu.wechat.swing.adapter.message.app.program.MessageRightProgramOfAppViewHolder;
 import cn.shu.wechat.swing.adapter.message.image.MessageLeftImageViewHolder;
 import cn.shu.wechat.swing.adapter.message.image.MessageRightImageViewHolder;
 import cn.shu.wechat.swing.adapter.message.system.MessageSystemMessageViewHolder;
@@ -266,7 +269,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
     private void processProgramOfAppMessage(MessageProgramOfAppViewHolder viewHolder, Message item) {
         viewHolder.title.setText(item.getTitle());
-        viewHolder.contentTitlePanel.setTag(item);
         viewHolder.sourceName.setText(item.getSourceName());
         if (StringUtils.isNotEmpty(item.getSourceIconUrl())){
             try {
@@ -338,7 +340,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     }
                 }
             };
-            viewHolder.contentTitlePanel.addMouseListener(messageMouseListener);
         }
         // 绑定右键菜单
         attachPopupMenu(viewHolder, item);
@@ -1011,9 +1012,8 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     }
 
     private void processContactsCardMessage(MessageContactsCardOfAppViewHolder cardOfAppViewHolder, Message item) {
-        cardOfAppViewHolder.contentTitlePanel.setTag(item);
-        cardOfAppViewHolder.desc.setText("WechatId："+item.getContactsId()
-                +"\n地区："+item.getContactsProvince()
+        cardOfAppViewHolder.desc.setText("WechatId：\t"+item.getContactsId()
+                +"\n\n地区：\t"+item.getContactsProvince()
         +" "+item.getContactsCity());
         cardOfAppViewHolder.title.setText(item.getContactsNickName());
         cardOfAppViewHolder.sourcePanel.setVisible(true);
@@ -1024,7 +1024,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 try {
                     BufferedImage image = ImageIO.read(URI.create(item.getThumbUrl()).toURL());
                     if (image != null) {
-                        ImageIcon imageIcon = new ImageIcon(IconUtil.preferredImageSize(image, MessageLinkOfAppViewHolder.THUMB_WIDTH, MessageLinkOfAppViewHolder.THUMB_HEIGHT));
+                        ImageIcon imageIcon = new ImageIcon(IconUtil.preferredImageSize(image, MessageContactsCardOfAppViewHolder.THUMB_WIDTH, MessageContactsCardOfAppViewHolder.THUMB_HEIGHT));
                         SwingUtilities.invokeLater(() ->
                                 cardOfAppViewHolder.icon.setIcon(imageIcon));
 
@@ -1073,17 +1073,14 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         cardOfAppViewHolder.desc.addMouseListener(messageMouseListener);
         cardOfAppViewHolder.title.addMouseListener(messageMouseListener);
         cardOfAppViewHolder.icon.addMouseListener(messageMouseListener);
-        cardOfAppViewHolder.contentTitlePanel.addMouseListener(messageMouseListener);
         cardOfAppViewHolder.messageBubble.addMouseListener(messageMouseListener);
         listView.setScrollHiddenOnMouseLeave(cardOfAppViewHolder.desc);
         listView.setScrollHiddenOnMouseLeave(cardOfAppViewHolder.title);
         listView.setScrollHiddenOnMouseLeave(cardOfAppViewHolder.icon);
-        listView.setScrollHiddenOnMouseLeave(cardOfAppViewHolder.contentTitlePanel);
         listView.setScrollHiddenOnMouseLeave(cardOfAppViewHolder.messageBubble);
     }
 
     private void processLinkMessage(MessageLinkOfAppViewHolder linkViewHolder, Message item) {
-        linkViewHolder.contentTitlePanel.setTag(item);
         linkViewHolder.desc.setText(StringEscapeUtils.unescapeHtml4(item.getDesc()));
         linkViewHolder.title.setText(item.getTitle());
         linkViewHolder.icon.setIcon(IconUtil.getIcon(this, "/image/image_loading.gif"));
@@ -1149,14 +1146,11 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         linkViewHolder.desc.addMouseListener(messageMouseListener);
         linkViewHolder.title.addMouseListener(messageMouseListener);
         linkViewHolder.icon.addMouseListener(messageMouseListener);
-        linkViewHolder.contentTitlePanel.addMouseListener(messageMouseListener);
         linkViewHolder.messageBubble.addMouseListener(messageMouseListener);
         listView.setScrollHiddenOnMouseLeave(linkViewHolder.desc);
         listView.setScrollHiddenOnMouseLeave(linkViewHolder.title);
         listView.setScrollHiddenOnMouseLeave(linkViewHolder.icon);
-        listView.setScrollHiddenOnMouseLeave(linkViewHolder.contentTitlePanel);
         listView.setScrollHiddenOnMouseLeave(linkViewHolder.messageBubble);
-        Dimension preferredSize = linkViewHolder.contentTitlePanel.getPreferredSize();
     }
 
     /**
@@ -1341,7 +1335,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     case PICTURE:
                     case LINK:{
                             MessageAppViewHolder holder = (MessageAppViewHolder) viewHolder;
-                            contentComponent = holder.contentTitlePanel;
                             messageBubble = holder.messageBubble;
                         break;
                     }
@@ -1352,7 +1345,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             case MSGTYPE_VERIFYMSG:
             case MSGTYPE_SHARECARD:{
                 MessageAppViewHolder holder = (MessageAppViewHolder) viewHolder;
-                contentComponent = holder.contentTitlePanel;
                 messageBubble = holder.messageBubble;
                 break;
             }

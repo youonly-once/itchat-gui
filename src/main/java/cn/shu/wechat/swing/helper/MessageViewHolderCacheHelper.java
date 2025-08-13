@@ -1,9 +1,11 @@
 package cn.shu.wechat.swing.helper;
 
 import cn.shu.wechat.entity.Message;
-import cn.shu.wechat.swing.adapter.message.app.*;
 import cn.shu.wechat.swing.adapter.message.app.attachment.MessageLeftAttachmentViewHolder;
 import cn.shu.wechat.swing.adapter.message.app.attachment.MessageRightAttachmentViewHolder;
+import cn.shu.wechat.swing.adapter.message.app.program.MessageLeftProgramOfAppViewHolder;
+import cn.shu.wechat.swing.adapter.message.app.program.MessageProgramOfAppViewHolder;
+import cn.shu.wechat.swing.adapter.message.app.program.MessageRightProgramOfAppViewHolder;
 import cn.shu.wechat.swing.adapter.message.image.MessageLeftImageViewHolder;
 import cn.shu.wechat.swing.adapter.message.image.MessageRightImageViewHolder;
 import cn.shu.wechat.swing.adapter.message.system.MessageSystemMessageViewHolder;
@@ -92,7 +94,7 @@ public class MessageViewHolderCacheHelper {
     public MessageLeftProgramOfAppViewHolder tryGetLeftProgramOfAppViewHolder(Message messageItem) {
 
         return new MessageLeftProgramOfAppViewHolder(messageItem.isGroup(),IconUtil.getScaleDimension(messageItem.getImgWidth(),messageItem.getImgHeight()
-                ,MessageProgramOfAppViewHolder.maxWidth, MessageProgramOfAppViewHolder.maxHeight),messageItem.getTitle());
+                , MessageProgramOfAppViewHolder.maxWidth, MessageProgramOfAppViewHolder.maxHeight),messageItem.getTitle());
 
     }
 

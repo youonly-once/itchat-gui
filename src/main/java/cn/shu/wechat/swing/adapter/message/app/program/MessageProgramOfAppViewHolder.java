@@ -1,5 +1,6 @@
-package cn.shu.wechat.swing.adapter.message.app;
+package cn.shu.wechat.swing.adapter.message.app.program;
 
+import cn.shu.wechat.swing.adapter.message.app.MessageAppViewHolder;
 import cn.shu.wechat.swing.components.message.RCAttachmentMessageBubble;
 
 import javax.swing.*;
@@ -24,16 +25,16 @@ public abstract class MessageProgramOfAppViewHolder extends MessageAppViewHolder
         super(messageBubble);
         this.imgSize = imgSize;
         //让图片宽度和标题一样
-        this.imgSize.setSize(this.title.getFontMetrics(this.getFont()).stringWidth(title), this.imgSize.height);
+       // this.imgSize.setSize(this.title.getFontMetrics(this.getFont()).stringWidth(title), this.imgSize.height);
         initComponents();
         initView();
     }
 
     private void initComponents() {
         imageLabel.setHorizontalAlignment(JLabel.CENTER);
-        imageLabel.setPreferredSize(imgSize);
+        contentPanel.setLayout(new BorderLayout());
         contentPanel.setPreferredSize(imgSize);
-        contentPanel.add(imageLabel);
+        contentPanel.add(imageLabel,BorderLayout.CENTER);
 
     }
 

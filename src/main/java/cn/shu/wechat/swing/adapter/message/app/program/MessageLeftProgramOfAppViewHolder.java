@@ -1,29 +1,23 @@
-package cn.shu.wechat.swing.adapter.message.app.card;
+package cn.shu.wechat.swing.adapter.message.app.program;
 
 import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.components.message.RCRightLinkMessageBubble;
+import cn.shu.wechat.swing.components.message.RCLeftAppMessageBubble;
 
 import javax.swing.*;
 import java.awt.*;
 
 /**
- * right ContactsCard of app
- * @author 舒新胜
- * @date 2021-09-29
+ * @作者 舒新胜
+ * @项目 AutoWechat
+ * @创建时间 8/15/2021 11:58
  */
-
-
-public class MessageLeftContactsCardOfAppViewHolder extends MessageContactsCardOfAppViewHolder {
-    private final boolean isGroup ;
-    public MessageLeftContactsCardOfAppViewHolder(boolean isGroup) {
-        super(new RCRightLinkMessageBubble());
-        this.isGroup = isGroup;
-        initView();
+public class MessageLeftProgramOfAppViewHolder extends MessageProgramOfAppViewHolder{
+    public MessageLeftProgramOfAppViewHolder(boolean isGroup, Dimension size,String title) {
+        super(new RCLeftAppMessageBubble(),size,title);
+        initView(isGroup);
     }
 
-    private void initView() {
-
-
+    private void initView(boolean isGroup) {
         setLayout(new GridBagLayout());
 
         add(time, new GBC(0, 0).setWeight(1, 1)
@@ -53,4 +47,5 @@ public class MessageLeftContactsCardOfAppViewHolder extends MessageContactsCardO
         //占位，revoke被隐藏则messageBubble被拉伸到最右边，从而不能左对齐
         add(Box.createHorizontalStrut(5), new GBC(3, 1 + newLine).setWeight(1, 100)); // 占位行
     }
+
 }
