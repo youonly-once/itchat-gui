@@ -9,6 +9,7 @@ import cn.shu.wechat.swing.frames.MainFrame;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseListener;
 
 /**
  *
@@ -17,9 +18,16 @@ import java.awt.*;
  */
 public class MessageLeftTextViewHolder extends BaseMessageViewHolder {
 
-    public SizeAutoAdjustTextArea text;
+    public SizeAutoAdjustTextArea text= new SizeAutoAdjustTextArea( (int) (MainFrame.getContext().currentWindowWidth * 0.5));
 
-    public RCLeftImageMessageBubble messageBubble = new RCLeftImageMessageBubble();
+    public RCLeftImageMessageBubble messageBubble = new RCLeftImageMessageBubble(){
+        @Override
+        public synchronized void addMouseListener(MouseListener l) {
+            super.addMouseListener(l);
+            text.addMouseListener(l);
+
+        }
+    };
 
     private final JPanel messageAvatarPanel = new JPanel();
     private final boolean isGroup;
@@ -32,7 +40,6 @@ public class MessageLeftTextViewHolder extends BaseMessageViewHolder {
 
     private void initComponents() {
         int maxWidth = (int) (MainFrame.getContext().currentWindowWidth * 0.5);
-        text = new SizeAutoAdjustTextArea(maxWidth);
         text.setParseUrl(true);
 
         messageAvatarPanel.setBackground(Colors.WINDOW_BACKGROUND);

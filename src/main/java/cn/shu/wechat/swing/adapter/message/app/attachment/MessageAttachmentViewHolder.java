@@ -30,9 +30,6 @@ public class MessageAttachmentViewHolder extends BaseMessageViewHolder {
         }
     }; // 进度条
 
-    public JPanel messageAvatarPanel = new JPanel(); // 消息 + 头像组合面板
-
-    public TagPanel attachmentPanel = new TagPanel(); // 附件面板
 
     public JLabel attachmentIcon = new JLabel(); // 附件类型icon
 
@@ -61,7 +58,6 @@ public class MessageAttachmentViewHolder extends BaseMessageViewHolder {
             }
         };
 
-        attachmentPanel.addMouseListener(listener);
         attachmentTitle.addMouseListener(listener);
 
     }
@@ -70,12 +66,7 @@ public class MessageAttachmentViewHolder extends BaseMessageViewHolder {
         int maxWidth = (int) (MainFrame.getContext().currentWindowWidth * 0.427);
         attachmentTitle = new SizeAutoAdjustTextArea(maxWidth);
 
-        messageAvatarPanel.setBackground(Colors.WINDOW_BACKGROUND);
-
-        attachmentPanel.setOpaque(false);
-
         messageBubble.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        messageBubble.add(attachmentPanel);
 
 
         progressBar.setMaximum(100);
@@ -92,18 +83,18 @@ public class MessageAttachmentViewHolder extends BaseMessageViewHolder {
     }
     protected void initView(){
         setLayout(new GridBagLayout());
-        attachmentPanel.setLayout(new GridBagLayout());
-        attachmentPanel.add(attachmentIcon, new GBC(0, 0)
+        messageBubble.setLayout(new GridBagLayout());
+        messageBubble.add(attachmentIcon, new GBC(0, 0)
                 .setWeight(1, 1)
                 .setInsets(2, 5, 0, 0)
                         .setFill(GBC.BOTH)
                 .setGridHeight(2));
-        attachmentPanel.add(attachmentTitle, new GBC(1, 0)
+        messageBubble.add(attachmentTitle, new GBC(1, 0)
                 .setWeight(1, 1)
                 .setFill(GBC.BOTH)
                 .setAnchor(GBC.NORTHWEST)
                 .setInsets(2, 5, 0, 5));
-        attachmentPanel.add(sizeLabel, new GBC(1, 1)
+        messageBubble.add(sizeLabel, new GBC(1, 1)
                 .setWeight(1, 1)
                 .setFill(GBC.BOTH)
                 .setAnchor(GBC.NORTHWEST)
@@ -112,8 +103,7 @@ public class MessageAttachmentViewHolder extends BaseMessageViewHolder {
 
     @Override
     public void removeNotify() {
-        attachmentPanel.removeMouseListener(listener);
-        attachmentTitle.removeMouseListener(listener);
+        messageBubble.removeMouseListener(listener);
         super.removeNotify();
     }
 }

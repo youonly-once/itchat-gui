@@ -9,15 +9,23 @@ import cn.shu.wechat.utils.IconUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseListener;
 
 /**
  * Created by 舒新胜 on 17-6-2.
  */
 public class MessageRightTextViewHolder extends BaseMessageViewHolder {
 
-    public SizeAutoAdjustTextArea text;
+    public SizeAutoAdjustTextArea text= new SizeAutoAdjustTextArea( (int) (MainFrame.getContext().currentWindowWidth * 0.5));
 
-    public RCRightImageMessageBubble messageBubble = new RCRightImageMessageBubble();
+    public RCRightImageMessageBubble messageBubble = new RCRightImageMessageBubble(){
+        @Override
+        public synchronized void addMouseListener(MouseListener l) {
+            super.addMouseListener(l);
+            text.addMouseListener(l);
+
+        }
+    };
 
     // 重发按钮
     public JLabel resend = new JLabel();
@@ -32,8 +40,6 @@ public class MessageRightTextViewHolder extends BaseMessageViewHolder {
 
     private void initComponents() {
 
-        int maxWidth = (int) (MainFrame.getContext().currentWindowWidth * 0.5);
-        text = new SizeAutoAdjustTextArea(maxWidth);
         text.setParseUrl(true);
 
         resend.setIcon(IconUtil.getIcon(this, "/image/resend.png", 20, 20));

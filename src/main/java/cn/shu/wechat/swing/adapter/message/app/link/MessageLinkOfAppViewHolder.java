@@ -53,6 +53,8 @@ public abstract class MessageLinkOfAppViewHolder extends MessageAppViewHolder {
         MouseAdapter listener = messageBubble.getMouseListener();
         title.addMouseListener(listener);
         desc.addMouseListener(listener);
+        icon.addMouseListener(listener);
+        contentPanel.addMouseListener(listener);
     }
     private void initView() {
 

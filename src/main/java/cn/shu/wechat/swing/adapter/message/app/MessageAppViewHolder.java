@@ -30,7 +30,7 @@ public abstract class MessageAppViewHolder extends BaseMessageViewHolder {
     /**
      * 消息内容面板 由APP消息各类子类型实现
      */
-    protected final JPanel contentPanel = new JPanel(new BorderLayout());
+    public final JPanel contentPanel = new JPanel(new BorderLayout());
 
     public final RCAttachmentMessageBubble messageBubble;
     /**

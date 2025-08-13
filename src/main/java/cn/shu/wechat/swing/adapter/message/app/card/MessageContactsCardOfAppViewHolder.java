@@ -52,6 +52,8 @@ public abstract class MessageContactsCardOfAppViewHolder extends MessageAppViewH
         MouseAdapter listener = messageBubble.getMouseListener();
         title.addMouseListener(listener);
         desc.addMouseListener(listener);
+        icon.addMouseListener(listener);
+        contentPanel.addMouseListener(listener);
     }
     private void initView() {
 

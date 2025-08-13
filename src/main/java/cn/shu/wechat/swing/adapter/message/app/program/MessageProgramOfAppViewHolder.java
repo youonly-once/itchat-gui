@@ -5,6 +5,7 @@ import cn.shu.wechat.swing.components.message.RCAttachmentMessageBubble;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
 
 /**
  * App 消息
@@ -28,6 +29,7 @@ public abstract class MessageProgramOfAppViewHolder extends MessageAppViewHolder
        // this.imgSize.setSize(this.title.getFontMetrics(this.getFont()).stringWidth(title), this.imgSize.height);
         initComponents();
         initView();
+        setListeners();
     }
 
     private void initComponents() {
@@ -36,6 +38,15 @@ public abstract class MessageProgramOfAppViewHolder extends MessageAppViewHolder
         imageLabel.setPreferredSize(imgSize);
         contentPanel.add(imageLabel,BorderLayout.CENTER);
 
+    }
+
+    private void setListeners() {
+        MouseAdapter listener = messageBubble.getMouseListener();
+        title.addMouseListener(listener);
+        imageLabel.addMouseListener(listener);
+        sourceIcon.addMouseListener(listener);
+        sourceName.addMouseListener(listener);
+        contentPanel.addMouseListener(listener);
     }
 
     private void initView() {

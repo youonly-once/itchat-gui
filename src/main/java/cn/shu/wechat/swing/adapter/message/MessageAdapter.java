@@ -340,9 +340,11 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     }
                 }
             };
+            viewHolder.messageBubble.addMouseListener(messageMouseListener);
         }
         // 绑定右键菜单
         attachPopupMenu(viewHolder, item);
+
     }
 
     private void process(Message item, MessageProgramOfAppViewHolder appViewHolder, byte[] secondBytes) {
@@ -382,9 +384,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
         setAttachmentClickListener(holder, item);
 
-        listView.setScrollHiddenOnMouseLeave(holder.attachmentPanel);
         listView.setScrollHiddenOnMouseLeave(holder.messageBubble);
-        listView.setScrollHiddenOnMouseLeave(holder.attachmentTitle);
 
         // 绑定右键菜单
         attachPopupMenu(holder, item);
@@ -443,9 +443,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         // 绑定右键菜单
         attachPopupMenu(holder, item);
 
-        listView.setScrollHiddenOnMouseLeave(holder.attachmentPanel);
         listView.setScrollHiddenOnMouseLeave(holder.messageBubble);
-        listView.setScrollHiddenOnMouseLeave(holder.attachmentTitle);
     }
 
     /**
@@ -456,7 +454,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     private void updateFileDownloadProgress(MessageAttachmentViewHolder holder, Message item) {
         holder.sizeLabel.setText("0/" + FileUtil.fileSizeString(item.getFileSize()));
         String filePath = item.getFilePath();
-        holder.attachmentPanel.setTag(item);
 
         ImageIcon attachmentTypeIcon = attachmentIconHelper.getImageIcon(filePath);
         holder.attachmentIcon.setIcon(attachmentTypeIcon);
@@ -547,7 +544,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         };
 
 
-        viewHolder.attachmentPanel.addMouseListener(listener);
         viewHolder.attachmentTitle.addMouseListener(listener);
     }
 
@@ -968,8 +964,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         // 绑定右键菜单
         attachPopupMenu(holder, item);
 
-        listView.setScrollHiddenOnMouseLeave(holder.messageBubble);
-        listView.setScrollHiddenOnMouseLeave(holder.text);
     }
 
     /**
@@ -984,9 +978,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         holder.text.setText(item.getPlaintext() == null ? "[空消息]" : item.getPlaintext());
         holder.text.setTag(item);
 
-
-        listView.setScrollHiddenOnMouseLeave(holder.messageBubble);
-        listView.setScrollHiddenOnMouseLeave(holder.text);
         attachPopupMenu(holder, item);
     }
 
@@ -1074,10 +1065,8 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         cardOfAppViewHolder.title.addMouseListener(messageMouseListener);
         cardOfAppViewHolder.icon.addMouseListener(messageMouseListener);
         cardOfAppViewHolder.messageBubble.addMouseListener(messageMouseListener);
-        listView.setScrollHiddenOnMouseLeave(cardOfAppViewHolder.desc);
-        listView.setScrollHiddenOnMouseLeave(cardOfAppViewHolder.title);
-        listView.setScrollHiddenOnMouseLeave(cardOfAppViewHolder.icon);
-        listView.setScrollHiddenOnMouseLeave(cardOfAppViewHolder.messageBubble);
+        cardOfAppViewHolder.contentPanel.addMouseListener(messageMouseListener);
+
     }
 
     private void processLinkMessage(MessageLinkOfAppViewHolder linkViewHolder, Message item) {
@@ -1305,27 +1294,9 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                             MessageRightAttachmentViewHolder holder = (MessageRightAttachmentViewHolder) viewHolder;
                             messageBubble = holder.messageBubble;
 
-                            holder.attachmentTitle.addMouseListener(new MessageMouseListener() {
-                                @Override
-                                public void mouseReleased(MouseEvent e) {
-                                    if (e.getButton() == MouseEvent.BUTTON3) {
-                                        // 通过holder.attachmentPane.getTag()可以获取文件附件信息
-                                        popupMenu.show(holder.attachmentPanel, e.getX(), e.getY(), item.getMsgType());
-                                    }
-                                }
-                            });
                         }else {
                             MessageLeftAttachmentViewHolder holder = (MessageLeftAttachmentViewHolder) viewHolder;
                             messageBubble = holder.messageBubble;
-
-                            holder.attachmentTitle.addMouseListener(new MessageMouseListener() {
-                                @Override
-                                public void mouseReleased(MouseEvent e) {
-                                    if (e.getButton() == MouseEvent.BUTTON3) {
-                                        popupMenu.show(holder.attachmentPanel, e.getX(), e.getY(), item.getMsgType());
-                                    }
-                                }
-                            });
 
                         }
                         break;

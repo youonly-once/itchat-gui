@@ -9,6 +9,7 @@ import cn.shu.wechat.utils.IconUtil;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.MouseListener;
 
 /**
  * Created by 舒新胜 on 17-6-3.
@@ -23,7 +24,15 @@ public class MessageRightAttachmentViewHolder extends MessageAttachmentViewHolde
     }
 
     protected void initComponents() {
-        messageBubble = new RCRightAttachmentMessageBubble();
+        messageBubble = new RCRightAttachmentMessageBubble(){
+            @Override
+            public synchronized void addMouseListener(MouseListener l) {
+                super.addMouseListener(l);
+                attachmentTitle.addMouseListener(l);
+                attachmentIcon.addMouseListener(l);
+                sizeLabel.addMouseListener(l);
+            }
+        };
         super.initComponents();
 
         resend.setIcon(IconUtil.getIcon(this,"/image/resend.png",20,20));

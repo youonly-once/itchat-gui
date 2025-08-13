@@ -10,6 +10,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.awt.event.MouseListener;
 
 /**
  * Created by 舒新胜 on 17-6-2.
@@ -27,7 +28,15 @@ public class MessageLeftAttachmentViewHolder extends MessageAttachmentViewHolder
     }
 
     protected void initComponents() {
-        messageBubble = new RCLeftImageMessageBubble();
+        messageBubble = new RCLeftImageMessageBubble(){
+            @Override
+            public synchronized void addMouseListener(MouseListener l) {
+                super.addMouseListener(l);
+                attachmentTitle.addMouseListener(l);
+                attachmentIcon.addMouseListener(l);
+                sizeLabel.addMouseListener(l);
+            }
+        };
         super.initComponents();
         progressBar.setBorder(new EmptyBorder(0, messageBubble.getSalientPointPixel(), 0, 0));
     }
