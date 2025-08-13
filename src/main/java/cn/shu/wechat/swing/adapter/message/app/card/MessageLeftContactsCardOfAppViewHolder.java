@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.adapter.message.app.card;
 
 import cn.shu.wechat.swing.components.GBC;
+import cn.shu.wechat.swing.components.message.RCLeftLinkMessageBubble;
 import cn.shu.wechat.swing.components.message.RCRightLinkMessageBubble;
 
 import javax.swing.*;
@@ -16,7 +17,7 @@ import java.awt.*;
 public class MessageLeftContactsCardOfAppViewHolder extends MessageContactsCardOfAppViewHolder {
     private final boolean isGroup ;
     public MessageLeftContactsCardOfAppViewHolder(boolean isGroup) {
-        super(new RCRightLinkMessageBubble());
+        super(new RCLeftLinkMessageBubble());
         this.isGroup = isGroup;
         initView();
     }
@@ -46,7 +47,7 @@ public class MessageLeftContactsCardOfAppViewHolder extends MessageContactsCardO
         }
 
         add(messageBubble, new GBC(1, 1 + newLine).setWeight(0, 10)
-                .setAnchor(GBC.CENTER).setInsets(0, 12, 0, 0).setFill(GBC.NONE));
+                .setAnchor(GBC.CENTER).setInsets(0, 5, 0, 0).setFill(GBC.NONE));
 
         add(revoke, new GBC(2, 1 + newLine).setWeight(1, 1)
                 .setAnchor(GBC.WEST).setInsets(0, 5, 0, 0));

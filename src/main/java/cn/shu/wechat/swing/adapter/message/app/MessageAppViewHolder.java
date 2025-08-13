@@ -80,7 +80,7 @@ public abstract class MessageAppViewHolder extends BaseMessageViewHolder {
         messageBubble.setCursor(new Cursor(Cursor.HAND_CURSOR));
         messageBubble.setLayout(new GridBagLayout());
         messageBubble.add(title,        new GBC(0, 0).setGridWidth(2).setAnchor(GBC.WEST).setFill(GBC.BOTH).setFill(GBC.HORIZONTAL).setInsets(5, 5, 0, 5));
-        messageBubble.add(contentPanel,new GBC(0, 1).setGridWidth(2).setAnchor(GBC.CENTER).setFill(GBC.BOTH).setInsets(0, 0, 0, 5));
+        messageBubble.add(contentPanel,new GBC(0, 1).setGridWidth(2).setAnchor(GBC.CENTER).setFill(GBC.BOTH).setInsets(0, 0, 0, 0));
         messageBubble.add(sourceIcon,new GBC(0, 2).setAnchor(GBC.WEST).setFill(GBC.BOTH).setInsets(5, 5, 0, 0));
         messageBubble.add(sourceName,new GBC(1, 2).setAnchor(GBC.WEST).setFill(GBC.BOTH).setInsets(5, 0, 0, 5));
 

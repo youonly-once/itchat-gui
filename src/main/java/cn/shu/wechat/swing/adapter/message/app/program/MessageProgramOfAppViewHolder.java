@@ -13,7 +13,7 @@ import java.awt.*;
  */
 
 public abstract class MessageProgramOfAppViewHolder extends MessageAppViewHolder {
-    public final static int maxWidth = 300;
+    public final static int maxWidth = 250;
     public final static int maxHeight = 200;
     /**
      * 小程序消息的图片
@@ -33,7 +33,7 @@ public abstract class MessageProgramOfAppViewHolder extends MessageAppViewHolder
     private void initComponents() {
         imageLabel.setHorizontalAlignment(JLabel.CENTER);
         contentPanel.setLayout(new BorderLayout());
-        contentPanel.setPreferredSize(imgSize);
+        imageLabel.setPreferredSize(imgSize);
         contentPanel.add(imageLabel,BorderLayout.CENTER);
 
     }
