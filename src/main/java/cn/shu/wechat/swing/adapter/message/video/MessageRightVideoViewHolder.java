@@ -6,6 +6,7 @@ import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.utils.IconUtil;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
@@ -29,35 +30,54 @@ public class MessageRightVideoViewHolder extends MessageVideoViewHolder {
 
     protected void initComponents() {
         super.initComponents();
-
-        ImageIcon resendIcon = IconUtil.getIcon(this,"/image/resend.png",20,20);
-        resend.setIcon(resendIcon);
+        resend.setIcon(IconUtil.getIcon(this,"/image/resend.png",20,20));
         resend.setVisible(false);
         resend.setToolTipText("图片发送失败，点击重新发送");
         resend.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
     }
 
     protected void initView() {
         super.initView();
 
-        statusPanel.add(resend);
-        statusPanel.add(sendingProgress);
+        add(time, new GBC(0, 0).setWeight(1, 1)
+                .setAnchor(GBC.NORTH).setInsets(0, 0, 0, 0).setFill(GBC.HORIZONTAL).setGridWidth(3)
+        );
 
 
-        JPanel statusContentSender = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        statusContentSender.add(statusPanel);
-        statusContentSender.add(videoProgressBarPanel);
-
-
-
-        messageAvatarPanel.setLayout(new GridBagLayout());
-        messageAvatarPanel.add(avatar, new GBC(2, 0).setWeight(1, 1).setAnchor(GBC.NORTH).setInsets(0, 5, 0, 5));
-        messageAvatarPanel.add(statusContentSender, new GBC(1, 0)
-                .setWeight(1000, 1)
+        add(resend, new GBC(0, 1)
+                .setWeight(1, 1)
+                .setFill(GBC.NONE)
                 .setAnchor(GBC.EAST)
-                .setInsets(0, 5, 0, 0));
-        add(timePanel, BorderLayout.NORTH);
-        add(messageAvatarPanel, BorderLayout.CENTER);
+                .setInsets(0, 0, 0, 5));
+
+
+        add(sendingProgress, new GBC(0, 2)
+                .setWeight(1, 1)
+                .setAnchor(GBC.EAST)
+                .setInsets(0, 0, 0, 5)
+                .setFill(GBC.NONE));
+
+        add(revoke, new GBC(0, 3)
+                .setWeight(1, 1)
+                .setFill(GBC.NONE)
+                .setAnchor(GBC.EAST)
+                .setInsets(0, 0, 0, 5));
+
+
+        //占位，revoke被隐藏则messageBubble被拉伸到最左边，从而不能右对齐
+        add(Box.createHorizontalStrut(5), new GBC(0, 4).setWeight(100, 100)); // 占位行
+
+
+        add(getLayerPanel(), new GBC(1, 1).setWeight(0, 10)
+                .setAnchor(GBC.CENTER).setInsets(0, 0, 0, 5)
+                .setFill(GBC.BOTH)
+                .setGridHeight(3));
+
+        add(avatar, new GBC(2, 1).setWeight(0, 1)
+                .setAnchor(GBC.EAST).setInsets(0, 0, 0, 0).setFill(GBC.NONE)
+                .setGridHeight(3));
+
     }
 
 

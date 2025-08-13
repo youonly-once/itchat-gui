@@ -49,8 +49,7 @@ public abstract class MessageVoiceViewHolder extends BaseMessageViewHolder {
     }
     private void setListeners() {
         MouseAdapter mouseListener = messageBubble.getMouseListener();
-        /*durationText.addMouseListener(mouseListener);
-        voiceImgLabel.addMouseListener(mouseListener);*/
+
     }
     protected void initComponents() {
 

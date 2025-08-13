@@ -26,6 +26,7 @@ import cn.shu.wechat.swing.adapter.message.text.MessageLeftTextViewHolder;
 import cn.shu.wechat.swing.adapter.message.text.MessageRightTextViewHolder;
 import cn.shu.wechat.swing.adapter.message.video.MessageLeftVideoViewHolder;
 import cn.shu.wechat.swing.adapter.message.video.MessageRightVideoViewHolder;
+import cn.shu.wechat.swing.adapter.message.video.MessageVideoViewHolder;
 import cn.shu.wechat.swing.adapter.message.voice.MessageLeftVoiceViewHolder;
 import cn.shu.wechat.swing.adapter.message.voice.MessageRightVoiceViewHolder;
 import cn.shu.wechat.swing.adapter.message.voice.MessageVoiceViewHolder;
@@ -661,13 +662,12 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     , holder.timeLabel
                     , holder.playImgLabel
                     , holder.slaveImgLabel
-                    , holder.videoProgressBarPanel);
+                    , holder.contentLayeredPane);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
-        holder.videoProgressBarPanel.setTag(item);
-        listView.setScrollHiddenOnMouseLeave(holder.videoProgressBarPanel);
-        listView.setScrollHiddenOnMouseLeave(holder.imageBubble);
+        holder.contentLayeredPane.setTag(item);
+        listView.setScrollHiddenOnMouseLeave(holder.contentLayeredPane);
 
         // 绑定右键菜单
         attachPopupMenu(holder, item);
@@ -685,13 +685,12 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     , holder.timeLabel
                     , holder.playImgLabel
                     , holder.slaveImgLabel
-                    , holder.videoProgressBarPanel);
+                    , holder.contentLayeredPane);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
-        holder.videoProgressBarPanel.setTag(item);
-        listView.setScrollHiddenOnMouseLeave(holder.videoProgressBarPanel);
-        listView.setScrollHiddenOnMouseLeave(holder.imageBubble);
+        holder.contentLayeredPane.setTag(item);
+        listView.setScrollHiddenOnMouseLeave(holder.contentLayeredPane);
         // 判断是否显示重发按钮
         holder.resend.setVisible(item.isNeedToResend());
 
@@ -1289,17 +1288,8 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 break;
             }
             case MSGTYPE_VIDEO:{
-                if (isSelf){
-                    MessageRightVideoViewHolder holder = (MessageRightVideoViewHolder) viewHolder;
-                    contentComponent = holder.videoProgressBarPanel;
-                    messageBubble = holder.imageBubble;
-                }else {
-                    MessageLeftVideoViewHolder holder = (MessageLeftVideoViewHolder) viewHolder;
-                    contentComponent = holder.videoProgressBarPanel;
-                    messageBubble = holder.imageBubble;
-
-
-                }
+                    MessageVideoViewHolder holder = (MessageVideoViewHolder) viewHolder;
+                    contentComponent = holder.contentLayeredPane;
                 break;
             }
             case MSGTYPE_VOICE:{

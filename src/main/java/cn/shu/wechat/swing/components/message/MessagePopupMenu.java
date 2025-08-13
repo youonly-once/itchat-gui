@@ -59,6 +59,15 @@ public class MessagePopupMenu extends JPopupMenu {
                     case MSGTYPE_VIDEO: {
                         TagJLayeredPane videoPanel = (TagJLayeredPane) getInvoker();
                         Object obj = videoPanel.getTag();
+                        if (obj != null) {
+                            ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
+                                Message msg = (Message) obj;
+                                String filePath = msg.getFilePath();
+                                ClipboardUtil.copyFile(filePath);
+                            });
+
+
+                        }
                         break;
                     }
 
@@ -69,13 +78,10 @@ public class MessagePopupMenu extends JPopupMenu {
                         MessageImageLabel imageLabel = (MessageImageLabel) getInvoker();
                         Object obj = imageLabel.getTag();
                         if (obj != null) {
-                            ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Message msg = (Message) obj;
-                                    String filePath = msg.getFilePath();
-                                    ClipboardUtil.copyFile(filePath);
-                                }
+                            ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
+                                Message msg = (Message) obj;
+                                String filePath = msg.getFilePath();
+                                ClipboardUtil.copyFile(filePath);
                             });
 
 
@@ -261,7 +267,11 @@ public class MessagePopupMenu extends JPopupMenu {
                         obj = imageLabel.getTag();
                         break;
                     }
-                    case MSGTYPE_VIDEO:
+                    case MSGTYPE_VIDEO:{
+                        TagJLayeredPane attachmentPanel = (TagJLayeredPane) getInvoker();
+                        obj = attachmentPanel.getTag();
+                        break;
+                    }
                     case MSGTYPE_VOICE:
                     case MSGTYPE_APP: {
                         TagPanel attachmentPanel = (TagPanel) getInvoker();

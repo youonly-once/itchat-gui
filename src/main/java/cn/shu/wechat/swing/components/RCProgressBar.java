@@ -1,5 +1,7 @@
 package cn.shu.wechat.swing.components;
 
+import lombok.Getter;
+
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
@@ -21,6 +23,10 @@ public class RCProgressBar extends JProgressBar {
 
     @Override
     protected void paintBorder(Graphics g) {
+    }
+
+    public int getHeight() {
+        return height;
     }
 
 

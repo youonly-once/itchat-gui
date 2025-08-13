@@ -58,7 +58,7 @@ public class MessageRightImageViewHolder extends BaseMessageViewHolder {
 
 
         add(time, new GBC(0, 0).setWeight(1, 1)
-                .setAnchor(GBC.NORTH).setInsets(0, 0, 0, 0)
+                .setAnchor(GBC.NORTH).setInsets(0, 0, 0, 0).setFill(GBC.HORIZONTAL).setGridWidth(3)
         );
 
 
