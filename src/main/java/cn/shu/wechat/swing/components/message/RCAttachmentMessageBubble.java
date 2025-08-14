@@ -12,6 +12,7 @@ import java.awt.event.MouseListener;
  * Created by 舒新胜 on 17-6-3.
  */
 public class RCAttachmentMessageBubble extends JPanel implements RCMessageBubble {
+    public Object tag;
     private NinePatchImageIcon backgroundNormalIcon;
     private NinePatchImageIcon backgroundActiveIcon;
     private Icon currentBackgroundIcon;

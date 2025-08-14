@@ -603,7 +603,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
      */
     private void processVoice(Message item, MessageVoiceViewHolder holder) {
 
-       // holder.contentTagPanel.setTag(item);
+        holder.messageBubble.tag = item;
 // 设置语音时长（单位为秒，四舍五入）
         long voiceDurationSec = Math.max(1, Math.round(item.getVoiceLength() / 1000.0)); // 最少显示1秒
         holder.durationText.setText(voiceDurationSec + "");
@@ -1257,12 +1257,16 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 if (isSelf) {
                     MessageRightTextViewHolder holder = (MessageRightTextViewHolder) viewHolder;
                     contentComponent = holder.text;
+                    holder.text.setTag(item);
+                    holder.messageBubble.tag = item;
                     messageBubble = holder.messageBubble;
 
                 } else {
                     MessageLeftTextViewHolder holder = (MessageLeftTextViewHolder) viewHolder;
                     contentComponent = holder.text;
                     messageBubble = holder.messageBubble;
+                    holder.text.setTag(item);
+                    holder.messageBubble.tag = item;
 
                 }
                 break;
@@ -1275,6 +1279,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 }else{
                     MessageLeftImageViewHolder holder = (MessageLeftImageViewHolder) viewHolder;
                     contentComponent = holder.image;
+                    holder.image.setTag(item);
 
                 }
                 break;
@@ -1282,17 +1287,18 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             case MSGTYPE_VIDEO:{
                     MessageVideoViewHolder holder = (MessageVideoViewHolder) viewHolder;
                     contentComponent = holder.contentLayeredPane;
+                 holder.contentLayeredPane.setTag(item);
                 break;
             }
             case MSGTYPE_VOICE:{
                if (isSelf){
                    MessageRightVoiceViewHolder holder = (MessageRightVoiceViewHolder) viewHolder;
                    messageBubble = holder.messageBubble;
-                   contentComponent = holder.voiceImgLabel;
+                   holder.messageBubble.tag = item;
                 }else {
                    MessageLeftVoiceViewHolder holder = (MessageLeftVoiceViewHolder) viewHolder;
                    messageBubble = holder.messageBubble;
-                   contentComponent = holder.voiceImgLabel;
+                   holder.messageBubble.tag = item;
 
                 }
                 break;
@@ -1305,11 +1311,15 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                             MessageRightAttachmentViewHolder holder = (MessageRightAttachmentViewHolder) viewHolder;
                             messageBubble = holder.messageBubble;
                             contentComponent = holder.attachmentTitle;
+                            holder.attachmentTitle.setTag(item);
+                            holder.messageBubble.tag = item;
 
                         }else {
                             MessageLeftAttachmentViewHolder holder = (MessageLeftAttachmentViewHolder) viewHolder;
                             messageBubble = holder.messageBubble;
                             contentComponent = holder.attachmentIcon;
+                            holder.attachmentTitle.setTag(item);
+                            holder.messageBubble.tag = item;
 
                         }
                         break;
@@ -1321,6 +1331,8 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                             MessageAppViewHolder holder = (MessageAppViewHolder) viewHolder;
                             messageBubble = holder.messageBubble;
                             contentComponent = holder.contentPanel;
+                        holder.contentPanel.setTag(item);
+                        holder.messageBubble.tag = item;
                         break;
                     }
 
@@ -1332,6 +1344,8 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 MessageAppViewHolder holder = (MessageAppViewHolder) viewHolder;
                 messageBubble = holder.messageBubble;
                 contentComponent = holder.contentPanel;
+                holder.contentPanel.setTag(item);
+                holder.messageBubble.tag = item;
                 break;
             }
         }
@@ -1361,7 +1375,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     if (e.getButton() == MouseEvent.BUTTON3) {
-                        popupMenu.show((Component) e.getSource(), e.getX(), e.getY(), item.getMsgType());
+                        popupMenu.show((Component) e.getSource(), e.getX(), e.getY(), item);
                     }
 
                     super.mouseReleased(e);
@@ -1395,7 +1409,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     if (e.getButton() == MouseEvent.BUTTON3) {
-                        popupMenu.show((Component) e.getSource(), e.getX(), e.getY(), item.getMsgType());
+                        popupMenu.show((Component) e.getSource(), e.getX(), e.getY(), item);
                     }
                 }
             });

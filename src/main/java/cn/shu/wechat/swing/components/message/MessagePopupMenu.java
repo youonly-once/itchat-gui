@@ -33,6 +33,7 @@ public class MessagePopupMenu extends JPopupMenu {
     private final JMenuItem showPathItem = new JMenuItem("文件夹");
     private final JMenuItem revokeItem = new JMenuItem("撤回");
     private WeakReference<Component> lastInvokerRef = new WeakReference<>(null);
+    private WeakReference<Message> msg = new WeakReference<>(null);
     public MessagePopupMenu() {
         initMenuItem();
     }
@@ -56,31 +57,11 @@ public class MessagePopupMenu extends JPopupMenu {
                         }
                         break;
                     }
-                    case MSGTYPE_VIDEO: {
-                        TagJLayeredPane videoPanel = (TagJLayeredPane) getInvoker();
-                        Object obj = videoPanel.getTag();
+                    case MSGTYPE_VIDEO, MSGTYPE_IMAGE, MSGTYPE_EMOTICON, MSGTYPE_VOICE, MSGTYPE_APP: {
+                        Message obj = msg.get();
                         if (obj != null) {
                             ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
-                                Message msg = (Message) obj;
-                                String filePath = msg.getFilePath();
-                                ClipboardUtil.copyFile(filePath);
-                            });
-
-
-                        }
-                        break;
-                    }
-
-                    case MSGTYPE_IMAGE:
-                    case MSGTYPE_EMOTICON:
-                    case MSGTYPE_VOICE:
-                    case MSGTYPE_APP: {
-                        MessageImageLabel imageLabel = (MessageImageLabel) getInvoker();
-                        Object obj = imageLabel.getTag();
-                        if (obj != null) {
-                            ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
-                                Message msg = (Message) obj;
-                                String filePath = msg.getFilePath();
+                                String filePath = obj.getFilePath();
                                 ClipboardUtil.copyFile(filePath);
                             });
 
@@ -99,16 +80,15 @@ public class MessagePopupMenu extends JPopupMenu {
         pause.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Object obj = null;
+
                 switch (messageType) {
                     case MSGTYPE_APP: {
-                        TagPanel attachmentPanel = (TagPanel) getInvoker();
-                        obj = attachmentPanel.getTag();
+
                         break;
                     }
                     default:
                 }
-                Message item = (Message) obj;
+                Message item = msg.get();
                 if (item != null) {
                     if (MessageTools.getMapPasue().containsKey(item.getFilePath())){
                         if (MessageTools.getMapPasue().get(item.getFilePath())){
@@ -136,30 +116,25 @@ public class MessagePopupMenu extends JPopupMenu {
                 Object obj = null;
                 switch (messageType) {
                     case MSGTYPE_TEXT: {
-                        SizeAutoAdjustTextArea textArea = (SizeAutoAdjustTextArea) getInvoker();
-                        obj = textArea.getTag();
+
                         break;
                     }
                     case MSGTYPE_VIDEO: {
-                        TagJLayeredPane videoPanel = (TagJLayeredPane) getInvoker();
-                        obj = videoPanel.getTag();
+
                         break;
                     }
                     case MSGTYPE_EMOTICON:
                     case MSGTYPE_IMAGE: {
-                        MessageImageLabel imageLabel = (MessageImageLabel) getInvoker();
-                        obj = imageLabel.getTag();
+
                         break;
                     }
                     case MSGTYPE_APP: {
-                        TagPanel attachmentPanel = (TagPanel) getInvoker();
-                        obj = attachmentPanel.getTag();
+
                         break;
                     }
                     default:
                 }
-                Message item = (Message) obj;
-                ChatUtil.deleteMessage(item);
+                ChatUtil.deleteMessage(msg.get());
             }
         });
 
@@ -167,36 +142,31 @@ public class MessagePopupMenu extends JPopupMenu {
         forwardItem.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Object obj = null;
+
                 switch (messageType) {
                     case MSGTYPE_TEXT: {
-                        SizeAutoAdjustTextArea textArea = (SizeAutoAdjustTextArea) getInvoker();
-                        obj = textArea.getTag();
+
                         break;
                     }
                     case MSGTYPE_VIDEO: {
-                        TagJLayeredPane videoPanel = (TagJLayeredPane) getInvoker();
-                        obj = videoPanel.getTag();
+
                         break;
                     }
 
                     case MSGTYPE_EMOTICON:
                     case MSGTYPE_VOICE:
                     case MSGTYPE_IMAGE: {
-                        MessageImageLabel imageLabel = (MessageImageLabel) getInvoker();
-                        obj = imageLabel.getTag();
+
                         break;
                     }
                     case MSGTYPE_APP: {
-                        TagPanel attachmentPanel = (TagPanel) getInvoker();
-                        obj = attachmentPanel.getTag();
+
                         break;
                     }
                     default:
                 }
-                if (obj == null) return;
-                Message item = (Message) obj;
-                ForwardMsgDialog dialog = new ForwardMsgDialog(MainFrame.getContext(), true, item);
+
+                ForwardMsgDialog dialog = new ForwardMsgDialog(MainFrame.getContext(), true, msg.get());
                 dialog.setVisible(true);
             }
         });
@@ -207,35 +177,27 @@ public class MessagePopupMenu extends JPopupMenu {
                 Object obj = null;
                 switch (messageType) {
                     case MSGTYPE_TEXT: {
-                        SizeAutoAdjustTextArea textArea = (SizeAutoAdjustTextArea) getInvoker();
-                        obj = textArea.getTag();
+
                         break;
                     }
                     case MSGTYPE_EMOTICON:
                     case MSGTYPE_IMAGE: {
-                        MessageImageLabel imageLabel = (MessageImageLabel) getInvoker();
-                        obj = imageLabel.getTag();
+
                         break;
                     }
                     case MSGTYPE_APP:
                     case MSGTYPE_VOICE: {
-                        TagPanel attachmentPanel = (TagPanel) getInvoker();
-                        obj = attachmentPanel.getTag();
+
                         break;
                     }
                     case MSGTYPE_VIDEO: {
-                        TagJLayeredPane attachmentPanel = (TagJLayeredPane) getInvoker();
-                        obj = attachmentPanel.getTag();
+
                         break;
                     }
                     default:
                 }
-                if (obj == null) {
-                    return;
 
-                }
-                Message item = (Message) obj;
-                final String messageId = item.getId();
+                final String messageId = msg.get().getId();
                 if (!StringUtils.isEmpty(messageId)) {
                     ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
                         MessageMapper bean = SpringContextHolder.getBean(MessageMapper.class);
@@ -259,34 +221,27 @@ public class MessagePopupMenu extends JPopupMenu {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                Object obj = null;
                 switch (messageType) {
                     case MSGTYPE_EMOTICON:
                     case MSGTYPE_IMAGE: {
-                        MessageImageLabel imageLabel = (MessageImageLabel) getInvoker();
-                        obj = imageLabel.getTag();
+
                         break;
                     }
                     case MSGTYPE_VIDEO:{
-                        TagJLayeredPane attachmentPanel = (TagJLayeredPane) getInvoker();
-                        obj = attachmentPanel.getTag();
+
                         break;
                     }
                     case MSGTYPE_VOICE:
                     case MSGTYPE_APP: {
-                        TagPanel attachmentPanel = (TagPanel) getInvoker();
-                        obj = attachmentPanel.getTag();
+
                         break;
                     }
                     default:
                         break;
                 }
-                if (obj == null) {
-                    return;
-                }
-                Message item = (Message) obj;
-                if (StringUtils.isNotEmpty(item.getFilePath())) {
-                    ExecutorServiceUtil.getGlobalExecutorService().submit(() -> FileUtil.showAtExplorer(item.getFilePath()));
+
+                if (StringUtils.isNotEmpty(msg.get().getFilePath())) {
+                    ExecutorServiceUtil.getGlobalExecutorService().submit(() -> FileUtil.showAtExplorer(msg.get().getFilePath()));
                 }
 
 
@@ -309,8 +264,9 @@ public class MessagePopupMenu extends JPopupMenu {
         //super.show(invoker, x, y);
     }
 
-    public void show(Component invoker, int x, int y, int messageType) {
-        this.messageType = WxRespConstant.WXReceiveMsgCodeEnum.getByCode(messageType);
+    public void show(Component invoker, int x, int y,Message msg) {
+
+        this.messageType = WxRespConstant.WXReceiveMsgCodeEnum.getByCode(msg.getMsgType());
         switch (this.messageType) {
             case MSGTYPE_TEXT:
                 remove(showPathItem);
@@ -319,11 +275,12 @@ public class MessagePopupMenu extends JPopupMenu {
                 add(showPathItem);
 
         }
-        if (messageType<0){
+        if (msg.getMsgType()<0){
             remove(revokeItem);
         }else{
             add(revokeItem);
         }
+        this.msg = new WeakReference<>(msg);;
         lastInvokerRef = new WeakReference<>(invoker);
         super.show(invoker, x, y);
     }
