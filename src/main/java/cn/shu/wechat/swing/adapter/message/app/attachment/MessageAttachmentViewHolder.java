@@ -3,12 +3,10 @@ package cn.shu.wechat.swing.adapter.message.app.attachment;
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.components.*;
 import cn.shu.wechat.swing.components.message.RCAttachmentMessageBubble;
-import cn.shu.wechat.swing.components.message.TagPanel;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.utils.FontUtil;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -16,7 +14,7 @@ import java.awt.event.MouseEvent;
 /**
  * Created by 舒新胜 on 16/06/2017.
  */
-public class MessageAttachmentViewHolder extends BaseMessageViewHolder {
+public abstract class MessageAttachmentViewHolder extends BaseMessageViewHolder {
     public SizeAutoAdjustTextArea attachmentTitle;
 
     public RCProgressBar progressBar = new RCProgressBar(){
@@ -40,24 +38,13 @@ public class MessageAttachmentViewHolder extends BaseMessageViewHolder {
     private MouseAdapter listener;
 
     public MessageAttachmentViewHolder() {
-
+        initComponents();
+        initView();
+        setListeners();
     }
 
     private void setListeners() {
-         listener = new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                messageBubble.setActiveStatus(true);
-                super.mouseEntered(e);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                messageBubble.setActiveStatus(false);
-                super.mouseExited(e);
-            }
-        };
-
+        listener = messageBubble.getMouseListener();
         attachmentTitle.addMouseListener(listener);
 
     }
@@ -65,8 +52,6 @@ public class MessageAttachmentViewHolder extends BaseMessageViewHolder {
     protected void initComponents() {
         int maxWidth = (int) (MainFrame.getContext().currentWindowWidth * 0.427);
         attachmentTitle = new SizeAutoAdjustTextArea(maxWidth);
-
-        messageBubble.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
 
         progressBar.setMaximum(100);
@@ -79,10 +64,10 @@ public class MessageAttachmentViewHolder extends BaseMessageViewHolder {
         sizeLabel.setForeground(Colors.FONT_GRAY);
         sizeLabel.setPreferredSize(new Dimension(100, 10));
 
-        setListeners();
     }
     protected void initView(){
         setLayout(new GridBagLayout());
+        messageBubble.setCursor(new Cursor(Cursor.HAND_CURSOR));
         messageBubble.setLayout(new GridBagLayout());
         messageBubble.add(attachmentIcon, new GBC(0, 0)
                 .setWeight(1, 1)
@@ -93,12 +78,12 @@ public class MessageAttachmentViewHolder extends BaseMessageViewHolder {
                 .setWeight(1, 1)
                 .setFill(GBC.BOTH)
                 .setAnchor(GBC.NORTHWEST)
-                .setInsets(2, 5, 0, 5));
+                .setInsets(0, 5, 0, 5));
         messageBubble.add(sizeLabel, new GBC(1, 1)
                 .setWeight(1, 1)
                 .setFill(GBC.BOTH)
                 .setAnchor(GBC.NORTHWEST)
-                .setInsets(2, 8, 0, 5));
+                .setInsets(2, 10, 0, 5));
     }
 
     @Override

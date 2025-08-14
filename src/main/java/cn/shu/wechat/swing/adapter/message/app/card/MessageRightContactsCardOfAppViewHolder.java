@@ -1,10 +1,12 @@
 package cn.shu.wechat.swing.adapter.message.app.card;
 
 import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.components.message.RCRightLinkMessageBubble;
+import cn.shu.wechat.swing.components.message.RCLeftAttachmentMessageBubble;
+import cn.shu.wechat.swing.components.message.RCRightAttachmentMessageBubble;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseListener;
 
 /**
  * right ContactsCard of app
@@ -15,12 +17,18 @@ import java.awt.*;
 
 public class MessageRightContactsCardOfAppViewHolder extends MessageContactsCardOfAppViewHolder {
     public MessageRightContactsCardOfAppViewHolder() {
-        super(new RCRightLinkMessageBubble());
-        initView();
+        super();
+
     }
 
-    private void initView() {
-
+    @Override
+    protected void initComponents() {
+        super.initComponents();
+        messageBubble = new RCRightAttachmentMessageBubble(new Insets(2, 2, 5, 13));
+    }
+    @Override
+    protected void initView() {
+        super.initView();
         setLayout(new GridBagLayout());
 
         add(time, new GBC(0, 0).setWeight(1, 1)

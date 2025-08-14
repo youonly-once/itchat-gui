@@ -3,7 +3,8 @@ package cn.shu.wechat.swing.adapter.message.text;
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
-import cn.shu.wechat.swing.components.message.RCRightImageMessageBubble;
+import cn.shu.wechat.swing.components.message.RCRightAttachmentMessageBubble;
+import cn.shu.wechat.swing.components.message.RCRightGreenMessageBubble;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.utils.IconUtil;
 
@@ -18,9 +19,9 @@ public class MessageRightTextViewHolder extends BaseMessageViewHolder {
 
     public SizeAutoAdjustTextArea text= new SizeAutoAdjustTextArea( (int) (MainFrame.getContext().currentWindowWidth * 0.5));
 
-    public RCRightImageMessageBubble messageBubble = new RCRightImageMessageBubble(){
+    public RCRightGreenMessageBubble messageBubble = new RCRightGreenMessageBubble(new Insets(2, 2, 5, 8)){
         @Override
-        public synchronized void addMouseListener(MouseListener l) {
+        public void addMouseListener(MouseListener l) {
             super.addMouseListener(l);
             text.addMouseListener(l);
 

@@ -4,7 +4,7 @@ import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
-import cn.shu.wechat.swing.components.message.RCLeftImageMessageBubble;
+import cn.shu.wechat.swing.components.message.RCLeftAttachmentMessageBubble;
 import cn.shu.wechat.swing.frames.MainFrame;
 
 import javax.swing.*;
@@ -20,16 +20,8 @@ public class MessageLeftTextViewHolder extends BaseMessageViewHolder {
 
     public SizeAutoAdjustTextArea text= new SizeAutoAdjustTextArea( (int) (MainFrame.getContext().currentWindowWidth * 0.5));
 
-    public RCLeftImageMessageBubble messageBubble = new RCLeftImageMessageBubble(){
-        @Override
-        public synchronized void addMouseListener(MouseListener l) {
-            super.addMouseListener(l);
-            text.addMouseListener(l);
+    public RCLeftAttachmentMessageBubble messageBubble = new RCLeftAttachmentMessageBubble(new Insets(2, 9, 5, 2));
 
-        }
-    };
-
-    private final JPanel messageAvatarPanel = new JPanel();
     private final boolean isGroup;
 
     public MessageLeftTextViewHolder(boolean isGroup) {
@@ -39,11 +31,7 @@ public class MessageLeftTextViewHolder extends BaseMessageViewHolder {
     }
 
     private void initComponents() {
-        int maxWidth = (int) (MainFrame.getContext().currentWindowWidth * 0.5);
         text.setParseUrl(true);
-
-        messageAvatarPanel.setBackground(Colors.WINDOW_BACKGROUND);
-
     }
 
     private void initView() {

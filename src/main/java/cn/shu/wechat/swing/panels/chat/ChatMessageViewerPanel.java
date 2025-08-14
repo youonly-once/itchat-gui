@@ -17,7 +17,6 @@ import lombok.extern.log4j.Log4j2;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 
 /**

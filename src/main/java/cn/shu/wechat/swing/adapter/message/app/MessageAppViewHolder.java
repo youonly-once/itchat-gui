@@ -1,12 +1,9 @@
 package cn.shu.wechat.swing.adapter.message.app;
 
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
-import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.components.message.RCAttachmentMessageBubble;
 import cn.shu.wechat.swing.components.message.TagPanel;
-import cn.shu.wechat.utils.FontUtil;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -30,9 +27,9 @@ public abstract class MessageAppViewHolder extends BaseMessageViewHolder {
     /**
      * 消息内容面板 由APP消息各类子类型实现
      */
-    public final JPanel contentPanel = new JPanel(new BorderLayout());
+    public final TagPanel contentPanel = new TagPanel(new BorderLayout());
 
-    public final RCAttachmentMessageBubble messageBubble;
+    public RCAttachmentMessageBubble messageBubble;
     /**
      * APP名称
      */
@@ -41,29 +38,28 @@ public abstract class MessageAppViewHolder extends BaseMessageViewHolder {
      * APP图标
      */
     public final JLabel sourceIcon = new JLabel();
-    /**
-     * APP信息面板
-     */
-    public final JPanel sourcePanel =  new JPanel((new FlowLayout(FlowLayout.LEFT,5,0)));
 
-    public MessageAppViewHolder(RCAttachmentMessageBubble messageBubble) {
-        this.messageBubble = messageBubble;
+
+    public MessageAppViewHolder() {
         initComponents();
         initView();
         setListeners();
     }
 
-    private void initComponents() {
+    protected void initComponents() {
         contentPanel.setBorder(new EmptyBorder(5,5,5,5));
         contentPanel.setOpaque(false);
 
     }
-    private void setListeners() {
+    protected void setListeners() {
         MouseAdapter listener = messageBubble.getMouseListener();
         title.addMouseListener(listener);
+        sourceName.addMouseListener(listener);
+        contentPanel.addMouseListener(listener);
+        sourceIcon.addMouseListener(listener);
 
     }
-    private void initView() {
+    protected void initView() {
 
         sourceName.setFont(new Font("楷体",Font.PLAIN,12));
         sourceName.setOpaque(false);

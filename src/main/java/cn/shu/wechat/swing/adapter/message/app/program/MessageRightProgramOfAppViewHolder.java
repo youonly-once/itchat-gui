@@ -1,10 +1,12 @@
 package cn.shu.wechat.swing.adapter.message.app.program;
 
 import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.components.message.RCRightAppMessageBubble;
+import cn.shu.wechat.swing.components.message.RCLeftAttachmentMessageBubble;
+import cn.shu.wechat.swing.components.message.RCRightAttachmentMessageBubble;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseListener;
 
 /**
  * @作者 舒新胜
@@ -14,13 +16,17 @@ import java.awt.*;
 public class MessageRightProgramOfAppViewHolder extends MessageProgramOfAppViewHolder{
 
     public MessageRightProgramOfAppViewHolder(Dimension imgSize,String title) {
-        super(new RCRightAppMessageBubble(),imgSize,title);
+        super(imgSize,title);
 
-        initView();
+    }
+    @Override
+    protected void initComponents() {
+        super.initComponents();
+        messageBubble = new RCRightAttachmentMessageBubble(new Insets(5,10,5,15));
     }
 
-    private void initView() {
-
+    protected void initView() {
+        super.initView();
         setLayout(new GridBagLayout());
 
 

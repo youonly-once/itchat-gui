@@ -4,8 +4,6 @@ import cn.shu.wechat.utils.ExecutorServiceUtil;
 import lombok.extern.log4j.Log4j2;
 
 import javax.sound.sampled.*;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 
 @Log4j2

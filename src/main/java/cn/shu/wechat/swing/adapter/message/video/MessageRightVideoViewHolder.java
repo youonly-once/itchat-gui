@@ -1,12 +1,9 @@
 package cn.shu.wechat.swing.adapter.message.video;
 
-import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.utils.IconUtil;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
@@ -69,13 +66,13 @@ public class MessageRightVideoViewHolder extends MessageVideoViewHolder {
         add(Box.createHorizontalStrut(5), new GBC(0, 4).setWeight(100, 100)); // 占位行
 
 
-        add(getLayerPanel(), new GBC(1, 1).setWeight(0, 10)
-                .setAnchor(GBC.CENTER).setInsets(0, 0, 0, 5)
+        add(contentLayeredPane, new GBC(1, 1).setWeight(0, 10)
+                .setAnchor(GBC.NORTHEAST).setInsets(0, 0, 0, 5)
                 .setFill(GBC.BOTH)
                 .setGridHeight(3));
 
         add(avatar, new GBC(2, 1).setWeight(0, 1)
-                .setAnchor(GBC.EAST).setInsets(0, 0, 0, 0).setFill(GBC.NONE)
+                .setAnchor(GBC.NORTHEAST).setInsets(0, 0, 0, 0).setFill(GBC.NONE)
                 .setGridHeight(3));
 
     }

@@ -1,15 +1,12 @@
 package cn.shu.wechat.swing.adapter.message.voice;
 
-import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.components.VerticalFlowLayout;
-import cn.shu.wechat.swing.components.message.RCLeftVoiceMessageBubble;
-import cn.shu.wechat.utils.FontUtil;
+import cn.shu.wechat.swing.components.message.RCLeftAttachmentMessageBubble;
 import cn.shu.wechat.utils.IconUtil;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import java.awt.event.MouseListener;
 
 /**
  *
@@ -19,24 +16,36 @@ import java.awt.*;
 
 public class MessageLeftVoiceViewHolder extends MessageVoiceViewHolder {
     private JLabel unreadPoint;
+    protected final boolean isGroup;
+
     public MessageLeftVoiceViewHolder(boolean isGroup) {
-       super(isGroup,new RCLeftVoiceMessageBubble());
+       super();
+       this.isGroup = isGroup;
+
         initComponents();
         initView();
     }
     protected void initComponents(){
         super.initComponents();
+        voiceImgLabel.setIcon(IconUtil.getIcon(this, "/image/left_voice.png"));
+        messageBubble = new RCLeftAttachmentMessageBubble();
+
         progressBar.setBorder(new EmptyBorder(0, messageBubble.getSalientPointPixel(), 0, 0));
 
         unreadPoint = new JLabel(IconUtil.getIcon(this, "/image/voice_redpoint.png"));
         unreadPoint.setBorder(new EmptyBorder(0, 5, 0, 0));
+
+
     }
 
 
 
     protected void initView(){
         super.initView();
-
+        messageBubble.add(voiceImgLabel);
+        messageBubble.add(durationText);
+        messageBubble.add(unitLabel);
+        messageBubble.add(gapText);
         add(time, new GBC(0, 0).setWeight(1, 1)
                 .setAnchor(GBC.NORTH).setInsets(0, 0, 0, 0).setGridWidth(4)
                 .setFill(GBC.HORIZONTAL));

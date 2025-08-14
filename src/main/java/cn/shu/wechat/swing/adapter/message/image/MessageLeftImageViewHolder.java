@@ -1,15 +1,10 @@
 package cn.shu.wechat.swing.adapter.message.image;
 
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
-import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.components.message.MessageImageLabel;
-import cn.shu.wechat.swing.components.message.RCLeftImageMessageBubble;
-import cn.shu.wechat.utils.FontUtil;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
@@ -40,6 +35,7 @@ public class MessageLeftImageViewHolder extends BaseMessageViewHolder {
         if (imgSize != null) {
             image.setPreferredSize(imgSize);
         }
+        image.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 
     private void initView() {

@@ -1,13 +1,10 @@
 package cn.shu.wechat.swing.adapter.message.app.link;
 
-import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.components.message.RCLeftLinkMessageBubble;
-import cn.shu.wechat.utils.FontUtil;
+import cn.shu.wechat.swing.components.message.RCLeftAttachmentMessageBubble;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import java.awt.event.MouseListener;
 
 /**
  *
@@ -19,14 +16,25 @@ public class MessageLeftLinkOfAppViewHolder extends MessageLinkOfAppViewHolder {
 
     private final boolean isGroup ;
     public MessageLeftLinkOfAppViewHolder(boolean isGroup) {
-        super(new RCLeftLinkMessageBubble());
+        super();
         this.isGroup = isGroup;
-        initView();
+
     }
 
-    private void initView() {
+    @Override
+    protected void setListeners() {
+        super.setListeners();
+    }
 
-        setLayout(new GridBagLayout());
+    @Override
+    protected void initComponents() {
+        super.initComponents();
+        messageBubble = new RCLeftAttachmentMessageBubble();
+    }
+
+    protected void initView() {
+
+        super.initView();
 
         add(time, new GBC(0, 0).setWeight(1, 1)
                 .setAnchor(GBC.NORTH).setInsets(0, 0, 0, 0).setGridWidth(4)

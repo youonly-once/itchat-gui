@@ -3,7 +3,6 @@ package cn.shu.wechat.swing.adapter.message.system;
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.utils.FontUtil;
 
 import javax.swing.*;

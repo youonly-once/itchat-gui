@@ -1,8 +1,6 @@
 package cn.shu.wechat.swing.adapter.message.app.attachment;
 
-import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.components.VerticalFlowLayout;
 import cn.shu.wechat.swing.components.message.RCRightAttachmentMessageBubble;
 import cn.shu.wechat.utils.IconUtil;
 
@@ -15,26 +13,17 @@ import java.awt.event.MouseListener;
  * Created by 舒新胜 on 17-6-3.
  */
 public class MessageRightAttachmentViewHolder extends MessageAttachmentViewHolder {
-    public JLabel resend = new JLabel(); // 重发按钮
+    public JLabel resend; // 重发按钮
 
 
     public MessageRightAttachmentViewHolder() {
-        initComponents();
-        initView();
+
     }
 
     protected void initComponents() {
-        messageBubble = new RCRightAttachmentMessageBubble(){
-            @Override
-            public synchronized void addMouseListener(MouseListener l) {
-                super.addMouseListener(l);
-                attachmentTitle.addMouseListener(l);
-                attachmentIcon.addMouseListener(l);
-                sizeLabel.addMouseListener(l);
-            }
-        };
         super.initComponents();
-
+        messageBubble = new RCRightAttachmentMessageBubble(new Insets(8, 4, 8, 8));
+        resend = new JLabel();
         resend.setIcon(IconUtil.getIcon(this,"/image/resend.png",20,20));
         resend.setToolTipText("文件发送失败，点击重新发送");
         resend.setCursor(new Cursor(Cursor.HAND_CURSOR));

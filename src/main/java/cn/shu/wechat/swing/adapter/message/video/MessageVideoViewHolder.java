@@ -1,16 +1,14 @@
 package cn.shu.wechat.swing.adapter.message.video;
 
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
-import cn.shu.wechat.swing.components.*;
-import cn.shu.wechat.swing.components.message.RCLeftVideoMessageBubble;
+import cn.shu.wechat.swing.components.GradientProgressBarUI;
+import cn.shu.wechat.swing.components.RCProgressBar;
 import cn.shu.wechat.swing.components.message.TagJLayeredPane;
-import cn.shu.wechat.swing.components.message.TagPanel;
 import cn.shu.wechat.utils.FontUtil;
 import cn.shu.wechat.utils.IconUtil;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 
 /**
  * Created by 舒新胜 on 17-6-2.
@@ -70,6 +68,7 @@ public class MessageVideoViewHolder extends BaseMessageViewHolder {
         progressBar.setVisible(true);
 
         progressBar.setBorder(null);
+        contentLayeredPane = getLayerPanel();
     }
 
     protected void initView(){
@@ -82,7 +81,7 @@ public class MessageVideoViewHolder extends BaseMessageViewHolder {
     /**
      * @return 组件
      */
-    protected TagJLayeredPane getLayerPanel() {
+    private TagJLayeredPane getLayerPanel() {
         contentLayeredPane = new TagJLayeredPane();
         contentLayeredPane.setPreferredSize(new Dimension(slaveImgWidth, slaveImgHeight+progressBar.getHeight()));
         contentLayeredPane.setCursor(new Cursor(Cursor.HAND_CURSOR));

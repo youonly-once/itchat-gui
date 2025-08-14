@@ -19,20 +19,22 @@ public abstract class MessageContactsCardOfAppViewHolder extends MessageAppViewH
     /**
      * 链接预览图
      */
-    public final JLabel icon = new JLabel();
+    public JLabel icon;
 
     /**
      * 描述
      */
-    public final JTextArea desc = new JTextArea();
-    public MessageContactsCardOfAppViewHolder(RCAttachmentMessageBubble messageBubble) {
-        super(messageBubble);
-        initComponents();
-        initView();
-        setListeners();
+    public JTextArea desc;
+    public MessageContactsCardOfAppViewHolder() {
+        super();
     }
 
-    private void initComponents() {
+    protected void initComponents() {
+        super.initComponents();
+
+        desc = new JTextArea();
+        icon = new JLabel();
+
         contentPanel.setLayout(new BorderLayout());
         contentPanel.setOpaque(false);
         contentPanel.add(desc,BorderLayout.CENTER);
@@ -48,14 +50,15 @@ public abstract class MessageContactsCardOfAppViewHolder extends MessageAppViewH
         desc.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
     }
-    private void setListeners() {
+    protected void setListeners() {
+        super.setListeners();
         MouseAdapter listener = messageBubble.getMouseListener();
         title.addMouseListener(listener);
         desc.addMouseListener(listener);
         icon.addMouseListener(listener);
         contentPanel.addMouseListener(listener);
     }
-    private void initView() {
-
+    protected void initView() {
+        super.initView();
     }
 }

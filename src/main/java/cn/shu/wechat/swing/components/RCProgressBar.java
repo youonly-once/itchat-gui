@@ -1,7 +1,5 @@
 package cn.shu.wechat.swing.components;
 
-import lombok.Getter;
-
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;

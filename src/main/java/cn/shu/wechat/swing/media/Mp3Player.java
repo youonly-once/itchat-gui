@@ -1,11 +1,9 @@
 package cn.shu.wechat.swing.media;
 
-import cn.shu.wechat.swing.components.RCProgressBar;
 import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.Player;
 import lombok.extern.log4j.Log4j2;
 
-import javax.swing.*;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

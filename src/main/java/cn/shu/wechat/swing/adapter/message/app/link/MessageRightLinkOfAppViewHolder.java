@@ -1,10 +1,12 @@
 package cn.shu.wechat.swing.adapter.message.app.link;
 
 import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.components.message.RCRightLinkMessageBubble;
+import cn.shu.wechat.swing.components.message.RCLeftAttachmentMessageBubble;
+import cn.shu.wechat.swing.components.message.RCRightAttachmentMessageBubble;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseListener;
 
 /**
  *
@@ -13,15 +15,22 @@ import java.awt.*;
  */
 
 public class MessageRightLinkOfAppViewHolder extends MessageLinkOfAppViewHolder {
+
     public MessageRightLinkOfAppViewHolder() {
-        super(new RCRightLinkMessageBubble());
-        initView();
+
+    }
+    @Override
+    protected void setListeners() {
+        super.setListeners();
     }
 
-    private void initView() {
-        setLayout(new GridBagLayout());
-
-
+    @Override
+    protected void initComponents() {
+        super.initComponents();
+        messageBubble = new RCRightAttachmentMessageBubble(new Insets(5,5,5,10));
+    }
+    protected void initView() {
+        super.initView();
         add(time, new GBC(0, 0).setWeight(1, 1)
                 .setAnchor(GBC.NORTH).setInsets(0, 0, 0, 0).setFill(GBC.HORIZONTAL).setGridWidth(3)
         );

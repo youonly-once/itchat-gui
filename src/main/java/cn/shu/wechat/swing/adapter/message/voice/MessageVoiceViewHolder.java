@@ -1,13 +1,10 @@
 package cn.shu.wechat.swing.adapter.message.voice;
 
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
-import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.CountDownJLabel;
 import cn.shu.wechat.swing.components.GradientProgressBarUI;
 import cn.shu.wechat.swing.components.RCProgressBar;
 import cn.shu.wechat.swing.components.message.RCAttachmentMessageBubble;
-import cn.shu.wechat.swing.components.message.TagPanel;
-import cn.shu.wechat.utils.FontUtil;
 import cn.shu.wechat.utils.IconUtil;
 
 import javax.swing.*;
@@ -27,46 +24,42 @@ public abstract class MessageVoiceViewHolder extends BaseMessageViewHolder {
 
     public final JLabel gapText = new JLabel();
 
-    protected final JLabel unitLabel = new JLabel("''");
+    public final JLabel unitLabel = new JLabel("''");
 
-    protected final boolean isGroup;
 
-    protected final JLabel voiceImgLabel = new JLabel();
+    public final JLabel voiceImgLabel = new JLabel();
 
-    public final RCAttachmentMessageBubble messageBubble;
+    public RCAttachmentMessageBubble messageBubble;
     /**
      *播放进度条
      */
     public final RCProgressBar progressBar = new RCProgressBar(2);
 
-    public MessageVoiceViewHolder(boolean isGroup, RCAttachmentMessageBubble messageBubble) {
-        this.messageBubble = messageBubble;
-        this.isGroup = isGroup;
+    public MessageVoiceViewHolder() {
+
 
     }
-    public MessageVoiceViewHolder(RCAttachmentMessageBubble messageBubble) {
-        this(false,messageBubble);
-    }
-    private void setListeners() {
+
+    protected void setListeners() {
+
         MouseAdapter mouseListener = messageBubble.getMouseListener();
         durationText.addMouseListener(mouseListener);
         voiceImgLabel.addMouseListener(mouseListener);
+        unitLabel.addMouseListener(mouseListener);
+        gapText.addMouseListener(mouseListener);
     }
     protected void initComponents() {
 
         progressBar.setUI(new GradientProgressBarUI());
         progressBar.setVisible(false);
 
-        voiceImgLabel.setIcon(IconUtil.getIcon(this, "/image/left_voice.png"));
+
     }
 
     protected void initView() {
         setLayout(new GridBagLayout());
         messageBubble.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        messageBubble.add(voiceImgLabel);
-        messageBubble.add(durationText);
-        messageBubble.add(unitLabel);
-        messageBubble.add(gapText);
+
         setListeners();
     }
     public void removeUnreadPoint(){

@@ -1,14 +1,10 @@
 package cn.shu.wechat.swing.adapter.message.app.attachment;
 
-import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.components.VerticalFlowLayout;
-import cn.shu.wechat.swing.components.message.RCLeftImageMessageBubble;
-import cn.shu.wechat.utils.FontUtil;
+import cn.shu.wechat.swing.components.message.RCLeftAttachmentMessageBubble;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.MouseListener;
 
@@ -22,21 +18,11 @@ public class MessageLeftAttachmentViewHolder extends MessageAttachmentViewHolder
     public MessageLeftAttachmentViewHolder(boolean isGroup) {
         this.isGroup = isGroup;
 
-
-        initComponents();
-        initView();
     }
 
     protected void initComponents() {
-        messageBubble = new RCLeftImageMessageBubble(){
-            @Override
-            public synchronized void addMouseListener(MouseListener l) {
-                super.addMouseListener(l);
-                attachmentTitle.addMouseListener(l);
-                attachmentIcon.addMouseListener(l);
-                sizeLabel.addMouseListener(l);
-            }
-        };
+        super.initComponents();
+        messageBubble = new RCLeftAttachmentMessageBubble(new Insets(8, 10, 8, 8));
         super.initComponents();
         progressBar.setBorder(new EmptyBorder(0, messageBubble.getSalientPointPixel(), 0, 0));
     }

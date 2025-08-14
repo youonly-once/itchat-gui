@@ -1,10 +1,11 @@
 package cn.shu.wechat.swing.adapter.message.app.program;
 
 import cn.shu.wechat.swing.components.GBC;
-import cn.shu.wechat.swing.components.message.RCLeftAppMessageBubble;
+import cn.shu.wechat.swing.components.message.RCLeftAttachmentMessageBubble;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseListener;
 
 /**
  * @作者 舒新胜
@@ -12,12 +13,20 @@ import java.awt.*;
  * @创建时间 8/15/2021 11:58
  */
 public class MessageLeftProgramOfAppViewHolder extends MessageProgramOfAppViewHolder{
+    private final boolean isGroup;
     public MessageLeftProgramOfAppViewHolder(boolean isGroup, Dimension size,String title) {
-        super(new RCLeftAppMessageBubble(),size,title);
-        initView(isGroup);
+        super(size,title);
+        this.isGroup = isGroup;
     }
 
-    private void initView(boolean isGroup) {
+    @Override
+    protected void initComponents() {
+        super.initComponents();
+        messageBubble = new RCLeftAttachmentMessageBubble();
+    }
+
+    protected void initView() {
+        super.initView();
         setLayout(new GridBagLayout());
 
         add(time, new GBC(0, 0).setWeight(1, 1)

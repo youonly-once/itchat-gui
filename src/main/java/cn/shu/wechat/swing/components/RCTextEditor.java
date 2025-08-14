@@ -8,7 +8,6 @@ import cn.shu.wechat.utils.IconUtil;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.CaretListener;
-import javax.swing.text.Caret;
 import java.awt.*;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.*;

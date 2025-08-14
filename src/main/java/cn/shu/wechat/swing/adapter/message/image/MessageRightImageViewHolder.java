@@ -1,14 +1,12 @@
 package cn.shu.wechat.swing.adapter.message.image;
 
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
-import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.message.MessageImageLabel;
-import cn.shu.wechat.swing.components.message.RCRightImageMessageBubble;
-import cn.shu.wechat.utils.FontUtil;
 import cn.shu.wechat.utils.IconUtil;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 
 /**
@@ -43,14 +41,15 @@ public class MessageRightImageViewHolder extends BaseMessageViewHolder {
         resend.setToolTipText("图片发送失败，点击重新发送");
         resend.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
+        // 设置图标水平居中
+        image.setHorizontalAlignment(SwingConstants.CENTER);
 
+        //  设置图标垂直居中
+        image.setVerticalAlignment(SwingConstants.CENTER);
         if (imgSize != null) {
             image.setPreferredSize(imgSize);
         }
-        // 设置图标水平居中
-        image.setHorizontalAlignment(SwingConstants.CENTER);
-        // 设置图标垂直居中
-        image.setVerticalAlignment(SwingConstants.CENTER);
+        image.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 
     private void initView() {
@@ -87,12 +86,12 @@ public class MessageRightImageViewHolder extends BaseMessageViewHolder {
 
 
         add(image, new GBC(1, 1).setWeight(0, 10)
-                .setAnchor(GBC.CENTER).setInsets(0, 0, 0, 5)
+                .setAnchor(GBC.NORTHEAST).setInsets(0, 0, 0, 5)
                 .setFill(GBC.NONE)
                 .setGridHeight(3));
 
         add(avatar, new GBC(2, 1).setWeight(0, 1)
-                .setAnchor(GBC.EAST).setInsets(0, 0, 0, 0).setFill(GBC.NONE)
+                .setAnchor(GBC.NORTHEAST).setInsets(0, 0, 0, 0).setFill(GBC.NONE)
                 .setGridHeight(3));
 
     }

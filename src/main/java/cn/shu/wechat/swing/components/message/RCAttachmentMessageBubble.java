@@ -15,9 +15,12 @@ public class RCAttachmentMessageBubble extends JPanel implements RCMessageBubble
     private NinePatchImageIcon backgroundNormalIcon;
     private NinePatchImageIcon backgroundActiveIcon;
     private Icon currentBackgroundIcon;
-
-
-    public RCAttachmentMessageBubble() {
+    private final Insets currentBackgroundInsets;
+    public Insets getInsets() {
+        return currentBackgroundInsets;
+    }
+    public RCAttachmentMessageBubble(Insets currentBackgroundInsets) {
+        this.currentBackgroundInsets = currentBackgroundInsets;
         setOpaque(false);
         setListener();
     }

@@ -1,6 +1,7 @@
 package cn.shu.wechat.swing.components.message;
 
 import javax.swing.*;
+import java.awt.*;
 
 /**
  *
@@ -9,6 +10,10 @@ import javax.swing.*;
  */
 public class TagPanel extends JPanel {
     private Object tag;
+
+    public TagPanel(BorderLayout borderLayout) {
+        super(borderLayout);
+    }
 
     public Object getTag() {
         return tag;
