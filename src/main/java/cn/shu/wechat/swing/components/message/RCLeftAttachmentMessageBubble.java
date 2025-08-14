@@ -7,8 +7,9 @@ import java.awt.*;
 /**
  * 右侧文本聊天气泡
  */
-public class RCLeftAppMessageBubble extends RCAttachmentMessageBubble {
-    public RCLeftAppMessageBubble() {
+public class RCLeftAttachmentMessageBubble extends RCAttachmentMessageBubble {
+    public RCLeftAttachmentMessageBubble(Insets insets) {
+        super(insets);
         NinePatchImageIcon backgroundNormal = new NinePatchImageIcon(IconUtil.getBufferedImage(this,"/image/left.9.png"));
         NinePatchImageIcon backgroundActive = new NinePatchImageIcon(IconUtil.getBufferedImage(this,"/image/left_active.9.png"));
         setBackgroundNormalIcon(backgroundNormal);
@@ -16,9 +17,8 @@ public class RCLeftAppMessageBubble extends RCAttachmentMessageBubble {
         setBackgroundIcon(backgroundNormal);
     }
 
-    @Override
-    public Insets getInsets() {
-        return new Insets(2, 9, 3, 2);
-        //return new Insets(9,9,9,9);
+    public RCLeftAttachmentMessageBubble() {
+        this(new Insets(5,5,5,5));
     }
+
 }
