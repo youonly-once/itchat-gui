@@ -18,7 +18,9 @@ import java.awt.event.MouseListener;
 public class MessageRightContactsCardOfAppViewHolder extends MessageContactsCardOfAppViewHolder {
     public MessageRightContactsCardOfAppViewHolder() {
         super();
-
+        initComponents();
+        initView();
+        setListeners();
     }
 
     @Override

@@ -17,7 +17,9 @@ public class MessageRightProgramOfAppViewHolder extends MessageProgramOfAppViewH
 
     public MessageRightProgramOfAppViewHolder(Dimension imgSize,String title) {
         super(imgSize,title);
-
+        initComponents();
+        initView();
+        setListeners();
     }
     @Override
     protected void initComponents() {

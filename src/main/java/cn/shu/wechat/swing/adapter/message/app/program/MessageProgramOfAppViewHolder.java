@@ -35,7 +35,9 @@ public abstract class MessageProgramOfAppViewHolder extends MessageAppViewHolder
         imageLabel = new JLabel();
         imageLabel.setHorizontalAlignment(JLabel.CENTER);
         contentPanel.setLayout(new BorderLayout());
+        //TODO 此时imgSize还没被赋值
         imageLabel.setPreferredSize(imgSize);
+        contentPanel.setPreferredSize(imgSize);
         contentPanel.add(imageLabel,BorderLayout.CENTER);
 
     }

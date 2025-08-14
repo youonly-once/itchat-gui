@@ -17,7 +17,9 @@ import java.awt.event.MouseListener;
 public class MessageRightLinkOfAppViewHolder extends MessageLinkOfAppViewHolder {
 
     public MessageRightLinkOfAppViewHolder() {
-
+        initComponents();
+        initView();
+        setListeners();
     }
     @Override
     protected void setListeners() {

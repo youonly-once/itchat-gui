@@ -19,7 +19,9 @@ public class MessageLeftContactsCardOfAppViewHolder extends MessageContactsCardO
     public MessageLeftContactsCardOfAppViewHolder(boolean isGroup) {
         super();
         this.isGroup = isGroup;
-
+        initComponents();
+        initView();
+        setListeners();
     }
 
     @Override

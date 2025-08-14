@@ -17,6 +17,9 @@ public class MessageLeftProgramOfAppViewHolder extends MessageProgramOfAppViewHo
     public MessageLeftProgramOfAppViewHolder(boolean isGroup, Dimension size,String title) {
         super(size,title);
         this.isGroup = isGroup;
+        initComponents();
+        initView();
+        setListeners();
     }
 
     @Override

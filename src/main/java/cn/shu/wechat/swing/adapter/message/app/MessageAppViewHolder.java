@@ -41,9 +41,7 @@ public abstract class MessageAppViewHolder extends BaseMessageViewHolder {
 
 
     public MessageAppViewHolder() {
-        initComponents();
-        initView();
-        setListeners();
+
     }
 
     protected void initComponents() {

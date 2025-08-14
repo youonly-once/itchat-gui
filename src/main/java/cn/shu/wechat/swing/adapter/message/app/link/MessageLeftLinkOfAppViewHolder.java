@@ -18,7 +18,9 @@ public class MessageLeftLinkOfAppViewHolder extends MessageLinkOfAppViewHolder {
     public MessageLeftLinkOfAppViewHolder(boolean isGroup) {
         super();
         this.isGroup = isGroup;
-
+        initComponents();
+        initView();
+        setListeners();
     }
 
     @Override
