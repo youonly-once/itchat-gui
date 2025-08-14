@@ -24,6 +24,7 @@ public class MessageLeftVoiceViewHolder extends MessageVoiceViewHolder {
 
         initComponents();
         initView();
+        setListeners();
     }
     protected void initComponents(){
         super.initComponents();

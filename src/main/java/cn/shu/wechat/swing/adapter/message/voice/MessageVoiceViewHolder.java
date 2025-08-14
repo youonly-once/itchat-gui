@@ -33,7 +33,16 @@ public abstract class MessageVoiceViewHolder extends BaseMessageViewHolder {
     /**
      *播放进度条
      */
-    public final RCProgressBar progressBar = new RCProgressBar(2);
+    public final RCProgressBar progressBar = new RCProgressBar(2){
+        @Override
+        public void setVisible(boolean aFlag) {
+            if(aFlag){
+                super.setVisible(aFlag);
+            }else{
+                setValue(0);
+            }
+        }
+    };
 
     public MessageVoiceViewHolder() {
 
@@ -51,7 +60,10 @@ public abstract class MessageVoiceViewHolder extends BaseMessageViewHolder {
     protected void initComponents() {
 
         progressBar.setUI(new GradientProgressBarUI());
-        progressBar.setVisible(false);
+        progressBar.setVisible(true);
+        progressBar.setMinimum(0);
+        progressBar.setValue(0);
+        progressBar.setMaximum(100);
 
 
     }
@@ -60,7 +72,7 @@ public abstract class MessageVoiceViewHolder extends BaseMessageViewHolder {
         setLayout(new GridBagLayout());
         messageBubble.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        setListeners();
+
     }
     public void removeUnreadPoint(){
 
