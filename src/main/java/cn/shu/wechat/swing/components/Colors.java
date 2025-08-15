@@ -17,10 +17,12 @@ public class Colors {
     public static Color BG_GRAY = new Color(234, 232, 231);
     public static Color SCROLL_BAR_TRACK_LIGHT = new Color(214, 214, 214);
     public static Color FONT_WHITE = new Color(255, 255, 255);
+    public static Color CHAT_BACKGROUND_WHITE = new Color(255, 255, 255);
     public static Color FONT_GRAY = new Color(152, 152, 152);
     public static Color FONT_GRAY_DARKER = new Color(152, 152, 152);
     public static Color DARKER = new Color(38, 41, 46);
-    public static Color WINDOW_BACKGROUND = new Color(238, 238, 238);
+    public static Color WINDOW_BACKGROUND = new Color(245, 245, 245);
+    public static Color LEFT_WINDOW_BACKGROUND = new Color(238, 238, 238);
     public static Color ITEM_SELECTED_DARK = new Color(228, 228, 228);
     public static Color ITEM_SELECTED = new Color(214, 214, 214);
 

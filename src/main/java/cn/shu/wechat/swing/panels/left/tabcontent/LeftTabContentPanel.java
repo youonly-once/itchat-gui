@@ -30,7 +30,7 @@ public class LeftTabContentPanel extends SearchCardLayoutPanel {
 
     private void initView() {
         this.setLayout(cardLayout);
-        setBackground(Colors.WINDOW_BACKGROUND);
+        this.setBackground(Colors.LEFT_WINDOW_BACKGROUND);
     }
 
     /**

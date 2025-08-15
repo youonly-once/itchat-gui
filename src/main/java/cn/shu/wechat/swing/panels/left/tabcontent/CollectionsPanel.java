@@ -25,7 +25,7 @@ public class CollectionsPanel extends ParentAvailablePanel {
     }
 
     private void initView() {
-        this.setBackground(Colors.DARK);
+        this.setBackground(Colors.LEFT_WINDOW_BACKGROUND);
         setLayout(new FlowLayout());
         add(tipLabel);
     }

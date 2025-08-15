@@ -120,7 +120,7 @@ public final class LoginFrame extends JFrame {
         refreshCodeBt.setBorder(BorderFactory.createLineBorder(borderColor, 1, true));
 
         refreshCodeBt.setForeground(textColor);
-        refreshCodeBt.setFont(new Font("微软雅黑", Font.BOLD, 14));
+        //refreshCodeBt.setFont(new Font("微软雅黑", Font.BOLD, 14));
 
 
         closeLabel = new JLabel();

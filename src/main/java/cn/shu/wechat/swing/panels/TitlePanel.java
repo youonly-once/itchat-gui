@@ -189,6 +189,7 @@ public class TitlePanel extends ParentAvailablePanel {
 
         titleLabel = new JTextArea();
         titleLabel.setOpaque(false);
+        titleLabel.setBorder(null);
 
         titleLabel.setFont(FontUtil.getDefaultFont(16));
         titleLabel.setText("微信");
@@ -239,7 +240,7 @@ public class TitlePanel extends ParentAvailablePanel {
 
         int margin;
         if (OSUtil.getOsType() != OSUtil.Mac_OS) {
-            add(controlPanel);
+           // add(controlPanel);
             add(titlePanel);
 
             margin = 5;

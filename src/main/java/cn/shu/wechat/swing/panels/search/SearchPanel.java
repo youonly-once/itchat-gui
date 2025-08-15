@@ -80,7 +80,7 @@ public class SearchPanel extends ParentAvailablePanel {
     }
 
     private void initView() {
-        setBackground(Colors.WINDOW_BACKGROUND);
+        this.setBackground(Colors.LEFT_WINDOW_BACKGROUND);
         this.setLayout(new GridBagLayout());
         this.add(searchTextField, new GBC(0, 0)
                 .setFill(GBC.HORIZONTAL)

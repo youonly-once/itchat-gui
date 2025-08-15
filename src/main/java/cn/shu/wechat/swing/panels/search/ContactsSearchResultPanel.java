@@ -36,7 +36,7 @@ public class ContactsSearchResultPanel extends SearchResultPanel {
 
     private void initComponents() {
         resultItemsListView = new RCListView();
-        this.setBackground(Colors.WINDOW_BACKGROUND);
+        this.setBackground(Colors.LEFT_WINDOW_BACKGROUND);
 
         tipLabel = new JLabel("无搜索结果");
         tipLabel.setHorizontalAlignment(SwingConstants.CENTER);

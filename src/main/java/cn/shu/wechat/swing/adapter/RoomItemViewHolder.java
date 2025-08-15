@@ -19,12 +19,10 @@ public class RoomItemViewHolder extends ViewHolder {
     public JLabel avatar = new JLabel();
     public JLabel roomName = new JLabel();
     public JLabel brief = new JLabel();
-    public JPanel nameBrief = new JPanel();
     public JLabel time = new JLabel();
     public JLabel unreadCount = new JLabel();
     public JLabel mutePoint = new JLabel();
     public JPanel timeUnread = new JPanel();
-    public JPanel atAndBrief = new JPanel();
     //有人@我
     public JLabel atMe = new JLabel("【有人@我】");
     public static final int HEIGHT = 64;
@@ -39,7 +37,7 @@ public class RoomItemViewHolder extends ViewHolder {
 
     private void initComponents() {
         setPreferredSize(new Dimension(100, HEIGHT));
-        setBackground(Colors.WINDOW_BACKGROUND);
+        setBackground(Colors.LEFT_WINDOW_BACKGROUND);
         setBorder(new RCBorder(RCBorder.BOTTOM, Colors.SCROLL_BAR_TRACK_LIGHT));
         setOpaque(true);
         setForeground(Colors.DARK);
@@ -53,24 +51,15 @@ public class RoomItemViewHolder extends ViewHolder {
         brief.setForeground(Colors.FONT_GRAY);
         brief.setFont(FontUtil.getDefaultFont(12));
 
-        atAndBrief.setLayout(new GridBagLayout());
-        atAndBrief.setBackground(Colors.WINDOW_BACKGROUND);
         atMe.setVisible(false);
         atMe.setForeground(Color.RED);
 
-        atAndBrief.add(atMe,new GBC(0, 0).setWeight(2, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0));
-        atAndBrief.add(brief,new GBC(1, 0).setWeight(100, 1).setFill(GBC.BOTH).setInsets(5, 5, 0, 0));
-        nameBrief.setLayout(new BorderLayout());
-        nameBrief.setBackground(Colors.WINDOW_BACKGROUND);
-        nameBrief.add(roomName, BorderLayout.NORTH);
-        nameBrief.add(atAndBrief, BorderLayout.CENTER);
 
         time.setForeground(Colors.FONT_GRAY);
         time.setFont(FontUtil.getDefaultFont(12));
 
-        unreadCount.setIcon(IconUtil.getIcon(this,"/image/count_bg.png"));
+        unreadCount.setIcon(IconUtil.getIcon(this,"/image/count_bg.png",12,12));
         unreadCount.setFont(FontUtil.getDefaultFont(12));
-        unreadCount.setPreferredSize(new Dimension(10, 10));
         unreadCount.setForeground(Color.WHITE);
         unreadCount.setHorizontalTextPosition(SwingConstants.CENTER);
         unreadCount.setHorizontalAlignment(SwingConstants.CENTER);
@@ -85,17 +74,25 @@ public class RoomItemViewHolder extends ViewHolder {
         timeUnread = new JPanel();
         timeUnread.setLayout(new BorderLayout());
         timeUnread.setBackground(Colors.WINDOW_BACKGROUND);
-        timeUnread.add(time, BorderLayout.NORTH);
-
         timeUnread.add(unreadCount, BorderLayout.CENTER);
 
     }
 
     private void initView() {
         setLayout(new GridBagLayout());
-        add(avatar, new GBC(0, 0).setWeight(2, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0));
-        add(nameBrief, new GBC(1, 0).setWeight(100, 1).setFill(GBC.BOTH).setInsets(5, 5, 0, 0));
-        add(timeUnread, new GBC(2, 0).setWeight(1, 1).setFill(GBC.BOTH).setInsets(5, 0, 0, 0));
+        add(avatar, new GBC(0, 0).setWeight(2, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0)
+                .setGridHeight(2));
+        add(roomName, new GBC(1, 0).setWeight(100, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0)
+                .setGridWidth(2));
+        //占位，atMe被隐藏则 被拉伸到最左边，从而不能右对齐
+        add(Box.createHorizontalStrut(1), new GBC(2, 0).setWeight(1, 1));
+        add(time, new GBC(3, 0).setWeight(1, 1).setFill(GBC.NONE).setInsets(0, 5, 0, 10)
+                .setAnchor(GridBagConstraints.EAST));
+
+        add(atMe, new GBC(1, 1).setWeight(1, 1).setFill(GBC.BOTH).setInsets(5, 5, 0, 0));
+        add(brief, new GBC(2, 1).setWeight(100, 1).setFill(GBC.BOTH).setInsets(5, 5, 0, 0));
+        add(timeUnread, new GBC(3, 1).setWeight(1, 1).setFill(GBC.NONE).setInsets(5, 5, 0, 10)
+                .setAnchor(GridBagConstraints.EAST));
 
     }
 

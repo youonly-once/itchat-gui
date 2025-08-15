@@ -83,7 +83,9 @@ public class RoomsPanel extends ParentAvailablePanel {
 
     private void initView() {
         setLayout(new GridBagLayout());
-        setBackground(Colors.WINDOW_BACKGROUND);
+        this.setBackground(Colors.LEFT_WINDOW_BACKGROUND);
+        roomItemsListView.setBackground(Colors.LEFT_WINDOW_BACKGROUND);
+        roomItemsListView.getContentPanel().setBackground(Colors.LEFT_WINDOW_BACKGROUND);
         roomItemsListView.setContentPanelBackground(Colors.WINDOW_BACKGROUND);
         add(roomItemsListView, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 1));
         roomItemsListView.setAdapter(new RoomItemsAdapter(roomItemList));
@@ -368,9 +370,7 @@ public class RoomsPanel extends ParentAvailablePanel {
      */
     private void setItemBackground(RoomItemViewHolder holder, Color color) {
         holder.setBackground(color);
-        holder.nameBrief.setBackground(color);
         holder.timeUnread.setBackground(color);
-        holder.atAndBrief.setBackground(color);
     }
 
     public void scrollPoint(int point){

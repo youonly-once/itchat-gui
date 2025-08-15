@@ -83,7 +83,7 @@ public class TabOperationPanel extends ParentAvailablePanel {
 
     private void initView() {
         setLayout(new GridBagLayout());
-        setBackground(Colors.WINDOW_BACKGROUND);
+        this.setBackground(Colors.LEFT_WINDOW_BACKGROUND);
         setBorder(new RCBorder(RCBorder.BOTTOM,Colors.SCROLL_BAR_TRACK_LIGHT));
         add(chatLabel, new GBC(0, 0).setFill(GBC.HORIZONTAL).setWeight(1, 1).setInsets(0, 10, 0, 10));
         add(contactsLabel, new GBC(1, 0).setFill(GBC.HORIZONTAL).setWeight(1, 1).setInsets(0, 10, 0, 10));

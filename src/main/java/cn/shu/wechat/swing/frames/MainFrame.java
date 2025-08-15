@@ -23,8 +23,10 @@ import java.util.concurrent.locks.LockSupport;
 @Getter
 public class MainFrame extends JFrame {
     public final static int DEFAULT_WIDTH = 900;
-    public final static int DEFAULT_HEIGHT = 650;
-    public final static int LEFT_PANEL_WIDTH = 300;
+    public static int DEFAULT_HEIGHT = 650;
+    public final static int MIN_DEFAULT_WIDTH = 900;
+    public final static int MIN_DEFAULT_HEIGHT = 650;
+    public final static int LEFT_PANEL_WIDTH = 250;
     public int currentWindowWidth = DEFAULT_WIDTH;
     public int currentWindowHeight = DEFAULT_HEIGHT;
     private static final long NOTIFY_INTERVAL_MS = 10_000; // 提示最小间隔：10秒
@@ -264,13 +266,25 @@ public class MainFrame extends JFrame {
     }
 
     private void initView() {
-        setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
-        setMinimumSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
+        GraphicsConfiguration gc = GraphicsEnvironment
+                .getLocalGraphicsEnvironment()
+                .getDefaultScreenDevice()
+                .getDefaultConfiguration();
+        Rectangle bounds = gc.getBounds();
+        Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(gc);
 
+        int usableHeight = bounds.height - insets.top - insets.bottom;
+        DEFAULT_HEIGHT = usableHeight*4/5;
+        System.out.println("可用桌面高度: " + usableHeight);
+
+
+        setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+        setMinimumSize(new Dimension(MIN_DEFAULT_WIDTH, MIN_DEFAULT_HEIGHT));
+        setResizable(true);
 
         if (OSUtil.getOsType() != OSUtil.Mac_OS) {
             // 隐藏标题栏
-            setUndecorated(true);
+            //setUndecorated(true);
 
             String windows = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
             try {

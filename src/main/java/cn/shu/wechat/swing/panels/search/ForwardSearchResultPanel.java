@@ -68,7 +68,7 @@ public class ForwardSearchResultPanel extends SearchResultPanel {
 
     private void initView() {
 
-
+        this.setBackground(Colors.LEFT_WINDOW_BACKGROUND);
         this.setLayout(new GridBagLayout());
         this.add(selectUserListView, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 1).setInsets(0, 0, 5, 0));
 

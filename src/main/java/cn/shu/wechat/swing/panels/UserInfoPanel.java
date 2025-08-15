@@ -120,7 +120,7 @@ public class UserInfoPanel extends ParentAvailablePanel {
         avatarInfoPanel.add(infoPanel,BorderLayout.CENTER);
         contentPanel.add(avatarInfoPanel);
         contentPanel.add(button);
-        add(titlePanel, new GBC(0, 0).setWeight(1, 1).setFill(GBC.BOTH).setAnchor(GBC.CENTER).setInsets(0, 0, 0, 0));
+        //add(titlePanel, new GBC(0, 0).setWeight(1, 1).setFill(GBC.BOTH).setAnchor(GBC.CENTER).setInsets(0, 0, 0, 0));
         add(contentPanel, new GBC(0, 1).setWeight(1, 1000).setAnchor(GBC.CENTER)
                 .setInsets(0, 0, 250, 0));
     }

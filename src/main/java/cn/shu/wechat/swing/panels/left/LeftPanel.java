@@ -74,18 +74,18 @@ public class LeftPanel extends JPanel {
     }
 
     private void initView() {
-        this.setBackground(Colors.WINDOW_BACKGROUND);
+        this.setBackground(Colors.LEFT_WINDOW_BACKGROUND);
         this.setLayout(new GridBagLayout());
 
         leftTabContentPanel.add(roomsPanel, CHAT);
         leftTabContentPanel.add(contactsPanel, CONTACTS);
         // leftTabContentPanel.add(collectionPanel, COLLECTIONS);
         leftTabContentPanel.add(searchResultPanel, SEARCH);
-
-        add(myInfoPanel, new GBC(0, 0).setAnchor(GBC.CENTER).setFill(GBC.BOTH).setWeight(1, 10).setInsets(0,0,0,0));
-        add(searchPanel, new GBC(0, 1).setAnchor(GBC.CENTER).setFill(GBC.BOTH).setWeight(1, 2).setInsets(0,0,0,0));
-        add(mainOperationPanel, new GBC(0, 2).setAnchor(GBC.CENTER).setFill(GBC.BOTH).setWeight(1, 2).setInsets(0,0,0,0));
-        add(leftTabContentPanel, new GBC(0, 3).setAnchor(GBC.CENTER).setFill(GBC.BOTH).setWeight(1, 86).setInsets(0,0,0,0));
+        leftTabContentPanel.setBackground(Colors.LEFT_WINDOW_BACKGROUND);
+        add(myInfoPanel, new GBC(0, 0).setAnchor(GBC.CENTER).setFill(GBC.BOTH).setWeight(1, 1).setInsets(0,0,0,0));
+        add(searchPanel, new GBC(0, 1).setAnchor(GBC.CENTER).setFill(GBC.BOTH).setWeight(1, 1).setInsets(0,0,0,0));
+        add(mainOperationPanel, new GBC(0, 2).setAnchor(GBC.CENTER).setFill(GBC.BOTH).setWeight(1, 1).setInsets(0,0,0,0));
+        add(leftTabContentPanel, new GBC(0, 3).setAnchor(GBC.CENTER).setFill(GBC.BOTH).setWeight(1, 100).setInsets(0,0,0,0));
     }
 
     public LeftTabContentPanel getListPanel() {

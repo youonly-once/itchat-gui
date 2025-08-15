@@ -6,6 +6,7 @@ import lombok.Getter;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
+import javax.swing.border.MatteBorder;
 import java.awt.*;
 
 /**
@@ -28,10 +29,7 @@ public class RightPanel extends JPanel {
     public static final String CHAT_ROOM = "CHAT_ROOM";
     public static final String USER_INFO = "USER_INFO";
 
-    public static RightPanel getContext() {
-        return context;
-    }
-
+    @Getter
     private static RightPanel context;
     /**
      * 布局
@@ -42,7 +40,13 @@ public class RightPanel extends JPanel {
         userInfoPanel = new UserInfoPanel(this);
         chatPanelContainer = new ChatPanelContainer(this);
         cardLayout = new CardLayout();
-        setBorder(new LineBorder(Colors.SCROLL_BAR_TRACK_LIGHT));
+        setBorder(new MatteBorder(
+                0,  // 上边框宽度
+                1,  // 左边框宽度
+                1,  // 下边框宽度
+                1,  // 右边框宽度
+                Colors.SCROLL_BAR_TRACK_LIGHT // 颜色
+        ));
         setLayout(cardLayout);
         add(userInfoPanel, USER_INFO);
         add(chatPanelContainer, CHAT_ROOM);

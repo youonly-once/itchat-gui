@@ -52,6 +52,7 @@ public class ContactsPanel extends ParentAvailablePanel {
 
     private void initView() {
         //绑定list到Adapter
+        this.setBackground(Colors.LEFT_WINDOW_BACKGROUND);
         contactsListView.setAdapter(new ContactsItemsAdapter(contactsItemList));
         loadedCount.set(contactsItemList.size());
         setLayout(new GridBagLayout());

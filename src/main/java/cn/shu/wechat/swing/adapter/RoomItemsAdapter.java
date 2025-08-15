@@ -186,7 +186,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             if (e.getButton() == MouseEvent.BUTTON1) {
                 if (selectedViewHolder != myHolder) {
                     //之前选择的房间背景色去掉
-                    setBackground(selectedViewHolder, Colors.WINDOW_BACKGROUND);
+                    setBackground(selectedViewHolder, Colors.LEFT_WINDOW_BACKGROUND);
                     // 进入房间
                     RoomsPanel.getContext().enterRoom(myRoomId);
 
@@ -208,7 +208,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
         @Override
         public void mouseExited(MouseEvent e) {
             if (selectedViewHolder != myHolder) {
-                setBackground(myHolder, Colors.WINDOW_BACKGROUND);
+                setBackground(myHolder, Colors.LEFT_WINDOW_BACKGROUND);
             }
         }
     };
@@ -218,9 +218,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             return;
         }
         holder.setBackground(color);
-        holder.nameBrief.setBackground(color);
         holder.timeUnread.setBackground(color);
-        holder.atAndBrief.setBackground(color);
     }
 
     @Override

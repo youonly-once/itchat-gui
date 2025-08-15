@@ -97,7 +97,7 @@ public class MyInfoPanel extends ParentAvailablePanel {
     }
 
     private void initView() {
-        this.setBackground(Colors.WINDOW_BACKGROUND);
+        this.setBackground(Colors.LEFT_WINDOW_BACKGROUND);
         this.setLayout(new GridBagLayout());
 
         add(avatar, new GBC(0, 0).setFill(GBC.NONE).setWeight(2, 1));
