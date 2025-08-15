@@ -1,6 +1,9 @@
 package cn.shu.wechat.swing.panels.chat;
 
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -8,18 +11,16 @@ import java.awt.*;
  * Created by 舒新胜 on 04/07/2017.
  */
 public class MessageEditorExpressionItemLabel extends JLabel {
+    @Getter
+    @Setter
     private String code;
-    private ImageIcon icon;
-    private String displayName;
 
     private Dimension size;
 
 
     public MessageEditorExpressionItemLabel(String code, ImageIcon icon, String displayName) {
         this.code = code;
-        this.icon = icon;
-        this.displayName = displayName;
-        size = new Dimension(20, 20);
+        size = new Dimension(40, 40);
         this.setPreferredSize(size);
         this.setIcon(icon);
         this.setOpaque(true);
@@ -30,30 +31,6 @@ public class MessageEditorExpressionItemLabel extends JLabel {
         this.setToolTipText(displayName);
     }
 
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public ImageIcon getIcon() {
-        return icon;
-    }
-
-    public void setIcon(ImageIcon icon) {
-        this.icon = icon;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
 
     @Override
     public Dimension getSize() {

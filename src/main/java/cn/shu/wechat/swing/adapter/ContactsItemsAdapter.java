@@ -15,8 +15,10 @@ import org.apache.commons.lang3.StringUtils;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Created by 舒新胜 on 17-5-30.
@@ -152,7 +154,18 @@ public class ContactsItemsAdapter extends BaseAdapter<ContactsItemViewHolder> {
     public void processData() {
 
         positionMap.clear();
-        Collections.sort(contactsItems);
+        contactsItems.sort((o1, o2) -> {
+            Contacts contacts1 = Core.getMemberMap().get(o1);
+            Contacts.ContactsType type = contacts1.getType();
+
+            Contacts contacts2 = Core.getMemberMap().get(o2);
+            Contacts.ContactsType type2 = contacts2.getType();
+
+            String tc = ContactsTools.getContactDisplayNameInitialByUserName(contacts1);
+            String oc = ContactsTools.getContactDisplayNameInitialByUserName(contacts2);
+            return type.equals(type2) ? tc.compareTo(oc) : type.code - type2.code;
+
+        });
         int index = 0;
         String lastChara = "";
         for (String username : contactsItems) {

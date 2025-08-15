@@ -13,8 +13,8 @@ import java.awt.*;
  * Created by 舒新胜 on 04/07/2017.
  */
 public class MessageEditorExpressionPopup extends JPopupMenu {
-    private static final int WIDTH = 400;
-    private static final int HEIGHT = 300;
+    private static final int WIDTH = 600;
+    private static final int HEIGHT = 350;
 
     private JPanel listPanel;
     private JPanel tabIconPanel;

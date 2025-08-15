@@ -7,6 +7,7 @@ import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.utils.FontUtil;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 
 /**
@@ -32,13 +33,16 @@ public class SearchResultUserItemViewHolder extends SearchResultItemViewHolder {
 
         name.setFont(FontUtil.getDefaultFont(14));
         name.setForeground(Colors.DARK);
+        name.setVerticalAlignment(SwingConstants.CENTER);
 
     }
 
     private void initView() {
         setLayout(new GridBagLayout());
-        add(avatar, new GBC(0, 0).setWeight(2, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0));
-        add(name, new GBC(1, 0).setWeight(100, 1).setFill(GBC.BOTH).setInsets(3, 5, 0, 0));
-        add(type,new GBC(2, 0).setWeight(1, 1).setFill(GBC.BOTH).setInsets(3, 5, 0, 0));
+        name.setBorder(new LineBorder(Color.RED));
+        add(avatar, new GBC(0, 0).setWeight(1, 1).setFill(GBC.BOTH).setInsets(3, 5, 0, 0));
+        add(name, new GBC(1, 0).setWeight(100, 1).setFill(GBC.BOTH)
+                .setInsets(0, 5, 0, 0));
+        add(type, new GBC(2, 0).setWeight(1, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0));
     }
 }

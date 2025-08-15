@@ -18,8 +18,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -371,6 +371,26 @@ public class ContactsTools {
         if (StringUtils.isNotEmpty(contacts.getPyinitial() )) {
             return contacts.getPyinitial();
         }else{
+            return "#";
+        }
+    }
+
+    /**
+     * 根据用户名获取用户显示名称对应的拼音
+     * 有备注显示备注，无备注显示昵称
+     * 群则直接显示昵称
+     *
+     * @return 备注
+     */
+    public static String getContactDisplayNameInitialByUserName(Contacts contacts) {
+
+
+        if (StringUtils.isNotEmpty(contacts.getRemarkpyinitial())) {
+            return contacts.getRemarkpyinitial();
+        }
+        if (StringUtils.isNotEmpty(contacts.getPyinitial())) {
+            return contacts.getPyinitial();
+        } else {
             return "#";
         }
     }

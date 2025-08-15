@@ -5,7 +5,6 @@ import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.utils.FontUtil;
 import cn.shu.wechat.utils.IconUtil;
-import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,9 +24,8 @@ public class RoomItemViewHolder extends ViewHolder {
     public JPanel timeUnread = new JPanel();
     //有人@我
     public JLabel atMe = new JLabel("【有人@我】");
-    public static final int HEIGHT = 64;
-    @Setter
-    private Object tag;
+    public static final int HEIGHT = 55;
+
     protected RoomItemsAdapter.RoomItemAbstractMouseListener mouseListener;
     public RoomItemViewHolder() {
         initComponents();
@@ -42,8 +40,7 @@ public class RoomItemViewHolder extends ViewHolder {
         setOpaque(true);
         setForeground(Colors.DARK);
 
-
-
+        avatar.setVerticalAlignment(SwingConstants.CENTER);
 
         roomName.setFont(FontUtil.getDefaultFont(14));
         roomName.setForeground(Colors.DARK);
@@ -73,25 +70,30 @@ public class RoomItemViewHolder extends ViewHolder {
 
         timeUnread = new JPanel();
         timeUnread.setLayout(new BorderLayout());
-        timeUnread.setBackground(Colors.WINDOW_BACKGROUND);
+        timeUnread.setBackground(Colors.LEFT_WINDOW_BACKGROUND);
         timeUnread.add(unreadCount, BorderLayout.CENTER);
 
     }
 
     private void initView() {
         setLayout(new GridBagLayout());
-        add(avatar, new GBC(0, 0).setWeight(2, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0)
+        add(avatar, new GBC(0, 0).setWeight(0, 100).setFill(GBC.BOTH)
+                .setInsets(5, 5, 0, 0)
+                .setAnchor(GBC.WEST)
                 .setGridHeight(2));
-        add(roomName, new GBC(1, 0).setWeight(100, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0)
-                .setGridWidth(2));
+        add(roomName, new GBC(1, 0).setWeight(100, 1).setFill(GBC.BOTH).setInsets(5, 5, 0, 0)
+                .setAnchor(GBC.WEST).setGridWidth(2));
         //占位，atMe被隐藏则 被拉伸到最左边，从而不能右对齐
         add(Box.createHorizontalStrut(1), new GBC(2, 0).setWeight(1, 1));
-        add(time, new GBC(3, 0).setWeight(1, 1).setFill(GBC.NONE).setInsets(0, 5, 0, 10)
+        add(time, new GBC(3, 0).setWeight(1, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 10)
                 .setAnchor(GridBagConstraints.EAST));
 
-        add(atMe, new GBC(1, 1).setWeight(1, 1).setFill(GBC.BOTH).setInsets(5, 5, 0, 0));
-        add(brief, new GBC(2, 1).setWeight(100, 1).setFill(GBC.BOTH).setInsets(5, 5, 0, 0));
-        add(timeUnread, new GBC(3, 1).setWeight(1, 1).setFill(GBC.NONE).setInsets(5, 5, 0, 10)
+        add(atMe, new GBC(1, 1).setWeight(1, 1).setFill(GBC.BOTH).setInsets(5, 5, 0, 0)
+                .setAnchor(GBC.WEST));
+        add(brief, new GBC(2, 1).setWeight(100, 1).setFill(GBC.BOTH)
+                .setInsets(5, 5, 0, 0)
+                .setAnchor(GBC.WEST));
+        add(timeUnread, new GBC(3, 1).setWeight(1, 1).setFill(GBC.BOTH).setInsets(5, 5, 0, 10)
                 .setAnchor(GridBagConstraints.EAST));
 
     }

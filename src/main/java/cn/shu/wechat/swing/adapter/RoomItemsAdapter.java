@@ -16,8 +16,6 @@ import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,13 +62,12 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             roomItemViewHolder = new RoomItemViewHolder();
             viewHolders.add(position,roomItemViewHolder);
         }
-        return roomItemViewHolder;
+        return new RoomItemViewHolder();
     }
 
     @Override
     public void onBindViewHolder(RoomItemViewHolder viewHolder, int position) {
         RoomItem roomItem = roomItems.get(position);
-        viewHolder.setTag(roomItem.getRoomId());
         Contacts contacts = Core.getMemberMap().get(roomItem.getRoomId());
         if (contacts != null){
             viewHolder.roomName.setText(ContactsTools.getContactDisplayNameByUserName(contacts));
@@ -129,7 +126,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             setBackground(viewHolder, Colors.SCROLL_BAR_TRACK_LIGHT);
             selectedViewHolder = viewHolder;
         }else{
-            setBackground(viewHolder, Colors.WINDOW_BACKGROUND);
+            setBackground(viewHolder, Colors.LEFT_WINDOW_BACKGROUND);
         }
 
         //更新鼠标监听器
@@ -148,12 +145,11 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
     class RoomItemAbstractMouseListener extends AbstractMouseListener{
         private final JPopupMenu jPopupMenu = new JPopupMenu();
 
-        public void setPosition(int position) {
-            this.position = position;
-        }
-
+        @Setter
         private  int position;
+        @Setter
         private RoomItemViewHolder myHolder ;
+        @Setter
         private String myRoomId ;
         public RoomItemAbstractMouseListener(RoomItemViewHolder myHolder, String myRoomId,int pos) {
             this.myHolder = myHolder;
@@ -162,23 +158,9 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             JMenuItem delItem = new JMenuItem("删除");
             delItem.setFont(FontUtil.getDefaultFont(14));
             delItem.setIcon(IconUtil.getIcon(this, "/image/delete.png"));
-            delItem.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    RoomsPanel.getContext().removeItem(position,RoomItemAbstractMouseListener.this.myRoomId);
-                }
-            });
+            delItem.addActionListener(e -> RoomsPanel.getContext().removeItem(position, RoomItemAbstractMouseListener.this.myRoomId));
             jPopupMenu.add(delItem);
         }
-
-        public void setMyHolder(RoomItemViewHolder myHolder) {
-            this.myHolder = myHolder;
-        }
-
-        public void setMyRoomId(String myRoomId) {
-            this.myRoomId = myRoomId;
-        }
-
 
 
         @Override

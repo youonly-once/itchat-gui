@@ -99,7 +99,7 @@ public class ContactsPanel extends ParentAvailablePanel {
     @Override
     public void setVisible(boolean aFlag) {
         if (aFlag) {
-            initData();
+            // notifyDataSetChanged();
         }
         super.setVisible(aFlag);
     }

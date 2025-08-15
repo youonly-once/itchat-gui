@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.List;
 
@@ -118,6 +119,7 @@ public class ChatMessageViewerPanel extends ParentAvailablePanel {
 
     private void initView() {
         this.setLayout(new BorderLayout());
+        messageListView.getContentPanel().setBorder(new EmptyBorder(0, 5, 5, 10));
         add(messageListView, BorderLayout.CENTER);
     }
 

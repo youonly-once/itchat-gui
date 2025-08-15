@@ -46,7 +46,7 @@ public class MessageEditorEmojiPanel extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 MessageEditorExpressionItemLabel panel = (MessageEditorExpressionItemLabel) e.getSource();
                 if (expressionListener != null) {
-                    ImageIcon icon = new ImageIcon(panel.getIcon().getImage());
+                    ImageIcon icon = (ImageIcon) panel.getIcon();
                     icon.setDescription(panel.getCode()+"&"+icon.getDescription());
                     expressionListener.onSelected(icon);
 
@@ -63,7 +63,7 @@ public class MessageEditorEmojiPanel extends JPanel {
 
                 IntStream.range(0, EmojiUtil.wechatEmojiList.size()).parallel().forEach(i -> {
                     String code = EmojiUtil.wechatEmojiList.get(i);
-                    ImageIcon icon = IconUtil.getIcon(MessageEditorEmojiPanel.this, iconPath + (2 * i + 4) + ".png", 22, 22);
+                    ImageIcon icon = IconUtil.getIcon(MessageEditorEmojiPanel.this, iconPath + (2 * i + 4) + ".png", 40, 40);
                     JLabel label = new MessageEditorExpressionItemLabel(code, icon, code);
                     label.addMouseListener(listener);
                     publish(label);

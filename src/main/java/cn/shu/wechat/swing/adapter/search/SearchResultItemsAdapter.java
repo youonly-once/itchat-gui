@@ -84,7 +84,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
                     holder = new SearchResultUserItemViewHolder();
                     searchResultUserItemViewHolderList.add(position,new WeakReference<>(holder));
                 }
-                return holder;
+                return new SearchResultUserItemViewHolder();
             }
             case VIEW_TYPE_MESSAGE: {
                 return new SearchResultMessageViewHolder();
