@@ -38,12 +38,10 @@ public abstract class MessageAttachmentViewHolder extends BaseMessageViewHolder 
     private MouseAdapter listener;
 
     public MessageAttachmentViewHolder() {
-        initComponents();
-        initView();
-        setListeners();
+
     }
 
-    private void setListeners() {
+    protected void setListeners() {
         listener = messageBubble.getMouseListener();
         attachmentTitle.addMouseListener(listener);
         sizeLabel.addMouseListener(listener);

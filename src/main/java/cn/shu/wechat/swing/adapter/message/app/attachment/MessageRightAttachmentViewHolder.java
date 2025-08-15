@@ -17,7 +17,9 @@ public class MessageRightAttachmentViewHolder extends MessageAttachmentViewHolde
 
 
     public MessageRightAttachmentViewHolder() {
-
+        initComponents();
+        initView();
+        setListeners();
     }
 
     protected void initComponents() {

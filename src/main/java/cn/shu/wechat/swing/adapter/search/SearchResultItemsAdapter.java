@@ -1,7 +1,9 @@
 package cn.shu.wechat.swing.adapter.search;
 
+import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.constant.SearchResultType;
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.entity.SearchResultItem;
 import cn.shu.wechat.swing.adapter.BaseAdapter;
 import cn.shu.wechat.swing.components.Colors;
@@ -26,6 +28,7 @@ import java.lang.ref.WeakReference;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 搜索结果适配器
@@ -40,8 +43,6 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
     public static final int VIEW_TYPE_MESSAGE = 1;
     public static final int VIEW_TYPE_FILE = 2;
     private final AttachmentIconHelper attachmentIconHelper = new AttachmentIconHelper();
-
-    private final List<String> downloadingFiles = new ArrayList<>();
 
     private final List<WeakReference<SearchResultFileItemViewHolder>> fileItemViewHolders = new ArrayList<>();
     private final List<WeakReference<SearchResultUserItemViewHolder>> searchResultUserItemViewHolderList = new ArrayList<>(10);
@@ -229,15 +230,11 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
 
     private void processMouseListeners(SearchResultItemViewHolder viewHolder, SearchResultItem item) {
         if (viewHolder.mouseListener != null){
-            viewHolder.mouseListener.fresh(SearchResultType.getByCode(item.getType())
-                    ,item.getId()
-                    ,item.getTag()
+            viewHolder.mouseListener.fresh(item
                     ,viewHolder);
 
         }else{
-            viewHolder.mouseListener = new SearchResultItemAbstractMouseListener( SearchResultType.getByCode(item.getType())
-            ,item.getId()
-            ,item.getTag()
+            viewHolder.mouseListener = new SearchResultItemAbstractMouseListener( item
             ,viewHolder);
            viewHolder.addMouseListener(  viewHolder.mouseListener);
         }
@@ -283,29 +280,29 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
     ;
 
     class SearchResultItemAbstractMouseListener extends AbstractMouseListener {
-        private JPopupMenu jPopupMenu ;
-        private SearchResultType type;
-        private String id;
+        private WeakReference<JPopupMenu> jPopupMenu ;
         private SearchResultItemViewHolder holder;
-        private String tag;
+        private WeakReference<SearchResultItem> item;
 
-        public void fresh(SearchResultType type, String id,String tag, SearchResultItemViewHolder viewHolder) {
+        public void fresh(SearchResultItem item, SearchResultItemViewHolder viewHolder) {
             this.holder = viewHolder;
-            this.id = id;
-            this.type = type;
-            this.tag = tag;
+            this.item = new WeakReference<>(item);
         }
-        public SearchResultItemAbstractMouseListener(SearchResultType type, String id,String filePath, SearchResultItemViewHolder holder) {
-            fresh(type,id,filePath,holder);
+        public SearchResultItemAbstractMouseListener(SearchResultItem item, SearchResultItemViewHolder holder) {
+            fresh(item,holder);
 
         }
         @Override
         public void mouseReleased(MouseEvent e) {
+            SearchResultItem searchResultItem = item.get();
+            if (searchResultItem == null) {
+                return;
+            }
             if (e.getButton() == MouseEvent.BUTTON1) {
-                switch (type) {
+                switch (SearchResultType.getByCode(searchResultItem.getType())) {
                     case CONTACTS:
                     case ROOM:
-                        UserInfoPanel.getContext().setContacts(Core.getMemberMap().get(id));
+                        UserInfoPanel.getContext().setContacts(Core.getMemberMap().get(searchResultItem.getId()));
                         RightPanel.getContext().show(RightPanel.USER_INFO);
                         //enterRoom(item.getId(), 0L);
                         //clearSearchText();
@@ -320,26 +317,38 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
                             searchMessageOrFileListener.onSearchMessage();
                         }
                         break;
-                    case MESSAGE:
-                        RoomsPanel.getContext().enterRoom(tag);
+                    case MESSAGE: {
+                        if (Core.getMemberMap().containsKey(searchResultItem.getTag())) {
+                            RoomsPanel.getContext().enterRoom(searchResultItem.getTag());
+                        }else{
+                            Optional<Contacts> contacts = ContactsTools.findContactsByString(searchResultItem.getSender());
+                            contacts.ifPresent(con->{
+                                RoomsPanel.getContext().enterRoom(con.getUsername());
+                            });
+                        }
+
                         break;
+                    }
                     case FILE:{
-                            downloadOrOpenFile(tag, holder);
+                            downloadOrOpenFile(item.get().getTag(), holder);
                         break;
                     }
                     default:
                         throw new RuntimeException("ViewType 不正确");
                 }
             }else if (e.getButton() == MouseEvent.BUTTON3){
-                switch (type) {
+                switch (SearchResultType.getByCode(searchResultItem.getType())) {
                     case FILE: {
-                        if (jPopupMenu == null) {
-                            jPopupMenu = new JPopupMenu();
-                            JMenuItem jMenuItem = new JMenuItem("打开文件夹");
-                            jMenuItem.addActionListener(e1 -> ExecutorServiceUtil.getGlobalExecutorService().submit(() -> FileUtil.showAtExplorer(tag)));
-                            jPopupMenu.add(jMenuItem);
+                        JPopupMenu jPopupMenuLocal = jPopupMenu.get();
+                        if (jPopupMenuLocal == null) {
+                            jPopupMenuLocal = new JPopupMenu();
+                            jPopupMenu = new WeakReference<>(jPopupMenuLocal);
                         }
-                        jPopupMenu.show(holder, e.getX()
+                        JMenuItem jMenuItem = new JMenuItem("打开文件夹");
+                        jMenuItem.addActionListener(e1 -> ExecutorServiceUtil.getGlobalExecutorService().submit(() -> FileUtil.showAtExplorer(searchResultItem.getTag())));
+                        jPopupMenuLocal.add(jMenuItem);
+
+                        jPopupMenuLocal.show(holder, e.getX()
                                 , e.getY());
                         break;
                     }

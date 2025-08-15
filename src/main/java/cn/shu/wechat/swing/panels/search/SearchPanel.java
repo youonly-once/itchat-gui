@@ -251,6 +251,9 @@ public class SearchPanel extends ParentAvailablePanel {
                 item = new SearchResultItem(msg.getId(), content, SearchResultType.MESSAGE);
                 item.setDateTime(msg.getMessageTime());
                 item.setSender(msg.getFromNickname().equals(Core.getNickName()) ? msg.getToRemarkname() : msg.getFromRemarkname());
+                if (StringUtils.isEmpty(item.getSender())) {
+                    item.setSender(msg.getFromNickname().equals(Core.getNickName()) ? msg.getToNickname() : msg.getFromNickname());
+                }
                 item.setTag(msg.getFromNickname().equals(Core.getNickName()) ? msg.getToUsername() : msg.getFromUsername());
                 item.setKey(key);
                 searchResultItems.add(item);

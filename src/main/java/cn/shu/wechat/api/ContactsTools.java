@@ -739,6 +739,18 @@ public class ContactsTools {
         return Optional.empty();
     }
 
+    public static Optional<Contacts> findContactsByString(String str) {
+        for (Contacts m : Core.getMemberMap().values()) {
+            if (
+                    Objects.equals(m.getRemarkname(), str) ||
+                    Objects.equals(m.getDisplayname(), str) ||
+                    Objects.equals(m.getNickname(), str)) {
+                return Optional.of(m);
+            }
+        }
+        return Optional.empty();
+    }
+
     /**
      * 第一次收到群消息 加载群成员详细细腻
      *

@@ -13,17 +13,18 @@ import java.awt.event.MouseListener;
  */
 public class MessageLeftAttachmentViewHolder extends MessageAttachmentViewHolder {
 
-    private boolean isGroup = true;
+    private final boolean isGroup;
 
     public MessageLeftAttachmentViewHolder(boolean isGroup) {
         this.isGroup = isGroup;
-
+        initComponents();
+        initView();
+        setListeners();
     }
 
     protected void initComponents() {
         super.initComponents();
         messageBubble = new RCLeftAttachmentMessageBubble(new Insets(8, 10, 8, 8));
-        super.initComponents();
         progressBar.setBorder(new EmptyBorder(0, messageBubble.getSalientPointPixel(), 0, 0));
     }
 
