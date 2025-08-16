@@ -8,9 +8,7 @@
 
 ## 使用方法
 
-### 1. 下载并安装 JDK 21
-
-请先安装 JDK 21。下载链接：[JDK21 下载](https://www.oracle.com/java/technologies/javase/jdk21-archive-downloads.html)
+### 1. 下载并安装 [JDK 21](https://www.oracle.com/java/technologies/javase/jdk21-archive-downloads.html)
 
 ### 2. 下载并解压 [wechat.zip](https://github.com/youonly-once/itchat-gui/releases/tag/2.0)) 文件
 
