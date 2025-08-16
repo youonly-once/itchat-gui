@@ -1,7 +1,6 @@
 package cn.shu.wechat.swing.adapter.message.text;
 
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
-import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
 import cn.shu.wechat.swing.components.message.RCLeftAttachmentMessageBubble;
@@ -9,7 +8,6 @@ import cn.shu.wechat.swing.frames.MainFrame;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseListener;
 
 /**
  *
@@ -63,7 +61,7 @@ public class MessageLeftTextViewHolder extends BaseMessageViewHolder {
         add(revoke, new GBC(2, 1 + newLine).setWeight(1, 1)
                 .setAnchor(GBC.WEST).setInsets(0, 5, 0, 0));
         //占位，revoke被隐藏则messageBubble被拉伸到最右边，从而不能左对齐
-        add(Box.createHorizontalStrut(5), new GBC(3, 1 + newLine).setWeight(1, 100)); // 占位行
+        add(Box.createHorizontalStrut(1), new GBC(3, 1 + newLine).setWeight(1, 100)); // 占位行
 
     }
 }

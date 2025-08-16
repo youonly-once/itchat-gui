@@ -59,7 +59,7 @@ public class RCBorder implements Border {
 
     @Override
     public Insets getBorderInsets(Component c) {
-        return new Insets(1, 5, 5, 1);
+        return new Insets(1, 5, 1, 1);
     }
 
     @Override

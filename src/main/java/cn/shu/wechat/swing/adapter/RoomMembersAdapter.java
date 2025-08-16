@@ -79,7 +79,7 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
 
                 @Override
                 public void mouseExited(MouseEvent e) {
-                    viewHolder.setBackground(Colors.WINDOW_BACKGROUND_LIGHT);
+                    viewHolder.setBackground(Color.WHITE);
 
                 }
             });
@@ -100,7 +100,7 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
 
                 @Override
                 public void mouseExited(MouseEvent e) {
-                    viewHolder.setBackground(Colors.WINDOW_BACKGROUND_LIGHT);
+                    viewHolder.setBackground(Color.WHITE);
 
                 }
 
@@ -127,7 +127,7 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
                     @Override
                     public void mouseClicked(MouseEvent e) {
                         if (selectedViewHolder != null){
-                            selectedViewHolder.setBackground(Colors.WINDOW_BACKGROUND_LIGHT);
+                            selectedViewHolder.setBackground(Color.WHITE);
                         }
                         selectedViewHolder = viewHolder;
                         viewHolder.setBackground(Colors.ITEM_SELECTED_LIGHT);
@@ -142,7 +142,7 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
 
                         for (RoomMembersItemViewHolder holder : viewHolders) {
                             if (holder != viewHolder) {
-                                holder.setBackground(Colors.WINDOW_BACKGROUND_LIGHT);
+                                holder.setBackground(Color.WHITE);
                             }
                         }
 
@@ -155,7 +155,7 @@ public class RoomMembersAdapter extends BaseAdapter<RoomMembersItemViewHolder> {
 
                     @Override
                     public void mouseExited(MouseEvent e) {
-                        viewHolder.setBackground(Colors.WINDOW_BACKGROUND_LIGHT);
+                        viewHolder.setBackground(Color.WHITE);
 
                     }
                 });

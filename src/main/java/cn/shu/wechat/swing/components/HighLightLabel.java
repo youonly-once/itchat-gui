@@ -2,7 +2,6 @@ package cn.shu.wechat.swing.components;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.font.LineMetrics;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,46 +34,55 @@ public class HighLightLabel extends JLabel {
     @Override
     public void paint(Graphics g) {
         Graphics2D g2d = (Graphics2D) g.create();
-        g2d.setFont(getFont());
+        g2d.setFont(getFont()); // 保证字体样式一致
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        FontMetrics fm = getFontMetrics(getFont());
-        LineMetrics lm = getFont().getLineMetrics(getText(), g2d.getFontRenderContext());
 
-        // 文本于容器垂直居中
-        int y = (int) (fm.getHeight() + lm.getAscent() - lm.getDescent());
-        int x = 0;
+        FontMetrics fm = g2d.getFontMetrics();
+        Insets insets = getInsets();
 
-        String str = getText();
-        List<Integer> posArr = keyWordPositions(str, keyWord);
-        int keyLen = keyWord.length();
-        int strIndex = 0;
-        int posIndex = 0;
-        while (strIndex < str.length()) {
-            if (posIndex >= posArr.size()) {
-                String s = str.substring(strIndex);
+        String text = getText();
+        if (text == null || text.isEmpty()) {
+            g2d.dispose();
+            return;
+        }
+
+        // 垂直居中计算
+        int y = insets.top + (getHeight() - insets.top - insets.bottom - fm.getHeight()) / 2 + fm.getAscent();
+        int x = insets.left;
+
+        if (keyWord == null || keyWord.isEmpty()) {
+            g2d.setColor(getForeground());
+            g2d.drawString(text, x, y);
+        } else {
+            List<Integer> posArr = keyWordPositions(text, keyWord);
+            int strIndex = 0;
+            int posIndex = 0;
+            int keyLen = keyWord.length();
+
+            while (strIndex < text.length()) {
+                if (posIndex >= posArr.size()) {
+                    String s = text.substring(strIndex);
+                    g2d.setColor(getForeground());
+                    g2d.drawString(s, x, y);
+                    break;
+                }
+
+                int pos = posArr.get(posIndex);
+                String s = text.substring(strIndex, pos);
                 g2d.setColor(getForeground());
                 g2d.drawString(s, x, y);
                 x += fm.stringWidth(s);
-                break;
+                strIndex += s.length();
+
+                g2d.setColor(highLightColor);
+                g2d.drawString(keyWord, x, y);
+                x += fm.stringWidth(keyWord);
+                strIndex += keyLen;
+                posIndex++;
             }
-
-            String s = str.substring(strIndex, posArr.get(posIndex));
-            g2d.setColor(getForeground());
-            g2d.drawString(s, x, y);
-            x += fm.stringWidth(s);
-            strIndex += s.length();
-
-            g2d.setColor(highLightColor);
-            g2d.drawString(keyWord, x, y);
-            x += fm.stringWidth(keyWord);
-            strIndex += keyLen;
-
-            posIndex++;
         }
 
         g2d.dispose();
-
-
     }
 
     private List<Integer> keyWordPositions(String str, String key) {

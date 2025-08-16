@@ -19,6 +19,7 @@ import cn.shu.wechat.utils.DateUtils;
 import cn.shu.wechat.utils.ExecutorServiceUtil;
 import cn.shu.wechat.utils.FileUtil;
 import cn.shu.wechat.utils.IconUtil;
+import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -36,8 +37,8 @@ import java.util.Optional;
  */
 public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHolder> {
     private final List<SearchResultItem> searchResultItems;
-    private String keyWord;
-    private SearchMessageOrFileListener searchMessageOrFileListener;
+    private final List<WeakReference<SearchResultUserItemViewHolder>> searchResultUserItemViewHolderList = new ArrayList<>();
+    private final List<WeakReference<SearchResultMessageViewHolder>> searchResultMessageItemViewHolderList = new ArrayList<>();
 
     public static final int VIEW_TYPE_CONTACTS_ROOM = 0;
     public static final int VIEW_TYPE_MESSAGE = 1;
@@ -45,7 +46,10 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
     private final AttachmentIconHelper attachmentIconHelper = new AttachmentIconHelper();
 
     private final List<WeakReference<SearchResultFileItemViewHolder>> fileItemViewHolders = new ArrayList<>();
-    private final List<WeakReference<SearchResultUserItemViewHolder>> searchResultUserItemViewHolderList = new ArrayList<>(10);
+    @Setter
+    private String keyWord;
+    @Setter
+    private SearchMessageOrFileListener searchMessageOrFileListener;
 
     public SearchResultItemsAdapter(List<SearchResultItem> searchResultItems) {
         this.searchResultItems = searchResultItems;
@@ -67,7 +71,6 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
         };
     }
 
-
     @Override
     public SearchResultItemViewHolder onCreateViewHolder(int viewType,int subViewType,  int position) {
         switch (viewType) {
@@ -84,10 +87,22 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
                     holder = new SearchResultUserItemViewHolder();
                     searchResultUserItemViewHolderList.add(position,new WeakReference<>(holder));
                 }
-                return new SearchResultUserItemViewHolder();
+                return holder;
             }
             case VIEW_TYPE_MESSAGE: {
-                return new SearchResultMessageViewHolder();
+                //避免重复创建
+                SearchResultMessageViewHolder holder = null;
+                if (searchResultMessageItemViewHolderList.size() > position) {
+                    holder = searchResultMessageItemViewHolderList.get(position).get();
+                    if (holder == null) {
+                        holder = new SearchResultMessageViewHolder();
+                        searchResultMessageItemViewHolderList.set(position, new WeakReference<>(holder));
+                    }
+                } else {
+                    holder = new SearchResultMessageViewHolder();
+                    searchResultMessageItemViewHolderList.add(position, new WeakReference<>(holder));
+                }
+                return holder;
             }
             case VIEW_TYPE_FILE: {
                 //避免重复创建
@@ -121,16 +136,6 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
         } else if (viewHolder instanceof SearchResultFileItemViewHolder) {
             processFileResult(viewHolder, item);
         }
-
-//        if (!viewHolders.contains(viewHolder))
-//        {
-//            viewHolders.add(viewHolder);
-//        }
-
-        //viewHolder.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        //SearchResultItem item = searchResultItems.get(position);
-
     }
 
     /**
@@ -142,8 +147,7 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
     private void processFileResult(SearchResultItemViewHolder viewHolder, SearchResultItem item) {
         SearchResultFileItemViewHolder holder = (SearchResultFileItemViewHolder) viewHolder;
 
-        ImageIcon attachmentTypeIcon = attachmentIconHelper.getImageIcon(item.getName());
-        attachmentTypeIcon.setImage(attachmentTypeIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH));
+        ImageIcon attachmentTypeIcon = attachmentIconHelper.getImageIcon(item.getName(), 40, 40);
         holder.avatar.setIcon(attachmentTypeIcon);
         holder.name.setKeyWord(keyWord);
         holder.dateTime.setText(item.getDateTime().format(DateTimeFormatter.ofPattern(DateUtils.YYYY_MM_DD_HH_MM_SS)));
@@ -213,8 +217,8 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
             }
         }
         //***************
-        if (item.getSender().length() > 7) {
-            holder.roomName.setText(item.getSender().substring(0, 7) + "...");
+        if (item.getSender().length() > 4) {
+            holder.roomName.setText(item.getSender().substring(0, 4) + "...");
         } else {
 
             holder.roomName.setText(item.getSender());
@@ -277,10 +281,38 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
         processMouseListeners(viewHolder, item);
     }
 
-    ;
+    /**
+     * 设置item的背影色
+     *
+     * @param holder
+     * @param color
+     */
+    private void setBackground(SearchResultItemViewHolder holder, Color color) {
+        holder.setBackground(color);
+        if (holder instanceof SearchResultUserItemViewHolder) {
+            ((SearchResultUserItemViewHolder) holder).name.setBackground(color);
+        } else if (holder instanceof SearchResultMessageViewHolder) {
+            ((SearchResultMessageViewHolder) holder).nameBrief.setBackground(color);
+        } else if (holder instanceof SearchResultFileItemViewHolder) {
+            ((SearchResultFileItemViewHolder) holder).name.setBackground(color);
+        }
+    }
+
+    class SearchResultItemJPopupMenu extends JPopupMenu {
+
+        @Setter
+        private String tag;
+
+        public SearchResultItemJPopupMenu(String tag) {
+            this.tag = tag;
+            JMenuItem jMenuItem = new JMenuItem("打开文件夹");
+            jMenuItem.addActionListener(e1 -> ExecutorServiceUtil.getGlobalExecutorService().submit(() -> FileUtil.showAtExplorer(tag)));
+            this.add(jMenuItem);
+        }
+    }
 
     class SearchResultItemAbstractMouseListener extends AbstractMouseListener {
-        private WeakReference<JPopupMenu> jPopupMenu ;
+        private WeakReference<SearchResultItemJPopupMenu> jPopupMenu;
         private SearchResultItemViewHolder holder;
         private WeakReference<SearchResultItem> item;
 
@@ -339,14 +371,17 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
             }else if (e.getButton() == MouseEvent.BUTTON3){
                 switch (SearchResultType.getByCode(searchResultItem.getType())) {
                     case FILE: {
-                        JPopupMenu jPopupMenuLocal = jPopupMenu.get();
-                        if (jPopupMenuLocal == null) {
-                            jPopupMenuLocal = new JPopupMenu();
-                            jPopupMenu = new WeakReference<>(jPopupMenuLocal);
+                        if (jPopupMenu == null) {
+                            jPopupMenu = new WeakReference<>(new SearchResultItemJPopupMenu(searchResultItem.getTag()));
                         }
-                        JMenuItem jMenuItem = new JMenuItem("打开文件夹");
-                        jMenuItem.addActionListener(e1 -> ExecutorServiceUtil.getGlobalExecutorService().submit(() -> FileUtil.showAtExplorer(searchResultItem.getTag())));
-                        jPopupMenuLocal.add(jMenuItem);
+                        SearchResultItemJPopupMenu jPopupMenuLocal = jPopupMenu.get();
+                        if (jPopupMenuLocal == null) {
+                            jPopupMenuLocal = new SearchResultItemJPopupMenu(searchResultItem.getTag());
+                            jPopupMenu = new WeakReference<>(jPopupMenuLocal);
+                        } else {
+                            jPopupMenuLocal.setTag(searchResultItem.getTag());
+                        }
+
 
                         jPopupMenuLocal.show(holder, e.getX()
                                 , e.getY());
@@ -369,57 +404,6 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
 
     }
 
-
-    /**
-     * 根据房间类型获取对应的头像
-     *
-     * @return
-     */
-    /*private Image getRoomAvatar(String type, String name)
-    {
-        if (type.equals("c"))
-        {
-            return AvatarUtil.createOrLoadGroupAvatar("##", name).getScaledInstance(35, 35, Image.SCALE_SMOOTH);
-        }
-        else if (type.equals("p"))
-        {
-            return AvatarUtil.createOrLoadGroupAvatar("#", name).getScaledInstance(35, 35, Image.SCALE_SMOOTH);
-        }
-        // 私聊头像
-        else if (type.equals("d"))
-        {
-            return AvatarUtil.createOrLoadAvatar(name).getScaledInstance(35, 35, Image.SCALE_SMOOTH);
-        }
-
-        return null;
-    }*/
-
-    private void clearSearchText() {
-        //LeftTabContentPanel.getContext().showPanel(LeftTabContentPanel.CHAT);
-        //SearchPanel.getContext().clearSearchText();
-    }
-
-    /**
-     * 设置item的背影色
-     *
-     * @param holder
-     * @param color
-     */
-    private void setBackground(SearchResultItemViewHolder holder, Color color) {
-        holder.setBackground(color);
-        if (holder instanceof SearchResultUserItemViewHolder) {
-            ((SearchResultUserItemViewHolder) holder).name.setBackground(color);
-        } else if (holder instanceof SearchResultMessageViewHolder) {
-            ((SearchResultMessageViewHolder) holder).nameBrief.setBackground(color);
-        } else if (holder instanceof SearchResultFileItemViewHolder) {
-            ((SearchResultFileItemViewHolder) holder).nameProgressPanel.setBackground(color);
-        }
-    }
-
-    public void setKeyWord(String keyWord) {
-        this.keyWord = keyWord;
-    }
-
     private void enterRoom(String roomId) {
         //添加房间
         RoomsPanel.getContext().addRoomOrUpdateRoom(roomId, "", 0, null, false, false);
@@ -427,10 +411,6 @@ public class SearchResultItemsAdapter extends BaseAdapter<SearchResultItemViewHo
         //添加聊天房
          ChatPanelContainer.getContext().createAndShow(roomId);
 
-    }
-
-    public void setSearchMessageOrFileListener(SearchMessageOrFileListener searchMessageOrFileListener) {
-        this.searchMessageOrFileListener = searchMessageOrFileListener;
     }
 
     /**

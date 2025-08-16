@@ -1,13 +1,11 @@
 package cn.shu.wechat.swing.adapter.search;
 
 import cn.shu.wechat.swing.components.Colors;
-import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.HighLightLabel;
 import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.utils.FontUtil;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 
 /**
@@ -38,11 +36,9 @@ public class SearchResultUserItemViewHolder extends SearchResultItemViewHolder {
     }
 
     private void initView() {
-        setLayout(new GridBagLayout());
-        name.setBorder(new LineBorder(Color.RED));
-        add(avatar, new GBC(0, 0).setWeight(1, 1).setFill(GBC.BOTH).setInsets(3, 5, 0, 0));
-        add(name, new GBC(1, 0).setWeight(100, 1).setFill(GBC.BOTH)
-                .setInsets(0, 5, 0, 0));
-        add(type, new GBC(2, 0).setWeight(1, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0));
+        setLayout(new BorderLayout(5, 0));
+        this.add(avatar, BorderLayout.WEST);
+        this.add(name, BorderLayout.CENTER);
+        this.add(type, BorderLayout.EAST);
     }
 }

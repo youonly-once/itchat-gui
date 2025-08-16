@@ -27,9 +27,9 @@ public class SearchResultMessageViewHolder extends SearchResultItemViewHolder {
     }
 
     private void initComponents() {
-        setPreferredSize(new Dimension(100, 65));
+        setPreferredSize(new Dimension(100, 60));
         setBackground(Colors.WINDOW_BACKGROUND);
-        setBorder(new RCBorder(RCBorder.BOTTOM));
+        setBorder(new RCBorder(RCBorder.BOTTOM, Color.WHITE));
         setOpaque(true);
         setForeground(Colors.DARK);
 
@@ -51,7 +51,7 @@ public class SearchResultMessageViewHolder extends SearchResultItemViewHolder {
 
     private void initView() {
         setLayout(new GridBagLayout());
-        add(avatar, new GBC(0, 0).setWeight(2, 1).setFill(GBC.BOTH).setInsets(5, 5, 5, 0).setGridHeight(2));
+        add(avatar, new GBC(0, 0).setWeight(10, 1).setFill(GBC.BOTH).setInsets(5, 5, 5, 0).setGridHeight(2));
         add(nameBrief, new GBC(1, 0).setWeight(50, 1).setFill(GBC.BOTH).setInsets(5, 5, 0, 0));
         add(brief, new GBC(1, 1).setWeight(50, 50).setFill(GBC.BOTH).setInsets(0, 5, 5, 0));
 

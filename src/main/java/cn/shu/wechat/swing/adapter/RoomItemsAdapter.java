@@ -17,6 +17,7 @@ import lombok.Setter;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,7 +63,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             roomItemViewHolder = new RoomItemViewHolder();
             viewHolders.add(position,roomItemViewHolder);
         }
-        return new RoomItemViewHolder();
+        return roomItemViewHolder;
     }
 
     @Override
@@ -134,6 +135,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             viewHolder.mouseListener.setMyHolder(viewHolder);
             viewHolder.mouseListener.setMyRoomId(roomItem.getRoomId());
             viewHolder.mouseListener.setPosition(position);
+            System.out.println(viewHolder.getMouseListeners().length);
         }else{
             viewHolder.mouseListener = new RoomItemAbstractMouseListener(viewHolder,roomItem.getRoomId(),position);;
             viewHolder.addMouseListener(viewHolder.mouseListener);
@@ -141,9 +143,24 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
 
     }
 
+    class RoomItemJPopupMenu extends JPopupMenu {
+        @Setter
+        private int position;
+        @Setter
+        private String myRoomId;
 
+        public RoomItemJPopupMenu(int position, String roomId) {
+            this.position = position;
+            this.myRoomId = myRoomId;
+            JMenuItem delItem = new JMenuItem("删除");
+            delItem.setFont(FontUtil.getDefaultFont(14));
+            delItem.setIcon(IconUtil.getIcon(this, "/image/delete.png"));
+            delItem.addActionListener(e -> RoomsPanel.getContext().removeItem(position, roomId));
+            this.add(delItem);
+        }
+    }
     class RoomItemAbstractMouseListener extends AbstractMouseListener{
-        private final JPopupMenu jPopupMenu = new JPopupMenu();
+        private WeakReference<RoomItemJPopupMenu> jPopupMenu;
 
         @Setter
         private  int position;
@@ -155,11 +172,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             this.myHolder = myHolder;
             this.myRoomId = myRoomId;
             this.position = pos;
-            JMenuItem delItem = new JMenuItem("删除");
-            delItem.setFont(FontUtil.getDefaultFont(14));
-            delItem.setIcon(IconUtil.getIcon(this, "/image/delete.png"));
-            delItem.addActionListener(e -> RoomsPanel.getContext().removeItem(position, RoomItemAbstractMouseListener.this.myRoomId));
-            jPopupMenu.add(delItem);
+            new RoomItemJPopupMenu(position, RoomItemAbstractMouseListener.this.myRoomId);
         }
 
 
@@ -175,7 +188,18 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
                     selectedViewHolder = myHolder;
                 }
             }else if(e.getButton() == MouseEvent.BUTTON3){
-                jPopupMenu.show(e.getComponent(),e.getX(),e.getY());
+                if (jPopupMenu == null) {
+                    jPopupMenu = new WeakReference<>(new RoomItemJPopupMenu(position, myRoomId));
+                }
+                RoomItemJPopupMenu jPopupMenuLocal = jPopupMenu.get();
+                if (jPopupMenuLocal == null) {
+                    jPopupMenuLocal = new RoomItemJPopupMenu(position, myRoomId);
+                    jPopupMenu = new WeakReference<>(jPopupMenuLocal);
+                } else {
+                    jPopupMenuLocal.setPosition(position);
+                    jPopupMenuLocal.setMyRoomId(myRoomId);
+                }
+                jPopupMenuLocal.show(e.getComponent(), e.getX(), e.getY());
             }
         }
 

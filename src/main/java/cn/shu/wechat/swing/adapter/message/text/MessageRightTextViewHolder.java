@@ -3,7 +3,6 @@ package cn.shu.wechat.swing.adapter.message.text;
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
-import cn.shu.wechat.swing.components.message.RCRightAttachmentMessageBubble;
 import cn.shu.wechat.swing.components.message.RCRightGreenMessageBubble;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.utils.IconUtil;
@@ -88,16 +87,16 @@ public class MessageRightTextViewHolder extends BaseMessageViewHolder {
 
 
         //占位，revoke被隐藏则messageBubble被拉伸到最左边，从而不能右对齐
-        add(Box.createHorizontalStrut(5), new GBC(0, 4).setWeight(100, 100)); // 占位行
+        add(Box.createHorizontalStrut(1), new GBC(0, 4).setWeight(100, 100)); // 占位行
 
 
         add(messageBubble, new GBC(1, 1).setWeight(0, 10)
-                .setAnchor(GBC.CENTER).setInsets(0, 0, 0, 5)
+                .setAnchor(GBC.NORTHEAST).setInsets(0, 0, 0, 5)
                 .setFill(GBC.NONE)
                 .setGridHeight(3));
 
         add(avatar, new GBC(2, 1).setWeight(0, 1)
-                .setAnchor(GBC.EAST).setInsets(0, 0, 0, 0).setFill(GBC.NONE)
+                .setAnchor(GBC.NORTHEAST).setInsets(0, 0, 0, 0).setFill(GBC.NONE)
                 .setGridHeight(3));
 
 

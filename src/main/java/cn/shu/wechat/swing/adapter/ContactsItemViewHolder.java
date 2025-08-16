@@ -1,7 +1,6 @@
 package cn.shu.wechat.swing.adapter;
 
 import cn.shu.wechat.swing.components.Colors;
-import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.utils.FontUtil;
 
@@ -29,13 +28,13 @@ public class ContactsItemViewHolder extends ViewHolder {
         setOpaque(true);
         setForeground(Colors.DARK);
 
-        roomName.setFont(FontUtil.getDefaultFont(13));
+        roomName.setFont(FontUtil.getDefaultFont(14));
         roomName.setForeground(Colors.DARK);
     }
 
     private void initView() {
-        setLayout(new GridBagLayout());
-        add(avatar, new GBC(0, 0).setWeight(1, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0));
-        add(roomName, new GBC(1, 0).setWeight(10, 1).setFill(GBC.BOTH));
+        setLayout(new BorderLayout(5, 0));
+        add(avatar, BorderLayout.WEST);
+        add(roomName, BorderLayout.CENTER);
     }
 }
