@@ -277,7 +277,6 @@ public final class LoginFrame extends JFrame {
      */
     private void openMainFrame() {
         MainFrame frame = new MainFrame();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
         this.dispose();
 
