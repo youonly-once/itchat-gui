@@ -8,7 +8,7 @@
 
 ## 使用方法
 
-### 1. 下载并安装 JDK21
+### 1. 下载并安装 JDK 21
 
 请先安装 JDK 21。下载链接：[JDK21 下载](https://www.oracle.com/java/technologies/javase/jdk21-archive-downloads.html)
 
