@@ -68,7 +68,8 @@ public class ImageViewerFrame extends JFrame {
         this.setVisible(true);
     }
     public static ImageViewerFrame getInstance() {
-        return ImageViewerFrame.InstanceHolder.instance;
+        //return ImageViewerFrame.InstanceHolder.instance;
+        return new ImageViewerFrame();
     }
 
     public void setImage(Image image) {

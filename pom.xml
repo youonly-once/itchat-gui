@@ -271,65 +271,22 @@
             <version>0.9.0</version>
         </dependency>
         <!--视频工具-->
+
+        <!-- OpenCV Windows 64 位 -->
         <dependency>
             <groupId>org.bytedeco</groupId>
-            <artifactId>javacv-platform</artifactId>
+            <artifactId>javacv</artifactId>
             <version>1.5.12</version>
-            <!--            <exclusions>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
-<!--                    <artifactId>ffmpeg</artifactId>-->
-<!--                </exclusion>-->
-<!--                                <exclusion>-->
-<!--                                    <groupId>org.bytedeco</groupId>-->
-<!--                                    <artifactId>javacv</artifactId>-->
-<!--                                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
-<!--                    <artifactId>flycapture-platform</artifactId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
-<!--                    <artifactId>libdc1394-platform</artifactId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
-<!--                    <artifactId>libfreenect-platform</artifactId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
-<!--                    <artifactId>libfreenect2-platform</artifactId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
-<!--                    <artifactId>librealsense-platform</artifactId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
-<!--                    <artifactId>videoinput-platform</artifactId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
-<!--                    <artifactId>opencv-platform</artifactId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
-<!--                    <artifactId>tesseract-platform</artifactId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
-<!--                    <artifactId>leptonica-platform</artifactId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
-<!--                    <artifactId>flandmark-platform</artifactId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.bytedeco.javacpp-presets</groupId>-->
-<!--                    <artifactId>artoolkitplus-platform</artifactId>-->
-<!--                </exclusion>-->
-            <!--            </exclusions>-->
         </dependency>
+
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>ffmpeg</artifactId>
+            <version>7.1.1-1.5.12</version>
+            <classifier>windows-x86_64</classifier>
+        </dependency>
+
+
         <!--easypoi-->
         <dependency>
             <groupId>cn.afterturn</groupId>

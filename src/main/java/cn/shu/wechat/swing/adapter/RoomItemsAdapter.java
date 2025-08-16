@@ -100,19 +100,16 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             if (roomItem.getUnreadCount() > 0) {
                 //消息免打扰
                 if(roomItem.isMute()){
-                    viewHolder. timeUnread.add(viewHolder.mutePoint,BorderLayout.CENTER);
                     viewHolder.mutePoint.setVisible(true);
                     viewHolder.unreadCount.setVisible(false);
                     viewHolder.unreadCount.setText( "");
                 }else{
-                    viewHolder. timeUnread.add(viewHolder.unreadCount,BorderLayout.CENTER);
                     viewHolder.mutePoint.setVisible(false);
                     viewHolder.unreadCount.setVisible(true);
                     viewHolder.unreadCount.setText(roomItem.getUnreadCount() + "");
                 }
 
             } else if (roomItem.isHasNewMsg() && roomItem.isMute()){
-                viewHolder. timeUnread.add(viewHolder.mutePoint,BorderLayout.CENTER);
                 viewHolder.mutePoint.setVisible(true);
                 viewHolder.unreadCount.setVisible(false);
                 viewHolder.unreadCount.setText( "");
@@ -135,7 +132,6 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             viewHolder.mouseListener.setMyHolder(viewHolder);
             viewHolder.mouseListener.setMyRoomId(roomItem.getRoomId());
             viewHolder.mouseListener.setPosition(position);
-            System.out.println(viewHolder.getMouseListeners().length);
         }else{
             viewHolder.mouseListener = new RoomItemAbstractMouseListener(viewHolder,roomItem.getRoomId(),position);;
             viewHolder.addMouseListener(viewHolder.mouseListener);
@@ -224,7 +220,6 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             return;
         }
         holder.setBackground(color);
-        holder.timeUnread.setBackground(color);
     }
 
     @Override

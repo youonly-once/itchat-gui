@@ -21,7 +21,6 @@ public class RoomItemViewHolder extends ViewHolder {
     public JLabel time = new JLabel();
     public JLabel unreadCount = new JLabel();
     public JLabel mutePoint = new JLabel();
-    public JPanel timeUnread = new JPanel();
     //有人@我
     public JLabel atMe = new JLabel("【有人@我】");
     public static final int HEIGHT = 55;
@@ -68,11 +67,6 @@ public class RoomItemViewHolder extends ViewHolder {
         mutePoint.setHorizontalAlignment(SwingConstants.CENTER);
         mutePoint.setVerticalAlignment(SwingConstants.CENTER);
 
-        timeUnread = new JPanel();
-        timeUnread.setLayout(new BorderLayout());
-        timeUnread.setBackground(Colors.LEFT_WINDOW_BACKGROUND);
-        timeUnread.add(unreadCount, BorderLayout.CENTER);
-
     }
 
     private void initView() {
@@ -86,16 +80,17 @@ public class RoomItemViewHolder extends ViewHolder {
         //占位，atMe被隐藏则 被拉伸到最左边，从而不能右对齐
         add(Box.createHorizontalStrut(1), new GBC(2, 0).setWeight(1, 1));
         add(time, new GBC(3, 0).setWeight(1, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 10)
-                .setAnchor(GridBagConstraints.EAST));
+                .setAnchor(GridBagConstraints.EAST).setGridWidth(2));
 
         add(atMe, new GBC(1, 1).setWeight(1, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0)
                 .setAnchor(GBC.WEST));
         add(brief, new GBC(2, 1).setWeight(100, 1).setFill(GBC.BOTH)
                 .setInsets(0, 5, 0, 0)
                 .setAnchor(GBC.WEST));
-        add(timeUnread, new GBC(3, 1).setWeight(1, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 10)
+        add(unreadCount, new GBC(3, 1).setWeight(1, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 10)
                 .setAnchor(GridBagConstraints.EAST));
-
+        add(mutePoint, new GBC(4, 1).setWeight(1, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 10)
+                .setAnchor(GridBagConstraints.EAST));
     }
 
 

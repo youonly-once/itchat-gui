@@ -371,7 +371,6 @@ public class RoomsPanel extends ParentAvailablePanel {
      */
     private void setItemBackground(RoomItemViewHolder holder, Color color) {
         holder.setBackground(color);
-        holder.timeUnread.setBackground(color);
     }
 
     public void scrollPoint(int point){

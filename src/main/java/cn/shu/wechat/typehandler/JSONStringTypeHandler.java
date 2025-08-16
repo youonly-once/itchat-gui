@@ -4,10 +4,10 @@ import cn.shu.wechat.entity.Contacts;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedJdbcTypes;
 import org.apache.ibatis.type.MappedTypes;
-import org.apache.ibatis.type.TypeHandler;
 import org.springframework.stereotype.Component;
 
 import java.sql.CallableStatement;
@@ -20,44 +20,38 @@ import java.util.List;
 @MappedTypes(value = {Contacts.class})
 @MappedJdbcTypes({JdbcType.VARCHAR})
 @Component
-public class JSONStringTypeHandler<T extends Object> implements TypeHandler<List<T>> {
+public class JSONStringTypeHandler extends BaseTypeHandler<List<Contacts>> {
 
-    /**
-     * json字符串转list
-     *
-     * @param content 字符串
-     * @return list
-     */
-    private List<T> getListByJsonArrayString(String content) {
-        if (StringUtils.isEmpty(content)) {
+    @Override
+    public void setNonNullParameter(PreparedStatement ps, int i, List<Contacts> parameter, JdbcType jdbcType) throws SQLException {
+        ps.setString(i, JSON.toJSONString(parameter));
+    }
+
+    @Override
+    public List<Contacts> getNullableResult(ResultSet rs, String columnName) throws SQLException {
+        return parseJson(rs.getString(columnName));
+    }
+
+    @Override
+    public List<Contacts> getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
+        return parseJson(rs.getString(columnIndex));
+    }
+
+    @Override
+    public List<Contacts> getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
+        return parseJson(cs.getString(columnIndex));
+    }
+
+    private List<Contacts> parseJson(String json) {
+        if (StringUtils.isBlank(json)) {
             return new ArrayList<>();
         }
-        return JSON.parseObject(content, new TypeReference<ArrayList<T>>() {
-        });
-
-    }
-
-    @Override
-    public void setParameter(PreparedStatement preparedStatement, int i, List<T> ts, JdbcType jdbcType) throws SQLException {
-        if (ts.isEmpty()) {
-            preparedStatement.setString(i, null);
-        } else {
-            preparedStatement.setString(i, JSON.toJSONString(ts));
+        try {
+            return JSON.parseObject(json, new TypeReference<List<Contacts>>() {
+            });
+        } catch (Exception e) {
+            // 可记录日志，避免查询失败导致SQL抛异常
+            return new ArrayList<>();
         }
-    }
-
-    @Override
-    public List<T> getResult(ResultSet resultSet, String s) throws SQLException {
-        return getListByJsonArrayString(resultSet.getString(s));
-    }
-
-    @Override
-    public List<T> getResult(ResultSet resultSet, int i) throws SQLException {
-        return getListByJsonArrayString(resultSet.getString(i));
-    }
-
-    @Override
-    public List<T> getResult(CallableStatement callableStatement, int i) throws SQLException {
-        return getListByJsonArrayString(callableStatement.getString(i));
     }
 }
