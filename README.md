@@ -12,7 +12,7 @@
 
 请先安装 JDK 21。下载链接：[JDK21 下载](https://www.oracle.com/java/technologies/javase/jdk21-archive-downloads.html)
 
-### 2. 下载并解压 `wechat.zip` 文件
+### 2. 下载并解压 [wechat.zip](https://github.com/youonly-once/itchat-gui/releases/tag/2.0)) 文件
 
 下载后解压文件至您选择的目录。
 
@@ -39,11 +39,11 @@
 
 ### 6. 登录成功
 
-![首页界面](https://github.com/user-attachments/assets/64cac0aa-e9ef-453c-bfab-7f1941399a01)
+![首页界面](https://github.com/user-attachments/assets/731f241b-503b-4a62-b4a0-dd365c656742)
 
 ---
 
-## 一、功能扩展介绍
+## 一、功能扩展介绍(旧版本界面)
 
 ### 1. 防撤回功能
 - 支持语音、文字、图片、视频等消息防撤回。
