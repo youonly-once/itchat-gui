@@ -135,7 +135,6 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             viewHolder.mouseListener.setMyHolder(viewHolder);
             viewHolder.mouseListener.setMyRoomId(roomItem.getRoomId());
             viewHolder.mouseListener.setPosition(position);
-            System.out.println(viewHolder.getMouseListeners().length);
         }else{
             viewHolder.mouseListener = new RoomItemAbstractMouseListener(viewHolder,roomItem.getRoomId(),position);;
             viewHolder.addMouseListener(viewHolder.mouseListener);

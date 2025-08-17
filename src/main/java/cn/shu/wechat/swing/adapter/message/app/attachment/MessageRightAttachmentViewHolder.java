@@ -6,6 +6,7 @@ import cn.shu.wechat.utils.IconUtil;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.MouseListener;
 
@@ -43,23 +44,23 @@ public class MessageRightAttachmentViewHolder extends MessageAttachmentViewHolde
                 .setAnchor(GBC.NORTH).setInsets(0, 0, 0, 0).setFill(GBC.HORIZONTAL).setGridWidth(3)
         );
 
-
+        resend.setBorder(new LineBorder(Color.RED));
         add(resend, new GBC(0, 1)
-                .setWeight(1, 1)
+                .setWeight(1, 100)
                 .setFill(GBC.NONE)
                 .setAnchor(GBC.EAST)
                 .setInsets(0, 0, 0, 5));
 
 
         add(revoke, new GBC(0, 2)
-                .setWeight(1, 1)
+                .setWeight(1, 100)
                 .setFill(GBC.NONE)
                 .setAnchor(GBC.EAST)
                 .setInsets(0, 0, 0, 5));
 
 
         //占位，revoke被隐藏则messageBubble被拉伸到最左边，从而不能右对齐
-        add(Box.createHorizontalStrut(5), new GBC(0, 4).setWeight(100, 100)); // 占位行
+        add(Box.createHorizontalStrut(5), new GBC(0, 4).setWeight(100, 0)); // 占位行
 
 
         add(messageBubble, new GBC(1, 1).setWeight(0, 10)
@@ -71,7 +72,7 @@ public class MessageRightAttachmentViewHolder extends MessageAttachmentViewHolde
                 .setAnchor(GBC.SOUTHEAST).setInsets(0, 5, 0, 0).setFill(GBC.HORIZONTAL));
 
         add(avatar, new GBC(2, 1).setWeight(0, 1)
-                .setAnchor(GBC.EAST).setInsets(0, 0, 0, 0).setFill(GBC.NONE)
+                .setAnchor(GBC.NORTHEAST).setInsets(0, 0, 0, 0).setFill(GBC.NONE)
                 .setGridHeight(2));
 
     }
