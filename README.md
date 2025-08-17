@@ -16,26 +16,14 @@
 
 ![解压界面](https://github.com/user-attachments/assets/ba944d8b-e86a-442b-8154-633d132219a9)
 
-### 3. 配置聊天记录及聊天文件存放位置
-
-打开 `wechat\conf\application-dev.yml` 文件，配置聊天记录和文件存放目录。
-
-![配置文件](https://github.com/user-attachments/assets/e94847a0-4160-45d7-9408-9f69844e8e41)
-
-### 4. 复制数据库文件
-
-将 `wechat\conf\weixin.db` 文件复制到配置的目录（示例路径：`G:/weixin`）。
-
-![数据库文件复制](https://github.com/user-attachments/assets/a53dc001-608b-47dc-8b34-2a99b4b25513)
-
-### 5. 启动程序
+### 3. 启动程序
 
 双击 `wechat\conf\wechat.vbs` 或 `wechat\conf\wechat.bat` 启动应用。
 
 ![启动界面](https://github.com/user-attachments/assets/d803bec1-d41f-403a-ae23-a98607677c1e)
 
 
-### 6. 登录成功
+### 4. 登录成功
 
 ![首页界面](https://github.com/user-attachments/assets/731f241b-503b-4a62-b4a0-dd365c656742)
 
