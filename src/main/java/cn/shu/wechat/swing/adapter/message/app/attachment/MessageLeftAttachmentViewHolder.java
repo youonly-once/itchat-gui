@@ -57,8 +57,8 @@ public class MessageLeftAttachmentViewHolder extends MessageAttachmentViewHolder
         add(progressBar, new GBC(1, 2 + newLine).setWeight(0, 10)
                 .setAnchor(GBC.NORTHWEST).setInsets(0, 5, 0, 0).setFill(GBC.BOTH));
 
-        add(revoke, new GBC(2, 1 + newLine).setWeight(1, 1)
-                .setAnchor(GBC.WEST).setInsets(0, 5, 0, 0).setGridHeight(2));
+        add(revoke, new GBC(2, 1 + newLine).setWeight(1, 100)
+                .setAnchor(GBC.CENTER).setInsets(0, 5, 0, 0).setGridHeight(2));
         //占位，revoke被隐藏则messageBubble被拉伸到最右边，从而不能左对齐
         add(Box.createHorizontalStrut(5), new GBC(3, 1 + newLine).setWeight(1, 100)); // 占位行
 

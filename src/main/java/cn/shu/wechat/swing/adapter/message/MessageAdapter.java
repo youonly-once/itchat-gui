@@ -209,7 +209,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
     @Override
     public void onBindViewHolder(BaseMessageViewHolder viewHolder, int position) {
-
+        long l = System.currentTimeMillis();
         final Message item = messageItems.get(position);
         Message preItem = position == 0 ? null : messageItems.get(position - 1);
 
@@ -255,6 +255,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             default -> {
             }
         }
+        System.out.println((System.currentTimeMillis() - l)+"  "+item.getMsgType());
     }
 
     private void processLeftProgramOfAppMessage(MessageLeftProgramOfAppViewHolder viewHolder, Message item) {
@@ -789,6 +790,12 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             playImgLabel.setIcon(icon);
         }else {
             slaveImgLabel.setIcon(IconUtil.getIcon(this, "/image/image_loading.gif"));
+            if (!DownloadManager.containsTask(item.getSlavePath())){
+                File file = new File(item.getSlavePath());
+                if (!file.exists()) {
+                    return;
+                }
+            }
             ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
                 @Override
                 public void run() {
@@ -797,6 +804,9 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                     DownloadManager.awaitDownload(slaveImgPath,1000*60*2);
                     timeLabel.setText(getSecString(item.getPlayLength()));
                     File file = new File(slaveImgPath);
+                    if (!file.exists()) {
+                        return;
+                    }
                     try {
                         Image scaledImageByHeight = IconUtil.getScaledImageByMax(ImageIO.read(file),MessageRightVideoViewHolder.maxWidth, MessageRightVideoViewHolder.maxHeight);
                         ImageIcon imageIcon = new ImageIcon(scaledImageByHeight);
