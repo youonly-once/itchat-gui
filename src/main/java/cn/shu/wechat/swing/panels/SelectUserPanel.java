@@ -2,10 +2,10 @@ package cn.shu.wechat.swing.panels;
 
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.entity.SelectUserData;
-import cn.shu.wechat.swing.adapter.SelectUserItemViewHolder;
-import cn.shu.wechat.swing.adapter.SelectUserItemsAdapter;
-import cn.shu.wechat.swing.adapter.SelectedUserItemViewHolder;
-import cn.shu.wechat.swing.adapter.SelectedUserItemsAdapter;
+import cn.shu.wechat.swing.adapter.selected.SelectUserItemViewHolder;
+import cn.shu.wechat.swing.adapter.selected.SelectUserItemsAdapter;
+import cn.shu.wechat.swing.adapter.selected.SelectedUserItemViewHolder;
+import cn.shu.wechat.swing.adapter.selected.SelectedUserItemsAdapter;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCBorder;

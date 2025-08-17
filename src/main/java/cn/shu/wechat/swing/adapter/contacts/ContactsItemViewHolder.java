@@ -1,5 +1,6 @@
-package cn.shu.wechat.swing.adapter;
+package cn.shu.wechat.swing.adapter.contacts;
 
+import cn.shu.wechat.swing.adapter.ViewHolder;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.utils.FontUtil;

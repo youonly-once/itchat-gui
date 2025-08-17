@@ -1,6 +1,9 @@
-package cn.shu.wechat.swing.adapter;
+package cn.shu.wechat.swing.adapter.selected;
 
 import cn.shu.wechat.entity.SelectUserData;
+import cn.shu.wechat.swing.adapter.BaseAdapter;
+import cn.shu.wechat.swing.adapter.HeaderViewHolder;
+import cn.shu.wechat.swing.adapter.contacts.ContactsHeaderViewHolder;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;

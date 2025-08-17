@@ -6,9 +6,7 @@ import cn.shu.wechat.utils.IconUtil;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.MouseListener;
 
 /**
  * Created by 舒新胜 on 17-6-3.
@@ -40,40 +38,33 @@ public class MessageRightAttachmentViewHolder extends MessageAttachmentViewHolde
 
         super.initView();
 
-        add(time, new GBC(0, 0).setWeight(1, 1)
+        add(time, new GBC(0, 0).setWeight(1, 0)
                 .setAnchor(GBC.NORTH).setInsets(0, 0, 0, 0).setFill(GBC.HORIZONTAL).setGridWidth(3)
         );
 
-        resend.setBorder(new LineBorder(Color.RED));
         add(resend, new GBC(0, 1)
-                .setWeight(1, 100)
+                .setWeight(1, 1)
                 .setFill(GBC.NONE)
                 .setAnchor(GBC.EAST)
                 .setInsets(0, 0, 0, 5));
 
 
-        add(revoke, new GBC(0, 2)
-                .setWeight(1, 100)
+        add(revoke, new GBC(0, 1)
+                .setWeight(1, 1)
                 .setFill(GBC.NONE)
                 .setAnchor(GBC.EAST)
                 .setInsets(0, 0, 0, 5));
-
-
         //占位，revoke被隐藏则messageBubble被拉伸到最左边，从而不能右对齐
-        add(Box.createHorizontalStrut(5), new GBC(0, 4).setWeight(100, 0)); // 占位行
+        add(Box.createHorizontalStrut(5), new GBC(0, 1).setWeight(100, 0)); // 占位行
 
-
-        add(messageBubble, new GBC(1, 1).setWeight(0, 10)
+        add(messageBubble, new GBC(1, 1).setWeight(0, 1)
                 .setAnchor(GBC.NORTHEAST).setInsets(0, 0, 0, 5)
-                .setFill(GBC.NONE)
-                .setGridHeight(3));
+                .setFill(GBC.NONE));
 
-        add(progressBar, new GBC(1, 2).setWeight(0, 10)
+        add(progressBar, new GBC(1, 2).setWeight(0, 0)
                 .setAnchor(GBC.SOUTHEAST).setInsets(0, 5, 0, 0).setFill(GBC.HORIZONTAL));
-
-        add(avatar, new GBC(2, 1).setWeight(0, 1)
-                .setAnchor(GBC.NORTHEAST).setInsets(0, 0, 0, 0).setFill(GBC.NONE)
-                .setGridHeight(2));
+        add(avatar, new GBC(2, 1).setWeight(0, 0)
+                .setAnchor(GBC.NORTHEAST).setInsets(0, 0, 0, 0).setFill(GBC.NONE));
 
     }
 

@@ -209,7 +209,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
     @Override
     public void onBindViewHolder(BaseMessageViewHolder viewHolder, int position) {
-        long l = System.currentTimeMillis();
+        // long l = System.currentTimeMillis();
         final Message item = messageItems.get(position);
         Message preItem = position == 0 ? null : messageItems.get(position - 1);
 
@@ -255,7 +255,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
             default -> {
             }
         }
-        System.out.println((System.currentTimeMillis() - l)+"  "+item.getMsgType());
+        //System.out.println((System.currentTimeMillis() - l)+"  "+item.getMsgType());
     }
 
     private void processLeftProgramOfAppMessage(MessageLeftProgramOfAppViewHolder viewHolder, Message item) {
@@ -272,59 +272,92 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         viewHolder.title.setText(item.getTitle());
         viewHolder.sourceName.setText(item.getSourceName());
         if (StringUtils.isNotEmpty(item.getSourceIconUrl())){
-            try {
-                ImageIcon imageIcon = new ImageIcon(URI.create(item.getSourceIconUrl()).toURL());
-                IconUtil.preferredImageSize(imageIcon, 16,16);
-                viewHolder.sourceIcon.setIcon(imageIcon);
-            } catch (MalformedURLException e) {
-                log.error(e.getMessage(), e);
-            }
+            ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
+                try {
+                    ImageIcon imageIcon = new ImageIcon(URI.create(item.getSourceIconUrl()).toURL());
+                    IconUtil.preferredImageSize(imageIcon, 16, 16);
+                    SwingUtilities.invokeLater(() -> viewHolder.sourceIcon.setIcon(imageIcon));
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
-        //加载缩略图
-        if (StringUtils.isEmpty(item.getThumbUrl())){
-            viewHolder.imageLabel.setIcon(IconUtil.getIcon(this, "/image/image_loading.gif"));
 
-            DownloadTask<byte[]> downloadTask = new DownloadTask<>();
-            downloadTask.setMsgId(item.getMsgId());
-            downloadTask.setTaskId(item.getMsgId() + WXMsgUrl.BIG_TYPE);
-            downloadTask.setType(DownloadType.ImgByteByMsgID);
-            downloadTask.setResourceType(WXMsgUrl.BIG_TYPE);
-
-            downloadTask.setCallback(task -> {
-                byte[] bytes = task.getResult();
+        viewHolder.imageLabel.setIcon(IconUtil.getIcon(this, "/image/image_loading.gif"));
+        if (StringUtils.isNotEmpty(item.getThumbUrl())) {
+            ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
+                try {
+                    ImageIcon imageIcon = new ImageIcon(URI.create((item.getThumbUrl())).toURL());
+                    SwingUtilities.invokeLater(() -> viewHolder.imageLabel.setIcon(imageIcon));
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } else if (DownloadManager.containsTask(item.getMsgId() + WXMsgUrl.SLAVE_TYPE)) {
+            ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
+                byte[] bytes = DownloadManager.<byte[]>awaitDownloadTimeOut(item.getMsgId() + WXMsgUrl.SLAVE_TYPE);
                 if (bytes != null && bytes.length > 0) {
                     process(item, viewHolder, bytes);
                 } else {
-                    downloadTask.setResourceType(WXMsgUrl.SLAVE_TYPE);
-                    downloadTask.setTaskId(item.getMsgId() + WXMsgUrl.SLAVE_TYPE);
-                    downloadTask.setCallback(secondTask -> {
-                        byte[] secondBytes = secondTask.getResult();
-                        if (secondBytes != null && secondBytes.length > 0) {
-                            process(item, viewHolder, secondBytes);
+                    if (DownloadManager.containsTask(item.getMsgId() + WXMsgUrl.BIG_TYPE)) {
+                        bytes = DownloadManager.<byte[]>awaitDownloadTimeOut(item.getMsgId() + WXMsgUrl.BIG_TYPE);
+                        if (bytes != null && bytes.length > 0) {
+                            process(item, viewHolder, bytes);
                         }
+                    }
+                }
+            });
+        } else if (DownloadManager.containsTask(item.getMsgId() + WXMsgUrl.BIG_TYPE)) {
+            ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
+                byte[] bytes = DownloadManager.<byte[]>awaitDownloadTimeOut(item.getMsgId() + WXMsgUrl.BIG_TYPE);
+                if (bytes != null && bytes.length > 0) {
+                    process(item, viewHolder, bytes);
+                }
+            });
+        } else {
+            try {
+                if (StringUtils.isNotEmpty(item.getFilePath())
+                        && Files.exists(Path.of(item.getFilePath())) && Files.size(Path.of(item.getFilePath())) > 0) {
+                    ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
+                        DownloadManager.awaitDownloadTimeOut(item.getFilePath());
+                        if (Files.exists(Path.of(item.getFilePath()))) {
+                            ImageIcon imageIcon = new ImageIcon(item.getFilePath());
+                            IconUtil.preferredImageSize(imageIcon, MessageProgramOfAppViewHolder.maxWidth, MessageProgramOfAppViewHolder.maxHeight);
+                            SwingUtilities.invokeLater(() -> viewHolder.imageLabel.setIcon(imageIcon));
+                        }
+                    });
+                } else {
+
+                    DownloadTask<byte[]> downloadTask = new DownloadTask<>();
+                    downloadTask.setMsgId(item.getMsgId());
+                    downloadTask.setTaskId(item.getMsgId() + WXMsgUrl.BIG_TYPE);
+                    downloadTask.setType(DownloadType.ImgByteByMsgID);
+                    downloadTask.setResourceType(WXMsgUrl.BIG_TYPE);
+
+                    downloadTask.setCallback(task -> {
+                        byte[] bytes = task.getResult();
+                        if (bytes != null && bytes.length > 0) {
+                            process(item, viewHolder, bytes);
+                        } else {
+                            downloadTask.setResourceType(WXMsgUrl.SLAVE_TYPE);
+                            downloadTask.setTaskId(item.getMsgId() + WXMsgUrl.SLAVE_TYPE);
+                            downloadTask.setCallback(secondTask -> {
+                                byte[] secondBytes = secondTask.getResult();
+                                if (secondBytes != null && secondBytes.length > 0) {
+                                    process(item, viewHolder, secondBytes);
+                                }
+                            });
+                            DownloadManager.submit(downloadTask);
+                        }
+
                     });
                     DownloadManager.submit(downloadTask);
                 }
-
-            });
-            DownloadManager.submit(downloadTask);
-
-        } else if (StringUtils.isEmpty(item.getFilePath())) {
-            try {
-                viewHolder.imageLabel.setIcon(new ImageIcon(URI.create((item.getThumbUrl())).toURL()));
-            } catch (MalformedURLException e) {
+            } catch (IOException e) {
                 log.error(e.getMessage(), e);
             }
-        } else {
-            ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
-                DownloadManager.awaitDownloadTimeOut(item.getFilePath());
-                if (Files.exists(Path.of(item.getFilePath()))) {
-                    ImageIcon imageIcon = new ImageIcon(item.getFilePath());
-                    IconUtil.preferredImageSize(imageIcon,MessageProgramOfAppViewHolder.maxWidth,MessageProgramOfAppViewHolder.maxHeight);
-                    SwingUtilities.invokeLater(() -> viewHolder.imageLabel.setIcon(imageIcon));
-                }
-            });
         }
+
         if (StringUtils.isNotEmpty(item.getUrl())) {
             //点击打开链接
             MessageMouseListener messageMouseListener = new MessageMouseListener() {
@@ -353,6 +386,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
     }
 
     private void process(Message item, MessageProgramOfAppViewHolder appViewHolder, byte[] secondBytes) {
+        if (secondBytes == null) return;
         ImageIcon imageIcon = null;
         if (IconUtil.isGIF(secondBytes)) {
             imageIcon = IconUtil.preferredGifSize(secondBytes, item.getImgWidth(), item.getImgHeight(),MessageProgramOfAppViewHolder.maxWidth,MessageProgramOfAppViewHolder.maxHeight);

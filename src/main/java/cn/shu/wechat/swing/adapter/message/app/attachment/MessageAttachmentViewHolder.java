@@ -9,7 +9,6 @@ import cn.shu.wechat.utils.FontUtil;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 /**
  * Created by 舒新胜 on 16/06/2017.
@@ -70,20 +69,20 @@ public abstract class MessageAttachmentViewHolder extends BaseMessageViewHolder 
         messageBubble.setCursor(new Cursor(Cursor.HAND_CURSOR));
         messageBubble.setLayout(new GridBagLayout());
         messageBubble.add(attachmentIcon, new GBC(0, 0)
-                .setWeight(1, 1)
-                .setInsets(2, 5, 0, 0)
+                .setWeight(0, 1)
+                .setInsets(0, 5, 0, 0)
                         .setFill(GBC.BOTH)
                 .setGridHeight(2));
         messageBubble.add(attachmentTitle, new GBC(1, 0)
                 .setWeight(1, 1)
                 .setFill(GBC.BOTH)
                 .setAnchor(GBC.NORTHWEST)
-                .setInsets(0, 5, 0, 5));
+                .setInsets(0, 5, 0, 0));
         messageBubble.add(sizeLabel, new GBC(1, 1)
-                .setWeight(1, 1)
+                .setWeight(1, 0)
                 .setFill(GBC.BOTH)
                 .setAnchor(GBC.NORTHWEST)
-                .setInsets(2, 10, 0, 5));
+                .setInsets(2, 8, 0, 0));
     }
 
     @Override

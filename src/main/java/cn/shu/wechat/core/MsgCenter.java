@@ -6,6 +6,7 @@ import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.constant.DownloadType;
 import cn.shu.wechat.constant.WxRespConstant;
 import cn.shu.wechat.constant.WxURLEnum;
+import cn.shu.wechat.dto.request.msg.url.WXMsgUrl;
 import cn.shu.wechat.dto.response.msg.send.WebWXSendMsgResponse;
 import cn.shu.wechat.dto.response.sync.AddMsgList;
 import cn.shu.wechat.dto.response.sync.RecommendInfo;
@@ -27,12 +28,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
-import java.awt.*;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.List;
 
 import static cn.shu.wechat.constant.WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_TEXT;
 
@@ -168,8 +169,6 @@ public class MsgCenter {
 
     }
 
-
-
     /**
      * 下载文件
      */
@@ -182,6 +181,53 @@ public class MsgCenter {
         DownloadTask<AddMsgList> downloadTask = new DownloadTask<>(msg, null);
         downloadTask.setType(DownloadType.FN);
         downloadTask.setTaskId(path);
+        DownloadManager.submit(downloadTask);
+
+
+    }
+
+    /**
+     * 下载文件
+     */
+    private void downloadFileByMsg(AddMsgList msg, String filename, String ext) {
+
+        //下载资源文件
+        String path = DownloadTools.getDownloadFilePath(msg, filename, ext);
+        msg.setFilePath(path);
+        Path pathP = Paths.get(path);
+        DownloadTask<byte[]> downloadTask = new DownloadTask<>();
+        downloadTask.setMsgId(msg.getMsgId());
+        downloadTask.setTaskId(msg.getMsgId() + WXMsgUrl.SLAVE_TYPE);
+        downloadTask.setType(DownloadType.ImgByteByMsgID);
+        downloadTask.setResourceType(WXMsgUrl.SLAVE_TYPE);
+
+        downloadTask.setCallback(task -> {
+            byte[] bytes = task.getResult();
+            if (bytes != null && bytes.length > 0) {
+                try {// 确保父目录存在
+                    Files.createDirectories(pathP.getParent());
+                    Files.write(pathP, bytes);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                downloadTask.setResourceType(WXMsgUrl.BIG_TYPE);
+                downloadTask.setTaskId(msg.getMsgId() + WXMsgUrl.BIG_TYPE);
+                downloadTask.setCallback(secondTask -> {
+                    byte[] secondBytes = secondTask.getResult();
+                    if (secondBytes != null && secondBytes.length > 0) {
+                        try {
+                            Files.createDirectories(pathP.getParent());
+                            Files.write(Paths.get(path), secondBytes);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                });
+                DownloadManager.submit(downloadTask);
+            }
+
+        });
         DownloadManager.submit(downloadTask);
 
 
@@ -518,7 +564,9 @@ public class MsgCenter {
                         break;
                     default:
                     case PROGRAM:
+                        ext = ".gif";
                         msg.setPlainText("[小程序]" + title);
+                        downloadFileByMsg(msg, fileName, ext);
                         break;
                     case MUSIC:
                         msg.setPlainText("[音乐]" + title);

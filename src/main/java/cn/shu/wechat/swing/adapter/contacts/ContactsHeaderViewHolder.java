@@ -1,4 +1,6 @@
-package cn.shu.wechat.swing.adapter;
+package cn.shu.wechat.swing.adapter.contacts;
+
+import cn.shu.wechat.swing.adapter.HeaderViewHolder;
 
 import javax.swing.*;
 

@@ -1,5 +1,6 @@
-package cn.shu.wechat.swing.adapter;
+package cn.shu.wechat.swing.adapter.selected;
 
+import cn.shu.wechat.swing.adapter.ViewHolder;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCBorder;
@@ -13,14 +14,13 @@ import java.awt.*;
 /**
  * Created by 舒新胜 on 17-5-30.
  */
-public class SelectedUserItemViewHolder extends ViewHolder {
+public class SelectUserItemViewHolder extends ViewHolder {
     public JLabel avatar = new JLabel();
     public String username ;
     public JLabel disPlayNameLabel = new JLabel();
     public JLabel icon = new JLabel();
-    public boolean active = false;
 
-    public SelectedUserItemViewHolder() {
+    public SelectUserItemViewHolder() {
         initComponents();
         initView();
     }
@@ -31,17 +31,15 @@ public class SelectedUserItemViewHolder extends ViewHolder {
         setBorder(new RCBorder(RCBorder.BOTTOM, Colors.LIGHT_GRAY));
         setOpaque(true);
         setForeground(Colors.FONT_BLACK);
-
         disPlayNameLabel.setFont(FontUtil.getDefaultFont(13));
         disPlayNameLabel.setForeground(Colors.FONT_BLACK);
 
-        icon.setIcon(IconUtil.getIcon(this, "/image/remove.png", 18, 18));
-        icon.setToolTipText("移除");
+        icon.setIcon(IconUtil.getIcon(this, "/image/uncheck.png"));
 
         setLayout(new GridBagLayout());
         add(avatar, new GBC(0, 0).setWeight(1, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0));
         add(disPlayNameLabel, new GBC(1, 0).setWeight(100, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0));
-        add(icon, new GBC(2, 0).setWeight(1, 1).setFill(GBC.BOTH).setInsets(0, 0, 0, 10));
+        add(icon, new GBC(2, 0).setWeight(1, 1).setFill(GBC.BOTH).setInsets(0, 0, 0, 5));
     }
 
     private void initView() {

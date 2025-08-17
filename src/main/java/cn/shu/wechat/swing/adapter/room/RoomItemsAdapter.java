@@ -1,9 +1,10 @@
-package cn.shu.wechat.swing.adapter;
+package cn.shu.wechat.swing.adapter.room;
 
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.entity.RoomItem;
+import cn.shu.wechat.swing.adapter.BaseAdapter;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.listener.AbstractMouseListener;
 import cn.shu.wechat.swing.media.HeadLoadingSwingWorker;
@@ -63,7 +64,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             roomItemViewHolder = new RoomItemViewHolder();
             viewHolders.add(position,roomItemViewHolder);
         }
-        return roomItemViewHolder;
+        return new RoomItemViewHolder();
     }
 
     @Override

@@ -1,5 +1,6 @@
-package cn.shu.wechat.swing.adapter;
+package cn.shu.wechat.swing.adapter.room;
 
+import cn.shu.wechat.swing.adapter.ViewHolder;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCBorder;
@@ -71,26 +72,24 @@ public class RoomItemViewHolder extends ViewHolder {
 
     private void initView() {
         setLayout(new GridBagLayout());
-        add(avatar, new GBC(0, 0).setWeight(0, 100).setFill(GBC.BOTH)
+        add(avatar, new GBC(0, 0).setWeight(0, 1).setFill(GBC.BOTH)
                 .setInsets(0, 5, 0, 0)
                 .setAnchor(GBC.WEST)
                 .setGridHeight(2));
-        add(roomName, new GBC(1, 0).setWeight(100, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0)
+        add(roomName, new GBC(1, 0).setWeight(1, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0)
                 .setAnchor(GBC.WEST).setGridWidth(2));
-        //占位，atMe被隐藏则 被拉伸到最左边，从而不能右对齐
-        add(Box.createHorizontalStrut(1), new GBC(2, 0).setWeight(1, 1));
-        add(time, new GBC(3, 0).setWeight(1, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 10)
-                .setAnchor(GridBagConstraints.EAST).setGridWidth(2));
 
-        add(atMe, new GBC(1, 1).setWeight(1, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0)
+        add(time, new GBC(3, 0).setWeight(0, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 10)
+                .setAnchor(GridBagConstraints.EAST));
+        add(atMe, new GBC(1, 1).setWeight(0, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 0)
                 .setAnchor(GBC.WEST));
-        add(brief, new GBC(2, 1).setWeight(100, 1).setFill(GBC.BOTH)
+        add(brief, new GBC(2, 1).setWeight(1, 1).setFill(GBC.BOTH)
                 .setInsets(0, 5, 0, 0)
                 .setAnchor(GBC.WEST));
-        add(unreadCount, new GBC(3, 1).setWeight(1, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 10)
-                .setAnchor(GridBagConstraints.EAST));
-        add(mutePoint, new GBC(4, 1).setWeight(1, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 10)
-                .setAnchor(GridBagConstraints.EAST));
+        add(unreadCount, new GBC(3, 1).setWeight(0, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 10)
+                .setAnchor(GridBagConstraints.CENTER));
+        add(mutePoint, new GBC(3, 1).setWeight(0, 1).setFill(GBC.BOTH).setInsets(0, 5, 0, 10)
+                .setAnchor(GridBagConstraints.CENTER));
     }
 
 

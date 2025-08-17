@@ -6,7 +6,6 @@ import cn.shu.wechat.swing.components.message.RCLeftAttachmentMessageBubble;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.MouseListener;
 
 /**
  * Created by 舒新胜 on 17-6-2.
@@ -30,14 +29,12 @@ public class MessageLeftAttachmentViewHolder extends MessageAttachmentViewHolder
 
     protected void initView() {
         super.initView();
-
-        add(time, new GBC(0, 0).setWeight(1, 1)
-                .setAnchor(GBC.NORTH).setInsets(0, 0, 0, 0).setGridWidth(4)
-                .setFill(GBC.HORIZONTAL));
-
-
+        avatar.setVerticalAlignment(SwingConstants.TOP);
+        add(time, new GBC(0, 0).setWeight(1, 0)
+                .setAnchor(GBC.NORTH).setInsets(0, 0, 0, 0).setGridWidth(3)
+                .setFill(GBC.BOTH));
         add(avatar, new GBC(0, 1).setWeight(0, 1)
-                .setAnchor(GBC.NORTHWEST).setInsets(0, 5, 0, 0).setFill(GBC.NONE)
+                .setAnchor(GBC.NORTHWEST).setInsets(0, 5, 0, 0).setFill(GBC.BOTH)
                 .setGridHeight(2));
         int newLine = 0;
         if (isGroup) {
@@ -46,21 +43,20 @@ public class MessageLeftAttachmentViewHolder extends MessageAttachmentViewHolder
                     .setWeight(10, 100).setGridWidth(4)); // 占位行
 
             add(sender, new GBC(1, 1).setWeight(0, 1)
-                    .setAnchor(GBC.NORTHWEST).setInsets(-10, 5, 0, 0).setFill(GBC.NONE));
+                    .setAnchor(GBC.NORTHWEST).setInsets(-10, 5 + messageBubble.getSalientPointPixel(), 0, 0).setFill(GBC.NONE));
             newLine = 1;
         }
 
-        add(messageBubble, new GBC(1, 1 + newLine).setWeight(0, 10)
-                .setAnchor(GBC.NORTHWEST).setInsets(0, 5, 0, 0).setFill(GBC.NONE));
-
-
-        add(progressBar, new GBC(1, 2 + newLine).setWeight(0, 10)
+        add(messageBubble, new GBC(1, 1 + newLine).setWeight(0, 1)
                 .setAnchor(GBC.NORTHWEST).setInsets(0, 5, 0, 0).setFill(GBC.BOTH));
 
-        add(revoke, new GBC(2, 1 + newLine).setWeight(1, 100)
-                .setAnchor(GBC.CENTER).setInsets(0, 5, 0, 0).setGridHeight(2));
-        //占位，revoke被隐藏则messageBubble被拉伸到最右边，从而不能左对齐
-        add(Box.createHorizontalStrut(5), new GBC(3, 1 + newLine).setWeight(1, 100)); // 占位行
 
+        add(progressBar, new GBC(1, 2 + newLine).setWeight(0, 0)
+                .setAnchor(GBC.NORTHWEST).setInsets(0, 5, 0, 0).setFill(GBC.BOTH));
+
+        add(revoke, new GBC(2, 1 + newLine).setWeight(1, 1)
+                .setAnchor(GBC.WEST).setInsets(0, 5, 0, 0).setFill(GBC.BOTH));
+        //占位，revoke被隐藏则messageBubble被拉伸到最右边，从而不能左对齐
+        add(Box.createHorizontalStrut(5), new GBC(2, 1 + newLine).setWeight(1, 100)); // 占位行
     }
 }

@@ -73,7 +73,10 @@ public class ChatPanelContainer extends ParentAvailablePanel {
      * @param roomId 房间id
      */
     public void show(String roomId){
-        if (roomId.equals(currRoomId)) return;
+        if (roomId.equals(currRoomId)) {
+            cardLayout.show(this, roomId);
+            return;
+        }
         //移出之前的Panel
         if (currRoomId != null) {
             removeCard(currRoomId);

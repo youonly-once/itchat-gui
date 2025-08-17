@@ -221,8 +221,8 @@ public class DownloadManager {
      *
      * @param taskId 任务ID
      */
-    public static void awaitDownloadTimeOut(String taskId) {
-        awaitDownload(taskId, 1000 * 60 * 1);
+    public static <R> R awaitDownloadTimeOut(String taskId) {
+        return awaitDownload(taskId, 1000 * 60 * 1);
     }
 
     /**
@@ -231,23 +231,23 @@ public class DownloadManager {
      * @param taskId  任务ID
      * @param timeOut 超时时间（单位：毫秒）
      */
-    public static void awaitDownload(String taskId, long timeOut) {
+    public static <R> R awaitDownload(String taskId, long timeOut) {
         DownloadTask task = taskMap.get(taskId);
         if (task == null) {
-            return;
+            return null;
         }
 
-        Future<?> future = task.getFuture();
+        Future<R> future = task.getFuture();
         if (future == null) {
             awaitDownloadLatch(task, timeOut);
-            return;
+            return null;
         }
         try {
-            future.get(timeOut, TimeUnit.MILLISECONDS); // 阻塞等待
+            return future.get(timeOut, TimeUnit.MILLISECONDS); // 阻塞等待
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             log.error("等待任务执行出错", e);
         }
-
+        return null;
     }
 
     private static void cleanFinishedTasks() {
