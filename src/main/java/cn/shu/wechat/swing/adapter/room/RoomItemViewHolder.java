@@ -55,7 +55,7 @@ public class RoomItemViewHolder extends ViewHolder {
         time.setForeground(Colors.FONT_GRAY);
         time.setFont(FontUtil.getDefaultFont(12));
 
-        unreadCount.setIcon(IconUtil.getIcon(this,"/image/count_bg.png",12,12));
+        unreadCount.setIcon(IconUtil.getIcon(this,"/image/count_bg.png"));
         unreadCount.setFont(FontUtil.getDefaultFont(12));
         unreadCount.setForeground(Color.WHITE);
         unreadCount.setHorizontalTextPosition(SwingConstants.CENTER);
