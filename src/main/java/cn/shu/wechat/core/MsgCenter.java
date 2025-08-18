@@ -580,10 +580,10 @@ public class MsgCenter {
                         msg.setPlainText(desc == null ? "[微信转账]" : desc.toString());
                         msg.setAppMsgType(WxRespConstant.WXReceiveMsgCodeOfAppEnum.LINK.getType());
                         break;
-                  /*  default:
+                    case OTHER:
                         msg.setMsgType(MSGTYPE_TEXT.getCode());
                         msg.setPlainText(msg.getContent());
-                        break;*/
+                        break;
 
 
                 }

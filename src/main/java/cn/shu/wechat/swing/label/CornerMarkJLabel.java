@@ -40,14 +40,14 @@ public class CornerMarkJLabel extends JLabel {
         if (cornerText.length()==2){
             icon  = IconUtil.getIcon(this, "/image/count_bg.png");
             g.drawImage(icon.getImage()
-                    ,x+13,y-5,null);
-            g.drawString(cornerText,x+17,y+8);
+                    ,x+13,y-2,null);
+            g.drawString(cornerText,x+17,y+11);
 
         }else {
             icon  = IconUtil.getIcon(this, "/image/red_point16.png");
             g.drawImage(icon.getImage()
-                    ,x+13,y-5,null);
-            g.drawString(cornerText,x+17,y+8);
+                    ,x+13,y-2,null);
+            g.drawString(cornerText,x+17,y+11);
         }
 
 

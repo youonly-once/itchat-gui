@@ -86,15 +86,9 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
             targetWidth = maxWidth;
         }
         for (Line line : lineEmojiInfoList) {
-            if (line.getLineWidth() > maxWidth) {
-                int ret = line.getLineWidth() / maxWidth;
-                int l = ret == 0 ? ret : ret + 1;
-                totalLine += l == 0 ? 1 : l;
-                targetHeight += (line.lineHeight * l);
-            } else {
-                totalLine += 1;
-                targetHeight += (line.lineHeight);
-            }
+            Dimension dim = computeLineDimension(line);
+            targetHeight += dim.height;
+            targetWidth = Math.max(targetWidth, dim.width);
 
         }
 
@@ -119,7 +113,63 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
         }
 
     }
+    /**
+     * 精确计算单行的实际宽度和换行带来的高度
+     */
+    private Dimension computeLineDimension(Line line) {
+        int lineHeight = line.getLineHeight();
+        int width = 0;
+        int maxLineWidth = 0;
+        int totalHeight = lineHeight;
 
+        String str = line.getStr();
+        int emojiIdx = 0;
+
+        TabExpander expander = (x, tabOffset) -> {
+            int tabSize = 22 * fontMetrics.charWidth(' ');
+            return ((x / tabSize) + 1) * tabSize;
+        };
+
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            int charWidth;
+
+            if (c == '\t') {
+                charWidth = (int) (expander.nextTabStop(width, i) - width);
+            } else {
+                charWidth = fontMetrics.charWidth(c);
+            }
+
+            if (width + charWidth > maxWidth) {
+                // 换行
+                maxLineWidth = Math.max(maxLineWidth, width);
+                width = charWidth;
+                totalHeight += lineHeight;
+            } else {
+                width += charWidth;
+            }
+        }
+
+        // 补偿行末宽度
+        maxLineWidth = Math.max(maxLineWidth, width);
+
+        // 加上 emoji 宽度
+        if (!line.getEmojiList().isEmpty()) {
+            for (EmojiInfo emoji : line.getEmojiList()) {
+                int emojiWidth = emojiSize;
+                if (width + emojiWidth > maxWidth) {
+                    maxLineWidth = Math.max(maxLineWidth, width);
+                    width = emojiWidth;
+                    totalHeight += lineHeight;
+                } else {
+                    width += emojiWidth;
+                }
+            }
+            maxLineWidth = Math.max(maxLineWidth, width);
+        }
+
+        return new Dimension(maxLineWidth, totalHeight);
+    }
     /**
      * 网址高亮
      *
@@ -239,7 +289,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
         if (existEmoji) {
             this.existEmoji = true;
         }
-        int lineWidth = fontMetrics.stringWidth(plainText);
+        int lineWidth = getTextWidth(plainText);
 
         if (lineWidth > 0) isAllEmoji = false;
 
@@ -257,7 +307,13 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
                 .build();
     }
 
-
+    private int getTextWidth(String text) {
+        TabExpander expander = (x, tabOffset) -> {
+            int tabSize = 22 * fontMetrics.charWidth(' ');
+            return ((x / tabSize) + 1) * tabSize;
+        };
+        return (int)Math.ceil(Utilities.getTabbedTextWidth(new Segment(text.toCharArray(), 0, text.length()), fontMetrics, 0f, expander, 0));
+    }
     private List<UrlInfo> parseUrl(String src) {
         List<UrlInfo> urlList = new ArrayList<>();
 

@@ -823,10 +823,10 @@ public class ChatMessagePanel extends ParentAvailablePanel {
         if (messageItem.isGroup()) {
             recentSenderUser.put(messageItem.getFromMemberOfGroupUsername(), messageItem.getFromMemberOfGroupNickname());
         }
-        if (messageItems.size() > PAGE_LENGTH) {
-            this.messageItems.removeFirst();
-            chatMessageViewerPanel.getMessageListView().getContentPanel().remove(0);
-        }
+//        if (messageItems.size() > PAGE_LENGTH) {
+//            this.messageItems.removeFirst();
+//            chatMessageViewerPanel.getMessageListView().getContentPanel().remove(0);
+//        }
         this.messageItems.add(messageItem);
         BaseMessageViewHolder holder = chatMessageViewerPanel.getMessageListView().notifyItemInserted(messageItems.size() - 1, true);
         // 只有当滚动条在最底部最，新消到来后才自动滚动到底部
