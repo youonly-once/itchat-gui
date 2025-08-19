@@ -151,6 +151,22 @@ public final class EmojiUtil {
             "[ThumbsUp]", "[Toasted]", "[Tongue]", "[Tremble]", "[Trick]", "[Twirl]", "[Watermelon]", "[Waddle]",
             "[Whimper]", "[Wilt]", "[Worship]", "[Wow]", "[Yawn]", "[Yeah!]"
     );
+    public static List<String> wechatEmojiListZh = Arrays.asList(
+            "[啊啊啊!]", "[撅嘴]", "[棒极了]", "[尴尬]", "[呸！右]", "[呸！左]", "[招手]", "[啤酒]",
+            "[祝福]", "[脸红]", "[炸弹]", "[无聊]", "[伤心]", "[心碎]", "[再见]", "[蛋糕]",
+            "[轻笑]", "[鼓掌]", "[砍刀]", "[咖啡]", "[突击]", "[担心]", "[酷哥]", "[哭泣]",
+            "[坚定]", "[眩晕]", "[狗头]", "[流口水]", "[困倦]", "[呃]", "[嗯]", "[捂脸]",
+            "[烟花]", "[拳头]", "[脸红羞涩]", "[皱眉]", "[礼物]", "[加油]", "[鬼脸]", "[咧嘴笑]",
+            "[锤子]", "[开心]", "[心]", "[嘿]", "[拥抱]", "[受伤]", "[喜悦]", "[继续奋斗]", "[亲吻]",
+            "[大笑]", "[失望]", "[让我看看]", "[嘴唇]", "[笑出声]", "[月亮]", "[我的错]", "[没问题]",
+            "[挖鼻]", "[OK]", "[天哪]", "[旁观者]", "[红包]", "[惊慌]", "[派对]", "[和平]", "[猪]",
+            "[便便]", "[大便]", "[呕吐]", "[敬意]", "[玫瑰]", "[敬礼]", "[训斥]", "[生气]",
+            "[尖叫]", "[摇晃]", "[嘘]", "[震惊]", "[缩小]", "[害羞]", "[生病]", "[叹气]", "[沉默]",
+            "[骷髅]", "[睡觉]", "[轻微]", "[狡猾]", "[聪明]", "[微笑]", "[奸笑]", "[得意]", "[抽泣]",
+            "[无语]", "[太阳]", "[惊讶]", "[流汗]", "[冷汗]", "[眼泛泪光]", "[恐惧]", "[不赞]",
+            "[点赞]", "[烤面包]", "[吐舌]", "[颤抖]", "[捣蛋]", "[旋转]", "[西瓜]", "[摇摆]",
+            "[呜咽]", "[枯萎]", "[崇拜]", "[哇]", "[打哈欠]", "[耶!]"
+    );
 
     public static List<String> getWechatEmojiList() {
         return wechatEmojiList;
@@ -169,7 +185,10 @@ public final class EmojiUtil {
     public static ImageIcon getWeChatEmoji(Object context,String code) {
         int i = wechatEmojiList.indexOf(code);
         if (i == -1){
-            return null;
+            int i1 = wechatEmojiListZh.indexOf(code);
+            if (i1 == -1){
+                return null;
+            }
         }
         String weChatIconPath = "/emoji/wechat_emoji/";
         return IconUtil.getIcon(context, weChatIconPath + (2*i + 4) + ".png",22,22);
