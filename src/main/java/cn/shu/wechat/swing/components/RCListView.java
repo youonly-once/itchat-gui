@@ -140,7 +140,8 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
         contentPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, hGap, vGap, true, false));
         //contentPanel.setLayout(new GridLayout(0,1,hGap,vGap));
         contentPanel.setBackground(Colors.WINDOW_BACKGROUND);
-
+        contentPanel.setDoubleBuffered(true);
+        this.getViewport().setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE);
         this.setViewportView(contentPanel);
         this.setBorder(null);
         this.getVerticalScrollBar().setUnitIncrement(25);
@@ -302,7 +303,7 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
         contentPanel.removeAll();
         fillComponents();
         contentPanel.revalidate();
-        contentPanel.repaint();
+        contentPanel.repaint(contentPanel.getBounds());
 
     }
 
@@ -331,12 +332,11 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
         }
 
         contentPanel.revalidate();
-        contentPanel.repaint();
-        SwingUtilities.invokeLater(() -> {
-            int heightAfter = viewport.getPreferredSize().height;
-            int delta = heightAfter - heightBefore;
-            viewport.setViewPosition(new Point(viewPosBefore.x, viewPosBefore.y + delta));
-        });
+        contentPanel.repaint(contentPanel.getBounds());
+        contentPanel.doLayout(); // 强制立即布局
+        int heightAfter = viewport.getPreferredSize().height;
+        int delta = heightAfter - heightBefore;
+        viewport.setViewPosition(new Point(viewPosBefore.x, viewPosBefore.y + delta));
     }
 
     /**
@@ -364,7 +364,7 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
 
         }
         contentPanel.revalidate();
-        contentPanel.repaint();
+        contentPanel.repaint(contentPanel.getBounds());
     }
 
     /**
@@ -394,7 +394,7 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
             //元素pos
             adapter.onBindViewHolder(holder, position);
         }
-        holder.repaint();
+        holder.repaint(holder.getBounds());
     }
 
     /**
@@ -419,7 +419,7 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
             //元素pos
             adapter.onBindViewHolder(viewHolder, position);
         }
-        viewHolder.repaint();
+        viewHolder.repaint(viewHolder.getBounds());
     }
 
 
@@ -443,7 +443,7 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
 
         contentPanel.add(holder, position);
         contentPanel.revalidate();
-        contentPanel.repaint();
+        contentPanel.repaint(contentPanel.getBounds());
         SwingUtilities.invokeLater(() -> {
             int heightAfter = viewport.getPreferredSize().height;
             int delta = heightAfter - heightBefore;
@@ -477,7 +477,7 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
         }
 
         contentPanel.revalidate();
-        contentPanel.repaint();
+        contentPanel.repaint(contentPanel.getBounds());
     }
 
 
