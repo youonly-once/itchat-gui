@@ -130,6 +130,14 @@ public class Message implements Comparable<Message>{
     @TableField(value = "message_time", typeHandler = LocalDateTimeTextHandler.class)
     private LocalDateTime messageTime;
 
+    /**
+     * 上一条消息的时间
+     */
+
+    @TableField(exist = false)
+    private LocalDateTime preMessageTime;
+
+
 
     private String desc ;
 

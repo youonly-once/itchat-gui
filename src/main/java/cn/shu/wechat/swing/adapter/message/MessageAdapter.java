@@ -1223,7 +1223,18 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 holder.time.setVisible(true);
                 holder.time.setText(DateUtils.diff(messageTime, true));
             }
-        } else {
+        }else if(item.getPreMessageTime() != null){
+
+            if (DateUtils.inTheSameMinute(messageTime
+                    , item.getPreMessageTime())) {
+                holder.time.setVisible(false);
+            } else {
+                holder.time.setVisible(true);
+                holder.time.setText(DateUtils.diff(messageTime, true));
+            }
+        }
+
+        else {
             holder.time.setVisible(true);
             holder.time.setText(DateUtils.diff(messageTime, true));
         }

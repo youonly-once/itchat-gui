@@ -62,6 +62,7 @@ public class ChatMessageViewerPanel extends ParentAvailablePanel {
                     String remarkName = ContactsTools.getContactRemarkNameByUserName(contacts);
                     String nickName = ContactsTools.getContactNickNameByUserName(contacts);
                     java.util.List<Message> messageList = mapper.selectByPage(messageItems.size(), PAGE_LENGTH, roomId, remarkName, nickName);
+                    int i =0;
                     for (Message message : messageList) {
                         if (message.getIsSend()) {
                             message.setFromUsername(Core.getUserName());
@@ -80,8 +81,13 @@ public class ChatMessageViewerPanel extends ParentAvailablePanel {
                             }
                         }
                         ContactsTools.loadUserInfo(message.getFromUsername(), message.getToUsername(), message.getFromMemberOfGroupUsername(), message);
+                        if (i+1<messageList.size()) {
+                            message.setPreMessageTime(messageList.get(i+1).getMessageTime());
+                        }
+
                         SwingUtilities.invokeLater(() -> {
                             try {
+
                                 messageItems.addFirst(message);
                                 messageListView.notifyItemRangeInsertedHead(0, 1);
 
@@ -90,6 +96,7 @@ public class ChatMessageViewerPanel extends ParentAvailablePanel {
                                 ((ChatPanel)((ChatMessagePanel) ChatMessageViewerPanel.this.getParentPanel()).getParentPanel()).getTitlePanel().hideStatusLabel();
                             }
                         });
+                        i++;
                     }
 
                     //messageList = messageList.reversed();
