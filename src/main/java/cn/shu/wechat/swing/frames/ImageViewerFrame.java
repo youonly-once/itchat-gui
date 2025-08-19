@@ -389,7 +389,45 @@ public class ImageViewerFrame extends JFrame {
             windowMax = true;
         }
     }
+    private void removeListeners() {
+        // 移除 imageLabel 的鼠标监听器
+        for (MouseListener l : imageLabel.getMouseListeners()) {
+            imageLabel.removeMouseListener(l);
+        }
 
+        // 移除菜单项的动作监听器
+        for (ActionListener l : enlargeItem.getActionListeners()) {
+            enlargeItem.removeActionListener(l);
+        }
+        for (ActionListener l : narrowItem.getActionListeners()) {
+            narrowItem.removeActionListener(l);
+        }
+        for (ActionListener l : saveAsItem.getActionListeners()) {
+            saveAsItem.removeActionListener(l);
+        }
+
+        // 移除 ESC 监听
+        for (KeyListener l : getKeyListeners()) {
+            removeKeyListener(l);
+        }
+
+        // 移除 Windows 下自定义的拖拽和双击逻辑
+        if (OSUtil.getOsType() == OSUtil.Windows) {
+            for (MouseListener l : controlPanel.getMouseListeners()) {
+                controlPanel.removeMouseListener(l);
+            }
+            for (MouseMotionListener l : controlPanel.getMouseMotionListeners()) {
+                controlPanel.removeMouseMotionListener(l);
+            }
+
+            for (MouseListener l : getMouseListeners()) {
+                removeMouseListener(l);
+            }
+            for (MouseMotionListener l : getMouseMotionListeners()) {
+                removeMouseMotionListener(l);
+            }
+        }
+    }
     private class ControlLabelMouseListener extends MouseAdapter {
         @Override
         public void mouseClicked(MouseEvent e) {
@@ -426,17 +464,12 @@ public class ImageViewerFrame extends JFrame {
 
         // 主动释放旧图资源
         imageLabel.clearImage();
+        removeListeners();
         super.dispose();
     }
     public void setVisible(boolean visible) {
         if (!visible) {
-            if (image != null) {
-                image.flush();
-                image = null;
-            }
-
-            // 主动释放旧图资源
-            imageLabel.clearImage();
+            this.dispose();
         }
         super.setVisible(visible);
     }

@@ -64,7 +64,7 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             roomItemViewHolder = new RoomItemViewHolder();
             viewHolders.add(position,roomItemViewHolder);
         }
-        return new RoomItemViewHolder();
+        return roomItemViewHolder;
     }
 
     @Override
