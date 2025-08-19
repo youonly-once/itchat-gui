@@ -38,19 +38,6 @@ public class ChatPanelContainer extends ParentAvailablePanel {
     private void init(){
         cardLayout = new CardLayout();
         this.setLayout(cardLayout);
-
-        java.util.Timer timer = new Timer();
-
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                for (ChatPanel value : cards.values()) {
-                    value.clearMsgItem();
-                }
-
-            }
-        }, 1000 * 60 * 10, 1000 * 60 * 20);
-
     }
 
     /**

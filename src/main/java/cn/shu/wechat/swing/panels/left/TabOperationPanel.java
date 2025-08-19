@@ -6,6 +6,8 @@ import cn.shu.wechat.swing.components.RCBorder;
 import cn.shu.wechat.swing.label.CornerMarkJLabel;
 import cn.shu.wechat.swing.panels.ParentAvailablePanel;
 import cn.shu.wechat.swing.panels.RightPanel;
+import cn.shu.wechat.swing.panels.left.tabcontent.ContactsPanel;
+import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.utils.IconUtil;
 import lombok.Getter;
 
@@ -105,6 +107,7 @@ public class TabOperationPanel extends ParentAvailablePanel {
         if (e.getComponent() == chatLabel) {
             switchToChatLabel();
         } else if (e.getComponent() == contactsLabel) {
+            ContactsPanel.getContext().notifyDataSetChanged();
             RightPanel.getContext().show(RightPanel.USER_INFO);
             chatLabel.setIcon(chatIconNormal);
             contactsLabel.setIcon(contactIconActive);

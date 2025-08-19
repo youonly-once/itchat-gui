@@ -80,22 +80,32 @@ public class ChatMessageViewerPanel extends ParentAvailablePanel {
                             }
                         }
                         ContactsTools.loadUserInfo(message.getFromUsername(), message.getToUsername(), message.getFromMemberOfGroupUsername(), message);
+                        SwingUtilities.invokeLater(() -> {
+                            try {
+                                messageItems.addFirst(message);
+                                messageListView.notifyItemRangeInsertedHead(0, 1);
+
+                            } finally {
+                                isLoadHis = false;
+                                ((ChatPanel)((ChatMessagePanel) ChatMessageViewerPanel.this.getParentPanel()).getParentPanel()).getTitlePanel().hideStatusLabel();
+                            }
+                        });
                     }
 
-                    messageList = messageList.reversed();
-                    List<Message> finalMessageList = messageList;
-                    SwingUtilities.invokeLater(() -> {
-                        try {
-                            if (finalMessageList != null && !finalMessageList.isEmpty()) {
-                                messageItems.addAll(0, finalMessageList);
-                                messageListView.notifyItemRangeInsertedHead(0, finalMessageList.size());
-                            }
-
-                        } finally {
-                            isLoadHis = false;
-                            ((ChatPanel)((ChatMessagePanel) ChatMessageViewerPanel.this.getParentPanel()).getParentPanel()).getTitlePanel().hideStatusLabel();
-                        }
-                    });
+                    //messageList = messageList.reversed();
+//                    List<Message> finalMessageList = messageList;
+//                    SwingUtilities.invokeLater(() -> {
+//                        try {
+//                            if (finalMessageList != null && !finalMessageList.isEmpty()) {
+//                                messageItems.addAll(0, finalMessageList);
+//                                messageListView.notifyItemRangeInsertedHead(0, finalMessageList.size());
+//                            }
+//
+//                        } finally {
+//                            isLoadHis = false;
+//                            ((ChatPanel)((ChatMessagePanel) ChatMessageViewerPanel.this.getParentPanel()).getParentPanel()).getTitlePanel().hideStatusLabel();
+//                        }
+//                    });
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);
                 }

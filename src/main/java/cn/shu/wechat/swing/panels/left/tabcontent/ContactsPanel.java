@@ -79,6 +79,9 @@ public class ContactsPanel extends ParentAvailablePanel {
 
         });
         add(contactsListView, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 1));
+
+    }
+    private void clear(){
         java.util.Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
@@ -95,7 +98,6 @@ public class ContactsPanel extends ParentAvailablePanel {
             }
         }, 1000 * 60 * 10, 1000 * 60 * 20);
     }
-
     @Override
     public void setVisible(boolean aFlag) {
         if (aFlag) {
@@ -123,6 +125,7 @@ public class ContactsPanel extends ParentAvailablePanel {
             initData();
             SwingUtilities.invokeLater(() -> {
                 int count = Math.min(initialCount, contactsItemList.size());
+                contactsListView.getContentPanel().removeAll();
                 contactsListView.notifyItemAppend(loadedCount.getAndAdd(count), count);
             });
         });

@@ -300,9 +300,9 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
         }
 
         contentPanel.removeAll();
-        contentPanel.repaint();
         fillComponents();
         contentPanel.revalidate();
+        contentPanel.repaint();
 
     }
 
@@ -331,6 +331,7 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
         }
 
         contentPanel.revalidate();
+        contentPanel.repaint();
         SwingUtilities.invokeLater(() -> {
             int heightAfter = viewport.getPreferredSize().height;
             int delta = heightAfter - heightBefore;
@@ -362,6 +363,8 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
 
 
         }
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
 
     /**
@@ -440,10 +443,13 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
 
         contentPanel.add(holder, position);
         contentPanel.revalidate();
+        contentPanel.repaint();
         SwingUtilities.invokeLater(() -> {
             int heightAfter = viewport.getPreferredSize().height;
             int delta = heightAfter - heightBefore;
             viewport.setViewPosition(new Point(viewPosBefore.x, viewPosBefore.y + delta));
+            viewport.revalidate();
+            viewport.repaint();
         });
 
         return holder;
