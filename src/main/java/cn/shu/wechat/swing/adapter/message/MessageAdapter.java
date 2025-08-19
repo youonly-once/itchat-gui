@@ -71,6 +71,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Created by 舒新胜 on 17-6-2.
@@ -294,67 +295,57 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                 }
             });
         } else if (DownloadManager.containsTask(item.getMsgId() + WXMsgUrl.SLAVE_TYPE)) {
-            ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
-                byte[] bytes = DownloadManager.<byte[]>awaitDownloadTimeOut(item.getMsgId() + WXMsgUrl.SLAVE_TYPE);
-                if (bytes != null && bytes.length > 0) {
-                    process(item, viewHolder, bytes);
+
+            DownloadManager.<byte[]>completableFuture(item.getMsgId() + WXMsgUrl.SLAVE_TYPE).thenCompose(res -> {
+                if (res == null && DownloadManager.containsTask(item.getMsgId() + WXMsgUrl.BIG_TYPE)) {
+                    return DownloadManager.completableFuture(item.getMsgId() + WXMsgUrl.BIG_TYPE);
                 } else {
-                    if (DownloadManager.containsTask(item.getMsgId() + WXMsgUrl.BIG_TYPE)) {
-                        bytes = DownloadManager.<byte[]>awaitDownloadTimeOut(item.getMsgId() + WXMsgUrl.BIG_TYPE);
-                        if (bytes != null && bytes.length > 0) {
-                            process(item, viewHolder, bytes);
-                        }
-                    }
+                    return CompletableFuture.completedFuture(res);
                 }
+            }).thenAccept(bytes->{
+                SwingUtilities.invokeLater(()->process(item, viewHolder, bytes));
             });
+
         } else if (DownloadManager.containsTask(item.getMsgId() + WXMsgUrl.BIG_TYPE)) {
-            ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
-                byte[] bytes = DownloadManager.<byte[]>awaitDownloadTimeOut(item.getMsgId() + WXMsgUrl.BIG_TYPE);
-                if (bytes != null && bytes.length > 0) {
-                    process(item, viewHolder, bytes);
+            DownloadManager.<byte[]>completableFuture(item.getMsgId() + WXMsgUrl.BIG_TYPE).thenCompose(res -> {
+                if (res == null && DownloadManager.containsTask(item.getMsgId() + WXMsgUrl.SLAVE_TYPE)) {
+                    return DownloadManager.completableFuture(item.getMsgId() + WXMsgUrl.SLAVE_TYPE);
+                } else {
+                    return CompletableFuture.completedFuture(res);
                 }
+            }).thenAccept(bytes->{
+                SwingUtilities.invokeLater(()->process(item, viewHolder, bytes));
             });
         } else {
-            try {
-                if (StringUtils.isNotEmpty(item.getFilePath())
-                        && Files.exists(Path.of(item.getFilePath())) && Files.size(Path.of(item.getFilePath())) > 0) {
-                    ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
-                        DownloadManager.awaitDownloadTimeOut(item.getFilePath());
-                        if (Files.exists(Path.of(item.getFilePath()))) {
-                            ImageIcon imageIcon = new ImageIcon(item.getFilePath());
-                            IconUtil.preferredImageSize(imageIcon, MessageProgramOfAppViewHolder.maxWidth, MessageProgramOfAppViewHolder.maxHeight);
-                            SwingUtilities.invokeLater(() -> viewHolder.imageLabel.setIcon(imageIcon));
-                        }
-                    });
-                } else {
 
-                    DownloadTask<byte[]> downloadTask = new DownloadTask<>();
-                    downloadTask.setMsgId(item.getMsgId());
-                    downloadTask.setTaskId(item.getMsgId() + WXMsgUrl.BIG_TYPE);
-                    downloadTask.setType(DownloadType.ImgByteByMsgID);
-                    downloadTask.setResourceType(WXMsgUrl.BIG_TYPE);
+            if (StringUtils.isNotEmpty(item.getFilePath())
+                    && Files.exists(Path.of(item.getFilePath()))) {
+                DownloadManager.completableFuture(item.getFilePath()).thenAccept(e->{
+                    if (Files.exists(Path.of(item.getFilePath()))) {
+                        ImageIcon imageIcon = new ImageIcon(item.getFilePath());
+                        IconUtil.preferredImageSize(imageIcon, MessageProgramOfAppViewHolder.maxWidth, MessageProgramOfAppViewHolder.maxHeight);
+                        SwingUtilities.invokeLater(() -> viewHolder.imageLabel.setIcon(imageIcon));
+                    }
+                });
 
-                    downloadTask.setCallback(task -> {
-                        byte[] bytes = task.getResult();
-                        if (bytes != null && bytes.length > 0) {
-                            process(item, viewHolder, bytes);
-                        } else {
-                            downloadTask.setResourceType(WXMsgUrl.SLAVE_TYPE);
-                            downloadTask.setTaskId(item.getMsgId() + WXMsgUrl.SLAVE_TYPE);
-                            downloadTask.setCallback(secondTask -> {
-                                byte[] secondBytes = secondTask.getResult();
-                                if (secondBytes != null && secondBytes.length > 0) {
-                                    process(item, viewHolder, secondBytes);
-                                }
-                            });
-                            DownloadManager.submit(downloadTask);
-                        }
+            } else {
 
-                    });
-                    DownloadManager.submit(downloadTask);
-                }
-            } catch (IOException e) {
-                log.error(e.getMessage(), e);
+                DownloadTask<byte[]> downloadTask = new DownloadTask<>();
+                downloadTask.setMsgId(item.getMsgId());
+                downloadTask.setTaskId(item.getMsgId() + WXMsgUrl.BIG_TYPE);
+                downloadTask.setType(DownloadType.ImgByteByMsgID);
+                downloadTask.setResourceType(WXMsgUrl.BIG_TYPE);
+                DownloadManager.submit(downloadTask).thenCompose(bytes->{
+                    if (bytes == null || bytes.length == 0) {
+                        downloadTask.setResourceType(WXMsgUrl.SLAVE_TYPE);
+                        downloadTask.setTaskId(item.getMsgId() + WXMsgUrl.SLAVE_TYPE);
+                        return DownloadManager.submit(downloadTask);
+                    }else{
+                        return CompletableFuture.completedFuture(bytes);
+                    }
+                }).thenAccept(bytes->{
+                    SwingUtilities.invokeLater(()->process(item, viewHolder, bytes));
+                });
             }
         }
 
@@ -919,7 +910,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                         imageIcon = IconUtil.getIconFromFile(file);
                         item.setImgWidth(imageIcon.getIconWidth());
                         item.setImgHeight(imageIcon.getIconHeight());
-                        imageLabel.setPreferredSize(new Dimension(imageIcon.getIconWidth(), imageIcon.getIconHeight()));
                     }
 
                     if (IconUtil.isGIFByFile(finalPath)) {
@@ -931,10 +921,6 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                         IconUtil.preferredImageSize(imageIcon,MessageRightImageViewHolder.maxWidth,MessageRightImageViewHolder.maxHeight);
                     }
                 }
-                if (imageIcon!=null) {
-                    imageLabel.setPreferredSize(new Dimension(imageIcon.getIconWidth(), imageIcon.getIconHeight()));
-                }
-                imageLabel.setIcon(imageIcon);
                 ImageIcon finalImageIcon = imageIcon;
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
@@ -944,6 +930,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                             imageLabel.setText("[不支持的表情消息，请在手机上查看]");
                             return;
                         }
+                        imageLabel.setPreferredSize(new Dimension(finalImageIcon.getIconWidth(), finalImageIcon.getIconHeight()));
                         imageLabel.setIcon(finalImageIcon);
                         // 当点击图片时，使用默认程序打开图片
                         imageLabel.addMouseListener(new MessageMouseListener() {

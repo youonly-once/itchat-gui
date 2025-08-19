@@ -17,10 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.net.http.HttpResponse;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 
 /**
@@ -68,7 +65,7 @@ public class DownloadTask<R> implements Callable<R> {
 
     @Getter(value = AccessLevel.PROTECTED)
     @Setter(value = AccessLevel.PROTECTED)
-    private volatile Future<R> future;
+    private volatile CompletableFuture<R> future;
 
     /**
      * 下载类型（由上层设置）

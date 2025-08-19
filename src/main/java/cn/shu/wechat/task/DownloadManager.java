@@ -50,17 +50,29 @@ public class DownloadManager {
      * @param task 下载任务
      * @param <R>  结果类型
      */
-    public static <R> void submit(DownloadTask<R> task) {
+    public static <R> CompletableFuture<R> completableFuture(String taskId) {
+        return Optional.of(taskMap.get(taskId)).map(DownloadTask::getFuture).orElse(CompletableFuture.failedFuture(new RuntimeException("任务不存在")));
+
+    }
+
+    /**
+     * 异步提交下载任务
+     *
+     * @param task 下载任务
+     * @param <R>  结果类型
+     */
+    public static <R> CompletableFuture<R> submit(DownloadTask<R> task) {
         DownloadTask<R> existing = taskMap.putIfAbsent(task.getTaskId(), task);
         if (existing != null) {
             if (existing.getStatus() == DownloadStatus.FAIL) {
                 taskMap.remove(task.getTaskId());
             } else if (existing.getStatus() == DownloadStatus.WAITING || existing.getStatus() == DownloadStatus.RUNNING) {
-                return;
+                return existing.getFuture();
             }
         }
-        Future<R> submit = workerPool.submit(task);// 异步执行
+        CompletableFuture<R> submit = CompletableFuture.supplyAsync(task::call, workerPool);
         task.setFuture(submit);
+        return submit;
     }
 
     /**
@@ -101,7 +113,7 @@ public class DownloadManager {
             }
         }else {
             log.info("提交新任务：{}", task);
-            Future<R> future = workerPool.submit(task);
+            CompletableFuture<R> future = CompletableFuture.supplyAsync(task::call, workerPool);
             task.setFuture(future);
             try {
                 return future.get(timeout,unit);
@@ -134,7 +146,7 @@ public class DownloadManager {
                 }
             }
         }
-        Future<R> future = workerPool.submit(task);
+        CompletableFuture<R> future = CompletableFuture.supplyAsync(task::call, workerPool);
         task.setFuture(future);
         try {
             return future.get(); // 阻塞等待执行完成
@@ -204,7 +216,7 @@ public class DownloadManager {
             log.error("任务不存在，taskId=" + taskId);
             return;
         }
-        Future<?> future = task.getFuture();
+        CompletableFuture<?> future = task.getFuture();
         if (future == null) {
             awaitDownloadLatch(task);
             return;
@@ -237,7 +249,7 @@ public class DownloadManager {
             return null;
         }
 
-        Future<R> future = task.getFuture();
+        CompletableFuture<R> future = task.getFuture();
         if (future == null) {
             awaitDownloadLatch(task, timeOut);
             return null;

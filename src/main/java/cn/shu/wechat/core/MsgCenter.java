@@ -34,6 +34,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 import static cn.shu.wechat.constant.WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_TEXT;
 
@@ -201,34 +202,26 @@ public class MsgCenter {
         downloadTask.setType(DownloadType.ImgByteByMsgID);
         downloadTask.setResourceType(WXMsgUrl.SLAVE_TYPE);
 
-        downloadTask.setCallback(task -> {
-            byte[] bytes = task.getResult();
+        DownloadManager.submit(downloadTask).thenCompose(bytes->{
+            if (bytes == null || bytes.length == 0) {
+                downloadTask.setResourceType(WXMsgUrl.SLAVE_TYPE);
+                downloadTask.setTaskId(msg.getMsgId() + WXMsgUrl.SLAVE_TYPE);
+                return DownloadManager.submit(downloadTask);
+            }else{
+                return CompletableFuture.completedFuture(bytes);
+            }
+        }).thenAccept(bytes->{
             if (bytes != null && bytes.length > 0) {
-                try {// 确保父目录存在
+                try {
                     Files.createDirectories(pathP.getParent());
-                    Files.write(pathP, bytes);
+                    Files.write(Paths.get(path), bytes);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-            } else {
-                downloadTask.setResourceType(WXMsgUrl.BIG_TYPE);
-                downloadTask.setTaskId(msg.getMsgId() + WXMsgUrl.BIG_TYPE);
-                downloadTask.setCallback(secondTask -> {
-                    byte[] secondBytes = secondTask.getResult();
-                    if (secondBytes != null && secondBytes.length > 0) {
-                        try {
-                            Files.createDirectories(pathP.getParent());
-                            Files.write(Paths.get(path), secondBytes);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                });
-                DownloadManager.submit(downloadTask);
             }
-
         });
-        DownloadManager.submit(downloadTask);
+
+
 
 
     }
