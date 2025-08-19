@@ -260,7 +260,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
         Matcher matcher = wxEmojiPattern.matcher(src);
         while (matcher.find()) {
             String extracted = matcher.group(1); // 获取捕获组中的内容
-            if (EmojiUtil.getWechatEmojiList().contains(extracted)) {
+            if (EmojiUtil.isWeChatEmoji(extracted)) {
                 plainText = plainText.replace(extracted, "");
                 int start = matcher.start();  // 当前匹配起始索引
                 int end = matcher.end();

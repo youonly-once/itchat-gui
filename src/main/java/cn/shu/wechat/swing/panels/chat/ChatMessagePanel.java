@@ -254,7 +254,7 @@ public class ChatMessagePanel extends ParentAvailablePanel {
                             String pathAndCode = icon.getDescription();
                             if (pathAndCode.contains("&")){
                                 String code = pathAndCode.substring(0,pathAndCode.indexOf("&"));
-                                if (EmojiUtil.isWeChatEmoji(this,code)){
+                                if (EmojiUtil.isWeChatEmoji(code)){
                                     inputData.add(code);
                                 }else{
                                     inputData.add(icon);

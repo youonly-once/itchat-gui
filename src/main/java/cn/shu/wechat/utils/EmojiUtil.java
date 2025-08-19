@@ -183,15 +183,8 @@ public final class EmojiUtil {
      * @return Icon
      */
     public static ImageIcon getWeChatEmoji(Object context,String code) {
-        int i = wechatEmojiList.indexOf(code);
-        if (i == -1){
-            int i1 = wechatEmojiListZh.indexOf(code);
-            if (i1 == -1){
-                return null;
-            }
-        }
-        String weChatIconPath = "/emoji/wechat_emoji/";
-        return IconUtil.getIcon(context, weChatIconPath + (2*i + 4) + ".png",22,22);
+
+        return getWeChatEmoji(context,code,22,22);
     }
     /**
      * 获取微信表情
@@ -202,7 +195,10 @@ public final class EmojiUtil {
     public static ImageIcon getWeChatEmoji(Object context,String code,int width,int height) {
         int i = wechatEmojiList.indexOf(code);
         if (i == -1){
-            return null;
+            int i1 = wechatEmojiListZh.indexOf(code);
+            if (i1 == -1){
+                return null;
+            }
         }
         String weChatIconPath = "/emoji/wechat_emoji/";
 
@@ -211,12 +207,11 @@ public final class EmojiUtil {
 
     /**
      * 是否为微信表情
-     * @param context context
      * @param code 表情代码
      * @return Boolean
      */
-    public static boolean isWeChatEmoji(Object context,String code) {
-       return wechatEmojiList.contains(code);
+    public static boolean isWeChatEmoji(String code) {
+       return wechatEmojiList.contains(code)||wechatEmojiListZh.contains(code);
     }
     /**
      * 获取Emoji表情
