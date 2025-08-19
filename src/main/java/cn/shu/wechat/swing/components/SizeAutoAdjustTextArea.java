@@ -77,8 +77,15 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
         if (lineEmojiInfoList.isEmpty()) {
             return;
         }
+
         super.setText("");
+        if (isAllEmoji) {
+            maxLengthLine = (int) (maxLengthLine / emojiSize) * 40;
+        }
         int targetWidth = maxLengthLine + 7;
+        if (isAllEmoji) {
+            emojiSize = 40;
+        }
 
         int totalLine = 0;
         int targetHeight = 0;
@@ -118,6 +125,9 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
      */
     private Dimension computeLineDimension(Line line) {
         int lineHeight = line.getLineHeight();
+        if (isAllEmoji) {
+            lineHeight = emojiSize + 2;
+        }
         int width = 0;
         int maxLineWidth = 0;
         int totalHeight = lineHeight;
@@ -438,7 +448,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
             this.image = image;
             this.imageWidth = imageWidth;
             this.imageHeight = imageHeight;
-            this.containerHeight = fm.getHeight(); // 用于占位
+            this.containerHeight = Math.max(fm.getHeight(), this.imageHeight); // 用于占位
         }
 
         @Override
@@ -456,7 +466,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
             // 以整行的垂直中点居中
             int drawY = y + (containerHeight - imageHeight) / 2;
             if (isAllEmoji) {
-                g.drawImage(image, x, drawY, imageWidth, imageHeight, c);
+                g.drawImage(image, x - 3, drawY, imageWidth, imageHeight, c);
             } else {
                 g.drawImage(image, x, drawY + SizeAutoAdjustTextArea.this.getInsets().top, imageWidth, imageHeight, c);
             }
