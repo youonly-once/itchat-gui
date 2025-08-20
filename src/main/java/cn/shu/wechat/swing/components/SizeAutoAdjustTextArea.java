@@ -346,7 +346,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
             @Override
             public void componentResized(ComponentEvent e) {
                 maxWidth = (int) (MainFrame.getContext().currentWindowWidth * 0.5);
-                if (maxLengthLine > maxWidth) {
+             //   if (maxLengthLine > maxWidth) {
                     if (resizeTimer != null && resizeTimer.isRunning()) {
                         resizeTimer.restart();
                     } else {
@@ -356,7 +356,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
                         resizeTimer.setRepeats(false);
                         resizeTimer.start();
                     }
-                }
+               // }
                 super.componentResized(e);
             }
         };
