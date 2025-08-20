@@ -1,6 +1,8 @@
 package cn.shu.wechat.swing.components;
 
 import cn.shu.wechat.swing.components.message.JIMSendTextPane;
+import cn.shu.wechat.swing.frames.MainFrame;
+import cn.shu.wechat.swing.panels.RightPanel;
 import cn.shu.wechat.utils.EmojiUtil;
 import cn.shu.wechat.utils.FontUtil;
 import lombok.Builder;
@@ -11,9 +13,7 @@ import javax.swing.*;
 import javax.swing.event.CaretListener;
 import javax.swing.text.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+import java.awt.event.*;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,9 +30,8 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
     /**
      * 约束的组件最大宽度
      */
-    private final int maxWidth;
-
-
+    private int maxWidth;
+    private Timer resizeTimer;
     private static final Pattern emojiPattern = Pattern.compile(":.+?:");
 
     private static final Pattern urlPattern = Pattern.compile("(?:https?://)?(www\\.)?[\\w]+(?:\\.[\\w]+)+[\\w,\\-_/?&=#%.:]*");
@@ -43,6 +42,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
     @Setter
     private boolean parseUrl = false;
     private MouseMotionAdapter mouseMotionListener;
+    private ComponentAdapter componentAdapter;
     // 最长一行长度
     private int maxLengthLine = 0;
 
@@ -62,8 +62,13 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
         fontMetrics = getFontMetrics(getFont());
         emojiSize = fontMetrics.getHeight();
 
-    }
 
+    }
+    @Override
+    public void addNotify() {
+        super.addNotify();
+        setOtherListeners();
+    }
 
     @Override
     public void setText(String t) {
@@ -336,8 +341,36 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
         }
         return urlList;
     }
+    private void setOtherListeners() {
+        componentAdapter = new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                maxWidth = (int) (MainFrame.getContext().currentWindowWidth * 0.5);
+                if (maxLengthLine > maxWidth) {
+                    if (resizeTimer != null && resizeTimer.isRunning()) {
+                        resizeTimer.restart();
+                    } else {
+                        resizeTimer = new Timer(50, evt -> {
+                            adjustTextArea();
+                        });
+                        resizeTimer.setRepeats(false);
+                        resizeTimer.start();
+                    }
+                }
+                super.componentResized(e);
+            }
+        };
+        RightPanel.getContext().addComponentListener(componentAdapter);
+    }
 
+    private void adjustTextArea() {
 
+            if (SizeAutoAdjustTextArea.this.getCaret() == null) {
+                SizeAutoAdjustTextArea.this.setCaret(new DefaultCaret());
+            }
+            SizeAutoAdjustTextArea.this.setText(SizeAutoAdjustTextArea.this.getText());
+
+    }
     private void setListeners() {
 
             mouseAdapter = new MouseAdapter() {
@@ -372,9 +405,12 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
                 }
             }
         };
+
         this.addMouseMotionListener(mouseMotionListener);
 
         this.addMouseListener(mouseAdapter);
+
+
     }
     public void removeMouseAdapter() {
         if (mouseAdapter != null) {
@@ -383,7 +419,13 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
         if (mouseMotionListener != null) {
             removeMouseMotionListener(mouseMotionListener);
         }
-
+        if (componentAdapter!=null){
+            RightPanel.getContext().removeComponentListener(componentAdapter);
+        }
+        if (resizeTimer != null) {
+            resizeTimer.stop();
+            resizeTimer = null;
+        }
     }
     /**
      * 打开默认浏览器访问页面

@@ -3,6 +3,8 @@ package cn.shu.wechat.swing.adapter.message.system;
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
+import cn.shu.wechat.swing.frames.MainFrame;
+import cn.shu.wechat.swing.panels.RightPanel;
 import cn.shu.wechat.utils.FontUtil;
 
 import javax.swing.*;
@@ -12,12 +14,12 @@ import java.awt.*;
  * Created by 舒新胜 on 17-6-2.
  */
 public class MessageSystemMessageViewHolder extends BaseMessageViewHolder {
-    public JLabel text = new JLabel() {
+    public JTextArea  text = new JTextArea () {
 
-        @Override
-        public void setText(String text) {
-            super.setText("<html>" + text + "</html>");
-        }
+//        @Override
+//        public void setText(String text) {
+//            super.setText("<html>" + text + "</html>");
+//        }
     };
     private JPanel textPanel;
 
@@ -29,10 +31,15 @@ public class MessageSystemMessageViewHolder extends BaseMessageViewHolder {
 
     private void initComponents() {
         setBackground(Colors.WINDOW_BACKGROUND);
-
-        text.setHorizontalTextPosition(SwingConstants.CENTER);
+        text.setLineWrap(true);          // 启用自动换行
+        text.setWrapStyleWord(true);     // 按单词边界换行
+        text.setEditable(false);         // 不可编辑
+        text.setOpaque(false);           // 背景透明
+        text.setFocusable(false);        // 不可聚焦
+       // text.setHorizontalTextPosition(SwingConstants.CENTER);
         text.setFont(FontUtil.getDefaultFont(12));
         text.setForeground(new Color(248, 248, 248));
+        text.setSize((int)(RightPanel.getContext().getWidth()/1.5), Short.MAX_VALUE);
         textPanel = new JPanel() {
             @Override
             public Insets getInsets() {
