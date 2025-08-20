@@ -51,7 +51,7 @@ public class DownloadManager {
      * @param <R>  结果类型
      */
     public static <R> CompletableFuture<R> completableFuture(String taskId) {
-        return Optional.of(taskMap.get(taskId)).map(DownloadTask::getFuture).orElse(CompletableFuture.failedFuture(new RuntimeException("任务不存在")));
+        return Optional.ofNullable(taskMap.get(taskId)).map(DownloadTask::getFuture).orElse(CompletableFuture.failedFuture(new RuntimeException("任务不存在")));
 
     }
 

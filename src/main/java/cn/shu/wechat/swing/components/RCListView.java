@@ -136,9 +136,7 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
                 super.removeAll();
             }
         };
-        //用VerticalFlowLayout有问题，显示的房间数和实际不符
         contentPanel.setLayout(new VerticalFlowLayout(VerticalFlowLayout.TOP, hGap, vGap, true, false));
-        //contentPanel.setLayout(new GridLayout(0,1,hGap,vGap));
         contentPanel.setBackground(Colors.WINDOW_BACKGROUND);
         contentPanel.setDoubleBuffered(true);
         this.getViewport().setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE);
@@ -152,13 +150,10 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
         adjustmentListener = new AdjustmentListener() {
             @Override
             public void adjustmentValueChanged(AdjustmentEvent evt) {
+                setScrollBarColor(Colors.SCROLL_BAR_THUMB, Colors.WINDOW_BACKGROUND);
                 // 之所以要加上!scrollBarPressed这个条件，scrollBar在顶部的时间，scrollbar点击和释放都分别会触发adjustmentValueChanged这个事件
                 // 所以只让scrollBar释放的时候触发这个回调
                 // !scrollToBottom 这个条件保证在自动滚动到底部之前，不会调用此回调
-                if (evt.getValue() == 0 && evt.getValue() != lastScrollValue && scrollToTopListener != null && !scrollBarPressed && !scrollToBottom) {
-                    messageLoading = true;
-                    scrollToTopListener.onScrollToTop();
-                }
                 if (evt.getAdjustmentType() == AdjustmentEvent.TRACK && scrollToBottom) {
                     getVerticalScrollBar().setValue(getVerticalScrollBar().getModel().getMaximum()
                             - getVerticalScrollBar().getModel().getExtent());
@@ -167,7 +162,6 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
                     scrollListener.onScroll(evt.getValue()
                             ,evt.getAdjustable().getMaximum());
                 }
-                lastScrollValue = evt.getValue();
 
             }
         };
@@ -189,27 +183,22 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
                 // 如果两次鼠标滚轮间隔小于1秒，则忽略
-                if (System.currentTimeMillis() - lastWheelTime < 1000) {
+                if (System.currentTimeMillis() - lastWheelTime < 100 || messageLoading) {
                     lastWheelTime = System.currentTimeMillis();
                     return;
                 }
+                lastWheelTime = System.currentTimeMillis();
+                if (getVerticalScrollBar().getValue() <= getVerticalScrollBar().getUnitIncrement()) {
 
-                if (getVerticalScrollBar().getValue() == 0) {
-                    if (messageLoading) {
+                    System.out.println("鼠标滚轮到顶，自动加载");
+                    if (scrollToTopListener != null) {
+                        scrollToTopListener.onScrollToTop();
                         messageLoading = false;
-                    } else {
-                        System.out.println("鼠标滚轮到顶，自动加载");
-                        if (scrollToTopListener != null) {
-                            scrollToTopListener.onScrollToTop();
-                        }
                     }
 
                 }
 
                 scrollToBottom = false;
-
-                lastWheelTime = System.currentTimeMillis();
-
                 super.mouseWheelMoved(e);
             }
         };
@@ -332,11 +321,17 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
         }
 
         contentPanel.revalidate();
-        contentPanel.repaint(contentPanel.getBounds());
-        contentPanel.doLayout(); // 强制立即布局
-        int heightAfter = viewport.getPreferredSize().height;
-        int delta = heightAfter - heightBefore;
-        viewport.setViewPosition(new Point(viewPosBefore.x, viewPosBefore.y + delta));
+//        contentPanel.repaint(contentPanel.getBounds());
+//        contentPanel.doLayout(); // 强制立即布局
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                int heightAfter = viewport.getPreferredSize().height;
+                int delta = heightAfter - heightBefore;
+                viewport.setViewPosition(new Point(viewPosBefore.x, viewPosBefore.y + delta));
+            }
+        });
+
     }
 
     /**

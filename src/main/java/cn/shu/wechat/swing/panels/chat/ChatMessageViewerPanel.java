@@ -44,46 +44,52 @@ public class ChatMessageViewerPanel extends ParentAvailablePanel {
         initComponents();
         initView();
         setListeners();
+        loadHistory();
     }
 
-    private void setListeners() {
-        messageListView.setScrollToTopListener(() -> {
-            // 当滚动到顶部时，继续拿前面的消息
-            if (isLoadHis) {
-                return;
-            }
-            isLoadHis = true;
-            ((ChatPanel)((ChatMessagePanel) ChatMessageViewerPanel.this.getParentPanel()).getParentPanel()).getTitlePanel().showStatusLabel("加载中...");
+    @Override
+    public void addNotify() {
+        super.addNotify();
 
-            ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
-                try {
-                    MessageMapper mapper = SpringContextHolder.getBean(MessageMapper.class);
-                    Contacts contacts = Core.getMemberMap().get(roomId);
-                    String remarkName = ContactsTools.getContactRemarkNameByUserName(contacts);
-                    String nickName = ContactsTools.getContactNickNameByUserName(contacts);
-                    java.util.List<Message> messageList = mapper.selectByPage(messageItems.size(), PAGE_LENGTH, roomId, remarkName, nickName);
-                    int i =0;
-                    for (Message message : messageList) {
-                        if (message.getIsSend()) {
-                            message.setFromUsername(Core.getUserName());
-                            message.setToUsername(roomId);
-                            if (ContactsTools.isRoomContact(roomId)) {
-                                message.setFromMemberOfGroupUsername(Core.getUserName());
-                            }
-                        } else {
-                            message.setFromUsername(roomId);
-                            message.setToUsername(Core.getUserName());
-                            if (ContactsTools.isRoomContact(roomId)) {
-                                java.util.List<Contacts> members = Core.getMemberMap().get(roomId).getMemberlist();
-                                ContactsTools.findGroupMember(members, message).ifPresent(member ->
-                                        message.setFromMemberOfGroupUsername(member.getUsername())
-                                );
-                            }
+    }
+
+    private void loadHistory() {
+        // 当滚动到顶部时，继续拿前面的消息
+        if (isLoadHis) {
+            return;
+        }
+        isLoadHis = true;
+        ((ChatPanel) ((ChatMessagePanel) ChatMessageViewerPanel.this.getParentPanel()).getParentPanel()).getTitlePanel().showStatusLabel("加载中...");
+
+        ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
+            try {
+                MessageMapper mapper = SpringContextHolder.getBean(MessageMapper.class);
+                Contacts contacts = Core.getMemberMap().get(roomId);
+                String remarkName = ContactsTools.getContactRemarkNameByUserName(contacts);
+                String nickName = ContactsTools.getContactNickNameByUserName(contacts);
+                java.util.List<Message> messageList = mapper.selectByPage(messageItems.size(), PAGE_LENGTH, roomId, remarkName, nickName);
+                int i = 0;
+                for (Message message : messageList) {
+                    if (message.getIsSend()) {
+                        message.setFromUsername(Core.getUserName());
+                        message.setToUsername(roomId);
+                        if (ContactsTools.isRoomContact(roomId)) {
+                            message.setFromMemberOfGroupUsername(Core.getUserName());
                         }
-                        // ContactsTools.loadUserInfo(message.getFromUsername(), message.getToUsername(), message.getFromMemberOfGroupUsername(), message);
-                        if (i+1<messageList.size()) {
-                            message.setPreMessageTime(messageList.get(i+1).getMessageTime());
+                    } else {
+                        message.setFromUsername(roomId);
+                        message.setToUsername(Core.getUserName());
+                        if (ContactsTools.isRoomContact(roomId)) {
+                            java.util.List<Contacts> members = Core.getMemberMap().get(roomId).getMemberlist();
+                            ContactsTools.findGroupMember(members, message).ifPresent(member ->
+                                    message.setFromMemberOfGroupUsername(member.getUsername())
+                            );
                         }
+                    }
+                    // ContactsTools.loadUserInfo(message.getFromUsername(), message.getToUsername(), message.getFromMemberOfGroupUsername(), message);
+                    if (i + 1 < messageList.size()) {
+                        message.setPreMessageTime(messageList.get(i + 1).getMessageTime());
+                    }
 
 //                        SwingUtilities.invokeLater(() -> {
 //                            try {
@@ -96,29 +102,31 @@ public class ChatMessageViewerPanel extends ParentAvailablePanel {
 //                                ((ChatPanel)((ChatMessagePanel) ChatMessageViewerPanel.this.getParentPanel()).getParentPanel()).getTitlePanel().hideStatusLabel();
 //                            }
 //                        });
-                        i++;
-                    }
-
-                    messageList = messageList.reversed();
-                    List<Message> finalMessageList = messageList;
-                    SwingUtilities.invokeLater(() -> {
-                        try {
-                            if (finalMessageList != null && !finalMessageList.isEmpty()) {
-                                messageItems.addAll(0, finalMessageList);
-                                messageListView.notifyItemRangeInsertedHead(0, finalMessageList.size());
-                            }
-
-                        } finally {
-                            isLoadHis = false;
-                            ((ChatPanel) ((ChatMessagePanel) ChatMessageViewerPanel.this.getParentPanel()).getParentPanel()).getTitlePanel().hideStatusLabel();
-                        }
-                    });
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
+                    i++;
                 }
-            });
 
+                messageList = messageList.reversed();
+                List<Message> finalMessageList = messageList;
+                SwingUtilities.invokeLater(() -> {
+                    try {
+                        if (finalMessageList != null && !finalMessageList.isEmpty()) {
+                            messageItems.addAll(0, finalMessageList);
+                            messageListView.notifyItemRangeInsertedHead(0, finalMessageList.size());
+                        }
+
+                    } finally {
+                        isLoadHis = false;
+                        ((ChatPanel) ((ChatMessagePanel) ChatMessageViewerPanel.this.getParentPanel()).getParentPanel()).getTitlePanel().hideStatusLabel();
+                    }
+                });
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
         });
+    }
+
+    private void setListeners() {
+        messageListView.setScrollToTopListener(this::loadHistory);
     }
 
 
