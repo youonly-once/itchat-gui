@@ -397,28 +397,24 @@ public final class AvatarUtil {
      * @return 头像
      */
     private static Image createAvatar(String displayName,int width, int height) {
-        String drawString;
+        String drawString = displayName;
         //取前几位绘制头像
         if (displayName.length() > 1) {
-            drawString = displayName.substring(0, 1).toUpperCase() + displayName.substring(1, 2).toLowerCase();
-        } else {
-            drawString = displayName;
+            drawString = displayName.substring(displayName.length()-2);
         }
-
+        Graphics2D g2d = null;
         try {
 
             // 创建BufferedImage对象
             Font font = FontUtil.getDefaultFont(width/2, Font.PLAIN);
             BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
             // 获取Graphics2D
-            Graphics2D g2d = image.createGraphics();
-
+             g2d = image.createGraphics();
             // 抗锯齿
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             // 画图
             g2d.setBackground(getColor(displayName));
             g2d.clearRect(0, 0, width, height);
-
             // 文字
             g2d.setFont(font);
             g2d.setPaint(new Color(255, 255, 255));
@@ -426,22 +422,22 @@ public final class AvatarUtil {
             int strWidth = fm.stringWidth(drawString);
             int strHeight = fm.getHeight();
             int x = (width - strWidth) / 2;
-
             g2d.drawString(drawString, x, strHeight);
 
             BufferedImage roundImage = IconUtil.setRadius(image, width, height, width / 3);
-
             g2d.dispose();
-
-
             return roundImage;
         } catch (Exception ex) {
-            log.error(ex.getMessage());
+            log.error(ex.getMessage(),ex);
+        }finally {
+            if (g2d!=null){
+                g2d.dispose();
+            }
         }
 
         Image scaledInstance = IconUtil.getBufferedImage(MainFrame.getContext(), "/image/default_head.png");
         if (scaledInstance != null) {
-            IconUtil.getScaledImage(scaledInstance, NORMAL_AVATAR_SIZE, NORMAL_AVATAR_SIZE);
+            scaledInstance = IconUtil.getScaledImage(scaledInstance, NORMAL_AVATAR_SIZE, NORMAL_AVATAR_SIZE);
         }
         return scaledInstance;
     }

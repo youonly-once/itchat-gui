@@ -48,7 +48,10 @@ public class MessageEditorEmojiPanel extends JPanel {
                 if (expressionListener != null) {
                     ImageIcon icon = (ImageIcon) panel.getIcon();
                     icon.setDescription(panel.getCode()+"&"+icon.getDescription());
-                    expressionListener.onSelected(icon);
+                    //同一个对象不能多次放入编辑框中
+                    ImageIcon imageIcon = new ImageIcon(icon.getImage());
+                    imageIcon.setDescription(panel.getCode()+"&"+icon.getDescription());
+                    expressionListener.onSelected(imageIcon);
 
                 }
                 super.mouseClicked(e);

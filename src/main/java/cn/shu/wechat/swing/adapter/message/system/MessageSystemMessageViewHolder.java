@@ -8,6 +8,7 @@ import cn.shu.wechat.swing.panels.RightPanel;
 import cn.shu.wechat.utils.FontUtil;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 
 /**
@@ -16,10 +17,16 @@ import java.awt.*;
 public class MessageSystemMessageViewHolder extends BaseMessageViewHolder {
     public JTextArea  text = new JTextArea () {
 
-//        @Override
-//        public void setText(String text) {
-//            super.setText("<html>" + text + "</html>");
-//        }
+        @Override
+        protected void paintComponent(Graphics g) {
+            FontMetrics fm = g.getFontMetrics(getFont());
+            int x = (getWidth() - fm.stringWidth(getText())) / 2;
+            int y = fm.getAscent() + (getHeight() - fm.getHeight()) / 2;
+
+            g.setFont(getFont());
+            g.setColor(getForeground());
+            g.drawString(getText(), x, y);
+        }
     };
     private JPanel textPanel;
 
@@ -57,22 +64,6 @@ public class MessageSystemMessageViewHolder extends BaseMessageViewHolder {
 
                 g2d.dispose();
             }
-//            public void paint(Graphics g) {
-//
-//                super.paintComponent(g);
-//                Graphics2D g2d = (Graphics2D) g.create();
-//
-//                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-//                g2d.setColor(new Color(195, 195, 195));
-//                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
-//
-//                g2d.dispose();
-////                g2d.setColor(new Color(248, 248, 248));
-////                FontMetrics fm = getFontMetrics(getFont());
-////                int x = (getWidth() - fm.stringWidth(text.getText())) / 2;
-////                g2d.drawString(text.getText(), x, fm.getHeight() - 1);
-////                g2d.dispose();
-//            }
         };
 
         textPanel.setFont(FontUtil.getDefaultFont(12));

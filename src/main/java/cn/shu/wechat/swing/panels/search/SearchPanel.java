@@ -307,9 +307,9 @@ public class SearchPanel extends ParentAvailablePanel {
     private void searchContacts(String keyWord, int version, List<SearchResultItem> data) {
         ;
         String keyWordLower = keyWord.toLowerCase();
-        String keyWordPinyin = toPinyin(keyWord);
-        String keyWordInitial = toInitial(keyWord);
-
+        String keyWordPinyin = toPinyin(keyWord).toLowerCase();
+        String keyWordInitial = toInitial(keyWord).toUpperCase();
+        //initial都是大写  quanping都是小写
         List<SearchResultItem> results = searchList.stream()
                 .takeWhile(contact -> !outdatedVersionAndInterrupted(version))
                 .map(contact -> {
@@ -320,7 +320,12 @@ public class SearchPanel extends ParentAvailablePanel {
                         String remarkName = contact.getRemarkname();
                         String nickname = contact.getNickname();
                         String displayname = contact.getDisplayname();
-
+                        if (StringUtils.isEmpty(contact.getPyinitial())){
+                            contact.setPyinitial(toInitial(contact.getNickname()).toUpperCase());
+                        }
+                        if (StringUtils.isEmpty(contact.getPyquanpin())){
+                            contact.setPyquanpin(toPinyin(contact.getNickname()).toLowerCase());
+                        }
                         // 拼音/首字母匹配
                         if (StringUtils.isNotEmpty(contact.getPyinitial()) && contact.getPyinitial().contains(keyWordInitial)) {
                             score += 1;
@@ -331,13 +336,22 @@ public class SearchPanel extends ParentAvailablePanel {
                             matchField = nickname;
                         }
 
+
+
                         // 备注名拼音匹配
                         if (StringUtils.isNotEmpty(remarkName)) {
-                            if (toPinyin(remarkName).contains(keyWordPinyin)) {
+                            if (StringUtils.isEmpty(contact.getRemarkpyinitial())){
+                                contact.setRemarkpyinitial(toInitial(contact.getRemarkname()).toUpperCase());
+                            }
+                            if (StringUtils.isEmpty(contact.getRemarkpyquanpin())){
+                                contact.setRemarkpyquanpin(toPinyin(contact.getRemarkname()).toLowerCase());
+                            }
+
+                            if (contact.getRemarkpyquanpin().contains(keyWordPinyin)) {
                                 score += 3;
                                 matchField = remarkName;
                             }
-                            if (toInitial(remarkName).contains(keyWordInitial)) {
+                            if (contact.getRemarkpyinitial().contains(keyWordInitial)) {
                                 score += 2;
                                 matchField = remarkName;
                             }

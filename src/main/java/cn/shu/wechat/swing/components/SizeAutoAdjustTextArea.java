@@ -195,7 +195,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
         for (UrlInfo url : urlInfos) {
             SimpleAttributeSet bSet = new SimpleAttributeSet();
             StyleConstants.setForeground(bSet, Color.blue);
-            StyleConstants.setUnderline(bSet, true);
+            StyleConstants.setUnderline(bSet, false);
             bSet.addAttribute("url", url.getUrl());
             doc.setCharacterAttributes(url.getStart(), url.getUrl().length(), bSet, false);
         }
@@ -463,7 +463,7 @@ public class SizeAutoAdjustTextArea extends JIMSendTextPane {
             // 以整行的垂直中点居中
             int drawY = y + (containerHeight - imageHeight) / 2;
             if (isAllEmoji) {
-                g.drawImage(image, x - 3, drawY, imageWidth, imageHeight, c);
+                g.drawImage(image, x , drawY, imageWidth, imageHeight, c);
             } else {
                 g.drawImage(image, x, drawY + SizeAutoAdjustTextArea.this.getInsets().top, imageWidth, imageHeight, c);
             }
