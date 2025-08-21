@@ -3,6 +3,7 @@ package cn.shu.wechat.swing.adapter.message.system;
 import cn.shu.wechat.swing.adapter.message.BaseMessageViewHolder;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
+import cn.shu.wechat.swing.components.SizeAutoAdjustTextArea;
 import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.swing.panels.RightPanel;
 import cn.shu.wechat.utils.FontUtil;
@@ -15,18 +16,18 @@ import java.awt.*;
  * Created by 舒新胜 on 17-6-2.
  */
 public class MessageSystemMessageViewHolder extends BaseMessageViewHolder {
-    public JTextArea  text = new JTextArea () {
+    public SizeAutoAdjustTextArea text = new SizeAutoAdjustTextArea ((int)(RightPanel.getContext().getWidth()/1.5)) {
 
-        @Override
-        protected void paintComponent(Graphics g) {
-            FontMetrics fm = g.getFontMetrics(getFont());
-            int x = (getWidth() - fm.stringWidth(getText())) / 2;
-            int y = fm.getAscent() + (getHeight() - fm.getHeight()) / 2;
-
-            g.setFont(getFont());
-            g.setColor(getForeground());
-            g.drawString(getText(), x, y);
-        }
+//        @Override
+//        protected void paintComponent(Graphics g) {
+//            FontMetrics fm = g.getFontMetrics(getFont());
+//            int x = (getWidth() - fm.stringWidth(getText())) / 2;
+//            int y = fm.getAscent() + (getHeight() - fm.getHeight()) / 2;
+//
+//            g.setFont(getFont());
+//            g.setColor(getForeground());
+//            g.drawString(getText(), x, y);
+//        }
     };
     private JPanel textPanel;
 
@@ -38,15 +39,15 @@ public class MessageSystemMessageViewHolder extends BaseMessageViewHolder {
 
     private void initComponents() {
         setBackground(Colors.WINDOW_BACKGROUND);
-        text.setLineWrap(true);          // 启用自动换行
-        text.setWrapStyleWord(true);     // 按单词边界换行
+        //text.setLineWrap(true);          // 启用自动换行
+       // text.setWrapStyleWord(true);     // 按单词边界换行
         text.setEditable(false);         // 不可编辑
         text.setOpaque(false);           // 背景透明
         text.setFocusable(false);        // 不可聚焦
        // text.setHorizontalTextPosition(SwingConstants.CENTER);
         text.setFont(FontUtil.getDefaultFont(12));
         text.setForeground(new Color(248, 248, 248));
-        text.setSize((int)(RightPanel.getContext().getWidth()/1.5), Short.MAX_VALUE);
+       // text.setColumns(20);
         textPanel = new JPanel() {
             @Override
             public Insets getInsets() {
