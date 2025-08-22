@@ -16,8 +16,7 @@ public final class FileUtil {
 
     private static final long KB = 1024;
     private static final long MB = KB * 1024;
-    private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.#");
-
+    private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("0.0");
     private FileUtil() {
     }
 
@@ -109,18 +108,17 @@ public final class FileUtil {
      */
     public static String fileSizeString(Long size) {
         if (size == null || size < 0) {
-            return "未知大小";
+            return "none";
         }
 
         if (size < KB) {
-            return size + " 字节";
+            return size + " B";
         } else if (size < MB) {
             return DECIMAL_FORMAT.format(size / (double) KB) + " K";
         } else {
             return DECIMAL_FORMAT.format(size / (double) MB) + " M";
         }
     }
-
     public static long getDirectorySize(File dir) {
         if (dir == null || !dir.exists()) return 0L;
         if (dir.isFile()) return dir.length();

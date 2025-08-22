@@ -7,6 +7,7 @@ import cn.shu.wechat.swing.frames.MainFrame;
 import cn.shu.wechat.utils.FontUtil;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 
@@ -78,8 +79,9 @@ public abstract class MessageAttachmentViewHolder extends BaseMessageViewHolder 
                 .setFill(GBC.BOTH)
                 .setAnchor(GBC.NORTHWEST)
                 .setInsets(0, 5, 0, 0));
+
         messageBubble.add(sizeLabel, new GBC(1, 1)
-                .setWeight(1, 0)
+                .setWeight(1, 1)
                 .setFill(GBC.BOTH)
                 .setAnchor(GBC.NORTHWEST)
                 .setInsets(2, 8, 0, 0));

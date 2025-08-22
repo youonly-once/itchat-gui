@@ -62,7 +62,7 @@ public class MessageRightAttachmentViewHolder extends MessageAttachmentViewHolde
                 .setFill(GBC.NONE));
 
         add(progressBar, new GBC(1, 2).setWeight(0, 0)
-                .setAnchor(GBC.SOUTHEAST).setInsets(0, 5, 0, 0).setFill(GBC.HORIZONTAL));
+                .setAnchor(GBC.SOUTHEAST).setInsets(0, 0, 0, 5).setFill(GBC.HORIZONTAL));
         add(avatar, new GBC(2, 1).setWeight(0, 0)
                 .setAnchor(GBC.NORTHEAST).setInsets(0, 0, 0, 0).setFill(GBC.NONE));
 

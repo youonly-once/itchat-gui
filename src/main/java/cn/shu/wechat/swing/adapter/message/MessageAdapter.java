@@ -467,7 +467,7 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
         }else if (item.getProgress() > 0) {
             holder.sizeLabel.setText("0/"+ FileUtil.fileSizeString(item.getFileSize()));
         } else {
-            holder.sizeLabel.setText("等待上传...");
+            holder.sizeLabel.setText("0/"+ FileUtil.fileSizeString(item.getFileSize()));
         }
 
         // 绑定右键菜单
