@@ -57,7 +57,7 @@ public class ImageViewerFrame extends JFrame {
     }
 
     public void topShow(Image read) {
-        this.setVisible(false);
+        super.setVisible(false);
         this.setImage(read);
         this.toFront();
 
@@ -372,6 +372,8 @@ public class ImageViewerFrame extends JFrame {
 
             controlPanel.addMouseListener(mouseAdapter);
             controlPanel.addMouseMotionListener(mouseMotionListener);
+            imageLabel.addMouseListener(mouseAdapter);
+            imageLabel.addMouseMotionListener(mouseMotionListener);
 
             this.addMouseListener(mouseAdapter);
             this.addMouseMotionListener(mouseMotionListener);
@@ -419,6 +421,14 @@ public class ImageViewerFrame extends JFrame {
             for (MouseMotionListener l : controlPanel.getMouseMotionListeners()) {
                 controlPanel.removeMouseMotionListener(l);
             }
+
+            for (MouseListener l : imageLabel.getMouseListeners()) {
+                imageLabel.removeMouseListener(l);
+            }
+            for (MouseMotionListener l : imageLabel.getMouseMotionListeners()) {
+                imageLabel.removeMouseMotionListener(l);
+            }
+
 
             for (MouseListener l : getMouseListeners()) {
                 removeMouseListener(l);

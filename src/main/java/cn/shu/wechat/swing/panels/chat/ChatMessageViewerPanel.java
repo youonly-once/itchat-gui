@@ -44,13 +44,13 @@ public class ChatMessageViewerPanel extends ParentAvailablePanel {
         initComponents();
         initView();
         setListeners();
-        loadHistory();
+
     }
 
     @Override
     public void addNotify() {
         super.addNotify();
-
+        loadHistory();
     }
 
     private void loadHistory() {
