@@ -109,7 +109,7 @@ public final class ChatUtil {
                 });
             }
         }
-        return isAtMe.get() ? true : null;
+        return isAtMe.get();
     }
 
     /**

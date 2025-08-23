@@ -321,8 +321,8 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
         }
 
         contentPanel.revalidate();
-        contentPanel.repaint(contentPanel.getBounds());
-//        contentPanel.doLayout(); // 强制立即布局
+        contentPanel.repaint();
+        contentPanel.doLayout(); // 强制立即布局
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {

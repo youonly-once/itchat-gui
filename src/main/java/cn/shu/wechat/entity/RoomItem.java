@@ -19,9 +19,9 @@ import java.util.Objects;
 @NoArgsConstructor
 public class RoomItem implements Comparable<RoomItem> {
 
-    private Boolean atMe;
+    private boolean currentAtMe;
 
-
+    private boolean beforeAtMe;
     /**
      * 房间id 对应微信用户的UserName以@开头或@@
      */

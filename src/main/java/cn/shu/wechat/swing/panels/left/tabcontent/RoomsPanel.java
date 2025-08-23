@@ -105,7 +105,7 @@ public class RoomsPanel extends ParentAvailablePanel {
         //进入房间后 "有人@我"标识消失
         for (RoomItem roomItem : roomItemList) {
             if (roomItem.getRoomId().equals(roomId)) {
-                roomItem.setAtMe(false);
+                roomItem.setBeforeAtMe(false);
                 break;
             }
         }
@@ -130,10 +130,14 @@ public class RoomsPanel extends ParentAvailablePanel {
      * @param latestMsg 最近的一条消息
      * @param hasNewMsg 是否有未读消息 ，当房间为免打扰房间时newReadCount不计数，此时通过hasNewMsg判断
      */
-    private void addRoomFirst(String roomId, String latestMsg, int newReadCount, Boolean hasNewMsg, Boolean atMe) {
+    private void addRoomFirst(String roomId, String latestMsg, int newReadCount, Boolean hasNewMsg, boolean atMe) {
         Contacts contacts = Core.getMemberMap().get(roomId);
         RoomItem roomItem = new RoomItem(contacts, latestMsg, newReadCount, hasNewMsg);
-        roomItem.setAtMe(atMe);
+        roomItem.setCurrentAtMe(atMe);
+        roomItem.setBeforeAtMe(atMe);
+        if (atMe){
+            roomItem.setBeforeAtMe(true);
+        }
         addRoomFirst(roomItem);
     }
     /**
@@ -162,7 +166,7 @@ public class RoomsPanel extends ParentAvailablePanel {
      * @param isMute 是否免打扰
      * @param hasNewMsg 是否有未读消息 ，当房间为免打扰房间时newReadCount不计数，此时通过hasNewMsg判断
      */
-    public void addRoomOrUpdateRoom(String roomId, String latestMsg, int newReadCount, Boolean isMute, boolean hasNewMsg, Boolean atMe) {
+    public void addRoomOrUpdateRoom(String roomId, String latestMsg, int newReadCount, Boolean isMute, boolean hasNewMsg, boolean atMe) {
 
         //更新聊天列表
         Set<String> recentContacts = Core.getRecentContacts();
@@ -281,7 +285,7 @@ public class RoomsPanel extends ParentAvailablePanel {
      * @param isMute 是否免打扰
      * @param hasNewMsg 是否有未读消息 ，当房间为免打扰房间时newReadCount不计数，此时通过hasNewMsg判断
      */
-    public void updateRoomItem(String roomId, int newReadCount, String lastMsg, LocalDateTime time, Boolean isMute, Boolean hasNewMsg,Boolean atMe) {
+    public void updateRoomItem(String roomId, int newReadCount, String lastMsg, LocalDateTime time, Boolean isMute, Boolean hasNewMsg,boolean atMe) {
         if (roomId == null || roomId.isEmpty()) {
             notifyDataSetChanged(true);
             return;
@@ -306,8 +310,9 @@ public class RoomsPanel extends ParentAvailablePanel {
                  if(hasNewMsg!=null){
                      item.setHasNewMsg(hasNewMsg);
                  }
-                if (atMe != null) {
-                    item.setAtMe(atMe);
+                 item.setCurrentAtMe(atMe);
+                if (atMe ) {
+                    item.setBeforeAtMe(true);
                 }
                 //最新消息移到首行
                 if (i != 0) {
