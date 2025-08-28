@@ -154,10 +154,10 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
                 // 之所以要加上!scrollBarPressed这个条件，scrollBar在顶部的时间，scrollbar点击和释放都分别会触发adjustmentValueChanged这个事件
                 // 所以只让scrollBar释放的时候触发这个回调
                 // !scrollToBottom 这个条件保证在自动滚动到底部之前，不会调用此回调
-//                if (evt.getValue() == 0 && evt.getValue() != lastScrollValue && scrollToTopListener != null && !scrollBarPressed && !scrollToBottom) {
-//                    messageLoading = true;
-//                    scrollToTopListener.onScrollToTop();
-//                }
+                if (evt.getValue() == 0 && evt.getValue() != lastScrollValue && scrollToTopListener != null && !scrollBarPressed && !scrollToBottom) {
+                    messageLoading = true;
+                    scrollToTopListener.onScrollToTop();
+                }
 
                 if (evt.getAdjustmentType() == AdjustmentEvent.TRACK && scrollToBottom) {
                     getVerticalScrollBar().setValue(getVerticalScrollBar().getModel().getMaximum()
@@ -167,7 +167,7 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
                     scrollListener.onScroll(evt.getValue()
                             ,evt.getAdjustable().getMaximum());
                 }
-               // lastScrollValue = evt.getValue();
+                lastScrollValue = evt.getValue();
             }
         };
 
