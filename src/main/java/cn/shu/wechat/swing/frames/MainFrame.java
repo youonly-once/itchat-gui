@@ -140,7 +140,6 @@ public class MainFrame extends JFrame {
         exitItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                clearClipboardCache();
                 WeChatTool.webWXLogOut();
                 System.exit(1);
             }
