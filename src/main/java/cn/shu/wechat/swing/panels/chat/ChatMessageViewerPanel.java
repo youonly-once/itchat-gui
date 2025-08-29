@@ -44,6 +44,7 @@ public class ChatMessageViewerPanel extends ParentAvailablePanel {
         initComponents();
         initView();
         setListeners();
+        loadHistory();
     }
 
     @Override

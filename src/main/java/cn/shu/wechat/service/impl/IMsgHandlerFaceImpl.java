@@ -508,7 +508,10 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             roomId = msg.getToUserName();
         }
         //在被撤回的消息旁边标注“已撤回”
-        ChatPanelContainer.get(roomId).getChatMessagePanel().setRevokeStatus(oldMessage.getId());
+        if (ChatPanelContainer.getContext().isCurrentRoom(roomId)) {
+            ChatPanelContainer.get(roomId).getChatMessagePanel().setRevokeStatus(oldMessage.getId());
+        }
+
 
 
         //==============是否为自己的消息
