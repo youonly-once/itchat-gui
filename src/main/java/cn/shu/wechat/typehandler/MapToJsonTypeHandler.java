@@ -13,7 +13,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
+
 public class MapToJsonTypeHandler extends BaseTypeHandler<Map<String, Object>> {
 
     @Override
