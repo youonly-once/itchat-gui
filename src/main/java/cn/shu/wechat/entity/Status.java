@@ -26,4 +26,14 @@ public class Status {
      * 自动回复状态1自动回复2不自动回复
      */
     private Short autoStatus;
+
+    /**
+     * 自动回复状态1自动回复2不自动回复
+     */
+    private String key;
+
+    /**
+     * 自动回复状态1自动回复2不自动回复
+     */
+    private String value;
 }

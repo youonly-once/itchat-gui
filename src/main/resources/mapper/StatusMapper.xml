@@ -289,6 +289,12 @@
             <if test="autoStatus != null">
                 auto_status,
             </if>
+            <if test="key != null">
+                key,
+            </if>
+            <if test="value != null">
+                value,
+            </if>
         </trim>
         VALUES
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -300,6 +306,12 @@
             </if>
             <if test="autoStatus != null">
                 #{autoStatus,jdbcType=SMALLINT},
+            </if>
+            <if test="key != null">
+                #{key,jdbcType=VARCHAR},
+            </if>
+            <if test="value != null">
+                #{value,jdbcType=VARCHAR},
             </if>
         </trim>
     </insert>

@@ -759,6 +759,16 @@ public class ContactsTools {
         return Optional.empty();
     }
 
+    public static Optional<Contacts> findGroupMemberByNickName(List<Contacts> members, String nickName) {
+        for (Contacts m : members) {
+            if (
+                    Objects.equals(m.getNickname(),nickName)) {
+                return Optional.of(m);
+            }
+        }
+        return Optional.empty();
+    }
+
     public static Optional<Contacts> findContactsByString(String str) {
         for (Contacts m : Core.getMemberMap().values()) {
             if (

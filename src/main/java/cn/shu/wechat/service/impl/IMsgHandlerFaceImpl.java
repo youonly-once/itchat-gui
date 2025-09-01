@@ -3,6 +3,7 @@ package cn.shu.wechat.service.impl;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
+import cn.shu.wechat.constant.DownloadType;
 import cn.shu.wechat.constant.TulLingResultType;
 import cn.shu.wechat.constant.WxReqParamsConstant;
 import cn.shu.wechat.constant.WxRespConstant;
@@ -10,26 +11,34 @@ import cn.shu.wechat.core.Core;
 import cn.shu.wechat.dto.response.sync.AddMsgList;
 import cn.shu.wechat.dto.response.tuling.Results;
 import cn.shu.wechat.dto.response.tuling.TuLingResponseBean;
+import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.entity.Status;
 import cn.shu.wechat.entity.StatusExample;
 import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.mapper.StatusMapper;
 import cn.shu.wechat.service.IMsgHandlerFace;
+import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.task.DownloadManager;
+import cn.shu.wechat.task.DownloadTask;
 import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.ThreadUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 @Log4j2
@@ -55,11 +64,15 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     @Resource
     private ChartUtil chartUtil;
 
+    private Pattern pattern = Pattern.compile("\"([^\"]*)\"");
+
 
     /**
      * 已关闭防撤回联系人列表
      */
     public final Set<String> nonPreventUndoMsgUserName = new HashSet<>();
+    @Autowired
+    private LoginService loginService;
 
     @PostConstruct
     private void initSet() {
@@ -154,6 +167,8 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                             .content("【oauto/cauto】\n\t开启/关闭群消息自动回复\n"
                                     + "【opundo/cpundo】\n\t开启/关闭群消息防撤回\n"
                                     + "【ggr】\n\t群成员性别比例图\n"
+                                    + "【welo】\n\t开启新成员欢迎功能\n"
+                                    + "【welc】\n\t关闭新成员欢迎功能\n"
                                     + "【gpr】\n\t群成员省市分布图\n"
                                     + "【op/cp】\n\t开启/关闭全局个人用户消息自动回复\n"
                                     + "【gma10】\n\t群成员活跃度TOP10\n"
@@ -172,6 +187,8 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                             .content("【oauto/cauto】\n\t开启/关闭当前联系人自动回复\n"
                                     + "【opundo/cpundo】\n\t开启/关闭当前联系人消息防撤回\n"
                                     + "【op/cp】\n\t开启/关闭全局个人用户消息自动回复\n"
+                                    + "【welo】\n\t开启新成员欢迎功能\n"
+                                    + "【welc】\n\t关闭新成员欢迎功能\n"
                                     + "【mf10】\n\t聊天消息关键词TOP10\n"
                                     + "【gma10】\n\t活跃度TOP\n"
                                     + "【updateinfo】\n\t好友属性更新次数排行\n"
@@ -203,7 +220,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 Status build = Status.builder().name(to)
                         .autoStatus((short) 1).build();
                 statusMapper.insertOrUpdateSelectiveForSqlite(build);
-                ChatPanelContainer.get(toUserName).getChatMessagePanel().getChatMessageEditorPanel().setUndoAndAutoLabel();
+                if(ChatPanelContainer.getContext().isCurrentRoom(toUserName)) {
+                    ChatPanelContainer.get(toUserName).getChatMessagePanel().getChatMessageEditorPanel().setUndoAndAutoLabel();
+                }
 
                 messages.add(Message.builder().msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                         .content("已开启【" + remarkNameByGroupUserName + "】自动回复功能")
@@ -216,11 +235,37 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                build = Status.builder().name(to)
                         .autoStatus((short) 2).build();
                 statusMapper.insertOrUpdateSelectiveForSqlite(build);
-                ChatPanelContainer.get(toUserName).getChatMessagePanel().getChatMessageEditorPanel().setUndoAndAutoLabel();
+                if(ChatPanelContainer.getContext().isCurrentRoom(toUserName)) {
+                    ChatPanelContainer.get(toUserName).getChatMessagePanel().getChatMessageEditorPanel().setUndoAndAutoLabel();
+                }
                 messages.add(Message.builder().msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                         .content("已关闭【" + remarkNameByGroupUserName + "】自动回复功能")
                         .toUsername(toUserName).build());
                 log.info("已关闭【" + remarkNameByGroupUserName + "】自动回复功能");
+                break;
+            case "welo":
+                to = ContactsTools.getContactDisplayNameByUserName(toUserName);
+                 build = Status.builder().name(to)
+                         .key("welcome")
+                         .value("true").build();
+                statusMapper.insertOrUpdateSelectiveForSqlite(build);
+
+                messages.add(Message.builder().msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
+                        .content("已开启【" + remarkNameByGroupUserName + "】新成员欢迎功能")
+                        .toUsername(toUserName).build());
+                log.info("已开启【" + remarkNameByGroupUserName + "】新成员欢迎功能");
+                break;
+            case "welc":
+                to = ContactsTools.getContactDisplayNameByUserName(toUserName);
+                build = Status.builder().name(to)
+                        .key("welcome")
+                        .value("false").build();
+                statusMapper.insertOrUpdateSelectiveForSqlite(build);
+
+                messages.add(Message.builder().msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
+                        .content("已关闭【" + remarkNameByGroupUserName + "】新成员欢迎功能")
+                        .toUsername(toUserName).build());
+                log.info("已关闭【" + remarkNameByGroupUserName + "】新成员欢迎功能");
                 break;
             case "opundo":
                 to = ContactsTools.getContactDisplayNameByUserName(toUserName);
@@ -228,7 +273,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 build = Status.builder().name(to)
                         .undoStatus((short) 1).build();
                 statusMapper.insertOrUpdateSelectiveForSqlite(build);
-                ChatPanelContainer.get(toUserName).getChatMessagePanel().getChatMessageEditorPanel().setUndoAndAutoLabel();
+                if(ChatPanelContainer.getContext().isCurrentRoom(toUserName)) {
+                    ChatPanelContainer.get(toUserName).getChatMessagePanel().getChatMessageEditorPanel().setUndoAndAutoLabel();
+                }
 
                 messages.add(Message.builder().msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                         .content("已开启【" + remarkNameByGroupUserName + "】防撤回功能")
@@ -242,7 +289,10 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 statusMapper.insertOrUpdateSelectiveForSqlite(build);
                 //群消息
                 nonPreventUndoMsgUserName.add(to);
-                ChatPanelContainer.get(toUserName).getChatMessagePanel().getChatMessageEditorPanel().setUndoAndAutoLabel();
+                if(ChatPanelContainer.getContext().isCurrentRoom(toUserName)) {
+                    ChatPanelContainer.get(toUserName).getChatMessagePanel().getChatMessageEditorPanel().setUndoAndAutoLabel();
+
+                }
 
                 messages.add(Message.builder().msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                         .content("已关闭【" + remarkNameByGroupUserName + "】防撤回功能")
@@ -745,6 +795,58 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
 
     @Override
     public List<Message> systemMsgHandle(AddMsgList msg) {
+
+        //判断是否加入群里消息
+        if (msg.getContent().contains("加入了群聊")|| msg.getContent().contains("加入群聊")){
+            // 正则匹配双引号中的内容
+            Status welcome = statusMapper.selectOne(Wrappers.<Status>lambdaQuery().eq(Status::getKey, "welcome").eq(Status::getName,ContactsTools.getContactDisplayNameByUserName(msg.getFromUserName())));
+            if (welcome == null || welcome.getValue().equals("false")) {
+                return null;
+            }
+            Matcher matcher = pattern.matcher(msg.getPlainText());
+            if (msg.getContent().contains("加入了群聊") && !msg.getContent().startsWith("你")){
+                matcher.find();
+            }
+            List<Message> results = new ArrayList<>();
+            if (matcher.find()) {
+                String nickName = matcher.group(1);
+
+                try {
+                    ThreadUtils.sleepQuietly(Duration.ofSeconds(10));
+                    loginService.WebWxBatchGetContact(msg.getFromUserName());
+                } catch (IOException | InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+
+                Optional<Contacts> groupMemberByNickName = ContactsTools.findGroupMemberByNickName(Core.getMemberMap().get(msg.getFromUserName()).getMemberlist(), nickName);
+                if (groupMemberByNickName.isPresent()) {
+                    Contacts contacts = groupMemberByNickName.get();
+                    String content = "欢迎【"+nickName+"】加入群聊";
+                    if (contacts.getSex() != null){
+                        content+="\n性别:"+(contacts.getSex()==1?"男":"女");
+                    }
+                    if (contacts.getProvince() != null || contacts.getCity() != null){
+                        content+="\n"+"城市："+(contacts.getProvince()==null?"":contacts.getProvince())+(contacts.getCity()==null?"":contacts.getCity());
+                    }
+                    if (contacts.getSignature() != null ){
+                        content+="\n"+"签名："+contacts.getSignature();
+                    }
+                    results.add(Message.builder()
+                            .content(content)
+                            .msgType(WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
+                            .toUsername(msg.getFromUserName())
+                            .build());
+                }else{
+                    results.add(Message.builder()
+                            .content("欢迎【"+nickName+"】加入群聊")
+                            .msgType(WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
+                            .toUsername(msg.getFromUserName())
+                            .build());
+                }
+
+                return results;
+            }
+        }
         return null;
     }
 

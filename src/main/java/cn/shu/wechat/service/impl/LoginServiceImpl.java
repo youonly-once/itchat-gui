@@ -430,7 +430,12 @@ public class LoginServiceImpl implements LoginService {
             case MOD_CONTACT:
             case ADD_OR_DEL_CONTACT:
             case NEW_MSG:
+                if (!webWxSyncMsg.getModContactList().isEmpty()) {
+                    //  ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
 
+                    msgCenter.handleModContact(webWxSyncMsg.getModContactList());
+                    // });
+                }
                 //新消息
                 for (AddMsgList msg : webWxSyncMsg.getAddMsgList()) {
                     if (msgIds.contains(msg.getMsgId())) {
@@ -442,16 +447,12 @@ public class LoginServiceImpl implements LoginService {
                         //=============加载群成员==============
                         MsgCenter.groupMsgFormat(msg);
                         Contacts contacts = ContactsTools.loadUserInfo(msg.getFromUserName(), msg.getToUserName(), msg.getMemberName(), msg);
+                        //联系人修改
+
                         msgCenter.handleNewMsg(msg, contacts);
                     });
                 }
-                //联系人修改
-                if (!webWxSyncMsg.getModContactList().isEmpty()) {
-                    ExecutorServiceUtil.getGlobalExecutorService().execute(() -> {
 
-                        msgCenter.handleModContact(webWxSyncMsg.getModContactList());
-                    });
-                }
                 for (Contacts contacts : webWxSyncMsg.getDelContactList()) {
                     log.info("联系人删除：{}", contacts);
                 }
