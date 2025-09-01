@@ -3,7 +3,6 @@ package cn.shu.wechat.service.impl;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
-import cn.shu.wechat.constant.DownloadType;
 import cn.shu.wechat.constant.TulLingResultType;
 import cn.shu.wechat.constant.WxReqParamsConstant;
 import cn.shu.wechat.constant.WxRespConstant;
@@ -21,7 +20,6 @@ import cn.shu.wechat.service.IMsgHandlerFace;
 import cn.shu.wechat.service.LoginService;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.task.DownloadManager;
-import cn.shu.wechat.task.DownloadTask;
 import cn.shu.wechat.utils.*;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -416,7 +414,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
 
         //处理控制命令
         List<Message> messages = controlCommandHandler(msg);
-        if (messages.size() > 0) {
+        if (!messages.isEmpty()) {
             return messages;
         }
         try {
@@ -809,30 +807,33 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             }
             List<Message> results = new ArrayList<>();
             if (matcher.find()) {
-                String nickName = matcher.group(1);
-
-                try {
-                    ThreadUtils.sleepQuietly(Duration.ofSeconds(10));
-                    loginService.WebWxBatchGetContact(msg.getFromUserName());
-                } catch (IOException | InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-
+                String nickName = EmojiUtil.emojiFormatter(matcher.group(1));
                 Optional<Contacts> groupMemberByNickName = ContactsTools.findGroupMemberByNickName(Core.getMemberMap().get(msg.getFromUserName()).getMemberlist(), nickName);
+                if (groupMemberByNickName.isEmpty()) {
+                    try {
+                        ThreadUtils.sleepQuietly(Duration.ofSeconds(10));
+                        loginService.WebWxBatchGetContact(msg.getFromUserName());
+                    } catch (IOException | InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                groupMemberByNickName = ContactsTools.findGroupMemberByNickName(Core.getMemberMap().get(msg.getFromUserName()).getMemberlist(), nickName);
                 if (groupMemberByNickName.isPresent()) {
                     Contacts contacts = groupMemberByNickName.get();
-                    String content = "欢迎【"+nickName+"】加入群聊";
-                    if (contacts.getSex() != null){
-                        content+="\n性别:"+(contacts.getSex()==1?"男":"女");
+                    StringBuilder content = new StringBuilder("欢迎【" + nickName + "】加入群聊");
+                    if (contacts.getSex() != null) {
+                        content.append("\n性别：").append(contacts.getSex() == 1 ? "男" : "女");
                     }
-                    if (contacts.getProvince() != null || contacts.getCity() != null){
-                        content+="\n"+"城市："+(contacts.getProvince()==null?"":contacts.getProvince())+(contacts.getCity()==null?"":contacts.getCity());
+                    if (contacts.getProvince() != null || contacts.getCity() != null) {
+                        content.append("\n城市：")
+                                .append(contacts.getProvince() == null ? "" : contacts.getProvince())
+                                .append(contacts.getCity() == null ? "" : contacts.getCity());
                     }
-                    if (contacts.getSignature() != null ){
-                        content+="\n"+"签名："+contacts.getSignature();
+                    if (contacts.getSignature() != null) {
+                        content.append("\n签名：").append(EmojiUtil.emojiFormatter(contacts.getSignature()));
                     }
                     results.add(Message.builder()
-                            .content(content)
+                            .content(content.toString())
                             .msgType(WxRespConstant.WXReceiveMsgCodeEnum.MSGTYPE_TEXT.getCode())
                             .toUsername(msg.getFromUserName())
                             .build());
