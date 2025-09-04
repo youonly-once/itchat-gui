@@ -809,7 +809,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             if (matcher.find()) {
                 String nickName = EmojiUtil.emojiFormatter(matcher.group(1));
                 Optional<Contacts> groupMemberByNickName = ContactsTools.findGroupMemberByNickName(Core.getMemberMap().get(msg.getFromUserName()).getMemberlist(), nickName);
-                if (groupMemberByNickName.isEmpty()) {
+                if (groupMemberByNickName.isEmpty() || groupMemberByNickName.get().getSex() == null) {
                     try {
                         ThreadUtils.sleepQuietly(Duration.ofSeconds(10));
                         loginService.WebWxBatchGetContact(msg.getFromUserName());

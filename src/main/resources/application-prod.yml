@@ -3,6 +3,9 @@ mybatis:
 spring:
   application:
     name: autowechat
+  main:
+    allow-circular-references: true
+
   profiles:
     active: test
   datasource: #数据源配置在bootstrap.yml启动报错，why？

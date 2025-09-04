@@ -154,10 +154,12 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
                 // 之所以要加上!scrollBarPressed这个条件，scrollBar在顶部的时间，scrollbar点击和释放都分别会触发adjustmentValueChanged这个事件
                 // 所以只让scrollBar释放的时候触发这个回调
                 // !scrollToBottom 这个条件保证在自动滚动到底部之前，不会调用此回调
-//                if (evt.getValue() == 0 && evt.getValue() != lastScrollValue && scrollToTopListener != null && !scrollBarPressed && !scrollToBottom) {
-//                    messageLoading = true;
-//                    scrollToTopListener.onScrollToTop();
-//                }
+                //初始的时候才会调用  滑动滚动条会调用
+                if (evt.getValue() == 0 && evt.getValue() != lastScrollValue && scrollToTopListener != null && !scrollBarPressed && !scrollToBottom && !messageLoading) {
+                    messageLoading = true;
+                    scrollToTopListener.onScrollToTop();
+                    messageLoading = false;
+                }
 
                 if (evt.getAdjustmentType() == AdjustmentEvent.TRACK && scrollToBottom) {
                     getVerticalScrollBar().setValue(getVerticalScrollBar().getModel().getMaximum()
@@ -167,7 +169,7 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
                     scrollListener.onScroll(evt.getValue()
                             ,evt.getAdjustable().getMaximum());
                 }
-               // lastScrollValue = evt.getValue();
+                lastScrollValue = evt.getValue();
             }
         };
 
@@ -192,11 +194,13 @@ public class RCListView<T extends ViewHolder, M extends BaseAdapter<T>> extends 
                     lastWheelTime = System.currentTimeMillis();
                     return;
                 }
+                //之所以!getVerticalScrollBar().isVisible()是因为 滚动条显示会触发上面的adjustmentValueChanged，导致调用两次
                 lastWheelTime = System.currentTimeMillis();
-                if (getVerticalScrollBar().getValue() <= getVerticalScrollBar().getUnitIncrement()) {
-
+                if (!getVerticalScrollBar().isVisible() && getVerticalScrollBar().getValue() <= getVerticalScrollBar().getUnitIncrement()) {
+                    //滚轮滑动会调用
                     System.out.println("鼠标滚轮到顶，自动加载");
                     if (scrollToTopListener != null) {
+                        messageLoading = true;
                         scrollToTopListener.onScrollToTop();
                         messageLoading = false;
                     }
