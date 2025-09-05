@@ -320,13 +320,15 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
 
             if (StringUtils.isNotEmpty(item.getFilePath())
                     && Files.exists(Path.of(item.getFilePath()))) {
-                DownloadManager.completableFuture(item.getFilePath()).thenAccept(e->{
-                    if (Files.exists(Path.of(item.getFilePath()))) {
-                        ImageIcon imageIcon = new ImageIcon(item.getFilePath());
-                        IconUtil.preferredImageSize(imageIcon, MessageProgramOfAppViewHolder.maxWidth, MessageProgramOfAppViewHolder.maxHeight);
-                        SwingUtilities.invokeLater(() -> viewHolder.imageLabel.setIcon(imageIcon));
-                    }
-                });
+                DownloadManager.completableFuture(item.getFilePath())
+                        .handle((result, ex) -> {
+                            ImageIcon imageIcon = new ImageIcon(item.getFilePath());
+                            IconUtil.preferredImageSize(imageIcon,
+                                    MessageProgramOfAppViewHolder.maxWidth,
+                                    MessageProgramOfAppViewHolder.maxHeight);
+                            SwingUtilities.invokeLater(() -> viewHolder.imageLabel.setIcon(imageIcon));
+                            return null; // handle 必须返回值
+                        });
 
             } else {
 

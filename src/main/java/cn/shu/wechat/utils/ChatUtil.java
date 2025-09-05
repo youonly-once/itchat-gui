@@ -14,6 +14,7 @@ import javax.swing.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @作者 舒新胜
@@ -110,6 +111,27 @@ public final class ChatUtil {
             }
         }
         return isAtMe.get();
+    }
+
+    public static String isAtOnlyMe(String roomId, String lastMsg) {
+        //如果是 群 判断是否有人@我
+        //Contacts contacts = roomItem.getContacts();
+        AtomicReference<String> r = new AtomicReference<>("");
+        Contacts contacts = Core.getMemberMap().get(roomId);
+        if (contacts != null && ContactsTools.isRoomContact(contacts)) {
+            if ((StringUtils.isNotEmpty(Core.getUserSelf().getRemarkname()) && lastMsg.contains("@" + Core.getUserSelf().getRemarkname()+" "))) {
+                return "@" + Core.getUserSelf().getRemarkname()+" ";
+            } else if ( (StringUtils.isNotEmpty(Core.getNickName()) && lastMsg.contains("@" + Core.getNickName()+" "))) {
+                return "@" + Core.getNickName()+" ";
+            } else if (contacts.getMemberlist() != null) {
+                contacts.getMemberlist().stream().filter(e -> e.getUsername().equals(Core.getUserName())).findAny().ifPresent(e -> {
+                    if (StringUtils.isNotEmpty(e.getDisplayname()) && lastMsg.contains("@" + e.getDisplayname()+" ")) {
+                        r.set("@" + e.getDisplayname()+" ");
+                    }
+                });
+            }
+        }
+        return  r.get();
     }
 
     /**

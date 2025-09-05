@@ -26,6 +26,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.ThreadUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -162,7 +163,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 if (msg.isGroupMsg()) {
                     //群消息
                     messages.add(Message.builder()
-                            .content("【oauto/cauto】\n\t开启/关闭群消息自动回复\n"
+                            .content("【oauto/cauto】\n\t开启/关闭群消息自动回复(@我提问)\n"
                                     + "【opundo/cpundo】\n\t开启/关闭群消息防撤回\n"
                                     + "【ggr】\n\t群成员性别比例图\n"
                                     + "【welo】\n\t开启新成员欢迎功能\n"
@@ -421,7 +422,18 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             //是否需要自动回复
             String to = ContactsTools.getContactDisplayNameByUserName(msg.getFromUserName());
             if (autoChatUserNameList.contains(to)) {
-                messages = autoReply(text, msg);
+                if (msg.isGroupMsg()){
+                    String atOnlyMe = ChatUtil.isAtOnlyMe(msg.getFromUserName(), text);
+                    if (StringUtils.isNotBlank(atOnlyMe)) {
+                        messages = autoReply(text.replace(atOnlyMe,""), msg);
+                        for (Message message : messages) {
+                            message.setContent("@"+ContactsTools.getMemberDisplayNameOfGroup(msg.getFromUserName(),msg.getMemberName())+" "+message.getContent());
+                        }
+                    }
+                }else{
+                    messages = autoReply(text, msg);
+                }
+
             } else if (autoChatWithPersonal && !msg.isGroupMsg()) {
                 messages = autoReply(text, msg);
             } else if (text.startsWith("；") && msg.getFromUserName().equals(Core.getUserName())) {
@@ -447,7 +459,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     private List<Message> autoReply(String text, AddMsgList msg)  {
         try {
 
-            String result = Ollama.chatWithHistory(msg.getFromUserName(),text);
+            String result = Ollama.chatWithHistory(msg.getMemberName()==null?msg.getFromUserName():msg.getMemberName(),text);
             List<Message> messageList = Collections.singletonList(Message.builder()
                     .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                     .toUsername(msg.getFromUserName())
