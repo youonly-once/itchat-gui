@@ -29,7 +29,14 @@
 
 ---
 
-## 一、功能扩展介绍(旧版本界面)
+## 一、部分扩展功能介绍(旧版本界面)
+
+
+### 0. 群成员欢迎功能
+- 进群欢迎 退群通知。
+
+<img width="623" height="514" alt="image" src="https://github.com/user-attachments/assets/b181d886-7a74-4c2b-b7f2-f425b58ba519" />
+
 
 ### 1. 防撤回功能
 - 支持语音、文字、图片、视频等消息防撤回。
@@ -42,6 +49,7 @@
 - 不再担心因没及时回复女友消息而吵架分手。
 
 ![自动回复功能](https://github.com/youonly-once/itchat-gui/assets/67832925/39ad8a0d-ebca-4746-adb3-7f11c018ecd4)
+<img width="628" height="571" alt="image" src="https://github.com/user-attachments/assets/2495acca-bf8f-435d-a2e4-9eb57ec5e5ec" />
 
 ### 3. 用户属性监测
 - 监控好友头像、昵称、签名、朋友圈动态等变化。
@@ -57,8 +65,10 @@
 
 ### 5. 好友及群成员分析
 - 统计群成员的性别、城市、活跃度等信息，分析群体特征。
+<img width="901" height="565" alt="image" src="https://github.com/user-attachments/assets/e8e791c4-5589-405c-a66a-be8d1e8ade8a" />
 
 ![群成员统计](https://github.com/youonly-once/itchat-gui/assets/67832925/31b7d2c8-f16e-4fe3-9c3b-a84cc7055a84)
+<img width="957" height="567" alt="image" src="https://github.com/user-attachments/assets/11f3caef-66ea-45f2-a94a-ff95b0c9d162" />
 
 ---
 ## 常见问题
