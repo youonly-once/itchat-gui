@@ -5,3 +5,8 @@ spring:
     name: autowechat
   profiles:
     active: @spring-profiles-active@
+  ai:
+    ollama:
+      ## base-url: http://7d1e62bc.r15.cpolar.top
+      chat:
+        model: llama3.1:8b

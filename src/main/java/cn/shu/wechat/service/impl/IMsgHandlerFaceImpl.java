@@ -49,6 +49,10 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
 
     @Resource
     private StatusMapper statusMapper;
+
+    @Resource
+    private Ollama ollama;
+
     /**
      * autoChatUserNameList 包含 发送者：自动回复
      * 不包含：autoChatWithPersonal = true ：自动回复，false ：不回复
@@ -459,7 +463,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     private List<Message> autoReply(String text, AddMsgList msg)  {
         try {
 
-            String result = Ollama.chatWithHistory(msg.getMemberName()==null?msg.getFromUserName():msg.getMemberName(),text);
+            String result = ollama.chatWithSpringAi(msg.getMemberName() == null ? msg.getFromUserName() : msg.getMemberName(), text);
             List<Message> messageList = Collections.singletonList(Message.builder()
                     .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                     .toUsername(msg.getFromUserName())

@@ -7,6 +7,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.ollama.api.OllamaOptions;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,7 +20,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
+@Component
 public class Ollama {
+
+
     @Data
     static class Request {
         private String model;
@@ -50,9 +59,26 @@ public class Ollama {
         private long eval_duration;
     }
 
-    private static final Map<String, List<Message>> msgHistory = new HashMap<>();
+    private final ChatClient ollamaiChatClient;
 
-    public static String chat(String userNme, String question) {
+    public Ollama(ChatModel chatModel, ChatMemory chatMemory) {
+        // 构造时，可以设置 ChatClient 的参数
+        // {@link org.springframework.ai.chat.client.ChatClient};
+        this.ollamaiChatClient = ChatClient.builder(chatModel)
+                // 实现 Logger 的 Advisor
+                .defaultAdvisors(
+                        MessageChatMemoryAdvisor.builder(chatMemory).build()
+                )
+                // 设置 ChatClient 中 ChatModel 的 Options 参数
+                .defaultOptions(
+                        OllamaOptions.builder()
+                                .topP(0.7)
+                                .build()
+                )
+                .build();
+    }
+
+    public static String chatNative(String userNme, String question) {
 
 
         String json = "{\"model\": \"qwen:7b\", \"prompt\": \"Why is the sky blue?\",\"stream\": false}";
@@ -68,6 +94,15 @@ public class Ollama {
 
 
         return responseB.getResponse();
+    }
+    private static final Map<String, List<Message>> msgHistory = new HashMap<>();
+
+    public String chatWithSpringAi(String userNme, String question) {
+        return ollamaiChatClient.prompt()
+
+                .user(question)
+                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, userNme))
+                .call().content();
     }
 
     public static String chatWithHistory(String userName, String question) throws IOException {
