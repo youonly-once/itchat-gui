@@ -463,7 +463,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     private List<Message> autoReply(String text, AddMsgList msg)  {
         try {
 
-            String result = ollama.chatWithSpringAi(msg.getMemberName() == null ? msg.getFromUserName() : msg.getMemberName(), text);
+            String result = ollama.chatWithSpringAi(msg.getMemberName() == null ? msg.getFromUserName() : msg.getMemberName(), msg.getFromUserName(), text);
             List<Message> messageList = Collections.singletonList(Message.builder()
                     .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                     .toUsername(msg.getFromUserName())

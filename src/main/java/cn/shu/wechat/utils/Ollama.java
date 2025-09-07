@@ -1,7 +1,9 @@
 package cn.shu.wechat.utils;
 
 import cn.shu.wechat.configuration.WechatConfiguration;
+import cn.shu.wechat.service.FunctionCallingService;
 import com.alibaba.fastjson.JSON;
+import jakarta.annotation.Resource;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -96,12 +98,15 @@ public class Ollama {
         return responseB.getResponse();
     }
     private static final Map<String, List<Message>> msgHistory = new HashMap<>();
+    @Resource
+    private FunctionCallingService functionCallingService;
 
-    public String chatWithSpringAi(String userNme, String question) {
+    public String chatWithSpringAi(String fromUserNme, String toUserName, String question) {
+        FunctionCallingService.setUserName(toUserName);
         return ollamaiChatClient.prompt()
-
+                .tools(functionCallingService)
                 .user(question)
-                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, userNme))
+                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, fromUserNme))
                 .call().content();
     }
 
