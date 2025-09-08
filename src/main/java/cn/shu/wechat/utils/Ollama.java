@@ -14,6 +14,9 @@ import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.ollama.api.OllamaOptions;
+import org.springframework.ai.tool.definition.ToolDefinition;
+import org.springframework.ai.tool.method.MethodToolCallback;
+import org.springframework.ai.util.json.schema.JsonSchemaGenerator;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -103,8 +106,36 @@ public class Ollama {
 
     public String chatWithSpringAi(String fromUserNme, String toUserName, String question) {
         FunctionCallingService.setUserName(toUserName);
+        String systemPrompt = """
+你只能在用户明确请求时调用以下工具：
+
+1. get_group_gender_ratio(groupId)
+   - 仅在用户明确要求获取微信群成员男女比例时调用此工具。
+   - 不要在问候语、闲聊或与群男女比例无关的问题时调用。
+
+2. open_auto_reply(userId)
+   - 仅在用户明确要求开启群聊自动回复功能时调用此工具。
+   - 不要在问候语、闲聊或与自动回复无关的问题时调用。
+
+如果没有工具可以调用，请始终用自然语言回答。
+不要在一般知识性问题（如“中国有哪些出名的山”）中触发任何工具。
+""";
+
+//        String content = ollamaiChatClient.prompt()
+//                .tools(functionCallingService)
+//                .system(systemPrompt)
+//                .user(question)
+//                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, fromUserNme))
+//                .call().content();
+//        if (FunctionCallingService.invoke.get() == null || !FunctionCallingService.invoke.get()){
+//            return ollamaiChatClient.prompt()
+//                    .user(question)
+//                    .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, fromUserNme))
+//                    .call().content();
+//        }else{
+//            return content;
+//        }
         return ollamaiChatClient.prompt()
-                .tools(functionCallingService)
                 .user(question)
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, fromUserNme))
                 .call().content();

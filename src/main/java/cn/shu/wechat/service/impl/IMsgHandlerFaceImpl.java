@@ -62,7 +62,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     /**
      * 自动聊天联系人列表，包括个人、群...
      */
-    public final Set<String> autoChatUserNameList = new HashSet<>();
+    public final static Set<String> autoChatUserNameList = new HashSet<>();
 
     @Resource
     private ChartUtil chartUtil;
