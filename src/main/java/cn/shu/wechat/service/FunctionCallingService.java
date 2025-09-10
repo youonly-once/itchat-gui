@@ -10,9 +10,11 @@ import cn.shu.wechat.mapper.StatusMapper;
 import cn.shu.wechat.service.impl.IMsgHandlerFaceImpl;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.utils.ChartUtil;
+import dev.langchain4j.agent.tool.ReturnBehavior;
+import dev.langchain4j.agent.tool.Tool;
+import dev.langchain4j.guardrail.GuardrailResult;
+import dev.langchain4j.service.Result;
 import jakarta.annotation.Resource;
-import org.springframework.ai.tool.annotation.Tool;
-import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -33,33 +35,32 @@ public class FunctionCallingService {
 
     @Tool(
             name = "get_group_gender_ratio",
-            description = "Get the male-to-female ratio of members in a WeChat group. Only call this when the user explicitly asks for the gender ratio.",
-            returnDirect = true
+            value = "Get the male-to-female ratio of members in a WeChat group. Only call this when the user explicitly asks for the gender ratio."
     )
 
-    public String getGenderRatio(String groupId) {
+    public Result<String> getGenderRatio(String groupId) {
         invoke.set(true);
         String toUserName = contextToUserName.get();
         if (!ContactsTools.isRoomContact(toUserName)) {
-            return "当前不是群聊！";
+            return Result.<String>builder().content("当前不是群聊！").build();
         }
         Optional<String> pathOptional = chartUtil.makeContactsAttrPieChartAsPng(toUserName, "sex", 960, 540);
         if (pathOptional.isPresent()) {
             //群消息
             WebWXSendMsgResponse webWXSendMsgResponse = MessageTools.sendMsgByUserId(MessageTools.toPicMessage(pathOptional.get(), toUserName));
             if (webWXSendMsgResponse.getBaseResponse().getRet() != 0) {
-                return "生成比例图失败!";
+                return Result.<String>builder().content("生成比例图失败!").build();
             }
         }
-        return "已生成群聊男女比例图。";
+        return Result.<String>builder().content("已生成群聊男女比例图。").build() ;
     }
 
     @Tool(
             name = "open_auto_reply",
-            description = "Enable auto-reply in the group only when the user explicitly requests it.",
-            returnDirect = true
+            value = "Enable auto-reply in the group only when the user explicitly requests it."
+
     )
-    public String openAutoReply( String userId) {
+    public Result<String> openAutoReply() {
         invoke.set(true);
         String toUserName = contextToUserName.get();
 
@@ -79,6 +80,6 @@ public class FunctionCallingService {
                     .setUndoAndAutoLabel();
         }
 
-        return "已开启【" + to + "】自动回复功能";
+        return Result.<String>builder().content("已开启【" + to + "】自动回复功能").build();
     }
 }

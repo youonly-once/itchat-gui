@@ -21,3 +21,8 @@ wechat:
 openai:
   openai_key: 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
   expire: 60
+langchain4j:
+  ollama:
+    chat-model:
+      model-name: llama3.1:8b
+      base-url: http://localhost:11434

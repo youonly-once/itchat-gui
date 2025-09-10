@@ -1,22 +1,25 @@
 package cn.shu.wechat.utils;
 
 import cn.shu.wechat.configuration.WechatConfiguration;
+import cn.shu.wechat.service.Assisant;
 import cn.shu.wechat.service.FunctionCallingService;
 import com.alibaba.fastjson.JSON;
+import dev.langchain4j.agent.tool.ToolSpecification;
+import dev.langchain4j.agent.tool.ToolSpecifications;
+import dev.langchain4j.data.message.*;
+import dev.langchain4j.memory.ChatMemory;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.service.AiServices;
 import jakarta.annotation.Resource;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.ollama.api.OllamaOptions;
-import org.springframework.ai.tool.definition.ToolDefinition;
-import org.springframework.ai.tool.method.MethodToolCallback;
-import org.springframework.ai.util.json.schema.JsonSchemaGenerator;
+
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -24,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Function;
 
 @Component
 public class Ollama {
@@ -64,23 +68,26 @@ public class Ollama {
         private long eval_duration;
     }
 
-    private final ChatClient ollamaiChatClient;
+    private final ChatModel chatModel;
 
-    public Ollama(ChatModel chatModel, ChatMemory chatMemory) {
-        // 构造时，可以设置 ChatClient 的参数
-        // {@link org.springframework.ai.chat.client.ChatClient};
-        this.ollamaiChatClient = ChatClient.builder(chatModel)
-                // 实现 Logger 的 Advisor
-                .defaultAdvisors(
-                        MessageChatMemoryAdvisor.builder(chatMemory).build()
-                )
-                // 设置 ChatClient 中 ChatModel 的 Options 参数
-                .defaultOptions(
-                        OllamaOptions.builder()
-                                .topP(0.7)
-                                .build()
-                )
-                .build();
+    public Ollama(ChatModel chatModel) {
+        this.chatModel = chatModel;
+//        // 构造时，可以设置 ChatClient 的参数
+//        // {@link org.springframework.ai.chat.client.ChatClient};
+//        this.ollamaiChatClient = ChatClient.builder(chatModel)
+//                // 实现 Logger 的 Advisor
+//                .defaultAdvisors(
+//                        MessageChatMemoryAdvisor.builder(chatMemory).build()
+//                )
+//                // 设置 ChatClient 中 ChatModel 的 Options 参数
+//                .defaultOptions(
+//                        OllamaOptions.builder()
+//                                .topP(0.7)
+//                                .build()
+//                )
+//                .build();
+//        new T();
+//        chatModel.chat()
     }
 
     public static String chatNative(String userNme, String question) {
@@ -103,7 +110,8 @@ public class Ollama {
     private static final Map<String, List<Message>> msgHistory = new HashMap<>();
     @Resource
     private FunctionCallingService functionCallingService;
-
+    @Resource
+    private Assisant assisant;
     public String chatWithSpringAi(String fromUserNme, String toUserName, String question) {
         FunctionCallingService.setUserName(toUserName);
         String systemPrompt = """
@@ -135,10 +143,42 @@ public class Ollama {
 //        }else{
 //            return content;
 //        }
-        return ollamaiChatClient.prompt()
-                .user(question)
-                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, fromUserNme))
-                .call().content();
+//        return ollamaiChatClient.prompt()
+//                .user(question)
+//                .toolCallbacks(FunctionToolCallback.builder("getWeather", new Function<Object, Object>() {
+//                            @Override
+//                            public Object apply(Object o) {
+//                                return "测试";
+//                            }
+//                        })
+//                        .description("Use api.weather to get weather information.")
+//                        .inputType(String.class)
+//                        .build())
+//                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, fromUserNme))
+//                .call().content();
+//        UserMessage userMessage = UserMessage.from(
+//                TextContent.from(question)
+//        );
+//        List<ToolSpecification> toolSpecifications = ToolSpecifications.toolSpecificationsFrom(FunctionCallingService.class);
+//        ChatRequest request = ChatRequest.builder()
+//                .messages(userMessage)
+//                .toolSpecifications(toolSpecifications)
+//                .build();
+//        ChatResponse chat = chatModel.chat(request);
+
+
+
+//        if (chat.aiMessage().hasToolExecutionRequests()) {
+//            ToolExecutionResultMessage toolExecutionResultMessage = ToolExecutionResultMessage.from(chat.aiMessage().toolExecutionRequests(), result);
+//            ChatRequest request2 = ChatRequest.builder()
+//                    .messages(List.of(userMessage, chat.aiMessage(), toolExecutionResultMessage))
+//                    .toolSpecifications(toolSpecifications)
+//                    .build();
+//        }
+        String chat = assisant.chat(question);
+
+        return chat;
+        //return "";
     }
 
     public static String chatWithHistory(String userName, String question) throws IOException {
