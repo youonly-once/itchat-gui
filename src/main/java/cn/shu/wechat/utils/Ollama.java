@@ -25,10 +25,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.function.Function;
 
 @Component
 public class Ollama {
@@ -94,7 +96,11 @@ public class Ollama {
 
     private ChatModel openAIChatModel;
     @Bean
-    public Assisant assistant(@Qualifier("openAiChatModel") ChatModel chatModel, ChatMemoryProvider chatMemoryProvider, FunctionCallingService functionCallingService) {
+    public Assisant assistant( ChatMemoryProvider chatMemoryProvider, FunctionCallingService functionCallingService) {
+        OpenAiChatModel chatModel = OpenAiChatModel.builder()
+                .baseUrl("https://dashscope.aliyuncs.com/compatible-mode/v1")
+                .apiKey("sk-a7f53eff7ecb4787a23b7726301dad31")
+                .modelName("qwen3-max-preview").build();
         this.openAIChatModel = chatModel;
         return AiServices.builder(Assisant.class)
                 .chatModel(chatModel)
@@ -119,18 +125,20 @@ public class Ollama {
 
 
     public String chatWithHistory(String userName, Path imgPath) throws IOException {
+        Base64.Encoder encoder = Base64.getEncoder();
+        String s = encoder.encodeToString(Files.readAllBytes(imgPath));
         UserMessage userMessage = UserMessage.from(
                 TextContent.from("提取图中的群聊名称。"),
-                ImageContent.from(imgPath.toUri())
+                ImageContent.from(s,"image/gif")
         );
         OpenAiChatModel build = OpenAiChatModel.builder()
                 .baseUrl("https://dashscope.aliyuncs.com/compatible-mode/v1")
-                .apiKey("sk-a7f53eff7ecb4787a23b7726301dad")
+                .apiKey("sk-a7f53eff7ecb4787a23b7726301dad31")
                 .modelName("qwen-vl-max").build();
 //        byte[] imageData = Files.readAllBytes(imgPath);
 //        String base64Image = Base64.getEncoder().encodeToString(imageData);
         ChatResponse chat = build.chat(userMessage);
-        return chat.aiMessage().text();
+        return null;//chat.aiMessage().text();
     }
 
 
