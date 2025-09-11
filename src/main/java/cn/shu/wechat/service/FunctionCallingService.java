@@ -3,8 +3,6 @@ package cn.shu.wechat.service;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.constant.WxReqParamsConstant;
-import cn.shu.wechat.core.Core;
-import cn.shu.wechat.dto.response.msg.send.WebWXSendMsgResponse;
 import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.entity.Status;
 import cn.shu.wechat.mapper.StatusMapper;
@@ -12,15 +10,16 @@ import cn.shu.wechat.service.impl.IMsgHandlerFaceImpl;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.utils.ChartUtil;
 import dev.langchain4j.agent.tool.P;
-import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
-import dev.langchain4j.guardrail.GuardrailResult;
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.Result;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class FunctionCallingService{
@@ -237,7 +236,7 @@ public class FunctionCallingService{
                 chartUtil.makeWXMemberOfGroupActivityFile(toUserName) :
                 chartUtil.makeWXUserActivityFile(toUserName);
         MessageTools.sendMsgByUserId(MessageTools.toPicMessage(imgPath, toUserName));
-        return Result.<String>builder().content("已生成活跃度统计图，路径：" + imgPath).build();
+        return Result.<String>builder().content("已生成活跃度统计图").build();
     }
 
     @Tool(name = "generate_keyword_top10", value = "生成聊天关键词图表")
@@ -245,7 +244,7 @@ public class FunctionCallingService{
         String toUserName = contextToUserName.get();
         String imgPath = chartUtil.makeWXGroupMessageTopFile(toUserName);
         MessageTools.sendMsgByUserId(MessageTools.toPicMessage(imgPath, toUserName));
-        return Result.<String>builder().content("已生成关键词TOP10图表，路径：" + imgPath).build();
+        return Result.<String>builder().content("已生成关键词TOP10图表").build();
     }
 
     @Tool(name = "generate_message_type_top10", value = "生成聊天消息类型图表")
@@ -254,7 +253,7 @@ public class FunctionCallingService{
         String imgPath = chartUtil.makeWXGroupMessageTypeTopFile(toUserName);
 
         MessageTools.sendMsgByUserId(MessageTools.toPicMessage(imgPath, toUserName));
-        return Result.<String>builder().content("已生成消息类型TOP10图表，路径：" + imgPath).build();
+        return Result.<String>builder().content("已生成消息类型TOP10图表").build();
     }
 
     @Tool(name = "generate_update_info", value = "生成好友属性更新频率图表")
@@ -265,7 +264,7 @@ public class FunctionCallingService{
 
             MessageTools.sendMsgByUserId(MessageTools.toPicMessage(img, toUserName));
         }
-        return Result.<String>builder().content("已生成好友属性更新频率图表，路径：" + String.join(",", imgs)).build();
+        return Result.<String>builder().content("已生成好友属性更新频率图表").build();
     }
 
     @Tool(name = "send_dont_ask_voice", value = "如果发送人是自己，则发送语音消息 '不要问了'")
@@ -289,9 +288,14 @@ public class FunctionCallingService{
                     .content("不支持的属性：" + attribute + "，支持的属性有：" + attributeMap.keySet())
                     .build();
         }
+        Optional<String> pathOptional;
         String toUserName = contextToUserName.get();
-        Optional<String> pathOptional = chartUtil.makeContactsAttrPieChartAsPng(toUserName, attributeEn, 1920, 1080);
+        if (attributeEn.equals("sex")) {
+            pathOptional = chartUtil.makeContactsAttrPieChartAsPng(toUserName, "sex", 960, 540);
+        } else {
+            pathOptional = chartUtil.makeContactsAttrPieChartAsPng(toUserName, attributeEn, 1920, 1080);
 
+        }
         pathOptional.ifPresent(path ->
                 MessageTools.sendMsgByUserId(MessageTools.toPicMessage(path, toUserName))
         );

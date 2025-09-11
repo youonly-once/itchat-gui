@@ -3,7 +3,7 @@ spring:
     driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
     username: root
     password: 123456
-    url: jdbc:log4jdbc:sqlite:E:/weixin/wechat.db?date_string_format=yyyy-MM-dd HH:mm:ss
+    url: jdbc:log4jdbc:sqlite:G:/weixin/wechat.db?date_string_format=yyyy-MM-dd HH:mm:ss
   main:
     allow-circular-references: true
 wechat:
@@ -11,7 +11,7 @@ wechat:
   auto-chat-suffix: 【自动回复】
   app-version: 1.0
   login-title: 微信登录
-  base-path: E:/weixin
+  base-path: G:/weixin
   user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
   special-user: filehelper, weibo,qqmail, fmessage, tmessage, qmessage, qqsync, floatbottle, lbsapp, shakeapp, medianote,qqfriend, readerapp, blogapp, facebookapp, masssendapp, meishiapp, feedsapp, voip,blogappweixin, brandsessionholder, weixinreminder, officialaccounts, wxitil,notification_messages, wxid_novlwrv3lqwv11, gh_22b87fa7cb3c, userexperience_alarm
   fuzz-up-avatar: false
@@ -29,3 +29,9 @@ langchain4j:
       return-thinking: false
       think: false
       timeout: 600000
+      #31
+  open-ai:
+    chat-model:
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      api-key: sk-a7f53eff7ecb4787a23b7726301dad
+      model-name: qwen3-max-preview

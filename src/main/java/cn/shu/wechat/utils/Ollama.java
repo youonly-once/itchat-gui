@@ -1,17 +1,13 @@
 package cn.shu.wechat.utils;
 
-import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.service.Assisant;
 import cn.shu.wechat.service.FunctionCallingService;
-import com.alibaba.fastjson.JSON;
-import dev.langchain4j.agent.tool.ToolSpecification;
-import dev.langchain4j.agent.tool.ToolSpecifications;
-import dev.langchain4j.data.message.*;
-import dev.langchain4j.memory.ChatMemory;
+import dev.langchain4j.data.message.ImageContent;
+import dev.langchain4j.data.message.TextContent;
+import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.ollama.OllamaChatModel;
 import dev.langchain4j.service.AiServices;
@@ -22,21 +18,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.function.Function;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class Ollama {
@@ -101,7 +92,7 @@ public class Ollama {
     }
 
     @Bean
-    public Assisant assistant(@Qualifier("ollamaChatModel") ChatModel chatModel, ChatMemoryProvider chatMemoryProvider,FunctionCallingService functionCallingService) {
+    public Assisant assistant(@Qualifier("openAiChatModel") ChatModel chatModel, ChatMemoryProvider chatMemoryProvider, FunctionCallingService functionCallingService) {
         return AiServices.builder(Assisant.class)
                 .chatModel(chatModel)
                 .tools(functionCallingService)
