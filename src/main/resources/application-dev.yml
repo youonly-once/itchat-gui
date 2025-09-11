@@ -33,5 +33,5 @@ langchain4j:
   open-ai:
     chat-model:
       base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
-      api-key: sk-a7f53eff7ecb4787a23b7726301dad
+      api-key: sk-a7f53eff7ecb4787a23b7726301dad31
       model-name: qwen3-max-preview

@@ -10,6 +10,7 @@ import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.ollama.OllamaChatModel;
+import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import dev.langchain4j.store.memory.chat.InMemoryChatMemoryStore;
@@ -91,8 +92,10 @@ public class Ollama {
                 .build();
     }
 
+    private ChatModel openAIChatModel;
     @Bean
     public Assisant assistant(@Qualifier("openAiChatModel") ChatModel chatModel, ChatMemoryProvider chatMemoryProvider, FunctionCallingService functionCallingService) {
+        this.openAIChatModel = chatModel;
         return AiServices.builder(Assisant.class)
                 .chatModel(chatModel)
                 .tools(functionCallingService)
@@ -117,13 +120,16 @@ public class Ollama {
 
     public String chatWithHistory(String userName, Path imgPath) throws IOException {
         UserMessage userMessage = UserMessage.from(
-                TextContent.from("请仔细观察下面的图片，描述图片中的场景和人物，并分析图片传达的情绪或氛围。" +
-                        "用幽默风趣的方式回复我，像朋友在聊天一样。"),
+                TextContent.from("提取图中的群聊名称。"),
                 ImageContent.from(imgPath.toUri())
         );
+        OpenAiChatModel build = OpenAiChatModel.builder()
+                .baseUrl("https://dashscope.aliyuncs.com/compatible-mode/v1")
+                .apiKey("sk-a7f53eff7ecb4787a23b7726301dad")
+                .modelName("qwen-vl-max").build();
 //        byte[] imageData = Files.readAllBytes(imgPath);
 //        String base64Image = Base64.getEncoder().encodeToString(imageData);
-        ChatResponse chat = imageModel.chat(userMessage);
+        ChatResponse chat = build.chat(userMessage);
         return chat.aiMessage().text();
     }
 
