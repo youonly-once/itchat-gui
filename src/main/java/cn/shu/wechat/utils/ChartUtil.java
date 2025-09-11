@@ -198,6 +198,10 @@ public final class ChartUtil {
     public Optional<DefaultPieDataset<String>> getPieChatDatasetByWXContactsAttr(Collection<Contacts> sourceList, String attr) {
         try {
             Field declaredField = Contacts.class.getDeclaredField(attr);
+            System.out.println(Arrays.toString(Contacts.class.getDeclaredFields()));
+            for (Field field : Contacts.class.getDeclaredFields()) {
+                System.out.println(field.getName());
+            }
             declaredField.setAccessible(true);
             DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
             Map<String, Long> map = sourceList.stream()
