@@ -499,21 +499,21 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             String msgFilePath = msg.getFilePath();
             if (autoChatUserNameList.contains(to)) {
                 DownloadManager.awaitDownloadTimeOut(msgFilePath);
-                String result = Ollama.chatWithHistory(msg.getFromUserName(), Paths.get(msgFilePath));
+                String result = ollama.chatWithHistory(msg.getFromUserName(), Paths.get(msgFilePath));
                 return Collections.singletonList(Message.builder()
                         .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                         .toUsername(msg.getFromUserName())
                         .content(result).build());
             } else if (autoChatWithPersonal && !msg.isGroupMsg()) {
                 DownloadManager.awaitDownloadTimeOut(msgFilePath);
-                String result = Ollama.chatWithHistory(msg.getFromUserName(),Paths.get(msgFilePath));
+                String result = ollama.chatWithHistory(msg.getFromUserName(),Paths.get(msgFilePath));
                 return Collections.singletonList(Message.builder()
                         .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                         .toUsername(msg.getFromUserName())
                         .content(result).build());
             }
         } catch (NullPointerException | IOException e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
         }
         return null;
     }
@@ -875,7 +875,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
             String msgFilePath = msg.getFilePath();
             if (autoChatUserNameList.contains(to)) {
                 DownloadManager.awaitDownloadTimeOut(msgFilePath);
-                String result = Ollama.chatWithHistory(msg.getFromUserName(), Paths.get(msgFilePath));
+                String result = ollama.chatWithHistory(msg.getFromUserName(), Paths.get(msgFilePath));
 
                 return Collections.singletonList(Message.builder()
                         .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
@@ -883,7 +883,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                         .content(result).build());
             } else if (autoChatWithPersonal && !msg.isGroupMsg()) {
                 DownloadManager.awaitDownloadTimeOut(msgFilePath);
-                String result = Ollama.chatWithHistory(msg.getFromUserName(),Paths.get(msgFilePath));
+                String result = ollama.chatWithHistory(msg.getFromUserName(),Paths.get(msgFilePath));
                 return Collections.singletonList(Message.builder()
                         .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                         .toUsername(msg.getFromUserName())

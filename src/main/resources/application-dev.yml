@@ -24,5 +24,8 @@ openai:
 langchain4j:
   ollama:
     chat-model:
-      model-name: llama3.1:8b
+      model-name: qwen3:8b
       base-url: http://localhost:11434
+      return-thinking: false
+      think: false
+      timeout: 600000
