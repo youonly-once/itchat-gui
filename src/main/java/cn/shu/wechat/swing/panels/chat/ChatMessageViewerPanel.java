@@ -67,7 +67,7 @@ public class ChatMessageViewerPanel extends ParentAvailablePanel {
                 Contacts contacts = Core.getMemberMap().get(roomId);
                 String remarkName = ContactsTools.getContactRemarkNameByUserName(contacts);
                 String nickName = ContactsTools.getContactNickNameByUserName(contacts);
-                java.util.List<Message> messageList = mapper.selectByPage(messageItems.size(), PAGE_LENGTH, roomId, remarkName, nickName);
+                java.util.List<Message> messageList = mapper.selectByPage(messageItems.size(), PAGE_LENGTH, roomId, remarkName, nickName, null);
                 int i = 0;
                 for (Message message : messageList) {
                     if (message.getIsSend()) {

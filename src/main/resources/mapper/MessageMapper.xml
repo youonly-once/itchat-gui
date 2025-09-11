@@ -1105,24 +1105,28 @@
         order by create_time desc
         limit 0,1
     </select>
-    <select id="selectByPage" resultMap="BaseResultMap">
-      select
-      <include refid="Base_Column_List"/>
-      from message
-      where from_username = #{userName,jdbcType=VARCHAR}
-      or to_username = #{userName,jdbcType=VARCHAR}
-      <if test="remarkName!=null and  remarkName!=''">
-        or to_remarkname = #{remarkName,jdbcType=VARCHAR}
-        or from_remarkname = #{remarkName,jdbcType=VARCHAR}
-      </if>
-      <if test="nickName!=null and  nickName!=''">
-        or to_nickname = #{nickName,jdbcType=VARCHAR}
-        or from_nickname = #{nickName,jdbcType=VARCHAR}
-      </if>
-
-      order by message_time desc
-      limit #{start},#{end}
-    </select>
+  <select id="selectByPage" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+    from message
+    where (
+    from_username = #{userName,jdbcType=VARCHAR}
+    or to_username = #{userName,jdbcType=VARCHAR}
+    <if test="remarkName!=null and  remarkName!=''">
+      or to_remarkname = #{remarkName,jdbcType=VARCHAR}
+      or from_remarkname = #{remarkName,jdbcType=VARCHAR}
+    </if>
+    <if test="nickName!=null and  nickName!=''">
+      or to_nickname = #{nickName,jdbcType=VARCHAR}
+      or from_nickname = #{nickName,jdbcType=VARCHAR}
+    </if>
+    )
+    <if test="type!=null">
+      and type = #{type}
+    </if>
+    order by message_time desc
+    limit #{start},#{end}
+  </select>
 
   <select id="searchFileByName"  resultMap="BaseResultMap">
     select

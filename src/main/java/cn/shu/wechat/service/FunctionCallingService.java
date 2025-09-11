@@ -3,12 +3,16 @@ package cn.shu.wechat.service;
 import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.api.MessageTools;
 import cn.shu.wechat.constant.WxReqParamsConstant;
+import cn.shu.wechat.core.Core;
+import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.entity.Message;
 import cn.shu.wechat.entity.Status;
+import cn.shu.wechat.mapper.MessageMapper;
 import cn.shu.wechat.mapper.StatusMapper;
 import cn.shu.wechat.service.impl.IMsgHandlerFaceImpl;
 import cn.shu.wechat.swing.panels.chat.ChatPanelContainer;
 import cn.shu.wechat.utils.ChartUtil;
+import cn.shu.wechat.utils.SpringContextHolder;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.service.MemoryId;
@@ -16,10 +20,11 @@ import dev.langchain4j.service.Result;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class FunctionCallingService{
@@ -306,4 +311,32 @@ public class FunctionCallingService{
                 .build();
     }
 
+    @Tool(name = "extract_recent_activity_names",
+            value = "提取最近 X 个活动的名称（例如群聊活动或系统中记录的活动）")
+    public Result<String> extractRecentActivityNames(
+            @MemoryId String sessionId,
+            @P("要提取的活动数量，例如 5") int count) {
+
+        String toUserName = contextToUserName.get();
+
+        MessageMapper mapper = SpringContextHolder.getBean(MessageMapper.class);
+        Contacts contacts = Core.getMemberMap().get(toUserName);
+        String remarkName = ContactsTools.getContactRemarkNameByUserName(contacts);
+        String nickName = ContactsTools.getContactNickNameByUserName(contacts);
+        java.util.List<Message> messageList = mapper.selectByPage(1, count, toUserName, remarkName, nickName, 3);
+        Base64.Encoder encoder = Base64.getEncoder();
+        String collected = messageList.stream().map(Message::getFilePath)
+                .filter(Objects::nonNull)
+                .map(e -> {
+                    try {
+                        return encoder.encodeToString(Files.readAllBytes(Path.of(e)));
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }).collect(Collectors.joining(","));
+
+        return Result.<String>builder()
+                .content("最近活动的以逗号分割的多个base64图片，请提取其中的活动名称并返回：" + collected)
+                .build();
+    }
 }

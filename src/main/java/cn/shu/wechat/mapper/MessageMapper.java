@@ -38,7 +38,7 @@ public interface MessageMapper extends BaseMapper<Message> {
             , @Param("end") int end
             , @Param("userName") String userName
             , @Param("remarkName") String remarkName
-            , @Param("nickName") String nickName);
+            , @Param("nickName") String nickName, @Param("type") Integer type);
 
     /**
      * 搜索文件
