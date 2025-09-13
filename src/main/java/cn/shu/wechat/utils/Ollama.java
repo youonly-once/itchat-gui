@@ -2,78 +2,36 @@ package cn.shu.wechat.utils;
 
 import cn.shu.wechat.service.Assisant;
 import cn.shu.wechat.service.FunctionCallingService;
-import dev.langchain4j.data.message.ImageContent;
-import dev.langchain4j.data.message.TextContent;
-import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.ollama.OllamaChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import dev.langchain4j.store.memory.chat.InMemoryChatMemoryStore;
 import jakarta.annotation.Resource;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.function.Function;
+import java.util.Base64;
 
 @Component
 public class Ollama {
 
 
-    @Data
-    static class Request {
-        private String model;
-        private List<Message> messages;
-        private Boolean stream;
-    }
-
-    @Builder
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    static class Message {
-        private String role;
-        private String content;
-        private List<String> images;
-    }
-
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    static class ResponseBody {
-        private String response;
-        private String model;
-        //private Date created_at;
-        private Message message;
-        private String done_reason;
-        private boolean done;
-        private long total_duration;
-        private long load_duration;
-        private int prompt_eval_count;
-        private long prompt_eval_duration;
-        private int eval_count;
-        private long eval_duration;
-    }
-
-
     @Resource
     private Assisant assisant;
+
+
+    @Autowired
+    @Qualifier("imageModel")
+    private ChatModel imageModel;
 
     @Bean
     public ChatMemoryStore chatMemoryStore() {
@@ -104,7 +62,7 @@ public class Ollama {
     }
 
     @Bean
-    public Assisant assistant( @Qualifier("openAiChatModel") ChatModel openAiChatModel,ChatMemoryProvider chatMemoryProvider, FunctionCallingService functionCallingService) {
+    public Assisant assistant(@Qualifier("ollamaChatModel") ChatModel openAiChatModel, ChatMemoryProvider chatMemoryProvider, FunctionCallingService functionCallingService) {
         return AiServices.builder(Assisant.class)
                 .chatModel(openAiChatModel)
                 .tools(functionCallingService)
@@ -112,11 +70,6 @@ public class Ollama {
                 .build();
     }
 
-    @Autowired
-    @Qualifier("imageModel")
-    private ChatModel imageModel;
-
-    private static final Map<String, List<Message>> msgHistory = new HashMap<>();
 
 
     public String chatWithSpringAi(String fromUserNme, String toUserName, String question) {

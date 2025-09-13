@@ -73,7 +73,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     /**
      * 已关闭防撤回联系人列表
      */
-    public final Set<String> nonPreventUndoMsgUserName = new HashSet<>();
+    public final static Set<String> nonPreventUndoMsgUserName = new HashSet<>();
     @Autowired
     private LoginService loginService;
 
