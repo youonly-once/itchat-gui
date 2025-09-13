@@ -497,61 +497,32 @@
     </build>
     <profiles>
         <profile>
-            <id>1-dev</id>
+            <id>1-company</id>
             <properties>
-                <spring-profiles-active>dev</spring-profiles-active>
+                <spring-profiles-active>company</spring-profiles-active>
                 <output-basedir>E:\JAVA\eee\dev</output-basedir>
             </properties>
-            <repositories>
-                <repository>
-                    <id>alimaven</id>
-                    <name>aliyun maven</name>
-                    <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
-                    <releases>
-                        <enabled>true</enabled>
-                    </releases>
-                    <snapshots>
-                        <enabled>true</enabled>
-                    </snapshots>
-                </repository>
-            </repositories>
-            <pluginRepositories>
-                <pluginRepository>
-                    <id>alimaven</id>
-                    <name>aliyun maven</name>
-                    <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
-                </pluginRepository>
-            </pluginRepositories>
         </profile>
         <profile>
-            <id>2-prod</id>
+            <id>2-home</id>
             <properties>
-                <spring-profiles-active>prod</spring-profiles-active>
+                <spring-profiles-active>home</spring-profiles-active>
                 <output-basedir>E:\JAVA\eee\prod</output-basedir>
             </properties>
-            <repositories>
-                <repository>
-                    <id>alimaven</id>
-                    <name>aliyun maven</name>
-                    <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
-                    <releases>
-                        <enabled>true</enabled>
-                    </releases>
-                    <snapshots>
-                        <enabled>true</enabled>
-                    </snapshots>
-                </repository>
-            </repositories>
-            <pluginRepositories>
-                <pluginRepository>
-                    <id>alimaven</id>
-                    <name>aliyun maven</name>
-                    <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
-                </pluginRepository>
-            </pluginRepositories>
         </profile>
     </profiles>
     <repositories>
+        <repository>
+            <id>alimaven</id>
+            <name>aliyun maven</name>
+            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
         <repository>
             <name>Central Portal Snapshots</name>
             <id>central-portal-snapshots</id>
@@ -563,5 +534,23 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
+        <repository>
+            <id>alimaven</id>
+            <name>aliyun maven</name>
+            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
     </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>alimaven</id>
+            <name>aliyun maven</name>
+            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+        </pluginRepository>
+    </pluginRepositories>
 </project>

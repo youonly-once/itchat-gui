@@ -1,0 +1,10 @@
+langchain4j:
+  ollama:
+    chat-model:
+      base-url: http://5845bd1e.r15.cpolar.top
+wechat:
+  base-path: G:/weixin
+
+spring:
+  datasource: #数据源配置在bootstrap.yml启动报错，why？
+    url: jdbc:log4jdbc:sqlite:${wechat.base-path}/wechat.db?date_string_format=yyyy-MM-dd HH:mm:ss
