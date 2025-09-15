@@ -37,33 +37,12 @@
                 <scope>import</scope>
             </dependency>
 
-<!--            <dependency>-->
-<!--                <groupId>org.springframework.ai</groupId>-->
-<!--                <artifactId>spring-ai-bom</artifactId>-->
-<!--                <version>${spring-ai.version}</version>-->
-<!--                <type>pom</type>-->
-<!--                <scope>import</scope>-->
-<!--            </dependency>-->
-<!--            <dependency>-->
-<!--                <groupId>com.alibaba.cloud.ai</groupId>-->
-<!--                <artifactId>spring-ai-alibaba-bom</artifactId>-->
-<!--                <version>${spring-ai-alibaba.version}</version>-->
-<!--                <type>pom</type>-->
-<!--                <scope>import</scope>-->
-<!--            </dependency>-->
         </dependencies>
     </dependencyManagement>
 
 
     <dependencies>
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-starter-web</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.alibaba.cloud.ai</groupId>-->
-<!--            <artifactId>spring-ai-alibaba-starter-dashscope</artifactId>-->
-<!--        </dependency>-->
+
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-ollama-spring-boot-starter</artifactId>
@@ -386,6 +365,25 @@
             <version>${easypoi.version}</version>
         </dependency>
     </dependencies>
+<!--    完整的JAR配置-->
+<!--    <build>-->
+<!--        <directory>${output-directory}</directory>-->
+<!--        <plugins>-->
+<!--            &lt;!&ndash; Spring Boot 打包插件 &ndash;&gt;-->
+<!--            <plugin>-->
+<!--                <groupId>org.springframework.boot</groupId>-->
+<!--                <artifactId>spring-boot-maven-plugin</artifactId>-->
+<!--                <version>3.5.3</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <goals>-->
+<!--                            <goal>repackage</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+<!--        </plugins>-->
+<!--    </build>-->
     <build>
         <plugins>
             <!--打包JAR配置-->
@@ -466,8 +464,31 @@
                                         <include>**/*.table</include>
                                         <include>**/*.wav</include>
                                         <include>**/*.db</include>
+                                    </includes>
+                                    <excludes>
+                                        <exclude>rebel.xml</exclude>
+                                        <exclude>使用说明.txt</exclude>
+                                    </excludes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <!-- 新增：拷贝 vbs 和 bat 到和 jar 同级 -->
+                    <execution>
+                        <id>copy-scripts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${output-directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/target/classes</directory>
+                                    <includes>
                                         <include>**/*.vbs</include>
                                         <include>**/*.bat</include>
+                                        <include>**/*.txt</include>
                                     </includes>
                                 </resource>
                             </resources>
@@ -529,17 +550,6 @@
             <url>https://central.sonatype.com/repository/maven-snapshots/</url>
             <releases>
                 <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>alimaven</id>
-            <name>aliyun maven</name>
-            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
-            <releases>
-                <enabled>true</enabled>
             </releases>
             <snapshots>
                 <enabled>true</enabled>

@@ -1,9 +1,9 @@
 langchain4j:
   ollama:
     chat-model:
-      base-url: http://127.0.0.1:11414
+      base-url: http://127.0.0.1:11434
 wechat:
-  base-path: F:/weixin
+  base-path: E:/weixin
 
 spring:
   datasource: #数据源配置在bootstrap.yml启动报错，why？

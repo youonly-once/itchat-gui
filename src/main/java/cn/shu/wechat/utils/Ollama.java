@@ -48,7 +48,7 @@ public class Ollama {
     public ChatModel qwenVLMaximageChatModel(@Qualifier("openAiChatModel") ChatModel openAiChatModel) {
         return OpenAiChatModel.builder()
                 .baseUrl("https://dashscope.aliyuncs.com/compatible-mode/v1")
-                .apiKey("sk-a7f53eff7ecb4787a23b7726301dad")
+                .apiKey("sk-a7f53eff7ecb4787a23b7726301dad31")
                 .modelName("qwen-vl-max").build();
     }
 

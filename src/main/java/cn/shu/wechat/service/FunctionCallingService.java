@@ -51,6 +51,10 @@ public class FunctionCallingService{
     @Qualifier("qwenVLMaximageChatModel")
     private ChatModel qwenVLMaximageChatModel;
 
+    @Resource
+    @Qualifier("ollamaChatModel")
+    private ChatModel ollamaChatModel;
+
     private final Map<String, String> attributeMap = new HashMap<>();
 
     public FunctionCallingService(){
@@ -168,6 +172,9 @@ public class FunctionCallingService{
     public Result<String> enableWelcome(@MemoryId String sessionId) {
         return safeRun(() -> {
         String toUserName = contextToUserName.get();
+        if (!ContactsTools.isRoomContact(toUserName)) {
+            return Result.<String>builder().content("个人用户无需开启").build();
+        }
         String to = ContactsTools.getContactDisplayNameByUserName(toUserName);
         Status build = Status.builder().name(to).key("welcome").value("true").build();
         statusMapper.insertOrUpdateSelectiveForSqlite(build);
@@ -179,6 +186,9 @@ public class FunctionCallingService{
     public Result<String> disableWelcome(@MemoryId String sessionId) {
         return safeRun(() -> {
         String toUserName = contextToUserName.get();
+        if (!ContactsTools.isRoomContact(toUserName)) {
+            return Result.<String>builder().content("个人用户无需关闭").build();
+        }
         String to = ContactsTools.getContactDisplayNameByUserName(toUserName);
         Status build = Status.builder().name(to).key("welcome").value("false").build();
         statusMapper.insertOrUpdateSelectiveForSqlite(build);
@@ -222,11 +232,11 @@ public class FunctionCallingService{
     }
 
 
-    @Tool(name = "generate_activity_top10", value = "生成群成员或个人消息活跃度图表")
-    public Result<String> generateActivityTop10(@MemoryId String sessionId, boolean isGroupMsg) {
+    @Tool(name = "generate_activity_top10", value = "生成群成员活跃度统计图表，例如活跃度TOP10、群活跃情况、消息频率排行")
+    public Result<String> generateActivityTop10(@MemoryId String sessionId) {
         return safeRun(() -> {
         String toUserName = contextToUserName.get();
-        String imgPath = isGroupMsg ?
+        String imgPath = ContactsTools.isRoomContact(toUserName) ?
                 chartUtil.makeWXMemberOfGroupActivityFile(toUserName) :
                 chartUtil.makeWXUserActivityFile(toUserName);
         MessageTools.sendMsgByUserId(MessageTools.toPicMessage(imgPath, toUserName));
@@ -234,7 +244,7 @@ public class FunctionCallingService{
         });
     }
 
-    @Tool(name = "generate_keyword_top10", value = "生成聊天关键词图表")
+    @Tool(name = "generate_keyword_top10", value = "生成群聊关键词统计图表，例如关键词TOP10、消息高频词、常用词汇")
     public Result<String> generateKeywordTop10(@MemoryId String sessionId) {
         return safeRun(() -> {
         String toUserName = contextToUserName.get();
@@ -269,7 +279,7 @@ public class FunctionCallingService{
     }
 
     @Tool(name = "send_dont_ask_voice", value = "如果发送人是自己，则发送语音消息 '不要问了'")
-    public Result<String> sendDontAskVoice(@MemoryId String sessionId, String fromUserName) {
+    public Result<String> sendDontAskVoice(@MemoryId String sessionId) {
         return safeRun(() -> {
         String toUserName = contextToUserName.get();
         MessageTools.sendMsgByUserId(Message.builder().msgType(WxReqParamsConstant.WXSendMsgCodeEnum.VOICE.getCode())
@@ -280,18 +290,25 @@ public class FunctionCallingService{
     }
 
 
-    @Tool(name = "generate_attribute_distribution", value = "生成群成员属性分布图，例如性别、城市、省份等")
+    @Tool(name = "generate_attribute_distribution", value = "生成群成员属性分布图，例如性别比例、城市分布、省份统计、用户名分布")
     public Result<String> generateAttributeDistribution(
             @MemoryId String sessionId,
             @P("要统计的属性名称，例如 sex（性别）、city（城市）、province（省份）") String attribute) {
         return safeRun(() -> {
         // 属性映射表：自然语言 -> 数据库字段
-        String attributeEn = attributeMap.get(attribute);
-        if (attributeEn == null) {
-            return Result.<String>builder()
-                    .content("不支持的属性：" + attribute + "，支持的属性有：" + attributeMap.keySet())
-                    .build();
-        }
+            // 用户输入可能是中文，也可能是英文
+            String attributeEn = attributeMap.get(attribute);
+            if (attributeEn == null) {
+                // 如果不是中文，就尝试当英文字段名去用
+                if (attributeMap.containsValue(attribute)) {
+                    attributeEn = attribute;
+                } else {
+                    return Result.<String>builder()
+                            .content("不支持的属性：" + attribute + "，支持的属性有："
+                                    + attributeMap.keySet() + " 或 " + attributeMap.values())
+                            .build();
+                }
+            }
         Optional<String> pathOptional;
         String toUserName = contextToUserName.get();
         if (attributeEn.equals("sex")) {
@@ -304,23 +321,12 @@ public class FunctionCallingService{
             String path = pathOptional.get();
             MessageTools.sendMsgByUserId(MessageTools.toPicMessage(path, toUserName));
 
-            byte[] imageBytes = null;
-            try {
-                imageBytes = Files.readAllBytes(Path.of(path));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            Base64.Encoder encoder = Base64.getEncoder();
-            Content content =  ImageContent.from(encoder.encodeToString(imageBytes), "image/png");
-            UserMessage userMessage = UserMessage.from(content);
-            ChatResponse chat = qwenVLMaximageChatModel.chat(userMessage);
-            return Result.<String>builder()
-                    .content(chat.aiMessage().text())
-                    .build();
+
         }
 
-        return Result.<String>builder()
-                .content(pathOptional.map(path -> "生成【" + attributeEn + "】分布图成功" )
+            String finalAttributeEn = attributeEn;
+            return Result.<String>builder()
+                .content(pathOptional.map(path -> "生成【" + finalAttributeEn + "】分布图成功" )
                         .orElse("生成【" + attributeEn + "】分布图失败"))
                 .build();
         });
@@ -405,6 +411,92 @@ public class FunctionCallingService{
                     .content(chatResponse.aiMessage().text())
                     .build();
         });
+    }
+    /**
+     * 群聊内容总结，生成简短的群公告
+     */
+    @Tool(
+            name = "generate_group_summary",
+            value = "总结最近群聊内容，生成简短群公告，例如会议总结、讨论要点"
+    )
+    public Result<String> generateGroupSummary(@MemoryId String chatId) {
+        // TODO: 调用消息分析服务，提取核心内容，生成摘要
+        return Result.<String>builder().content("群聊内容总结功能待实现").build();
+    }
+
+    /**
+     * 群话题排行榜
+     */
+    @Tool(
+            name = "generate_topic_ranking",
+            value = "生成群聊话题排行榜，例如近期最常讨论的话题"
+    )
+    public Result<String> generateTopicRanking(@MemoryId String chatId) {
+        // TODO: 分析消息主题，聚合统计，返回话题排行
+        return Result.<String>builder().content("群话题排行榜功能待实现").build();
+    }
+
+    /**
+     * 群聊情绪分析
+     */
+    @Tool(
+            name = "analyze_group_sentiment",
+            value = "分析群聊氛围，判断近期情绪偏向积极、中立还是消极"
+    )
+    public Result<String> analyzeGroupSentiment(@MemoryId String chatId) {
+        // TODO: 对最近消息做情感分类，统计整体情绪占比
+        String toUserName = contextToUserName.get();
+        Contacts contacts = Core.getMemberMap().get(toUserName);
+
+        String remarkName = ContactsTools.getContactRemarkNameByUserName(contacts);
+        String nickName = ContactsTools.getContactNickNameByUserName(contacts);
+
+        // 1. 查询最近聊天记录
+        List<Message> messageList = mapper.selectByPage(1, 100, toUserName, remarkName, nickName, 1);
+
+        // 2. 转换为多模态内容
+        List<Content> contents = buildMessageContents(messageList);
+
+        UserMessage userMessage = UserMessage.from(contents);
+        ChatResponse chat = ollamaChatModel.chat(userMessage);
+        return Result.<String>builder().content(chat.aiMessage().text()).build();
+    }
+
+    /**
+     * 群成员画像
+     */
+    @Tool(
+            name = "generate_member_profile",
+            value = "生成指定群成员的聊天画像，例如活跃时间、常用词、互动情况"
+    )
+    public Result<String> generateMemberProfile(@MemoryId String chatId, String memberId) {
+        // TODO: 分析该成员的消息行为，生成简要画像
+        return Result.<String>builder().content("群成员画像功能待实现").build();
+    }
+
+    /**
+     * 群成员关系网络图
+     */
+    @Tool(
+            name = "generate_interaction_network",
+            value = "生成群成员关系网络图，例如互动最频繁的成员关系"
+    )
+    public Result<String> generateInteractionNetwork(@MemoryId String chatId) {
+        // TODO: 构建成员之间的互动关系，返回图表或关系数据
+        return Result.<String>builder().content("群成员关系网络功能待实现").build();
+    }
+
+    /**
+     * 定时群消息
+     */
+    @Tool(
+            name = "schedule_group_message",
+            value = "定时发送群消息，例如早安、节日祝福、提醒事项"
+    )
+    public Result<String> scheduleGroupMessage(@MemoryId
+                                                   String chatId, String message, String cronExpression) {
+        // TODO: 调用定时任务服务，在指定时间发送消息
+        return Result.<String>builder().content("定时群消息功能待实现").build();
     }
 
     /**

@@ -402,10 +402,10 @@ public class MsgCenter {
      * @param contacts 联系人
      */
     public void handleModContact(Contacts contacts) {
-        log.info("联系人修改:{}",contacts);
+        log.info("联系人修改:{}",ContactsTools.getContactDisplayNameByUserName(contacts));
         if (contacts != null) {
             if (ContactsTools.isRoomContact(contacts)) {
-                log.info("联系人修改后重新群成员详细信息:{}",contacts);
+                log.info("联系人修改后重新群成员详细信息:{}",ContactsTools.getContactDisplayNameByUserName(contacts));
                 DownloadTask<Void> objectDownloadTask = new DownloadTask<>();
                 objectDownloadTask.setTaskId("WebWxBatchGetContact:" + contacts.getUsername());
                 objectDownloadTask.setGroupName(contacts.getUsername());
