@@ -278,41 +278,29 @@
         </trim>
     </insert>
     <insert id="insertOrUpdateSelectiveForSqlite" parameterType="cn.shu.wechat.entity.Status">
-        INSERT OR REPLACE INTO status
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="name != null">
-                `name`,
-            </if>
-            <if test="undoStatus != null">
-                undo_status,
-            </if>
-            <if test="autoStatus != null">
-                auto_status,
-            </if>
-            <if test="key != null">
-                key,
-            </if>
-            <if test="value != null">
-                value,
-            </if>
-        </trim>
-        VALUES
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="name != null">
-                #{name,jdbcType=VARCHAR},
-            </if>
-            <if test="undoStatus != null">
-                #{undoStatus,jdbcType=SMALLINT},
-            </if>
-            <if test="autoStatus != null">
-                #{autoStatus,jdbcType=SMALLINT},
-            </if>
-            <if test="key != null">
-                #{key,jdbcType=VARCHAR},
-            </if>
-            <if test="value != null">
-                #{value,jdbcType=VARCHAR},
-            </if>
-        </trim>
+        INSERT INTO status (name, undo_status, auto_status, key, value)
+        VALUES (
+        #{name,jdbcType=VARCHAR},
+        #{undoStatus,jdbcType=SMALLINT},
+        #{autoStatus,jdbcType=SMALLINT},
+        #{key,jdbcType=VARCHAR},
+        #{value,jdbcType=VARCHAR}
+        )
+        ON CONFLICT(name) DO UPDATE SET
+        <!-- 需要动态判断每个字段是否要更新，这非常麻烦 -->
+        <if test="undoStatus != null">
+            undo_status = excluded.undo_status,
+        </if>
+        <if test="autoStatus != null">
+            auto_status = excluded.auto_status,
+        </if>
+        <if test="key != null">
+            key = excluded.key,
+        </if>
+        <if test="value != null">
+            value = excluded.value,
+        </if>
+        <!-- 必须处理所有字段都为null的情况，否则语法错误 -->
+        name = name
     </insert>
 </mapper>
