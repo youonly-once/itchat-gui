@@ -105,34 +105,35 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         String[] split = msg.getPlainText().split(":");
         if (split.length >= 2 && msg.getFromUserName().equals(Core.getUserName())) {
             try {
-                long sleep = 100;
-                try {
-                    sleep = Long.parseLong(split[2]);
-                } catch (ArrayIndexOutOfBoundsException e) {
-
-                }
-                String s = split[1];
-                int i = Integer.parseInt(s);
-                Message build = Message.builder()
-                        .content("开始发送：" + i + "个" + split[0])
-                        .toUsername(msg.getToUserName())
-                        .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
-                        .build();
-                MessageTools.sendMsgByUserId(build);
-                for (int j = 0; j < i; j++) {
-                    Message build1 = Message.builder()
-                            .content(split[0])
-                            .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
-                            .toUsername(msg.getToUserName())
-                            .build();
-                    MessageTools.sendMsgByUserId(build1);
-                    try {
-                        Thread.sleep(sleep);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-                return messages;
+//                long sleep = 100;
+//                try {
+//                    sleep = Long.parseLong(split[2]);
+//                } catch (ArrayIndexOutOfBoundsException e) {
+//
+//                }
+//                String s = split[1];
+//                int i = Integer.parseInt(s);
+//                Message build = Message.builder()
+//                        .content("开始发送：" + i + "个" + split[0])
+//                        .toUsername(msg.getToUserName())
+//                        .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
+//                        .build();
+//                MessageTools.sendMsgByUserId(build);
+//                for (int j = 0; j < i; j++) {
+//                    Message build1 = Message.builder()
+//                            .content(split[0])
+//                            .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
+//                            .toUsername(msg.getToUserName())
+//                            .build();
+//                    MessageTools.sendMsgByUserId(build1);
+//                    try {
+//                        Thread.sleep(sleep);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//                return messages;
+                return null;
 
             } catch (NumberFormatException e) {
             }
