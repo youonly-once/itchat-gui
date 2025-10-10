@@ -18,10 +18,13 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.awt.*;
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -33,6 +36,55 @@ import java.util.stream.Collectors;
  */
 @Log4j2
 public class ContactsTools {
+
+
+    public static final Map<String, String> attributeMap = new HashMap<>();
+    public static Map<String, String> attributeReverseMap = new HashMap<>();
+    private static final Pattern pattern = Pattern.compile(".+\\?seq=(\\d+).+");
+    static {
+        attributeMap.put("性别", "sex");
+        attributeMap.put("城市", "city");
+        attributeMap.put("省份", "province");
+        attributeMap.put("用户名", "username");
+        attributeMap.put("昵称", "nickname");
+        attributeMap.put("签名", "signature");
+        attributeMap.put("备注名", "remarkname");
+        attributeMap.put("群ID", "chatroomid");
+        attributeMap.put("状态", "statues");
+        attributeMap.put("拼音全拼", "pyquanpin");
+        attributeMap.put("加密群ID", "encrychatroomid");
+        attributeMap.put("显示名", "displayname");
+        attributeMap.put("验证标志", "verifyflag");
+        attributeMap.put("统一好友", "unifriend");
+        attributeMap.put("联系人标志", "contactflag");
+        attributeMap.put("成员列表", "memberlist");
+        attributeMap.put("星标好友", "starfriend");
+        attributeMap.put("头像URL", "headimgurl");
+        attributeMap.put("应用账号标志", "appaccountflag");
+        attributeMap.put("成员数", "membercount");
+        attributeMap.put("备注首字母", "remarkpyinitial");
+        attributeMap.put("社交标志", "snsflag");
+        attributeMap.put("别名", "alias");
+        attributeMap.put("关键词", "keyword");
+        attributeMap.put("隐藏输入栏标志", "hideinputbarflag");
+        attributeMap.put("备注拼音全拼", "remarkpyquanpin");
+        attributeMap.put("用户ID", "uin");
+        attributeMap.put("群主ID", "owneruin");
+        attributeMap.put("是否群主", "isowner");
+        attributeMap.put("拼音首字母", "pyinitial");
+        attributeMap.put("票据", "ticket");
+        attributeMap.put("是否互为好友", "mutualCreate");
+        attributeMap.put("类型", "type");
+        attributeMap.put("是否联系人", "iscontacts");
+        attributeMap.put("头像图标", "avatarIcon");
+        attributeMap.put("群名称", "groupName");
+        attributeReverseMap = attributeMap.entrySet()
+                .stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getValue,
+                        Map.Entry::getKey
+                ));
+    }
 
     private static final WechatConfiguration configuration = SpringContextHolder.getBean(WechatConfiguration.class);
     /**
@@ -544,7 +596,7 @@ public class ContactsTools {
             return null;
         }
         //TODO 更改一次头像  有二次seq都不一样，导致重发
-        Map<String, Map<String, String>> differenceMap = JSONObjectUtil.getDifferenceMap(oldMember, newMember);
+        Map<String, Map<String, String>> differenceMap = getDifferenceMap(oldMember, newMember);
         if (differenceMap.isEmpty()) {
             return null;
         }
@@ -579,11 +631,12 @@ public class ContactsTools {
                 return;
             }
             //TODO 更改一次头像  有二次seq都不一样，导致重发
-            Map<String, Map<String, String>> differenceMap = JSONObjectUtil.getDifferenceMap(oldV, newV);
+            Map<String, Map<String, String>> differenceMap = getDifferenceMap(oldV, newV);
             if (differenceMap.isEmpty()) {
                 return;
             }
             String s = differenceMapToString(differenceMap);
+
             String name = ContactsTools.getContactDisplayNameByUserName(newV.getUsername());
             ArrayList<Message> messages = new ArrayList<>();
              messages.add(Message.builder().content("普通联系人" + "（" + name + "）属性更新：" + s)
@@ -591,11 +644,12 @@ public class ContactsTools {
                     .toUsername("filehelper")
                     .build());
             log.info("普通联系人" + "（" + name + "）属性更新：" + s);
+
             //差异存到数据库
             store(differenceMap, oldV, messages);
             MessageTools.sendMsgByUserId(messages);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
 
     }
@@ -867,5 +921,73 @@ public class ContactsTools {
         }
         return contacts;
 
+    }
+
+    /**
+     * 返回二个JSONObject的差异
+     *
+     * @param oldO 旧
+     * @param newO 新
+     * @return difference
+     */
+    public static Map<String, Map<String, String>> getDifferenceMap(Contacts oldO, Contacts newO) {
+
+        Map<String, Map<String, String>> diffMap = new HashMap<>();
+
+        if (oldO == null || newO == null) {
+            throw new IllegalArgumentException("两个对象都不能为空");
+        }
+
+        Field[] fields = oldO.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            field.setAccessible(true);
+            try {
+                Object oldValue = field.get(oldO);
+                Object newValue = field.get(newO);
+                if (oldValue == null || newValue == null) {
+                    continue;
+                }
+                if ("memberlist".equalsIgnoreCase(field.getName())) {
+                    continue;
+                }
+                if ("remarkpyinitial".equalsIgnoreCase(field.getName())) {
+                    continue;
+                }
+                if ("remarkpyquanpin".equalsIgnoreCase(field.getName())) {
+                    continue;
+                }
+                if ("pyquanpin".equalsIgnoreCase(field.getName())) {
+                    continue;
+                }
+                if ("pyinitial".equalsIgnoreCase(field.getName())) {
+                    continue;
+                }
+
+                if ("HeadImgUrl".equalsIgnoreCase(field.getName())) {
+                    if (StringUtils.isNotEmpty((String)newValue) && StringUtils.isNotEmpty((String)oldValue)) {
+                        Matcher matcherNew = pattern.matcher((String)newValue);
+                        Matcher matcherOld = pattern.matcher((String)oldValue);
+                        if (matcherNew.find() && matcherOld.find()) {
+                            //头像相同
+                            String groupNew = matcherNew.group(1);
+                            String groupOld = matcherOld.group(1);
+                            if (!groupNew.equals(groupOld)) {
+                                Map<String, String> valueDiff = new HashMap<>();
+                                valueDiff.put(String.valueOf(oldValue),String.valueOf(newValue));
+                                diffMap.put(field.getName(), valueDiff);
+                            }
+                        }
+                    }
+                }else if (!Objects.equals(oldValue, newValue)) {
+                    Map<String, String> valueDiff = new HashMap<>();
+                    valueDiff.put(EmojiUtil.emojiFormatter(String.valueOf(oldValue)),EmojiUtil.emojiFormatter(String.valueOf(newValue)));
+                    diffMap.put(ContactsTools.attributeReverseMap.get(field.getName()), valueDiff);
+                }
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException("字段访问异常: " + field.getName(), e);
+            }
+        }
+
+        return diffMap;
     }
 }

@@ -99,7 +99,7 @@ public final class ChatUtil {
         Contacts contacts = Core.getMemberMap().get(roomId);
         if (contacts != null && ContactsTools.isRoomContact(contacts)) {
             if ((StringUtils.isNotEmpty(Core.getUserSelf().getRemarkname()) && lastMsg.contains("@" + Core.getUserSelf().getRemarkname()))
-                    || lastMsg.contains("@所有人")
+                    || (lastMsg!=null && lastMsg.contains("@所有人"))
                     || (StringUtils.isNotEmpty(Core.getNickName()) && lastMsg.contains("@" + Core.getNickName()))) {
                 return true;
             } else if (contacts.getMemberlist() != null) {
