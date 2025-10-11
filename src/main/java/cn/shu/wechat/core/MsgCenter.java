@@ -649,8 +649,18 @@ public class MsgCenter {
                         //=============用户在其他平台消息已读的通知=============
                         //更新聊天列表未读数量
                         RoomsPanel.getContext().hasRead(msg.getToUserName());
-                        msg.setPlainText(WxRespConstant.WXReceiveMsgStatusNotifyCodeEnum.getByCode(msg.getStatusNotifyCode()).getDesc());
-                        message = newMsgToDBMessage(msg);
+                        if (!Core.getRecentContacts().contains(msg.getToUserName())) {
+                            SwingUtilities.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    RoomsPanel.getContext().addRoomFirst(msg.getToUserName());
+                                    Core.getRecentContacts().add(msg.getToUserName());
+                                }
+                            });
+                        }
+
+
                         //return;
 
                     default:
