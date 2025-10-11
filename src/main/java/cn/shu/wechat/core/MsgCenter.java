@@ -649,7 +649,8 @@ public class MsgCenter {
                         //=============用户在其他平台消息已读的通知=============
                         //更新聊天列表未读数量
                         RoomsPanel.getContext().hasRead(msg.getToUserName());
-                        if (!Core.getRecentContacts().contains(msg.getToUserName())) {
+
+                        if (!Core.getRecentContacts().contains(msg.getToUserName()) && !contacts.getNickname().equals("未知")) {
                             SwingUtilities.invokeLater(new Runnable() {
 
                                 @Override
