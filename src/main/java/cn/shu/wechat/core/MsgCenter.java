@@ -650,7 +650,7 @@ public class MsgCenter {
                         //更新聊天列表未读数量
                         RoomsPanel.getContext().hasRead(msg.getToUserName());
 
-                        if (!Core.getRecentContacts().contains(msg.getToUserName()) && !contacts.getNickname().equals("未知")) {
+                        if (!Core.getRecentContacts().contains(msg.getToUserName()) && !"未知".equals(contacts.getNickname())) {
                             SwingUtilities.invokeLater(new Runnable() {
 
                                 @Override
@@ -662,7 +662,7 @@ public class MsgCenter {
                         }
 
 
-                        //return;
+                        return;
 
                     default:
 
