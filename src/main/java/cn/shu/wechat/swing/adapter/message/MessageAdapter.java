@@ -942,12 +942,10 @@ public class MessageAdapter extends BaseAdapter<BaseMessageViewHolder> {
                                 if (IconUtil.isGIFByFile(item.getFilePath())) {
                                     FileUtil.openFileWithDefaultApplication(item.getFilePath());
                                 } else {
-                                    if (file.exists() && file.length() <= 1024 * 1024) {
+                                    if (file.exists() ) {
                                         //小图片 用自带图片查看器
                                         try {
-                                            BufferedImage read = ImageIO.read(new File(item.getFilePath()));
-                                            ImageViewerFrame frame = ImageViewerFrame.getInstance();
-                                            frame.topShow(read);
+                                            ImageViewerFrame.topShow(item.getFilePath());
                                         } catch (IOException ex) {
                                             log.error(ex.getMessage(), ex);
                                         }

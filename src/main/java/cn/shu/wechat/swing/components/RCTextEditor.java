@@ -92,9 +92,8 @@ public class RCTextEditor extends JTextPane implements DropTargetListener {
             public void mouseClicked(MouseEvent e) {
                 // 双击预览选中的图片
                 if (e.getClickCount() == 2) {
-                    ImageViewerFrame frame = ImageViewerFrame.getInstance();
                     try {
-                        frame.topShow(ImageIO.read(new File(path)));
+                        ImageViewerFrame.topShow(path);
                     } catch (IOException ex) {
                         throw new RuntimeException(ex);
                     }

@@ -6,13 +6,17 @@ import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.RCMenuItemUI;
 import cn.shu.wechat.utils.IconUtil;
 import cn.shu.wechat.utils.OSUtil;
+import lombok.Setter;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -20,14 +24,14 @@ import java.io.*;
  */
 public class ImageViewerFrame extends JFrame {
     private static final int controlPanelHeight = 30;
-    private static Point origin = new Point();
+    private static final Point origin = new Point();
     private int minWidth;
     private int minHeight;
     private int maxWidth;
     private int maxHeight;
     private ImageLabel imageLabel;
     private String imagePath;
-    private Toolkit tooKit;
+    private final Toolkit tooKit;
     private Image image;
     private JPopupMenu popupMenu;
     private JMenuItem saveAsItem;
@@ -44,8 +48,9 @@ public class ImageViewerFrame extends JFrame {
     private Rectangle normalBounds;
     private int actualWidth;
     private int actualHeight;
+    @Setter
     private boolean isGif;
-
+    private static final Map<String,ImageViewerFrame> instances = new HashMap<>();
     private ImageViewerFrame() {
         tooKit = Toolkit.getDefaultToolkit();
         isGif = imagePath != null && IconUtil.isGifByFileName(imagePath);
@@ -55,7 +60,27 @@ public class ImageViewerFrame extends JFrame {
 
         setListeners();
     }
+    public static void topShow(String imagePath) throws IOException {
 
+        if (instances.containsKey(imagePath)) {
+            instances.get(imagePath).topShow();
+        }else{
+            BufferedImage read = ImageIO.read(new File(imagePath));
+            ImageViewerFrame imageViewerFrame = new ImageViewerFrame();
+            instances.put(imagePath, imageViewerFrame);
+            imageViewerFrame.topShow(read);
+        }
+    }
+    public void topShow() {
+        super.setVisible(false);
+        this.toFront();
+
+        // 1. 如果最小化了，则恢复
+        if ((this.getExtendedState() & JFrame.ICONIFIED) == JFrame.ICONIFIED) {
+            this.setExtendedState(JFrame.NORMAL);
+        }
+        this.setVisible(true);
+    }
     public void topShow(Image read) {
         super.setVisible(false);
         this.setImage(read);
@@ -67,6 +92,7 @@ public class ImageViewerFrame extends JFrame {
         }
         this.setVisible(true);
     }
+
     public static ImageViewerFrame getInstance() {
         //return ImageViewerFrame.InstanceHolder.instance;
         return new ImageViewerFrame();
@@ -471,7 +497,7 @@ public class ImageViewerFrame extends JFrame {
             image.flush();
             image = null;
         }
-
+        instances.entrySet().removeIf(entry -> entry.getValue().equals(this));
         // 主动释放旧图资源
         imageLabel.clearImage();
         removeListeners();
