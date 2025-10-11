@@ -649,7 +649,9 @@ public class MsgCenter {
                         //=============用户在其他平台消息已读的通知=============
                         //更新聊天列表未读数量
                         RoomsPanel.getContext().hasRead(msg.getToUserName());
-                        return;
+                        msg.setPlainText(WxRespConstant.WXReceiveMsgStatusNotifyCodeEnum.getByCode(msg.getStatusNotifyCode()).getDesc());
+                        message = newMsgToDBMessage(msg);
+                        //return;
 
                     default:
 
