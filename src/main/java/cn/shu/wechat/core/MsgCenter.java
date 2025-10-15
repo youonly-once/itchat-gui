@@ -313,7 +313,7 @@ public class MsgCenter {
         }
 
         if (isFlashingTray){
-            MainFrame.getContext().setTrayFlashing(true);
+            MainFrame.getContext().setTrayFlashing(true,ContactsTools.getContactDisplayNameByUserName(contacts),msg.getPlainText());
             msgUnReadCount = 1;
         }
 

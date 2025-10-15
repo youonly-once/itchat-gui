@@ -211,11 +211,16 @@ public class MainFrame extends JFrame {
             }
         });
     }
-
     /**
      * 设置任务栏图标闪动
      */
     public void setTrayFlashing(boolean flashing) {
+        setTrayFlashing(flashing,"新消息","您有一条新消息，请查收");
+    }
+    /**
+     * 设置任务栏图标闪动
+     */
+    public void setTrayFlashing(boolean flashing,String title,String msg) {
         if (flashing) {
             SoundPlayer.playMessageSound();
         }
@@ -232,7 +237,7 @@ public class MainFrame extends JFrame {
                 if (SystemTray.isSupported()) {
                     long now = System.currentTimeMillis();
                     if (now - lastNotifyTime >= NOTIFY_INTERVAL_MS) {
-                        trayIcon.displayMessage("新消息", "您有一条新消息，请查收", TrayIcon.MessageType.INFO);
+                        trayIcon.displayMessage(title, msg, TrayIcon.MessageType.INFO);
                         lastNotifyTime = now;
                     }
                 }
