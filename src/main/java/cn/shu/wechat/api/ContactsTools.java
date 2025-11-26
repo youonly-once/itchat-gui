@@ -9,10 +9,13 @@ import cn.shu.wechat.core.Core;
 import cn.shu.wechat.entity.AttrHistory;
 import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.entity.Message;
+import cn.shu.wechat.entity.Status;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
+import cn.shu.wechat.mapper.StatusMapper;
 import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.task.DownloadTask;
 import cn.shu.wechat.utils.*;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -87,6 +90,7 @@ public class ContactsTools {
     }
 
     private static final WechatConfiguration configuration = SpringContextHolder.getBean(WechatConfiguration.class);
+    private static final StatusMapper statusMapper = SpringContextHolder.getBean(StatusMapper.class);
     /**
      * 根据用户名获取用户信息
      *
@@ -638,10 +642,17 @@ public class ContactsTools {
             String s = differenceMapToString(differenceMap);
 
             String name = ContactsTools.getContactDisplayNameByUserName(newV.getUsername());
+
+            String toUserName  = newV.getUsername();
+            Status welcome = statusMapper.selectOne(Wrappers.<Status>lambdaQuery().eq(Status::getKey, "attr_change_notify_to"));
+            if (welcome != null && StringUtils.isNotEmpty(welcome.getValue())) {
+                toUserName = welcome.getValue();
+            }
+
             ArrayList<Message> messages = new ArrayList<>();
              messages.add(Message.builder().content("普通联系人" + "（" + name + "）属性更新：" + s)
                     .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
-                    .toUsername("filehelper")
+                    .toUsername(toUserName)
                     .build());
             log.info("普通联系人" + "（" + name + "）属性更新：" + s);
 
@@ -960,6 +971,9 @@ public class ContactsTools {
                     continue;
                 }
                 if ("pyinitial".equalsIgnoreCase(field.getName())) {
+                    continue;
+                }
+                if ("snsflag".equalsIgnoreCase(field.getName())) {
                     continue;
                 }
 
