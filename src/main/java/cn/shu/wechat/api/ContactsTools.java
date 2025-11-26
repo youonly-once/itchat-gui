@@ -973,9 +973,6 @@ public class ContactsTools {
                 if ("pyinitial".equalsIgnoreCase(field.getName())) {
                     continue;
                 }
-                if ("snsflag".equalsIgnoreCase(field.getName())) {
-                    continue;
-                }
 
                 if ("HeadImgUrl".equalsIgnoreCase(field.getName())) {
                     if (StringUtils.isNotEmpty((String)newValue) && StringUtils.isNotEmpty((String)oldValue)) {
