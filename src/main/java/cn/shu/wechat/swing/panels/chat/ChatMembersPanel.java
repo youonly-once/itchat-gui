@@ -102,9 +102,8 @@ public class ChatMembersPanel extends ParentAvailablePanel {
         operationPanel.add(leaveButton);
 
         setLayout(new GridBagLayout());
-        add(listView, new GBC(0, 0).setFill(GBC.HORIZONTAL).setWeight(1, 1000).setAnchor(GridBagConstraints.NORTH));
-        add(operationPanel, new GBC(0, 1).setFill(GBC.HORIZONTAL).setWeight(1, 1).setAnchor(GridBagConstraints.SOUTH).setInsets(10, 0, 5, 0));
-
+        add(listView, new GBC(0, 0).setFill(GBC.BOTH).setWeight(1, 1000));
+        add(operationPanel, new GBC(0, 1).setFill(GBC.BOTH).setWeight(1, 1).setInsets(10, 0, 5, 0));
         adapter = new RoomMembersAdapter(members);
         listView.setAdapter(adapter);
     }
@@ -145,6 +144,10 @@ public class ChatMembersPanel extends ParentAvailablePanel {
     private void processGroupExtra(List<Contacts> memberlist) {
         members.clear();
         members.addAll(memberlist);
+        if (members.size()<47){
+            int extraHeight = (7 - (int)(Math.ceil(members.size() / 8.0)))*70;
+            setPreferredSize(new Dimension(ROOM_MEMBER_PANEL_WIDTH, MainFrame.getContext().currentWindowHeight / 2-(extraHeight)));
+        }
 
         for (Contacts contacts : members) {
             contacts.setGroupName(roomId);
