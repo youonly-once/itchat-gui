@@ -144,10 +144,6 @@ public class ChatMembersPanel extends ParentAvailablePanel {
     private void processGroupExtra(List<Contacts> memberlist) {
         members.clear();
         members.addAll(memberlist);
-        if (members.size()<47){
-            int extraHeight = (7 - (int)(Math.ceil(members.size() / 8.0)))*70;
-            setPreferredSize(new Dimension(ROOM_MEMBER_PANEL_WIDTH, MainFrame.getContext().currentWindowHeight / 2-(extraHeight)));
-        }
 
         for (Contacts contacts : members) {
             contacts.setGroupName(roomId);
@@ -159,6 +155,10 @@ public class ChatMembersPanel extends ParentAvailablePanel {
             if (members.size() > 1) {
                 members.add(Contacts.builder().displayname("删除成员").build());
             }
+        }
+        if (members.size()<47){
+            int extraHeight = (7 - (int)(Math.ceil(members.size() / 8.0)))*70;
+            setPreferredSize(new Dimension(ROOM_MEMBER_PANEL_WIDTH, MainFrame.getContext().currentWindowHeight / 2-(extraHeight)));
         }
 
         if (isRoomCreator()) {
@@ -185,6 +185,7 @@ public class ChatMembersPanel extends ParentAvailablePanel {
         if (!ContactsTools.isRoomContact(roomId)) {
             members.clear();
             members.add(Core.getMemberMap().get(roomId));
+            setPreferredSize(new Dimension(ROOM_MEMBER_PANEL_WIDTH, MainFrame.getContext().currentWindowHeight /2- (6*75)));
             listView.notifyDataSetChanged(false);
         } else {
             List<Contacts> memberlist = Core.getMemberMap().get(roomId).getMemberlist();
