@@ -55,7 +55,7 @@ public class LoginServiceImpl implements LoginService {
 
     private volatile boolean WebWxBatchGetContactExcept;
 
-    private Timer timer ;
+    private Timer timer;
 
     public static <T> List<List<T>> splitIntoGroups(List<T> input, int groupSize) {
         List<List<T>> result = new ArrayList<>();
@@ -572,7 +572,7 @@ public class LoginServiceImpl implements LoginService {
     public void WebWxBatchGetContact(Set<String> groupName) throws IOException, InterruptedException {
         if (WebWxBatchGetContactExcept) {
             if (timer != null) {
-                log.error("微信异常信息，暂时停止访问");
+                log.error("微信接口1205频繁异常信息，暂时停止访问");
                 return;
 
             }
@@ -582,14 +582,16 @@ public class LoginServiceImpl implements LoginService {
                 if (timer != null) {
                     return;
                 }
-                timer = new Timer();
+                timer = new Timer("Timer-WebWxBatchGetContactExcept");
                 timer.schedule(new TimerTask() {
                     @Override
                     public void run() {
                         WebWxBatchGetContactExcept = false;
+                        timer.cancel();
+                        timer = null;
                     }
                 }, 1000 * 60 * 30);
-                log.error("微信异常信息，暂时停止访问");
+                log.error("微信接口1205频繁异常信息，暂时停止访问");
                 return;
             }
         }
