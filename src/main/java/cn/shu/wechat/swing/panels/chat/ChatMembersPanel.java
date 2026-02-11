@@ -25,6 +25,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -148,6 +149,22 @@ public class ChatMembersPanel extends ParentAvailablePanel {
         for (Contacts contacts : members) {
             contacts.setGroupName(roomId);
         }
+        members.sort((o1, o2) -> {
+            if (Core.getMemberMap().containsKey(o1.getUsername()) || Core.getMemberMap().containsKey(o2.getUsername())) {
+                if (Core.getMemberMap().containsKey(o1.getUsername()) && Core.getMemberMap().containsKey(o2.getUsername())) {
+                    return ContactsTools.getContactDisplayNameByUserName(o2).compareTo(ContactsTools.getContactDisplayNameByUserName(o1));
+                }
+                if (Core.getMemberMap().containsKey(o1.getUsername())){
+                    return -1;
+                }
+                if (Core.getMemberMap().containsKey(o2.getUsername())){
+                    return 1;
+                }
+            }else {
+                return ContactsTools.getContactDisplayNameByUserName(o2).compareTo(ContactsTools.getContactDisplayNameByUserName(o1));
+            }
+            return 0;
+        });
 
         members.add(Contacts.builder().displayname("添加成员").build());
 
