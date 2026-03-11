@@ -49,7 +49,7 @@ public class Ollama {
         return OpenAiChatModel.builder()
                 .baseUrl("https://dashscope.aliyuncs.com/compatible-mode/v1")
                 .apiKey("sk-a7f53eff7ecb4787a23b7726301dad31")
-                .modelName("qwen-vl-max").build();
+                .modelName("qwen3-vl-plus-2025-12-19").build();
     }
 
     @Bean
