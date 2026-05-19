@@ -13,14 +13,16 @@ import cn.shu.wechat.swing.panels.left.tabcontent.RoomsPanel;
 import cn.shu.wechat.utils.DateUtils;
 import cn.shu.wechat.utils.FontUtil;
 import cn.shu.wechat.utils.IconUtil;
+import lombok.Getter;
 import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author 舒新胜
@@ -31,6 +33,9 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
      * 房间条目
      */
     private final List<RoomItem> roomItems;
+
+    @Getter
+    private final static Set<Contacts.ContactsType> visibleType = Arrays.stream(Contacts.ContactsType.values()).collect(Collectors.toSet());
 
     /**
      * 当前选中的viewHolder
@@ -70,7 +75,12 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
     @Override
     public void onBindViewHolder(RoomItemViewHolder viewHolder, int position) {
         RoomItem roomItem = roomItems.get(position);
+
+
+
         Contacts contacts = Core.getMemberMap().get(roomItem.getRoomId());
+
+
         if (contacts != null){
             viewHolder.roomName.setText(ContactsTools.getContactDisplayNameByUserName(contacts));
         }else {
@@ -136,7 +146,12 @@ public class RoomItemsAdapter extends BaseAdapter<RoomItemViewHolder> {
             viewHolder.mouseListener = new RoomItemAbstractMouseListener(viewHolder,roomItem.getRoomId(),position);;
             viewHolder.addMouseListener(viewHolder.mouseListener);
         }
-
+        if (contacts!= null && !visibleType.contains(contacts.getType())) {
+            // 公众号/服务号
+            viewHolder.setVisible(false);
+        }else {
+            viewHolder.setVisible(true);
+        }
     }
 
     class RoomItemJPopupMenu extends JPopupMenu {

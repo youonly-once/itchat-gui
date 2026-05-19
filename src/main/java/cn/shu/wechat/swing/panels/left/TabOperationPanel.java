@@ -1,5 +1,7 @@
 package cn.shu.wechat.swing.panels.left;
 
+import cn.shu.wechat.entity.Contacts;
+import cn.shu.wechat.swing.adapter.room.RoomItemsAdapter;
 import cn.shu.wechat.swing.components.Colors;
 import cn.shu.wechat.swing.components.GBC;
 import cn.shu.wechat.swing.components.RCBorder;
@@ -15,6 +17,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.Set;
 
 /**
  * Created by 舒新胜 on 17-5-29.
@@ -34,7 +37,7 @@ public class TabOperationPanel extends ParentAvailablePanel {
     private ImageIcon contactIconActive;
     private ImageIcon meIconNormal;
     private ImageIcon meIconActive;
-
+    JPanel chatPanel;
     @Getter
     private static TabOperationPanel context;
     private LeftPanel parent;
@@ -58,10 +61,90 @@ public class TabOperationPanel extends ParentAvailablePanel {
 
         chatLabel = new CornerMarkJLabel();
         chatLabel.setIcon(chatIconActive);
-        chatLabel.setBorder(rcBorder);
+
         chatLabel.setHorizontalAlignment(JLabel.CENTER);
         chatLabel.setCursor(handCursor);
         chatLabel.addMouseListener(clickListener);
+
+        // 初始化右边的菜单按钮
+        JLabel menuButton = new JLabel(); // 也可以换成一个小图标
+        menuButton.setCursor(handCursor);
+        menuButton.setIcon(IconUtil.getIcon(this,"/image/options.png"));
+
+        // 创建菜单
+        JPopupMenu filterMenu = new JPopupMenu();
+
+        ;
+        for (Contacts.ContactsType type : Contacts.ContactsType.values()) {
+            Set<Contacts.ContactsType> visibleTypes = RoomItemsAdapter.getVisibleType();
+            JCheckBoxMenuItem item = new JCheckBoxMenuItem(type.desc,visibleTypes.contains(type));
+            item.addActionListener(e -> {
+
+                boolean changed = false;
+
+                if (item.isSelected()) {
+                    // 只有当集合中没有该元素时，才添加
+                    if (visibleTypes.add(type)) {
+                        changed = true;
+                    }
+                } else {
+                    // 只有当集合中存在该元素时，才删除
+                    if (visibleTypes.remove(type)) {
+                        changed = true;
+                    }
+                }
+
+                // 只有列表真正变化才刷新 UI
+                if (changed) {
+                    RoomsPanel.getContext().updateAll();
+                }
+            });
+            filterMenu.add(item);
+        }
+
+        // 给按钮绑定弹出菜单事件
+        menuButton.addMouseListener(new MouseListener() {
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+
+                    filterMenu.show(menuButton, 0, menuButton.getHeight());
+
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
+
+        // 下面假设你有一个 JPanel 存放 chatLabel 和按钮
+         chatPanel = new JPanel(new GridBagLayout());
+        chatPanel.setBorder(rcBorder);
+        chatPanel.setBackground(chatLabel.getBackground());
+        chatPanel.add(chatLabel, new GBC(0, 0).setFill(GBC.HORIZONTAL).setWeight(100, 1).setInsets(0, 10, 0, 10));
+        chatPanel.add(menuButton, new GBC(1, 0).setFill(GBC.HORIZONTAL).setWeight(1, 1).setInsets(0, 10, 0, 10));
+
+        // 最终把 chatPanel 添加到父容器
+        parent = (LeftPanel) getParentPanel();
+        parent.add(chatPanel);
+
+
 
         contactIconNormal = IconUtil.getIcon(this,"/image/contacts_normal.png");
         contactIconActive = IconUtil.getIcon(this,"/image/contacts_active.png");
@@ -87,7 +170,7 @@ public class TabOperationPanel extends ParentAvailablePanel {
         setLayout(new GridBagLayout());
         this.setBackground(Colors.LEFT_WINDOW_BACKGROUND);
         setBorder(new RCBorder(RCBorder.BOTTOM,Colors.SCROLL_BAR_TRACK_LIGHT));
-        add(chatLabel, new GBC(0, 0).setFill(GBC.HORIZONTAL).setWeight(1, 1).setInsets(0, 10, 0, 10));
+        add(chatPanel, new GBC(0, 0).setFill(GBC.HORIZONTAL).setWeight(1, 1).setInsets(0, 10, 0, 10));
         add(contactsLabel, new GBC(1, 0).setFill(GBC.HORIZONTAL).setWeight(1, 1).setInsets(0, 10, 0, 10));
        // add(meLable, new GBC(2, 0).setFill(GBC.HORIZONTAL).setWeight(1, 1).setInsets(0, 10, 0, 10));
     }

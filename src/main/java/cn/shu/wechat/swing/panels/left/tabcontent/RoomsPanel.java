@@ -158,6 +158,11 @@ public class RoomsPanel extends ParentAvailablePanel {
         roomItemsListView.scrollToPosition(0);
     }
 
+    public void updateAll() {
+        roomItemsListView.notifyDataSetChanged(false);
+        roomItemsListView.scrollToPosition(0);
+    }
+
     /**
      * 添加房间
      * @param roomId 房间id

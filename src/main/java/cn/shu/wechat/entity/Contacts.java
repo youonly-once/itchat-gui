@@ -138,6 +138,15 @@ public class Contacts {
             this.code = code;
             this.desc = desc;
         }
+        // 枚举内部方法：返回 byte[]
+        public static byte[] codes() {
+            ContactsType[] types = values();
+            byte[] result = new byte[types.length];
+            for (int i = 0; i < types.length; i++) {
+                result[i] = types[i].code;
+            }
+            return result;
+        }
     }
     private ContactsType type;
     /**
