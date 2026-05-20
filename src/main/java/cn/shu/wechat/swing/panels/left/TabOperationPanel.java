@@ -84,12 +84,12 @@ public class TabOperationPanel extends ParentAvailablePanel {
 
                 if (item.isSelected()) {
                     // 只有当集合中没有该元素时，才添加
-                    if (visibleTypes.add(type)) {
+                    if (!visibleTypes.contains(type) && visibleTypes.add(type)) {
                         changed = true;
                     }
                 } else {
                     // 只有当集合中存在该元素时，才删除
-                    if (visibleTypes.remove(type)) {
+                    if (visibleTypes.contains(type) && visibleTypes.remove(type)) {
                         changed = true;
                     }
                 }
