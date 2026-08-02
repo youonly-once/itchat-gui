@@ -419,32 +419,39 @@ public class ChatMessageEditorPanel extends ParentAvailablePanel {
 
         ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
             Short preventStatus = 0;
+            boolean isGroup = shareRoomId.startsWith("@@");
 
             String to = ContactsTools.getContactDisplayNameByUserName(shareRoomId);
             IMsgHandlerFaceImpl face = SpringContextHolder.getBean(IMsgHandlerFaceImpl.class);
             StatusMapper statusMapper = SpringContextHolder.getBean(StatusMapper.class);
             Status status = statusMapper.selectByPrimaryKey(to);
-            if (status == null) {
-                //关闭防撤回
-                status = new Status();
-                preventStatus = 2;
-            } else {
-                preventStatus = status.getUndoStatus();
-                if (preventStatus == null) {
-                    //关闭防撤回
-                    preventStatus = 2;
-                } else if (preventStatus == 2) {
-                    //开启防撤回
+            if (isGroup) {
+                //群：白名单模式，null→1(开启)，1→2(关闭)，2→1(开启)
+                if (status == null || status.getUndoStatus() == null || status.getUndoStatus() == 2) {
                     preventStatus = 1;
-                } else if (preventStatus == 1) {
-                    //关闭防撤回
+                } else {
                     preventStatus = 2;
                 }
+            } else {
+                //个人：黑名单模式，null→2(关闭)，1→2(关闭)，2→1(开启)
+                if (status == null || status.getUndoStatus() == null || status.getUndoStatus() == 1) {
+                    preventStatus = 2;
+                } else {
+                    preventStatus = 1;
+                }
             }
-            if (preventStatus == 2) {
-                face.nonPreventUndoMsgUserName.add(to);
-            } else if (preventStatus == 1) {
-                face.nonPreventUndoMsgUserName.remove(to);
+            if (preventStatus == 1) {
+                if (isGroup) {
+                    face.preventUndoMsgUserName.add(to);
+                } else {
+                    face.nonPreventUndoMsgUserName.remove(to);
+                }
+            } else if (preventStatus == 2) {
+                if (isGroup) {
+                    face.preventUndoMsgUserName.remove(to);
+                } else {
+                    face.nonPreventUndoMsgUserName.add(to);
+                }
             }
             status.setUndoStatus(preventStatus);
             status.setName(to);
@@ -473,14 +480,19 @@ public class ChatMessageEditorPanel extends ParentAvailablePanel {
             @Override
             public void run() {
                 String to = ContactsTools.getContactDisplayNameByUserName(shareRoomId);
+                boolean isGroup = shareRoomId.startsWith("@@");
                 StatusMapper statusMapper = SpringContextHolder.getBean(StatusMapper.class);
                 Status finalStatus = statusMapper.selectByPrimaryKey(to);
                 SwingUtilities.invokeLater(() -> {
-                    if (finalStatus == null || finalStatus.getUndoStatus() == null || finalStatus.getUndoStatus() == 1) {
-                        preventUndoLabel.setIcon(preventUndoActiveIcon);
+                    boolean preventActive;
+                    if (isGroup) {
+                        //群：白名单，仅显式开启(1)才激活
+                        preventActive = finalStatus != null && finalStatus.getUndoStatus() != null && finalStatus.getUndoStatus() == 1;
                     } else {
-                        preventUndoLabel.setIcon(preventUndoNormalIcon);
+                        //个人：黑名单，仅显式关闭(2)才不激活
+                        preventActive = !(finalStatus != null && finalStatus.getUndoStatus() != null && finalStatus.getUndoStatus() == 2);
                     }
+                    preventUndoLabel.setIcon(preventActive ? preventUndoActiveIcon : preventUndoNormalIcon);
 
                     if (finalStatus == null || finalStatus.getAutoStatus() == null || finalStatus.getAutoStatus() == 2) {
                         autoReplyLabel.setIcon(autoReplyNormalIcon);

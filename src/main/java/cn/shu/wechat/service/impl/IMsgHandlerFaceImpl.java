@@ -71,7 +71,11 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
 
 
     /**
-     * 已关闭防撤回联系人列表
+     * 已开启防撤回的群列表（白名单，默认所有群都不防撤回）
+     */
+    public final static Set<String> preventUndoMsgUserName = new HashSet<>();
+    /**
+     * 已关闭防撤回的个人联系人列表（黑名单，默认所有个人都防撤回）
      */
     public final static Set<String> nonPreventUndoMsgUserName = new HashSet<>();
     @Autowired
@@ -84,6 +88,9 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         for (Status status : statuses) {
             if (status.getAutoStatus() != null && status.getAutoStatus() == 1) {
                 autoChatUserNameList.add(status.getName());
+            }
+            if (status.getUndoStatus() != null && status.getUndoStatus() == 1) {
+                preventUndoMsgUserName.add(status.getName());
             }
             if (status.getUndoStatus() != null && status.getUndoStatus() == 2) {
                 nonPreventUndoMsgUserName.add(status.getName());
@@ -274,7 +281,11 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 break;
             case "opundo":
                 to = ContactsTools.getContactDisplayNameByUserName(toUserName);
-                nonPreventUndoMsgUserName.remove(to);
+                if (msg.isGroupMsg()) {
+                    preventUndoMsgUserName.add(to);
+                } else {
+                    nonPreventUndoMsgUserName.remove(to);
+                }
                 build = Status.builder().name(to)
                         .undoStatus((short) 1).build();
                 statusMapper.insertOrUpdateSelectiveForSqlite(build);
@@ -292,8 +303,11 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 build = Status.builder().name(to)
                         .undoStatus((short) 2).build();
                 statusMapper.insertOrUpdateSelectiveForSqlite(build);
-                //群消息
-                nonPreventUndoMsgUserName.add(to);
+                if (msg.isGroupMsg()) {
+                    preventUndoMsgUserName.remove(to);
+                } else {
+                    nonPreventUndoMsgUserName.add(to);
+                }
                 if(ChatPanelContainer.getContext().isCurrentRoom(toUserName)) {
                     ChatPanelContainer.get(toUserName).getChatMessagePanel().getChatMessageEditorPanel().setUndoAndAutoLabel();
 
@@ -541,16 +555,15 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
     @Override
     public List<Message> undoMsgHandle(AddMsgList msg) {
         String to = ContactsTools.getContactDisplayNameByUserName(msg.getFromUserName());
-        //======家人群不发送撤回消息====
-        if (msg.getFromUserName().startsWith("@@")) {
-            if ("❤汪家人❤".equals(to) ) {
-                log.error("重要群群，不发送撤回消息");
+        //群：白名单模式，默认不防撤回；个人：黑名单模式，默认防撤回
+        if (msg.isGroupMsg()) {
+            if (!preventUndoMsgUserName.contains(to)) {
                 return null;
             }
-        }
-        //不处理撤回消息的群
-        if (nonPreventUndoMsgUserName.contains(to)) {
-            return null;
+        } else {
+            if (nonPreventUndoMsgUserName.contains(to)) {
+                return null;
+            }
         }
         /*============获取被撤回的消息id============*/
         Map<String, Object> map = msg.getContentMap();

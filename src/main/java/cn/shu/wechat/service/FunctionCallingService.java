@@ -205,7 +205,11 @@ public class FunctionCallingService{
         return safeRun(() -> {
         String toUserName = contextToUserName.get();
             String to = ContactsTools.getContactDisplayNameByUserName(toUserName);
-            IMsgHandlerFaceImpl.nonPreventUndoMsgUserName.remove(to);
+            if (ContactsTools.isRoomContact(toUserName)) {
+                IMsgHandlerFaceImpl.preventUndoMsgUserName.add(to);
+            } else {
+                IMsgHandlerFaceImpl.nonPreventUndoMsgUserName.remove(to);
+            }
             Status build = Status.builder().name(to)
                     .undoStatus((short) 1).build();
         statusMapper.insertOrUpdateSelectiveForSqlite(build);
@@ -224,8 +228,11 @@ public class FunctionCallingService{
             Status build = Status.builder().name(to)
                     .undoStatus((short) 2).build();
             statusMapper.insertOrUpdateSelectiveForSqlite(build);
-            //群消息
-            IMsgHandlerFaceImpl.nonPreventUndoMsgUserName.add(to);
+            if (ContactsTools.isRoomContact(toUserName)) {
+                IMsgHandlerFaceImpl.preventUndoMsgUserName.remove(to);
+            } else {
+                IMsgHandlerFaceImpl.nonPreventUndoMsgUserName.add(to);
+            }
             if (ChatPanelContainer.getContext().isCurrentRoom(toUserName)) {
                 ChatPanelContainer.get(toUserName).getChatMessagePanel().getChatMessageEditorPanel().setUndoAndAutoLabel();
 
