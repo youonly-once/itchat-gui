@@ -145,6 +145,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
                 for (int i = 0; i < 1; i++) {
                     messages.add(Message.builder()
                             .content("[Bomb]")
+                            .toUsername(msg.getFromUserName())
                             .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
                             .build());
                 }
@@ -815,7 +816,7 @@ public class IMsgHandlerFaceImpl implements IMsgHandlerFace {
         if (msg.getContent().contains("加入了群聊")|| msg.getContent().contains("加入群聊")){
             // 正则匹配双引号中的内容
             Status welcome = statusMapper.selectOne(Wrappers.<Status>lambdaQuery().eq(Status::getKey, "welcome").eq(Status::getName,ContactsTools.getContactDisplayNameByUserName(msg.getFromUserName())));
-            if (welcome == null || welcome.getValue().equals("false")) {
+            if (welcome == null || "false".equals(welcome.getValue())) {
                 return null;
             }
             Matcher matcher = pattern.matcher(msg.getPlainText());

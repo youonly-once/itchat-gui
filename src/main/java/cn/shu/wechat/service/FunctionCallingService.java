@@ -103,6 +103,10 @@ public class FunctionCallingService{
         contextToUserName.set(userName);
     }
 
+    public static void clearUserName() {
+        contextToUserName.remove();
+    }
+
     @Tool(name = "help_command", value = "Display help information.")
     public Result<String> help(@MemoryId String sessionId) {
         return safeRun(() -> {

@@ -25,6 +25,7 @@
         <easypoi.version>4.2.0</easypoi.version>
         <spring-cloud-alibaba.version>2.2.1.RELEASE</spring-cloud-alibaba.version>
         <output-directory>${output-basedir}/${project.artifactId}</output-directory>
+        <native.maven.plugin.version>1.1.2</native.maven.plugin.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -536,7 +537,7 @@
         <repository>
             <id>alimaven</id>
             <name>aliyun maven</name>
-            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+            <url>https://maven.aliyun.com/nexus/content/groups/public/</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
@@ -556,8 +557,8 @@
     <pluginRepositories>
         <pluginRepository>
             <id>alimaven</id>
-            <name>aliyun maven</name>
-            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+            <name>aliyunmaven</name>
+            <url>https://maven.aliyun.com/nexus/content/groups/public/</url>
         </pluginRepository>
     </pluginRepositories>
 </project>

@@ -638,7 +638,10 @@ public class LoginServiceImpl implements LoginService {
                         List<Contacts> memberList = JSON.parseArray(JSON.toJSONString(memberArray), Contacts.class);
                         for (Contacts contacts : memberList) {
                             contacts.setGroupName(userName);
-                            contacts.setDisplayname(oldMemberList.get(contacts.getUsername()).getDisplayname());
+                            Contacts old = oldMemberList.get(contacts.getUsername());
+                            if (old != null) {
+                                contacts.setDisplayname(old.getDisplayname());
+                            }
                         }
                         if (!memberList.isEmpty()) {
                             group.setMemberlist(memberList);
@@ -648,9 +651,11 @@ public class LoginServiceImpl implements LoginService {
                     }
 
                     //以上接口返回的成员属性不全，以下的接口获取群成员详细属性
-                    if (group.getMemberlist().isEmpty()){
-                        group.setMemberlist( Core.getMemberMap().get(userName).getMemberlist());
-
+                    if (group.getMemberlist() == null || group.getMemberlist().isEmpty()) {
+                        Contacts cached = Core.getMemberMap().get(userName);
+                        if (cached != null && cached.getMemberlist() != null) {
+                            group.setMemberlist(cached.getMemberlist());
+                        }
                     }
                     ContactsTools.addContacts(group);
                 }

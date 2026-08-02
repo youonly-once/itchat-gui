@@ -74,9 +74,11 @@ public class Ollama {
 
     public String chatWithSpringAi(String fromUserNme, String toUserName, String question) {
         FunctionCallingService.setUserName(toUserName);
-        String chat = assisant.chat(fromUserNme,question);
-
-        return chat;
+        try {
+            return assisant.chat(fromUserNme, question);
+        } finally {
+            FunctionCallingService.clearUserName();
+        }
     }
 
 

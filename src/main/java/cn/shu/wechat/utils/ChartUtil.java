@@ -4,10 +4,9 @@ import cn.shu.wechat.api.ContactsTools;
 import cn.shu.wechat.configuration.WechatConfiguration;
 import cn.shu.wechat.constant.WxRespConstant;
 import cn.shu.wechat.core.Core;
+import cn.shu.wechat.entity.Contacts;
 import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.mapper.MessageMapper;
-import cn.shu.wechat.entity.Contacts;
-import cn.shu.wechat.service.LoginService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.jfree.chart.*;
@@ -38,12 +37,13 @@ import org.springframework.stereotype.Component;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -739,7 +739,9 @@ public final class ChartUtil {
             return null;
         } finally {
             try {
-                fos_jpg.close();
+                if (fos_jpg != null) {
+                    fos_jpg.close();
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
