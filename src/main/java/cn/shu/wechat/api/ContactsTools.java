@@ -14,7 +14,10 @@ import cn.shu.wechat.mapper.AttrHistoryMapper;
 import cn.shu.wechat.mapper.StatusMapper;
 import cn.shu.wechat.task.DownloadManager;
 import cn.shu.wechat.task.DownloadTask;
-import cn.shu.wechat.utils.*;
+import cn.shu.wechat.utils.AvatarUtil;
+import cn.shu.wechat.utils.EmojiUtil;
+import cn.shu.wechat.utils.IconUtil;
+import cn.shu.wechat.utils.SpringContextHolder;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
@@ -22,8 +25,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.awt.*;
 import java.lang.reflect.Field;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -42,8 +45,13 @@ public class ContactsTools {
 
 
     public static final Map<String, String> attributeMap = new HashMap<>();
-    public static Map<String, String> attributeReverseMap = new HashMap<>();
+    public static final Map<String, String> attributeReverseMap;
     private static final Pattern pattern = Pattern.compile(".+\\?seq=(\\d+).+");
+    private static final AttrHistoryMapper attrHistoryMapper = SpringContextHolder.getBean(AttrHistoryMapper.class);
+
+    private static final WechatConfiguration configuration = SpringContextHolder.getBean(WechatConfiguration.class);
+    private static final StatusMapper statusMapper = SpringContextHolder.getBean(StatusMapper.class);
+
     static {
         attributeMap.put("性别", "sex");
         attributeMap.put("城市", "city");
@@ -53,7 +61,7 @@ public class ContactsTools {
         attributeMap.put("签名", "signature");
         attributeMap.put("备注名", "remarkname");
         attributeMap.put("群ID", "chatroomid");
-        attributeMap.put("状态", "statues");
+        attributeMap.put("状态", "status");
         attributeMap.put("拼音全拼", "pyquanpin");
         attributeMap.put("加密群ID", "encrychatroomid");
         attributeMap.put("显示名", "displayname");
@@ -88,9 +96,6 @@ public class ContactsTools {
                         Map.Entry::getKey
                 ));
     }
-
-    private static final WechatConfiguration configuration = SpringContextHolder.getBean(WechatConfiguration.class);
-    private static final StatusMapper statusMapper = SpringContextHolder.getBean(StatusMapper.class);
     /**
      * 根据用户名获取用户信息
      *
@@ -461,8 +466,8 @@ public class ContactsTools {
                 || contacts.getType().equals(Contacts.ContactsType.SPECIAL_USER)) {
             return true;
         } else if (isRoomContact(contacts.getUsername())) {
-            return (contacts.getStatues() == null||
-                    contacts.getStatues() == WxConstant.ChatRoomMute.CHATROOM_NOTIFY_CLOSE.CODE
+            return (contacts.getStatus() == null ||
+                    contacts.getStatus() == WxConstant.ChatRoomMute.CHATROOM_NOTIFY_CLOSE.CODE
             );
         }else{
             return ((contacts.getContactflag() & WxConstant.ContactFlag.CONTACTFLAG_NOTIFYCLOSECONTACT.CODE) > 0);
@@ -525,10 +530,10 @@ public class ContactsTools {
 
             //新旧集合交集 判断更新的内容
             Map<String, Contacts> oldMap = oldMemberList.stream()
-                    .collect(Collectors.toMap(Contacts::getUsername, Function.identity()));
+                    .collect(Collectors.toMap(Contacts::getUsername, Function.identity(), (a, b) -> b));
 
             Map<String, Contacts> newMap = newMemberList.stream()
-                    .collect(Collectors.toMap(Contacts::getUsername, Function.identity()));
+                    .collect(Collectors.toMap(Contacts::getUsername, Function.identity(), (a, b) -> b));
 
 
             Set<String> oldKeys = oldMap.keySet();
@@ -610,15 +615,19 @@ public class ContactsTools {
         String memberDisplayNameOfGroup = ContactsTools.getMemberDisplayNameOfGroupObj(oldGroup, oldMember.getUsername());
         //获取群昵称
         String groupName = ContactsTools.getContactDisplayNameByUserName(oldGroup);
+        String notifyTo = "filehelper";
 
         Message message = Message.builder().content("群成员信息更改" + "：【" + groupName + "】" + "（" + memberDisplayNameOfGroup + "）属性更新：" + differenceStr)
                 .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.TEXT.getCode())
-                .toUsername("filehelper")
+                .toUsername(notifyTo)
                 .build();
         log.info("群成员信息更改" + "：【" + groupName + "】" + "（" + memberDisplayNameOfGroup + "）属性更新：" + differenceStr);
-        //差异存到数据库
-        store(differenceMap, oldMember, List.of(message));
-
+        //问题14：差异存到数据库（拆分为三步骤）
+        List<Message> messageList = new ArrayList<>(List.of(message));
+        List<AttrHistory> attrHistories = buildAttrHistories(differenceMap, oldMember);
+        handleAvatarIfNeeded(differenceMap, oldMember, attrHistories, messageList, notifyTo);
+        batchSaveAttrHistories(attrHistories);
+        // message 本身已在 messageList 首部返回；若 handleAvatar 追加了图片消息，仅用于发送，但 compareGroupMember 返回只返回文本消息
         return message;
     }
 
@@ -656,8 +665,11 @@ public class ContactsTools {
                     .build());
             log.info("普通联系人" + "（" + name + "）属性更新：" + s);
 
-            //差异存到数据库
-            store(differenceMap, oldV, messages);
+            //问题14：差异存到数据库（拆分为三步骤，职责分离；toUsername 统一使用文本消息目标，不再硬编码 filehelper）
+            List<AttrHistory> attrHistories = buildAttrHistories(differenceMap, oldV);
+            handleAvatarIfNeeded(differenceMap, oldV, attrHistories, messages, toUserName);
+            batchSaveAttrHistories(attrHistories);
+
             MessageTools.sendMsgByUserId(messages);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -666,64 +678,35 @@ public class ContactsTools {
     }
 
     /**
-     * 保存修改记录到数据库
+     * 问题14拆分1：仅构建 AttrHistory 列表，不做任何 IO
+     * 头像分支的 oldval/newval 先填 URL 字符串，真正下载成功后会在 handleAvatarIfNeeded 中替换为本地路径
      *
-     * @param differenceMap
-     * @param oldV
+     * @return AttrHistory 列表
      */
-    private static void store(Map<String, Map<String, String>> differenceMap, Contacts oldV, List<Message> messages) {
+    private static List<AttrHistory> buildAttrHistories(Map<String, Map<String, String>> differenceMap, Contacts oldV) {
         ArrayList<AttrHistory> attrHistories = new ArrayList<>();
         for (Map.Entry<String, Map<String, String>> stringMapEntry : differenceMap.entrySet()) {
+            String attrKey = stringMapEntry.getKey();
             for (Map.Entry<String, String> stringStringEntry : stringMapEntry.getValue().entrySet()) {
-                if (stringMapEntry.getKey().equalsIgnoreCase("headimgurl")
-                        || stringMapEntry.getKey().equals("头像更换")) {
+                // 问题8/8+：统一用"头像URL"或兼容历史"headimgurl"判断；移除不存在的"头像更换"
+                boolean isHeadAttr = "头像URL".equalsIgnoreCase(attrKey) || "headimgurl".equalsIgnoreCase(attrKey);
+                if (isHeadAttr) {
                     String oldHeadPath = Core.getContactHeadImgPath().get(oldV.getUsername());
-
-                    DownloadTask<String> downloadTask = new DownloadTask<>();
-                    downloadTask.setRelativeUrl(stringStringEntry.getValue());
-                    downloadTask.setType(DownloadType.HEAD_IMAGE_BIG);
-                    downloadTask.setUserName(oldV.getUsername());
-                    downloadTask.setTaskId(stringStringEntry.getValue()+oldV.getUsername());
-                    String newHeadPath = DownloadManager.submitAwait(downloadTask,1000*60*5, TimeUnit.MILLISECONDS);
-
-                    //更换头像需要发送图片
-                    //更换前
-                    Dimension imageSize = IconUtil.getImageSize(oldHeadPath);
-                    messages.add(Message.builder()
-                            .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.PIC.getCode())
-                            .toUsername("filehelper")
-                                    .imgHeight(imageSize.height)
-                            .imgWidth(imageSize.width)
-                            .filePath(oldHeadPath).build());
-                    if (newHeadPath != null) {
-                        Core.getContactHeadImgPath().put(oldV.getUsername(), newHeadPath);
-                        //刷新头像
-                        AvatarUtil.putUserAvatarCache(oldV.getUsername(), newHeadPath);
-                        //更换后
-                        imageSize = IconUtil.getImageSize(newHeadPath);
-                        messages.add(Message.builder()
-                                .toUsername("filehelper")
-                                .imgHeight(imageSize.height)
-                                .imgWidth(imageSize.width)
-                                .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.PIC.getCode())
-                                .filePath(newHeadPath).build());
-                    }
-
-
+                    // 问题9：头像分支 remarkname 使用 oldV.getRemarkname()，不再错填 nickname
                     AttrHistory build = AttrHistory.builder()
-                            .attr(stringMapEntry.getKey())
-                            .oldval(oldHeadPath)
-                            .newval(newHeadPath)
+                            .attr(attrKey)
+                            .oldval(oldHeadPath != null ? oldHeadPath : stringStringEntry.getKey())
+                            .newval(stringStringEntry.getValue()) // 先填 URL，后续下载成功再替换为本地路径
                             .id(0)
                             .nickname(oldV.getNickname())
-                            .remarkname(oldV.getNickname())
+                            .remarkname(oldV.getRemarkname())
                             .username(oldV.getUsername())
                             .createtime(new Date())
                             .build();
                     attrHistories.add(build);
                 } else {
                     AttrHistory build = AttrHistory.builder()
-                            .attr(stringMapEntry.getKey())
+                            .attr(attrKey)
                             .oldval(stringStringEntry.getKey())
                             .newval(stringStringEntry.getValue())
                             .id(0)
@@ -734,13 +717,99 @@ public class ContactsTools {
                             .build();
                     attrHistories.add(build);
                 }
-
             }
         }
+        return attrHistories;
+    }
+
+    /**
+     * 问题14拆分2：仅处理头像相关逻辑（下载、追加图片消息、更新缓存、回填 AttrHistory 本地路径）
+     *
+     * @param toUserName 消息接收方，由 compareContacts/compareGroupMember 决定；不再硬编码 filehelper
+     */
+    private static void handleAvatarIfNeeded(Map<String, Map<String, String>> differenceMap,
+                                             Contacts oldV,
+                                             List<AttrHistory> attrHistories,
+                                             List<Message> messages,
+                                             String toUserName) {
+        for (Map.Entry<String, Map<String, String>> stringMapEntry : differenceMap.entrySet()) {
+            String attrKey = stringMapEntry.getKey();
+            boolean isHeadAttr = "头像URL".equalsIgnoreCase(attrKey) || "headimgurl".equalsIgnoreCase(attrKey);
+            if (!isHeadAttr) {
+                continue;
+            }
+            for (Map.Entry<String, String> stringStringEntry : stringMapEntry.getValue().entrySet()) {
+                // 问题13：oldHeadPath 可能 null，IconUtil.getImageSize 前保护
+                String oldHeadPath = Core.getContactHeadImgPath().get(oldV.getUsername());
+                if (StringUtils.isNotEmpty(oldHeadPath)) {
+                    Dimension imageSize = IconUtil.getImageSize(oldHeadPath);
+                    if (imageSize != null) {
+                        // 问题14：toUsername 使用传入值，不再硬编码 filehelper
+                        messages.add(Message.builder()
+                                .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.PIC.getCode())
+                                .toUsername(toUserName)
+                                .imgHeight(imageSize.height)
+                                .imgWidth(imageSize.width)
+                                .filePath(oldHeadPath).build());
+                    }
+                } else {
+                    log.warn("旧头像路径为空，用户：{}，跳过发送旧头像图片", oldV.getUsername());
+                }
+
+                String newHeadPath = null;
+                try {
+                    DownloadTask<String> downloadTask = new DownloadTask<>();
+                    downloadTask.setRelativeUrl(stringStringEntry.getValue());
+                    downloadTask.setType(DownloadType.HEAD_IMAGE_BIG);
+                    downloadTask.setUserName(oldV.getUsername());
+                    downloadTask.setTaskId(stringStringEntry.getValue() + oldV.getUsername());
+                    newHeadPath = DownloadManager.submitAwait(downloadTask, 1000 * 60 * 5, TimeUnit.MILLISECONDS);
+                } catch (Exception e) {
+                    log.warn("新头像下载失败，用户：{}，URL：{}，原因：{}", oldV.getUsername(), stringStringEntry.getValue(), e.getMessage());
+                }
+
+                if (newHeadPath != null) {
+                    // 更新缓存
+                    Core.getContactHeadImgPath().put(oldV.getUsername(), newHeadPath);
+                    AvatarUtil.putUserAvatarCache(oldV.getUsername(), newHeadPath);
+
+                    // 问题13：newHeadPath 下载成功仍需保护 IconUtil
+                    Dimension imageSize = IconUtil.getImageSize(newHeadPath);
+                    if (imageSize != null) {
+                        messages.add(Message.builder()
+                                .toUsername(toUserName)
+                                .imgHeight(imageSize.height)
+                                .imgWidth(imageSize.width)
+                                .msgType(WxReqParamsConstant.WXSendMsgCodeEnum.PIC.getCode())
+                                .filePath(newHeadPath).build());
+                    }
+
+                    // 回填 AttrHistory：newval → 本地路径
+                    String finalNewHeadPath = newHeadPath;
+                    for (AttrHistory h : attrHistories) {
+                        if (("头像URL".equalsIgnoreCase(h.getAttr()) || "headimgurl".equalsIgnoreCase(h.getAttr()))
+                                && Objects.equals(h.getUsername(), oldV.getUsername())) {
+                            h.setNewval(finalNewHeadPath);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 问题14拆分3：仅负责 batchInsert，异常打印完整堆栈便于排查
+     */
+    private static void batchSaveAttrHistories(List<AttrHistory> attrHistories) {
+        if (CollectionUtils.isEmpty(attrHistories)) {
+            return;
+        }
         try {
-            cn.shu.wechat.utils.SpringContextHolder.getBean(AttrHistoryMapper.class).batchInsert(attrHistories);
+            // 问题7：使用 static final 字段，不再每次 SpringContextHolder.getBean
+            attrHistoryMapper.batchInsert(attrHistories);
         } catch (Exception e) {
-            log.warn(e.getMessage());
+            log.error("批量保存AttrHistory失败：{}，数量：{}", e.getMessage(), attrHistories.size(), e);
         }
     }
 
@@ -758,7 +827,8 @@ public class ContactsTools {
                     return firstMapEntry.getValue().entrySet().stream().map(
                             secondMapEntry -> {
                                 StringBuilder str = new StringBuilder();
-                                if (key.equals("头像更换") || key.equalsIgnoreCase("headimgurl")) {
+                                // 头像分支：统一 key 为"头像URL"或兼容历史的"headimgurl"；移除不存在的"头像更换"判断
+                                if ("头像URL".equalsIgnoreCase(key) || "headimgurl".equalsIgnoreCase(key)) {
                                     str.append("\n【").append(key).append("】更换前后如下");
                                 } else {
                                     str.append("\n【").append(key).append("】(\"").append(secondMapEntry.getKey()).append("\" -> \"").append(secondMapEntry.getValue()).append("\")");
@@ -955,44 +1025,69 @@ public class ContactsTools {
             try {
                 Object oldValue = field.get(oldO);
                 Object newValue = field.get(newO);
-                if (oldValue == null || newValue == null) {
+
+                String fieldName = field.getName();
+
+                if ("memberlist".equalsIgnoreCase(fieldName)) {
                     continue;
                 }
-                if ("memberlist".equalsIgnoreCase(field.getName())) {
+                if ("remarkpyinitial".equalsIgnoreCase(fieldName)) {
                     continue;
                 }
-                if ("remarkpyinitial".equalsIgnoreCase(field.getName())) {
+                if ("remarkpyquanpin".equalsIgnoreCase(fieldName)) {
                     continue;
                 }
-                if ("remarkpyquanpin".equalsIgnoreCase(field.getName())) {
+                if ("pyquanpin".equalsIgnoreCase(fieldName)) {
                     continue;
                 }
-                if ("pyquanpin".equalsIgnoreCase(field.getName())) {
+                if ("pyinitial".equalsIgnoreCase(fieldName)) {
                     continue;
                 }
-                if ("pyinitial".equalsIgnoreCase(field.getName())) {
+                if ("attrstatus".equalsIgnoreCase(fieldName)) {
                     continue;
                 }
 
-                if ("HeadImgUrl".equalsIgnoreCase(field.getName())) {
-                    if (StringUtils.isNotEmpty((String)newValue) && StringUtils.isNotEmpty((String)oldValue)) {
-                        Matcher matcherNew = pattern.matcher((String)newValue);
-                        Matcher matcherOld = pattern.matcher((String)oldValue);
+                // 问题4：null 值规范化 —— String 字段做 null→"" 规范化，其他类型保持原样；仅二者都 null 时才跳过
+                Object oldV;
+                Object newV;
+                if (oldValue instanceof String || newValue instanceof String) {
+                    oldV = oldValue == null ? "" : oldValue;
+                    newV = newValue == null ? "" : newValue;
+                } else {
+                    oldV = oldValue;
+                    newV = newValue;
+                }
+                if (Objects.equals(oldV, newV)) {
+                    continue;
+                }
+
+                if ("HeadImgUrl".equalsIgnoreCase(fieldName)) {
+                    if (StringUtils.isNotEmpty((String) newV) && StringUtils.isNotEmpty((String) oldV)) {
+                        Matcher matcherNew = pattern.matcher((String) newV);
+                        Matcher matcherOld = pattern.matcher((String) oldV);
                         if (matcherNew.find() && matcherOld.find()) {
                             //头像相同
                             String groupNew = matcherNew.group(1);
                             String groupOld = matcherOld.group(1);
                             if (!groupNew.equals(groupOld)) {
                                 Map<String, String> valueDiff = new HashMap<>();
-                                valueDiff.put(String.valueOf(oldValue),String.valueOf(newValue));
-                                diffMap.put(field.getName(), valueDiff);
+                                valueDiff.put(String.valueOf(oldV), String.valueOf(newV));
+                                // 问题8：统一用中文 key "头像URL"
+                                String attrKey = attributeReverseMap.getOrDefault(fieldName, "头像URL");
+                                diffMap.put(attrKey, valueDiff);
                             }
                         }
                     }
-                }else if (!Objects.equals(oldValue, newValue)) {
+                } else {
+                    String attrKey = attributeReverseMap.get(fieldName);
+                    // 问题17 兜底：未在 attributeMap 注册的字段，不产生差异，避免 null key
+                    if (attrKey == null) {
+                        continue;
+                    }
                     Map<String, String> valueDiff = new HashMap<>();
-                    valueDiff.put(EmojiUtil.emojiFormatter(String.valueOf(oldValue)),EmojiUtil.emojiFormatter(String.valueOf(newValue)));
-                    diffMap.put(ContactsTools.attributeReverseMap.get(field.getName()), valueDiff);
+                    valueDiff.put(EmojiUtil.emojiFormatter(String.valueOf(oldV)),
+                            EmojiUtil.emojiFormatter(String.valueOf(newV)));
+                    diffMap.put(attrKey, valueDiff);
                 }
             } catch (IllegalAccessException e) {
                 throw new RuntimeException("字段访问异常: " + field.getName(), e);

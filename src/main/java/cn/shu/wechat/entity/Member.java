@@ -17,7 +17,7 @@ public class Member {
 
     private Double attrstatus;
 
-    private Double statues;
+    private Double status;
 
     private String pyquanpin;
 

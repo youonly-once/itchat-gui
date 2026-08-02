@@ -66,7 +66,7 @@ public class FunctionCallingService{
         attributeMap.put("签名", "signature");
         attributeMap.put("备注名", "remarkname");
         attributeMap.put("群ID", "chatroomid");
-        attributeMap.put("状态", "statues");
+        attributeMap.put("状态", "status");
         attributeMap.put("拼音全拼", "pyquanpin");
         attributeMap.put("加密群ID", "encrychatroomid");
         attributeMap.put("显示名", "displayname");

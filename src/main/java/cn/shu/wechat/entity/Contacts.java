@@ -48,8 +48,8 @@ public class Contacts {
     /**
      * 等于0消息免打扰 1正常
      */
-    @Excel(name="statues")
-    private Integer statues;
+    @Excel(name = "status")
+    private Integer status;
 
     @Excel(name="pyquanpin")
     private String pyquanpin;

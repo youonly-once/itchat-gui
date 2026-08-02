@@ -8,7 +8,7 @@
         <result column="ChatRoomId" jdbcType="DOUBLE" property="chatroomid"/>
         <result column="Sex" jdbcType="DOUBLE" property="sex"/>
         <result column="AttrStatus" jdbcType="DOUBLE" property="attrstatus"/>
-        <result column="Statues" jdbcType="DOUBLE" property="statues"/>
+        <result column="Statues" jdbcType="DOUBLE" property="status"/>
         <result column="PYQuanPin" jdbcType="VARCHAR" property="pyquanpin"/>
         <result column="EncryChatRoomId" jdbcType="VARCHAR" property="encrychatroomid"/>
         <result column="DisplayName" jdbcType="VARCHAR" property="displayname"/>
@@ -75,7 +75,7 @@
         Uin, OwnerUin, IsOwner,
         PYInitial, IsContacts)
         values (#{username,jdbcType=VARCHAR}, #{chatroomid,jdbcType=DOUBLE}, #{sex,jdbcType=DOUBLE},
-        #{attrstatus,jdbcType=DOUBLE}, #{statues,jdbcType=DOUBLE}, #{pyquanpin,jdbcType=VARCHAR},
+        #{attrstatus,jdbcType=DOUBLE}, #{status,jdbcType=DOUBLE}, #{pyquanpin,jdbcType=VARCHAR},
         #{encrychatroomid,jdbcType=VARCHAR}, #{displayname,jdbcType=VARCHAR}, #{verifyflag,jdbcType=DOUBLE},
         #{unifriend,jdbcType=DOUBLE}, #{contactflag,jdbcType=DOUBLE}, #{memberlist,jdbcType=VARCHAR},
         #{starfriend,jdbcType=DOUBLE}, #{headimgurl,jdbcType=VARCHAR}, #{appaccountflag,jdbcType=DOUBLE},
@@ -102,7 +102,7 @@
             <if test="attrstatus != null">
                 AttrStatus,
             </if>
-            <if test="statues != null">
+            <if test="status != null">
                 Statues,
             </if>
             <if test="pyquanpin != null">
@@ -200,8 +200,8 @@
             <if test="attrstatus != null">
                 #{attrstatus,jdbcType=DOUBLE},
             </if>
-            <if test="statues != null">
-                #{statues,jdbcType=DOUBLE},
+            <if test="status != null">
+                #{status,jdbcType=DOUBLE},
             </if>
             <if test="pyquanpin != null">
                 #{pyquanpin,jdbcType=VARCHAR},
@@ -301,8 +301,8 @@
             <if test="attrstatus != null">
                 AttrStatus = #{attrstatus,jdbcType=DOUBLE},
             </if>
-            <if test="statues != null">
-                Statues = #{statues,jdbcType=DOUBLE},
+            <if test="status != null">
+                Statues = #{status,jdbcType=DOUBLE},
             </if>
             <if test="pyquanpin != null">
                 PYQuanPin = #{pyquanpin,jdbcType=VARCHAR},
@@ -394,7 +394,7 @@
         set ChatRoomId = #{chatroomid,jdbcType=DOUBLE},
         Sex = #{sex,jdbcType=DOUBLE},
         AttrStatus = #{attrstatus,jdbcType=DOUBLE},
-        Statues = #{statues,jdbcType=DOUBLE},
+        Statues = #{status,jdbcType=DOUBLE},
         PYQuanPin = #{pyquanpin,jdbcType=VARCHAR},
         EncryChatRoomId = #{encrychatroomid,jdbcType=VARCHAR},
         DisplayName = #{displayname,jdbcType=VARCHAR},
@@ -445,7 +445,7 @@
             </trim>
             <trim prefix="Statues = case" suffix="end,">
                 <foreach collection="list" index="index" item="item">
-                    when UserName = #{item.username,jdbcType=VARCHAR} then #{item.statues,jdbcType=DOUBLE}
+                    when UserName = #{item.username,jdbcType=VARCHAR} then #{item.status,jdbcType=DOUBLE}
                 </foreach>
             </trim>
             <trim prefix="PYQuanPin = case" suffix="end,">
@@ -600,7 +600,7 @@
         values
         <foreach collection="list" item="item" separator=",">
             (#{item.username,jdbcType=VARCHAR}, #{item.chatroomid,jdbcType=DOUBLE}, #{item.sex,jdbcType=DOUBLE},
-            #{item.attrstatus,jdbcType=DOUBLE}, #{item.statues,jdbcType=DOUBLE}, #{item.pyquanpin,jdbcType=VARCHAR},
+            #{item.attrstatus,jdbcType=DOUBLE}, #{item.status,jdbcType=DOUBLE}, #{item.pyquanpin,jdbcType=VARCHAR},
             #{item.encrychatroomid,jdbcType=VARCHAR}, #{item.displayname,jdbcType=VARCHAR},
             #{item.verifyflag,jdbcType=DOUBLE}, #{item.unifriend,jdbcType=DOUBLE}, #{item.contactflag,jdbcType=DOUBLE},
             #{item.memberlist,jdbcType=VARCHAR}, #{item.starfriend,jdbcType=DOUBLE},
@@ -626,7 +626,7 @@
         PYInitial, IsContacts)
         values
         (#{username,jdbcType=VARCHAR}, #{chatroomid,jdbcType=DOUBLE}, #{sex,jdbcType=DOUBLE},
-        #{attrstatus,jdbcType=DOUBLE}, #{statues,jdbcType=DOUBLE}, #{pyquanpin,jdbcType=VARCHAR},
+        #{attrstatus,jdbcType=DOUBLE}, #{status,jdbcType=DOUBLE}, #{pyquanpin,jdbcType=VARCHAR},
         #{encrychatroomid,jdbcType=VARCHAR}, #{displayname,jdbcType=VARCHAR}, #{verifyflag,jdbcType=DOUBLE},
         #{unifriend,jdbcType=DOUBLE}, #{contactflag,jdbcType=DOUBLE}, #{memberlist,jdbcType=VARCHAR},
         #{starfriend,jdbcType=DOUBLE}, #{headimgurl,jdbcType=VARCHAR}, #{appaccountflag,jdbcType=DOUBLE},
@@ -641,7 +641,7 @@
         ChatRoomId = #{chatroomid,jdbcType=DOUBLE},
         Sex = #{sex,jdbcType=DOUBLE},
         AttrStatus = #{attrstatus,jdbcType=DOUBLE},
-        Statues = #{statues,jdbcType=DOUBLE},
+        Statues = #{status,jdbcType=DOUBLE},
         PYQuanPin = #{pyquanpin,jdbcType=VARCHAR},
         EncryChatRoomId = #{encrychatroomid,jdbcType=VARCHAR},
         DisplayName = #{displayname,jdbcType=VARCHAR},
@@ -686,7 +686,7 @@
             <if test="attrstatus != null">
                 AttrStatus,
             </if>
-            <if test="statues != null">
+            <if test="status != null">
                 Statues,
             </if>
             <if test="pyquanpin != null">
@@ -785,8 +785,8 @@
             <if test="attrstatus != null">
                 #{attrstatus,jdbcType=DOUBLE},
             </if>
-            <if test="statues != null">
-                #{statues,jdbcType=DOUBLE},
+            <if test="status != null">
+                #{status,jdbcType=DOUBLE},
             </if>
             <if test="pyquanpin != null">
                 #{pyquanpin,jdbcType=VARCHAR},
@@ -884,8 +884,8 @@
             <if test="attrstatus != null">
                 AttrStatus = #{attrstatus,jdbcType=DOUBLE},
             </if>
-            <if test="statues != null">
-                Statues = #{statues,jdbcType=DOUBLE},
+            <if test="status != null">
+                Statues = #{status,jdbcType=DOUBLE},
             </if>
             <if test="pyquanpin != null">
                 PYQuanPin = #{pyquanpin,jdbcType=VARCHAR},
