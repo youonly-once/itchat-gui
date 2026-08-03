@@ -195,6 +195,8 @@ public class ChatMessageEditorPanel extends ParentAvailablePanel {
             ChatPanelContainer.getContext().removeAllListenersRecursively(shareTextEditor);
         }
         shareTextEditor = textEditor;
+        //切换聊天时刷新防撤回/自动回复图标状态，避免显示上一个聊天的状态
+        setUndoAndAutoLabel();
     }
 
     public static void removeShareComponent() {
@@ -419,9 +421,9 @@ public class ChatMessageEditorPanel extends ParentAvailablePanel {
 
         ExecutorServiceUtil.getGlobalExecutorService().submit(() -> {
             Short preventStatus = 0;
-            boolean isGroup = shareRoomId.startsWith("@@");
+            boolean isGroup = roomId.startsWith("@@");
 
-            String to = ContactsTools.getContactDisplayNameByUserName(shareRoomId);
+            String to = ContactsTools.getContactDisplayNameByUserName(roomId);
             IMsgHandlerFaceImpl face = SpringContextHolder.getBean(IMsgHandlerFaceImpl.class);
             StatusMapper statusMapper = SpringContextHolder.getBean(StatusMapper.class);
             Status status = statusMapper.selectByPrimaryKey(to);
@@ -453,6 +455,9 @@ public class ChatMessageEditorPanel extends ParentAvailablePanel {
                     face.nonPreventUndoMsgUserName.add(to);
                 }
             }
+            if (status == null) {
+                status = new Status();
+            }
             status.setUndoStatus(preventStatus);
             status.setName(to);
             int i = statusMapper.insertOrUpdateSelectiveForSqlite(status);
@@ -479,8 +484,8 @@ public class ChatMessageEditorPanel extends ParentAvailablePanel {
         ExecutorServiceUtil.getGlobalExecutorService().submit(new Runnable() {
             @Override
             public void run() {
-                String to = ContactsTools.getContactDisplayNameByUserName(shareRoomId);
-                boolean isGroup = shareRoomId.startsWith("@@");
+                String to = ContactsTools.getContactDisplayNameByUserName(roomId);
+                boolean isGroup = roomId.startsWith("@@");
                 StatusMapper statusMapper = SpringContextHolder.getBean(StatusMapper.class);
                 Status finalStatus = statusMapper.selectByPrimaryKey(to);
                 SwingUtilities.invokeLater(() -> {
